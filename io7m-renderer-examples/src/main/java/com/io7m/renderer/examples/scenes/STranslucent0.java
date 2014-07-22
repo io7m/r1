@@ -41,6 +41,7 @@ import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialSpecularConstant;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegularBuilderType;
+import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.types.RException;
@@ -211,8 +212,11 @@ public final class STranslucent0 implements ExampleSceneType
 
     scene.sceneAddTranslucentLit(glass, lights);
 
+    final KSceneLightGroupBuilderType g = scene.sceneNewLightGroup("g");
+    g.groupAddInstance(floor);
+
     for (final KLightType l : lights) {
-      scene.sceneAddOpaqueLitVisibleWithoutShadow(l, floor);
+      g.groupAddLight(l);
     }
   }
 

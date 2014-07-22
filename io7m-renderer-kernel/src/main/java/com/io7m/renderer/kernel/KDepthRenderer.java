@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.DepthFunction;
@@ -62,10 +63,10 @@ import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueVisitorType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
 
 /**
@@ -79,6 +80,34 @@ import com.io7m.renderer.types.RTransformViewType;
 
   static {
     NAME = "depth";
+  }
+
+  private static Map<String, String> makeCodeMap(
+    final KGraphicsCapabilitiesType caps)
+  {
+    final Map<String, String> m = new HashMap<String, String>();
+
+    if (caps.getSupportsDepthTextures() == false) {
+      {
+        final String code = KMaterialDepthAlpha.getMaterialCode();
+        m.put(code, String.format("%s4444", code));
+      }
+      {
+        final String code = KMaterialDepthConstant.getMaterialCode();
+        m.put(code, String.format("%s4444", code));
+      }
+    } else {
+      {
+        final String code = KMaterialDepthAlpha.getMaterialCode();
+        m.put(code, code);
+      }
+      {
+        final String code = KMaterialDepthConstant.getMaterialCode();
+        m.put(code, code);
+      }
+    }
+
+    return m;
   }
 
   /**
@@ -277,11 +306,11 @@ import com.io7m.renderer.types.RTransformViewType;
   }
 
   private final KGraphicsCapabilitiesType caps;
+  private final Map<String, String>       code_map;
   private final JCGLImplementationType    g;
   private final LogUsableType             log;
   private final KMutableMatrices          matrices;
   private final KShaderCacheDepthType     shader_cache;
-  private final Map<String, String>       code_map;
 
   private KDepthRenderer(
     final JCGLImplementationType gl,
@@ -308,34 +337,6 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  private static Map<String, String> makeCodeMap(
-    final KGraphicsCapabilitiesType caps)
-  {
-    final Map<String, String> m = new HashMap<String, String>();
-
-    if (caps.getSupportsDepthTextures()) {
-      {
-        final String code = KMaterialDepthAlpha.getMaterialCode();
-        m.put(code, String.format("%s4444", code));
-      }
-      {
-        final String code = KMaterialDepthConstant.getMaterialCode();
-        m.put(code, String.format("%s4444", code));
-      }
-    } else {
-      {
-        final String code = KMaterialDepthAlpha.getMaterialCode();
-        m.put(code, code);
-      }
-      {
-        final String code = KMaterialDepthConstant.getMaterialCode();
-        m.put(code, code);
-      }
-    }
-
-    return m;
-  }
-
   private void renderConfigureDepthColorMasks(
     final JCGLInterfaceCommonType gc)
     throws JCGLException
@@ -353,7 +354,8 @@ import com.io7m.renderer.types.RTransformViewType;
     final MatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
     throws JCGLException,
-      RException
+      RException,
+      JCacheException
   {
     for (final String depth_code : batches.keySet()) {
       assert depth_code != null;
@@ -363,7 +365,7 @@ import com.io7m.renderer.types.RTransformViewType;
       final String shader_code = this.code_map.get(depth_code);
       assert shader_code != null;
 
-      final KProgram program = this.shader_cache.getDepth(shader_code);
+      final KProgram program = this.shader_cache.cacheGetLU(shader_code);
       final JCBExecutorType exec = program.getExecutable();
 
       exec.execRun(new JCBExecutorProcedureType<RException>() {
@@ -383,7 +385,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   @Override public void rendererEvaluateDepth(
     final RMatrixI4x4F<RTransformViewType> view,
-    final RMatrixI4x4F<RTransformProjectionType> projection,
+    final KProjectionType projection,
     final Map<String, List<KInstanceOpaqueType>> batches,
     final KFramebufferDepthUsableType framebuffer,
     final OptionType<KFaceSelection> faces)
@@ -405,8 +407,16 @@ import com.io7m.renderer.types.RTransformViewType;
             throws RException,
               JCGLException
           {
-            KDepthRenderer.this.renderScene(batches, framebuffer, mwo, faces);
-            return Unit.unit();
+            try {
+              KDepthRenderer.this.renderScene(
+                batches,
+                framebuffer,
+                mwo,
+                faces);
+              return Unit.unit();
+            } catch (final JCacheException e) {
+              throw new UnreachableCodeException(e);
+            }
           }
         });
     } catch (final JCGLException e) {
@@ -425,7 +435,8 @@ import com.io7m.renderer.types.RTransformViewType;
     final MatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
     throws JCGLException,
-      RException
+      RException,
+      JCacheException
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 

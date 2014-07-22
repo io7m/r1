@@ -18,21 +18,19 @@ package com.io7m.renderer.debug;
 
 module Debug is
 
-  import com.io7m.parasol.Matrix3x3f        as M3;
-  import com.io7m.parasol.Matrix4x4f        as M4;
-  import com.io7m.parasol.Vector3f          as V3;
-  import com.io7m.parasol.Vector4f          as V4;
-  import com.io7m.parasol.Sampler2D         as S;
-  import com.io7m.parasol.Float             as F;
+  import com.io7m.parasol.Matrix3x3f as M3;
+  import com.io7m.parasol.Matrix4x4f as M4;
+  import com.io7m.parasol.Vector3f   as V3;
+  import com.io7m.parasol.Vector4f   as V4;
+  import com.io7m.parasol.Sampler2D  as S;
+  import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Fragment;
-
-  import com.io7m.renderer.core.Normals as N;
 
   --
   -- "Constant color" program.
   --
 
-  shader vertex ccolor_v is
+  shader vertex show_ccolor_v is
     in v_position              : vector_3f;
     parameter m_modelview      : matrix_4x4f;
     parameter m_projection     : matrix_4x4f;
@@ -47,55 +45,23 @@ module Debug is
     out f_position_clip = clip_position;
   end;
 
-  shader fragment ccolor_f is
+  shader fragment show_ccolor_f is
     parameter f_ccolor : vector_4f;
     out       out_0     : vector_4f as 0;
   as
     out out_0 = f_ccolor;
   end;
 
-  shader program ccolor is
-    vertex   ccolor_v;
-    fragment ccolor_f;
-  end;
-
-  --
-  -- Visible depth program.
-  --
-
-  shader vertex depth_v is
-    in v_position              : vector_3f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-    out vertex f_position_clip : vector_4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-  as
-    out f_position_clip = clip_position;
-  end;
-
-  shader fragment depth_f is
-    out out_0 : vector_4f as 0;
-  with
-    value rgba = new vector_4f (Fragment.coordinate [z z z], 1.0);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program show_depth is
-    vertex   depth_v;
-    fragment depth_f;
+  shader program show_ccolor is
+    vertex   show_ccolor_v;
+    fragment show_ccolor_f;
   end;
 
   --
   -- Visible UV program.
   --
 
-  shader vertex uv_v is
+  shader vertex show_uv_v is
     in v_position              : vector_3f;
     in v_uv                    : vector_2f;
     out f_uv                   : vector_2f;
@@ -113,7 +79,7 @@ module Debug is
     out f_uv            = v_uv;
   end;
 
-  shader fragment uv_f is
+  shader fragment show_uv_f is
     in  f_uv  : vector_2f;
     out out_0 : vector_4f as 0;
   with
@@ -122,16 +88,16 @@ module Debug is
     out out_0 = rgba;
   end;
 
-  shader program uv is
-    vertex   uv_v;
-    fragment uv_f;
+  shader program show_uv is
+    vertex   show_uv_v;
+    fragment show_uv_f;
   end;
 
   --
   -- "Vertex color" program.
   --
 
-  shader vertex vcolor_v is
+  shader vertex show_vcolor_v is
     in v_position              : vector_3f;
     in v_color                : vector_4f;
     out f_color               : vector_4f;
@@ -149,23 +115,23 @@ module Debug is
     out f_color        = v_color;
   end;
 
-  shader fragment vcolor_f is
+  shader fragment show_vcolor_f is
     in  f_color : vector_4f;
-    out out_0    : vector_4f as 0;
+    out out_0   : vector_4f as 0;
   as
     out out_0 = f_color;
   end;
 
-  shader program vcolor is
-    vertex   vcolor_v;
-    fragment vcolor_f;
+  shader program show_vcolor is
+    vertex   show_vcolor_v;
+    fragment show_vcolor_f;
   end;
 
   --
   -- Flat textured UV program.
   --
 
-  shader vertex flat_uv_v is
+  shader vertex show_flat_uv_v is
     in v_position              : vector_3f;
     in v_uv                    : vector_2f;
     out f_uv                   : vector_2f;
@@ -183,7 +149,7 @@ module Debug is
     out f_uv        = v_uv;
   end;
 
-  shader fragment flat_uv_f is
+  shader fragment show_flat_uv_f is
     in        f_uv     : vector_2f;
     parameter t_albedo : sampler_2d;
     out       out_0    : vector_4f as 0;
@@ -193,399 +159,9 @@ module Debug is
     out out_0 = rgba;
   end;
 
-  shader program flat_uv is
-    vertex   flat_uv_v;
-    fragment flat_uv_f;
-  end;
-
-  --
-  -- Visible object-space normals.
-  --
-
-  shader vertex normals_vertex_local_v is
-    in v_position              : vector_3f;
-    in v_normal                : vector_3f;
-    out f_normal               : vector_3f;
-    out vertex f_position_clip : vector_4f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-  as
-    out f_position_clip = clip_position;
-    out f_normal        = v_normal;
-  end;
-
-  shader fragment normals_vertex_local_f is
-    in f_normal : vector_3f;
-    out out_0   : vector_4f as 0;
-  with
-    value rgba = N.to_rgba (f_normal);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program normals_vertex_local is
-    vertex   normals_vertex_local_v;
-    fragment normals_vertex_local_f;
-  end;
-
-  --
-  -- Visible eye-space normals.
-  --
-
-  shader vertex normals_vertex_eye_v is
-    in v_position              : vector_3f;
-    in v_normal                : vector_3f;
-    out f_normal               : vector_3f;
-    out vertex f_position_clip : vector_4f;
-    parameter m_normal         : matrix_3x3f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-    value normal =
-      M3.multiply_vector (m_normal, v_normal);
-  as
-    out f_position_clip = clip_position;
-    out f_normal        = normal;
-  end;
-
-  shader fragment normals_vertex_eye_f is
-    in f_normal : vector_3f;
-    out out_0   : vector_4f as 0;
-  with
-    value rgba = N.to_rgba (f_normal);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program normals_vertex_eye is
-    vertex   normals_vertex_eye_v;
-    fragment normals_vertex_eye_f;
-  end;
-
-  --
-  -- Visible object-space bitangents.
-  --
-
-  shader vertex bitangents_vertex_local_v is
-    in v_position              : vector_3f;
-    in v_normal                : vector_3f;
-    in v_tangent4              : vector_4f;
-    out f_bitangent            : vector_3f;
-    out vertex f_position_clip : vector_4f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-    value bitangent =
-      N.bitangent (v_normal, v_tangent4);
-  as
-    out f_position_clip = clip_position;
-    out f_bitangent     = bitangent;
-  end;
-
-  shader fragment bitangents_vertex_local_f is
-    in f_bitangent : vector_3f;
-    out out_0      : vector_4f as 0;
-  with
-    value rgba = N.to_rgba (f_bitangent);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program bitangents_vertex_local is
-    vertex   bitangents_vertex_local_v;
-    fragment bitangents_vertex_local_f;
-  end;
-
-  --
-  -- Visible object-space tangents.
-  --
-
-  shader vertex tangents_vertex_local_v is
-    in v_position              : vector_3f;
-    in v_tangent4              : vector_4f;
-    out f_tangent              : vector_3f;
-    out vertex f_position_clip : vector_4f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-    value tangent =
-      v_tangent4 [x y z];
-  as
-    out f_position_clip = clip_position;
-    out f_tangent       = tangent;
-  end;
-
-  shader fragment tangents_vertex_local_f is
-    in f_tangent : vector_3f;
-    out out_0    : vector_4f as 0;
-  with
-    value rgba = N.to_rgba (f_tangent);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program tangents_vertex_local is
-    vertex   tangents_vertex_local_v;
-    fragment tangents_vertex_local_f;
-  end;
-
-  --
-  -- Visible eye-space bitangents.
-  --
-
-  shader vertex bitangents_vertex_eye_v is
-    in v_position              : vector_3f;
-    in v_normal                : vector_3f;
-    in v_tangent4              : vector_4f;
-    out f_bitangent            : vector_3f;
-    out vertex f_position_clip : vector_4f;
-    parameter m_normal         : matrix_3x3f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-    value bitangent =
-      M3.multiply_vector (m_normal, N.bitangent (v_normal, v_tangent4));
-  as
-    out f_position_clip = clip_position;
-    out f_bitangent     = bitangent;
-  end;
-
-  shader fragment bitangents_vertex_eye_f is
-    in f_bitangent : vector_3f;
-    out out_0      : vector_4f as 0;
-  with
-    value rgba = N.to_rgba (f_bitangent);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program bitangents_vertex_eye is
-    vertex   bitangents_vertex_eye_v;
-    fragment bitangents_vertex_eye_f;
-  end;
-
-  --
-  -- Visible object-space tangents.
-  --
-
-  shader vertex tangents_vertex_eye_v is
-    in v_position              : vector_3f;
-    in v_tangent4              : vector_4f;
-    out f_tangent              : vector_3f;
-    out vertex f_position_clip : vector_4f;
-    parameter m_normal         : matrix_3x3f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-    value tangent =
-      M3.multiply_vector (m_normal, v_tangent4 [x y z]);
-  as
-    out f_position_clip = clip_position;
-    out f_tangent       = tangent;
-  end;
-
-  shader fragment tangents_vertex_eye_f is
-    in f_tangent : vector_3f;
-    out out_0    : vector_4f as 0;
-  with
-    value rgba = N.to_rgba (f_tangent);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program tangents_vertex_eye is
-    vertex   tangents_vertex_eye_v;
-    fragment tangents_vertex_eye_f;
-  end;
-
-  --
-  -- Visible object-space mapped normals.
-  --
-
-  shader vertex normals_map_local_v is
-    in v_position              : vector_3f;
-    in v_normal                : vector_3f;
-    in v_tangent4              : vector_4f;
-    in v_uv                    : vector_2f;
-    out vertex f_position_clip : vector_4f;
-    out f_normal               : vector_3f;
-    out f_tangent              : vector_3f;
-    out f_bitangent            : vector_3f;
-    out f_uv                   : vector_2f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-    value tangent =
-      v_tangent4 [x y z];
-    value bitangent =
-      N.bitangent (v_normal, v_tangent4);
-  as
-    out f_position_clip = clip_position;
-    out f_normal        = v_normal;
-    out f_tangent       = tangent;
-    out f_bitangent     = bitangent;
-    out f_uv            = v_uv;
-  end;
-
-  shader fragment normals_map_local_f is
-    in f_normal        : vector_3f;
-    in f_tangent       : vector_3f;
-    in f_bitangent     : vector_3f;
-    in f_uv            : vector_2f;
-    parameter t_normal : sampler_2d;
-    out out_0          : vector_4f as 0;
-  with
-    value normal =
-      N.bump_local (
-        t_normal,
-        V3.normalize (f_normal),
-        V3.normalize (f_tangent),
-        V3.normalize (f_bitangent),
-        f_uv
-      );
-    value rgba = N.to_rgba (normal);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program normals_map_local is
-    vertex   normals_map_local_v;
-    fragment normals_map_local_f;
-  end;
-
-  --
-  -- Visible eye-space mapped normals.
-  --
-
-  shader vertex normals_map_eye_v is
-    in v_position              : vector_3f;
-    in v_normal                : vector_3f;
-    in v_tangent4              : vector_4f;
-    in v_uv                    : vector_2f;
-    out vertex f_position_clip : vector_4f;
-    out f_normal               : vector_3f;
-    out f_tangent              : vector_3f;
-    out f_bitangent            : vector_3f;
-    out f_uv                   : vector_2f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-    value tangent =
-      v_tangent4 [x y z];
-    value bitangent =
-      N.bitangent (v_normal, v_tangent4);
-  as
-    out f_position_clip = clip_position;
-    out f_normal        = v_normal;
-    out f_tangent       = tangent;
-    out f_bitangent     = bitangent;
-    out f_uv            = v_uv;
-  end;
-
-  shader fragment normals_map_eye_f is
-    in f_normal        : vector_3f;
-    in f_tangent       : vector_3f;
-    in f_bitangent     : vector_3f;
-    in f_uv            : vector_2f;
-    parameter m_normal : matrix_3x3f;
-    parameter t_normal : sampler_2d;
-    out out_0          : vector_4f as 0;
-  with
-    value normal =
-      N.bump (
-        t_normal,
-        m_normal,
-        V3.normalize (f_normal),
-        V3.normalize (f_tangent),
-        V3.normalize (f_bitangent),
-        f_uv
-      );
-    value rgba = N.to_rgba (normal);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program normals_map_eye is
-    vertex   normals_map_eye_v;
-    fragment normals_map_eye_f;
-  end;
-
-  --
-  -- Visible tangent-space mapped normals.
-  --
-
-  shader vertex normals_map_tangent_v is
-    in v_position              : vector_3f;
-    in v_uv                    : vector_2f;
-    out f_uv                   : vector_2f;
-    out vertex f_position_clip : vector_4f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-  as
-    out f_position_clip = clip_position;
-    out f_uv            = v_uv;
-  end;
-
-  shader fragment normals_map_tangent_f is
-    in f_uv            : vector_2f;
-    parameter t_normal : sampler_2d;
-    out out_0          : vector_4f as 0;
-  with
-    value rgba = N.to_rgba (S.texture (t_normal, f_uv) [x y z]);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program normals_map_tangent is
-    vertex   normals_map_tangent_v;
-    fragment normals_map_tangent_f;
+  shader program show_flat_uv is
+    vertex   show_flat_uv_v;
+    fragment show_flat_uv_f;
   end;
 
 end;

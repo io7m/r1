@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
@@ -28,7 +29,8 @@ import com.io7m.renderer.types.RVectorI3F;
  * A transformation consisting of an orientation, a scale, and a translation.
  */
 
-public final class KTransformOST implements KTransformType
+@EqualityStructural public final class KTransformOST implements
+  KTransformType
 {
   /**
    * Construct a new transform.

@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
 
@@ -34,7 +35,7 @@ import com.io7m.renderer.types.RException;
  * @see com.io7m.renderer.kernel.types.KMaterialDepthType
  */
 
-public final class KSceneBatchedShadow
+@EqualityReference public final class KSceneBatchedShadow
 {
   private static final KInstanceOpaqueVisitorType<String, UnreachableCodeException> GET_CODE;
 

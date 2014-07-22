@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,6 +25,7 @@ import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jnull.NonNull;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KFaceSelection;
@@ -51,6 +52,8 @@ import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
+import com.io7m.renderer.kernel.types.KProjectionFrustum;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.kernel.types.KTransformMatrix4x4;
@@ -69,7 +72,6 @@ import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceRGBAType;
 import com.io7m.renderer.types.RTransformModelType;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformTextureType;
 import com.io7m.renderer.types.RTransformViewType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -162,8 +164,15 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
 
   @Override protected @NonNull KSceneBuilderWithCreateType newBuilder()
   {
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.identity();
+    final KProjectionType projection =
+      KProjectionFrustum.newProjection(
+        new MatrixM4x4F(),
+        -1.0f,
+        1.0f,
+        -1.0f,
+        1.0f,
+        1.0f,
+        100.0f);
     final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
     final KCamera camera = KCamera.newCamera(view, projection);
     return KScene.newBuilder(camera);

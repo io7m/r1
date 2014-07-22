@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,6 +24,7 @@ import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -54,14 +55,13 @@ import com.io7m.renderer.kernel.types.KShadowVisitorType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI4x4F;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
 
 /**
  * The default shadow map renderer implementation.
  */
 
-@SuppressWarnings("synthetic-access") public final class KShadowMapRenderer implements
+@SuppressWarnings("synthetic-access") @EqualityReference public final class KShadowMapRenderer implements
   KShadowMapRendererType
 {
   private static final String NAME;
@@ -72,7 +72,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   /**
    * Construct a new shadow map renderer.
-   * 
+   *
    * @param g
    *          The OpenGL implementation
    * @param depth_renderer
@@ -83,12 +83,10 @@ import com.io7m.renderer.types.RTransformViewType;
    *          A blur postprocessor for softening shadow maps
    * @param shadow_cache
    *          A shadow map cache
-   * @param shader_cache
-   *          The shader cache
    * @param log
    *          A log handle
    * @return A new depth renderer
-   * 
+   *
    * @throws RException
    *           If an error occurs during initialization
    */
@@ -98,7 +96,6 @@ import com.io7m.renderer.types.RTransformViewType;
     final KDepthRendererType depth_renderer,
     final KDepthVarianceRendererType depth_variance_renderer,
     final KPostprocessorBlurDepthVarianceType blur,
-    final KShaderCacheType shader_cache,
     final KShadowMapCacheType shadow_cache,
     final LogUsableType log)
     throws RException
@@ -167,14 +164,14 @@ import com.io7m.renderer.types.RTransformViewType;
       this.renderShadowMapsInitialize(lights);
       this.renderShadowMapsPre(camera, batches);
       return with.withMaps(new KShadowMapContextType() {
-        @Override public KShadowMapType getShadowMap(
+        @Override public KShadowMapUsableType getShadowMap(
           final KShadowType shadow)
           throws RException
         {
           try {
             return shadow
-              .shadowAccept(new KShadowVisitorType<KShadowMapType, JCacheException>() {
-                @Override public KShadowMapType shadowMappedBasic(
+              .shadowAccept(new KShadowVisitorType<KShadowMapUsableType, JCacheException>() {
+                @Override public KShadowMapUsableType shadowMappedBasic(
                   final KShadowMappedBasic s)
                   throws JCGLException,
                     RException,
@@ -184,7 +181,7 @@ import com.io7m.renderer.types.RTransformViewType;
                     .cacheGetPeriodic(s.getDescription());
                 }
 
-                @Override public KShadowMapType shadowMappedVariance(
+                @Override public KShadowMapUsableType shadowMappedVariance(
                   final KShadowMappedVariance s)
                   throws JCGLException,
                     RException,
@@ -224,8 +221,6 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveView());
-    final RMatrixI4x4F<RTransformProjectionType> proj =
-      RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveProjection());
 
     /**
      * Basic shadow mapping produces fewer artifacts if only back faces are
@@ -234,7 +229,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
     this.depth_renderer.rendererEvaluateDepth(
       view,
-      proj,
+      mwp.getProjectiveProjection(),
       batches,
       smb.getFramebuffer(),
       Option.some(KFaceSelection.FACE_RENDER_BACK));
@@ -439,7 +434,7 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     this.matrices.withObserver(
       camera.getViewMatrix(),
-      camera.getProjectionMatrix(),
+      camera.getProjection(),
       new MatricesObserverFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
           final MatricesObserverType mo)
@@ -462,8 +457,6 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveView());
-    final RMatrixI4x4F<RTransformProjectionType> proj =
-      RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveProjection());
 
     /**
      * Variance shadow mapping does not require front-face culling, so
@@ -473,7 +466,7 @@ import com.io7m.renderer.types.RTransformViewType;
     final OptionType<KFaceSelection> none = Option.none();
     this.depth_variance_renderer.rendererEvaluateDepthVariance(
       view,
-      proj,
+      mwp.getProjectiveProjection(),
       batches,
       smv.getFramebuffer(),
       none);

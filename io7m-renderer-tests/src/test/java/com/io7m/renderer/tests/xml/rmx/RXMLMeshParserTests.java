@@ -1,10 +1,10 @@
 /*
  * Copyright © 2013 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,6 +28,7 @@ import org.junit.Test;
 import com.io7m.jequality.AlmostEqualFloat.ContextRelative;
 import com.io7m.jnull.NonNull;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.renderer.meshes.RMeshParserEventsType;
 import com.io7m.renderer.types.RSpaceObjectType;
 import com.io7m.renderer.types.RSpaceTextureType;
 import com.io7m.renderer.types.RVectorI2F;
@@ -37,14 +38,13 @@ import com.io7m.renderer.types.RXMLException;
 import com.io7m.renderer.xml.rmx.RXMLMeshAttribute;
 import com.io7m.renderer.xml.rmx.RXMLMeshDocument;
 import com.io7m.renderer.xml.rmx.RXMLMeshParser;
-import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
 
 @SuppressWarnings("synthetic-access") public final class RXMLMeshParserTests
 {
-  class Show implements RXMLMeshParserEventsType<Throwable>
+  class Show implements RMeshParserEventsType<Throwable>
   {
     @Override public void eventError(
-      final RXMLException e)
+      final Exception e)
       throws Throwable
     {
       // Nothing
@@ -64,10 +64,10 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshTriangle(
-      final int index,
-      final int v0,
-      final int v1,
-      final int v2)
+      final long index,
+      final long v0,
+      final long v1,
+      final long v2)
       throws Throwable
     {
       // Nothing
@@ -80,21 +80,21 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshTrianglesStarted(
-      final int count)
+      final long count)
       throws Throwable
     {
       // Nothing
     }
 
     @Override public void eventMeshVertexEnded(
-      final int index)
+      final long index)
       throws Throwable
     {
       // Nothing
     }
 
     @Override public void eventMeshVertexNormal(
-      final int index,
+      final long index,
       final RVectorI3F<RSpaceObjectType> normal)
       throws Throwable
     {
@@ -102,7 +102,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshVertexPosition(
-      final int index,
+      final long index,
       final RVectorI3F<RSpaceObjectType> position)
       throws Throwable
     {
@@ -110,14 +110,14 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshVertexStarted(
-      final int index)
+      final long index)
       throws Throwable
     {
       // Nothing
     }
 
     @Override public void eventMeshVertexTangent4f(
-      final int index,
+      final long index,
       final RVectorI4F<RSpaceObjectType> tangent)
       throws Throwable
     {
@@ -125,7 +125,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshVertexUV(
-      final int index,
+      final long index,
       final RVectorI2F<RSpaceTextureType> uv)
       throws Throwable
     {
@@ -141,7 +141,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshVerticesStarted(
-      final int count)
+      final long count)
       throws Throwable
     {
       // Nothing
@@ -266,7 +266,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     s.close();
   }
 
-  static class Checked implements RXMLMeshParserEventsType<Throwable>
+  static class Checked implements RMeshParserEventsType<Throwable>
   {
     private boolean                                     mesh_ended;
     private boolean                                     mesh_started;
@@ -304,7 +304,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventError(
-      final RXMLException e)
+      final Exception e)
       throws Throwable
     {
       throw new AssertionError(e);
@@ -324,10 +324,10 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshTriangle(
-      final int index,
-      final int v0,
-      final int v1,
-      final int v2)
+      final long index,
+      final long v0,
+      final long v1,
+      final long v2)
       throws Throwable
     {
       this.triangle_called = true;
@@ -342,7 +342,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshTrianglesStarted(
-      final int count)
+      final long count)
       throws Throwable
     {
       this.triangles_started = true;
@@ -350,14 +350,14 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshVertexEnded(
-      final int index)
+      final long index)
       throws Throwable
     {
       this.mesh_vertex_ended = true;
     }
 
     @Override public void eventMeshVertexNormal(
-      final int index,
+      final long index,
       final RVectorI3F<RSpaceObjectType> normal)
       throws Throwable
     {
@@ -365,7 +365,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshVertexPosition(
-      final int index,
+      final long index,
       final RVectorI3F<RSpaceObjectType> position)
       throws Throwable
     {
@@ -373,7 +373,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshVertexStarted(
-      final int index)
+      final long index)
       throws Throwable
     {
       this.vertex_started_called = true;
@@ -381,7 +381,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshVertexTangent4f(
-      final int index,
+      final long index,
       final RVectorI4F<RSpaceObjectType> tangent)
       throws Throwable
     {
@@ -389,7 +389,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshVertexUV(
-      final int index,
+      final long index,
       final RVectorI2F<RSpaceTextureType> uv)
       throws Throwable
     {
@@ -423,7 +423,7 @@ import com.io7m.renderer.xml.rmx.RXMLMeshParserEventsType;
     }
 
     @Override public void eventMeshVerticesStarted(
-      final int count)
+      final long count)
       throws Throwable
     {
       this.vertices_started = true;

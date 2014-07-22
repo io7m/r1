@@ -16,13 +16,14 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.types.RException;
 
 /**
  * Properties for unmasked refraction.
  */
 
-public final class KMaterialRefractiveUnmasked implements
+@EqualityReference public final class KMaterialRefractiveUnmasked implements
   KMaterialRefractiveType
 {
   /**

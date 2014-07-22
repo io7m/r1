@@ -29,11 +29,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 final class VWindowUtilities
 {
-  private VWindowUtilities()
-  {
-    throw new UnreachableCodeException();
-  }
-
   /**
    * Send a {@link WindowEvent#WINDOW_CLOSING} event to the given dialog.
    */
@@ -55,5 +50,10 @@ final class VWindowUtilities
   {
     final WindowEvent ev = new WindowEvent(frame, WindowEvent.WINDOW_CLOSING);
     frame.dispatchEvent(ev);
+  }
+
+  private VWindowUtilities()
+  {
+    throw new UnreachableCodeException();
   }
 }

@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
-import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionMaterialMissingAlbedoTexture;
@@ -30,11 +30,11 @@ import com.io7m.renderer.types.RVectorI3F;
  * The type of translucent, specular-only materials.
  */
 
-@EqualityStructural public final class KMaterialTranslucentSpecularOnly implements
+@EqualityReference public final class KMaterialTranslucentSpecularOnly implements
   KMaterialTranslucentType,
   KMaterialLitType
 {
-  @SuppressWarnings("synthetic-access") private static final class Builder implements
+  @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KMaterialTranslucentSpecularOnlyBuilderType
   {
     private static final RVectorI3F<RSpaceRGBType> WHITE;

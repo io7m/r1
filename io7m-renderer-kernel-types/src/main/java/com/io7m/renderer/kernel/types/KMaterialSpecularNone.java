@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -23,7 +24,8 @@ import com.io7m.renderer.types.RException;
  * specularity.
  */
 
-public final class KMaterialSpecularNone implements KMaterialSpecularType
+@EqualityReference public final class KMaterialSpecularNone implements
+  KMaterialSpecularType
 {
   private static final KMaterialSpecularNone NONE_FIELD;
 

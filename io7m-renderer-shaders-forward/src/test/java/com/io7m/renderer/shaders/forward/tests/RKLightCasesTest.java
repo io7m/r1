@@ -16,6 +16,8 @@
 
 package com.io7m.renderer.shaders.forward.tests;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -24,9 +26,10 @@ import org.reflections.Reflections;
 
 import com.io7m.jfunctional.Pair;
 import com.io7m.renderer.kernel.types.KLightType;
+import com.io7m.renderer.kernel.types.KLightWithTransformType;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.shaders.core.FakeImmutableCapabilities;
-import com.io7m.renderer.shaders.forward.RKLightCases;
+import com.io7m.renderer.shaders.forward.RKFLightCases;
 
 @SuppressWarnings("static-method") public final class RKLightCasesTest
 {
@@ -37,7 +40,7 @@ import com.io7m.renderer.shaders.forward.RKLightCases;
 
   @Test public void testLightCasesShow()
   {
-    final RKLightCases c = new RKLightCases();
+    final RKFLightCases c = new RKFLightCases();
     for (final Pair<KLightType, FakeImmutableCapabilities> p : c.getCases()) {
       System.out.println(p.getLeft().lightGetCode());
     }
@@ -46,10 +49,28 @@ import com.io7m.renderer.shaders.forward.RKLightCases;
   @Test public void testLightCases()
   {
     final Reflections r = RKLightCasesTest.getReflections();
-    final Set<Class<? extends KLightType>> lt =
+    final Set<Class<? extends KLightType>> lt0 =
       r.getSubTypesOf(KLightType.class);
+    final Set<Class<? extends KLightWithTransformType>> lt1 =
+      r.getSubTypesOf(KLightWithTransformType.class);
     final Set<Class<? extends KShadowType>> st =
       r.getSubTypesOf(KShadowType.class);
+
+    final Set<Class<?>> lt = new HashSet<Class<?>>();
+    lt.addAll(lt0);
+    lt.addAll(lt1);
+
+    /**
+     * Remove any non-concrete types.
+     */
+
+    final Iterator<Class<?>> iter = lt.iterator();
+    while (iter.hasNext()) {
+      final Class<?> c = iter.next();
+      if (c.isInterface()) {
+        iter.remove();
+      }
+    }
 
     /**
      * One case per light...
@@ -64,7 +85,7 @@ import com.io7m.renderer.shaders.forward.RKLightCases;
 
     types = types + (st.size() + 1);
 
-    final RKLightCases c = new RKLightCases();
+    final RKFLightCases c = new RKFLightCases();
     Assert.assertEquals(types, c.getCases().size());
   }
 }

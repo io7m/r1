@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,7 +17,6 @@
 package com.io7m.renderer.examples.viewer;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,10 +31,10 @@ import javax.media.opengl.GLProfile;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
-import com.io7m.jcache.LRUCacheConfig;
-import com.io7m.jcache.LRUCacheTrivial;
+import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
@@ -58,13 +57,20 @@ import com.io7m.jlog.LogType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeInclusiveL;
-import com.io7m.jvvfs.FilesystemType;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.jvvfs.FilesystemError;
 import com.io7m.renderer.examples.ExampleClasses;
+import com.io7m.renderer.examples.ExampleRendererConstructorDebugType;
+import com.io7m.renderer.examples.ExampleRendererConstructorDeferredType;
+import com.io7m.renderer.examples.ExampleRendererConstructorForwardType;
 import com.io7m.renderer.examples.ExampleRendererConstructorType;
-import com.io7m.renderer.examples.ExampleRendererForwardDefault;
+import com.io7m.renderer.examples.ExampleRendererConstructorVisitorType;
+import com.io7m.renderer.examples.ExampleRendererDebugType;
+import com.io7m.renderer.examples.ExampleRendererDeferredType;
 import com.io7m.renderer.examples.ExampleRendererForwardType;
 import com.io7m.renderer.examples.ExampleRendererType;
 import com.io7m.renderer.examples.ExampleRendererVisitorType;
+import com.io7m.renderer.examples.ExampleRenderers;
 import com.io7m.renderer.examples.ExampleSceneBuilderType;
 import com.io7m.renderer.examples.ExampleSceneType;
 import com.io7m.renderer.examples.ExampleSceneUtilities;
@@ -72,22 +78,24 @@ import com.io7m.renderer.examples.ExampleViewType;
 import com.io7m.renderer.examples.tools.EMeshCache;
 import com.io7m.renderer.examples.tools.ETexture2DCache;
 import com.io7m.renderer.examples.tools.ETextureCubeCache;
+import com.io7m.renderer.kernel.KFramebufferDeferred;
+import com.io7m.renderer.kernel.KFramebufferDeferredType;
 import com.io7m.renderer.kernel.KFramebufferForward;
 import com.io7m.renderer.kernel.KFramebufferForwardType;
 import com.io7m.renderer.kernel.KFramebufferType;
 import com.io7m.renderer.kernel.KProgram;
+import com.io7m.renderer.kernel.KRendererDebugType;
+import com.io7m.renderer.kernel.KRendererDeferredType;
 import com.io7m.renderer.kernel.KRendererForwardType;
-import com.io7m.renderer.kernel.KShaderCacheFilesystem;
-import com.io7m.renderer.kernel.KShaderCacheFilesystemLoader;
-import com.io7m.renderer.kernel.KShaderCacheType;
+import com.io7m.renderer.kernel.KShaderCachePostprocessingType;
 import com.io7m.renderer.kernel.KShadingProgramCommon;
-import com.io7m.renderer.kernel.KUnitQuad;
-import com.io7m.renderer.kernel.KUnitQuadUsableType;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
+import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
@@ -96,16 +104,17 @@ import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
+import com.io7m.renderer.kernel.types.KSceneBatchedDeferred;
 import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
+import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.kernel.types.KTranslucentType;
+import com.io7m.renderer.kernel.types.KUnitQuad;
+import com.io7m.renderer.kernel.types.KUnitQuadUsableType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyShadowed;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyUnshadowed;
-import com.io7m.renderer.types.RExceptionInstanceAlreadyVisible;
 import com.io7m.renderer.types.RExceptionJCGL;
+import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
 import com.io7m.renderer.types.RExceptionLightMissingShadow;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
@@ -148,24 +157,25 @@ final class ViewerSingleMainWindow implements Runnable
       }
     }
 
-    private final ETexture2DCache        cache_2d;
-    private final ETextureCubeCache      cache_cube;
-    private final EMeshCache             cache_mesh;
-    private final ExampleSceneType       example;
-    private final KFramebufferType       framebuffer;
-    private final JCGLImplementationType gi;
-    private final TextureLoaderType      loader;
-    private final KUnitQuad              quad;
-    private final ExampleRendererType    renderer;
-    private final KShaderCacheType       shader_cache;
-    private int                          view_index;
+    private final ETexture2DCache           cache_2d;
+    private final ETextureCubeCache         cache_cube;
+    private final EMeshCache                cache_mesh;
+    private final ExampleSceneType          example;
+    private final KFramebufferType          framebuffer;
+    private final JCGLImplementationType    gi;
+    private final TextureLoaderType         loader;
+    private final KUnitQuad                 quad;
+    private final ExampleRendererType       renderer;
+    private int                             view_index;
+    private final KGraphicsCapabilitiesType caps;
+    private final VShaderCaches             shader_caches;
 
     Runner(
       final GLAutoDrawable drawable,
       final JCGLImplementationType in_gi,
-      final FilesystemType in_filesystem,
       final ExampleSceneType in_example,
       final ExampleRendererConstructorType in_renderer_cons,
+      final VShaderCaches in_shader_caches,
       final LogUsableType in_log)
       throws JCGLException,
         RException
@@ -179,33 +189,111 @@ final class ViewerSingleMainWindow implements Runnable
       this.cache_2d = new ETexture2DCache(in_gi, this.loader, in_log);
       this.cache_mesh = new EMeshCache(in_gi, in_log);
       this.quad = KUnitQuad.newQuad(in_gi.getGLCommon(), in_log);
-
-      final LRUCacheConfig scc =
-        LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(1024));
-
-      this.shader_cache =
-        KShaderCacheFilesystem.wrap(LRUCacheTrivial.newCache(
-          KShaderCacheFilesystemLoader.newLoader(
-            this.gi,
-            in_filesystem,
-            in_log),
-          scc));
+      this.caps = KGraphicsCapabilities.getCapabilities(in_gi);
+      this.shader_caches = in_shader_caches;
 
       this.renderer =
-        in_renderer_cons.newRenderer(in_log, this.shader_cache, this.gi);
+        in_renderer_cons
+          .matchConstructor(new ExampleRendererConstructorVisitorType<ExampleRendererType, RException>() {
+            @Override public ExampleRendererType debug(
+              final ExampleRendererConstructorDebugType c)
+              throws RException,
+                JCGLException
+            {
+              return c.newRenderer(
+                in_log,
+                in_shader_caches.getShaderDepthCache(),
+                in_shader_caches.getShaderDebugCache(),
+                in_gi);
+            }
+
+            @Override public ExampleRendererType deferred(
+              final ExampleRendererConstructorDeferredType c)
+              throws RException,
+                JCGLException
+            {
+              return c.newRenderer(
+                in_log,
+                in_shader_caches.getShaderDebugCache(),
+                in_shader_caches.getShaderForwardTranslucentLitCache(),
+                in_shader_caches.getShaderForwardTranslucentUnlitCache(),
+                in_shader_caches.getShaderDepthCache(),
+                in_shader_caches.getShaderDepthVarianceCache(),
+                in_shader_caches.getShaderPostprocessingCache(),
+                in_shader_caches.getShaderDeferredGeoCache(),
+                in_shader_caches.getShaderDeferredLightCache(),
+                in_gi);
+            }
+
+            @Override public ExampleRendererType forward(
+              final ExampleRendererConstructorForwardType c)
+              throws RException,
+                JCGLException
+            {
+              return c.newRenderer(
+                in_log,
+                in_shader_caches.getShaderForwardOpaqueLitCache(),
+                in_shader_caches.getShaderForwardOpaqueUnlitCache(),
+                in_shader_caches.getShaderForwardTranslucentLitCache(),
+                in_shader_caches.getShaderForwardTranslucentUnlitCache(),
+                in_shader_caches.getShaderDepthCache(),
+                in_shader_caches.getShaderDepthVarianceCache(),
+                in_shader_caches.getShaderPostprocessingCache(),
+                in_gi);
+            }
+          });
 
       this.framebuffer =
         this.renderer
           .rendererAccept(new ExampleRendererVisitorType<KFramebufferType>() {
-            @Override public KFramebufferType visitForward(
-              final ExampleRendererForwardType rf)
+            @Override public KFramebufferType visitDeferred(
+              final ExampleRendererDeferredType r)
               throws RException
+            {
+              final AreaInclusive area = this.makeArea();
+
+              final KFramebufferRGBADescription rgba_description =
+                KFramebufferRGBADescription.newDescription(
+                  area,
+                  TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+                  TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                  KRGBAPrecision.RGBA_PRECISION_8);
+
+              final KFramebufferDepthDescription depth_description =
+                KFramebufferDepthDescription.newDescription(
+                  area,
+                  TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
+                  TextureFilterMinification.TEXTURE_FILTER_NEAREST,
+                  KDepthPrecision.DEPTH_PRECISION_24);
+
+              return KFramebufferDeferred.newFramebuffer(
+                Runner.this.gi,
+                KFramebufferForwardDescription.newDescription(
+                  rgba_description,
+                  depth_description));
+            }
+
+            private AreaInclusive makeArea()
             {
               final RangeInclusiveL range_x =
                 new RangeInclusiveL(0, drawable.getWidth() - 1);
               final RangeInclusiveL range_y =
                 new RangeInclusiveL(0, drawable.getHeight() - 1);
               final AreaInclusive area = new AreaInclusive(range_x, range_y);
+              return area;
+            }
+
+            @Override public KFramebufferType visitForward(
+              final ExampleRendererForwardType rf)
+              throws RException
+            {
+              return this.makeForward();
+            }
+
+            private KFramebufferType makeForward()
+              throws RException
+            {
+              final AreaInclusive area = this.makeArea();
 
               final KFramebufferRGBADescription rgba_description =
                 KFramebufferRGBADescription.newDescription(
@@ -227,21 +315,30 @@ final class ViewerSingleMainWindow implements Runnable
                   rgba_description,
                   depth_description));
             }
+
+            @Override public KFramebufferType visitDebug(
+              final ExampleRendererDebugType r)
+              throws RException
+            {
+              return this.makeForward();
+            }
           });
     }
 
     private void renderSceneResults(
       final KFramebufferForwardType fb)
       throws JCGLException,
-        RException
+        RException,
+        JCacheException
     {
       final JCGLImplementationType g = this.gi;
       assert g != null;
       final JCGLInterfaceCommonType gc = g.getGLCommon();
 
-      final KShaderCacheType sc = this.shader_cache;
+      final KShaderCachePostprocessingType sc =
+        this.shader_caches.getShaderPostprocessingCache();
       assert sc != null;
-      final KProgram kp = sc.getPostprocessing("copy_rgba");
+      final KProgram kp = sc.cacheGetLU("copy_rgba");
       gc.framebufferDrawUnbind();
 
       try {
@@ -252,6 +349,11 @@ final class ViewerSingleMainWindow implements Runnable
         if (gc.depthBufferGetBits() > 0) {
           gc.depthBufferTestDisable();
           gc.depthBufferWriteDisable();
+        }
+
+        if (gc.stencilBufferGetBits() > 0) {
+          gc.stencilBufferDisable();
+          gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0);
         }
 
         gc.viewportSet(fb.kFramebufferGetArea());
@@ -309,40 +411,19 @@ final class ViewerSingleMainWindow implements Runnable
           return Runner.this.cache_mesh.loadMesh(name);
         }
 
-        @Override public void sceneAddInvisibleWithShadow(
-          final KLightType light,
-          final KInstanceOpaqueType instance)
-          throws RExceptionInstanceAlreadyVisible,
-            RExceptionLightMissingShadow
-        {
-          scene_builder.sceneAddInvisibleWithShadow(light, instance);
-        }
-
-        @Override public void sceneAddOpaqueLitVisibleWithoutShadow(
-          final KLightType light,
-          final KInstanceOpaqueType instance)
-          throws RExceptionInstanceAlreadyUnlit,
-            RExceptionInstanceAlreadyShadowed
-        {
-          scene_builder
-            .sceneAddOpaqueLitVisibleWithoutShadow(light, instance);
-        }
-
-        @Override public void sceneAddOpaqueLitVisibleWithShadow(
-          final KLightType light,
-          final KInstanceOpaqueType instance)
-          throws RExceptionInstanceAlreadyUnlit,
-            RExceptionLightMissingShadow,
-            RExceptionInstanceAlreadyUnshadowed
-        {
-          scene_builder.sceneAddOpaqueLitVisibleWithShadow(light, instance);
-        }
-
         @Override public void sceneAddOpaqueUnlit(
           final KInstanceOpaqueType instance)
           throws RExceptionInstanceAlreadyLit
         {
           scene_builder.sceneAddOpaqueUnlit(instance);
+        }
+
+        @Override public void sceneAddShadowCaster(
+          final KLightType light,
+          final KInstanceOpaqueType instance)
+          throws RExceptionLightMissingShadow
+        {
+          scene_builder.sceneAddShadowCaster(light, instance);
         }
 
         @Override public void sceneAddTranslucentLit(
@@ -377,13 +458,6 @@ final class ViewerSingleMainWindow implements Runnable
 
         @Override public
           Map<KLightType, Set<KInstanceOpaqueType>>
-          sceneGetInstancesOpaqueLitVisibleByLight()
-        {
-          return scene_builder.sceneGetInstancesOpaqueLitVisibleByLight();
-        }
-
-        @Override public
-          Map<KLightType, Set<KInstanceOpaqueType>>
           sceneGetInstancesOpaqueShadowCastingByLight()
         {
           return scene_builder.sceneGetInstancesOpaqueShadowCastingByLight();
@@ -411,6 +485,13 @@ final class ViewerSingleMainWindow implements Runnable
           return scene_builder.sceneGetTranslucents();
         }
 
+        @Override public KSceneLightGroupBuilderType sceneNewLightGroup(
+          final String name)
+          throws RExceptionLightGroupAlreadyAdded
+        {
+          return scene_builder.sceneNewLightGroup(name);
+        }
+
         @Override public Texture2DStaticUsableType texture(
           final String name)
           throws RException
@@ -423,11 +504,54 @@ final class ViewerSingleMainWindow implements Runnable
             throw new RuntimeException(e);
           }
         }
+
+        @Override public KGraphicsCapabilitiesType capabilities()
+        {
+          return Runner.this.caps;
+        }
+
+        @Override public Texture2DStaticUsableType textureClamped(
+          final String name)
+          throws RException
+        {
+          try {
+            return Runner.this.cache_2d.loadTextureClamped(name);
+          } catch (final IOException e) {
+            throw new RuntimeException(e);
+          } catch (final JCGLException e) {
+            throw new RuntimeException(e);
+          }
+        }
       };
 
       this.example.exampleScene(b);
 
       this.renderer.rendererAccept(new ExampleRendererVisitorType<Unit>() {
+        @Override public Unit visitDeferred(
+          final ExampleRendererDeferredType rd)
+          throws RException
+        {
+          try {
+            final KRendererDeferredType dr = rd.rendererGetDeferred();
+            final KFramebufferDeferredType fb =
+              (KFramebufferDeferredType) Runner.this.framebuffer;
+            assert fb != null;
+
+            final KScene sc = scene_builder.sceneCreate();
+            final KSceneBatchedDeferred batched =
+              KSceneBatchedDeferred.fromScene(sc);
+
+            dr.rendererDeferredEvaluate(fb, batched);
+            Runner.this.renderSceneResults(fb);
+
+            return Unit.unit();
+          } catch (final JCGLException e) {
+            throw RExceptionJCGL.fromJCGLException(e);
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
+          }
+        }
+
         @Override public Unit visitForward(
           final ExampleRendererForwardType rf)
           throws RException
@@ -448,6 +572,31 @@ final class ViewerSingleMainWindow implements Runnable
             return Unit.unit();
           } catch (final JCGLException e) {
             throw RExceptionJCGL.fromJCGLException(e);
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
+          }
+        }
+
+        @Override public Unit visitDebug(
+          final ExampleRendererDebugType rd)
+          throws RException
+        {
+          try {
+            final KRendererDebugType dr = rd.rendererGetDebug();
+            final KFramebufferForwardType fb =
+              (KFramebufferForwardType) Runner.this.framebuffer;
+            assert fb != null;
+
+            final KScene sc = scene_builder.sceneCreate();
+
+            dr.rendererDebugEvaluate(fb, sc);
+            Runner.this.renderSceneResults(fb);
+
+            return Unit.unit();
+          } catch (final JCGLException e) {
+            throw RExceptionJCGL.fromJCGLException(e);
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
           }
         }
       });
@@ -461,23 +610,23 @@ final class ViewerSingleMainWindow implements Runnable
     }
   }
 
-  private final ViewerConfig     config;
-  private final ExampleSceneType example;
-  private final FilesystemType   fs;
-  private final LogType          log;
+  private final ViewerConfig                   config;
+  private final ExampleSceneType               example;
+  private final LogType                        log;
+  private final ExampleRendererConstructorType renderer;
 
   public ViewerSingleMainWindow(
     final ViewerConfig in_config,
     final LogType in_log,
-    final FilesystemType in_fs,
+    final String renderer_name,
     final String example_name)
     throws ClassNotFoundException,
       InstantiationException,
       IllegalAccessException
   {
     this.config = in_config;
-    this.fs = in_fs;
     this.log = in_log;
+    this.renderer = ExampleRenderers.getRenderer(renderer_name);
     this.example = ExampleClasses.getScene(example_name);
   }
 
@@ -523,17 +672,25 @@ final class ViewerSingleMainWindow implements Runnable
               ctx,
               ViewerSingleMainWindow.this.log);
 
+          final VShaderCaches caches =
+            VShaderCaches.newCachesFromArchives(
+              gi,
+              ViewerSingleMainWindow.this.config,
+              ViewerSingleMainWindow.this.log);
+
           this.runner =
             new Runner(
               drawable,
               gi,
-              ViewerSingleMainWindow.this.fs,
               ViewerSingleMainWindow.this.example,
-              ExampleRendererForwardDefault.get(),
+              ViewerSingleMainWindow.this.renderer,
+              caches,
               ViewerSingleMainWindow.this.log);
         } catch (final JCGLException e) {
           throw new RuntimeException(e);
         } catch (final RException e) {
+          throw new RuntimeException(e);
+        } catch (final FilesystemError e) {
           throw new RuntimeException(e);
         }
       }

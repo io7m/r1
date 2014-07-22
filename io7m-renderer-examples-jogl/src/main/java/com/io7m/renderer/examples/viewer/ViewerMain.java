@@ -40,14 +40,9 @@ import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogPolicyProperties;
 import com.io7m.jlog.LogPolicyType;
 import com.io7m.jlog.LogType;
-import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.Nullable;
 import com.io7m.jproperties.JPropertyException;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.jvvfs.Filesystem;
-import com.io7m.jvvfs.FilesystemError;
-import com.io7m.jvvfs.FilesystemType;
-import com.io7m.renderer.kernel.KShaderPaths;
 
 /**
  * The main viewer.
@@ -55,11 +50,6 @@ import com.io7m.renderer.kernel.KShaderPaths;
 
 public final class ViewerMain
 {
-  private ViewerMain()
-  {
-    throw new UnreachableCodeException();
-  }
-
   private static void announceTime()
   {
     final Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -182,138 +172,11 @@ public final class ViewerMain
       @Override public void run()
       {
         log.debug("starting");
-
-        try {
-          final FilesystemType fs =
-            Filesystem.makeWithoutArchiveDirectory(log);
-
-          ViewerMain.setupShaderFilesystem(config, fs, log);
-
-          final ViewerMainWindow vmw = new ViewerMainWindow(config, log, fs);
-          vmw.pack();
-          vmw.setVisible(true);
-        } catch (final FilesystemError e) {
-          VErrorBox.showErrorWithTitleLater(log, "Filesystem error", e);
-          e.printStackTrace();
-          System.exit(1);
-        }
+        final ViewerMainWindow vmw = new ViewerMainWindow(config, log);
+        vmw.pack();
+        vmw.setVisible(true);
       }
     });
-  }
-
-  private static void setupShaderFilesystem(
-    final ViewerConfig config,
-    final FilesystemType fs,
-    final LogUsableType log)
-    throws FilesystemError
-  {
-    fs.createDirectory(KShaderPaths.PATH_DEPTH);
-    fs.createDirectory(KShaderPaths.PATH_DEPTH_VARIANCE);
-    fs.createDirectory(KShaderPaths.PATH_FORWARD_OPAQUE_LIT);
-    fs.createDirectory(KShaderPaths.PATH_FORWARD_OPAQUE_UNLIT);
-    fs.createDirectory(KShaderPaths.PATH_FORWARD_TRANSLUCENT_LIT);
-    fs.createDirectory(KShaderPaths.PATH_FORWARD_TRANSLUCENT_UNLIT);
-    fs.createDirectory(KShaderPaths.PATH_POSTPROCESSING);
-
-    /**
-     * If running from eclipse, alternate measures have to be taken to set up
-     * the shader filesystem, because the program's not running from a neatly
-     * arranged assembly directory.
-     */
-
-    if (config.isEclipse()) {
-      log
-        .info("Running under eclipse - loading shaders from target directories");
-
-      fs.mountArchiveFromAnywhere(
-        ViewerMain.makeShaderArchiveNameEclipse(config, "depth"),
-        KShaderPaths.PATH_DEPTH);
-      fs.mountArchiveFromAnywhere(
-        ViewerMain.makeShaderArchiveNameEclipse(config, "depth_variance"),
-        KShaderPaths.PATH_DEPTH_VARIANCE);
-      fs
-        .mountArchiveFromAnywhere(ViewerMain.makeShaderArchiveNameEclipse(
-          config,
-          "forward-opaque-lit"), KShaderPaths.PATH_FORWARD_OPAQUE_LIT);
-      fs.mountArchiveFromAnywhere(ViewerMain.makeShaderArchiveNameEclipse(
-        config,
-        "forward-opaque-unlit"), KShaderPaths.PATH_FORWARD_OPAQUE_UNLIT);
-      fs
-        .mountArchiveFromAnywhere(
-          ViewerMain.makeShaderArchiveNameEclipse(
-            config,
-            "forward-translucent-lit"),
-          KShaderPaths.PATH_FORWARD_TRANSLUCENT_LIT);
-      fs.mountArchiveFromAnywhere(
-        ViewerMain.makeShaderArchiveNameEclipse(
-          config,
-          "forward-translucent-unlit"),
-        KShaderPaths.PATH_FORWARD_TRANSLUCENT_UNLIT);
-      fs.mountArchiveFromAnywhere(
-        ViewerMain.makeShaderArchiveNameEclipse(config, "postprocessing"),
-        KShaderPaths.PATH_POSTPROCESSING);
-    } else {
-      fs.mountArchiveFromAnywhere(
-        ViewerMain.makeShaderArchiveNameAssembled(config, "depth"),
-        KShaderPaths.PATH_DEPTH);
-      fs.mountArchiveFromAnywhere(
-        ViewerMain.makeShaderArchiveNameAssembled(config, "depth_variance"),
-        KShaderPaths.PATH_DEPTH_VARIANCE);
-      fs.mountArchiveFromAnywhere(ViewerMain.makeShaderArchiveNameAssembled(
-        config,
-        "forward-opaque-lit"), KShaderPaths.PATH_FORWARD_OPAQUE_LIT);
-      fs.mountArchiveFromAnywhere(ViewerMain.makeShaderArchiveNameAssembled(
-        config,
-        "forward-opaque-unlit"), KShaderPaths.PATH_FORWARD_OPAQUE_UNLIT);
-      fs
-        .mountArchiveFromAnywhere(
-          ViewerMain.makeShaderArchiveNameAssembled(
-            config,
-            "forward-translucent-lit"),
-          KShaderPaths.PATH_FORWARD_TRANSLUCENT_LIT);
-      fs.mountArchiveFromAnywhere(
-        ViewerMain.makeShaderArchiveNameAssembled(
-          config,
-          "forward-translucent-unlit"),
-        KShaderPaths.PATH_FORWARD_TRANSLUCENT_UNLIT);
-      fs.mountArchiveFromAnywhere(
-        ViewerMain.makeShaderArchiveNameAssembled(config, "postprocessing"),
-        KShaderPaths.PATH_POSTPROCESSING);
-    }
-  }
-
-  private static File makeShaderArchiveNameEclipse(
-    final ViewerConfig config,
-    final String name)
-  {
-    final StringBuilder s = new StringBuilder();
-    final String base = System.getenv("ECLIPSE_EXEC_DIR");
-    if (base == null) {
-      throw new IllegalStateException("ECLIPSE_EXEC_DIR is unset");
-    }
-
-    s.append(base);
-    s.append("/io7m-renderer-shaders-");
-    s.append(name);
-    s.append("/target/io7m-renderer-shaders-");
-    s.append(name);
-    s.append("-");
-    s.append(config.getProgramVersion());
-    s.append("-shaders.zip");
-    return new File(s.toString());
-  }
-
-  private static File makeShaderArchiveNameAssembled(
-    final ViewerConfig config,
-    final String name)
-  {
-    final StringBuilder s = new StringBuilder();
-    s.append("lib/io7m-renderer-shaders-");
-    s.append(name);
-    s.append("-");
-    s.append(config.getProgramVersion());
-    s.append("-shaders.zip");
-    return new File(s.toString());
   }
 
   /**
@@ -414,5 +277,10 @@ public final class ViewerMain
     } catch (final InterruptedException x) {
       x.printStackTrace();
     }
+  }
+
+  private ViewerMain()
+  {
+    throw new UnreachableCodeException();
   }
 }

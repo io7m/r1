@@ -16,9 +16,10 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
 
-final class KMaterialCodes
+@EqualityReference final class KMaterialCodes
 {
   public static String makeOpaqueRegularLitCodeWithDepth(
     final KMaterialDepthType in_depth,

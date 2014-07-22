@@ -12,4 +12,4 @@ do
   fi
 done
 
-exec java -cp "${JAR_PATH}" "com.io7m.renderer.kernel.examples.viewer.ViewerMain" $@
+exec java -cp "${JAR_PATH}" "com.io7m.renderer.examples.viewer.ViewerMain" $@

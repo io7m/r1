@@ -32,7 +32,7 @@ import com.io7m.renderer.types.RTransformTextureType;
   KMaterialTranslucentType,
   KMaterialRegularType
 {
-  @SuppressWarnings("synthetic-access") private static final class Builder implements
+  @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KMaterialTranslucentRegularBuilderType
   {
     private KMaterialAlbedoType                 albedo;

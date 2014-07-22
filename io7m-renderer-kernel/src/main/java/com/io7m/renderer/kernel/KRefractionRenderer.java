@@ -98,7 +98,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   /**
    * Calculate the bounding box for the given mesh and matrices in normalized
    * device coordinates.
-   * 
+   *
    * @return true If the given mesh is actually visible
    */
 
@@ -106,7 +106,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     boolean
     calculateNDCBounds(
       final KMeshBoundsCacheType<RSpaceObjectType> bounds_cache,
-      final LUCacheType<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException> bounds_triangle_cache,
+      final LUCacheType<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException> bounds_triangle_cache,
       final MatrixM4x4F.Context matrix_context,
       final KMutableMatrices.MatricesInstanceType mi,
       final KMeshReadableType mesh,
@@ -304,7 +304,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
   /**
    * Construct a new refraction renderer.
-   * 
+   *
    * @param gl
    *          The OpenGL implementation
    * @param copier
@@ -318,7 +318,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
    * @param bounds_tri_cache
    *          A triangle cache
    * @return A new renderer
-   * 
+   *
    * @throws RException
    *           If an error occurs during initialization
    */
@@ -449,11 +449,11 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   {
     final KMeshReadableType mesh = r.instanceGetMesh();
 
-    final BLUCacheReceiptType<KFramebufferForwardDescription, KFramebufferForwardType> scene_mask =
+    final BLUCacheReceiptType<KFramebufferForwardDescription, KFramebufferForwardUsableType> scene_mask =
       forward_cache.bluCacheGet(scene.kFramebufferGetForwardDescription());
 
     try {
-      final KFramebufferForwardType mask = scene_mask.getValue();
+      final KFramebufferForwardUsableType mask = scene_mask.getValue();
 
       copier.copierCopyRGBAWithDepth(
         scene,
@@ -494,7 +494,8 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KInstanceTranslucentRefractive r,
     final KMutableMatrices.MatricesInstanceType mi)
     throws JCGLException,
-      RException
+      RException,
+      JCacheException
   {
     KRefractionRenderer.rendererRefractionEvaluateRenderUnmasked(
       g,
@@ -515,10 +516,10 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final MatricesInstanceType mi,
     final KMeshReadableType mesh)
     throws RException,
-      JCGLException
+      JCGLException,
+      JCacheException
   {
-    final KProgram kprogram =
-      shader_cache.getForwardTranslucentUnlit("refraction_mask");
+    final KProgram kprogram = shader_cache.cacheGetLU("refraction_mask");
 
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     kprogram.getExecutable().execRun(
@@ -592,13 +593,13 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       final MatricesInstanceType mi,
       final KMeshReadableType mesh)
       throws JCGLException,
-        RException
+        RException,
+        JCacheException
   {
     final KMaterialTranslucentRefractive material = r.getMaterial();
     final String shader_code =
       KRefractionRenderer.shaderCodeFromMaterial(material);
-    final KProgram kprogram =
-      shader_cache.getForwardTranslucentUnlit(shader_code);
+    final KProgram kprogram = shader_cache.cacheGetLU(shader_code);
 
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
     final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
@@ -710,14 +711,14 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final MatricesInstanceType mi,
     final KMeshReadableType mesh)
     throws JCGLException,
-      RException
+      RException,
+      JCacheException
   {
     final KMaterialTranslucentRefractive material = r.getMaterial();
     final String shader_code =
       KRefractionRenderer.shaderCodeFromMaterial(material);
 
-    final KProgram kprogram =
-      shader_cache.getForwardTranslucentUnlit(shader_code);
+    final KProgram kprogram = shader_cache.cacheGetLU(shader_code);
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
     final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
 
@@ -946,7 +947,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
         this.window_bounds_lower,
         this.window_bounds_upper);
 
-      final BLUCacheReceiptType<KFramebufferForwardDescription, KFramebufferForwardType> temporary =
+      final BLUCacheReceiptType<KFramebufferForwardDescription, KFramebufferForwardUsableType> temporary =
         this.forward_cache.bluCacheGet(scene
           .kFramebufferGetForwardDescription());
 
@@ -1002,16 +1003,20 @@ import com.io7m.renderer.types.RVectorReadable3FType;
               throws RException,
                 JCGLException
             {
-              KRefractionRenderer
-                .rendererRefractionEvaluateForInstanceUnmasked(
-                  KRefractionRenderer.this.g,
-                  KRefractionRenderer.this.shader_cache,
-                  KRefractionRenderer.this.texture_units,
-                  scene,
-                  temporary.getValue(),
-                  r,
-                  mi);
-              return Unit.unit();
+              try {
+                KRefractionRenderer
+                  .rendererRefractionEvaluateForInstanceUnmasked(
+                    KRefractionRenderer.this.g,
+                    KRefractionRenderer.this.shader_cache,
+                    KRefractionRenderer.this.texture_units,
+                    scene,
+                    temporary.getValue(),
+                    r,
+                    mi);
+                return Unit.unit();
+              } catch (final JCacheException e) {
+                throw new UnreachableCodeException(e);
+              }
             }
           });
 

@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
-import com.io7m.jequality.annotations.EqualityStructural;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
@@ -26,7 +26,7 @@ import com.io7m.renderer.types.RTransformTextureType;
  * The type of translucent, refractive materials.
  */
 
-@EqualityStructural public final class KMaterialTranslucentRefractive implements
+@EqualityReference public final class KMaterialTranslucentRefractive implements
   KMaterialTranslucentType,
   KMaterialUnlitType
 {

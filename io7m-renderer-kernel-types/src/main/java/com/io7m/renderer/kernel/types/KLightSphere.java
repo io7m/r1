@@ -21,6 +21,8 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
@@ -34,9 +36,10 @@ import com.io7m.renderer.types.RVectorI3F;
  * </p>
  */
 
-@EqualityReference public final class KLightSphere implements KLightType
+@EqualityReference public final class KLightSphere implements
+  KLightWithTransformType
 {
-  @SuppressWarnings("synthetic-access") private static final class Builder implements
+  @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightSphereBuilderType
   {
     private RVectorI3F<RSpaceRGBType>    color;
@@ -124,7 +127,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * <p>
    * Create a builder for creating new spherical lights.
    * </p>
-   * 
+   *
    * @return A new light builder.
    */
 
@@ -138,7 +141,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * Create a builder for creating new spherical lights. The builder will be
    * initialized to values based on the given light.
    * </p>
-   * 
+   *
    * @param s
    *          The initial light.
    * @return A new light builder.
@@ -152,7 +155,7 @@ import com.io7m.renderer.types.RVectorI3F;
 
   /**
    * Construct a new spherical light.
-   * 
+   *
    * @param in_color
    *          The color.
    * @param in_intensity
@@ -186,6 +189,7 @@ import com.io7m.renderer.types.RVectorI3F;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float            intensity;
   private final RVectorI3F<RSpaceWorldType>                                    position;
   private final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius;
+  private final KTransformType                                                 transform;
 
   private KLightSphere(
     final RVectorI3F<RSpaceRGBType> in_color,
@@ -199,6 +203,12 @@ import com.io7m.renderer.types.RVectorI3F;
     this.position = NullCheck.notNull(in_position, "Position");
     this.radius = in_radius;
     this.falloff = in_falloff;
+
+    final VectorI3F scale =
+      new VectorI3F(this.radius, this.radius, this.radius);
+    this.transform =
+      KTransformOST
+        .newTransform(QuaternionI4F.IDENTITY, scale, this.position);
   }
 
   @Override public
@@ -257,6 +267,11 @@ import com.io7m.renderer.types.RVectorI3F;
   @Override public OptionType<KShadowType> lightGetShadow()
   {
     return Option.none();
+  }
+
+  @Override public KTransformType lightGetTransform()
+  {
+    return this.transform;
   }
 
   @Override public boolean lightHasShadow()

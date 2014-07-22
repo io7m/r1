@@ -37,7 +37,7 @@ public interface KRendererDebugType extends KRendererType
    */
 
   void rendererDebugEvaluate(
-    final KFramebufferRGBAUsableType framebuffer,
+    final KFramebufferForwardUsableType framebuffer,
     final KScene scene)
     throws RException;
 }

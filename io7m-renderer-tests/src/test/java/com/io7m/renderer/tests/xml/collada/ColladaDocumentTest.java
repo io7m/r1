@@ -38,9 +38,9 @@ import com.io7m.jnull.NonNull;
 import com.io7m.jproperties.JPropertyException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RXMLException;
-import com.io7m.renderer.xml.collada.ColladaDocument;
-import com.io7m.renderer.xml.collada.ColladaGeometry;
-import com.io7m.renderer.xml.collada.ColladaGeometryID;
+import com.io7m.renderer.xml.collada.RColladaDocument;
+import com.io7m.renderer.xml.collada.RColladaGeometry;
+import com.io7m.renderer.xml.collada.RColladaGeometryID;
 
 @SuppressWarnings("static-method") public class ColladaDocumentTest
 {
@@ -87,22 +87,22 @@ import com.io7m.renderer.xml.collada.ColladaGeometryID;
     throws RXMLException
   {
     final Document d = ColladaDocumentTest.getDocument("empty.dae");
-    final ColladaDocument p =
-      ColladaDocument.newDocument(d, ColladaDocumentTest.getLog());
-    Assert.assertEquals(new TreeSet<ColladaGeometryID>(), p.getGeometryIDs());
+    final RColladaDocument p =
+      RColladaDocument.newDocument(d, ColladaDocumentTest.getLog());
+    Assert.assertEquals(new TreeSet<RColladaGeometryID>(), p.getGeometryIDs());
   }
 
   @Test public void testGetGeometryNamesMonkeys()
     throws RXMLException
   {
     final Document d = ColladaDocumentTest.getDocument("monkeys.dae");
-    final ColladaDocument p =
-      ColladaDocument.newDocument(d, ColladaDocumentTest.getLog());
+    final RColladaDocument p =
+      RColladaDocument.newDocument(d, ColladaDocumentTest.getLog());
 
-    final TreeSet<ColladaGeometryID> names = new TreeSet<ColladaGeometryID>();
-    names.add(new ColladaGeometryID("monkey_textured_mesh-mesh"));
-    names.add(new ColladaGeometryID("monkey_no_material_mesh-mesh"));
-    names.add(new ColladaGeometryID("monkey_untextured_mesh-mesh"));
+    final TreeSet<RColladaGeometryID> names = new TreeSet<RColladaGeometryID>();
+    names.add(new RColladaGeometryID("monkey_textured_mesh-mesh"));
+    names.add(new RColladaGeometryID("monkey_no_material_mesh-mesh"));
+    names.add(new RColladaGeometryID("monkey_untextured_mesh-mesh"));
 
     Assert.assertEquals(names, p.getGeometryIDs());
   }
@@ -111,11 +111,11 @@ import com.io7m.renderer.xml.collada.ColladaGeometryID;
     throws RXMLException
   {
     final Document d = ColladaDocumentTest.getDocument("monkeys.dae");
-    final ColladaDocument p =
-      ColladaDocument.newDocument(d, ColladaDocumentTest.getLog());
+    final RColladaDocument p =
+      RColladaDocument.newDocument(d, ColladaDocumentTest.getLog());
 
-    for (final ColladaGeometryID id : p.getGeometryIDs()) {
-      final ColladaGeometry m = p.getGeometry(id);
+    for (final RColladaGeometryID id : p.getGeometryIDs()) {
+      final RColladaGeometry m = p.getGeometry(id);
       assert m != null;
       Assert.assertEquals(id, m.getID());
     }

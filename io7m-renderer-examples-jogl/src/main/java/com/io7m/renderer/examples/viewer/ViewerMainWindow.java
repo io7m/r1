@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Calendar;
 import java.util.Map;
@@ -53,7 +54,7 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.jvvfs.FSCapabilityReadType;
+import com.io7m.renderer.examples.ExampleImages;
 import com.io7m.renderer.examples.ExampleList;
 import com.io7m.renderer.examples.ExampleRendererConstructorType;
 import com.io7m.renderer.examples.ExampleRenderers;
@@ -142,7 +143,7 @@ final class ViewerMainWindow extends JFrame
 
   /**
    * Construct a new menu window.
-   * 
+   *
    * @param in_log
    *          A log handle
    * @param in_controller
@@ -153,8 +154,7 @@ final class ViewerMainWindow extends JFrame
 
   public ViewerMainWindow(
     final ViewerConfig config,
-    final LogType in_log,
-    final FSCapabilityReadType fs)
+    final LogType in_log)
   {
     super("Viewer");
     this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -234,10 +234,16 @@ final class ViewerMainWindow extends JFrame
         final String renderer_name = (String) rlist.getSelectedItem();
         final String example_name = elist.getSelectedValue();
 
+        final ExampleRendererConstructorType r =
+          ViewerMainWindow.this.renderers.get(renderer_name);
+        final Class<? extends ExampleSceneType> ex =
+          ViewerMainWindow.this.examples.get(example_name);
+        final ExampleImages<BufferedImage> example_images =
+          new ExampleImages<BufferedImage>(
+            new VSwingImageLoader(),
+            ViewerMainWindow.this.logx);
         final VExample v =
-          new VExample(in_log, config, fs, ViewerMainWindow.this.renderers
-            .get(renderer_name), ViewerMainWindow.this.examples
-            .get(example_name));
+          new VExample(in_log, config, example_images, r, ex);
 
         final SwingWorker<Unit, Unit> worker = new SwingWorker<Unit, Unit>() {
           @Override protected Unit doInBackground()

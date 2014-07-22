@@ -28,6 +28,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
+import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionCache;
 import com.io7m.renderer.types.RExceptionJCGL;
@@ -76,7 +77,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
   /**
    * Construct a new postprocessor.
-   * 
+   *
    * @param gi
    *          The OpenGL implementation
    * @param copier
@@ -85,8 +86,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
    *          A framebuffer cache
    * @param shader_cache
    *          A shader cache
-   * @param quad
-   *          A unit quad
+   * @param quad_cache
+   *          A unit quad_cache cache
    * @param log
    *          A log handle
    * @return A new postprocessor
@@ -97,7 +98,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KRegionCopierType copier,
     final KFramebufferDepthVarianceCacheType depth_variance_cache,
     final KShaderCachePostprocessingType shader_cache,
-    final KUnitQuadUsableType quad,
+    final KUnitQuadCacheType quad_cache,
     final LogUsableType log)
   {
     return new KPostprocessorBlurDepthVariance(
@@ -105,7 +106,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       copier,
       depth_variance_cache,
       shader_cache,
-      quad,
+      quad_cache,
       log);
   }
 
@@ -113,7 +114,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private final KFramebufferDepthVarianceCacheType depth_variance_cache;
   private final JCGLImplementationType             gi;
   private final LogUsableType                      log;
-  private final KUnitQuadUsableType                quad;
+  private final KUnitQuadCacheType                 quad_cache;
   private final KShaderCachePostprocessingType     shader_cache;
 
   private KPostprocessorBlurDepthVariance(
@@ -121,7 +122,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KRegionCopierType in_copier,
     final KFramebufferDepthVarianceCacheType in_depth_variance_cache,
     final KShaderCachePostprocessingType in_shader_cache,
-    final KUnitQuadUsableType in_quad,
+    final KUnitQuadCacheType in_quad_cache,
     final LogUsableType in_log)
   {
     this.gi = NullCheck.notNull(in_gi, "GL implementation");
@@ -134,7 +135,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
     this.copier = NullCheck.notNull(in_copier, "Copier");
 
-    this.quad = NullCheck.notNull(in_quad, "Quad");
+    this.quad_cache = NullCheck.notNull(in_quad_cache, "Quad cache");
 
     if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
       this.log.debug("initialized");
@@ -147,7 +148,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KFramebufferDepthVarianceUsableType temporary,
     final KFramebufferDepthVarianceUsableType target)
     throws JCGLException,
-      RException
+      RException,
+      JCacheException
   {
     assert source != temporary;
     assert temporary != target;
@@ -155,8 +157,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
     KPostprocessorBlurCommon.evaluateBlurH(
       this.gi,
       parameters.getBlurSize(),
-      this.quad,
-      this.shader_cache.getPostprocessing("gaussian_blur_horizontal_4f"),
+      this.quad_cache,
+      this.shader_cache.cacheGetLU("gaussian_blur_horizontal_4f"),
       source.kFramebufferGetDepthVarianceTexture(),
       source.kFramebufferGetArea(),
       temporary.kFramebufferGetDepthVariancePassFramebuffer(),
@@ -165,9 +167,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     KPostprocessorBlurCommon.evaluateBlurV(
       this.gi,
-      this.quad,
+      this.quad_cache,
       parameters.getBlurSize(),
-      this.shader_cache.getPostprocessing("gaussian_blur_vertical_4f"),
+      this.shader_cache.cacheGetLU("gaussian_blur_vertical_4f"),
       temporary.kFramebufferGetDepthVarianceTexture(),
       temporary.kFramebufferGetArea(),
       target.kFramebufferGetDepthVariancePassFramebuffer(),
@@ -208,7 +210,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
           parameters,
           desc);
 
-      final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType> receipt_a =
+      final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceUsableType> receipt_a =
         this.depth_variance_cache.bluCacheGet(new_desc);
 
       try {
@@ -217,7 +219,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
           return;
         }
 
-        final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceType> receipt_b =
+        final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceUsableType> receipt_b =
           this.depth_variance_cache.bluCacheGet(new_desc);
 
         try {

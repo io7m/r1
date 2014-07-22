@@ -16,13 +16,15 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.types.RException;
 
 /**
  * The type of constant emission properties.
  */
 
-public final class KMaterialEmissiveConstant implements KMaterialEmissiveType
+@EqualityReference public final class KMaterialEmissiveConstant implements
+  KMaterialEmissiveType
 {
   /**
    * Construct new emission properties.

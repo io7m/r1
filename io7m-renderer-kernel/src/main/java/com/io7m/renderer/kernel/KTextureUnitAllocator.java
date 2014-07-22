@@ -56,9 +56,9 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
   @EqualityReference private final class Context implements
     KTextureUnitContextType
   {
+    private @Nullable Context child;
     private int               count;
     private final int         first;
-    private @Nullable Context child;
 
     Context(
       final int in_first)

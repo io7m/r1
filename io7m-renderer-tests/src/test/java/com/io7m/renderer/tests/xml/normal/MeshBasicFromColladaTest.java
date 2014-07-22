@@ -23,41 +23,41 @@ import org.junit.Test;
 
 import com.io7m.jlog.LogType;
 import com.io7m.jnull.NonNull;
-import com.io7m.renderer.meshes.MeshBasic;
+import com.io7m.renderer.meshes.RMeshBasic;
 import com.io7m.renderer.tests.xml.collada.ColladaDocumentTest;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionMeshMissingUVs;
-import com.io7m.renderer.xml.collada.ColladaDocument;
-import com.io7m.renderer.xml.collada.ColladaGeometry;
-import com.io7m.renderer.xml.collada.ColladaGeometryID;
-import com.io7m.renderer.xml.tools.MeshBasicColladaImporter;
+import com.io7m.renderer.xml.collada.RColladaDocument;
+import com.io7m.renderer.xml.collada.RColladaGeometry;
+import com.io7m.renderer.xml.collada.RColladaGeometryID;
+import com.io7m.renderer.xml.collada.tools.RColladaToMeshBasic;
 
 @SuppressWarnings("static-method") public class MeshBasicFromColladaTest
 {
-  private static @NonNull MeshBasic makeMeshBasic(
+  private static @NonNull RMeshBasic makeMeshBasic(
     final @NonNull String file,
-    final @NonNull ColladaGeometryID geo)
+    final @NonNull RColladaGeometryID geo)
     throws RException
   {
     final LogType log = ColladaDocumentTest.getLog();
     final Document doc = ColladaDocumentTest.getDocument(file);
-    final ColladaDocument cd = ColladaDocument.newDocument(doc, log);
-    final ColladaGeometry geom = cd.getGeometry(geo);
+    final RColladaDocument cd = RColladaDocument.newDocument(doc, log);
+    final RColladaGeometry geom = cd.getGeometry(geo);
     assert geom != null;
 
-    final MeshBasicColladaImporter importer =
-      new MeshBasicColladaImporter(log);
-    final MeshBasic m = importer.newMeshFromColladaGeometry(cd, geom);
+    final RColladaToMeshBasic importer =
+      new RColladaToMeshBasic(log);
+    final RMeshBasic m = importer.newMeshFromColladaGeometry(cd, geom);
     return m;
   }
 
   @Test public void testMeshCubeOneFace()
     throws RException
   {
-    final MeshBasic m =
+    final RMeshBasic m =
       MeshBasicFromColladaTest.makeMeshBasic(
         "cube_oneface.dae",
-        new ColladaGeometryID("Cube_001-mesh"));
+        new RColladaGeometryID("Cube_001-mesh"));
 
     Assert.assertEquals(8, m.positionsGet().size());
     Assert.assertEquals(36, m.verticesGet().size());
@@ -69,10 +69,10 @@ import com.io7m.renderer.xml.tools.MeshBasicColladaImporter;
   @Test public void testMeshCylinder()
     throws RException
   {
-    final MeshBasic m =
+    final RMeshBasic m =
       MeshBasicFromColladaTest.makeMeshBasic(
         "cylinder.dae",
-        new ColladaGeometryID("cylinder_textured-mesh"));
+        new RColladaGeometryID("cylinder_textured-mesh"));
 
     Assert.assertEquals(32, m.positionsGet().size());
     Assert.assertEquals(180, m.verticesGet().size());
@@ -84,10 +84,10 @@ import com.io7m.renderer.xml.tools.MeshBasicColladaImporter;
   @Test(expected = RExceptionMeshMissingUVs.class) public void testMeshHex()
     throws RException
   {
-    final MeshBasic m =
+    final RMeshBasic m =
       MeshBasicFromColladaTest.makeMeshBasic(
         "hex.dae",
-        new ColladaGeometryID("Cylinder-mesh"));
+        new RColladaGeometryID("Cylinder-mesh"));
 
     Assert.assertEquals(12, m.positionsGet().size());
     Assert.assertEquals(60, m.verticesGet().size());
@@ -99,10 +99,10 @@ import com.io7m.renderer.xml.tools.MeshBasicColladaImporter;
   @Test public void testMeshTriTextured()
     throws RException
   {
-    final MeshBasic m =
+    final RMeshBasic m =
       MeshBasicFromColladaTest.makeMeshBasic(
         "tri.dae",
-        new ColladaGeometryID("tri_textured-mesh"));
+        new RColladaGeometryID("tri_textured-mesh"));
 
     Assert.assertEquals(3, m.positionsGet().size());
     Assert.assertEquals(3, m.verticesGet().size());
@@ -116,10 +116,10 @@ import com.io7m.renderer.xml.tools.MeshBasicColladaImporter;
     testMeshTriUntextured()
       throws RException
   {
-    final MeshBasic m =
+    final RMeshBasic m =
       MeshBasicFromColladaTest.makeMeshBasic(
         "tri_untextured.dae",
-        new ColladaGeometryID("tri_untextured-mesh"));
+        new RColladaGeometryID("tri_untextured-mesh"));
 
     Assert.assertEquals(3, m.positionsGet().size());
     Assert.assertEquals(3, m.verticesGet().size());

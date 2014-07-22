@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel.types;
 import java.util.Set;
 
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.Nullable;
 import com.io7m.renderer.types.RException;
 
@@ -26,7 +27,8 @@ import com.io7m.renderer.types.RException;
  * A regular translucent instance lit by a set of lights.
  */
 
-public final class KTranslucentRegularLit implements KTranslucentType
+@EqualityStructural public final class KTranslucentRegularLit implements
+  KTranslucentType
 {
   private final KInstanceTranslucentRegular instance;
   private final Set<KLightType>             lights;

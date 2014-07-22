@@ -200,16 +200,16 @@ public final class ExampleSceneUtilities
   public static final RVectorI3F<RSpaceRGBType>                      RGB_RED;
 
   /**
-   * RGB yellow.
-   */
-
-  public static final RVectorI3F<RSpaceRGBType>                      RGB_YELLOW;
-
-  /**
    * RGB white.
    */
 
   public static final RVectorI3F<RSpaceRGBType>                      RGB_WHITE;
+
+  /**
+   * RGB yellow.
+   */
+
+  public static final RVectorI3F<RSpaceRGBType>                      RGB_YELLOW;
 
   /**
    * RGBA blue.
@@ -258,6 +258,18 @@ public final class ExampleSceneUtilities
    */
 
   public static final KMaterialTranslucentRegular                    TRANSLUCENT_MATTE_WHITE;
+
+  /**
+   * A vector representing the global X axis.
+   */
+
+  public static final VectorI3F                                      X_AXIS;
+
+  /**
+   * A vector representing the global Y axis.
+   */
+
+  public static final VectorI3F                                      Y_AXIS;
 
   // CHECKSTYLE:OFF
   static {
@@ -436,6 +448,10 @@ public final class ExampleSceneUtilities
 
         LIGHT_SPHERICAL_LARGE_WHITE = b.build();
       }
+
+      X_AXIS = new VectorI3F(1.0f, 0.0f, 0.0f);
+
+      Y_AXIS = new VectorI3F(0.0f, 1.0f, 0.0f);
 
     } catch (final RException e) {
       throw new UnreachableCodeException(e);

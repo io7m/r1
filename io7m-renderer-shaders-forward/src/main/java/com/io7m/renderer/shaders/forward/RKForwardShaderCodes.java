@@ -16,13 +16,14 @@
 
 package com.io7m.renderer.shaders.forward;
 
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
 
-public final class RKForwardShaderCodes
+@EqualityReference public final class RKForwardShaderCodes
 {
   public static String fromLitOpaqueRegular(
     final KLightType l,
@@ -36,7 +37,7 @@ public final class RKForwardShaderCodes
   }
 
   public static String fromLitOpaqueRegularCase(
-    final RKLitCase<KMaterialOpaqueRegular> c)
+    final RKFLitCase<KMaterialOpaqueRegular> c)
   {
     return RKForwardShaderCodes.fromLitOpaqueRegular(
       c.getLight(),
@@ -55,7 +56,7 @@ public final class RKForwardShaderCodes
   }
 
   public static String fromLitTranslucentRegularCase(
-    final RKLitCase<KMaterialTranslucentRegular> c)
+    final RKFLitCase<KMaterialTranslucentRegular> c)
   {
     return RKForwardShaderCodes.fromLitTranslucentRegular(
       c.getLight(),
@@ -74,7 +75,7 @@ public final class RKForwardShaderCodes
   }
 
   public static String fromLitTranslucentSpecularOnlyCase(
-    final RKLitCase<KMaterialTranslucentSpecularOnly> c)
+    final RKFLitCase<KMaterialTranslucentSpecularOnly> c)
   {
     return RKForwardShaderCodes.fromLitTranslucentSpecularOnly(
       c.getLight(),
@@ -88,7 +89,7 @@ public final class RKForwardShaderCodes
   }
 
   public static String fromUnlitOpaqueRegular(
-    final RKLitCase<KMaterialOpaqueRegular> c)
+    final RKFLitCase<KMaterialOpaqueRegular> c)
   {
     final String lcode = c.getLight().lightGetCode();
     final String mcode = c.getMaterial().materialLitGetCodeWithoutDepth();

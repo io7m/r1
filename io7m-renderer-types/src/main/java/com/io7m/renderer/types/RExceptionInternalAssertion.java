@@ -23,7 +23,7 @@ import com.io7m.jnull.NullCheck;
  * An exception raised by bugs in the renderer.
  */
 
-@EqualityReference public final class RExceptionInternalAssertion extends
+@EqualityReference public abstract class RExceptionInternalAssertion extends
   RException
 {
   private static final long serialVersionUID;
@@ -32,13 +32,13 @@ import com.io7m.jnull.NullCheck;
     serialVersionUID = -4912708249227280442L;
   }
 
-  private RExceptionInternalAssertion(
+  protected RExceptionInternalAssertion(
     final String message)
   {
     super(NullCheck.notNull(message, "Message"));
   }
 
-  @Override <T, E extends Throwable> T exceptionAccept(
+  @Override final <T, E extends Throwable> T exceptionAccept(
     final RExceptionVisitorType<T, E> v)
     throws E
   {

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,15 +18,15 @@ package com.io7m.renderer.examples;
 
 import javax.annotation.concurrent.Immutable;
 
-import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jcanephora.ViewMatrix;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.renderer.kernel.types.KCamera;
+import com.io7m.renderer.kernel.types.KProjectionFOV;
+import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.types.RMatrixI4x4F;
 import com.io7m.renderer.types.RSpaceWorldType;
-import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformViewType;
 import com.io7m.renderer.types.RVectorI3F;
 
@@ -45,7 +45,7 @@ import com.io7m.renderer.types.RVectorI3F;
 
   /**
    * Look at a target from a source.
-   * 
+   *
    * @param in_source
    *          The source
    * @param in_target
@@ -72,7 +72,6 @@ import com.io7m.renderer.types.RVectorI3F;
     this.target = in_target;
 
     final MatrixM4x4F temp = new MatrixM4x4F();
-
     ViewMatrix.lookAt(
       temp,
       this.source,
@@ -82,15 +81,14 @@ import com.io7m.renderer.types.RVectorI3F;
     final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(temp);
 
-    ProjectionMatrix.makePerspectiveProjection(
-      temp,
-      0.1f,
-      100.0f,
-      640.0 / 480.0,
-      Math.toRadians(90.0));
-
-    final RMatrixI4x4F<RTransformProjectionType> projection =
-      RMatrixI4x4F.newFromReadable(temp);
+    MatrixM4x4F.setIdentity(temp);
+    final KProjectionType projection =
+      KProjectionFOV.newProjection(
+        temp,
+        (float) Math.toRadians(90),
+        640.0f / 480.0f,
+        0.1f,
+        100.0f);
 
     this.camera = KCamera.newCamera(view, projection);
   }
