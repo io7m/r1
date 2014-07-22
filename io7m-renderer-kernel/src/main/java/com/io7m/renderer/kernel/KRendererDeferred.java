@@ -202,25 +202,29 @@ import com.io7m.renderer.types.RExceptionJCGL;
           final FramebufferUsableType fb =
             framebuffer.kFramebufferGetColorFramebuffer();
 
+          gc.viewportSet(framebuffer.kFramebufferGetArea());
+
+          gc.colorBufferMask(true, true, true, true);
+          gc.colorBufferClearV4f(KRendererDeferred.this.background);
+
+          gc.depthBufferWriteEnable();
+          gc.depthBufferClear(1.0f);
+
+          final KSceneBatchedDeferredOpaque opaques =
+            scene.getDeferredOpaques();
+
+          final OptionType<DepthFunction> depth_function =
+            Option.some(DepthFunction.DEPTH_LESS_THAN);
+
+          KRendererDeferred.this.opaque_renderer.rendererEvaluateOpaqueLit(
+            framebuffer,
+            shadow_context,
+            depth_function,
+            mwo,
+            opaques);
+
           gc.framebufferDrawBind(fb);
           try {
-            gc.viewportSet(framebuffer.kFramebufferGetArea());
-
-            gc.colorBufferMask(true, true, true, true);
-            gc.colorBufferClearV4f(KRendererDeferred.this.background);
-
-            final KSceneBatchedDeferredOpaque opaques =
-              scene.getDeferredOpaques();
-
-            final OptionType<DepthFunction> depth_function =
-              Option.some(DepthFunction.DEPTH_LESS_THAN);
-            KRendererDeferred.this.opaque_renderer.rendererEvaluateOpaqueLit(
-              framebuffer,
-              shadow_context,
-              depth_function,
-              mwo,
-              opaques);
-
             final List<KTranslucentType> translucents =
               scene.getTranslucents();
 
@@ -230,7 +234,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
                 shadow_context,
                 mwo,
                 translucents);
-
           } finally {
             gc.framebufferDrawUnbind();
           }

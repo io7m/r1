@@ -23,30 +23,35 @@ import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
-import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.types.RException;
 
 /**
- * The type of opaque renderers that use forward rendering.
+ * The type of opaque unlit renderers that use forward rendering.
  */
 
-public interface KRendererForwardOpaqueType extends
-  KRendererForwardOpaqueUnlitType
+public interface KRendererForwardOpaqueUnlitType
 {
   /**
    * <p>
-   * Evaluate the given list of opaque lit instances.
+   * Evaluate the given list of opaque unlit instances.
    * </p>
    * <p>
-   * The renderer will not modify the contents of the current framebuffer's
-   * depth buffer, but will perform depth testing against the depth buffer for
+   * The renderer will perform depth testing against the depth buffer for
    * rendered objects if a {@link DepthFunction} is provided.
+   * </p>
+   * <p>
+   * The renderer will modify the contents of the depth buffer iff
+   * <code>depth_write</code> is <code>true</code>. This is intended for use
+   * when called from different renderers that may or may not have
+   * pre-populated the depth buffer with unlit objects.
    * </p>
    *
    * @see KDepthRendererType
    *
    * @param depth_function
    *          The optional depth test function.
+   * @param depth_write
+   *          <code>true</code> if the depth buffer should be modified.
    * @param shadow_context
    *          The shadow map context
    * @param mwo
@@ -58,10 +63,11 @@ public interface KRendererForwardOpaqueType extends
    *           If an error occurs.
    */
 
-  void rendererEvaluateOpaqueLit(
+  void rendererEvaluateOpaqueUnlit(
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
+    final boolean depth_write,
     final MatricesObserverType mwo,
-    final Map<KLightType, Map<String, Set<KInstanceOpaqueType>>> batches)
+    final Map<String, Set<KInstanceOpaqueType>> batches)
     throws RException;
 }

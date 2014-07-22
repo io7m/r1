@@ -93,7 +93,7 @@ import com.io7m.renderer.types.RException;
         KSceneBatchedForwardOpaque.makeLitBatches(light_groups);
 
       final Map<String, Set<KInstanceOpaqueType>> unlit_batches =
-        KSceneBatchedForwardOpaque.makeUnlitBatches(in_scene
+        KSceneBatchedCommon.makeUnlitBatches(in_scene
           .getUnlitOpaques());
 
       return new KSceneBatchedForwardOpaque(lit_batches, unlit_batches);
@@ -131,39 +131,6 @@ import com.io7m.renderer.types.RException;
       }
     }
     return lit_batches;
-  }
-
-  private static Map<String, Set<KInstanceOpaqueType>> makeUnlitBatches(
-    final Set<KInstanceOpaqueType> unlits)
-    throws RException,
-      JCGLException
-  {
-    final Map<String, Set<KInstanceOpaqueType>> batches =
-      new HashMap<String, Set<KInstanceOpaqueType>>();
-
-    for (final KInstanceOpaqueType o : unlits) {
-      o
-        .opaqueAccept(new KInstanceOpaqueVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit regular(
-            final KInstanceOpaqueRegular or)
-          {
-            final String code =
-              or.getMaterial().materialLitGetCodeWithoutDepth();
-            Set<KInstanceOpaqueType> batch_instances;
-            if (batches.containsKey(code)) {
-              batch_instances = batches.get(code);
-            } else {
-              batch_instances = new HashSet<KInstanceOpaqueType>();
-              batches.put(code, batch_instances);
-            }
-
-            batch_instances.add(or);
-            return Unit.unit();
-          }
-        });
-    }
-
-    return batches;
   }
 
   private final Map<KLightType, Map<String, Set<KInstanceOpaqueType>>> lit_batches;
