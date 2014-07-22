@@ -83,7 +83,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
   /**
    * Construct a new translucent renderer.
-   * 
+   *
    * @param in_g
    *          The OpenGL implementation
    * @param in_refraction_renderer
@@ -761,83 +761,90 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KRefractionRendererType rr = this.refraction_renderer;
     final KTextureUnitAllocator units = this.texture_units;
 
-    // Enabled by each translucent instance
-    gc.blendingDisable();
-    gc.colorBufferMask(true, true, true, true);
-    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
-    gc.depthBufferWriteDisable();
+    try {
+      gc.framebufferDrawBind(framebuffer.kFramebufferGetColorFramebuffer());
 
-    for (int index = 0; index < translucents.size(); ++index) {
       // Enabled by each translucent instance
-      gc.cullingDisable();
+      gc.blendingDisable();
+      gc.colorBufferMask(true, true, true, true);
+      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
+      gc.depthBufferWriteDisable();
 
-      final KTranslucentType translucent = translucents.get(index);
+      for (int index = 0; index < translucents.size(); ++index) {
+        // Enabled by each translucent instance
+        gc.cullingDisable();
 
-      translucent
-        .translucentAccept(new KTranslucentVisitorType<Unit, JCacheException>() {
-          @Override public Unit refractive(
-            final KInstanceTranslucentRefractive t)
-            throws JCGLException,
-              RException
-          {
-            rr.rendererRefractionEvaluate(framebuffer, mwo, t);
-            return Unit.unit();
-          }
+        final KTranslucentType translucent = translucents.get(index);
 
-          @Override public Unit regularLit(
-            final KTranslucentRegularLit t)
-            throws JCGLException,
-              RException,
-              JCacheException
-          {
-            KRendererCommon.renderConfigureFaceCulling(gc, t
-              .translucentGetInstance()
-              .instanceGetFaceSelection());
+        translucent
+          .translucentAccept(new KTranslucentVisitorType<Unit, JCacheException>() {
+            @Override public Unit refractive(
+              final KInstanceTranslucentRefractive t)
+              throws JCGLException,
+                RException
+            {
+              rr.rendererRefractionEvaluate(framebuffer, mwo, t);
+              return Unit.unit();
+            }
 
-            KTranslucentRenderer.this.renderTranslucentRegularLit(
-              gc,
-              shadow_context,
-              t,
-              mwo);
-            return Unit.unit();
-          }
+            @Override public Unit regularLit(
+              final KTranslucentRegularLit t)
+              throws JCGLException,
+                RException,
+                JCacheException
+            {
+              KRendererCommon.renderConfigureFaceCulling(gc, t
+                .translucentGetInstance()
+                .instanceGetFaceSelection());
 
-          @Override public Unit regularUnlit(
-            final KInstanceTranslucentRegular t)
-            throws JCGLException,
-              RException,
-              JCacheException
-          {
-            KRendererCommon.renderConfigureFaceCulling(
-              gc,
-              t.instanceGetFaceSelection());
+              KTranslucentRenderer.this.renderTranslucentRegularLit(
+                gc,
+                shadow_context,
+                t,
+                mwo);
+              return Unit.unit();
+            }
 
-            KTranslucentRenderer.this.renderTranslucentRegularUnlit(
-              gc,
-              mwo,
-              units,
-              t);
-            return Unit.unit();
-          }
+            @Override public Unit regularUnlit(
+              final KInstanceTranslucentRegular t)
+              throws JCGLException,
+                RException,
+                JCacheException
+            {
+              KRendererCommon.renderConfigureFaceCulling(
+                gc,
+                t.instanceGetFaceSelection());
 
-          @Override public Unit specularOnly(
-            final KTranslucentSpecularOnlyLit t)
-            throws JCacheException,
-              JCGLException,
-              RException
-          {
-            KRendererCommon.renderConfigureFaceCulling(gc, t
-              .translucentGetInstance()
-              .instanceGetFaceSelection());
+              KTranslucentRenderer.this.renderTranslucentRegularUnlit(
+                gc,
+                mwo,
+                units,
+                t);
+              return Unit.unit();
+            }
 
-            KTranslucentRenderer.this.renderTranslucentSpecularOnlyLit(
-              gc,
-              shadow_context,
-              t,
-              mwo);
-            return Unit.unit();
-          }
-        });
+            @Override public Unit specularOnly(
+              final KTranslucentSpecularOnlyLit t)
+              throws JCacheException,
+                JCGLException,
+                RException
+            {
+              KRendererCommon.renderConfigureFaceCulling(gc, t
+                .translucentGetInstance()
+                .instanceGetFaceSelection());
+
+              KTranslucentRenderer.this.renderTranslucentSpecularOnlyLit(
+                gc,
+                shadow_context,
+                t,
+                mwo);
+              return Unit.unit();
+            }
+          });
+      }
+
+    } finally {
+      gc.framebufferDrawUnbind();
     }
   }
 
