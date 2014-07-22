@@ -84,9 +84,7 @@ import com.io7m.renderer.types.RTransformProjectionType;
   }
 
   private final RMatrixI4x4F<RTransformProjectionType> matrix;
-
   private final float                                  x_max;
-
   private final float                                  x_min;
   private final float                                  y_max;
   private final float                                  y_min;
@@ -124,9 +122,8 @@ import com.io7m.renderer.types.RTransformProjectionType;
       return false;
     }
     final KProjectionOrthographic other = (KProjectionOrthographic) obj;
-    return this.matrix.equals(other.matrix)
-      && (Float.floatToIntBits(this.x_max) == Float
-        .floatToIntBits(other.x_max))
+    return (Float.floatToIntBits(this.x_max) == Float
+      .floatToIntBits(other.x_max))
       && (Float.floatToIntBits(this.x_min) == Float
         .floatToIntBits(other.x_min))
       && (Float.floatToIntBits(this.y_max) == Float
@@ -143,7 +140,6 @@ import com.io7m.renderer.types.RTransformProjectionType;
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + this.matrix.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.x_max);
     result = (prime * result) + Float.floatToIntBits(this.x_min);
     result = (prime * result) + Float.floatToIntBits(this.y_max);

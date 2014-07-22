@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -23,6 +23,8 @@ import com.io7m.jcache.LRUCacheAbstract;
 import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcache.LRUCacheType;
+import com.io7m.jcanephora.ArrayBufferUpdateUnmappedConstructorType;
+import com.io7m.jcanephora.IndexBufferUpdateUnmappedConstructorType;
 import com.io7m.jcanephora.api.JCGLArrayBuffersType;
 import com.io7m.jcanephora.api.JCGLIndexBuffersType;
 import com.io7m.jequality.annotations.EqualityReference;
@@ -45,6 +47,10 @@ import com.io7m.renderer.types.RException;
    *          The precise type of OpenGL interface
    * @param g
    *          The OpenGL implementation
+   * @param au_cons
+   *          An array buffer update constructor
+   * @param iu_cons
+   *          An index buffer update constructor
    * @param config
    *          The cache configuration
    * @param log
@@ -57,6 +63,8 @@ import com.io7m.renderer.types.RException;
     KFrustumMeshCacheType
     newCache(
       final G g,
+      final ArrayBufferUpdateUnmappedConstructorType au_cons,
+      final IndexBufferUpdateUnmappedConstructorType iu_cons,
       final LRUCacheConfig config,
       final LogUsableType log)
   {
@@ -68,7 +76,7 @@ import com.io7m.renderer.types.RException;
     assert one != null;
 
     final JCacheLoaderType<KProjectionType, KFrustumMesh, RException> loader =
-      KFrustumMesh.newCacheLoader(g, log);
+      KFrustumMesh.newCacheLoader(g, au_cons, iu_cons, log);
     final LRUCacheType<KProjectionType, KFrustumMeshUsableType, KFrustumMesh, RException> c =
       LRUCacheTrivial.newCache(loader, config);
 
@@ -83,6 +91,10 @@ import com.io7m.renderer.types.RException;
    *          The precise type of OpenGL interface
    * @param g
    *          The OpenGL implementation
+   * @param au_cons
+   *          An array buffer update constructor
+   * @param iu_cons
+   *          An index buffer update constructor
    * @param count
    *          The maximum number of allocated meshes in the cache.
    * @param log
@@ -95,10 +107,13 @@ import com.io7m.renderer.types.RException;
     KFrustumMeshCacheType
     newCacheWithCapacity(
       final G g,
+      final ArrayBufferUpdateUnmappedConstructorType au_cons,
+      final IndexBufferUpdateUnmappedConstructorType iu_cons,
       final BigInteger count,
       final LogUsableType log)
   {
     NullCheck.notNull(g, "OpenGL");
+    NullCheck.notNull(au_cons, "Constructor");
     NullCheck.notNull(count, "Count");
     NullCheck.notNull(log, "Log");
 
@@ -110,7 +125,7 @@ import com.io7m.renderer.types.RException;
     final LRUCacheConfig config =
       LRUCacheConfig.empty().withMaximumCapacity(capacity);
 
-    return KFrustumMeshCache.newCache(g, config, log);
+    return KFrustumMeshCache.newCache(g, au_cons, iu_cons, config, log);
   }
 
   /**

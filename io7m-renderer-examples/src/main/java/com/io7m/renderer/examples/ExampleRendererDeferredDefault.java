@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,6 +22,8 @@ import com.io7m.jcache.BLUCacheConfig;
 import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.PCacheConfig;
 import com.io7m.jcache.PCacheConfig.BuilderType;
+import com.io7m.jcanephora.ArrayBufferUpdateUnmapped;
+import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jlog.LogUsableType;
@@ -34,8 +36,6 @@ import com.io7m.renderer.kernel.KFramebufferDepthVarianceCache;
 import com.io7m.renderer.kernel.KFramebufferDepthVarianceCacheType;
 import com.io7m.renderer.kernel.KFramebufferForwardCache;
 import com.io7m.renderer.kernel.KFramebufferForwardCacheType;
-import com.io7m.renderer.kernel.KFramebufferStencilCache;
-import com.io7m.renderer.kernel.KFramebufferStencilCacheType;
 import com.io7m.renderer.kernel.KMeshBoundsCache;
 import com.io7m.renderer.kernel.KMeshBoundsCacheType;
 import com.io7m.renderer.kernel.KMeshBoundsTrianglesCache;
@@ -66,8 +66,9 @@ import com.io7m.renderer.kernel.KShadowMapRendererType;
 import com.io7m.renderer.kernel.KTranslucentRenderer;
 import com.io7m.renderer.kernel.KTranslucentRendererType;
 import com.io7m.renderer.kernel.Kernel;
+import com.io7m.renderer.kernel.types.KFrustumMeshCache;
+import com.io7m.renderer.kernel.types.KFrustumMeshCacheType;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
-import com.io7m.renderer.kernel.types.KUnitQuad;
 import com.io7m.renderer.kernel.types.KUnitQuadCache;
 import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
 import com.io7m.renderer.kernel.types.KUnitSphereCacheType;
@@ -150,7 +151,6 @@ public final class ExampleRendererDeferredDefault extends
     final KGraphicsCapabilities caps =
       KGraphicsCapabilities.getCapabilities(gi);
 
-    final KUnitQuad quad = KUnitQuad.newQuad(gi.getGLCommon(), log);
     final KUnitQuadCacheType quad_cache =
       KUnitQuadCache.newCache(gi.getGLCommon(), log);
 
@@ -250,16 +250,12 @@ public final class ExampleRendererDeferredDefault extends
         caps,
         log);
 
-    final BLUCacheConfig stencil_cache_config =
-      BLUCacheConfig
-        .empty()
-        .withMaximumBorrowsPerKey(BigInteger.TEN)
-        .withMaximumCapacity(BigInteger.valueOf(640 * 480 * 4 * 128));
-
-    final KFramebufferStencilCacheType stencil_cache =
-      KFramebufferStencilCache.newCacheWithConfig(
-        gi,
-        stencil_cache_config,
+    final KFrustumMeshCacheType frustum_cache =
+      KFrustumMeshCache.newCacheWithCapacity(
+        gi.getGLCommon(),
+        ArrayBufferUpdateUnmapped.newConstructor(),
+        IndexBufferUpdateUnmapped.newConstructor(),
+        BigInteger.valueOf(250),
         log);
 
     final KRendererDeferredOpaqueType opaque_renderer =
@@ -267,6 +263,7 @@ public final class ExampleRendererDeferredDefault extends
         gi,
         quad_cache,
         sphere_cache,
+        frustum_cache,
         in_shader_debug_cache,
         in_shader_deferred_geo_cache,
         in_shader_deferred_light_cache);
