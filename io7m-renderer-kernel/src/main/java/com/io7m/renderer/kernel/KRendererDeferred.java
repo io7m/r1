@@ -16,6 +16,8 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.List;
+
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FramebufferUsableType;
@@ -37,6 +39,7 @@ import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KSceneBatchedDeferred;
 import com.io7m.renderer.kernel.types.KSceneBatchedDeferredOpaque;
+import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 
@@ -218,12 +221,15 @@ import com.io7m.renderer.types.RExceptionJCGL;
               mwo,
               opaques);
 
+            final List<KTranslucentType> translucents =
+              scene.getTranslucents();
+
             KRendererDeferred.this.translucent_renderer
               .rendererEvaluateTranslucents(
                 framebuffer,
                 shadow_context,
                 mwo,
-                scene.getTranslucents());
+                translucents);
 
           } finally {
             gc.framebufferDrawUnbind();
