@@ -321,16 +321,23 @@ module VertexShaders is
 
   --
   -- Standard vertex shader for vertex positions that are
-  -- already specified in clip-space.
+  -- already specified in clip-space, and allow for modifying
+  -- UV coordinates via a matrix.
   --
 
   shader vertex standard_clip is
-    in v_position              : vector_3f;
+    parameter  m_uv            : matrix_3x3f;
+    in         v_position      : vector_3f;
+    in         v_uv            : vector_2f;
     out vertex f_position_clip : vector_4f;
+    out        f_uv            : vector_2f;
   with
     value position_clip =
       new vector_4f (v_position, 1.0);
+    value uv =
+      M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
   as
+    out f_uv            = uv;
     out f_position_clip = position_clip;
   end;
 

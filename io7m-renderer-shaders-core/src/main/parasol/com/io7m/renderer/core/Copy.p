@@ -14,20 +14,20 @@
 -- IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
 
-package com.io7m.renderer.postprocessing;
+package com.io7m.renderer.core;
 
 --
 -- Data copying shaders.
 --
 
-module PostprocessingCopy is
+module Copy is
 
   import com.io7m.parasol.Sampler2D;
   import com.io7m.renderer.core.Pack;
-  import com.io7m.renderer.postprocessing.Postprocessing;
+  import com.io7m.renderer.core.VertexShaders;
 
   shader program copy_rgba is
-    vertex   Postprocessing.screen_quad;
+    vertex   VertexShaders.standard_clip;
     fragment copy_rgba_f;
   end;
 
@@ -43,7 +43,7 @@ module PostprocessingCopy is
   end;
 
   shader program copy_rgba_depth is
-    vertex   Postprocessing.screen_quad;
+    vertex   VertexShaders.standard_clip;
     fragment copy_rgba_depth_f;
   end;
 
@@ -64,7 +64,7 @@ module PostprocessingCopy is
   end;
 
   shader program copy_depth4444 is
-    vertex   Postprocessing.screen_quad;
+    vertex   VertexShaders.standard_clip;
     fragment copy_depth4444_f;
   end;
 

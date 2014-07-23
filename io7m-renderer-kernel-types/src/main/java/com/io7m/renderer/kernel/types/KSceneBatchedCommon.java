@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
@@ -30,15 +31,23 @@ import com.io7m.renderer.types.RException;
  * Utility functions for scene batching.
  */
 
-final class KSceneBatchedCommon
+@EqualityReference final class KSceneBatchedCommon
 {
   private KSceneBatchedCommon()
   {
     throw new UnreachableCodeException();
   }
 
+  static enum BatchUseCode
+  {
+    BATCH_USE_UNLIT_CODE,
+    BATCH_USE_LIT_CODE_WITH_DEPTH,
+    BATCH_USE_LIT_CODE_WITHOUT_DEPTH
+  }
+
   static Map<String, Set<KInstanceOpaqueType>> makeUnlitBatches(
-    final Set<KInstanceOpaqueType> unlits)
+    final Set<KInstanceOpaqueType> unlits,
+    final BatchUseCode use_code)
     throws RException,
       JCGLException
   {
@@ -51,8 +60,28 @@ final class KSceneBatchedCommon
           @Override public Unit regular(
             final KInstanceOpaqueRegular or)
           {
-            final String code =
-              or.getMaterial().materialLitGetCodeWithoutDepth();
+            final KMaterialOpaqueRegular material = or.getMaterial();
+
+            String code = null;
+            switch (use_code) {
+              case BATCH_USE_LIT_CODE_WITHOUT_DEPTH:
+              {
+                code = material.materialLitGetCodeWithoutDepth();
+                break;
+              }
+              case BATCH_USE_LIT_CODE_WITH_DEPTH:
+              {
+                code = material.materialLitGetCodeWithDepth();
+                break;
+              }
+              case BATCH_USE_UNLIT_CODE:
+              {
+                code = material.materialUnlitGetCode();
+                break;
+              }
+            }
+            assert code != null;
+
             Set<KInstanceOpaqueType> batch_instances;
             if (batches.containsKey(code)) {
               batch_instances = batches.get(code);

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,10 +16,15 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
-import com.io7m.renderer.kernel.types.KSceneBatchedDeferredOpaque;
+import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
+import com.io7m.renderer.kernel.types.KSceneBatchedDeferredOpaque.Group;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -32,7 +37,7 @@ public interface KRendererDeferredOpaqueType
    * <p>
    * Evaluate the given set of opaque lit instances.
    * </p>
-   * 
+   *
    * @param framebuffer
    *          The framebuffer.
    * @param depth_function
@@ -41,9 +46,9 @@ public interface KRendererDeferredOpaqueType
    *          The shadow map context
    * @param mwo
    *          The current observer matrices
-   * @param batches
-   *          The opaque batches.
-   * 
+   * @param groups
+   *          The light groups.
+   *
    * @throws RException
    *           If an error occurs.
    */
@@ -53,6 +58,34 @@ public interface KRendererDeferredOpaqueType
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final MatricesObserverType mwo,
-    final KSceneBatchedDeferredOpaque batches)
+    final List<Group> groups)
+    throws RException;
+
+  /**
+   * <p>
+   * Evaluate the given set of opaque unlit instances.
+   * </p>
+   *
+   * @param framebuffer
+   *          The framebuffer.
+   * @param depth_function
+   *          The optional depth test function.
+   * @param shadow_context
+   *          The shadow map context
+   * @param mwo
+   *          The current observer matrices
+   * @param instances
+   *          The instances.
+   *
+   * @throws RException
+   *           If an error occurs.
+   */
+
+  void rendererEvaluateOpaqueUnlit(
+    final KFramebufferDeferredUsableType framebuffer,
+    final KShadowMapContextType shadow_context,
+    final OptionType<DepthFunction> depth_function,
+    final MatricesObserverType mwo,
+    final Map<String, Set<KInstanceOpaqueType>> instances)
     throws RException;
 }

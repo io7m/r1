@@ -2,6 +2,7 @@ gaussian_blur_horizontal_4f : com.io7m.renderer.postprocessing.PostprocessingBlu
 gaussian_blur_vertical_4f   : com.io7m.renderer.postprocessing.PostprocessingBlur.blur_vertical_4f
 gaussian_blur_horizontal_2f : com.io7m.renderer.postprocessing.PostprocessingBlur.blur_horizontal_2f
 gaussian_blur_vertical_2f   : com.io7m.renderer.postprocessing.PostprocessingBlur.blur_vertical_2f
-identity                    : com.io7m.renderer.postprocessing.Postprocessing.identity
 fog                         : com.io7m.renderer.postprocessing.PostprocessingFog.fog
-copy_rgba                   : com.io7m.renderer.postprocessing.PostprocessingCopy.copy_rgba
+copy_rgba                   : com.io7m.renderer.core.Copy.copy_rgba
+copy_rgba_depth             : com.io7m.renderer.core.Copy.copy_rgba_depth
+copy_depth4444              : com.io7m.renderer.core.Copy.copy_depth4444

@@ -26,6 +26,7 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.types.KSceneBatchedCommon.BatchUseCode;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -74,7 +75,7 @@ import com.io7m.renderer.types.RException;
 
   /**
    * Construct a new batched scene from the given scene.
-   * 
+   *
    * @param in_scene
    *          The scene.
    * @return A batched scene.
@@ -92,9 +93,15 @@ import com.io7m.renderer.types.RException;
       final Map<KLightType, Map<String, Set<KInstanceOpaqueType>>> lit_batches =
         KSceneBatchedForwardOpaque.makeLitBatches(light_groups);
 
+      /**
+       * Forward renderers want the unlit code in order to select the correct
+       * shader.
+       */
+
       final Map<String, Set<KInstanceOpaqueType>> unlit_batches =
-        KSceneBatchedCommon.makeUnlitBatches(in_scene
-          .getUnlitOpaques());
+        KSceneBatchedCommon.makeUnlitBatches(
+          in_scene.getUnlitOpaques(),
+          BatchUseCode.BATCH_USE_UNLIT_CODE);
 
       return new KSceneBatchedForwardOpaque(lit_batches, unlit_batches);
 
