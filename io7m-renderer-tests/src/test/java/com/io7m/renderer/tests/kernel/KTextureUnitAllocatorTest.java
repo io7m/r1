@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -64,6 +64,267 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
     final KJCGLTextureFake g = new KJCGLTextureFake(units);
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
     Assert.assertTrue(a.hasEnoughUnits(units.size() - 1));
+  }
+
+  @Test public void testBindings_0()
+    throws Exception
+  {
+    final List<TextureUnitType> units =
+      KTextureUnitAllocatorTest.makeUnits(8);
+    final KJCGLTextureFake g = new KJCGLTextureFake(units);
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+
+    Assert.assertFalse(g.isBound(0));
+    Assert.assertFalse(g.isBound(1));
+    Assert.assertFalse(g.isBound(2));
+    Assert.assertFalse(g.isBound(3));
+    Assert.assertFalse(g.isBound(4));
+    Assert.assertFalse(g.isBound(5));
+    Assert.assertFalse(g.isBound(6));
+    Assert.assertFalse(g.isBound(7));
+
+    final Texture2DStaticType t0 =
+      FakeTexture2DStatic.getDefaultWithName("t0");
+    final Texture2DStaticType t1 =
+      FakeTexture2DStatic.getDefaultWithName("t1");
+    final Texture2DStaticType t2 =
+      FakeTexture2DStatic.getDefaultWithName("t2");
+    final Texture2DStaticType t3 =
+      FakeTexture2DStatic.getDefaultWithName("t3");
+
+    a.withContext(new KTextureUnitWithType() {
+      @Override public void run(
+        final KTextureUnitContextType c0)
+        throws JCGLException,
+          RException
+      {
+        c0.withTexture2D(t0);
+        c0.withTexture2D(t1);
+        c0.withTexture2D(t2);
+        c0.withTexture2D(t3);
+
+        Assert.assertTrue(g.isBound(0));
+        Assert.assertTrue(g.isBound(1));
+        Assert.assertTrue(g.isBound(2));
+        Assert.assertTrue(g.isBound(3));
+        Assert.assertFalse(g.isBound(4));
+        Assert.assertFalse(g.isBound(5));
+        Assert.assertFalse(g.isBound(6));
+        Assert.assertFalse(g.isBound(7));
+      }
+    });
+
+    Assert.assertFalse(g.isBound(0));
+    Assert.assertFalse(g.isBound(1));
+    Assert.assertFalse(g.isBound(2));
+    Assert.assertFalse(g.isBound(3));
+    Assert.assertFalse(g.isBound(4));
+    Assert.assertFalse(g.isBound(5));
+    Assert.assertFalse(g.isBound(6));
+    Assert.assertFalse(g.isBound(7));
+  }
+
+  @Test public void testBindings_1()
+    throws Exception
+  {
+    final List<TextureUnitType> units =
+      KTextureUnitAllocatorTest.makeUnits(8);
+    final KJCGLTextureFake g = new KJCGLTextureFake(units);
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+
+    Assert.assertFalse(g.isBound(0));
+    Assert.assertFalse(g.isBound(1));
+    Assert.assertFalse(g.isBound(2));
+    Assert.assertFalse(g.isBound(3));
+    Assert.assertFalse(g.isBound(4));
+    Assert.assertFalse(g.isBound(5));
+    Assert.assertFalse(g.isBound(6));
+    Assert.assertFalse(g.isBound(7));
+
+    final Texture2DStaticType t0 =
+      FakeTexture2DStatic.getDefaultWithName("t0");
+    final Texture2DStaticType t1 =
+      FakeTexture2DStatic.getDefaultWithName("t1");
+    final Texture2DStaticType t2 =
+      FakeTexture2DStatic.getDefaultWithName("t2");
+    final Texture2DStaticType t3 =
+      FakeTexture2DStatic.getDefaultWithName("t3");
+
+    a.withContext(new KTextureUnitWithType() {
+      @Override public void run(
+        final KTextureUnitContextType c0)
+        throws JCGLException,
+          RException
+      {
+        c0.withTexture2D(t0);
+        c0.withTexture2D(t1);
+        c0.withTexture2D(t2);
+        c0.withTexture2D(t3);
+
+        Assert.assertTrue(g.isBound(0));
+        Assert.assertTrue(g.isBound(1));
+        Assert.assertTrue(g.isBound(2));
+        Assert.assertTrue(g.isBound(3));
+        Assert.assertFalse(g.isBound(4));
+        Assert.assertFalse(g.isBound(5));
+        Assert.assertFalse(g.isBound(6));
+        Assert.assertFalse(g.isBound(7));
+
+        c0.withContext(new KTextureUnitWithType() {
+          @Override public void run(
+            final KTextureUnitContextType c1)
+            throws JCGLException,
+              RException
+          {
+            c1.withTexture2D(t0);
+            c1.withTexture2D(t1);
+            c1.withTexture2D(t2);
+            c1.withTexture2D(t3);
+
+            Assert.assertTrue(g.isBound(0));
+            Assert.assertTrue(g.isBound(1));
+            Assert.assertTrue(g.isBound(2));
+            Assert.assertTrue(g.isBound(3));
+            Assert.assertTrue(g.isBound(4));
+            Assert.assertTrue(g.isBound(5));
+            Assert.assertTrue(g.isBound(6));
+            Assert.assertTrue(g.isBound(7));
+          }
+        });
+
+        Assert.assertTrue(g.isBound(0));
+        Assert.assertTrue(g.isBound(1));
+        Assert.assertTrue(g.isBound(2));
+        Assert.assertTrue(g.isBound(3));
+        Assert.assertFalse(g.isBound(4));
+        Assert.assertFalse(g.isBound(5));
+        Assert.assertFalse(g.isBound(6));
+        Assert.assertFalse(g.isBound(7));
+      }
+    });
+
+    Assert.assertFalse(g.isBound(0));
+    Assert.assertFalse(g.isBound(1));
+    Assert.assertFalse(g.isBound(2));
+    Assert.assertFalse(g.isBound(3));
+    Assert.assertFalse(g.isBound(4));
+    Assert.assertFalse(g.isBound(5));
+    Assert.assertFalse(g.isBound(6));
+    Assert.assertFalse(g.isBound(7));
+  }
+
+  @Test public void testBindings_2()
+    throws Exception
+  {
+    final List<TextureUnitType> units =
+      KTextureUnitAllocatorTest.makeUnits(8);
+    final KJCGLTextureFake g = new KJCGLTextureFake(units);
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+
+    Assert.assertFalse(g.isBound(0));
+    Assert.assertFalse(g.isBound(1));
+    Assert.assertFalse(g.isBound(2));
+    Assert.assertFalse(g.isBound(3));
+    Assert.assertFalse(g.isBound(4));
+    Assert.assertFalse(g.isBound(5));
+    Assert.assertFalse(g.isBound(6));
+    Assert.assertFalse(g.isBound(7));
+
+    final Texture2DStaticType t0 =
+      FakeTexture2DStatic.getDefaultWithName("t0");
+    final Texture2DStaticType t1 =
+      FakeTexture2DStatic.getDefaultWithName("t1");
+    final Texture2DStaticType t2 =
+      FakeTexture2DStatic.getDefaultWithName("t2");
+
+    a.withContext(new KTextureUnitWithType() {
+      @Override public void run(
+        final KTextureUnitContextType c0)
+        throws JCGLException,
+          RException
+      {
+        c0.withTexture2D(t0);
+        c0.withTexture2D(t1);
+        c0.withTexture2D(t2);
+
+        Assert.assertTrue(g.isBound(0));
+        Assert.assertTrue(g.isBound(1));
+        Assert.assertTrue(g.isBound(2));
+        Assert.assertFalse(g.isBound(3));
+        Assert.assertFalse(g.isBound(4));
+        Assert.assertFalse(g.isBound(5));
+        Assert.assertFalse(g.isBound(6));
+        Assert.assertFalse(g.isBound(7));
+
+        c0.withContext(new KTextureUnitWithType() {
+          @Override public void run(
+            final KTextureUnitContextType c1)
+            throws JCGLException,
+              RException
+          {
+            c1.withTexture2D(t0);
+            c1.withTexture2D(t1);
+            c1.withTexture2D(t2);
+
+            Assert.assertTrue(g.isBound(0));
+            Assert.assertTrue(g.isBound(1));
+            Assert.assertTrue(g.isBound(2));
+            Assert.assertTrue(g.isBound(3));
+            Assert.assertTrue(g.isBound(4));
+            Assert.assertTrue(g.isBound(5));
+            Assert.assertFalse(g.isBound(6));
+            Assert.assertFalse(g.isBound(7));
+
+            c1.withContext(new KTextureUnitWithType() {
+              @Override public void run(
+                final KTextureUnitContextType c2)
+                throws JCGLException,
+                  RException
+              {
+                c2.withTexture2D(t0);
+                c2.withTexture2D(t1);
+
+                Assert.assertTrue(g.isBound(0));
+                Assert.assertTrue(g.isBound(1));
+                Assert.assertTrue(g.isBound(2));
+                Assert.assertTrue(g.isBound(3));
+                Assert.assertTrue(g.isBound(4));
+                Assert.assertTrue(g.isBound(5));
+                Assert.assertTrue(g.isBound(6));
+                Assert.assertTrue(g.isBound(7));
+              }
+            });
+
+            Assert.assertTrue(g.isBound(0));
+            Assert.assertTrue(g.isBound(1));
+            Assert.assertTrue(g.isBound(2));
+            Assert.assertTrue(g.isBound(3));
+            Assert.assertTrue(g.isBound(4));
+            Assert.assertTrue(g.isBound(5));
+            Assert.assertFalse(g.isBound(6));
+            Assert.assertFalse(g.isBound(7));
+          }
+        });
+
+        Assert.assertTrue(g.isBound(0));
+        Assert.assertTrue(g.isBound(1));
+        Assert.assertTrue(g.isBound(2));
+        Assert.assertFalse(g.isBound(3));
+        Assert.assertFalse(g.isBound(4));
+        Assert.assertFalse(g.isBound(5));
+        Assert.assertFalse(g.isBound(6));
+        Assert.assertFalse(g.isBound(7));
+      }
+    });
+
+    Assert.assertFalse(g.isBound(0));
+    Assert.assertFalse(g.isBound(1));
+    Assert.assertFalse(g.isBound(2));
+    Assert.assertFalse(g.isBound(3));
+    Assert.assertFalse(g.isBound(4));
+    Assert.assertFalse(g.isBound(5));
+    Assert.assertFalse(g.isBound(6));
+    Assert.assertFalse(g.isBound(7));
   }
 
   @Test public void testNoUseCount()
