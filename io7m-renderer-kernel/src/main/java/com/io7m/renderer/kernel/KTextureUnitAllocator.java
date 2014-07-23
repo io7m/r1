@@ -88,12 +88,14 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
       }
 
       try {
-        this.child = new Context(this.first + this.count);
+        final int child_first = this.first + this.count;
+        this.child = new Context(child_first);
 
-        final Context c = new Context(this.first + this.count);
+        final Context c = new Context(child_first);
         f.run(c);
-        KTextureUnitAllocator.this.texturesRemoved(c
-          .getTextureCountForContext());
+        KTextureUnitAllocator.this.texturesRemoved(
+          child_first,
+          c.getTextureCountForContext());
       } finally {
         this.child = null;
       }
@@ -130,7 +132,7 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
 
   /**
    * Construct a new texture unit allocator.
-   * 
+   *
    * @param <G>
    *          The type of GL interfaces
    * @param gi
@@ -212,9 +214,17 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
   }
 
   protected void texturesRemoved(
-    final int x)
+    final int first,
+    final int count)
+    throws JCGLException
   {
-    this.allocated -= x;
+    for (int k = 0; k < count; ++k) {
+      final int index = first + ((count - 1) - k);
+      final TextureUnitType unit = this.units.get(index);
+      assert unit != null;
+      this.gc_textures2d.texture2DStaticUnbind(unit);
+      --this.allocated;
+    }
   }
 
   protected TextureUnitType texturesUnitGet(
@@ -243,7 +253,7 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
       this.in_use = true;
       final Context c = new Context(0);
       f.run(c);
-      this.texturesRemoved(c.getTextureCountForContext());
+      this.texturesRemoved(0, c.getTextureCountForContext());
     } finally {
       this.in_use = false;
     }

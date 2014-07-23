@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.tests.kernel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.io7m.jcanephora.CubeMapFaceLH;
@@ -40,12 +41,24 @@ public final class KJCGLTextureFake implements
   JCGLTexturesCubeStaticCommonType,
   JCGLTextureUnitsType
 {
+  private final List<Boolean>                  bound;
   private final @NonNull List<TextureUnitType> units;
 
   public KJCGLTextureFake(
     final @NonNull List<TextureUnitType> in_units)
   {
     this.units = NullCheck.notNullAll(in_units, "Units");
+    this.bound = new ArrayList<Boolean>(in_units.size());
+
+    for (int index = 0; index < in_units.size(); ++index) {
+      this.bound.add(Boolean.FALSE);
+    }
+  }
+
+  boolean isBound(
+    final int index)
+  {
+    return this.bound.get(index).booleanValue();
   }
 
   @Override public void texture2DStaticBind(
@@ -53,7 +66,8 @@ public final class KJCGLTextureFake implements
     final Texture2DStaticUsableType texture)
     throws JCGLException
   {
-    // Nothing
+    System.err.printf("texture2DStaticBind: %d\n", unit.unitGetIndex());
+    this.bound.set(unit.unitGetIndex(), Boolean.TRUE);
   }
 
   @Override public void texture2DStaticDelete(
@@ -68,14 +82,15 @@ public final class KJCGLTextureFake implements
     final Texture2DStaticUsableType texture)
     throws JCGLException
   {
-    return false;
+    return this.bound.get(unit.unitGetIndex()).booleanValue();
   }
 
   @Override public void texture2DStaticUnbind(
     final TextureUnitType unit)
     throws JCGLException
   {
-    // Nothing
+    System.err.printf("texture2DStaticUnbind: %d\n", unit.unitGetIndex());
+    this.bound.set(unit.unitGetIndex(), Boolean.FALSE);
   }
 
   @Override public void texture2DStaticUpdate(
@@ -90,7 +105,8 @@ public final class KJCGLTextureFake implements
     final TextureCubeStaticUsableType texture)
     throws JCGLException
   {
-    // Nothing
+    System.err.printf("textureCubeStaticBind: %d\n", unit.unitGetIndex());
+    this.bound.set(unit.unitGetIndex(), Boolean.TRUE);
   }
 
   @Override public void textureCubeStaticDelete(
@@ -105,14 +121,15 @@ public final class KJCGLTextureFake implements
     final TextureCubeStaticUsableType texture)
     throws JCGLException
   {
-    return false;
+    return this.bound.get(unit.unitGetIndex()).booleanValue();
   }
 
   @Override public void textureCubeStaticUnbind(
     final TextureUnitType unit)
     throws JCGLException
   {
-    // Nothing
+    System.err.printf("textureCubeStaticUnbind: %d\n", unit.unitGetIndex());
+    this.bound.set(unit.unitGetIndex(), Boolean.FALSE);
   }
 
   @Override public void textureCubeStaticUpdateLH(
