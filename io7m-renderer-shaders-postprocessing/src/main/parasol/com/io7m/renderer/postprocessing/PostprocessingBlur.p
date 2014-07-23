@@ -24,7 +24,7 @@ module PostprocessingBlur is
 
   import com.io7m.parasol.Sampler2D;
   import com.io7m.renderer.core.Gaussian;
-  import com.io7m.renderer.postprocessing.Postprocessing;
+  import com.io7m.renderer.core.VertexShaders;
 
   shader fragment blur_horizontal_4f_f is
     parameter t_image     : sampler_2d;
@@ -51,12 +51,12 @@ module PostprocessingBlur is
   end;
 
   shader program blur_horizontal_4f is
-    vertex   Postprocessing.screen_quad;
+    vertex   VertexShaders.standard_clip;
     fragment blur_horizontal_4f_f;
   end;
 
   shader program blur_vertical_4f is
-    vertex   Postprocessing.screen_quad;
+    vertex   VertexShaders.standard_clip;
     fragment blur_vertical_4f_f;
   end;
 
@@ -85,12 +85,12 @@ module PostprocessingBlur is
   end;
 
   shader program blur_horizontal_2f is
-    vertex   Postprocessing.screen_quad;
+    vertex   VertexShaders.standard_clip;
     fragment blur_horizontal_2f_f;
   end;
 
   shader program blur_vertical_2f is
-    vertex   Postprocessing.screen_quad;
+    vertex   VertexShaders.standard_clip;
     fragment blur_vertical_2f_f;
   end;
 

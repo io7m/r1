@@ -20,8 +20,7 @@ module PostprocessingFog is
 
   import com.io7m.parasol.Sampler2D;
   import com.io7m.parasol.Vector3f;
-
-  import com.io7m.renderer.postprocessing.Postprocessing;
+  import com.io7m.renderer.core.VertexShaders;
 
   type t is record
     color : vector_3f
@@ -48,7 +47,7 @@ module PostprocessingFog is
   end;
 
   shader program fog is
-    vertex   Postprocessing.screen_quad;
+    vertex   VertexShaders.standard_clip;
     fragment fog_f;
   end;
 

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,6 +28,7 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.renderer.kernel.types.KSceneBatchedCommon.BatchUseCode;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -125,8 +126,16 @@ import com.io7m.renderer.types.RException;
         in_groups.add(new Group(lg.getLights(), by_material));
       }
 
+      /**
+       * The deferred renderers want the lit code with depth in order to
+       * select the correct geometry-pass shaders.
+       */
+
       final Map<String, Set<KInstanceOpaqueType>> in_unlit =
-        KSceneBatchedCommon.makeUnlitBatches(in_scene.getUnlitOpaques());
+        KSceneBatchedCommon.makeUnlitBatches(
+          in_scene.getUnlitOpaques(),
+          BatchUseCode.BATCH_USE_LIT_CODE_WITH_DEPTH);
+
       return new KSceneBatchedDeferredOpaque(in_groups, in_unlit);
     } catch (final RException e) {
       throw new UnreachableCodeException(e);

@@ -19,8 +19,9 @@ package com.io7m.renderer.core;
 module Flat is
 
   import com.io7m.renderer.core.VertexShaders;
+  import com.io7m.parasol.Sampler2D;
 
-  shader fragment f is
+  shader fragment flat_f is
     parameter f_ccolor : vector_4f;
   
     out out_0 : vector_4f as 0;
@@ -32,12 +33,12 @@ module Flat is
 
   shader program flat_standard is
     vertex   VertexShaders.standard;
-    fragment f;
+    fragment flat_f;
   end;
 
   shader program flat_clip is
     vertex   VertexShaders.standard_clip;
-    fragment f;
+    fragment flat_f;
   end;
-  
+
 end;

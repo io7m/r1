@@ -136,6 +136,9 @@ import com.io7m.renderer.shaders.deferred.RKDeferredShader;
         batch.addShaderWithOutputName(TASTShaderNameFlat.parse(
           "com.io7m.renderer.core.Flat.flat_clip",
           meta), "flat_clip");
+        batch.addShaderWithOutputName(TASTShaderNameFlat.parse(
+          "com.io7m.renderer.core.Copy.copy_rgba",
+          meta), "copy_rgba");
       }
 
       final List<File> sources =

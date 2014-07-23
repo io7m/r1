@@ -30,7 +30,10 @@ import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLExceptionBlendingMisconfigured;
+import com.io7m.jcanephora.JCGLExceptionNoDepthBuffer;
 import com.io7m.jcanephora.JCGLExceptionNoStencilBuffer;
+import com.io7m.jcanephora.JCGLExceptionRuntime;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.StencilFunction;
 import com.io7m.jcanephora.StencilOperation;
@@ -81,6 +84,8 @@ import com.io7m.renderer.kernel.types.KUnitSphereUsableType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RMatrixI3x3F;
+import com.io7m.renderer.types.RMatrixM3x3F;
+import com.io7m.renderer.types.RMatrixReadable3x3FType;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RTransformTextureType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -99,6 +104,76 @@ import com.io7m.renderer.types.RVectorI4F;
     BLACK = new RVectorI4F<RSpaceRGBType>(0.0f, 0.0f, 0.0f, 1.0f);
   }
 
+  private static void configureRenderStateForGeometry(
+    final OptionType<DepthFunction> depth_function,
+    final JCGLInterfaceCommonType gc)
+    throws JCGLExceptionRuntime,
+      JCGLException,
+      JCGLExceptionNoStencilBuffer
+  {
+    gc.blendingDisable();
+    gc.colorBufferMask(true, true, true, true);
+    gc.cullingEnable(
+      FaceSelection.FACE_BACK,
+      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+    gc.depthBufferWriteEnable();
+
+    depth_function
+      .acceptPartial(new OptionPartialVisitorType<DepthFunction, Unit, JCGLException>() {
+        @Override public Unit none(
+          final None<DepthFunction> n)
+          throws JCGLException
+        {
+          gc.depthBufferTestDisable();
+          return Unit.unit();
+        }
+
+        @Override public Unit some(
+          final Some<DepthFunction> s)
+          throws JCGLException
+        {
+          gc.depthBufferTestEnable(s.get());
+          return Unit.unit();
+        }
+      });
+
+    KRendererDeferredOpaque.configureStencilForGeometry(gc);
+  }
+
+  private static void configureRenderStateForLightPass(
+    final JCGLInterfaceCommonType gc)
+    throws JCGLExceptionRuntime,
+      JCGLExceptionBlendingMisconfigured,
+      JCGLException,
+      JCGLExceptionNoDepthBuffer,
+      JCGLExceptionNoStencilBuffer
+  {
+    gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+    gc.colorBufferMask(true, true, true, true);
+    gc.cullingEnable(
+      FaceSelection.FACE_FRONT,
+      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+    gc.depthBufferWriteDisable();
+    gc.depthBufferTestDisable();
+
+    KRendererDeferredOpaque.configureStencilLight(gc);
+  }
+
+  private static void configureRenderStateForLightPre(
+    final JCGLInterfaceCommonType gc)
+    throws JCGLExceptionRuntime,
+      JCGLException,
+      JCGLExceptionNoDepthBuffer,
+      JCGLExceptionNoStencilBuffer
+  {
+    gc.colorBufferMask(false, false, false, false);
+    gc.cullingDisable();
+    gc.depthBufferWriteDisable();
+    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+
+    KRendererDeferredOpaque.configureStencilLightPre(gc);
+  }
+
   /**
    * <p>
    * Configure the stencil buffer for the geometry pass.
@@ -109,7 +184,7 @@ import com.io7m.renderer.types.RVectorI4F;
    * </p>
    */
 
-  private static void configureStencilGeometry(
+  private static void configureStencilForGeometry(
     final JCGLInterfaceCommonType gc)
     throws JCGLException,
       JCGLExceptionNoStencilBuffer
@@ -426,15 +501,16 @@ import com.io7m.renderer.types.RVectorI4F;
     return debug_only_geometry;
   }
 
-  private final KFrustumMeshCacheType            frustum_cache;
-  private final JCGLImplementationType           g;
-  private final KUnitQuadCacheType               quad_cache;
-  private final KShaderCacheDebugType            shader_debug_cache;
-  private final KShaderCacheDeferredGeometryType shader_geo_cache;
-  private final KShaderCacheDeferredLightType    shader_light_cache;
-  private final VectorM2F                        size;
-  private final KUnitSphereCacheType             sphere_cache;
-  private final KTextureUnitAllocator            texture_units;
+  private final KFrustumMeshCacheType                          frustum_cache;
+  private final JCGLImplementationType                         g;
+  private final KUnitQuadCacheType                             quad_cache;
+  private final KShaderCacheDebugType                          shader_debug_cache;
+  private final KShaderCacheDeferredGeometryType               shader_geo_cache;
+  private final KShaderCacheDeferredLightType                  shader_light_cache;
+  private final VectorM2F                                      size;
+  private final KUnitSphereCacheType                           sphere_cache;
+  private final KTextureUnitAllocator                          texture_units;
+  private final RMatrixReadable3x3FType<RTransformTextureType> uv_id;
 
   private KRendererDeferredOpaque(
     final JCGLImplementationType in_g,
@@ -465,6 +541,7 @@ import com.io7m.renderer.types.RVectorI4F;
         NullCheck.notNull(in_frustum_cache, "Frustum mesh cache");
 
       this.size = new VectorM2F();
+      this.uv_id = new RMatrixM3x3F<RTransformTextureType>();
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
@@ -504,6 +581,51 @@ import com.io7m.renderer.types.RVectorI4F;
     KShadingProgramCommon.putScreenSize(
       program,
       KRendererDeferredOpaque.this.size);
+  }
+
+  private void renderClearFramebuffers(
+    final KFramebufferDeferredUsableType framebuffer)
+    throws JCGLException
+  {
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+
+    /**
+     * Clear the rendering framebuffer.
+     */
+
+    final FramebufferUsableType rb =
+      framebuffer.kFramebufferGetColorFramebuffer();
+    try {
+      gc.framebufferDrawBind(rb);
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+      gc.depthBufferWriteEnable();
+      gc.depthBufferClear(1.0f);
+    } finally {
+      gc.framebufferDrawUnbind();
+    }
+
+    /**
+     * Clear the gbuffer.
+     */
+
+    final KGeometryBufferUsableType geom =
+      framebuffer.kFramebufferGetGeometryBuffer();
+    final FramebufferUsableType geom_fb = geom.geomGetFramebuffer();
+
+    try {
+      gc.framebufferDrawBind(geom_fb);
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+
+      /**
+       * Note that the depth buffer is shared with the rendering buffer and so
+       * was already cleared above.
+       */
+
+    } finally {
+      gc.framebufferDrawUnbind();
+    }
   }
 
   private void renderDebugGeometryProjective(
@@ -635,13 +757,12 @@ import com.io7m.renderer.types.RVectorI4F;
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final MatricesObserverType mwo,
-    final KSceneBatchedDeferredOpaque batches)
+    final List<Group> groups)
     throws RException
   {
     try {
-      this.renderInitial(framebuffer);
+      this.renderClearFramebuffers(framebuffer);
 
-      final List<Group> groups = batches.getGroups();
       for (int gindex = 0; gindex < groups.size(); ++gindex) {
         final KSceneBatchedDeferredOpaque.Group group = groups.get(gindex);
         assert group != null;
@@ -652,6 +773,52 @@ import com.io7m.renderer.types.RVectorI4F;
           depth_function,
           mwo,
           group);
+      }
+    } catch (final JCGLException e) {
+      throw RExceptionJCGL.fromJCGLException(e);
+    } catch (final JCacheException e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
+  @Override public void rendererEvaluateOpaqueUnlit(
+    final KFramebufferDeferredUsableType framebuffer,
+    final KShadowMapContextType shadow_context,
+    final OptionType<DepthFunction> depth_function,
+    final MatricesObserverType mwo,
+    final Map<String, Set<KInstanceOpaqueType>> instances)
+    throws RException
+  {
+    try {
+      if (instances.size() > 0) {
+        final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+
+        this.renderUnlitGeometry(framebuffer, depth_function, mwo, instances);
+
+        try {
+          final FramebufferUsableType render_fb =
+            framebuffer.kFramebufferGetColorFramebuffer();
+          gc.framebufferDrawBind(render_fb);
+
+          this.texture_units.withContext(new KTextureUnitWithType() {
+            @Override public void run(
+              final KTextureUnitContextType texture_context)
+              throws JCGLException,
+                RException
+            {
+              try {
+                KRendererDeferredOpaque.this.renderUnlitCopy(
+                  framebuffer,
+                  texture_context);
+              } catch (final JCacheException e) {
+                throw new UnreachableCodeException(e);
+              }
+            }
+          });
+
+        } finally {
+          gc.framebufferDrawUnbind();
+        }
       }
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
@@ -735,36 +902,9 @@ import com.io7m.renderer.types.RVectorI4F;
     try {
       gc.framebufferDrawBind(geom_fb);
 
-      gc.blendingDisable();
-
-      gc.colorBufferMask(true, true, true, true);
-
-      gc.cullingEnable(
-        FaceSelection.FACE_BACK,
-        FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-
-      gc.depthBufferWriteEnable();
-
-      depth_function
-        .acceptPartial(new OptionPartialVisitorType<DepthFunction, Unit, JCGLException>() {
-          @Override public Unit none(
-            final None<DepthFunction> n)
-            throws JCGLException
-          {
-            gc.depthBufferTestDisable();
-            return Unit.unit();
-          }
-
-          @Override public Unit some(
-            final Some<DepthFunction> s)
-            throws JCGLException
-          {
-            gc.depthBufferTestEnable(s.get());
-            return Unit.unit();
-          }
-        });
-
-      KRendererDeferredOpaque.configureStencilGeometry(gc);
+      KRendererDeferredOpaque.configureRenderStateForGeometry(
+        depth_function,
+        gc);
 
       final Map<String, Set<KInstanceOpaqueType>> by_material =
         group.getInstances();
@@ -842,9 +982,6 @@ import com.io7m.renderer.types.RVectorI4F;
         throws RException,
           JCGLException
       {
-        final RMatrixI3x3F<RTransformTextureType> id =
-          RMatrixI3x3F.identity();
-
         return mwo.withProjectiveLight(
           lp,
           new MatricesProjectiveLightFunctionType<Unit, JCGLException>() {
@@ -913,7 +1050,10 @@ import com.io7m.renderer.types.RVectorI4F;
       JCGLException
   {
     gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+    gc.colorBufferMask(true, true, true, true);
     gc.cullingDisable();
+    gc.depthBufferWriteDisable();
+    gc.depthBufferTestDisable();
 
     final KGeometryBufferUsableType gbuffer =
       framebuffer.kFramebufferGetGeometryBuffer();
@@ -994,15 +1134,7 @@ import com.io7m.renderer.types.RVectorI4F;
       RException,
       JCacheException
   {
-    gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
-    gc.colorBufferMask(true, true, true, true);
-    gc.cullingEnable(
-      FaceSelection.FACE_FRONT,
-      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-    gc.depthBufferWriteDisable();
-    gc.depthBufferTestDisable();
-
-    KRendererDeferredOpaque.configureStencilLight(gc);
+    KRendererDeferredOpaque.configureRenderStateForLightPass(gc);
 
     final KGeometryBufferUsableType gbuffer =
       framebuffer.kFramebufferGetGeometryBuffer();
@@ -1095,12 +1227,7 @@ import com.io7m.renderer.types.RVectorI4F;
       RException,
       JCacheException
   {
-    gc.colorBufferMask(false, false, false, false);
-    gc.cullingDisable();
-    gc.depthBufferWriteDisable();
-    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-
-    KRendererDeferredOpaque.configureStencilLightPre(gc);
+    KRendererDeferredOpaque.configureRenderStateForLightPre(gc);
 
     final KProgram kp = this.shader_light_cache.cacheGetLU("empty");
     final JCBExecutorType exec = kp.getExecutable();
@@ -1238,15 +1365,7 @@ import com.io7m.renderer.types.RVectorI4F;
       JCacheException,
       JCGLException
   {
-    gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
-    gc.colorBufferMask(true, true, true, true);
-    gc.cullingEnable(
-      FaceSelection.FACE_FRONT,
-      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-    gc.depthBufferWriteDisable();
-    gc.depthBufferTestDisable();
-
-    KRendererDeferredOpaque.configureStencilLight(gc);
+    KRendererDeferredOpaque.configureRenderStateForLightPass(gc);
 
     final KGeometryBufferUsableType gbuffer =
       framebuffer.kFramebufferGetGeometryBuffer();
@@ -1305,12 +1424,7 @@ import com.io7m.renderer.types.RVectorI4F;
       RException,
       JCacheException
   {
-    gc.colorBufferMask(false, false, false, false);
-    gc.cullingDisable();
-    gc.depthBufferWriteDisable();
-    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-
-    KRendererDeferredOpaque.configureStencilLightPre(gc);
+    KRendererDeferredOpaque.configureRenderStateForLightPre(gc);
 
     final KProgram kp = this.shader_light_cache.cacheGetLU("empty");
 
@@ -1347,31 +1461,80 @@ import com.io7m.renderer.types.RVectorI4F;
     });
   }
 
-  private void renderInitial(
-    final KFramebufferDeferredUsableType framebuffer)
-    throws JCGLException
+  private void renderUnlitCopy(
+    final KFramebufferDeferredUsableType framebuffer,
+    final KTextureUnitContextType texture_context)
+    throws JCGLException,
+      RException,
+      JCacheException
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+    final KGeometryBufferUsableType gbuffer =
+      framebuffer.kFramebufferGetGeometryBuffer();
+
+    gc.blendingDisable();
+    gc.cullingDisable();
+    gc.depthBufferWriteDisable();
+    gc.depthBufferTestDisable();
 
     /**
-     * Clear the rendering framebuffer.
+     * Configure the stencil buffer such that it is read-only, and only pixels
+     * with a corresponding 1 value in the stencil buffer will be written.
      */
 
-    final FramebufferUsableType rb =
-      framebuffer.kFramebufferGetColorFramebuffer();
-    try {
-      gc.framebufferDrawBind(rb);
-      gc.colorBufferMask(true, true, true, true);
-      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
-      gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
+    gc.stencilBufferEnable();
+    gc.stencilBufferFunction(
+      FaceSelection.FACE_FRONT_AND_BACK,
+      StencilFunction.STENCIL_EQUAL,
+      1,
+      0xffffffff);
+    gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0);
 
-    /**
-     * Clear the gbuffer.
-     */
+    final KProgram kp = this.shader_light_cache.cacheGetLU("copy_rgba");
+    final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
+    final ArrayBufferUsableType array = q.getArray();
+    final IndexBufferUsableType index = q.getIndices();
+
+    final JCBExecutorType exec = kp.getExecutable();
+    exec.execRun(new JCBExecutorProcedureType<RException>() {
+      @Override public void call(
+        final JCBProgramType program)
+        throws JCGLException,
+          RException
+      {
+        gc.arrayBufferBind(array);
+        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+        KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+
+        KShadingProgramCommon.putMatrixUVUnchecked(
+          program,
+          KRendererDeferredOpaque.this.uv_id);
+
+        program.programUniformPutTextureUnit(
+          "t_image",
+          texture_context.withTexture2D(gbuffer.geomGetTextureAlbedo()));
+
+        program.programExecute(new JCBProgramProcedureType<JCGLException>() {
+          @Override public void call()
+            throws JCGLException
+          {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
+          }
+        });
+      }
+    });
+  }
+
+  private void renderUnlitGeometry(
+    final KFramebufferDeferredUsableType framebuffer,
+    final OptionType<DepthFunction> depth_function,
+    final MatricesObserverType mwo,
+    final Map<String, Set<KInstanceOpaqueType>> instances)
+    throws RException,
+      JCacheException,
+      JCGLException
+  {
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 
     final KGeometryBufferUsableType geom =
       framebuffer.kFramebufferGetGeometryBuffer();
@@ -1379,13 +1542,37 @@ import com.io7m.renderer.types.RVectorI4F;
 
     try {
       gc.framebufferDrawBind(geom_fb);
-      gc.colorBufferMask(true, true, true, true);
-      gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
 
-      /**
-       * Note that the depth buffer is shared with the rendering buffer and so
-       * was already cleared above.
-       */
+      KRendererDeferredOpaque.configureRenderStateForGeometry(
+        depth_function,
+        gc);
+
+      for (final String code : instances.keySet()) {
+        assert code != null;
+        final Set<KInstanceOpaqueType> batch = instances.get(code);
+        assert batch != null;
+
+        final KProgram kprogram = this.shader_geo_cache.cacheGetLU(code);
+        kprogram.getExecutable().execRun(
+          new JCBExecutorProcedureType<RException>() {
+            @Override public void call(
+              final JCBProgramType program)
+              throws JCGLException,
+                RException
+            {
+              KShadingProgramCommon.putMatrixProjection(
+                program,
+                mwo.getMatrixProjection());
+
+              KRendererDeferredOpaque.renderGroupGeometryBatchInstances(
+                gc,
+                KRendererDeferredOpaque.this.texture_units,
+                mwo,
+                batch,
+                program);
+            }
+          });
+      }
 
     } finally {
       gc.framebufferDrawUnbind();
