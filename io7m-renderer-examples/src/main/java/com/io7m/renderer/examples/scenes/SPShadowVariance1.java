@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -114,8 +114,6 @@ public final class SPShadowVariance1 implements ExampleSceneType
           Math.toRadians(60.0f)),
         new VectorI3F(0.5f, 0.5f, 0.5f),
         new RVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 2.0f));
-
-    final Texture2DStaticUsableType t = scene.texture("monkey_albedo.png");
 
     final KMaterialOpaqueRegularBuilderType mmb =
       KMaterialOpaqueRegular
