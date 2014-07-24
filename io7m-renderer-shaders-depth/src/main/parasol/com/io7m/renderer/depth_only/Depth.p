@@ -126,7 +126,7 @@ module Depth is
     out f_uv            = uv;
   end;
   
-  shader fragment depth_DepM_f is
+  shader fragment depth_DepA_f is
     in f_uv                 : vector_2f;
     in f_position           : vector_4f;
     out out_0               : vector_4f as 0;
@@ -135,7 +135,7 @@ module Depth is
     parameter t_albedo      : sampler_2d;
   with
     value albedo : vector_4f =
-      Albedo.textured_translucent (
+      Albedo.textured (
         t_albedo,
         f_uv,
         p_albedo
@@ -147,9 +147,9 @@ module Depth is
     out out_0 = rgba;
   end;
 
-  shader program depth_DepM is
+  shader program depth_DepA is
     vertex   depth_textured_v;
-    fragment depth_DepM_f;
+    fragment depth_DepA_f;
   end;
 
   --
@@ -158,7 +158,7 @@ module Depth is
   -- platforms that do not have depth textures.
   --
 
-  shader fragment depth_DepM4444_f is
+  shader fragment depth_DepA4444_f is
     in f_uv                 : vector_2f;
     in f_position           : vector_4f;
     out out_0               : vector_4f as 0;
@@ -167,7 +167,7 @@ module Depth is
     parameter t_albedo      : sampler_2d;
   with
     value albedo : vector_4f =
-      Albedo.textured_translucent (
+      Albedo.textured (
         t_albedo,
         f_uv,
         p_albedo
@@ -178,9 +178,9 @@ module Depth is
     out out_0 = rgba;
   end;
 
-  shader program depth_DepM4444 is
+  shader program depth_DepA4444 is
     vertex   depth_textured_v;
-    fragment depth_DepM4444_f;
+    fragment depth_DepA4444_f;
   end;
 
 end;

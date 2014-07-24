@@ -32,30 +32,7 @@ module Albedo is
     mix   : float      -- The linear mix between the color and texture, in the range [0, 1]
   end;
 
-  function opaque (
-    d : t
-  ) : vector_4f =
-    new vector_4f (d.color [x y z], 1.0);
-
-  function translucent (
-    d : t
-  ) : vector_4f =
-    d.color;
-
-  function textured_opaque (
-    t : sampler_2d,
-    u : vector_2f,
-    d : t
-  ) : vector_4f =
-    let
-      value tc = S.texture (t, u);
-      value m  = F.multiply (tc [w], d.mix);
-      value c  = V3.interpolate (d.color [x y z], tc [x y z], m);
-    in
-      new vector_4f (c, 1.0)
-    end;
-
-  function textured_translucent (
+  function textured (
     t : sampler_2d,
     u : vector_2f,
     d : t

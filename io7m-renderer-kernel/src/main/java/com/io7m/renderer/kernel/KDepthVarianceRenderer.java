@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -53,6 +53,7 @@ import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialDepthAlpha;
 import com.io7m.renderer.kernel.types.KMaterialDepthConstant;
+import com.io7m.renderer.kernel.types.KMaterialDepthType;
 import com.io7m.renderer.kernel.types.KMaterialDepthVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
@@ -79,14 +80,14 @@ import com.io7m.renderer.types.RTransformViewType;
 
   /**
    * Construct a new depth renderer.
-   * 
+   *
    * @param g
    *          The OpenGL implementation
    * @param shader_cache
    *          The shader cache
-   * 
+   *
    * @return A new depth renderer
-   * 
+   *
    * @throws RException
    *           If an error occurs during initialization
    */
@@ -174,76 +175,79 @@ import com.io7m.renderer.types.RTransformViewType;
         jp,
         mwi.getMatrixModelView());
 
-      material.materialOpaqueGetDepth().depthAccept(
-        new KMaterialDepthVisitorType<Unit, JCGLException>() {
-          @Override public Unit alpha(
-            final KMaterialDepthAlpha mda)
-            throws RException,
-              JCGLException
-          {
-            /**
-             * Material is alpha-to-depth; must upload albedo texture,
-             * matrices, and threshold value.
-             */
+      final KMaterialDepthType depth = material.materialOpaqueGetDepth();
+      depth.depthAccept(new KMaterialDepthVisitorType<Unit, JCGLException>() {
+        @Override public Unit alpha(
+          final KMaterialDepthAlpha mda)
+          throws RException,
+            JCGLException
+        {
+          /**
+           * Material is alpha-to-depth; must upload albedo texture, matrices,
+           * and threshold value.
+           */
 
-            return material
-              .opaqueAccept(new KMaterialOpaqueVisitorType<Unit, JCGLException>() {
-                @Override public Unit materialOpaqueRegular(
-                  final KMaterialOpaqueRegular mor)
-                  throws RException,
-                    JCGLException
-                {
-                  return mor.materialRegularGetAlbedo().albedoAccept(
-                    new KMaterialAlbedoVisitorType<Unit, JCGLException>() {
-                      @Override public Unit textured(
-                        final KMaterialAlbedoTextured mat)
-                        throws RException,
-                          JCGLException
-                      {
-                        KShadingProgramCommon.putMatrixUVUnchecked(
-                          jp,
-                          mwi.getMatrixUV());
-                        KShadingProgramCommon.putMaterialAlphaDepthThreshold(
-                          jp,
-                          mda.getAlphaThreshold());
+          return material
+            .opaqueAccept(new KMaterialOpaqueVisitorType<Unit, JCGLException>() {
+              @Override public Unit materialOpaqueRegular(
+                final KMaterialOpaqueRegular mor)
+                throws RException,
+                  JCGLException
+              {
+                return mor.materialRegularGetAlbedo().albedoAccept(
+                  new KMaterialAlbedoVisitorType<Unit, JCGLException>() {
+                    @Override public Unit textured(
+                      final KMaterialAlbedoTextured mat)
+                      throws RException,
+                        JCGLException
+                    {
+                      KShadingProgramCommon.putMatrixUVUnchecked(
+                        jp,
+                        mwi.getMatrixUV());
+                      KShadingProgramCommon.putMaterialAlphaDepthThreshold(
+                        jp,
+                        mda.getAlphaThreshold());
 
-                        final TextureUnitType u = units.get(0);
-                        assert u != null;
-                        KShadingProgramCommon.bindPutTextureAlbedo(
-                          jp,
-                          gc,
-                          mat,
-                          u);
+                      KShadingProgramCommon
+                        .putMaterialAlbedoTextured(jp, mat);
 
-                        KShadingProgramCommon.bindAttributeUVUnchecked(
-                          jp,
-                          array);
-                        return Unit.unit();
-                      }
+                      final TextureUnitType u = units.get(0);
+                      assert u != null;
+                      KShadingProgramCommon.bindPutTextureAlbedo(
+                        jp,
+                        gc,
+                        mat,
+                        u);
 
-                      @Override public Unit untextured(
-                        final KMaterialAlbedoUntextured mau)
-                      {
-                        /**
-                         * Unreachable because material verification does not
-                         * allow untextured albedo with alpha-to-depth.
-                         */
+                      KShadingProgramCommon.bindAttributeUVUnchecked(
+                        jp,
+                        array);
+                      return Unit.unit();
+                    }
 
-                        throw new UnreachableCodeException();
-                      }
-                    });
-                }
-              });
-          }
+                    @Override public Unit untextured(
+                      final KMaterialAlbedoUntextured mau)
+                    {
+                      /**
+                       * Unreachable because material verification does not
+                       * allow untextured albedo with alpha-to-depth.
+                       */
 
-          @Override public Unit constant(
-            final KMaterialDepthConstant m)
-            throws RException,
-              JCGLException
-          {
-            return Unit.unit();
-          }
-        });
+                      throw new UnreachableCodeException();
+                    }
+                  });
+              }
+            });
+        }
+
+        @Override public Unit constant(
+          final KMaterialDepthConstant m)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+      });
 
       /**
        * If there's an override for face culling specified, use it. Otherwise,

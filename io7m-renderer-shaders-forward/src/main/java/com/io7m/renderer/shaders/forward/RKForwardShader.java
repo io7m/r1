@@ -637,8 +637,7 @@ import com.io7m.renderer.types.RException;
           {
             b.append("  -- Textured albedo\n");
             b.append("  value albedo : vector_4f =\n");
-            b
-              .append("    Albedo.textured_opaque (t_albedo, f_uv, p_albedo);\n");
+            b.append("    Albedo.textured (t_albedo, f_uv, p_albedo);\n");
             b.append("\n");
             return Unit.unit();
           }
@@ -648,7 +647,7 @@ import com.io7m.renderer.types.RException;
           {
             b.append("  -- Untextured albedo\n");
             b.append("  value albedo : vector_4f =\n");
-            b.append("    Albedo.opaque (p_albedo);\n");
+            b.append("    p_albedo.color;\n");
             b.append("\n");
             return Unit.unit();
           }
@@ -670,7 +669,7 @@ import com.io7m.renderer.types.RException;
           {
             b.append("  -- Textured albedo\n");
             b.append("  value albedo : vector_4f =\n");
-            b.append("    Albedo.textured_translucent (\n");
+            b.append("    Albedo.textured (\n");
             b.append("      t_albedo,\n");
             b.append("      f_uv,\n");
             b.append("      p_albedo\n");
@@ -684,7 +683,7 @@ import com.io7m.renderer.types.RException;
           {
             b.append("  -- Untextured albedo\n");
             b.append("  value albedo : vector_4f =\n");
-            b.append("    Albedo.translucent (p_albedo);\n");
+            b.append("    p_albedo.color;\n");
             b.append("\n");
             return Unit.unit();
           }

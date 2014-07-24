@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -230,6 +230,12 @@ public final class ExampleSceneUtilities
   public static final RVectorI4F<RSpaceRGBAType>                     RGBA_WHITE;
 
   /**
+   * RGBA nothing.
+   */
+
+  public static final RVectorI4F<RSpaceRGBAType>                     RGBA_NOTHING;
+
+  /**
    * A standard view from the left.
    */
 
@@ -285,6 +291,7 @@ public final class ExampleSceneUtilities
       RGBA_WHITE = new RVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f);
       RGBA_RED = new RVectorI4F<RSpaceRGBAType>(1.0f, 0.0f, 0.0f, 1.0f);
       RGBA_BLUE = new RVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 1.0f, 1.0f);
+      RGBA_NOTHING = new RVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.0f);
 
       IDENTITY_UV = RMatrixI3x3F.identity();
       IDENTITY_UV_M = new RMatrixM3x3F<RTransformTextureType>();

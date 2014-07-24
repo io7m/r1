@@ -53,7 +53,7 @@ module DepthVariance is
     parameter p_alpha_depth : float;
     out out_0               : vector_4f as 0;
   with
-    value albedo : vector_4f = Albedo.translucent (p_albedo);
+    value albedo : vector_4f = p_albedo.color;
     discard (F.lesser (albedo [w], p_alpha_depth));
 
     value rgba =
@@ -67,7 +67,7 @@ module DepthVariance is
     fragment depth_variance_U_f;
   end;
 
-  shader fragment depth_variance_M_f is
+  shader fragment depth_variance_A_f is
     in f_uv                 : vector_2f;
     in f_position           : vector_4f;
     out out_0               : vector_4f as 0;
@@ -76,7 +76,7 @@ module DepthVariance is
     parameter t_albedo      : sampler_2d;
   with
     value albedo : vector_4f =
-      Albedo.textured_translucent (
+      Albedo.textured (
         t_albedo,
         f_uv,
         p_albedo
@@ -90,9 +90,9 @@ module DepthVariance is
     out out_0 = rgba;
   end;
 
-  shader program depth_variance_M is
+  shader program depth_variance_A is
     vertex   Depth.depth_textured_v;
-    fragment depth_variance_M_f;
+    fragment depth_variance_A_f;
   end;
 
 end;
