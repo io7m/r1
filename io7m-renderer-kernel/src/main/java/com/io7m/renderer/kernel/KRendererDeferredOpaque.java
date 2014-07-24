@@ -69,6 +69,9 @@ import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightVisitorType;
+import com.io7m.renderer.kernel.types.KMaterialDepthAlpha;
+import com.io7m.renderer.kernel.types.KMaterialDepthConstant;
+import com.io7m.renderer.kernel.types.KMaterialDepthVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
 import com.io7m.renderer.kernel.types.KMaterialNormalVertex;
 import com.io7m.renderer.kernel.types.KMaterialNormalVisitorType;
@@ -425,6 +428,28 @@ import com.io7m.renderer.types.RVectorI4F;
       program,
       material);
     KRendererCommon.putMaterialRegular(program, material);
+
+    material.materialOpaqueGetDepth().depthAccept(
+      new KMaterialDepthVisitorType<Unit, JCGLException>() {
+        @Override public Unit alpha(
+          final KMaterialDepthAlpha m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putMaterialAlphaDepthThreshold(
+            program,
+            m.getAlphaThreshold());
+          return Unit.unit();
+        }
+
+        @Override public Unit constant(
+          final KMaterialDepthConstant m)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+      });
 
     try {
       gc.arrayBufferBind(array);
