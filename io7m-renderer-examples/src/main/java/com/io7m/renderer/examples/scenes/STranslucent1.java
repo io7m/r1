@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.renderer.examples.ExampleSceneBuilderType;
@@ -67,7 +68,7 @@ public final class STranslucent1 implements ExampleSceneType
 
   @Override public String exampleGetName()
   {
-    return this.getClass().getCanonicalName();
+    return NullCheck.notNull(this.getClass().getCanonicalName());
   }
 
   @Override public void exampleScene(
@@ -205,6 +206,7 @@ public final class STranslucent1 implements ExampleSceneType
     g.groupAddInstance(floor);
 
     for (final KLightType l : lights) {
+      assert l != null;
       g.groupAddLight(l);
     }
   }

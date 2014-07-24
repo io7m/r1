@@ -22,6 +22,7 @@ import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
@@ -75,7 +76,7 @@ public final class SPShadowVariance0 implements ExampleSceneType
 
   @Override public String exampleGetName()
   {
-    return this.getClass().getCanonicalName();
+    return NullCheck.notNull(this.getClass().getCanonicalName());
   }
 
   @Override public void exampleScene(

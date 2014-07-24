@@ -18,6 +18,7 @@ package com.io7m.renderer.examples.scenes;
 
 import java.util.List;
 
+import com.io7m.jnull.NullCheck;
 import com.io7m.renderer.examples.ExampleSceneBuilderType;
 import com.io7m.renderer.examples.ExampleSceneType;
 import com.io7m.renderer.examples.ExampleSceneUtilities;
@@ -52,7 +53,7 @@ public final class SLEnvironment2 implements ExampleSceneType
 
   @Override public String exampleGetName()
   {
-    return this.getClass().getCanonicalName();
+    return NullCheck.notNull(this.getClass().getCanonicalName());
   }
 
   @Override public void exampleScene(
