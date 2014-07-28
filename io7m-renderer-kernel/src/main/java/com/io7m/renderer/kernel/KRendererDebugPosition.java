@@ -253,7 +253,7 @@ import com.io7m.renderer.types.RTransformViewType;
       gc.depthBufferTestEnable(DepthFunction.DEPTH_EQUAL);
       gc.depthBufferWriteDisable();
 
-      final KProgram kp =
+      final KProgramType kp =
         this.shader_cache_debug
           .cacheGetLU("show_position_reconstruction_eye");
 

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -92,7 +92,8 @@ import com.io7m.renderer.types.RXMLException;
  * A kernel program.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" }) @EqualityStructural public final class KProgram
+@SuppressWarnings({ "boxing", "synthetic-access" }) @EqualityStructural public final class KProgram implements
+  KProgramType
 {
   private static void checkProgramVersionSupport(
     final GVersionType v,
@@ -499,7 +500,7 @@ import com.io7m.renderer.types.RXMLException;
   /**
    * Load the shader named <code>name</code> from the given filesystem, for
    * the given shading language API and version.
-   * 
+   *
    * @param gl
    *          The OpenGL interface
    * @param version
@@ -512,9 +513,9 @@ import com.io7m.renderer.types.RXMLException;
    *          The name of the shader
    * @param log
    *          A log handle
-   * 
+   *
    * @return A new program
-   * 
+   *
    * @throws RException
    *           If an error occurs, such as an OpenGL error, or the program not
    *           being supported on the current version and API
@@ -786,56 +787,27 @@ import com.io7m.renderer.types.RXMLException;
       && this.vertex_shader_meta.equals(other.vertex_shader_meta);
   }
 
-  /**
-   * @return A reference to the program's executable interface
-   */
-
-  public JCBExecutorType getExecutable()
+  @Override public JCBExecutorType getExecutable()
   {
     return this.exec;
   }
 
-  /**
-   * @return The fragment shader metadata.
-   */
-
-  public JPFragmentShaderMetaType getFragmentShaderMeta()
+  @Override public JPFragmentShaderMetaType getFragmentShaderMeta()
   {
     return this.fragment_shader_meta;
   }
 
-  /**
-   * @return Information about the compiled program
-   */
-
-  public JPUncompactedProgramShaderMeta getMeta()
+  @Override public JPUncompactedProgramShaderMeta getMeta()
   {
     return this.program_meta;
   }
 
-  /**
-   * @return The compiled program
-   */
-
-  public ProgramType getProgram()
+  @Override public ProgramType getProgram()
   {
     return this.program;
   }
 
-  /**
-   * @return The program metadata.
-   */
-
-  public JPUncompactedProgramShaderMeta getProgramMeta()
-  {
-    return this.program_meta;
-  }
-
-  /**
-   * @return The vertex shader metadata.
-   */
-
-  public JPVertexShaderMetaType getVertexShaderMeta()
+  @Override public JPVertexShaderMetaType getVertexShaderMeta()
   {
     return this.vertex_shader_meta;
   }

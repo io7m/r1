@@ -20,6 +20,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.jcache.JCacheException;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
@@ -28,7 +30,8 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.renderer.kernel.types.KUnitQuadCache;
 import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
 import com.io7m.renderer.kernel.types.KUnitQuadUsableType;
-import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
+import com.io7m.renderer.tests.RFakeGL;
+import com.io7m.renderer.tests.RFakeShaderControllers;
 import com.io7m.renderer.types.RException;
 
 @SuppressWarnings("static-method") public final class KUnitQuadCacheTest
@@ -39,8 +42,11 @@ import com.io7m.renderer.types.RException;
   {
     final LogUsableType log =
       Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests");
-    final FakeJCGLArrayAndIndexBuffers g = new FakeJCGLArrayAndIndexBuffers();
-    final KUnitQuadCacheType c = KUnitQuadCache.newCache(g, log);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30WithLog(log, RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+
+    final KUnitQuadCacheType c = KUnitQuadCache.newCache(gc, log);
 
     final KUnitQuadUsableType kq0 = c.cacheGetLU(Unit.unit());
     Assert.assertNotNull(kq0);

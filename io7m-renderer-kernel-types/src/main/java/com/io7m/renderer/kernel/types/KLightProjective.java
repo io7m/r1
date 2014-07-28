@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -303,7 +303,7 @@ import com.io7m.renderer.types.RVectorI3F;
     this.transform =
       KTransformOST.newTransform(
         this.orientation,
-        ONE,
+        KLightProjective.ONE,
         this.position);
 
     /**
@@ -411,32 +411,5 @@ import com.io7m.renderer.types.RVectorI3F;
   @Override public int texturesGetRequired()
   {
     return this.textures;
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder b = new StringBuilder();
-    b.append("[KLightProjective color=");
-    b.append(this.color);
-    b.append(" falloff=");
-    b.append(this.falloff);
-    b.append(" intensity=");
-    b.append(this.intensity);
-    b.append(" orientation=");
-    b.append(this.orientation);
-    b.append(" position=");
-    b.append(this.position);
-    b.append(" projection=");
-    b.append(this.projection);
-    b.append(" range=");
-    b.append(this.range);
-    b.append(" shadow=");
-    b.append(this.shadow);
-    b.append(" texture=");
-    b.append(this.texture);
-    b.append("]");
-    final String r = b.toString();
-    assert r != null;
-    return r;
   }
 }

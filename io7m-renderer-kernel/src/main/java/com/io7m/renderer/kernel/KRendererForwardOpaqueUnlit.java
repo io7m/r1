@@ -190,7 +190,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
         assert instances.isEmpty() == false;
 
         final KTextureUnitAllocator units = this.texture_units;
-        final KProgram kprogram =
+        final KProgramType kprogram =
           this.shader_unlit_cache.cacheGetLU(material_code);
 
         kprogram.getExecutable().execRun(

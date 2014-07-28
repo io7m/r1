@@ -102,7 +102,7 @@ import com.io7m.renderer.kernel.KFramebufferDeferredType;
 import com.io7m.renderer.kernel.KFramebufferForward;
 import com.io7m.renderer.kernel.KFramebufferForwardType;
 import com.io7m.renderer.kernel.KFramebufferType;
-import com.io7m.renderer.kernel.KProgram;
+import com.io7m.renderer.kernel.KProgramType;
 import com.io7m.renderer.kernel.KRendererDebugType;
 import com.io7m.renderer.kernel.KRendererDeferredType;
 import com.io7m.renderer.kernel.KRendererForwardType;
@@ -861,7 +861,7 @@ import com.jogamp.opengl.util.FPSAnimator;
       final KShaderCachePostprocessingType sc =
         scs.getShaderPostprocessingCache();
       assert sc != null;
-      final KProgram kp = sc.cacheGetLU("copy_rgba");
+      final KProgramType kp = sc.cacheGetLU("copy_rgba");
       gc.framebufferDrawUnbind();
 
       try {

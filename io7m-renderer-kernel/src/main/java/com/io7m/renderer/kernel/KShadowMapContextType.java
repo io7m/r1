@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,12 +16,26 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.kernel.types.KShadowType;
+import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.types.RException;
 
-interface KShadowMapContextType
+/**
+ * The type of shadow map contexts.
+ */
+
+public interface KShadowMapContextType
 {
+  /**
+   * Fetch the current shadow map for the given light.
+   * 
+   * @param light
+   *          The light.
+   * @return A shadow map.
+   * @throws RException
+   *           On errors.
+   */
+
   KShadowMapUsableType getShadowMap(
-    final KShadowType shadow)
+    final KLightType light)
     throws RException;
 }

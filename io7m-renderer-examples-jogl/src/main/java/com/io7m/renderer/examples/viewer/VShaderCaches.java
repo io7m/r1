@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,7 +28,7 @@ import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.FilesystemType;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.renderer.kernel.KProgram;
+import com.io7m.renderer.kernel.KProgramType;
 import com.io7m.renderer.kernel.KShaderCache;
 import com.io7m.renderer.kernel.KShaderCacheDebugType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredGeometryType;
@@ -333,9 +333,9 @@ public final class VShaderCaches
     final LRUCacheConfig cache_config,
     final FilesystemType fs)
   {
-    final JCacheLoaderType<String, KProgram, RException> loader =
+    final JCacheLoaderType<String, KProgramType, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+    final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
     return KShaderCache.wrapDebug(c);
   }
@@ -346,9 +346,9 @@ public final class VShaderCaches
     final LRUCacheConfig cache_config,
     final FilesystemType fs)
   {
-    final JCacheLoaderType<String, KProgram, RException> loader =
+    final JCacheLoaderType<String, KProgramType, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+    final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
     return KShaderCache.wrapDeferredGeometry(c);
   }
@@ -359,9 +359,9 @@ public final class VShaderCaches
     final LRUCacheConfig cache_config,
     final FilesystemType fs)
   {
-    final JCacheLoaderType<String, KProgram, RException> loader =
+    final JCacheLoaderType<String, KProgramType, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+    final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
     return KShaderCache.wrapDeferredLight(c);
   }
@@ -372,9 +372,9 @@ public final class VShaderCaches
     final LRUCacheConfig cache_config,
     final FilesystemType fs)
   {
-    final JCacheLoaderType<String, KProgram, RException> loader =
+    final JCacheLoaderType<String, KProgramType, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+    final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
     return KShaderCache.wrapDepth(c);
   }
@@ -385,9 +385,9 @@ public final class VShaderCaches
     final LRUCacheConfig cache_config,
     final FilesystemType fs)
   {
-    final JCacheLoaderType<String, KProgram, RException> loader =
+    final JCacheLoaderType<String, KProgramType, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+    final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
     return KShaderCache.wrapDepthVariance(c);
   }
@@ -398,9 +398,9 @@ public final class VShaderCaches
     final LRUCacheConfig cache_config,
     final FilesystemType fs)
   {
-    final JCacheLoaderType<String, KProgram, RException> loader =
+    final JCacheLoaderType<String, KProgramType, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+    final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
     return KShaderCache.wrapForwardOpaqueLit(c);
   }
@@ -411,9 +411,9 @@ public final class VShaderCaches
     final LRUCacheConfig cache_config,
     final FilesystemType fs)
   {
-    final JCacheLoaderType<String, KProgram, RException> loader =
+    final JCacheLoaderType<String, KProgramType, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+    final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
     return KShaderCache.wrapForwardOpaqueUnlit(c);
   }
@@ -426,9 +426,9 @@ public final class VShaderCaches
       final LRUCacheConfig cache_config,
       final FilesystemType fs)
   {
-    final JCacheLoaderType<String, KProgram, RException> loader =
+    final JCacheLoaderType<String, KProgramType, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+    final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
     return KShaderCache.wrapForwardTranslucentLit(c);
   }
@@ -441,9 +441,9 @@ public final class VShaderCaches
       final LRUCacheConfig cache_config,
       final FilesystemType fs)
   {
-    final JCacheLoaderType<String, KProgram, RException> loader =
+    final JCacheLoaderType<String, KProgramType, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+    final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
     return KShaderCache.wrapForwardTranslucentUnlit(c);
   }
@@ -454,9 +454,9 @@ public final class VShaderCaches
     final LRUCacheConfig cache_config,
     final FilesystemType fs)
   {
-    final JCacheLoaderType<String, KProgram, RException> loader =
+    final JCacheLoaderType<String, KProgramType, RException> loader =
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    final LRUCacheTrivial<String, KProgram, KProgram, RException> c =
+    final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
     return KShaderCache.wrapPostprocessing(c);
   }

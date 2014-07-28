@@ -38,6 +38,7 @@ import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLExceptionAttributeMissing;
 import com.io7m.jcanephora.JCGLExceptionDeleted;
 import com.io7m.jcanephora.JCGLExceptionTypeError;
+import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jranges.RangeCheckException;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
@@ -46,14 +47,16 @@ import com.io7m.renderer.kernel.types.KFrustumMesh;
 import com.io7m.renderer.kernel.types.KProjectionFOV;
 import com.io7m.renderer.kernel.types.KProjectionFrustum;
 import com.io7m.renderer.kernel.types.KProjectionOrthographic;
-import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
+import com.io7m.renderer.tests.RFakeGL;
+import com.io7m.renderer.tests.RFakeShaderControllers;
 
 @SuppressWarnings("static-method") public final class KFrustumMeshTest
 {
   @Test public void testDumpObj()
     throws Exception
   {
-    final FakeJCGLArrayAndIndexBuffers g = new FakeJCGLArrayAndIndexBuffers();
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
 
     final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionFOV p =
@@ -145,8 +148,7 @@ import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
 
             @Override public ArrayBufferUsableType getArrayBuffer()
             {
-              // TODO Auto-generated method stub
-              throw new UnimplementedCodeException();
+              return array;
             }
 
             @Override public long getTargetDataSize()
@@ -187,8 +189,7 @@ import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
           return new IndexBufferUpdateUnmappedType() {
             @Override public IndexBufferUsableType getIndexBuffer()
             {
-              // TODO Auto-generated method stub
-              throw new UnimplementedCodeException();
+              return b;
             }
 
             @Override public CursorWritableIndexType getCursor()
@@ -286,13 +287,14 @@ import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
       };
 
     System.out.printf("o Test\n");
-    KFrustumMesh.newFromFOV(g, au_cons, iu_cons, p);
+    KFrustumMesh.newFromFOV(g.getGLCommon(), au_cons, iu_cons, p);
   }
 
   @Test public void testFOV()
     throws Exception
   {
-    final FakeJCGLArrayAndIndexBuffers g = new FakeJCGLArrayAndIndexBuffers();
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
 
     final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionFOV p =
@@ -304,7 +306,7 @@ import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
         10.0f);
     final KFrustumMesh m =
       KFrustumMesh.newFromFOV(
-        g,
+        g.getGLCommon(),
         ArrayBufferUpdateUnmapped.newConstructor(),
         IndexBufferUpdateUnmapped.newConstructor(),
         p);
@@ -331,7 +333,8 @@ import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
   @Test public void testFrustum()
     throws Exception
   {
-    final FakeJCGLArrayAndIndexBuffers g = new FakeJCGLArrayAndIndexBuffers();
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
 
     final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionFrustum p =
@@ -345,7 +348,7 @@ import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
         10.0f);
     final KFrustumMesh m =
       KFrustumMesh.newFromFrustum(
-        g,
+        g.getGLCommon(),
         ArrayBufferUpdateUnmapped.newConstructor(),
         IndexBufferUpdateUnmapped.newConstructor(),
         p);
@@ -372,7 +375,8 @@ import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
   @Test public void testOrthographic()
     throws Exception
   {
-    final FakeJCGLArrayAndIndexBuffers g = new FakeJCGLArrayAndIndexBuffers();
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
 
     final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionOrthographic p =
@@ -386,7 +390,7 @@ import com.io7m.renderer.tests.FakeJCGLArrayAndIndexBuffers;
         10.0f);
     final KFrustumMesh m =
       KFrustumMesh.newFromOrthographic(
-        g,
+        g.getGLCommon(),
         ArrayBufferUpdateUnmapped.newConstructor(),
         IndexBufferUpdateUnmapped.newConstructor(),
         p);

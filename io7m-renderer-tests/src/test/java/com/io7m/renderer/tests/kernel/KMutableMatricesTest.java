@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,10 +28,12 @@ import com.io7m.jcanephora.ArrayBufferType;
 import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.ArrayDescriptorBuilderType;
 import com.io7m.jcanephora.IndexBufferType;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLExceptionAttributeDuplicate;
 import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.UsageHint;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jequality.AlmostEqualFloat;
 import com.io7m.jequality.AlmostEqualFloat.ContextRelative;
 import com.io7m.jfunctional.Option;
@@ -39,7 +41,6 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheckException;
-import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
@@ -72,10 +73,10 @@ import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
-import com.io7m.renderer.tests.FakeArrayBuffer;
 import com.io7m.renderer.tests.FakeCapabilities;
-import com.io7m.renderer.tests.FakeIndexBuffer;
-import com.io7m.renderer.tests.FakeTexture2DStatic;
+import com.io7m.renderer.tests.RFakeGL;
+import com.io7m.renderer.tests.RFakeShaderControllers;
+import com.io7m.renderer.tests.RFakeTextures2DStatic;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionMaterialMissingAlbedoTexture;
 import com.io7m.renderer.types.RExceptionMaterialMissingSpecularTexture;
@@ -114,7 +115,7 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     try {
       final Texture2DStaticUsableType texture =
-        FakeTexture2DStatic.getDefault();
+        RFakeTextures2DStatic.newAnything();
 
       final RVectorI3F<RSpaceWorldType> position =
         new RVectorI3F<RSpaceWorldType>(0, 0, 0);
@@ -142,7 +143,7 @@ import com.io7m.renderer.types.RVectorI4F;
 
       final KLightProjectiveBuilderType b =
         KLightProjective.newBuilder(
-          FakeTexture2DStatic.getDefault(),
+          RFakeTextures2DStatic.newAnything(),
           KMutableMatricesTest.arbitraryProjection());
       b.setColor(colour);
       b.setFalloff(falloff);
@@ -161,6 +162,9 @@ import com.io7m.renderer.types.RVectorI4F;
   private static @NonNull KInstanceType makeMeshInstance()
   {
     try {
+      final JCGLInterfaceCommonType gc =
+        RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+
       final RMatrixI3x3F<RTransformTextureType> uv_matrix =
         RMatrixI3x3F.identity();
 
@@ -172,17 +176,13 @@ import com.io7m.renderer.types.RVectorI4F;
 
       final ArrayDescriptor d = b.build();
       final ArrayBufferType array =
-        new FakeArrayBuffer(
-          1,
-          new RangeInclusiveL(0, 99),
-          d,
-          UsageHint.USAGE_STATIC_DRAW);
+        gc.arrayBufferAllocate(1, d, UsageHint.USAGE_STATIC_DRAW);
+
       final IndexBufferType indices =
-        new FakeIndexBuffer(
+        gc.indexBufferAllocateType(
+          JCGLUnsignedType.TYPE_UNSIGNED_INT,
           1,
-          new RangeInclusiveL(0, 99),
-          UsageHint.USAGE_STATIC_DRAW,
-          JCGLUnsignedType.TYPE_UNSIGNED_INT);
+          UsageHint.USAGE_STATIC_DRAW);
 
       final KMesh mesh =
         KMesh.newMesh(array, indices, new RVectorI3F<RSpaceObjectType>(
@@ -235,6 +235,8 @@ import com.io7m.renderer.types.RVectorI4F;
     } catch (final RExceptionMaterialMissingSpecularTexture e) {
       throw new UnreachableCodeException(e);
     } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    } catch (final JCGLException e) {
       throw new UnreachableCodeException(e);
     }
   }

@@ -24,15 +24,21 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
-import com.io7m.renderer.tests.FakeTexture2DStatic;
+import com.io7m.renderer.tests.RFakeGL;
+import com.io7m.renderer.tests.RFakeShaderControllers;
+import com.io7m.renderer.tests.RFakeTextures2DStatic;
 
 @SuppressWarnings({ "static-method", "null" }) public final class KMaterialNormalTest
 {
   @Test public void testMapped()
   {
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+
     QuickCheck.forAllVerbose(
-      FakeTexture2DStatic.generator(new StringGenerator()),
+      RFakeTextures2DStatic.generator(g, new StringGenerator()),
       new AbstractCharacteristic<Texture2DStaticUsableType>() {
         @Override protected void doSpecify(
           final Texture2DStaticUsableType t)

@@ -33,6 +33,7 @@ import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
@@ -60,6 +61,7 @@ import com.io7m.renderer.kernel.types.KMaterialNormalVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
+import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KTranslucentRegularLit;
 import com.io7m.renderer.kernel.types.KTranslucentSpecularOnlyLit;
 import com.io7m.renderer.kernel.types.KTranslucentType;
@@ -320,11 +322,10 @@ import com.io7m.renderer.types.RExceptionJCGL;
       RException
   {
     if (light.lightHasShadow()) {
-      KRendererCommon.putShadow(
-        shadow_context,
-        texture_unit_ctx,
-        program,
-        light);
+      final Some<KShadowType> shadow =
+        (Some<KShadowType>) light.lightGetShadow();
+      final KShadowMapUsableType map = shadow_context.getShadowMap(light);
+      KRendererCommon.putShadow(texture_unit_ctx, program, shadow.get(), map);
     }
 
     KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
@@ -893,7 +894,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
         gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
       }
 
-      final KProgram kprogram = this.shader_lit_cache.cacheGetLU(shader_code);
+      final KProgramType kprogram = this.shader_lit_cache.cacheGetLU(shader_code);
 
       kprogram.getExecutable().execRun(
         new JCBExecutorProcedureType<RException>() {
@@ -940,7 +941,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       BlendFunction.BLEND_ONE,
       BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
 
-    final KProgram kprogram = this.shader_unlit_cache.cacheGetLU(shader_code);
+    final KProgramType kprogram = this.shader_unlit_cache.cacheGetLU(shader_code);
 
     kprogram.getExecutable().execRun(
       new JCBExecutorProcedureType<RException>() {
@@ -1021,7 +1022,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
           unit_allocator.getUnitCount());
       }
 
-      final KProgram kprogram = this.shader_lit_cache.cacheGetLU(shader_code);
+      final KProgramType kprogram = this.shader_lit_cache.cacheGetLU(shader_code);
 
       kprogram.getExecutable().execRun(
         new JCBExecutorProcedureType<RException>() {

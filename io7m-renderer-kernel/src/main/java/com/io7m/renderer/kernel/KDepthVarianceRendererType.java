@@ -19,6 +19,7 @@ package com.io7m.renderer.kernel;
 import java.util.List;
 import java.util.Map;
 
+import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
@@ -34,8 +35,10 @@ import com.io7m.renderer.types.RTransformViewType;
 public interface KDepthVarianceRendererType extends KRendererType
 {
   /**
-   * Evaluate the given batches with the current depth renderer.
-   * 
+   * Bind the given framebuffer and then call
+   * {@link #rendererEvaluateDepthVarianceWithBoundFramebuffer(RMatrixI4x4F, KProjectionType, Map, AreaInclusive, OptionType)}
+   * , unbinding the framebuffer after use.
+   *
    * @param view
    *          The current view matrix
    * @param projection
@@ -47,7 +50,7 @@ public interface KDepthVarianceRendererType extends KRendererType
    * @param faces
    *          The face selection override (to force all instances to render
    *          using front faces, back faces, or both, if specified)
-   * 
+   *
    * @throws RException
    *           If an error occurs during rendering
    */
@@ -57,6 +60,38 @@ public interface KDepthVarianceRendererType extends KRendererType
     final KProjectionType projection,
     final Map<String, List<KInstanceOpaqueType>> batches,
     final KFramebufferDepthVarianceUsableType framebuffer,
+    final OptionType<KFaceSelection> faces)
+    throws RException;
+
+  /**
+   * <p>
+   * Evaluate the given batches with the renderer, assuming a depth-variance
+   * framebuffer is currently bound.
+   * </p>
+   * <p>
+   * The framebuffer will <i>not</i> be cleared prior to use.
+   * </p>
+   *
+   * @param view
+   *          The current view matrix
+   * @param projection
+   *          The current projection
+   * @param batches
+   *          The batches
+   * @param framebuffer_area
+   *          The inclusive area of the bound framebuffer
+   * @param faces
+   *          The face selection override (to force all instances to render
+   *          using front faces, back faces, or both, if specified)
+   * @throws RException
+   *           If an error occurs during rendering
+   */
+
+  void rendererEvaluateDepthVarianceWithBoundFramebuffer(
+    final RMatrixI4x4F<RTransformViewType> view,
+    final KProjectionType projection,
+    final Map<String, List<KInstanceOpaqueType>> batches,
+    final AreaInclusive framebuffer_area,
     final OptionType<KFaceSelection> faces)
     throws RException;
 }

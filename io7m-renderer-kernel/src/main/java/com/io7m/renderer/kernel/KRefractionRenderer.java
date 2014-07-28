@@ -519,7 +519,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       JCGLException,
       JCacheException
   {
-    final KProgram kprogram = shader_cache.cacheGetLU("refraction_mask");
+    final KProgramType kprogram = shader_cache.cacheGetLU("refraction_mask");
 
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     kprogram.getExecutable().execRun(
@@ -599,7 +599,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KMaterialTranslucentRefractive material = r.getMaterial();
     final String shader_code =
       KRefractionRenderer.shaderCodeFromMaterial(material);
-    final KProgram kprogram = shader_cache.cacheGetLU(shader_code);
+    final KProgramType kprogram = shader_cache.cacheGetLU(shader_code);
 
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
     final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
@@ -718,7 +718,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final String shader_code =
       KRefractionRenderer.shaderCodeFromMaterial(material);
 
-    final KProgram kprogram = shader_cache.cacheGetLU(shader_code);
+    final KProgramType kprogram = shader_cache.cacheGetLU(shader_code);
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
     final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
 

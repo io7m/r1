@@ -26,11 +26,13 @@ import com.io7m.jcanephora.ArrayBufferType;
 import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.ArrayDescriptorBuilderType;
 import com.io7m.jcanephora.IndexBufferType;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLExceptionAttributeDuplicate;
 import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.UsageHint;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jnull.NonNull;
-import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KCamera;
@@ -63,8 +65,8 @@ import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.kernel.types.KTransformMatrix4x4;
 import com.io7m.renderer.kernel.types.KTransformType;
-import com.io7m.renderer.tests.FakeArrayBuffer;
-import com.io7m.renderer.tests.FakeIndexBuffer;
+import com.io7m.renderer.tests.RFakeGL;
+import com.io7m.renderer.tests.RFakeShaderControllers;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionMaterialMissingAlbedoTexture;
 import com.io7m.renderer.types.RExceptionMaterialMissingSpecularTexture;
@@ -84,7 +86,8 @@ import com.io7m.renderer.types.RVectorI4F;
 
 @SuppressWarnings("static-method") public final class KSceneBatchedForwardOpaqueTest
 {
-  protected static @NonNull KInstanceOpaqueType getOpaque()
+  protected static @NonNull KInstanceOpaqueType getOpaque(
+    final JCGLImplementationType g)
   {
     try {
       final RMatrixI3x3F<RTransformTextureType> uv_m =
@@ -117,19 +120,14 @@ import com.io7m.renderer.types.RVectorI4F;
       tb.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
       final ArrayDescriptor t = tb.build();
 
+      final JCGLInterfaceCommonType gc = g.getGLCommon();
       final ArrayBufferType array =
-        new FakeArrayBuffer(
-          0,
-          new RangeInclusiveL(0, 99),
-          t,
-          UsageHint.USAGE_STATIC_DRAW);
-
+        gc.arrayBufferAllocate(100, t, UsageHint.USAGE_STATIC_DRAW);
       final IndexBufferType indices =
-        new FakeIndexBuffer(
-          0,
-          new RangeInclusiveL(0, 99),
-          UsageHint.USAGE_STATIC_DRAW,
-          JCGLUnsignedType.TYPE_UNSIGNED_INT);
+        gc.indexBufferAllocateType(
+          JCGLUnsignedType.TYPE_UNSIGNED_INT,
+          100,
+          UsageHint.USAGE_STATIC_DRAW);
 
       final RVectorI3F<RSpaceObjectType> bounds_lower =
         new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f);
@@ -164,6 +162,8 @@ import com.io7m.renderer.types.RVectorI4F;
       throw new UnreachableCodeException(e);
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
+    } catch (final JCGLException e) {
+      throw new UnreachableCodeException(e);
     }
   }
 
@@ -191,16 +191,23 @@ import com.io7m.renderer.types.RVectorI4F;
   @Test public void testBatches_0()
     throws RException
   {
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+
     final KSceneBuilderWithCreateType b =
       KSceneBatchedForwardOpaqueTest.newBuilder();
 
     final KLightSphere l0 =
       KSceneBatchedForwardOpaqueTest.getSphericalLight();
 
-    final KInstanceOpaqueType o0 = KSceneBatchedForwardOpaqueTest.getOpaque();
-    final KInstanceOpaqueType o1 = KSceneBatchedForwardOpaqueTest.getOpaque();
-    final KInstanceOpaqueType o2 = KSceneBatchedForwardOpaqueTest.getOpaque();
-    final KInstanceOpaqueType o3 = KSceneBatchedForwardOpaqueTest.getOpaque();
+    final KInstanceOpaqueType o0 =
+      KSceneBatchedForwardOpaqueTest.getOpaque(g);
+    final KInstanceOpaqueType o1 =
+      KSceneBatchedForwardOpaqueTest.getOpaque(g);
+    final KInstanceOpaqueType o2 =
+      KSceneBatchedForwardOpaqueTest.getOpaque(g);
+    final KInstanceOpaqueType o3 =
+      KSceneBatchedForwardOpaqueTest.getOpaque(g);
 
     b.sceneAddOpaqueUnlit(o0);
     b.sceneAddOpaqueUnlit(o1);
@@ -249,6 +256,9 @@ import com.io7m.renderer.types.RVectorI4F;
   @Test public void testBatches_1()
     throws RException
   {
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+
     final KSceneBuilderWithCreateType b =
       KSceneBatchedForwardOpaqueTest.newBuilder();
 
@@ -259,10 +269,14 @@ import com.io7m.renderer.types.RVectorI4F;
     final KLightSphere l2 =
       KSceneBatchedForwardOpaqueTest.getSphericalLight();
 
-    final KInstanceOpaqueType o0 = KSceneBatchedForwardOpaqueTest.getOpaque();
-    final KInstanceOpaqueType o1 = KSceneBatchedForwardOpaqueTest.getOpaque();
-    final KInstanceOpaqueType o2 = KSceneBatchedForwardOpaqueTest.getOpaque();
-    final KInstanceOpaqueType o3 = KSceneBatchedForwardOpaqueTest.getOpaque();
+    final KInstanceOpaqueType o0 =
+      KSceneBatchedForwardOpaqueTest.getOpaque(g);
+    final KInstanceOpaqueType o1 =
+      KSceneBatchedForwardOpaqueTest.getOpaque(g);
+    final KInstanceOpaqueType o2 =
+      KSceneBatchedForwardOpaqueTest.getOpaque(g);
+    final KInstanceOpaqueType o3 =
+      KSceneBatchedForwardOpaqueTest.getOpaque(g);
 
     b.sceneAddOpaqueUnlit(o0);
     b.sceneAddOpaqueUnlit(o1);

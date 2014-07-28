@@ -21,6 +21,7 @@ import net.java.quickcheck.generator.support.StringGenerator;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoType;
 import com.io7m.renderer.kernel.types.KMaterialDepthType;
@@ -29,8 +30,8 @@ import com.io7m.renderer.kernel.types.KMaterialEnvironmentType;
 import com.io7m.renderer.kernel.types.KMaterialNormalType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialSpecularType;
-import com.io7m.renderer.tests.FakeTexture2DStatic;
-import com.io7m.renderer.tests.FakeTextureCubeStatic;
+import com.io7m.renderer.tests.RFakeTextures2DStatic;
+import com.io7m.renderer.tests.RFakeTexturesCubeStatic;
 import com.io7m.renderer.tests.types.RMatrixI3x3FGenerator;
 import com.io7m.renderer.tests.types.RVectorI3FGenerator;
 import com.io7m.renderer.tests.types.RVectorI4FGenerator;
@@ -53,14 +54,15 @@ public final class KMaterialOpaqueRegularGenerator implements
   private final Generator<KMaterialNormalType>                 normal_gen;
   private final Generator<KMaterialSpecularType>               specular_gen;
 
-  public KMaterialOpaqueRegularGenerator()
+  public KMaterialOpaqueRegularGenerator(
+    final JCGLImplementationType g)
   {
     final Generator<Texture2DStaticUsableType> in_tex_gen =
-      FakeTexture2DStatic.generator(new StringGenerator());
+      RFakeTextures2DStatic.generator(g, new StringGenerator());
     final Generator<RVectorI4F<RSpaceRGBAType>> in_vec_gen =
       new RVectorI4FGenerator<RSpaceRGBAType>();
     final Generator<TextureCubeStaticUsableType> in_tex_cube_gen =
-      FakeTextureCubeStatic.generator(new StringGenerator());
+      RFakeTexturesCubeStatic.generator(g, new StringGenerator());
     final Generator<RVectorI3F<RSpaceRGBType>> in_vec3_gen =
       new RVectorI3FGenerator<RSpaceRGBType>();
 

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.jcache.PCacheType;
+import com.io7m.jcache.BLUCacheType;
 import com.io7m.renderer.kernel.types.KShadowMapDescriptionType;
 import com.io7m.renderer.types.RException;
 
@@ -25,7 +25,7 @@ import com.io7m.renderer.types.RException;
  */
 
 public interface KShadowMapCacheType extends
-  PCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException>
+  BLUCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException>
 {
   // No extra functions
 }

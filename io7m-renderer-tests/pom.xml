@@ -134,6 +134,11 @@
       <version>${com.io7m.jcanephora.versionRange}</version>
     </dependency>
     <dependency>
+      <groupId>com.io7m.jcanephora</groupId>
+      <artifactId>io7m-jcanephora-fake</artifactId>
+      <version>${com.io7m.jcanephora.versionRange}</version>
+    </dependency>
+    <dependency>
       <groupId>com.io7m.xom</groupId>
       <artifactId>xom</artifactId>
       <version>${com.io7m.xom.versionRange}</version>

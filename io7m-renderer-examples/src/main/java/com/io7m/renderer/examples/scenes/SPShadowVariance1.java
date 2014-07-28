@@ -43,7 +43,6 @@ import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
-import com.io7m.renderer.kernel.types.KMaterialDepthAlpha;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.renderer.kernel.types.KProjectionFrustum;
@@ -53,23 +52,19 @@ import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RMatrixI3x3F;
-import com.io7m.renderer.types.RMatrixM3x3F;
 import com.io7m.renderer.types.RMatrixM4x4F;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RTransformProjectionType;
-import com.io7m.renderer.types.RTransformTextureType;
 import com.io7m.renderer.types.RVectorI3F;
 
 /**
- * An example with projective variance shadow-mapped lighting and
- * depth-to-alpha material.
+ * An example with projective lighting and variance shadow mapping, where all
+ * lights have shadow casters assigned.
  */
 
 public final class SPShadowVariance1 implements ExampleSceneType
 {
   private final RMatrixM4x4F<RTransformProjectionType> projection;
-  private final RMatrixM3x3F<RTransformTextureType>    uv;
 
   /**
    * Construct the example.
@@ -78,10 +73,6 @@ public final class SPShadowVariance1 implements ExampleSceneType
   public SPShadowVariance1()
   {
     this.projection = new RMatrixM4x4F<RTransformProjectionType>();
-    this.uv = new RMatrixM3x3F<RTransformTextureType>();
-    this.uv.set(0, 0, 1.0f);
-    this.uv.set(1, 1, 1.0f);
-    this.uv.set(2, 2, 1.0f);
   }
 
   @Override public String exampleGetName()
@@ -109,28 +100,24 @@ public final class SPShadowVariance1 implements ExampleSceneType
         KFaceSelection.FACE_RENDER_FRONT);
 
     final KTransformType mt =
-      KTransformOST.newTransform(
-        QuaternionI4F.makeFromAxisAngle(
-          ExampleSceneUtilities.X_AXIS,
-          Math.toRadians(60.0f)),
-        new VectorI3F(0.5f, 0.5f, 0.5f),
-        new RVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 2.0f));
+      KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
+        1.0f,
+        1.0f,
+        1.0f), new RVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 1.0f));
+
+    final Texture2DStaticUsableType t = scene.texture("monkey_albedo.png");
 
     final KMaterialOpaqueRegularBuilderType mmb =
       KMaterialOpaqueRegular
         .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
-    final RMatrixI3x3F<RTransformTextureType> iuv =
-      RMatrixI3x3F.newFromReadable(this.uv);
-    mmb.setUVMatrix(iuv);
-    mmb.setDepth(KMaterialDepthAlpha.alpha(0.5f));
     mmb.setAlbedo(KMaterialAlbedoTextured.textured(
-      ExampleSceneUtilities.RGBA_NOTHING,
+      ExampleSceneUtilities.RGBA_WHITE,
       1.0f,
-      scene.texture("metalgrid_albedo.png")));
+      t));
 
     final KInstanceOpaqueRegular m =
       KInstanceOpaqueRegular.newInstance(
-        scene.mesh("plane2x2.rmx"),
+        scene.mesh("monkey-low.rmxz"),
         mmb.build(),
         mt,
         ExampleSceneUtilities.IDENTITY_UV,
@@ -148,6 +135,8 @@ public final class SPShadowVariance1 implements ExampleSceneType
     }
 
     final KLightProjective kp0;
+    final KLightProjective kp1;
+    final KLightProjective kp2;
 
     {
       final Texture2DStaticUsableType tp =
@@ -179,7 +168,7 @@ public final class SPShadowVariance1 implements ExampleSceneType
           KDepthPrecision.DEPTH_PRECISION_24,
           KDepthVariancePrecision.DEPTH_VARIANCE_PRECISION_32F);
       final KShadowMapVarianceDescription kvd =
-        KShadowMapVarianceDescription.newDescription(kfdvd, 9);
+        KShadowMapVarianceDescription.newDescription(kfdvd, 8);
       b.setShadow(KShadowMappedVariance.newMappedVariance(
         0.0f,
         0.0001f,
@@ -187,7 +176,7 @@ public final class SPShadowVariance1 implements ExampleSceneType
         bp.build(),
         kvd));
 
-      b.setColor(ExampleSceneUtilities.RGB_WHITE);
+      b.setColor(ExampleSceneUtilities.RGB_RED);
       b.setRange(8.0f);
 
       b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 3.0f, 3.0f));
@@ -201,13 +190,57 @@ public final class SPShadowVariance1 implements ExampleSceneType
       }
 
       kp0 = b.build(scene.capabilities());
+
+      b.setColor(ExampleSceneUtilities.RGB_YELLOW);
+      b.setPosition(new RVectorI3F<RSpaceWorldType>(-3.0f, 3.0f, 0.0f));
+
+      {
+        final QuaternionI4F ox =
+          QuaternionI4F.makeFromAxisAngle(
+            ExampleSceneUtilities.X_AXIS,
+            Math.toRadians(-45.0f));
+        final QuaternionI4F oy =
+          QuaternionI4F.makeFromAxisAngle(
+            ExampleSceneUtilities.Y_AXIS,
+            Math.toRadians(-90.0f));
+
+        final QuaternionI4F o = QuaternionI4F.multiply(oy, ox);
+
+        b.setOrientation(o);
+      }
+
+      kp1 = b.build(scene.capabilities());
+
+      b.setColor(ExampleSceneUtilities.RGB_BLUE);
+      b.setPosition(new RVectorI3F<RSpaceWorldType>(3.0f, 3.0f, 0.0f));
+
+      {
+        final QuaternionI4F ox =
+          QuaternionI4F.makeFromAxisAngle(
+            ExampleSceneUtilities.X_AXIS,
+            Math.toRadians(-45.0f));
+        final QuaternionI4F oy =
+          QuaternionI4F.makeFromAxisAngle(
+            ExampleSceneUtilities.Y_AXIS,
+            Math.toRadians(90.0f));
+
+        final QuaternionI4F o = QuaternionI4F.multiply(oy, ox);
+
+        b.setOrientation(o);
+      }
+
+      kp2 = b.build(scene.capabilities());
     }
 
     scene.sceneAddShadowCaster(kp0, m);
+    scene.sceneAddShadowCaster(kp1, m);
+    scene.sceneAddShadowCaster(kp2, m);
 
     final KSceneLightGroupBuilderType gb = scene.sceneNewLightGroup("g");
     gb.groupAddLight(ks);
     gb.groupAddLight(kp0);
+    gb.groupAddLight(kp1);
+    gb.groupAddLight(kp2);
     gb.groupAddInstance(floor);
     gb.groupAddInstance(m);
   }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,9 +22,11 @@ import com.io7m.jcanephora.ArrayAttributeDescriptor;
 import com.io7m.jcanephora.ArrayBufferType;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.ArrayDescriptor;
+import com.io7m.jcanephora.ArrayDescriptorBuilderType;
 import com.io7m.jcanephora.IndexBufferType;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLExceptionAttributeDuplicate;
 import com.io7m.jcanephora.JCGLResourceSizedType;
 import com.io7m.jcanephora.JCGLResourceUsableType;
 import com.io7m.jcanephora.api.JCGLArrayBuffersType;
@@ -32,6 +34,7 @@ import com.io7m.jcanephora.api.JCGLIndexBuffersType;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RExceptionMeshMissingNormals;
 import com.io7m.renderer.types.RExceptionMeshMissingPositions;
 import com.io7m.renderer.types.RExceptionMeshMissingTangents;
@@ -64,6 +67,25 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   JCGLResourceUsableType,
   JCGLResourceSizedType
 {
+  /**
+   * @return The standard array descriptor type for meshes.
+   */
+
+  public static ArrayDescriptor getStandardDescriptor()
+  {
+    try {
+      final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_NORMAL);
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
+      final ArrayDescriptor type = b.build();
+      return type;
+    } catch (final JCGLExceptionAttributeDuplicate e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
+
   private static boolean hasNormals(
     final Map<String, ArrayAttributeDescriptor> as)
   {
@@ -110,7 +132,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
   /**
    * Construct a new mesh.
-   * 
+   *
    * @param in_array
    *          The array buffer of vertex data
    * @param in_indices
@@ -183,7 +205,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
   /**
    * Delete the mesh.
-   * 
+   *
    * @param <G>
    *          The OpenGL capabilities required
    * @param gc
