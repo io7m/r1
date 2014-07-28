@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -644,7 +644,7 @@ import com.io7m.renderer.types.RVectorI4F;
       JCGLExceptionNoStencilBuffer,
       JCGLException
   {
-    final KProgram kp = this.shader_debug_cache.cacheGetLU("show_ccolor");
+    final KProgramType kp = this.shader_debug_cache.cacheGetLU("show_ccolor");
     final JCBExecutorType exec = kp.getExecutable();
 
     gc.stencilBufferDisable();
@@ -714,7 +714,7 @@ import com.io7m.renderer.types.RVectorI4F;
       JCGLException,
       JCGLExceptionNoStencilBuffer
   {
-    final KProgram kp = this.shader_debug_cache.cacheGetLU("show_ccolor");
+    final KProgramType kp = this.shader_debug_cache.cacheGetLU("show_ccolor");
     gc.stencilBufferDisable();
 
     final KUnitSphereUsableType s =
@@ -861,7 +861,7 @@ import com.io7m.renderer.types.RVectorI4F;
 
     KRendererDeferredOpaque.configureStencilGeometryGroupClearing(gc);
 
-    final KProgram kp = this.shader_light_cache.cacheGetLU("flat_clip");
+    final KProgramType kp = this.shader_light_cache.cacheGetLU("flat_clip");
     final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
     final ArrayBufferUsableType array = q.getArray();
     final IndexBufferUsableType index = q.getIndices();
@@ -923,7 +923,7 @@ import com.io7m.renderer.types.RVectorI4F;
           by_material.get(shader_code);
         assert instances != null;
 
-        final KProgram kprogram =
+        final KProgramType kprogram =
           this.shader_geo_cache.cacheGetLU(shader_code);
 
         kprogram.getExecutable().execRun(
@@ -1094,7 +1094,7 @@ import com.io7m.renderer.types.RVectorI4F;
     gc.depthBufferWriteDisable();
     gc.depthBufferTestDisable();
 
-    final KProgram kp = this.shader_light_cache.cacheGetLU(ld.lightGetCode());
+    final KProgramType kp = this.shader_light_cache.cacheGetLU(ld.lightGetCode());
     final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
     final ArrayBufferUsableType array = q.getArray();
     final IndexBufferUsableType index = q.getIndices();
@@ -1186,7 +1186,7 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     KRendererDeferredOpaque.configureRenderStateForLightPass(gc);
 
-    final KProgram kp = this.shader_light_cache.cacheGetLU(lp.lightGetCode());
+    final KProgramType kp = this.shader_light_cache.cacheGetLU(lp.lightGetCode());
     final JCBExecutorType exec = kp.getExecutable();
 
     final KFrustumMeshUsableType s =
@@ -1235,11 +1235,11 @@ import com.io7m.renderer.types.RVectorI4F;
                 program,
                 mdp.getMatrixDeferredProjection());
 
-              KShadingProgramCommon.putShadow(
+              KRendererCommon.putShadow(
                 shadow_map_context,
                 texture_unit_context,
                 program,
-                lp.lightGetShadow());
+                lp);
 
               KShadingProgramCommon.putTextureProjection(
                 program,
@@ -1278,7 +1278,7 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     KRendererDeferredOpaque.configureRenderStateForLightPre(gc);
 
-    final KProgram kp = this.shader_light_cache.cacheGetLU("empty");
+    final KProgramType kp = this.shader_light_cache.cacheGetLU("empty");
     final JCBExecutorType exec = kp.getExecutable();
 
     final KFrustumMeshUsableType s =
@@ -1451,7 +1451,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final ArrayBufferUsableType array = s.getArray();
     final IndexBufferUsableType index = s.getIndices();
 
-    final KProgram kp = this.shader_light_cache.cacheGetLU(ls.lightGetCode());
+    final KProgramType kp = this.shader_light_cache.cacheGetLU(ls.lightGetCode());
     final JCBExecutorType exec = kp.getExecutable();
 
     exec.execRun(new JCBExecutorProcedureType<RException>() {
@@ -1505,7 +1505,7 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     KRendererDeferredOpaque.configureRenderStateForLightPre(gc);
 
-    final KProgram kp = this.shader_light_cache.cacheGetLU("empty");
+    final KProgramType kp = this.shader_light_cache.cacheGetLU("empty");
 
     final KUnitSphereUsableType s =
       this.sphere_cache.cacheGetLU(KUnitSpherePrecision.KUNIT_SPHERE_16);
@@ -1569,7 +1569,7 @@ import com.io7m.renderer.types.RVectorI4F;
       0xffffffff);
     gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0);
 
-    final KProgram kp = this.shader_light_cache.cacheGetLU("copy_rgba");
+    final KProgramType kp = this.shader_light_cache.cacheGetLU("copy_rgba");
     final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
     final ArrayBufferUsableType array = q.getArray();
     final IndexBufferUsableType index = q.getIndices();
@@ -1631,7 +1631,7 @@ import com.io7m.renderer.types.RVectorI4F;
         final Set<KInstanceOpaqueType> batch = instances.get(code);
         assert batch != null;
 
-        final KProgram kprogram = this.shader_geo_cache.cacheGetLU(code);
+        final KProgramType kprogram = this.shader_geo_cache.cacheGetLU(code);
         kprogram.getExecutable().execRun(
           new JCBExecutorProcedureType<RException>() {
             @Override public void call(

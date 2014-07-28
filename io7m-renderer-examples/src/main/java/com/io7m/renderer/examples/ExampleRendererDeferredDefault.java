@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,8 +20,6 @@ import java.math.BigInteger;
 
 import com.io7m.jcache.BLUCacheConfig;
 import com.io7m.jcache.LRUCacheConfig;
-import com.io7m.jcache.PCacheConfig;
-import com.io7m.jcache.PCacheConfig.BuilderType;
 import com.io7m.jcanephora.ArrayBufferUpdateUnmapped;
 import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
 import com.io7m.jcanephora.JCGLException;
@@ -195,15 +193,15 @@ public final class ExampleRendererDeferredDefault extends
         quad_cache,
         log);
 
-    final BuilderType shadow_cache_config_builder = PCacheConfig.newBuilder();
-    shadow_cache_config_builder.setMaximumAge(BigInteger.valueOf(60));
-    shadow_cache_config_builder.setNoMaximumSize();
+    final BLUCacheConfig shadow_cache_config =
+      BLUCacheConfig
+        .empty()
+        .withMaximumBorrowsPerKey(BigInteger.valueOf(256))
+        .withMaximumCapacity(BigInteger.valueOf(1024 * 1024 * 8 * 128));
 
     final KShadowMapCacheType shadow_cache =
-      KShadowMapCache.newCacheWithConfig(
-        gi,
-        shadow_cache_config_builder.create(),
-        log);
+      KShadowMapCache.newCacheWithConfig(gi, shadow_cache_config, log);
+
     final KShadowMapRendererType shadow_renderer =
       KShadowMapRenderer.newRenderer(
         gi,

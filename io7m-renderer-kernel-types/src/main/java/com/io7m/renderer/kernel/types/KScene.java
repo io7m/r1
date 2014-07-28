@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -316,9 +316,40 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
       final List<KTranslucentType> in_translucents =
         this.state.translucents_ordered;
 
-      final Map<KLightType, Set<KInstanceOpaqueType>> in_instances_shadow =
+      /**
+       * If a light with a shadow has been added, but the light doesn't
+       * actually have any shadow casters, then add an empty set of instances
+       * (because the light still needs to have its shadow map initialized
+       * each frame, and the shadow map renderer works only with the shadow
+       * instances map).
+       */
+
+      for (final KLightType l : this.state.lights_shadow) {
+        if (l.lightHasShadow()) {
+          final HashPMap<KLightType, MapPSet<KInstanceOpaqueType>> is =
+            this.state.instances_shadow;
+
+          if (is.containsKey(l) == false) {
+            final BuilderState previous = this.state;
+            final MapPSet<KInstanceOpaqueType> none = HashTreePSet.empty();
+            this.state =
+              new BuilderState(
+                previous.instances_shadow.plus(l, none),
+                previous.instances_all,
+                previous.instances_opaque_lit,
+                previous.instances_opaque_unlit,
+                previous.lights_all,
+                previous.lights_shadow,
+                previous.translucents_ordered,
+                previous.instances_visible,
+                previous.light_group_builders);
+          }
+        }
+      }
+
+      final Map<KLightType, Set<KInstanceOpaqueType>> instances_shadow =
         (Map<KLightType, Set<KInstanceOpaqueType>>) ((Object) this.state.instances_shadow);
-      final KSceneShadows in_shadows = new KSceneShadows(in_instances_shadow);
+      final KSceneShadows in_shadows = new KSceneShadows(instances_shadow);
 
       HashPMap<String, KSceneLightGroup> gs = HashTreePMap.empty();
       for (final String name : this.state.light_group_builders.keySet()) {
@@ -596,7 +627,7 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
   /**
    * Retrieve a new {@link KSceneBuilderWithCreateType} with which to
    * construct a scene, rendered from the perspective of <code>camera</code>.
-   * 
+   *
    * @param camera
    *          The observer of the scene
    * @return A new scene builder

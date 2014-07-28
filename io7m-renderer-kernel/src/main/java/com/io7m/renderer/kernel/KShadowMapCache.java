@@ -16,11 +16,11 @@
 
 package com.io7m.renderer.kernel;
 
+import com.io7m.jcache.BLUCacheAbstract;
+import com.io7m.jcache.BLUCacheConfig;
+import com.io7m.jcache.BLUCacheTrivial;
+import com.io7m.jcache.BLUCacheType;
 import com.io7m.jcache.JCacheLoaderType;
-import com.io7m.jcache.PCacheAbstract;
-import com.io7m.jcache.PCacheConfig;
-import com.io7m.jcache.PCacheTrivial;
-import com.io7m.jcache.PCacheType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
@@ -33,7 +33,7 @@ import com.io7m.renderer.types.RException;
  */
 
 @EqualityReference public final class KShadowMapCache extends
-  PCacheAbstract<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> implements
+  BLUCacheAbstract<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> implements
   KShadowMapCacheType
 {
 
@@ -48,13 +48,13 @@ import com.io7m.renderer.types.RException;
   public static
     KShadowMapCacheType
     wrap(
-      final PCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> c)
+      final BLUCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> c)
   {
     return new KShadowMapCache(c);
   }
 
   private KShadowMapCache(
-    final PCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> in_cache)
+    final BLUCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> in_cache)
   {
     super(in_cache);
   }
@@ -73,7 +73,7 @@ import com.io7m.renderer.types.RException;
 
   public static KShadowMapCacheType newCacheWithConfig(
     final JCGLImplementationType gi,
-    final PCacheConfig config,
+    final BLUCacheConfig config,
     final LogUsableType log)
   {
     NullCheck.notNull(gi, "OpenGL implementation");
@@ -82,8 +82,8 @@ import com.io7m.renderer.types.RException;
 
     final JCacheLoaderType<KShadowMapDescriptionType, KShadowMapType, RException> loader =
       KShadowMapCacheLoader.newLoader(gi, log);
-    final PCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> c =
-      PCacheTrivial.newCache(loader, config);
+    final BLUCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> c =
+      BLUCacheTrivial.newCache(loader, config);
 
     return new KShadowMapCache(c);
   }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,7 +16,6 @@
 
 package com.io7m.renderer.tests.kernel;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,15 +29,19 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.TextureCubeStaticType;
 import com.io7m.jcanephora.TextureUnitType;
-import com.io7m.jnull.NonNull;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.KTextureUnitAllocator;
 import com.io7m.renderer.kernel.KTextureUnitContextInitialType;
 import com.io7m.renderer.kernel.KTextureUnitContextType;
 import com.io7m.renderer.kernel.KTextureUnitWithType;
-import com.io7m.renderer.tests.FakeTexture2DStatic;
-import com.io7m.renderer.tests.FakeTextureCubeStatic;
-import com.io7m.renderer.tests.FakeTextureUnit;
+import com.io7m.renderer.shaders.core.FakeTexture2DStatic;
+import com.io7m.renderer.shaders.core.FakeTextureCubeStatic;
+import com.io7m.renderer.tests.RFakeGL;
+import com.io7m.renderer.tests.RFakeShaderControllers;
+import com.io7m.renderer.tests.RFakeTextures2DStatic;
+import com.io7m.renderer.tests.RFakeTexturesCubeStatic;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionResource;
 import com.io7m.renderer.types.RExceptionUnitAllocatorActive;
@@ -46,51 +49,40 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
 
 @SuppressWarnings("static-method") public final class KTextureUnitAllocatorTest
 {
-  private static @NonNull List<TextureUnitType> makeUnits(
-    final int i)
-  {
-    final List<TextureUnitType> u = new ArrayList<TextureUnitType>(i);
-    for (int k = 0; k < i; ++k) {
-      u.add(FakeTextureUnit.newUnit(k));
-    }
-    return u;
-  }
-
   @Test public void testInit()
     throws JCGLException
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
     Assert.assertTrue(a.hasEnoughUnits(units.size() - 1));
   }
 
   @Test public void testBindings_0()
     throws Exception
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
-    Assert.assertFalse(g.isBound(0));
-    Assert.assertFalse(g.isBound(1));
-    Assert.assertFalse(g.isBound(2));
-    Assert.assertFalse(g.isBound(3));
-    Assert.assertFalse(g.isBound(4));
-    Assert.assertFalse(g.isBound(5));
-    Assert.assertFalse(g.isBound(6));
-    Assert.assertFalse(g.isBound(7));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(0)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(1)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(2)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(3)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(4)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(5)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
 
-    final Texture2DStaticType t0 =
-      FakeTexture2DStatic.getDefaultWithName("t0");
-    final Texture2DStaticType t1 =
-      FakeTexture2DStatic.getDefaultWithName("t1");
-    final Texture2DStaticType t2 =
-      FakeTexture2DStatic.getDefaultWithName("t2");
-    final Texture2DStaticType t3 =
-      FakeTexture2DStatic.getDefaultWithName("t3");
+    final Texture2DStaticType t0 = RFakeTextures2DStatic.newWithName(g, "t0");
+    final Texture2DStaticType t1 = RFakeTextures2DStatic.newWithName(g, "t1");
+    final Texture2DStaticType t2 = RFakeTextures2DStatic.newWithName(g, "t2");
+    final Texture2DStaticType t3 = RFakeTextures2DStatic.newWithName(g, "t3");
 
     a.withContext(new KTextureUnitWithType() {
       @Override public void run(
@@ -103,52 +95,49 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
         c0.withTexture2D(t2);
         c0.withTexture2D(t3);
 
-        Assert.assertTrue(g.isBound(0));
-        Assert.assertTrue(g.isBound(1));
-        Assert.assertTrue(g.isBound(2));
-        Assert.assertTrue(g.isBound(3));
-        Assert.assertFalse(g.isBound(4));
-        Assert.assertFalse(g.isBound(5));
-        Assert.assertFalse(g.isBound(6));
-        Assert.assertFalse(g.isBound(7));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(0)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(1)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(2)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(3)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(4)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(5)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
       }
     });
 
-    Assert.assertFalse(g.isBound(0));
-    Assert.assertFalse(g.isBound(1));
-    Assert.assertFalse(g.isBound(2));
-    Assert.assertFalse(g.isBound(3));
-    Assert.assertFalse(g.isBound(4));
-    Assert.assertFalse(g.isBound(5));
-    Assert.assertFalse(g.isBound(6));
-    Assert.assertFalse(g.isBound(7));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(0)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(1)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(2)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(3)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(4)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(5)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
   }
 
   @Test public void testBindings_1()
     throws Exception
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
-    Assert.assertFalse(g.isBound(0));
-    Assert.assertFalse(g.isBound(1));
-    Assert.assertFalse(g.isBound(2));
-    Assert.assertFalse(g.isBound(3));
-    Assert.assertFalse(g.isBound(4));
-    Assert.assertFalse(g.isBound(5));
-    Assert.assertFalse(g.isBound(6));
-    Assert.assertFalse(g.isBound(7));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(0)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(1)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(2)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(3)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(4)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(5)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
 
-    final Texture2DStaticType t0 =
-      FakeTexture2DStatic.getDefaultWithName("t0");
-    final Texture2DStaticType t1 =
-      FakeTexture2DStatic.getDefaultWithName("t1");
-    final Texture2DStaticType t2 =
-      FakeTexture2DStatic.getDefaultWithName("t2");
-    final Texture2DStaticType t3 =
-      FakeTexture2DStatic.getDefaultWithName("t3");
+    final Texture2DStaticType t0 = RFakeTextures2DStatic.newWithName(g, "t0");
+    final Texture2DStaticType t1 = RFakeTextures2DStatic.newWithName(g, "t1");
+    final Texture2DStaticType t2 = RFakeTextures2DStatic.newWithName(g, "t2");
+    final Texture2DStaticType t3 = RFakeTextures2DStatic.newWithName(g, "t3");
 
     a.withContext(new KTextureUnitWithType() {
       @Override public void run(
@@ -161,14 +150,14 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
         c0.withTexture2D(t2);
         c0.withTexture2D(t3);
 
-        Assert.assertTrue(g.isBound(0));
-        Assert.assertTrue(g.isBound(1));
-        Assert.assertTrue(g.isBound(2));
-        Assert.assertTrue(g.isBound(3));
-        Assert.assertFalse(g.isBound(4));
-        Assert.assertFalse(g.isBound(5));
-        Assert.assertFalse(g.isBound(6));
-        Assert.assertFalse(g.isBound(7));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(0)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(1)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(2)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(3)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(4)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(5)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
 
         c0.withContext(new KTextureUnitWithType() {
           @Override public void run(
@@ -181,61 +170,59 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
             c1.withTexture2D(t2);
             c1.withTexture2D(t3);
 
-            Assert.assertTrue(g.isBound(0));
-            Assert.assertTrue(g.isBound(1));
-            Assert.assertTrue(g.isBound(2));
-            Assert.assertTrue(g.isBound(3));
-            Assert.assertTrue(g.isBound(4));
-            Assert.assertTrue(g.isBound(5));
-            Assert.assertTrue(g.isBound(6));
-            Assert.assertTrue(g.isBound(7));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(0)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(1)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(2)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(3)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(4)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(5)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(6)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(7)));
           }
         });
 
-        Assert.assertTrue(g.isBound(0));
-        Assert.assertTrue(g.isBound(1));
-        Assert.assertTrue(g.isBound(2));
-        Assert.assertTrue(g.isBound(3));
-        Assert.assertFalse(g.isBound(4));
-        Assert.assertFalse(g.isBound(5));
-        Assert.assertFalse(g.isBound(6));
-        Assert.assertFalse(g.isBound(7));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(0)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(1)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(2)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(3)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(4)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(5)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
       }
     });
 
-    Assert.assertFalse(g.isBound(0));
-    Assert.assertFalse(g.isBound(1));
-    Assert.assertFalse(g.isBound(2));
-    Assert.assertFalse(g.isBound(3));
-    Assert.assertFalse(g.isBound(4));
-    Assert.assertFalse(g.isBound(5));
-    Assert.assertFalse(g.isBound(6));
-    Assert.assertFalse(g.isBound(7));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(0)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(1)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(2)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(3)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(4)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(5)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
   }
 
   @Test public void testBindings_2()
     throws Exception
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
-    Assert.assertFalse(g.isBound(0));
-    Assert.assertFalse(g.isBound(1));
-    Assert.assertFalse(g.isBound(2));
-    Assert.assertFalse(g.isBound(3));
-    Assert.assertFalse(g.isBound(4));
-    Assert.assertFalse(g.isBound(5));
-    Assert.assertFalse(g.isBound(6));
-    Assert.assertFalse(g.isBound(7));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(0)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(1)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(2)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(3)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(4)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(5)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
 
-    final Texture2DStaticType t0 =
-      FakeTexture2DStatic.getDefaultWithName("t0");
-    final Texture2DStaticType t1 =
-      FakeTexture2DStatic.getDefaultWithName("t1");
-    final Texture2DStaticType t2 =
-      FakeTexture2DStatic.getDefaultWithName("t2");
+    final Texture2DStaticType t0 = RFakeTextures2DStatic.newWithName(g, "t0");
+    final Texture2DStaticType t1 = RFakeTextures2DStatic.newWithName(g, "t1");
+    final Texture2DStaticType t2 = RFakeTextures2DStatic.newWithName(g, "t2");
 
     a.withContext(new KTextureUnitWithType() {
       @Override public void run(
@@ -247,14 +234,14 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
         c0.withTexture2D(t1);
         c0.withTexture2D(t2);
 
-        Assert.assertTrue(g.isBound(0));
-        Assert.assertTrue(g.isBound(1));
-        Assert.assertTrue(g.isBound(2));
-        Assert.assertFalse(g.isBound(3));
-        Assert.assertFalse(g.isBound(4));
-        Assert.assertFalse(g.isBound(5));
-        Assert.assertFalse(g.isBound(6));
-        Assert.assertFalse(g.isBound(7));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(0)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(1)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(2)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(3)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(4)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(5)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
 
         c0.withContext(new KTextureUnitWithType() {
           @Override public void run(
@@ -266,14 +253,14 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
             c1.withTexture2D(t1);
             c1.withTexture2D(t2);
 
-            Assert.assertTrue(g.isBound(0));
-            Assert.assertTrue(g.isBound(1));
-            Assert.assertTrue(g.isBound(2));
-            Assert.assertTrue(g.isBound(3));
-            Assert.assertTrue(g.isBound(4));
-            Assert.assertTrue(g.isBound(5));
-            Assert.assertFalse(g.isBound(6));
-            Assert.assertFalse(g.isBound(7));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(0)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(1)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(2)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(3)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(4)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(5)));
+            Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+            Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
 
             c1.withContext(new KTextureUnitWithType() {
               @Override public void run(
@@ -284,57 +271,58 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
                 c2.withTexture2D(t0);
                 c2.withTexture2D(t1);
 
-                Assert.assertTrue(g.isBound(0));
-                Assert.assertTrue(g.isBound(1));
-                Assert.assertTrue(g.isBound(2));
-                Assert.assertTrue(g.isBound(3));
-                Assert.assertTrue(g.isBound(4));
-                Assert.assertTrue(g.isBound(5));
-                Assert.assertTrue(g.isBound(6));
-                Assert.assertTrue(g.isBound(7));
+                Assert.assertTrue(gc.textureUnitIsBound(units.get(0)));
+                Assert.assertTrue(gc.textureUnitIsBound(units.get(1)));
+                Assert.assertTrue(gc.textureUnitIsBound(units.get(2)));
+                Assert.assertTrue(gc.textureUnitIsBound(units.get(3)));
+                Assert.assertTrue(gc.textureUnitIsBound(units.get(4)));
+                Assert.assertTrue(gc.textureUnitIsBound(units.get(5)));
+                Assert.assertTrue(gc.textureUnitIsBound(units.get(6)));
+                Assert.assertTrue(gc.textureUnitIsBound(units.get(7)));
               }
             });
 
-            Assert.assertTrue(g.isBound(0));
-            Assert.assertTrue(g.isBound(1));
-            Assert.assertTrue(g.isBound(2));
-            Assert.assertTrue(g.isBound(3));
-            Assert.assertTrue(g.isBound(4));
-            Assert.assertTrue(g.isBound(5));
-            Assert.assertFalse(g.isBound(6));
-            Assert.assertFalse(g.isBound(7));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(0)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(1)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(2)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(3)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(4)));
+            Assert.assertTrue(gc.textureUnitIsBound(units.get(5)));
+            Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+            Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
           }
         });
 
-        Assert.assertTrue(g.isBound(0));
-        Assert.assertTrue(g.isBound(1));
-        Assert.assertTrue(g.isBound(2));
-        Assert.assertFalse(g.isBound(3));
-        Assert.assertFalse(g.isBound(4));
-        Assert.assertFalse(g.isBound(5));
-        Assert.assertFalse(g.isBound(6));
-        Assert.assertFalse(g.isBound(7));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(0)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(1)));
+        Assert.assertTrue(gc.textureUnitIsBound(units.get(2)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(3)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(4)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(5)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+        Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
       }
     });
 
-    Assert.assertFalse(g.isBound(0));
-    Assert.assertFalse(g.isBound(1));
-    Assert.assertFalse(g.isBound(2));
-    Assert.assertFalse(g.isBound(3));
-    Assert.assertFalse(g.isBound(4));
-    Assert.assertFalse(g.isBound(5));
-    Assert.assertFalse(g.isBound(6));
-    Assert.assertFalse(g.isBound(7));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(0)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(1)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(2)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(3)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(4)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(5)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(6)));
+    Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
   }
 
   @Test public void testNoUseCount()
     throws JCGLException,
       RException
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
     final AtomicInteger called = new AtomicInteger(0);
 
@@ -393,13 +381,14 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
     throws JCGLException,
       RException
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
-    final AtomicInteger called = new AtomicInteger(0);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
-    final Texture2DStaticType t = FakeTexture2DStatic.getDefault();
+    final AtomicInteger called = new AtomicInteger(0);
+    final Texture2DStaticType t = RFakeTextures2DStatic.newWithName(g, "any");
 
     final AtomicReference<KTextureUnitContextInitialType> previous =
       new AtomicReference<KTextureUnitContextInitialType>(a);
@@ -428,12 +417,13 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
     throws JCGLException,
       RException
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
-    final Texture2DStaticType t = FakeTexture2DStatic.getDefault();
+    final Texture2DStaticType t = RFakeTextures2DStatic.newWithName(g, "any");
 
     final AtomicReference<KTextureUnitContextInitialType> previous =
       new AtomicReference<KTextureUnitContextInitialType>(a);
@@ -454,166 +444,15 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
     }
   }
 
-  //
-  // private static Texture2DStaticUsable makeTexture2D(
-  // final JCGLImplementation gi)
-  // throws JCGLException,
-  // ConstraintError
-  // {
-  // return gi
-  // .implementationAccept(new
-  // JCGLImplementationVisitor<Texture2DStaticUsable, JCGLException>() {
-  //
-  // @Override public Texture2DStaticUsable implementationIsGL2(
-  // final JCGLInterfaceGL2 gl)
-  // throws JCGLException,
-  // ConstraintError,
-  // JCGLException
-  // {
-  // return gl.texture2DStaticAllocateRGB8(
-  // "texture",
-  // 128,
-  // 128,
-  // TextureWrapS.TEXTURE_WRAP_REPEAT,
-  // TextureWrapT.TEXTURE_WRAP_REPEAT,
-  // TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-  // TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
-  // }
-  //
-  // @Override public Texture2DStaticUsable implementationIsGL3(
-  // final JCGLInterfaceGL3 gl)
-  // throws JCGLException,
-  // ConstraintError,
-  // JCGLException
-  // {
-  // return gl.texture2DStaticAllocateRGB8(
-  // "texture",
-  // 128,
-  // 128,
-  // TextureWrapS.TEXTURE_WRAP_REPEAT,
-  // TextureWrapT.TEXTURE_WRAP_REPEAT,
-  // TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-  // TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
-  // }
-  //
-  // @Override public Texture2DStaticUsable implementationIsGLES2(
-  // final JCGLInterfaceGLES2 gl)
-  // throws JCGLException,
-  // ConstraintError,
-  // JCGLException
-  // {
-  // return gl.texture2DStaticAllocateRGB565(
-  // "texture",
-  // 128,
-  // 128,
-  // TextureWrapS.TEXTURE_WRAP_REPEAT,
-  // TextureWrapT.TEXTURE_WRAP_REPEAT,
-  // TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-  // TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
-  // }
-  //
-  // @Override public Texture2DStaticUsable implementationIsGLES3(
-  // final JCGLInterfaceGLES3 gl)
-  // throws JCGLException,
-  // ConstraintError,
-  // JCGLException
-  // {
-  // return gl.texture2DStaticAllocateRGB8(
-  // "texture",
-  // 128,
-  // 128,
-  // TextureWrapS.TEXTURE_WRAP_REPEAT,
-  // TextureWrapT.TEXTURE_WRAP_REPEAT,
-  // TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-  // TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
-  // }
-  // });
-  // }
-  //
-  // private static TextureCubeStaticUsable makeTextureCube(
-  // final JCGLImplementation gi)
-  // throws JCGLException,
-  // ConstraintError
-  // {
-  // return gi
-  // .implementationAccept(new
-  // JCGLImplementationVisitor<TextureCubeStaticUsable, JCGLException>() {
-  //
-  // @Override public TextureCubeStaticUsable implementationIsGL2(
-  // final JCGLInterfaceGL2 gl)
-  // throws JCGLException,
-  // ConstraintError,
-  // JCGLException
-  // {
-  // return gl.textureCubeStaticAllocateRGB8(
-  // "texture",
-  // 128,
-  // TextureWrapR.TEXTURE_WRAP_REPEAT,
-  // TextureWrapS.TEXTURE_WRAP_REPEAT,
-  // TextureWrapT.TEXTURE_WRAP_REPEAT,
-  // TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-  // TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
-  // }
-  //
-  // @Override public TextureCubeStaticUsable implementationIsGL3(
-  // final JCGLInterfaceGL3 gl)
-  // throws JCGLException,
-  // ConstraintError,
-  // JCGLException
-  // {
-  // return gl.textureCubeStaticAllocateRGB8(
-  // "texture",
-  // 128,
-  // TextureWrapR.TEXTURE_WRAP_REPEAT,
-  // TextureWrapS.TEXTURE_WRAP_REPEAT,
-  // TextureWrapT.TEXTURE_WRAP_REPEAT,
-  // TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-  // TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
-  // }
-  //
-  // @Override public TextureCubeStaticUsable implementationIsGLES2(
-  // final JCGLInterfaceGLES2 gl)
-  // throws JCGLException,
-  // ConstraintError,
-  // JCGLException
-  // {
-  // return gl.textureCubeStaticAllocateRGB565(
-  // "texture",
-  // 128,
-  // TextureWrapR.TEXTURE_WRAP_REPEAT,
-  // TextureWrapS.TEXTURE_WRAP_REPEAT,
-  // TextureWrapT.TEXTURE_WRAP_REPEAT,
-  // TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-  // TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
-  // }
-  //
-  // @Override public TextureCubeStaticUsable implementationIsGLES3(
-  // final JCGLInterfaceGLES3 gl)
-  // throws JCGLException,
-  // ConstraintError,
-  // JCGLException
-  // {
-  // return gl.textureCubeStaticAllocateRGB8(
-  // "texture",
-  // 128,
-  // TextureWrapR.TEXTURE_WRAP_REPEAT,
-  // TextureWrapS.TEXTURE_WRAP_REPEAT,
-  // TextureWrapT.TEXTURE_WRAP_REPEAT,
-  // TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-  // TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
-  // }
-  // });
-  // }
-  //
-
   @Test public void testUseAll_2D_2()
     throws JCGLException,
       RException
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
     Assume.assumeTrue("8 texture units are available", units.size() == 8);
 
@@ -749,12 +588,14 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
     throws JCGLException,
       RException
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
+
     final AtomicInteger called = new AtomicInteger(0);
-    final TextureCubeStaticType t = FakeTextureCubeStatic.getDefault();
+    final TextureCubeStaticType t = RFakeTexturesCubeStatic.newAnything(g);
 
     final AtomicReference<KTextureUnitContextInitialType> previous =
       new AtomicReference<KTextureUnitContextInitialType>(a);
@@ -783,12 +624,13 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
     throws JCGLException,
       RException
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
-    final TextureCubeStaticType t = FakeTextureCubeStatic.getDefault();
+    final TextureCubeStaticType t = RFakeTexturesCubeStatic.newAnything(g);
 
     final AtomicReference<KTextureUnitContextInitialType> previous =
       new AtomicReference<KTextureUnitContextInitialType>(a);
@@ -813,10 +655,11 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
     throws JCGLException,
       RException
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
     Assume.assumeTrue("8 texture units are available", units.size() == 8);
 
@@ -954,10 +797,11 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
       throws JCGLException,
         RException
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
     a.withContext(new KTextureUnitWithType() {
       @Override public void run(
@@ -984,10 +828,11 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
       throws JCGLException,
         RException
   {
-    final List<TextureUnitType> units =
-      KTextureUnitAllocatorTest.makeUnits(8);
-    final KJCGLTextureFake g = new KJCGLTextureFake(units);
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(g);
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
     a.withContext(new KTextureUnitWithType() {
       @Override public void run(

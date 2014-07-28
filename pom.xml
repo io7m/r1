@@ -50,7 +50,7 @@
 
     <com.io7m.ieee754b16.versionRange>[1.0.0, 2.0.0)</com.io7m.ieee754b16.versionRange>
     <com.io7m.jcache.versionRange>[0.6.0, 0.7.0)</com.io7m.jcache.versionRange>
-    <com.io7m.jcanephora.versionRange>0.31.1</com.io7m.jcanephora.versionRange>
+    <com.io7m.jcanephora.versionRange>0.32.0</com.io7m.jcanephora.versionRange>
     <com.io7m.jequality.versionRange>[1.0.1, 2.0.0)</com.io7m.jequality.versionRange>
     <com.io7m.jfunctional.versionRange>[1.0.0, 2.0.0)</com.io7m.jfunctional.versionRange>
     <com.io7m.jintegers.versionRange>[1.0.0, 2.0.0)</com.io7m.jintegers.versionRange>

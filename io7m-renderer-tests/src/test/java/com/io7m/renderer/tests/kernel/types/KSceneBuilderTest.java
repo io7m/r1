@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,11 +20,13 @@ import com.io7m.jcanephora.ArrayBufferType;
 import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.ArrayDescriptorBuilderType;
 import com.io7m.jcanephora.IndexBufferType;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLExceptionAttributeDuplicate;
 import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.UsageHint;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jnull.NonNull;
-import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KCamera;
@@ -58,8 +60,6 @@ import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.kernel.types.KTransformMatrix4x4;
 import com.io7m.renderer.kernel.types.KTransformType;
-import com.io7m.renderer.tests.FakeArrayBuffer;
-import com.io7m.renderer.tests.FakeIndexBuffer;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionMaterialMissingAlbedoTexture;
 import com.io7m.renderer.types.RExceptionMaterialMissingSpecularTexture;
@@ -79,7 +79,8 @@ import com.io7m.renderer.types.RVectorI4F;
 
 public final class KSceneBuilderTest extends KSceneBuilderContract
 {
-  @Override protected @NonNull KInstanceOpaqueType getOpaque()
+  @Override protected @NonNull KInstanceOpaqueType getOpaque(
+    final JCGLImplementationType g)
   {
     try {
       final RMatrixI3x3F<RTransformTextureType> uv_m =
@@ -112,19 +113,14 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
       tb.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
       final ArrayDescriptor t = tb.build();
 
+      final JCGLInterfaceCommonType gc = g.getGLCommon();
       final ArrayBufferType array =
-        new FakeArrayBuffer(
-          0,
-          new RangeInclusiveL(0, 99),
-          t,
-          UsageHint.USAGE_STATIC_DRAW);
-
+        gc.arrayBufferAllocate(100, t, UsageHint.USAGE_STATIC_DRAW);
       final IndexBufferType indices =
-        new FakeIndexBuffer(
-          0,
-          new RangeInclusiveL(0, 99),
-          UsageHint.USAGE_STATIC_DRAW,
-          JCGLUnsignedType.TYPE_UNSIGNED_INT);
+        gc.indexBufferAllocateType(
+          JCGLUnsignedType.TYPE_UNSIGNED_INT,
+          100,
+          UsageHint.USAGE_STATIC_DRAW);
 
       final RVectorI3F<RSpaceObjectType> bounds_lower =
         new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f);
@@ -159,6 +155,8 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
       throw new UnreachableCodeException(e);
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
+    } catch (final JCGLException e) {
+      throw new UnreachableCodeException(e);
     }
   }
 
@@ -178,7 +176,8 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
     return KScene.newBuilder(camera);
   }
 
-  @Override protected KInstanceTranslucentRegular getTranslucent()
+  @Override protected KInstanceTranslucentRegular getTranslucent(
+    final JCGLImplementationType g)
   {
     try {
       final RMatrixI3x3F<RTransformTextureType> uv_m =
@@ -211,19 +210,14 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
       tb.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
       final ArrayDescriptor t = tb.build();
 
+      final JCGLInterfaceCommonType gc = g.getGLCommon();
       final ArrayBufferType array =
-        new FakeArrayBuffer(
-          0,
-          new RangeInclusiveL(0, 99),
-          t,
-          UsageHint.USAGE_STATIC_DRAW);
-
+        gc.arrayBufferAllocate(100, t, UsageHint.USAGE_STATIC_DRAW);
       final IndexBufferType indices =
-        new FakeIndexBuffer(
-          0,
-          new RangeInclusiveL(0, 99),
-          UsageHint.USAGE_STATIC_DRAW,
-          JCGLUnsignedType.TYPE_UNSIGNED_INT);
+        gc.indexBufferAllocateType(
+          JCGLUnsignedType.TYPE_UNSIGNED_INT,
+          100,
+          UsageHint.USAGE_STATIC_DRAW);
 
       final RVectorI3F<RSpaceObjectType> bounds_lower =
         new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f);
@@ -254,11 +248,14 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
     } catch (final RExceptionMaterialMissingSpecularTexture e) {
       throw new UnreachableCodeException(e);
     } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    } catch (final JCGLException e) {
       throw new UnreachableCodeException(e);
     }
   }
 
-  @Override protected KInstanceTranslucentUnlitType getTranslucentUnlit()
+  @Override protected KInstanceTranslucentUnlitType getTranslucentUnlit(
+    final JCGLImplementationType g)
   {
     try {
       final RMatrixI3x3F<RTransformTextureType> uv_m =
@@ -291,19 +288,14 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
       tb.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
       final ArrayDescriptor t = tb.build();
 
+      final JCGLInterfaceCommonType gc = g.getGLCommon();
       final ArrayBufferType array =
-        new FakeArrayBuffer(
-          0,
-          new RangeInclusiveL(0, 99),
-          t,
-          UsageHint.USAGE_STATIC_DRAW);
-
+        gc.arrayBufferAllocate(100, t, UsageHint.USAGE_STATIC_DRAW);
       final IndexBufferType indices =
-        new FakeIndexBuffer(
-          0,
-          new RangeInclusiveL(0, 99),
-          UsageHint.USAGE_STATIC_DRAW,
-          JCGLUnsignedType.TYPE_UNSIGNED_INT);
+        gc.indexBufferAllocateType(
+          JCGLUnsignedType.TYPE_UNSIGNED_INT,
+          100,
+          UsageHint.USAGE_STATIC_DRAW);
 
       final RVectorI3F<RSpaceObjectType> bounds_lower =
         new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f);
@@ -334,6 +326,8 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
     } catch (final RExceptionMaterialMissingSpecularTexture e) {
       throw new UnreachableCodeException(e);
     } catch (final RException e) {
+      throw new UnreachableCodeException(e);
+    } catch (final JCGLException e) {
       throw new UnreachableCodeException(e);
     }
   }

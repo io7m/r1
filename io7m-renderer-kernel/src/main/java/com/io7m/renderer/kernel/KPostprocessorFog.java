@@ -110,7 +110,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
 
-    final KProgram fog = this.shader_cache.cacheGetLU("fog");
+    final KProgramType fog = this.shader_cache.cacheGetLU("fog");
 
     try {
       gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());

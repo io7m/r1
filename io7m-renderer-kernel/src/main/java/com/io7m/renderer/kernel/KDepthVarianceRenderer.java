@@ -311,7 +311,7 @@ import com.io7m.renderer.types.RTransformViewType;
       final List<KInstanceOpaqueType> batch = batches.get(depth_code);
       assert batch != null;
 
-      final KProgram program = this.shader_cache.cacheGetLU(depth_code);
+      final KProgramType program = this.shader_cache.cacheGetLU(depth_code);
       final JCBExecutorType exec = program.getExecutable();
 
       exec.execRun(new JCBExecutorProcedureType<RException>() {
@@ -349,6 +349,43 @@ import com.io7m.renderer.types.RTransformViewType;
     NullCheck.notNull(faces, "Faces");
 
     try {
+      final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+
+      final FramebufferUsableType fb =
+        framebuffer.kFramebufferGetDepthVariancePassFramebuffer();
+
+      gc.framebufferDrawBind(fb);
+      try {
+        this.rendererEvaluateDepthVarianceWithBoundFramebuffer(
+          view,
+          projection,
+          batches,
+          framebuffer.kFramebufferGetArea(),
+          faces);
+      } finally {
+        gc.framebufferDrawUnbind();
+      }
+
+    } catch (final JCGLException e) {
+      throw RExceptionJCGL.fromJCGLException(e);
+    }
+  }
+
+  @Override public void rendererEvaluateDepthVarianceWithBoundFramebuffer(
+    final RMatrixI4x4F<RTransformViewType> view,
+    final KProjectionType projection,
+    final Map<String, List<KInstanceOpaqueType>> batches,
+    final AreaInclusive framebuffer_area,
+    final OptionType<KFaceSelection> faces)
+    throws RException
+  {
+    NullCheck.notNull(view, "View matrix");
+    NullCheck.notNull(projection, "Projection matrix");
+    NullCheck.notNull(batches, "Batches");
+    NullCheck.notNull(framebuffer_area, "Framebuffer area");
+    NullCheck.notNull(faces, "Faces");
+
+    try {
       this.matrices.withObserver(
         view,
         projection,
@@ -361,7 +398,7 @@ import com.io7m.renderer.types.RTransformViewType;
             try {
               KDepthVarianceRenderer.this.renderScene(
                 batches,
-                framebuffer,
+                framebuffer_area,
                 mwo,
                 faces);
               return Unit.unit();
@@ -382,7 +419,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   private void renderScene(
     final Map<String, List<KInstanceOpaqueType>> batches,
-    final KFramebufferDepthVarianceUsableType framebuffer,
+    final AreaInclusive framebuffer_area,
     final MatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
     throws JCGLException,
@@ -391,17 +428,16 @@ import com.io7m.renderer.types.RTransformViewType;
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 
-    final FramebufferUsableType fb =
-      framebuffer.kFramebufferGetDepthVariancePassFramebuffer();
+    gc.blendingDisable();
+    gc.colorBufferMask(true, true, true, true);
+    gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
+    gc.cullingDisable();
+    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+    gc.depthBufferWriteEnable();
+    gc.depthBufferClear(1.0f);
+    gc.scissorDisable();
+    gc.viewportSet(framebuffer_area);
 
-    gc.framebufferDrawBind(fb);
-    try {
-      final AreaInclusive area = framebuffer.kFramebufferGetArea();
-      gc.viewportSet(area);
-
-      this.renderDepthPassBatches(batches, gc, mwo, faces);
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
+    this.renderDepthPassBatches(batches, gc, mwo, faces);
   }
 }

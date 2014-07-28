@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -43,22 +43,22 @@ import com.io7m.renderer.types.RExceptionJCGL;
  */
 
 @EqualityReference public final class KShaderCacheFilesystemLoader implements
-  JCacheLoaderType<String, KProgram, RException>
+  JCacheLoaderType<String, KProgramType, RException>
 {
   /**
    * Construct a new cache loader.
-   * 
+   *
    * @param gi
    *          The OpenGL implementation
    * @param fs
    *          The filesystem from which to read shaders
    * @param log
    *          A log handle
-   * 
+   *
    * @return A new cache loader
    */
 
-  public static JCacheLoaderType<String, KProgram, RException> newLoader(
+  public static JCacheLoaderType<String, KProgramType, RException> newLoader(
     final JCGLImplementationType gi,
     final FSCapabilityReadType fs,
     final LogUsableType log)
@@ -81,7 +81,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   }
 
   @Override public void cacheValueClose(
-    final KProgram v)
+    final KProgramType v)
     throws RException
   {
     final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
@@ -114,7 +114,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   }
 
   @Override public BigInteger cacheValueSizeOf(
-    final KProgram v)
+    final KProgramType v)
   {
     final BigInteger one = BigInteger.ONE;
     assert one != null;

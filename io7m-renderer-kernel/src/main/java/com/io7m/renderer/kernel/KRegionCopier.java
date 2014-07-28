@@ -653,7 +653,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         source_select_area,
         this.matrix_uv);
 
-      final KProgram kp = this.shader_cache.cacheGetLU(shader_name);
+      final KProgramType kp = this.shader_cache.cacheGetLU(shader_name);
       gc.framebufferDrawBind(target);
 
       try {
@@ -745,7 +745,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         source_select_area,
         this.matrix_uv);
 
-      final KProgram kp = this.shader_cache.cacheGetLU(shader_name);
+      final KProgramType kp = this.shader_cache.cacheGetLU(shader_name);
       gc.framebufferDrawBind(target);
 
       try {
@@ -805,7 +805,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         source_select_area,
         this.matrix_uv);
 
-      final KProgram kp = this.shader_cache.cacheGetLU(shader_name);
+      final KProgramType kp = this.shader_cache.cacheGetLU(shader_name);
       gc.framebufferDrawBind(target);
 
       try {

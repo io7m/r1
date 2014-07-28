@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -369,7 +369,7 @@ import com.io7m.renderer.types.RTransformViewType;
       final String shader_code = this.code_map.get(depth_code);
       assert shader_code != null;
 
-      final KProgram program = this.shader_cache.cacheGetLU(shader_code);
+      final KProgramType program = this.shader_cache.cacheGetLU(shader_code);
       final JCBExecutorType exec = program.getExecutable();
 
       exec.execRun(new JCBExecutorProcedureType<RException>() {
@@ -401,6 +401,48 @@ import com.io7m.renderer.types.RTransformViewType;
     NullCheck.notNull(framebuffer, "Framebuffer");
     NullCheck.notNull(faces, "Faces");
 
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+    final FramebufferUsableType fb =
+      framebuffer.kFramebufferGetDepthPassFramebuffer();
+
+    try {
+      gc.framebufferDrawBind(fb);
+      try {
+        this.rendererEvaluateDepthWithBoundFramebuffer(
+          view,
+          projection,
+          batches,
+          framebuffer.kFramebufferGetArea(),
+          faces);
+      } finally {
+        gc.framebufferDrawUnbind();
+      }
+    } catch (final JCGLException e) {
+      throw RExceptionJCGL.fromJCGLException(e);
+    }
+  }
+
+  @Override public String rendererGetName()
+  {
+    return KDepthRenderer.NAME;
+  }
+
+  @Override public void rendererEvaluateDepthWithBoundFramebuffer(
+    final RMatrixI4x4F<RTransformViewType> view,
+    final KProjectionType projection,
+    final Map<String, List<KInstanceOpaqueType>> batches,
+    final AreaInclusive framebuffer_area,
+    final OptionType<KFaceSelection> faces)
+    throws RException
+  {
+    NullCheck.notNull(view, "View matrix");
+    NullCheck.notNull(projection, "Projection matrix");
+    NullCheck.notNull(batches, "Batches");
+    NullCheck.notNull(framebuffer_area, "Framebuffer area");
+    NullCheck.notNull(faces, "Faces");
+
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+
     try {
       this.matrices.withObserver(
         view,
@@ -413,8 +455,9 @@ import com.io7m.renderer.types.RTransformViewType;
           {
             try {
               KDepthRenderer.this.renderScene(
+                gc,
                 batches,
-                framebuffer,
+                framebuffer_area,
                 mwo,
                 faces);
               return Unit.unit();
@@ -428,46 +471,27 @@ import com.io7m.renderer.types.RTransformViewType;
     }
   }
 
-  @Override public String rendererGetName()
-  {
-    return KDepthRenderer.NAME;
-  }
-
   private void renderScene(
+    final JCGLInterfaceCommonType gc,
     final Map<String, List<KInstanceOpaqueType>> batches,
-    final KFramebufferDepthUsableType framebuffer,
+    final AreaInclusive area,
     final MatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
     throws JCGLException,
       RException,
       JCacheException
   {
-    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+    gc.blendingDisable();
+    gc.colorBufferMask(true, true, true, true);
+    gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
+    gc.cullingDisable();
+    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
+    gc.depthBufferWriteEnable();
+    gc.depthBufferClear(1.0f);
+    gc.scissorDisable();
+    gc.viewportSet(area);
 
-    final FramebufferUsableType fb =
-      framebuffer.kFramebufferGetDepthPassFramebuffer();
-
-    gc.framebufferDrawBind(fb);
-    try {
-      final AreaInclusive area = framebuffer.kFramebufferGetArea();
-
-      gc.blendingDisable();
-
-      gc.colorBufferMask(true, true, true, true);
-      gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-      gc.cullingDisable();
-
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-      gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
-
-      gc.viewportSet(area);
-
-      this.renderConfigureDepthColorMasks(gc);
-      this.renderDepthPassBatches(batches, gc, mwo, faces);
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
+    this.renderConfigureDepthColorMasks(gc);
+    this.renderDepthPassBatches(batches, gc, mwo, faces);
   }
 }

@@ -20,24 +20,17 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.jcanephora.ArrayBufferType;
-import com.io7m.jcanephora.ArrayBufferUpdateUnmappedType;
-import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.ArrayDescriptorBuilderType;
 import com.io7m.jcanephora.IndexBufferType;
-import com.io7m.jcanephora.IndexBufferUpdateUnmappedType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLExceptionDeleted;
 import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.UsageHint;
-import com.io7m.jcanephora.api.JCGLArrayBuffersType;
-import com.io7m.jcanephora.api.JCGLIndexBuffersType;
-import com.io7m.jranges.RangeInclusiveL;
-import com.io7m.junreachable.UnimplementedCodeException;
+import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
-import com.io7m.renderer.tests.FakeArrayBuffer;
-import com.io7m.renderer.tests.FakeIndexBuffer;
+import com.io7m.renderer.tests.RFakeGL;
+import com.io7m.renderer.tests.RFakeShaderControllers;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionMeshMissingNormals;
 import com.io7m.renderer.types.RExceptionMeshMissingPositions;
@@ -48,104 +41,13 @@ import com.io7m.renderer.types.RVectorI3F;
 
 @SuppressWarnings("static-method") public final class KMeshTest
 {
-  private static final class FakeGL implements
-    JCGLArrayBuffersType,
-    JCGLIndexBuffersType
-  {
-    public FakeGL()
-    {
-      // Nothing.
-    }
-
-    @Override public ArrayBufferType arrayBufferAllocate(
-      final long elements,
-      final ArrayDescriptor descriptor,
-      final UsageHint usage)
-      throws JCGLException
-    {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
-    }
-
-    @Override public void arrayBufferBind(
-      final ArrayBufferUsableType buffer)
-      throws JCGLException
-    {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
-    }
-
-    @Override public void arrayBufferDelete(
-      final ArrayBufferType id)
-      throws JCGLException,
-        JCGLExceptionDeleted
-    {
-      // Nothing.
-    }
-
-    @Override public boolean arrayBufferIsBound(
-      final ArrayBufferUsableType id)
-      throws JCGLException
-    {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
-    }
-
-    @Override public void arrayBufferUnbind()
-      throws JCGLException
-    {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
-    }
-
-    @Override public void arrayBufferUpdate(
-      final ArrayBufferUpdateUnmappedType data)
-      throws JCGLException
-    {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
-    }
-
-    @Override public IndexBufferType indexBufferAllocate(
-      final ArrayBufferUsableType buffer,
-      final long indices,
-      final UsageHint usage)
-      throws JCGLException
-    {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
-    }
-
-    @Override public IndexBufferType indexBufferAllocateType(
-      final JCGLUnsignedType type,
-      final long indices,
-      final UsageHint usage)
-      throws JCGLException
-    {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
-    }
-
-    @Override public void indexBufferDelete(
-      final IndexBufferType id)
-      throws JCGLException
-    {
-      // Nothing.
-    }
-
-    @Override public void indexBufferUpdate(
-      final IndexBufferUpdateUnmappedType data)
-      throws JCGLException
-    {
-      // TODO Auto-generated method stub
-      throw new UnimplementedCodeException();
-    }
-  }
-
   @Test public void testCorrect()
     throws JCGLException,
       RException
   {
+    final JCGLInterfaceCommonType gc =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+
     final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
     b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
     b.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
@@ -154,17 +56,13 @@ import com.io7m.renderer.types.RVectorI3F;
 
     final ArrayDescriptor type = b.build();
     final ArrayBufferType array =
-      new FakeArrayBuffer(
-        0,
-        new RangeInclusiveL(0, 99),
-        type,
-        UsageHint.USAGE_STATIC_DRAW);
+      gc.arrayBufferAllocate(1, type, UsageHint.USAGE_STATIC_DRAW);
     final IndexBufferType indices =
-      new FakeIndexBuffer(
-        0,
-        new RangeInclusiveL(0, 99),
-        UsageHint.USAGE_STATIC_DRAW,
-        JCGLUnsignedType.TYPE_UNSIGNED_INT);
+      gc.indexBufferAllocateType(
+        JCGLUnsignedType.TYPE_UNSIGNED_INT,
+        1,
+        UsageHint.USAGE_STATIC_DRAW);
+
     final RVectorI3F<RSpaceObjectType> lower = RVectorI3F.zero();
     final RVectorI3F<RSpaceObjectType> upper = RVectorI3F.zero();
 
@@ -175,7 +73,6 @@ import com.io7m.renderer.types.RVectorI3F;
     Assert.assertEquals(upper, k.meshGetBoundsUpper());
     Assert.assertFalse(k.resourceIsDeleted());
 
-    final FakeGL gc = new FakeGL();
     k.delete(gc);
 
     Assert.assertTrue(k.resourceIsDeleted());
@@ -187,6 +84,9 @@ import com.io7m.renderer.types.RVectorI3F;
       throws JCGLException,
         RException
   {
+    final JCGLInterfaceCommonType gc =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+
     final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
     b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
     b.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
@@ -194,17 +94,13 @@ import com.io7m.renderer.types.RVectorI3F;
 
     final ArrayDescriptor type = b.build();
     final ArrayBufferType array =
-      new FakeArrayBuffer(
-        0,
-        new RangeInclusiveL(0, 99),
-        type,
-        UsageHint.USAGE_STATIC_DRAW);
+      gc.arrayBufferAllocate(1, type, UsageHint.USAGE_STATIC_DRAW);
     final IndexBufferType indices =
-      new FakeIndexBuffer(
-        0,
-        new RangeInclusiveL(0, 99),
-        UsageHint.USAGE_STATIC_DRAW,
-        JCGLUnsignedType.TYPE_UNSIGNED_INT);
+      gc.indexBufferAllocateType(
+        JCGLUnsignedType.TYPE_UNSIGNED_INT,
+        1,
+        UsageHint.USAGE_STATIC_DRAW);
+
     final RVectorI3F<RSpaceObjectType> lower = RVectorI3F.zero();
     final RVectorI3F<RSpaceObjectType> upper = RVectorI3F.zero();
 
@@ -217,6 +113,9 @@ import com.io7m.renderer.types.RVectorI3F;
       throws JCGLException,
         RException
   {
+    final JCGLInterfaceCommonType gc =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+
     final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
     b.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
     b.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
@@ -224,17 +123,13 @@ import com.io7m.renderer.types.RVectorI3F;
 
     final ArrayDescriptor type = b.build();
     final ArrayBufferType array =
-      new FakeArrayBuffer(
-        0,
-        new RangeInclusiveL(0, 99),
-        type,
-        UsageHint.USAGE_STATIC_DRAW);
+      gc.arrayBufferAllocate(1, type, UsageHint.USAGE_STATIC_DRAW);
     final IndexBufferType indices =
-      new FakeIndexBuffer(
-        0,
-        new RangeInclusiveL(0, 99),
-        UsageHint.USAGE_STATIC_DRAW,
-        JCGLUnsignedType.TYPE_UNSIGNED_INT);
+      gc.indexBufferAllocateType(
+        JCGLUnsignedType.TYPE_UNSIGNED_INT,
+        1,
+        UsageHint.USAGE_STATIC_DRAW);
+
     final RVectorI3F<RSpaceObjectType> lower = RVectorI3F.zero();
     final RVectorI3F<RSpaceObjectType> upper = RVectorI3F.zero();
 
@@ -247,6 +142,9 @@ import com.io7m.renderer.types.RVectorI3F;
       throws JCGLException,
         RException
   {
+    final JCGLInterfaceCommonType gc =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+
     final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
     b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
     b.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
@@ -254,17 +152,13 @@ import com.io7m.renderer.types.RVectorI3F;
 
     final ArrayDescriptor type = b.build();
     final ArrayBufferType array =
-      new FakeArrayBuffer(
-        0,
-        new RangeInclusiveL(0, 99),
-        type,
-        UsageHint.USAGE_STATIC_DRAW);
+      gc.arrayBufferAllocate(1, type, UsageHint.USAGE_STATIC_DRAW);
     final IndexBufferType indices =
-      new FakeIndexBuffer(
-        0,
-        new RangeInclusiveL(0, 99),
-        UsageHint.USAGE_STATIC_DRAW,
-        JCGLUnsignedType.TYPE_UNSIGNED_INT);
+      gc.indexBufferAllocateType(
+        JCGLUnsignedType.TYPE_UNSIGNED_INT,
+        1,
+        UsageHint.USAGE_STATIC_DRAW);
+
     final RVectorI3F<RSpaceObjectType> lower = RVectorI3F.zero();
     final RVectorI3F<RSpaceObjectType> upper = RVectorI3F.zero();
 
@@ -277,6 +171,9 @@ import com.io7m.renderer.types.RVectorI3F;
       throws JCGLException,
         RException
   {
+    final JCGLInterfaceCommonType gc =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+
     final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
     b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
     b.addAttribute(KMeshAttributes.ATTRIBUTE_NORMAL);
@@ -284,17 +181,13 @@ import com.io7m.renderer.types.RVectorI3F;
 
     final ArrayDescriptor type = b.build();
     final ArrayBufferType array =
-      new FakeArrayBuffer(
-        0,
-        new RangeInclusiveL(0, 99),
-        type,
-        UsageHint.USAGE_STATIC_DRAW);
+      gc.arrayBufferAllocate(1, type, UsageHint.USAGE_STATIC_DRAW);
     final IndexBufferType indices =
-      new FakeIndexBuffer(
-        0,
-        new RangeInclusiveL(0, 99),
-        UsageHint.USAGE_STATIC_DRAW,
-        JCGLUnsignedType.TYPE_UNSIGNED_INT);
+      gc.indexBufferAllocateType(
+        JCGLUnsignedType.TYPE_UNSIGNED_INT,
+        1,
+        UsageHint.USAGE_STATIC_DRAW);
+
     final RVectorI3F<RSpaceObjectType> lower = RVectorI3F.zero();
     final RVectorI3F<RSpaceObjectType> upper = RVectorI3F.zero();
 
