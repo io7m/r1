@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -294,10 +294,10 @@ import com.io7m.renderer.types.RVectorI4F;
       JCGLExceptionNoStencilBuffer
   {
     gc.stencilBufferEnable();
-    gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xffffffff);
+    gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xfffffffe);
     gc.stencilBufferFunction(
       FaceSelection.FACE_FRONT_AND_BACK,
-      StencilFunction.STENCIL_GREATER_THAN_OR_EQUAL,
+      StencilFunction.STENCIL_EQUAL,
       0x1,
       0xffffffff);
     gc.stencilBufferOperation(
@@ -1094,7 +1094,8 @@ import com.io7m.renderer.types.RVectorI4F;
     gc.depthBufferWriteDisable();
     gc.depthBufferTestDisable();
 
-    final KProgramType kp = this.shader_light_cache.cacheGetLU(ld.lightGetCode());
+    final KProgramType kp =
+      this.shader_light_cache.cacheGetLU(ld.lightGetCode());
     final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
     final ArrayBufferUsableType array = q.getArray();
     final IndexBufferUsableType index = q.getIndices();
@@ -1186,7 +1187,8 @@ import com.io7m.renderer.types.RVectorI4F;
   {
     KRendererDeferredOpaque.configureRenderStateForLightPass(gc);
 
-    final KProgramType kp = this.shader_light_cache.cacheGetLU(lp.lightGetCode());
+    final KProgramType kp =
+      this.shader_light_cache.cacheGetLU(lp.lightGetCode());
     final JCBExecutorType exec = kp.getExecutable();
 
     final KFrustumMeshUsableType s =
@@ -1451,7 +1453,8 @@ import com.io7m.renderer.types.RVectorI4F;
     final ArrayBufferUsableType array = s.getArray();
     final IndexBufferUsableType index = s.getIndices();
 
-    final KProgramType kp = this.shader_light_cache.cacheGetLU(ls.lightGetCode());
+    final KProgramType kp =
+      this.shader_light_cache.cacheGetLU(ls.lightGetCode());
     final JCBExecutorType exec = kp.getExecutable();
 
     exec.execRun(new JCBExecutorProcedureType<RException>() {
