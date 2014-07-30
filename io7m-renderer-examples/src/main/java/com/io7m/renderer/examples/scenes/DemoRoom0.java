@@ -31,8 +31,11 @@ import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
+import com.io7m.renderer.kernel.types.KMaterialEnvironmentReflection;
+import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
+import com.io7m.renderer.kernel.types.KMaterialSpecularMapped;
 import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
@@ -64,15 +67,30 @@ public final class DemoRoom0 implements ExampleSceneType
     final ExampleSceneBuilderType scene)
     throws RException
   {
-    final Texture2DStaticUsableType t = scene.texture("room.png");
+    final Texture2DStaticUsableType room_albedo =
+      scene.texture("room_albedo.png");
+    final Texture2DStaticUsableType room_normal =
+      scene.texture("room_normal.png");
+    final Texture2DStaticUsableType room_specular =
+      scene.texture("room_spec.png");
 
-    final KMaterialOpaqueRegularBuilderType mmb =
+    final KMaterialOpaqueRegularBuilderType room_mat_b =
       KMaterialOpaqueRegular
         .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
-    mmb.setAlbedo(KMaterialAlbedoTextured.textured(
+    room_mat_b.setAlbedo(KMaterialAlbedoTextured.textured(
       ExampleSceneUtilities.RGBA_WHITE,
       1.0f,
-      t));
+      room_albedo));
+    room_mat_b.setNormal(KMaterialNormalMapped.mapped(room_normal));
+    room_mat_b.setSpecular(KMaterialSpecularMapped.mapped(
+      ExampleSceneUtilities.RGB_WHITE,
+      128.0f,
+      room_specular));
+    room_mat_b.setEnvironment(KMaterialEnvironmentReflection.reflection(
+      0.2f,
+      scene.cubeTexture("toronto/cube.rxc")));
+
+    final KMaterialOpaqueRegular room_mat = room_mat_b.build();
 
     final VectorI3F one = new VectorI3F(1.0f, 1.0f, 1.0f);
     final KTransformType room_trans_left =
@@ -89,7 +107,7 @@ public final class DemoRoom0 implements ExampleSceneType
     final KInstanceOpaqueRegular room_center =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("room.rmbz"),
-        mmb.build(),
+        room_mat,
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -97,7 +115,7 @@ public final class DemoRoom0 implements ExampleSceneType
     final KInstanceOpaqueRegular room_left =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("room.rmbz"),
-        mmb.build(),
+        room_mat,
         room_trans_left,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -105,8 +123,36 @@ public final class DemoRoom0 implements ExampleSceneType
     final KInstanceOpaqueRegular room_right =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("room.rmbz"),
-        mmb.build(),
+        room_mat,
         room_trans_right,
+        ExampleSceneUtilities.IDENTITY_UV,
+        KFaceSelection.FACE_RENDER_FRONT);
+
+    final Texture2DStaticUsableType sofa_albedo =
+      scene.texture("sofa_albedo.png");
+    final Texture2DStaticUsableType sofa_normal =
+      scene.texture("sofa_normal.png");
+
+    final KMaterialOpaqueRegularBuilderType sofa_mat_b =
+      KMaterialOpaqueRegular
+        .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
+    sofa_mat_b.setAlbedo(KMaterialAlbedoTextured.textured(
+      ExampleSceneUtilities.RGBA_WHITE,
+      1.0f,
+      sofa_albedo));
+    sofa_mat_b.setNormal(KMaterialNormalMapped.mapped(sofa_normal));
+
+    final KTransformType sofa_trans =
+      KTransformOST.newTransform(
+        QuaternionI4F.IDENTITY,
+        one,
+        new RVectorI3F<RSpaceWorldType>(0.0f, 0.1f, -1.0f));
+
+    final KInstanceOpaqueRegular sofa =
+      KInstanceOpaqueRegular.newInstance(
+        scene.mesh("sofa.rmbz"),
+        sofa_mat_b.build(),
+        sofa_trans,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
@@ -131,6 +177,7 @@ public final class DemoRoom0 implements ExampleSceneType
         gb.groupAddLight(sb.build());
         gb.groupAddLight(door_s_red);
         gb.groupAddLight(door_s_blue);
+        gb.groupAddInstance(sofa);
         gb.groupAddInstance(room_center);
       }
 
