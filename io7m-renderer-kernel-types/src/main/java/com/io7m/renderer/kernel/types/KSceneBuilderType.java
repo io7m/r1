@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -39,13 +39,13 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    * therefore the order that they are added to the scene has no effect on the
    * rendered image.
    * </p>
-   * 
+   *
    * @param instance
    *          The shadow-casting instance
    * @throws RExceptionInstanceAlreadyLit
    *           If the instance has already been added to one or more light
    *           groups.
-   * 
+   *
    * @see #sceneAddOpaqueLitVisibleWithoutShadow(KLightType,
    *      KInstanceOpaqueType)
    * @see #sceneAddOpaqueLitVisibleWithShadow(KLightType, KInstanceOpaqueType)
@@ -72,12 +72,12 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    * supported in order to allow separate, simplified geometry to be used for
    * shadow casting.
    * </p>
-   * 
+   *
    * @param light
    *          The light
    * @param instance
    *          The shadow-casting instance
-   * 
+   *
    * @throws RExceptionLightMissingShadow
    *           If the light has no shadow.
    */
@@ -92,9 +92,7 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    * Add an instance <code>instance</code> which is expected to have a
    * translucent material lit by lights <code>lights</code>. The instance will
    * not cast a shadow, even if any <code>lights</code> are configured to
-   * produce them. To make the instance cast shadows for a particular light,
-   * it must also be added to the scene with
-   * {@link #sceneAddShadowCaster(KLightType, KInstanceOpaqueType)} .
+   * produce them.
    * </p>
    * <p>
    * Translucent instances are rendered in the order that they are added to
@@ -106,12 +104,12 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    * without needing to be added to the scene in any particular order with
    * respect to opaque instances.
    * </p>
-   * 
+   *
    * @param lights
    *          The set of lights affecting the instance
    * @param instance
    *          The shadow-casting instance
-   * 
+   *
    * @see #sceneAddShadowCaster(KLightType, KInstanceOpaqueType)
    */
 
@@ -124,7 +122,7 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    * Add an instance <code>instance</code> which is expected to have a
    * translucent material and is unaffected by lighting.
    * </p>
-   * 
+   *
    * @param instance
    *          The unlit instance
    */
@@ -136,11 +134,11 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    * <p>
    * Construct a new builder to construct a light group.
    * </p>
-   * 
+   *
    * @return A new light group builder.
    * @param name
    *          The name of the new light group.
-   * 
+   *
    * @throws RExceptionLightGroupAlreadyAdded
    *           A light group already exists with the given name.
    */
