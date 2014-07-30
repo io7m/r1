@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.examples.scenes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
@@ -87,7 +88,7 @@ public final class DemoRoom0 implements ExampleSceneType
       128.0f,
       room_specular));
     room_mat_b.setEnvironment(KMaterialEnvironmentReflection.reflection(
-      0.2f,
+      0.15f,
       scene.cubeTexture("toronto/cube.rxc")));
 
     final KMaterialOpaqueRegular room_mat = room_mat_b.build();
@@ -211,6 +212,9 @@ public final class DemoRoom0 implements ExampleSceneType
 
   @Override public List<ExampleViewType> exampleViewpoints()
   {
-    return ExampleSceneUtilities.FAR_VIEWS_5;
+    final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
+    views.addAll(ExampleSceneUtilities.FAR_VIEWS_5);
+    views.addAll(ExampleSceneUtilities.STANDARD_VIEWS_CLOSE_3);
+    return views;
   }
 }
