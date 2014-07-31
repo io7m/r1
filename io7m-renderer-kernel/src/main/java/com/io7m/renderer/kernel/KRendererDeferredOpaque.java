@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -214,8 +214,8 @@ import com.io7m.renderer.types.RVectorI4F;
    * black prior to rendering any light contributions.
    * </p>
    * <p>
-   * The set to read-only, and configured such that only pixels that have a
-   * corresponding value of 1 in the stencil buffer will be written.
+   * The buffer is set to read-only, and configured such that only pixels that
+   * have a corresponding value of 1 in the stencil buffer will be written.
    * </p>
    */
 
@@ -231,6 +231,36 @@ import com.io7m.renderer.types.RVectorI4F;
       StencilFunction.STENCIL_EQUAL,
       0x1,
       0xffffffff);
+  }
+
+  /**
+   * <p>
+   * Configure the stencil buffer for the stencil clearing operating prior to
+   * rendering each light.
+   * </p>
+   * <p>
+   * The stencil buffer is configured such that it is writable, and such that
+   * all non-zero values in the stencil buffer will be set to 1.
+   * </p>
+   */
+
+  private static void configureStencilGeometryGroupLightClearing(
+    final JCGLInterfaceCommonType gc)
+    throws JCGLException,
+      JCGLExceptionNoStencilBuffer
+  {
+    gc.stencilBufferEnable();
+    gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xffffffff);
+    gc.stencilBufferFunction(
+      FaceSelection.FACE_FRONT_AND_BACK,
+      StencilFunction.STENCIL_LESS_THAN_OR_EQUAL,
+      0x1,
+      0xffffffff);
+    gc.stencilBufferOperation(
+      FaceSelection.FACE_FRONT_AND_BACK,
+      StencilOperation.STENCIL_OP_KEEP,
+      StencilOperation.STENCIL_OP_KEEP,
+      StencilOperation.STENCIL_OP_REPLACE);
   }
 
   /**
@@ -859,6 +889,54 @@ import com.io7m.renderer.types.RVectorI4F;
     this.renderGroupLights(framebuffer, shadow_context, mwo, group);
   }
 
+  /**
+   * Clear all non-zero values in the stencil buffer to <code>1</code>.
+   */
+
+  private void renderGroupClearStencilTo1(
+    final JCGLInterfaceCommonType gc)
+    throws JCGLException,
+      RException,
+      JCacheException
+  {
+    gc.colorBufferMask(false, false, false, false);
+    gc.blendingDisable();
+    gc.cullingDisable();
+    gc.depthBufferWriteDisable();
+    gc.depthBufferTestDisable();
+
+    KRendererDeferredOpaque.configureStencilGeometryGroupLightClearing(gc);
+
+    final KProgramType kp = this.shader_light_cache.cacheGetLU("flat_clip");
+    final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
+    final ArrayBufferUsableType array = q.getArray();
+    final IndexBufferUsableType index = q.getIndices();
+
+    final JCBExecutorType exec = kp.getExecutable();
+    exec.execRun(new JCBExecutorProcedureType<RException>() {
+      @Override public void call(
+        final JCBProgramType program)
+        throws JCGLException,
+          RException
+      {
+        gc.arrayBufferBind(array);
+        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+
+        program.programUniformPutVector4f(
+          "f_ccolor",
+          KRendererDeferredOpaque.BLACK);
+
+        program.programExecute(new JCBProgramProcedureType<JCGLException>() {
+          @Override public void call()
+            throws JCGLException
+          {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
+          }
+        });
+      }
+    });
+  }
+
   private void renderGroupClearToBlack(
     final JCGLInterfaceCommonType gc)
     throws RException,
@@ -974,10 +1052,23 @@ import com.io7m.renderer.types.RVectorI4F;
     final MatricesObserverType mwo,
     final KShadowMapContextType shadow_map_context,
     final KTextureUnitContextType texture_unit_context,
-    final KLightType light)
+    final KLightType light,
+    final boolean first)
     throws RException,
-      JCGLException
+      JCGLException,
+      JCacheException
   {
+    /**
+     * For all but the first light, set all stencil values for the current
+     * group to 1. This could be done for the first light too, but would be
+     * useless as the stencil buffer is already in the right state for that
+     * light.
+     */
+
+    if (first == false) {
+      this.renderGroupClearStencilTo1(gc);
+    }
+
     final KRendererDeferredOpaque r = KRendererDeferredOpaque.this;
 
     light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
@@ -1376,6 +1467,10 @@ import com.io7m.renderer.types.RVectorI4F;
     try {
       gc.framebufferDrawBind(render_fb);
 
+      /**
+       * Clear all geometry in the current group to black.
+       */
+
       this.renderGroupClearToBlack(gc);
 
       /**
@@ -1388,41 +1483,50 @@ import com.io7m.renderer.types.RVectorI4F;
           throws JCGLException,
             RException
         {
-          /**
-           * Bind all g-buffer textures.
-           */
+          try {
 
-          final KGeometryBufferUsableType gbuffer =
-            framebuffer.kFramebufferGetGeometryBuffer();
+            /**
+             * Bind all g-buffer textures.
+             */
 
-          final TextureUnitType t_map_albedo =
-            texture_context.withTexture2D(gbuffer.geomGetTextureAlbedo());
-          final TextureUnitType t_map_depth_stencil =
-            texture_context.withTexture2D(gbuffer
-              .geomGetTextureDepthStencil());
-          final TextureUnitType t_map_normal =
-            texture_context.withTexture2D(gbuffer.geomGetTextureNormal());
-          final TextureUnitType t_map_specular =
-            texture_context.withTexture2D(gbuffer.geomGetTextureSpecular());
-          final TextureUnitType t_map_eye_depth =
-            texture_context.withTexture2D(gbuffer
-              .geomGetTextureLinearEyeDepth());
+            final KGeometryBufferUsableType gbuffer =
+              framebuffer.kFramebufferGetGeometryBuffer();
 
-          for (final KLightType light : group.getLights()) {
-            assert light != null;
+            final TextureUnitType t_map_albedo =
+              texture_context.withTexture2D(gbuffer.geomGetTextureAlbedo());
+            final TextureUnitType t_map_depth_stencil =
+              texture_context.withTexture2D(gbuffer
+                .geomGetTextureDepthStencil());
+            final TextureUnitType t_map_normal =
+              texture_context.withTexture2D(gbuffer.geomGetTextureNormal());
+            final TextureUnitType t_map_specular =
+              texture_context.withTexture2D(gbuffer.geomGetTextureSpecular());
+            final TextureUnitType t_map_eye_depth =
+              texture_context.withTexture2D(gbuffer
+                .geomGetTextureLinearEyeDepth());
 
-            KRendererDeferredOpaque.this.renderGroupLight(
-              framebuffer,
-              t_map_albedo,
-              t_map_depth_stencil,
-              t_map_normal,
-              t_map_specular,
-              t_map_eye_depth,
-              gc,
-              mwo,
-              shadow_map_context,
-              texture_context,
-              light);
+            boolean first = true;
+            for (final KLightType light : group.getLights()) {
+              assert light != null;
+
+              KRendererDeferredOpaque.this.renderGroupLight(
+                framebuffer,
+                t_map_albedo,
+                t_map_depth_stencil,
+                t_map_normal,
+                t_map_specular,
+                t_map_eye_depth,
+                gc,
+                mwo,
+                shadow_map_context,
+                texture_context,
+                light,
+                first);
+
+              first = false;
+            }
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
           }
         }
       });
