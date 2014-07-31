@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -52,7 +52,6 @@ import com.io7m.renderer.kernel.types.KMaterialRefractiveUnmasked;
 import com.io7m.renderer.kernel.types.KMaterialSpecularConstant;
 import com.io7m.renderer.kernel.types.KMaterialSpecularMapped;
 import com.io7m.renderer.kernel.types.KMeshAttributes;
-import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 import com.io7m.renderer.kernel.types.KShadowType;
@@ -71,6 +70,7 @@ import com.io7m.renderer.types.RTransformDeferredProjectionType;
 import com.io7m.renderer.types.RTransformModelType;
 import com.io7m.renderer.types.RTransformModelViewType;
 import com.io7m.renderer.types.RTransformNormalType;
+import com.io7m.renderer.types.RTransformProjectionInverseType;
 import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformProjectiveModelViewType;
 import com.io7m.renderer.types.RTransformProjectiveProjectionType;
@@ -108,6 +108,8 @@ import com.io7m.renderer.types.RVectorReadable4FType;
                                                                        "m_position";
   private static final String MATRIX_NAME_PROJECTION                 =
                                                                        "m_projection";
+  private static final String MATRIX_NAME_PROJECTION_INVERSE         =
+                                                                       "m_projection_inv";
   private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW       =
                                                                        "m_projective_modelview";
   private static final String MATRIX_NAME_PROJECTIVE_PROJECTION      =
@@ -620,29 +622,12 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       unit);
   }
 
-  static void putFrustum(
+  static void putFarClipDistance(
     final JCBProgramType program,
-    final KProjectionType projection)
+    final float distance)
     throws JCGLException
   {
-    program.programUniformPutFloat(
-      "frustum.x_left",
-      projection.projectionGetXMinimum());
-    program.programUniformPutFloat(
-      "frustum.x_right",
-      projection.projectionGetXMaximum());
-    program.programUniformPutFloat(
-      "frustum.y_bottom",
-      projection.projectionGetYMinimum());
-    program.programUniformPutFloat(
-      "frustum.y_top",
-      projection.projectionGetYMaximum());
-    program.programUniformPutFloat(
-      "frustum.z_near",
-      projection.projectionGetZNear());
-    program.programUniformPutFloat(
-      "frustum.z_far",
-      projection.projectionGetZFar());
+    program.programUniformPutFloat("far_clip_distance", distance);
   }
 
   static void putLightDirectional(
@@ -1253,6 +1238,16 @@ import com.io7m.renderer.types.RVectorReadable4FType;
   {
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_DEFERRED_PROJECTION,
+      m);
+  }
+
+  static void putMatrixInverseProjection(
+    final JCBProgramType program,
+    final RMatrixReadable4x4FType<RTransformProjectionInverseType> m)
+    throws JCGLException
+  {
+    program.programUniformPutMatrix4x4f(
+      KShadingProgramCommon.MATRIX_NAME_PROJECTION_INVERSE,
       m);
   }
 

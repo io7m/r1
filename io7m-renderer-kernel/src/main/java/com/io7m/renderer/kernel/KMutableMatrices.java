@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -61,6 +61,7 @@ import com.io7m.renderer.types.RTransformDeferredProjectionType;
 import com.io7m.renderer.types.RTransformModelType;
 import com.io7m.renderer.types.RTransformModelViewType;
 import com.io7m.renderer.types.RTransformNormalType;
+import com.io7m.renderer.types.RTransformProjectionInverseType;
 import com.io7m.renderer.types.RTransformProjectionType;
 import com.io7m.renderer.types.RTransformProjectiveModelViewType;
 import com.io7m.renderer.types.RTransformProjectiveProjectionType;
@@ -169,6 +170,13 @@ import com.io7m.renderer.types.RTransformViewType;
       getMatrixProjection()
     {
       return this.parent.getMatrixProjection();
+    }
+
+    @Override public
+      RMatrixReadable4x4FType<RTransformProjectionInverseType>
+      getMatrixProjectionInverse()
+    {
+      return this.parent.getMatrixProjectionInverse();
     }
 
     @Override public RMatrixM3x3F<RTransformTextureType> getMatrixUV()
@@ -397,6 +405,13 @@ import com.io7m.renderer.types.RTransformViewType;
       getMatrixProjection()
     {
       return this.parent.getMatrixProjection();
+    }
+
+    @Override public
+      RMatrixReadable4x4FType<RTransformProjectionInverseType>
+      getMatrixProjectionInverse()
+    {
+      return this.parent.getMatrixProjectionInverse();
     }
 
     @Override public
@@ -877,6 +892,13 @@ import com.io7m.renderer.types.RTransformViewType;
     RMatrixReadable4x4FType<RTransformProjectionType> getMatrixProjection();
 
     /**
+     * @return The current inverse projection matrix for an observer
+     */
+
+      RMatrixReadable4x4FType<RTransformProjectionInverseType>
+      getMatrixProjectionInverse();
+
+    /**
      * @return The current view matrix for an observer
      */
 
@@ -1032,10 +1054,11 @@ import com.io7m.renderer.types.RTransformViewType;
   @EqualityReference private final class Observer implements
     MatricesObserverType
   {
-    private final RMatrixM4x4F<RTransformProjectionType>  matrix_projection;
-    private final RMatrixM4x4F<RTransformViewType>        matrix_view;
-    private final RMatrixM4x4F<RTransformViewInverseType> matrix_view_inverse;
-    private @Nullable KProjectionType                     projection;
+    private final RMatrixM4x4F<RTransformProjectionType>        matrix_projection;
+    private final RMatrixM4x4F<RTransformProjectionInverseType> matrix_projection_inverse;
+    private final RMatrixM4x4F<RTransformViewType>              matrix_view;
+    private final RMatrixM4x4F<RTransformViewInverseType>       matrix_view_inverse;
+    private @Nullable KProjectionType                           projection;
 
     public Observer()
     {
@@ -1043,6 +1066,8 @@ import com.io7m.renderer.types.RTransformViewType;
       this.matrix_view_inverse =
         new RMatrixM4x4F<RTransformViewInverseType>();
       this.matrix_projection = new RMatrixM4x4F<RTransformProjectionType>();
+      this.matrix_projection_inverse =
+        new RMatrixM4x4F<RTransformProjectionInverseType>();
     }
 
     @Override public Context getMatrixContext()
@@ -1057,6 +1082,14 @@ import com.io7m.renderer.types.RTransformViewType;
     {
       assert KMutableMatrices.this.observerIsActive();
       return this.matrix_projection;
+    }
+
+    @Override public
+      RMatrixReadable4x4FType<RTransformProjectionInverseType>
+      getMatrixProjectionInverse()
+    {
+      assert KMutableMatrices.this.observerIsActive();
+      return this.matrix_projection_inverse;
     }
 
     @Override public
@@ -1224,6 +1257,13 @@ import com.io7m.renderer.types.RTransformViewType;
       getMatrixProjection()
     {
       return this.parent.getMatrixProjection();
+    }
+
+    @Override public
+      RMatrixReadable4x4FType<RTransformProjectionInverseType>
+      getMatrixProjectionInverse()
+    {
+      return this.parent.getMatrixProjectionInverse();
     }
 
     @Override public
