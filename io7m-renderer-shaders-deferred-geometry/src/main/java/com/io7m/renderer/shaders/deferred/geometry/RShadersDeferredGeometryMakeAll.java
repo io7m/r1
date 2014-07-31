@@ -121,7 +121,7 @@ import com.io7m.renderer.shaders.deferred.RKDeferredShader;
         final String name =
           String.format(
             "%s.%s.p",
-            RKDeferredShader.PACKAGE_DEFERRED_GEOMETRY_OPAQUE_REGULAR,
+            RKDeferredShader.PACKAGE_DEFERRED_GEOMETRY_REGULAR,
             code);
         assert name != null;
 

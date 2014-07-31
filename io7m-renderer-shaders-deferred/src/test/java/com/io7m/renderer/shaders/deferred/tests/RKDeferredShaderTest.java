@@ -47,7 +47,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         KMaterialNormalVertex.vertex(),
         KMaterialSpecularNone.none());
 
-    RKDeferredShader.fragmentShaderOpaqueRegular(b, m);
+    RKDeferredShader.fragmentShaderRegular(b, m);
 
     System.out.println(b.toString());
   }
