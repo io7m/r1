@@ -91,7 +91,7 @@ import com.io7m.renderer.types.RException;
     b.append("  out out_albedo     : vector_4f as 0;\n");
     b.append("  out out_normal     : vector_2f as 1;\n");
     b.append("  out out_specular   : vector_4f as 2;\n");
-    b.append("  out out_emissive   : float     as 3;\n");
+    b.append("  out out_eye_depth  : float     as 3;\n");
     b.append("\n");
   }
 
@@ -157,11 +157,11 @@ import com.io7m.renderer.types.RException;
       b.append("shader fragment f is\n");
       b.append("\n");
       b.append("  -- G-buffer components\n");
-      b.append("  parameter t_map_albedo   : sampler_2d;\n");
-      b.append("  parameter t_map_normal   : sampler_2d;\n");
-      b.append("  parameter t_map_specular : sampler_2d;\n");
-      b.append("  parameter t_map_emissive : sampler_2d;\n");
-      b.append("  parameter t_map_depth    : sampler_2d;\n");
+      b.append("  parameter t_map_albedo    : sampler_2d;\n");
+      b.append("  parameter t_map_normal    : sampler_2d;\n");
+      b.append("  parameter t_map_specular  : sampler_2d;\n");
+      b.append("  parameter t_map_eye_depth : sampler_2d;\n");
+      b.append("  parameter t_map_depth     : sampler_2d;\n");
       b.append("\n");
       b.append("  -- Standard declarations\n");
       b.append("  out out_0 : vector_4f as 0;\n");
@@ -290,7 +290,7 @@ import com.io7m.renderer.types.RException;
 
       b.append("  -- Get surface emission\n");
       b.append("  value emission =\n");
-      b.append("    S.texture (t_map_emissive, map_position) [x];\n");
+      b.append("    0.0;\n");
       b.append("\n");
 
       b.append("  -- Get surface specular\n");
@@ -549,10 +549,10 @@ import com.io7m.renderer.types.RException;
     RKDeferredShader.fragmentShaderValuesSurface(b, envi);
     RKDeferredShader.fragmentShaderValuesResults(b, emissive, specular);
     b.append("as\n");
-    b.append("  out out_albedo   = r_albedo;\n");
-    b.append("  out out_normal   = r_normal;\n");
-    b.append("  out out_specular = r_specular;\n");
-    b.append("  out out_emissive = r_emission;\n");
+    b.append("  out out_albedo    = r_albedo;\n");
+    b.append("  out out_normal    = r_normal;\n");
+    b.append("  out out_specular  = r_specular;\n");
+    b.append("  out out_eye_depth = r_eye_depth;\n");
     b.append("end;\n");
     b.append("\n");
   }
@@ -628,10 +628,14 @@ import com.io7m.renderer.types.RException;
     final KMaterialSpecularType specular)
   {
     try {
+      b.append("  value r_eye_depth =\n");
+      b.append("    f_position_eye [z];\n");
+      b.append("\n");
       b.append("  value r_normal =\n");
       b.append("    Normals.compress (n);\n");
       b.append("\n");
-      b.append("  value r_albedo = surface;\n");
+      b.append("  value r_albedo =\n");
+      b.append("    surface;\n");
       b.append("\n");
 
       emissive
@@ -639,24 +643,24 @@ import com.io7m.renderer.types.RException;
           @Override public Unit constant(
             final KMaterialEmissiveConstant m)
           {
-            b.append("  value r_emission = p_emission.amount;\n");
-            b.append("\n");
+            // b.append("  value r_emission = p_emission.amount;\n");
+            // b.append("\n");
             return Unit.unit();
           }
 
           @Override public Unit mapped(
             final KMaterialEmissiveMapped m)
           {
-            b.append("  value r_emission = p_emission.amount;\n");
-            b.append("\n");
+            // b.append("  value r_emission = p_emission.amount;\n");
+            // b.append("\n");
             return Unit.unit();
           }
 
           @Override public Unit none(
             final KMaterialEmissiveNone m)
           {
-            b.append("  value r_emission = 0.0;\n");
-            b.append("\n");
+            // b.append("  value r_emission = 0.0;\n");
+            // b.append("\n");
             return Unit.unit();
           }
         });
