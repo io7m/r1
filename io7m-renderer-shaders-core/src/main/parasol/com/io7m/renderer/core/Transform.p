@@ -189,4 +189,32 @@ module Transform is
       eye
     end;
 
+  --
+  -- Given a screen-space position [screen_position] value, and an (eye-space)
+  -- depth value [current_z], reconstruct the eye-space position
+  -- based on the given [screen_size] and [frustum].
+  --
+
+  function screen_to_eye_with_eye_depth (
+    screen_position : vector_2f,
+    eye_z           : float,
+    screen_size     : vector_2f,
+    frustum         : Frustum.t
+  ) : vector_4f =
+    let
+      value ndc =
+        screen_to_ndc (
+          screen_position,
+          screen_size
+        );
+
+      value eye =
+        new vector_4f (
+          ndc_to_eye (ndc, frustum, eye_z),
+          1.0
+        );
+    in
+      eye
+    end;
+
 end;
