@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -96,51 +96,55 @@ import com.io7m.renderer.types.RVectorReadable4FType;
 
 @EqualityReference public final class KShadingProgramCommon
 {
-  private static final String MATRIX_NAME_DEFERRED_PROJECTION    =
-                                                                   "m_deferred_projective";
-  private static final String MATRIX_NAME_MODEL                  = "m_model";
-  private static final String MATRIX_NAME_MODELVIEW              =
-                                                                   "m_modelview";
-  private static final String MATRIX_NAME_NORMAL                 = "m_normal";
-  private static final String MATRIX_NAME_POSITION               =
-                                                                   "m_position";
-  private static final String MATRIX_NAME_PROJECTION             =
-                                                                   "m_projection";
-  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW   =
-                                                                   "m_projective_modelview";
-  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION  =
-                                                                   "m_projective_projection";
-  private static final String MATRIX_NAME_UV                     = "m_uv";
-  private static final String MATRIX_NAME_VIEW_INVERSE           =
-                                                                   "m_view_inv";
-  private static final String TEXTURE_NAME_ALBEDO                = "t_albedo";
-  private static final String TEXTURE_NAME_DEFERRED_ALBEDO       =
-                                                                   "t_map_albedo";
-  private static final String TEXTURE_NAME_DEFERRED_DEPTH        =
-                                                                   "t_map_depth";
-  private static final String TEXTURE_NAME_DEFERRED_EMISSIVE     =
-                                                                   "t_map_emissive";
-  private static final String TEXTURE_NAME_DEFERRED_NORMAL       =
-                                                                   "t_map_normal";
-  private static final String TEXTURE_NAME_DEFERRED_SPECULAR     =
-                                                                   "t_map_specular";
-  private static final String TEXTURE_NAME_EMISSION              =
-                                                                   "t_emission";
-  private static final String TEXTURE_NAME_ENVIRONMENT           =
-                                                                   "t_environment";
-  private static final String TEXTURE_NAME_NORMAL                = "t_normal";
-  private static final String TEXTURE_NAME_PROJECTION            =
-                                                                   "t_projection";
-  private static final String TEXTURE_NAME_REFRACTION_SCENE      =
-                                                                   "t_refraction_scene";
-  private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK =
-                                                                   "t_refraction_scene_mask";
-  private static final String TEXTURE_NAME_SHADOW_BASIC          =
-                                                                   "t_shadow_basic";
-  private static final String TEXTURE_NAME_SHADOW_VARIANCE       =
-                                                                   "t_shadow_variance";
-  private static final String TEXTURE_NAME_SPECULAR              =
-                                                                   "t_specular";
+  private static final String MATRIX_NAME_DEFERRED_PROJECTION        =
+                                                                       "m_deferred_projective";
+  private static final String MATRIX_NAME_MODEL                      =
+                                                                       "m_model";
+  private static final String MATRIX_NAME_MODELVIEW                  =
+                                                                       "m_modelview";
+  private static final String MATRIX_NAME_NORMAL                     =
+                                                                       "m_normal";
+  private static final String MATRIX_NAME_POSITION                   =
+                                                                       "m_position";
+  private static final String MATRIX_NAME_PROJECTION                 =
+                                                                       "m_projection";
+  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW       =
+                                                                       "m_projective_modelview";
+  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION      =
+                                                                       "m_projective_projection";
+  private static final String MATRIX_NAME_UV                         = "m_uv";
+  private static final String MATRIX_NAME_VIEW_INVERSE               =
+                                                                       "m_view_inv";
+  private static final String TEXTURE_NAME_ALBEDO                    =
+                                                                       "t_albedo";
+  private static final String TEXTURE_NAME_DEFERRED_ALBEDO           =
+                                                                       "t_map_albedo";
+  private static final String TEXTURE_NAME_DEFERRED_DEPTH            =
+                                                                       "t_map_depth";
+  private static final String TEXTURE_NAME_DEFERRED_LINEAR_EYE_DEPTH =
+                                                                       "t_map_eye_depth";
+  private static final String TEXTURE_NAME_DEFERRED_NORMAL           =
+                                                                       "t_map_normal";
+  private static final String TEXTURE_NAME_DEFERRED_SPECULAR         =
+                                                                       "t_map_specular";
+  private static final String TEXTURE_NAME_EMISSION                  =
+                                                                       "t_emission";
+  private static final String TEXTURE_NAME_ENVIRONMENT               =
+                                                                       "t_environment";
+  private static final String TEXTURE_NAME_NORMAL                    =
+                                                                       "t_normal";
+  private static final String TEXTURE_NAME_PROJECTION                =
+                                                                       "t_projection";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE          =
+                                                                       "t_refraction_scene";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK     =
+                                                                       "t_refraction_scene_mask";
+  private static final String TEXTURE_NAME_SHADOW_BASIC              =
+                                                                       "t_shadow_basic";
+  private static final String TEXTURE_NAME_SHADOW_VARIANCE           =
+                                                                       "t_shadow_variance";
+  private static final String TEXTURE_NAME_SPECULAR                  =
+                                                                       "t_specular";
 
   /**
    * Bind the vertex color attribute of the given array to the color attribute
@@ -586,13 +590,13 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       unit);
   }
 
-  static void putDeferredMapEmissive(
+  static void putDeferredMapLinearEyeDepth(
     final JCBProgramType program,
     final TextureUnitType unit)
     throws JCGLException
   {
     program.programUniformPutTextureUnit(
-      KShadingProgramCommon.TEXTURE_NAME_DEFERRED_EMISSIVE,
+      KShadingProgramCommon.TEXTURE_NAME_DEFERRED_LINEAR_EYE_DEPTH,
       unit);
   }
 

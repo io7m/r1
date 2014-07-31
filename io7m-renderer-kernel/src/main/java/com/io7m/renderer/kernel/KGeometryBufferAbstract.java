@@ -106,9 +106,9 @@ import com.io7m.renderer.types.RExceptionNotSupported;
           TextureFilterMinification.TEXTURE_FILTER_LINEAR,
           TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
 
-      final Texture2DStaticType emissive =
-        gl.texture2DStaticAllocateR8(
-          "gbuffer-emissive",
+      final Texture2DStaticType eye_depth =
+        gl.texture2DStaticAllocateR32f(
+          "gbuffer-eye-depth",
           width,
           height,
           TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
@@ -145,7 +145,7 @@ import com.io7m.renderer.types.RExceptionNotSupported;
         gl.framebufferDrawAttachColorTexture2DAt(fb, attach_0, albedo);
         gl.framebufferDrawAttachColorTexture2DAt(fb, attach_1, normal);
         gl.framebufferDrawAttachColorTexture2DAt(fb, attach_2, specular);
-        gl.framebufferDrawAttachColorTexture2DAt(fb, attach_3, emissive);
+        gl.framebufferDrawAttachColorTexture2DAt(fb, attach_3, eye_depth);
         gl.framebufferDrawSetBuffers(fb, mappings);
 
         final FramebufferStatus status = gl.framebufferDrawValidate(fb);
@@ -171,13 +171,13 @@ import com.io7m.renderer.types.RExceptionNotSupported;
         albedo,
         normal,
         specular,
-        emissive,
+        eye_depth,
         fb);
     }
 
     private final Texture2DStaticType albedo;
     private final Texture2DStaticType depth;
-    private final Texture2DStaticType emissive;
+    private final Texture2DStaticType eye_depth;
     private final FramebufferType     fb;
     private final Texture2DStaticType normal;
     private final Texture2DStaticType specular;
@@ -187,14 +187,14 @@ import com.io7m.renderer.types.RExceptionNotSupported;
       final Texture2DStaticType in_albedo,
       final Texture2DStaticType in_normal,
       final Texture2DStaticType in_specular,
-      final Texture2DStaticType in_emissive,
+      final Texture2DStaticType in_eye_depth,
       final FramebufferType in_fb)
     {
       this.depth = NullCheck.notNull(in_depth, "Depth");
       this.albedo = NullCheck.notNull(in_albedo, "Albedo");
       this.normal = NullCheck.notNull(in_normal, "Normal");
       this.specular = NullCheck.notNull(in_specular, "Specular");
-      this.emissive = NullCheck.notNull(in_emissive, "Emissive");
+      this.eye_depth = NullCheck.notNull(in_eye_depth, "Eye depth");
       this.fb = NullCheck.notNull(in_fb, "Framebuffer");
     }
 
@@ -209,7 +209,7 @@ import com.io7m.renderer.types.RExceptionNotSupported;
         gc.texture2DStaticDelete(this.depth);
         gc.texture2DStaticDelete(this.normal);
         gc.texture2DStaticDelete(this.specular);
-        gc.texture2DStaticDelete(this.emissive);
+        gc.texture2DStaticDelete(this.eye_depth);
       } catch (final JCGLException e) {
         throw RExceptionJCGL.fromJCGLException(e);
       } finally {
@@ -227,14 +227,14 @@ import com.io7m.renderer.types.RExceptionNotSupported;
       return this.albedo;
     }
 
-    @Override public Texture2DStaticUsableType geomGetTextureEmissive()
-    {
-      return this.emissive;
-    }
-
     @Override public Texture2DStaticUsableType geomGetTextureDepthStencil()
     {
       return this.depth;
+    }
+
+    @Override public Texture2DStaticUsableType geomGetTextureLinearEyeDepth()
+    {
+      return this.eye_depth;
     }
 
     @Override public Texture2DStaticUsableType geomGetTextureNormal()
