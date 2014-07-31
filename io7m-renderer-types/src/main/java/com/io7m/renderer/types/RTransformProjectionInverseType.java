@@ -17,8 +17,8 @@
 package com.io7m.renderer.types;
 
 /**
- * A transformation from eye ({@link RSpaceEyeType}) space to clip (
- * {@link RSpaceClipType}) space. Typically a 4x4 perspective or orthographic
+ * A transformation from clip ({@link RSpaceClipType}) space to eye (
+ * {@link RSpaceEyeType}) space. Typically a 4x4 perspective or orthographic
  * projection matrix.
  */
 

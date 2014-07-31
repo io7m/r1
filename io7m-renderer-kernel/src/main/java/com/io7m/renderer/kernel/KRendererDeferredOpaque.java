@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -430,6 +430,10 @@ import com.io7m.renderer.types.RVectorI4F;
     KRendererCommon.putMaterialRegular(program, material);
     KShadingProgramCommon.putMaterialAlphaOpacity(program, 1.0f);
 
+    KShadingProgramCommon.putFarClipDistance(program, mwi
+      .getProjection()
+      .projectionGetZFar());
+
     material.materialOpaqueGetDepth().depthAccept(
       new KMaterialDepthVisitorType<Unit, JCGLException>() {
         @Override public Unit alpha(
@@ -575,7 +579,9 @@ import com.io7m.renderer.types.RVectorI4F;
     KShadingProgramCommon.putDeferredMapLinearEyeDepth(
       program,
       t_map_eye_depth);
-    KShadingProgramCommon.putFrustum(program, projection);
+    KShadingProgramCommon.putFarClipDistance(
+      program,
+      projection.projectionGetZFar());
   }
 
   private void putFramebufferScreenSize(
@@ -1130,6 +1136,10 @@ import com.io7m.renderer.types.RVectorI4F;
           program,
           mwo.getProjection());
 
+        KShadingProgramCommon.putMatrixInverseProjection(
+          program,
+          mwo.getMatrixProjectionInverse());
+
         KShadingProgramCommon.putLightDirectional(
           program,
           mwo.getMatrixContext(),
@@ -1252,11 +1262,13 @@ import com.io7m.renderer.types.RVectorI4F;
                 program,
                 mdp.getMatrixDeferredProjection());
 
-              KRendererCommon.putShadow(
-                shadow_map_context,
-                texture_unit_context,
-                program,
-                lp);
+              if (lp.lightHasShadow()) {
+                KRendererCommon.putShadow(
+                  shadow_map_context,
+                  texture_unit_context,
+                  program,
+                  lp);
+              }
 
               KShadingProgramCommon.putTextureProjection(
                 program,
@@ -1488,6 +1500,7 @@ import com.io7m.renderer.types.RVectorI4F;
         gc.arrayBufferBind(array);
         KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
 
+        final KProjectionType projection = mwi.getProjection();
         KRendererDeferredOpaque.this.putDeferredParameters(
           framebuffer,
           t_map_albedo,
@@ -1496,7 +1509,7 @@ import com.io7m.renderer.types.RVectorI4F;
           t_map_specular,
           t_map_eye_depth,
           program,
-          mwi.getProjection());
+          projection);
 
         KShadingProgramCommon.putLightSpherical(
           program,

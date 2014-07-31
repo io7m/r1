@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -87,6 +87,10 @@ import com.io7m.renderer.types.RException;
       b.append("\n");
     }
 
+    b.append("  -- Far clip plane\n");
+    b.append("  parameter far_clip_distance : float;\n");
+    b.append("\n");
+
     b.append("  -- G-Buffer outputs\n");
     b.append("  out out_albedo     : vector_4f as 0;\n");
     b.append("  out out_normal     : vector_2f as 1;\n");
@@ -156,6 +160,10 @@ import com.io7m.renderer.types.RException;
     try {
       b.append("shader fragment f is\n");
       b.append("\n");
+      b
+        .append("  -- The eye-space position of the current light volume fragment\n");
+      b.append("  in f_position_eye : vector_4f;\n");
+      b.append("\n");
       b.append("  -- G-buffer components\n");
       b.append("  parameter t_map_albedo    : sampler_2d;\n");
       b.append("  parameter t_map_normal    : sampler_2d;\n");
@@ -166,8 +174,8 @@ import com.io7m.renderer.types.RException;
       b.append("  -- Standard declarations\n");
       b.append("  out out_0 : vector_4f as 0;\n");
       b.append("\n");
-      b.append("  parameter screen_size : vector_2f;\n");
-      b.append("  parameter frustum     : Frustum.t;\n");
+      b.append("  parameter screen_size       : vector_2f;\n");
+      b.append("  parameter far_clip_distance : float;\n");
       b.append("\n");
 
       l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
@@ -265,14 +273,13 @@ import com.io7m.renderer.types.RException;
       b.append("\n");
 
       b.append("  -- Reconstruct eye-space position.\n");
-      b.append("  value depth_sample = \n");
+      b.append("  value normalized_depth_sample = \n");
       b.append("    S.texture (t_map_eye_depth, map_position) [x];\n");
       b.append("  value eye_position =\n");
-      b.append("    Transform.screen_to_eye_with_eye_depth (\n");
-      b.append("      screen_position,\n");
-      b.append("      depth_sample,\n");
-      b.append("      screen_size,\n");
-      b.append("      frustum\n");
+      b.append("    Transform.reconstruct_eye (\n");
+      b.append("      f_position_eye,\n");
+      b.append("      far_clip_distance,\n");
+      b.append("      normalized_depth_sample\n");
       b.append("    );\n");
       b.append("\n");
 
@@ -629,7 +636,7 @@ import com.io7m.renderer.types.RException;
   {
     try {
       b.append("  value r_eye_depth =\n");
-      b.append("    f_position_eye [z];\n");
+      b.append("    F.divide (f_position_eye [z], far_clip_distance);\n");
       b.append("\n");
       b.append("  value r_normal =\n");
       b.append("    Normals.compress (n);\n");
@@ -762,7 +769,7 @@ import com.io7m.renderer.types.RException;
           throws RException
         {
           b.append("shader program p is\n");
-          b.append("  vertex VertexShaders.standard_clip;\n");
+          b.append("  vertex VertexShaders.standard_clip_eye;\n");
           b.append("  fragment f;\n");
           b.append("end;\n");
           b.append("\n");
@@ -859,7 +866,6 @@ import com.io7m.renderer.types.RException;
     b.append("import com.io7m.renderer.core.DirectionalLight;\n");
     b.append("import com.io7m.renderer.core.Emission;\n");
     b.append("import com.io7m.renderer.core.Environment;\n");
-    b.append("import com.io7m.renderer.core.Frustum;\n");
     b.append("import com.io7m.renderer.core.Light;\n");
     b.append("import com.io7m.renderer.core.Normals;\n");
     b.append("import com.io7m.renderer.core.ProjectiveLight;\n");
