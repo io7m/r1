@@ -87,6 +87,7 @@ import com.io7m.renderer.types.RException;
     b.append("  out out_albedo     : vector_4f as 0;\n");
     b.append("  out out_normal     : vector_2f as 1;\n");
     b.append("  out out_specular   : vector_4f as 2;\n");
+    b.append("  out out_emissive   : float     as 3;\n");
     b.append("\n");
   }
 
@@ -155,6 +156,7 @@ import com.io7m.renderer.types.RException;
       b.append("  parameter t_map_albedo   : sampler_2d;\n");
       b.append("  parameter t_map_normal   : sampler_2d;\n");
       b.append("  parameter t_map_specular : sampler_2d;\n");
+      b.append("  parameter t_map_emissive : sampler_2d;\n");
       b.append("  parameter t_map_depth    : sampler_2d;\n");
       b.append("\n");
       b.append("  -- Standard declarations\n");
@@ -277,13 +279,14 @@ import com.io7m.renderer.types.RException;
       b.append("    Normals.decompress (normal_sample);\n");
       b.append("\n");
 
-      b.append("  -- Get surface albedo and emission\n");
-      b.append("  value albedo_sample =\n");
-      b.append("    S.texture (t_map_albedo, map_position);\n");
+      b.append("  -- Get surface albedo\n");
       b.append("  value albedo =\n");
-      b.append("    albedo_sample [x y z];\n");
+      b.append("    S.texture (t_map_albedo, map_position);\n");
+      b.append("\n");
+
+      b.append("  -- Get surface emission\n");
       b.append("  value emission =\n");
-      b.append("    albedo_sample [w];\n");
+      b.append("    S.texture (t_map_emissive, map_position) [x];\n");
       b.append("\n");
 
       b.append("  -- Get surface specular\n");
@@ -496,7 +499,7 @@ import com.io7m.renderer.types.RException;
       });
 
       b.append("  value lit_d =\n");
-      b.append("    V3.multiply (albedo, light_diffuse);\n");
+      b.append("    V3.multiply (albedo [x y z], light_diffuse);\n");
       b.append("  value lit_s =\n");
       b.append("    V3.add (lit_d, light_specular);\n");
       b.append("  value rgba =\n");
@@ -544,6 +547,7 @@ import com.io7m.renderer.types.RException;
     b.append("  out out_albedo   = r_albedo;\n");
     b.append("  out out_normal   = r_normal;\n");
     b.append("  out out_specular = r_specular;\n");
+    b.append("  out out_emissive = r_emission;\n");
     b.append("end;\n");
     b.append("\n");
   }
@@ -557,17 +561,15 @@ import com.io7m.renderer.types.RException;
       b.append("  value r_normal =\n");
       b.append("    Normals.compress (n);\n");
       b.append("\n");
+      b.append("  value r_albedo = surface;\n");
+      b.append("\n");
 
       emissive
         .emissiveAccept(new KMaterialEmissiveVisitorType<Unit, UnreachableCodeException>() {
           @Override public Unit constant(
             final KMaterialEmissiveConstant m)
           {
-            b.append("  value r_albedo =\n");
-            b.append("    new vector_4f (\n");
-            b.append("      surface [x y z],\n");
-            b.append("      p_emission.amount\n");
-            b.append("    );\n");
+            b.append("  value r_emission = p_emission.amount;\n");
             b.append("\n");
             return Unit.unit();
           }
@@ -575,11 +577,7 @@ import com.io7m.renderer.types.RException;
           @Override public Unit mapped(
             final KMaterialEmissiveMapped m)
           {
-            b.append("  value r_albedo =\n");
-            b.append("    new vector_4f (\n");
-            b.append("      surface [x y z],\n");
-            b.append("      p_emission.amount\n");
-            b.append("    );\n");
+            b.append("  value r_emission = p_emission.amount;\n");
             b.append("\n");
             return Unit.unit();
           }
@@ -587,11 +585,7 @@ import com.io7m.renderer.types.RException;
           @Override public Unit none(
             final KMaterialEmissiveNone m)
           {
-            b.append("  value r_albedo =\n");
-            b.append("    new vector_4f (\n");
-            b.append("      surface [x y z],\n");
-            b.append("      0.0\n");
-            b.append("    );\n");
+            b.append("  value r_emission = 0.0;\n");
             b.append("\n");
             return Unit.unit();
           }

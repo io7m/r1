@@ -559,6 +559,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
+    final TextureUnitType t_map_emissive,
     final JCBProgramType program,
     final KProjectionType projection)
     throws JCGLException
@@ -570,6 +571,7 @@ import com.io7m.renderer.types.RVectorI4F;
     KShadingProgramCommon.putDeferredMapDepth(program, t_map_depth_stencil);
     KShadingProgramCommon.putDeferredMapNormal(program, t_map_normal);
     KShadingProgramCommon.putDeferredMapSpecular(program, t_map_specular);
+    KShadingProgramCommon.putDeferredMapEmissive(program, t_map_emissive);
     KShadingProgramCommon.putFrustum(program, projection);
   }
 
@@ -958,6 +960,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
+    final TextureUnitType t_map_emissive,
     final JCGLInterfaceCommonType gc,
     final MatricesObserverType mwo,
     final KShadowMapContextType shadow_map_context,
@@ -981,6 +984,7 @@ import com.io7m.renderer.types.RVectorI4F;
             t_map_depth_stencil,
             t_map_normal,
             t_map_specular,
+            t_map_emissive,
             gc,
             mwo,
             ld);
@@ -1022,6 +1026,7 @@ import com.io7m.renderer.types.RVectorI4F;
                       t_map_depth_stencil,
                       t_map_normal,
                       t_map_specular,
+                      t_map_emissive,
                       gc,
                       mdp,
                       shadow_map_context,
@@ -1062,6 +1067,7 @@ import com.io7m.renderer.types.RVectorI4F;
                   t_map_depth_stencil,
                   t_map_normal,
                   t_map_specular,
+                  t_map_emissive,
                   gc,
                   mwi,
                   ls);
@@ -1081,6 +1087,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
+    final TextureUnitType t_map_emissive,
     final JCGLInterfaceCommonType gc,
     final MatricesObserverType mwo,
     final KLightDirectional ld)
@@ -1116,6 +1123,7 @@ import com.io7m.renderer.types.RVectorI4F;
           t_map_depth_stencil,
           t_map_normal,
           t_map_specular,
+          t_map_emissive,
           program,
           mwo.getProjection());
 
@@ -1142,6 +1150,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
+    final TextureUnitType t_map_emissive,
     final JCGLInterfaceCommonType gc,
     final MatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
@@ -1163,6 +1172,7 @@ import com.io7m.renderer.types.RVectorI4F;
       t_map_depth_stencil,
       t_map_normal,
       t_map_specular,
+      t_map_emissive,
       gc,
       mdp,
       shadow_map_context,
@@ -1176,6 +1186,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
+    final TextureUnitType t_map_emissive,
     final JCGLInterfaceCommonType gc,
     final MatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
@@ -1224,6 +1235,7 @@ import com.io7m.renderer.types.RVectorI4F;
                 t_map_depth_stencil,
                 t_map_normal,
                 t_map_specular,
+                t_map_emissive,
                 program,
                 mdp.getProjection());
 
@@ -1377,6 +1389,8 @@ import com.io7m.renderer.types.RVectorI4F;
             texture_context.withTexture2D(gbuffer.geomGetTextureNormal());
           final TextureUnitType t_map_specular =
             texture_context.withTexture2D(gbuffer.geomGetTextureSpecular());
+          final TextureUnitType t_map_emissive =
+            texture_context.withTexture2D(gbuffer.geomGetTextureEmissive());
 
           for (final KLightType light : group.getLights()) {
             assert light != null;
@@ -1387,6 +1401,7 @@ import com.io7m.renderer.types.RVectorI4F;
               t_map_depth_stencil,
               t_map_normal,
               t_map_specular,
+              t_map_emissive,
               gc,
               mwo,
               shadow_map_context,
@@ -1409,6 +1424,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
+    final TextureUnitType t_map_emissive,
     final JCGLInterfaceCommonType gc,
     final MatricesInstanceType mwi,
     final KLightSphere ls)
@@ -1428,6 +1444,7 @@ import com.io7m.renderer.types.RVectorI4F;
       t_map_depth_stencil,
       t_map_normal,
       t_map_specular,
+      t_map_emissive,
       gc,
       mwi,
       ls);
@@ -1439,6 +1456,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
+    final TextureUnitType t_map_emissive,
     final JCGLInterfaceCommonType gc,
     final MatricesInstanceType mwi,
     final KLightSphere ls)
@@ -1472,6 +1490,7 @@ import com.io7m.renderer.types.RVectorI4F;
           t_map_depth_stencil,
           t_map_normal,
           t_map_specular,
+          t_map_emissive,
           program,
           mwi.getProjection());
 
