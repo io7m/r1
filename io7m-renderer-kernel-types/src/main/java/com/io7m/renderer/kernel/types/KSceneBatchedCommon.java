@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -38,16 +38,8 @@ import com.io7m.renderer.types.RException;
     throw new UnreachableCodeException();
   }
 
-  static enum BatchUseCode
-  {
-    BATCH_USE_UNLIT_CODE,
-    BATCH_USE_LIT_CODE_WITH_DEPTH,
-    BATCH_USE_LIT_CODE_WITHOUT_DEPTH
-  }
-
   static Map<String, Set<KInstanceOpaqueType>> makeUnlitBatches(
-    final Set<KInstanceOpaqueType> unlits,
-    final BatchUseCode use_code)
+    final Set<KInstanceOpaqueType> unlits)
     throws RException,
       JCGLException
   {
@@ -62,26 +54,7 @@ import com.io7m.renderer.types.RException;
           {
             final KMaterialOpaqueRegular material = or.getMaterial();
 
-            String code = null;
-            switch (use_code) {
-              case BATCH_USE_LIT_CODE_WITHOUT_DEPTH:
-              {
-                code = material.materialLitGetCodeWithoutDepth();
-                break;
-              }
-              case BATCH_USE_LIT_CODE_WITH_DEPTH:
-              {
-                code = material.materialLitGetCodeWithDepth();
-                break;
-              }
-              case BATCH_USE_UNLIT_CODE:
-              {
-                code = material.materialUnlitGetCode();
-                break;
-              }
-            }
-            assert code != null;
-
+            final String code = material.materialGetCode();
             Set<KInstanceOpaqueType> batch_instances;
             if (batches.containsKey(code)) {
               batch_instances = batches.get(code);

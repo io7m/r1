@@ -195,31 +195,7 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_normal,
       in_specular);
 
-    final String code_lit_without_depth =
-      KMaterialCodes.makeCodeOpaqueRegularLitWithoutDepth(
-        in_albedo,
-        in_emissive,
-        in_environment,
-        in_normal,
-        in_specular);
-
-    final String code_lit_with_depth =
-      KMaterialCodes.makeCodeOpaqueRegularLitWithDepth(
-        in_depth,
-        in_albedo,
-        in_emissive,
-        in_environment,
-        in_normal,
-        in_specular);
-
-    final String code_unlit =
-      KMaterialCodes.makeCodeOpaqueRegularUnlit(
-        in_albedo,
-        in_emissive,
-        in_environment,
-        in_normal);
-
-    final String code_deferred =
+    final String code =
       KMaterialCodes.makeCodeDeferredGeometryRegular(
         KMaterialAlphaConstant.opaque(),
         in_depth,
@@ -230,10 +206,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         in_specular);
 
     return new KMaterialOpaqueRegular(
-      code_lit_without_depth,
-      code_lit_with_depth,
-      code_unlit,
-      code_deferred,
+      code,
       in_uv_matrix,
       in_albedo,
       in_depth,
@@ -244,10 +217,7 @@ import com.io7m.renderer.types.RTransformTextureType;
   }
 
   private final KMaterialAlbedoType                 albedo;
-  private final String                              code_deferred;
-  private final String                              code_lit_with_depth;
-  private final String                              code_lit_without_depth;
-  private final String                              code_unlit;
+  private final String                              code;
   private final KMaterialDepthType                  depth;
   private final KMaterialEmissiveType               emissive;
   private final KMaterialEnvironmentType            environment;
@@ -258,10 +228,7 @@ import com.io7m.renderer.types.RTransformTextureType;
   private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialOpaqueRegular(
-    final String in_code_lit_without_depth,
-    final String in_code_lit_with_depth,
-    final String in_code_unlit,
-    final String in_code_deferred,
+    final String in_code,
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final KMaterialAlbedoType in_albedo,
     final KMaterialDepthType in_depth,
@@ -277,14 +244,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     this.normal = NullCheck.notNull(in_normal, "Normal");
     this.specular = NullCheck.notNull(in_specular, "Specular");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
-
-    this.code_deferred = NullCheck.notNull(in_code_deferred, "Deferred code");
-    this.code_lit_without_depth =
-      NullCheck.notNull(in_code_lit_without_depth, "Lit code");
-    this.code_lit_with_depth =
-      NullCheck.notNull(in_code_lit_with_depth, "Lit code");
-
-    this.code_unlit = NullCheck.notNull(in_code_unlit, "Unlit code");
+    this.code = NullCheck.notNull(in_code, "Code");
 
     {
       int req = 0;
@@ -319,9 +279,9 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.materialOpaque(this);
   }
 
-  @Override public String materialDeferredGetCode()
+  @Override public String materialGetCode()
   {
-    return this.code_deferred;
+    return this.code;
   }
 
   @Override public KMaterialNormalType materialGetNormal()
@@ -332,16 +292,6 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix()
   {
     return this.uv_matrix;
-  }
-
-  @Override public String materialLitGetCodeWithDepth()
-  {
-    return this.code_lit_with_depth;
-  }
-
-  @Override public String materialLitGetCodeWithoutDepth()
-  {
-    return this.code_lit_without_depth;
   }
 
   @Override public KMaterialDepthType materialOpaqueGetDepth()
@@ -374,11 +324,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     return this.required_uv;
   }
 
-  @Override public String materialUnlitGetCode()
-  {
-    return this.code_unlit;
-  }
-
   @Override public
     <A, E extends Throwable, V extends KMaterialOpaqueVisitorType<A, E>>
     A
@@ -400,10 +345,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     final StringBuilder b = new StringBuilder();
     b.append("[KMaterialOpaqueRegular albedo=");
     b.append(this.albedo);
-    b.append(" code_lit=");
-    b.append(this.code_lit_without_depth);
-    b.append(" code_unlit=");
-    b.append(this.code_unlit);
+    b.append(" code=");
+    b.append(this.code);
     b.append(" depth=");
     b.append(this.depth);
     b.append(" emissive=");
@@ -412,6 +355,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     b.append(this.environment);
     b.append(" normal=");
     b.append(this.normal);
+    b.append(" required_uv=");
+    b.append(this.required_uv);
     b.append(" specular=");
     b.append(this.specular);
     b.append(" textures_required=");

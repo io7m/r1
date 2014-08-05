@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -39,7 +39,6 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentSpecularOnly;
@@ -87,8 +86,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
    *          An unlit shader cache
    * @param in_shader_lit_cache
    *          An lit shader cache
-   * @param in_caps
-   *          The current graphics capabilities
    * @param in_log
    *          A log handle
    * @return A new renderer
@@ -101,7 +98,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShaderCacheForwardTranslucentUnlitType in_shader_unlit_cache,
     final KShaderCacheForwardTranslucentLitType in_shader_lit_cache,
     final KRefractionRendererType in_refraction_renderer,
-    final KGraphicsCapabilitiesType in_caps,
     final LogUsableType in_log)
     throws RException
   {
@@ -110,7 +106,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
       in_shader_unlit_cache,
       in_shader_lit_cache,
       in_refraction_renderer,
-      in_caps,
       in_log);
   }
 
@@ -674,7 +669,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
       });
   }
 
-  private final KGraphicsCapabilitiesType               caps;
   private final JCGLImplementationType                  g;
   private final LogUsableType                           log;
   private final KRefractionRendererType                 refraction_renderer;
@@ -687,7 +681,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShaderCacheForwardTranslucentUnlitType in_shader_unlit_cache,
     final KShaderCacheForwardTranslucentLitType in_shader_lit_cache,
     final KRefractionRendererType in_refraction_renderer,
-    final KGraphicsCapabilitiesType in_caps,
     final LogUsableType in_log)
     throws RException
   {
@@ -703,8 +696,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
       this.texture_units =
         KTextureUnitAllocator.newAllocator(in_g.getGLCommon());
-      this.caps = NullCheck.notNull(in_caps, "Capabilities");
-
       this.refraction_renderer =
         NullCheck.notNull(in_refraction_renderer, "Refraction renderer");
 
@@ -866,7 +857,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
       final KInstanceTranslucentRegular instance = t.translucentGetInstance();
       final KMaterialTranslucentRegular material = instance.getMaterial();
-      final String shader_code = this.shaderCodeFromRegular(light, material);
+      final String shader_code =
+        KTranslucentRenderer.shaderCodeFromRegular(light, material);
 
       final int required =
         light.texturesGetRequired() + material.texturesGetRequired();
@@ -933,7 +925,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       RException,
       JCacheException
   {
-    final String shader_code = t.getMaterial().materialUnlitGetCode();
+    final String shader_code = t.getMaterial().materialGetCode();
 
     gc.blendingEnable(
       BlendFunction.BLEND_ONE,
@@ -1011,7 +1003,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
       final KInstanceTranslucentSpecularOnly instance =
         t.translucentGetInstance();
 
-      final String shader_code = this.shaderCodeSpecularOnly(light, material);
+      final String shader_code =
+        KTranslucentRenderer.shaderCodeSpecularOnly(light, material);
 
       final int required = material.texturesGetRequired();
       if (unit_allocator.hasEnoughUnits(required) == false) {
@@ -1053,7 +1046,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     }
   }
 
-  private String shaderCodeFromLight(
+  private static String shaderCodeFromLight(
     final KLightType light)
   {
     try {
@@ -1069,13 +1062,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
           final KLightProjective l)
           throws RException
         {
-          if (KTranslucentRenderer.this.caps.getSupportsDepthTextures()) {
-            return l.lightGetCode();
-          }
-
-          final String r = String.format("%s4444", l.lightGetCode());
-          assert r != null;
-          return r;
+          return l.lightGetCode();
         }
 
         @Override public String lightSpherical(
@@ -1090,12 +1077,12 @@ import com.io7m.renderer.types.RExceptionJCGL;
     }
   }
 
-  private String shaderCodeFromRegular(
+  private static String shaderCodeFromRegular(
     final KLightType light,
     final KMaterialTranslucentRegular material)
   {
-    final String lcode = this.shaderCodeFromLight(light);
-    final String mcode = material.materialLitGetCodeWithoutDepth();
+    final String lcode = KTranslucentRenderer.shaderCodeFromLight(light);
+    final String mcode = material.materialGetCode();
 
     final StringBuilder s = new StringBuilder();
     s.append(lcode);
@@ -1107,12 +1094,12 @@ import com.io7m.renderer.types.RExceptionJCGL;
     return r;
   }
 
-  private String shaderCodeSpecularOnly(
+  private static String shaderCodeSpecularOnly(
     final KLightType light,
     final KMaterialTranslucentSpecularOnly material)
   {
-    final String lcode = this.shaderCodeFromLight(light);
-    final String mcode = material.materialLitGetCodeWithoutDepth();
+    final String lcode = KTranslucentRenderer.shaderCodeFromLight(light);
+    final String mcode = material.materialGetCode();
 
     final StringBuilder s = new StringBuilder();
     s.append(lcode);

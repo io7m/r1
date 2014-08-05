@@ -112,14 +112,12 @@ import com.io7m.renderer.types.RTransformViewType;
   @EqualityReference private final class InstanceFromObserver implements
     KMatricesInstanceType
   {
-    private final RMatrixM4x4F<RTransformDeferredProjectionType> matrix_deferred_proj;
-    private final RMatrixM4x4F<RTransformDeferredProjectionType> matrix_deferred_proj_temp;
-    private final RMatrixM4x4F<RTransformModelType>              matrix_model;
-    private final RMatrixM4x4F<RTransformModelViewType>          matrix_modelview;
-    private final RMatrixM3x3F<RTransformNormalType>             matrix_normal;
-    private final RMatrixM3x3F<RTransformTextureType>            matrix_uv;
-    private final RMatrixM3x3F<RTransformTextureType>            matrix_uv_temp;
-    private final Observer                                       parent;
+    private final RMatrixM4x4F<RTransformModelType>     matrix_model;
+    private final RMatrixM4x4F<RTransformModelViewType> matrix_modelview;
+    private final RMatrixM3x3F<RTransformNormalType>    matrix_normal;
+    private final RMatrixM3x3F<RTransformTextureType>   matrix_uv;
+    private final RMatrixM3x3F<RTransformTextureType>   matrix_uv_temp;
+    private final Observer                              parent;
 
     InstanceFromObserver(
       final Observer in_parent)
@@ -131,10 +129,6 @@ import com.io7m.renderer.types.RTransformViewType;
       this.matrix_normal = new RMatrixM3x3F<RTransformNormalType>();
       this.matrix_uv = new RMatrixM3x3F<RTransformTextureType>();
       this.matrix_uv_temp = new RMatrixM3x3F<RTransformTextureType>();
-      this.matrix_deferred_proj =
-        new RMatrixM4x4F<RTransformDeferredProjectionType>();
-      this.matrix_deferred_proj_temp =
-        new RMatrixM4x4F<RTransformDeferredProjectionType>();
     }
 
     @Override public Context getMatrixContext()
@@ -370,7 +364,6 @@ import com.io7m.renderer.types.RTransformViewType;
     private final RMatrixM3x3F<RTransformTextureType>             matrix_uv;
     private final RMatrixM3x3F<RTransformTextureType>             matrix_uv_temp;
     private final ProjectiveFromObserver                          parent;
-    private final MatrixM4x4F                                     temp;
 
     InstanceFromProjective(
       final ProjectiveFromObserver in_parent)
@@ -386,7 +379,6 @@ import com.io7m.renderer.types.RTransformViewType;
         new RMatrixM4x4F<RTransformProjectiveModelViewType>();
       this.matrix_deferred_projection =
         new RMatrixM4x4F<RTransformDeferredProjectionType>();
-      this.temp = new MatrixM4x4F();
     }
 
     @Override public Context getMatrixContext()

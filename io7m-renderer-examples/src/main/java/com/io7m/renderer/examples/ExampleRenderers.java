@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -73,9 +73,6 @@ public final class ExampleRenderers
     final SortedMap<String, ExampleRendererConstructorType> r =
       new TreeMap<String, ExampleRendererConstructorType>();
 
-    r.put(
-      ExampleRendererForwardDefault.class.getCanonicalName(),
-      ExampleRendererForwardDefault.get());
     r.put(
       ExampleRendererDeferredDefault.class.getCanonicalName(),
       ExampleRendererDeferredDefault.get());

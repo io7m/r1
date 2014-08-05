@@ -28,7 +28,6 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KSceneBatchedCommon.BatchUseCode;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -106,7 +105,7 @@ import com.io7m.renderer.types.RException;
               @Override public Unit regular(
                 final KInstanceOpaqueRegular o)
               {
-                final String code = o.getMaterial().materialDeferredGetCode();
+                final String code = o.getMaterial().materialGetCode();
 
                 Set<KInstanceOpaqueType> batch_instances;
                 if (by_material.containsKey(code)) {
@@ -131,9 +130,7 @@ import com.io7m.renderer.types.RException;
        */
 
       final Map<String, Set<KInstanceOpaqueType>> in_unlit =
-        KSceneBatchedCommon.makeUnlitBatches(
-          in_scene.getUnlitOpaques(),
-          BatchUseCode.BATCH_USE_LIT_CODE_WITH_DEPTH);
+        KSceneBatchedCommon.makeUnlitBatches(in_scene.getUnlitOpaques());
 
       return new KSceneBatchedDeferredOpaque(in_groups, in_unlit);
     } catch (final RException e) {

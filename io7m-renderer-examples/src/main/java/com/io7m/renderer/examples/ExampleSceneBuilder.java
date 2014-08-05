@@ -31,7 +31,6 @@ import com.io7m.renderer.examples.tools.EMeshCache;
 import com.io7m.renderer.examples.tools.ETexture2DCache;
 import com.io7m.renderer.examples.tools.ETextureCubeCache;
 import com.io7m.renderer.kernel.types.KCamera;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
@@ -55,7 +54,6 @@ import com.io7m.renderer.types.RXMLException;
 
 public final class ExampleSceneBuilder implements ExampleSceneBuilderType
 {
-  private final KGraphicsCapabilitiesType   caps;
   private final ETextureCubeCache           cube_cache;
   private final EMeshCache                  mesh_cache;
   private final KSceneBuilderWithCreateType scene_builder;
@@ -63,11 +61,9 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
 
   /**
    * Construct an example scene builder.
-   * 
+   *
    * @param in_scene_builder
    *          The base scene builder.
-   * @param in_caps
-   *          The current graphics capabilities.
    * @param in_cube_cache
    *          A cube map cache.
    * @param in_mesh_cache
@@ -78,21 +74,14 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
 
   public ExampleSceneBuilder(
     final KSceneBuilderWithCreateType in_scene_builder,
-    final KGraphicsCapabilitiesType in_caps,
     final ETextureCubeCache in_cube_cache,
     final EMeshCache in_mesh_cache,
     final ETexture2DCache in_texture2d_cache)
   {
     this.scene_builder = in_scene_builder;
-    this.caps = in_caps;
     this.cube_cache = in_cube_cache;
     this.mesh_cache = in_mesh_cache;
     this.texture2d_cache = in_texture2d_cache;
-  }
-
-  @Override public KGraphicsCapabilitiesType capabilities()
-  {
-    return this.caps;
   }
 
   @Override public TextureCubeStaticUsableType cubeTexture(

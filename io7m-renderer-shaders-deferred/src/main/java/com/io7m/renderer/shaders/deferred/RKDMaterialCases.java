@@ -19,9 +19,18 @@ package com.io7m.renderer.shaders.deferred;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.TextureCubeStaticType;
+import com.io7m.jcanephora.TextureFilterMagnification;
+import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jcanephora.TextureFormat;
+import com.io7m.jcanephora.TextureWrapR;
+import com.io7m.jcanephora.TextureWrapS;
+import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoType;
@@ -48,8 +57,6 @@ import com.io7m.renderer.kernel.types.KMaterialSpecularNone;
 import com.io7m.renderer.kernel.types.KMaterialSpecularType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialVerification;
-import com.io7m.renderer.shaders.core.FakeTexture2DStatic;
-import com.io7m.renderer.shaders.core.FakeTextureCubeStatic;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
 import com.io7m.renderer.types.RSpaceRGBType;
@@ -58,11 +65,11 @@ import com.io7m.renderer.types.RVectorI3F;
 
 @EqualityReference public final class RKDMaterialCases
 {
-  private static List<KMaterialAlbedoType> makeAlbedoCases()
+  private static List<KMaterialAlbedoType> makeAlbedoCases(
+    final Texture2DStaticType t)
   {
     final List<KMaterialAlbedoType> cases =
       new ArrayList<KMaterialAlbedoType>();
-    final Texture2DStaticType t = FakeTexture2DStatic.getDefault();
     final KMaterialAlbedoUntextured w = KMaterialAlbedoUntextured.white();
     cases.add(w);
     cases.add(KMaterialAlbedoTextured.textured(w.getColor(), 1.0f, t));
@@ -184,45 +191,45 @@ import com.io7m.renderer.types.RVectorI3F;
     return cases;
   }
 
-  private static List<KMaterialEmissiveType> makeEmissiveCases()
+  private static List<KMaterialEmissiveType> makeEmissiveCases(
+    final Texture2DStaticType t)
   {
     final List<KMaterialEmissiveType> cases =
       new ArrayList<KMaterialEmissiveType>();
-    final Texture2DStaticType t = FakeTexture2DStatic.getDefault();
     cases.add(KMaterialEmissiveNone.none());
     cases.add(KMaterialEmissiveConstant.constant(1.0f));
     cases.add(KMaterialEmissiveMapped.mapped(1.0f, t));
     return cases;
   }
 
-  private static List<KMaterialEnvironmentType> makeEnvironmentCases()
+  private static List<KMaterialEnvironmentType> makeEnvironmentCases(
+    final TextureCubeStaticType t)
   {
     final List<KMaterialEnvironmentType> cases =
       new ArrayList<KMaterialEnvironmentType>();
-    final TextureCubeStaticType t = FakeTextureCubeStatic.getDefault();
     cases.add(KMaterialEnvironmentNone.none());
     cases.add(KMaterialEnvironmentReflection.reflection(1.0f, t));
     cases.add(KMaterialEnvironmentReflectionMapped.reflectionMapped(1.0f, t));
     return cases;
   }
 
-  private static List<KMaterialNormalType> makeNormalCases()
+  private static List<KMaterialNormalType> makeNormalCases(
+    final Texture2DStaticType t)
   {
     final List<KMaterialNormalType> cases =
       new ArrayList<KMaterialNormalType>();
-    final Texture2DStaticType t = FakeTexture2DStatic.getDefault();
     cases.add(KMaterialNormalVertex.vertex());
     cases.add(KMaterialNormalMapped.mapped(t));
     return cases;
   }
 
-  private static List<KMaterialSpecularType> makeSpecularCases()
+  private static List<KMaterialSpecularType> makeSpecularCases(
+    final Texture2DStaticType t)
   {
     final List<KMaterialSpecularType> cases =
       new ArrayList<KMaterialSpecularType>();
     final RVectorI3F<RSpaceRGBType> color =
       new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
-    final Texture2DStaticType t = FakeTexture2DStatic.getDefault();
     cases.add(KMaterialSpecularNone.none());
     cases.add(KMaterialSpecularConstant.constant(color, 1.0f));
     cases.add(KMaterialSpecularMapped.mapped(color, 1.0f, t));
@@ -261,12 +268,199 @@ import com.io7m.renderer.types.RVectorI3F;
 
   public RKDMaterialCases()
   {
-    this.cases_albedo = RKDMaterialCases.makeAlbedoCases();
-    this.cases_emissive = RKDMaterialCases.makeEmissiveCases();
+    final Texture2DStaticType t2d = new Texture2DStaticType() {
+      @Override public long resourceGetSizeBytes()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public boolean resourceIsDeleted()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int getGLName()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapT textureGetWrapT()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapS textureGetWrapS()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetWidth()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeY()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeX()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public String textureGetName()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public
+        TextureFilterMinification
+        textureGetMinificationFilter()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public
+        TextureFilterMagnification
+        textureGetMagnificationFilter()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetHeight()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureFormat textureGetFormat()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public AreaInclusive textureGetArea()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+    };
+
+    final TextureCubeStaticType tc = new TextureCubeStaticType() {
+
+      @Override public boolean resourceIsDeleted()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public long resourceGetSizeBytes()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int getGLName()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapT textureGetWrapT()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapS textureGetWrapS()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapR textureGetWrapR()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetWidth()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeY()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeX()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public String textureGetName()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public
+        TextureFilterMinification
+        textureGetMinificationFilter()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public
+        TextureFilterMagnification
+        textureGetMagnificationFilter()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetHeight()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureFormat textureGetFormat()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public AreaInclusive textureGetArea()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+    };
+
+    this.cases_albedo = RKDMaterialCases.makeAlbedoCases(t2d);
+    this.cases_emissive = RKDMaterialCases.makeEmissiveCases(t2d);
     this.cases_depth = RKDMaterialCases.makeDepthCases();
-    this.cases_env = RKDMaterialCases.makeEnvironmentCases();
-    this.cases_normal = RKDMaterialCases.makeNormalCases();
-    this.cases_specular = RKDMaterialCases.makeSpecularCases();
+    this.cases_env = RKDMaterialCases.makeEnvironmentCases(tc);
+    this.cases_normal = RKDMaterialCases.makeNormalCases(t2d);
+    this.cases_specular = RKDMaterialCases.makeSpecularCases(t2d);
 
     this.cases_geom_opaque_regular =
       RKDMaterialCases.makeCasesGeometryOpaqueRegular(

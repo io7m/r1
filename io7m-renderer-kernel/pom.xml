@@ -105,16 +105,6 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-shaders-forward-opaque-lit</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-renderer-shaders-forward-opaque-unlit</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-shaders-forward-translucent-lit</artifactId>
       <version>${project.version}</version>
     </dependency>

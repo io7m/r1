@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -73,7 +73,6 @@ import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
-import com.io7m.renderer.tests.FakeCapabilities;
 import com.io7m.renderer.tests.RFakeGL;
 import com.io7m.renderer.tests.RFakeShaderControllers;
 import com.io7m.renderer.tests.RFakeTextures2DStatic;
@@ -139,8 +138,6 @@ import com.io7m.renderer.types.RVectorI4F;
       final Integer v = Integer.valueOf(23);
       assert v != null;
 
-      final FakeCapabilities caps = new FakeCapabilities();
-
       final KLightProjectiveBuilderType b =
         KLightProjective.newBuilder(
           RFakeTextures2DStatic.newAnything(),
@@ -153,7 +150,7 @@ import com.io7m.renderer.types.RVectorI4F;
       b.setRange(range);
       b.setShadowOption(shadow);
       b.setTexture(texture);
-      return b.build(caps);
+      return b.build();
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
     }
