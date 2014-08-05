@@ -16,6 +16,9 @@
 
 package com.io7m.renderer.shaders.forward.tests;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -53,11 +56,18 @@ import com.io7m.renderer.shaders.forward.RKFMaterialCases;
   {
     final RKFLitTranslucentRegularCases oc =
       new RKFLitTranslucentRegularCases();
+    final Set<String> set = new HashSet<String>();
 
     for (final RKFLitCase<KMaterialTranslucentRegular> c : oc.getCases()) {
       final String lc = c.getLight().lightGetCode();
-      final String mc = c.getMaterial().materialLitGetCodeWithoutDepth();
-      System.out.printf("%s_%s\n", lc, mc);
+      final String mc = c.getMaterial().materialGetCode();
+      final String code = String.format("%s_%s", lc, mc);
+      System.out.println(code);
+
+      if (set.contains(code)) {
+        Assert.fail(code + " already exists");
+      }
+      set.add(code);
     }
   }
 }

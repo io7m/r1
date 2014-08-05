@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -26,7 +26,6 @@ import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KLightDirectional;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightSphere;
@@ -78,18 +77,12 @@ import com.io7m.renderer.types.RException;
 {
   private static final OptionType<KLightType> NO_LIGHT = Option.none();
 
-  public static final String                  PACKAGE_FORWARD_OPAQUE_LIT_REGULAR;
-  public static final String                  PACKAGE_FORWARD_OPAQUE_UNLIT_REGULAR;
   public static final String                  PACKAGE_FORWARD_TRANSLUCENT_LIT_REGULAR;
   public static final String                  PACKAGE_FORWARD_TRANSLUCENT_LIT_SPECULAR_ONLY;
   public static final String                  PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REFRACTIVE;
   public static final String                  PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REGULAR;
 
   static {
-    PACKAGE_FORWARD_OPAQUE_UNLIT_REGULAR =
-      "com.io7m.renderer.kernel.forward.opaque.unlit.regular";
-    PACKAGE_FORWARD_OPAQUE_LIT_REGULAR =
-      "com.io7m.renderer.kernel.forward.opaque.lit.regular";
     PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REGULAR =
       "com.io7m.renderer.kernel.forward.translucent.unlit.regular";
     PACKAGE_FORWARD_TRANSLUCENT_UNLIT_REFRACTIVE =
@@ -447,7 +440,6 @@ import com.io7m.renderer.types.RException;
 
   public static void fragmentShaderLitTranslucentRegular(
     final StringBuilder b,
-    final KGraphicsCapabilitiesType c,
     final KLightType l,
     final KMaterialTranslucentRegular m)
   {
@@ -473,7 +465,7 @@ import com.io7m.renderer.types.RException;
     RKForwardShader.fragmentShaderValuesEmission(b, emissive);
     RKForwardShader.fragmentShaderValuesSpecular(b, specular);
     RKForwardShader.fragmentShaderValuesEnvironment(b, envi);
-    RKForwardShader.fragmentShaderValuesLight(b, c, l, emissive, specular);
+    RKForwardShader.fragmentShaderValuesLight(b, l, emissive, specular);
     RKForwardShader.fragmentShaderValuesAlbedoTranslucent(b, albedo);
     RKForwardShader.fragmentShaderValuesSurfaceTranslucent(b, envi);
     RKForwardShader.fragmentShaderValuesRGBATranslucentLit(b, specular);
@@ -485,7 +477,6 @@ import com.io7m.renderer.types.RException;
 
   public static void fragmentShaderLitTranslucentSpecularOnly(
     final StringBuilder b,
-    final KGraphicsCapabilitiesType c,
     final KLightType l,
     final KMaterialTranslucentSpecularOnly m)
   {
@@ -503,7 +494,7 @@ import com.io7m.renderer.types.RException;
     RKForwardShader.fragmentShaderValuesNormal(b, normal);
     RKForwardShader.fragmentShaderValuesAlpha(b, alpha);
     RKForwardShader.fragmentShaderValuesSpecularOnly(b, specular);
-    RKForwardShader.fragmentShaderValuesLightSpecularOnly(b, c, l, specular);
+    RKForwardShader.fragmentShaderValuesLightSpecularOnly(b, l, specular);
     RKForwardShader.fragmentShaderValuesRGBATranslucentLitSpecularOnly(
       b,
       specular);
@@ -515,7 +506,6 @@ import com.io7m.renderer.types.RException;
 
   public static void fragmentShaderOpaqueLit(
     final StringBuilder b,
-    final KGraphicsCapabilitiesType caps,
     final KLightType l,
     final KMaterialOpaqueRegular m)
   {
@@ -538,7 +528,7 @@ import com.io7m.renderer.types.RException;
     RKForwardShader.fragmentShaderValuesEmission(b, emissive);
     RKForwardShader.fragmentShaderValuesSpecular(b, specular);
     RKForwardShader.fragmentShaderValuesEnvironment(b, envi);
-    RKForwardShader.fragmentShaderValuesLight(b, caps, l, emissive, specular);
+    RKForwardShader.fragmentShaderValuesLight(b, l, emissive, specular);
     RKForwardShader.fragmentShaderValuesAlbedoOpaque(b, albedo);
     RKForwardShader.fragmentShaderValuesSurfaceOpaque(b, envi);
     RKForwardShader.fragmentShaderValuesRGBAOpaqueLit(b, specular);
@@ -812,7 +802,6 @@ import com.io7m.renderer.types.RException;
 
   public static void fragmentShaderValuesLight(
     final StringBuilder b,
-    final KGraphicsCapabilitiesType caps,
     final KLightType l,
     final KMaterialEmissiveType emissive,
     final KMaterialSpecularType specular)
@@ -834,7 +823,6 @@ import com.io7m.renderer.types.RException;
         {
           RKForwardShader.fragmentShaderValuesLightProjective(
             b,
-            caps,
             lp,
             emissive,
             specular);
@@ -1019,7 +1007,6 @@ import com.io7m.renderer.types.RException;
 
   public static void fragmentShaderValuesLightProjective(
     final StringBuilder b,
-    final KGraphicsCapabilitiesType caps,
     final KLightProjective lp,
     final KMaterialEmissiveType emissive,
     final KMaterialSpecularType specular)
@@ -1054,35 +1041,19 @@ import com.io7m.renderer.types.RException;
             @Override public Unit shadowMappedBasic(
               final KShadowMappedBasic s)
             {
-              if (caps.getSupportsDepthTextures()) {
-                b.append("  -- Basic shadow mapping\n");
-                b.append("  value light_shadow =\n");
-                b.append("    ShadowBasic.factor (\n");
-                b.append("      shadow_basic,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      f_position_light_clip\n");
-                b.append("    );\n");
-                b.append("  value light_attenuation =\n");
-                b.append("    F.multiply (\n");
-                b.append("      light_shadow,\n");
-                b.append("      light_vectors.attenuation\n");
-                b.append("    );\n");
-                b.append("\n");
-              } else {
-                b.append("  -- Basic shadow mapping with packed buffers\n");
-                b.append("  value light_shadow =\n");
-                b.append("    ShadowBasic.factor_packed4444 (\n");
-                b.append("      shadow_basic,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      f_position_light_clip\n");
-                b.append("    );\n");
-                b.append("  value light_attenuation =\n");
-                b.append("    F.multiply (\n");
-                b.append("      light_shadow,\n");
-                b.append("      light_vectors.attenuation\n");
-                b.append("    );\n");
-                b.append("\n");
-              }
+              b.append("  -- Basic shadow mapping\n");
+              b.append("  value light_shadow =\n");
+              b.append("    ShadowBasic.factor (\n");
+              b.append("      shadow_basic,\n");
+              b.append("      t_shadow_basic,\n");
+              b.append("      f_position_light_clip\n");
+              b.append("    );\n");
+              b.append("  value light_attenuation =\n");
+              b.append("    F.multiply (\n");
+              b.append("      light_shadow,\n");
+              b.append("      light_vectors.attenuation\n");
+              b.append("    );\n");
+              b.append("\n");
               return Unit.unit();
             }
 
@@ -1226,7 +1197,6 @@ import com.io7m.renderer.types.RException;
 
   public static void fragmentShaderValuesLightProjectiveSpecularOnly(
     final StringBuilder b,
-    final KGraphicsCapabilitiesType caps,
     final KLightProjective lp,
     final KMaterialSpecularType specular)
   {
@@ -1258,33 +1228,18 @@ import com.io7m.renderer.types.RException;
             @Override public Unit shadowMappedBasic(
               final KShadowMappedBasic s)
             {
-              if (caps.getSupportsDepthTextures()) {
-                b.append("  value light_shadow =\n");
-                b.append("    ShadowBasic.factor (\n");
-                b.append("      shadow_basic,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      f_position_light_clip\n");
-                b.append("    );\n");
-                b.append("  value light_attenuation =\n");
-                b.append("    F.multiply (\n");
-                b.append("      light_shadow,\n");
-                b.append("      light_vectors.attenuation\n");
-                b.append("    );\n");
-                b.append("\n");
-              } else {
-                b.append("  value light_shadow =\n");
-                b.append("    ShadowBasic.factor_packed4444 (\n");
-                b.append("      shadow_basic,\n");
-                b.append("      t_shadow_basic,\n");
-                b.append("      f_position_light_clip\n");
-                b.append("    );\n");
-                b.append("  value light_attenuation =\n");
-                b.append("    F.multiply (\n");
-                b.append("      light_shadow,\n");
-                b.append("      light_vectors.attenuation\n");
-                b.append("    );\n");
-                b.append("\n");
-              }
+              b.append("  value light_shadow =\n");
+              b.append("    ShadowBasic.factor (\n");
+              b.append("      shadow_basic,\n");
+              b.append("      t_shadow_basic,\n");
+              b.append("      f_position_light_clip\n");
+              b.append("    );\n");
+              b.append("  value light_attenuation =\n");
+              b.append("    F.multiply (\n");
+              b.append("      light_shadow,\n");
+              b.append("      light_vectors.attenuation\n");
+              b.append("    );\n");
+              b.append("\n");
               return Unit.unit();
             }
 
@@ -1372,7 +1327,6 @@ import com.io7m.renderer.types.RException;
 
   public static void fragmentShaderValuesLightSpecularOnly(
     final StringBuilder b,
-    final KGraphicsCapabilitiesType c,
     final KLightType l,
     final KMaterialSpecularType specular)
   {
@@ -1392,7 +1346,6 @@ import com.io7m.renderer.types.RException;
         {
           RKForwardShader.fragmentShaderValuesLightProjectiveSpecularOnly(
             b,
-            c,
             lp,
             specular);
           return Unit.unit();
@@ -2057,29 +2010,7 @@ import com.io7m.renderer.types.RException;
     b.append("\n");
   }
 
-  public static String moduleLitOpaqueRegular(
-    final KGraphicsCapabilitiesType c,
-    final KLightType l,
-    final KMaterialOpaqueRegular m)
-  {
-    final String code = RKForwardShaderCodes.fromLitOpaqueRegular(l, m);
-
-    final StringBuilder b = new StringBuilder();
-    RKForwardShader.moduleStart(
-      b,
-      RKForwardShader.PACKAGE_FORWARD_OPAQUE_LIT_REGULAR,
-      code);
-    RKForwardShader.fragmentShaderOpaqueLit(b, c, l, m);
-    RKForwardShader.moduleProgram(b, Option.some(l), m.materialGetNormal());
-    RKForwardShader.moduleEnd(b);
-
-    final String r = b.toString();
-    assert r != null;
-    return r;
-  }
-
   public static String moduleLitTranslucentRegular(
-    final KGraphicsCapabilitiesType c,
     final KLightType l,
     final KMaterialTranslucentRegular m)
   {
@@ -2090,7 +2021,7 @@ import com.io7m.renderer.types.RException;
       b,
       RKForwardShader.PACKAGE_FORWARD_TRANSLUCENT_LIT_REGULAR,
       code);
-    RKForwardShader.fragmentShaderLitTranslucentRegular(b, c, l, m);
+    RKForwardShader.fragmentShaderLitTranslucentRegular(b, l, m);
     RKForwardShader.moduleProgram(b, Option.some(l), m.materialGetNormal());
     RKForwardShader.moduleEnd(b);
 
@@ -2100,7 +2031,6 @@ import com.io7m.renderer.types.RException;
   }
 
   public static String moduleLitTranslucentSpecularOnly(
-    final KGraphicsCapabilitiesType c,
     final KLightType l,
     final KMaterialTranslucentSpecularOnly m)
   {
@@ -2112,7 +2042,7 @@ import com.io7m.renderer.types.RException;
       b,
       RKForwardShader.PACKAGE_FORWARD_TRANSLUCENT_LIT_SPECULAR_ONLY,
       code);
-    RKForwardShader.fragmentShaderLitTranslucentSpecularOnly(b, c, l, m);
+    RKForwardShader.fragmentShaderLitTranslucentSpecularOnly(b, l, m);
     RKForwardShader.moduleProgram(b, Option.some(l), m.materialGetNormal());
     RKForwardShader.moduleEnd(b);
 
@@ -2270,28 +2200,6 @@ import com.io7m.renderer.types.RException;
     b.append("import com.io7m.renderer.core.VectorAux;\n");
     b.append("import com.io7m.renderer.core.VertexShaders;\n");
     b.append("\n");
-  }
-
-  public static String moduleUnlitOpaqueRegular(
-    final KMaterialOpaqueRegular m)
-  {
-    final String code = RKForwardShaderCodes.fromUnlitOpaqueRegular(m);
-
-    final StringBuilder b = new StringBuilder();
-    RKForwardShader.moduleStart(
-      b,
-      RKForwardShader.PACKAGE_FORWARD_OPAQUE_UNLIT_REGULAR,
-      code);
-    RKForwardShader.fragmentShaderOpaqueUnlit(b, m);
-    RKForwardShader.moduleProgram(
-      b,
-      RKForwardShader.NO_LIGHT,
-      m.materialGetNormal());
-    RKForwardShader.moduleEnd(b);
-
-    final String r = b.toString();
-    assert r != null;
-    return r;
   }
 
   public static String moduleUnlitTranslucentRefractive(

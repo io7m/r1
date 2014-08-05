@@ -91,7 +91,6 @@ import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KLightProjective;
@@ -137,7 +136,6 @@ import com.io7m.renderer.types.RVectorI3F;
 
     public TestRenderer(
       final JCGLImplementationType g,
-      final KGraphicsCapabilities caps,
       final LogUsableType log)
       throws RException
     {
@@ -296,7 +294,7 @@ import com.io7m.renderer.types.RVectorI3F;
         KShaderCache.wrapDepthVariance(dvc);
 
       final KDepthRendererType depth_renderer =
-        KDepthRenderer.newRenderer(g, caps, depth_shader_cache, log);
+        KDepthRenderer.newRenderer(g, depth_shader_cache, log);
       final KDepthVarianceRendererType depth_variance_renderer =
         KDepthVarianceRenderer.newRenderer(g, depth_variance_shader_cache);
 
@@ -495,10 +493,8 @@ import com.io7m.renderer.types.RVectorI3F;
       Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests");
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30WithLog(log, shader_control);
-    final KGraphicsCapabilities caps =
-      KGraphicsCapabilities.getCapabilities(g);
 
-    final TestRenderer r = new TestRenderer(g, caps, log);
+    final TestRenderer r = new TestRenderer(g, log);
 
     final MatrixM4x4F temp = new MatrixM4x4F();
     final RMatrixI4x4F<RTransformViewType> id = RMatrixI4x4F.identity();
@@ -521,9 +517,9 @@ import com.io7m.renderer.types.RVectorI3F;
     final KShadowMapBasicDescription map_desc =
       KShadowMapBasicDescription.newDescription(fb_desc, 2);
     sl0b.setShadow(KShadowMappedBasic.newMappedBasic(0.001f, 0.0f, map_desc));
-    final KLightProjective sl0 = sl0b.build(caps);
-    final KLightProjective sl1 = sl0b.build(caps);
-    final KLightProjective sl2 = sl0b.build(caps);
+    final KLightProjective sl0 = sl0b.build();
+    final KLightProjective sl1 = sl0b.build();
+    final KLightProjective sl2 = sl0b.build();
 
     final KInstanceOpaqueType o1 = this.getOpaque(g);
     sb.sceneAddShadowCaster(sl0, o1);
@@ -644,10 +640,8 @@ import com.io7m.renderer.types.RVectorI3F;
       Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests");
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30WithLog(log, shader_control);
-    final KGraphicsCapabilities caps =
-      KGraphicsCapabilities.getCapabilities(g);
 
-    final TestRenderer r = new TestRenderer(g, caps, log);
+    final TestRenderer r = new TestRenderer(g, log);
 
     final MatrixM4x4F temp = new MatrixM4x4F();
     final RMatrixI4x4F<RTransformViewType> id = RMatrixI4x4F.identity();
@@ -670,9 +664,9 @@ import com.io7m.renderer.types.RVectorI3F;
     final KShadowMapBasicDescription map_desc =
       KShadowMapBasicDescription.newDescription(fb_desc, 2);
     sl0b.setShadow(KShadowMappedBasic.newMappedBasic(0.001f, 0.0f, map_desc));
-    final KLightProjective sl0 = sl0b.build(caps);
-    final KLightProjective sl1 = sl0b.build(caps);
-    final KLightProjective sl2 = sl0b.build(caps);
+    final KLightProjective sl0 = sl0b.build();
+    final KLightProjective sl1 = sl0b.build();
+    final KLightProjective sl2 = sl0b.build();
 
     final KInstanceOpaqueType o1 = this.getOpaque(g);
     sb.sceneAddShadowCaster(sl0, o1);

@@ -54,7 +54,6 @@ import com.io7m.renderer.kernel.KShaderCacheDeferredGeometryType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredLightType;
 import com.io7m.renderer.kernel.KShaderCacheDepthType;
 import com.io7m.renderer.kernel.KShaderCacheDepthVarianceType;
-import com.io7m.renderer.kernel.KShaderCacheForwardOpaqueUnlitType;
 import com.io7m.renderer.kernel.KShaderCacheForwardTranslucentLitType;
 import com.io7m.renderer.kernel.KShaderCacheForwardTranslucentUnlitType;
 import com.io7m.renderer.kernel.KShaderCachePostprocessingType;
@@ -67,7 +66,6 @@ import com.io7m.renderer.kernel.KTranslucentRendererType;
 import com.io7m.renderer.kernel.Kernel;
 import com.io7m.renderer.kernel.types.KFrustumMeshCache;
 import com.io7m.renderer.kernel.types.KFrustumMeshCacheType;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
 import com.io7m.renderer.kernel.types.KUnitQuadCache;
 import com.io7m.renderer.kernel.types.KUnitQuadCacheType;
 import com.io7m.renderer.kernel.types.KUnitSphereCacheType;
@@ -105,7 +103,6 @@ public final class ExampleRendererDeferredDefault extends
           final KShaderCacheDebugType in_shader_debug_cache,
           final KShaderCacheForwardTranslucentLitType in_shader_translucent_lit_cache,
           final KShaderCacheForwardTranslucentUnlitType in_shader_translucent_unlit_cache,
-          final KShaderCacheForwardOpaqueUnlitType in_shader_forward_opaque_unlit_cache,
           final KShaderCacheDepthType in_shader_depth_cache,
           final KShaderCacheDepthVarianceType in_shader_depth_variance_cache,
           final KShaderCachePostprocessingType in_shader_postprocessing_cache,
@@ -143,13 +140,9 @@ public final class ExampleRendererDeferredDefault extends
       final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache,
       final KShaderCacheDeferredLightType in_shader_deferred_light_cache,
       final JCGLImplementationType gi)
-      throws JCGLException,
-        RException
+      throws RException
   {
     NullCheck.notNull(gi, "GL");
-
-    final KGraphicsCapabilities caps =
-      KGraphicsCapabilities.getCapabilities(gi);
 
     final KUnitQuadCacheType quad_cache =
       KUnitQuadCache.newCache(gi.getGLCommon(), log);
@@ -169,7 +162,7 @@ public final class ExampleRendererDeferredDefault extends
         quad_cache);
 
     final KDepthRendererType depth_renderer =
-      KDepthRenderer.newRenderer(gi, caps, in_shader_depth_cache, log);
+      KDepthRenderer.newRenderer(gi, in_shader_depth_cache, log);
     final KDepthVarianceRendererType depth_variance_renderer =
       KDepthVarianceRenderer.newRenderer(gi, in_shader_depth_variance_cache);
 
@@ -255,7 +248,6 @@ public final class ExampleRendererDeferredDefault extends
         in_shader_translucent_unlit_cache,
         in_shader_translucent_lit_cache,
         refraction_renderer,
-        caps,
         log);
 
     final KRendererDeferredOpaqueType opaque_renderer =

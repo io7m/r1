@@ -31,8 +31,6 @@
     <module>io7m-renderer-shaders-deferred</module>
     <module>io7m-renderer-shaders-depth</module>
     <module>io7m-renderer-shaders-depth_variance</module>
-    <module>io7m-renderer-shaders-forward-opaque-lit</module>
-    <module>io7m-renderer-shaders-forward-opaque-unlit</module>
     <module>io7m-renderer-shaders-forward-translucent-lit</module>
     <module>io7m-renderer-shaders-forward-translucent-unlit</module>
     <module>io7m-renderer-shaders-forward</module>

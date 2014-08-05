@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,7 +22,6 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NonNull;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KLightProjective;
 import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.renderer.kernel.types.KProjectionType;
@@ -40,10 +39,8 @@ public final class KLightProjectiveGenerator implements
   private final @NonNull Generator<KProjectionType>             proj_gen;
   private final @NonNull Generator<Texture2DStaticUsableType>   tex_gen;
   private final @NonNull Generator<KShadowType>                 shad_gen;
-  private final @NonNull KGraphicsCapabilitiesType              caps;
 
   public KLightProjectiveGenerator(
-    final @NonNull KGraphicsCapabilitiesType in_caps,
     final @NonNull Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,
     final @NonNull Generator<RVectorI3F<RSpaceWorldType>> in_position_gen,
     final @NonNull Generator<QuaternionI4F> in_quat_gen,
@@ -51,7 +48,6 @@ public final class KLightProjectiveGenerator implements
     final @NonNull Generator<Texture2DStaticUsableType> in_tex_gen,
     final @NonNull Generator<KShadowType> in_shad_gen)
   {
-    this.caps = in_caps;
     this.colour_gen = in_colour_gen;
     this.position_gen = in_position_gen;
     this.quat_gen = in_quat_gen;
@@ -79,7 +75,7 @@ public final class KLightProjectiveGenerator implements
         b.setNoShadow();
       }
 
-      return b.build(this.caps);
+      return b.build();
     } catch (final Throwable x) {
       throw new UnreachableCodeException(x);
     }

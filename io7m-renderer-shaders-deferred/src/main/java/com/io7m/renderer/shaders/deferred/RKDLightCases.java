@@ -20,11 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jcanephora.TextureFormat;
+import com.io7m.jcanephora.TextureWrapS;
+import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KBlurParameters;
 import com.io7m.renderer.kernel.types.KDepthPrecision;
@@ -41,8 +46,6 @@ import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
 import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KShadowMappedVariance;
-import com.io7m.renderer.shaders.core.FakeImmutableCapabilities;
-import com.io7m.renderer.shaders.core.FakeTexture2DStatic;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
@@ -53,6 +56,96 @@ import com.io7m.renderer.types.RVectorI3F;
   private static List<KLightType> makeLightCases()
   {
     try {
+      final Texture2DStaticType t = new Texture2DStaticType() {
+        @Override public long resourceGetSizeBytes()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public boolean resourceIsDeleted()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public int getGLName()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public TextureWrapT textureGetWrapT()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public TextureWrapS textureGetWrapS()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public int textureGetWidth()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public RangeInclusiveL textureGetRangeY()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public RangeInclusiveL textureGetRangeX()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public String textureGetName()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public
+          TextureFilterMinification
+          textureGetMinificationFilter()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public
+          TextureFilterMagnification
+          textureGetMagnificationFilter()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public int textureGetHeight()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public TextureFormat textureGetFormat()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+
+        @Override public AreaInclusive textureGetArea()
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
+        }
+      };
+
       final ArrayList<KLightType> cases = new ArrayList<KLightType>();
       final RVectorI3F<RSpaceWorldType> v =
         new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f);
@@ -71,24 +164,22 @@ import com.io7m.renderer.types.RVectorI3F;
 
       {
         final KLightProjectiveBuilderType b =
-          KLightProjective.newBuilder(
-            FakeTexture2DStatic.getDefault(),
-            KProjectionFrustum.newProjection(
-              new MatrixM4x4F(),
-              -1.0f,
-              1.0f,
-              -1.0f,
-              1.0f,
-              1.0f,
-              100.0f));
+          KLightProjective.newBuilder(t, KProjectionFrustum.newProjection(
+            new MatrixM4x4F(),
+            -1.0f,
+            1.0f,
+            -1.0f,
+            1.0f,
+            1.0f,
+            100.0f));
 
         /**
          * No shadow.
          */
 
         {
-          b.setTexture(FakeTexture2DStatic.getDefault());
-          cases.add(b.build(FakeImmutableCapabilities.withDepthTextures()));
+          b.setTexture(t);
+          cases.add(b.build());
         }
 
         /**
@@ -110,7 +201,7 @@ import com.io7m.renderer.types.RVectorI3F;
             KShadowMapBasicDescription.newDescription(fd, 2);
 
           b.setShadow(KShadowMappedBasic.newMappedBasic(1.0f, 1.0f, d));
-          cases.add(b.build(FakeImmutableCapabilities.withDepthTextures()));
+          cases.add(b.build());
         }
 
         /**
@@ -138,7 +229,7 @@ import com.io7m.renderer.types.RVectorI3F;
             1.0f,
             kp,
             description));
-          cases.add(b.build(FakeImmutableCapabilities.withDepthTextures()));
+          cases.add(b.build());
         }
 
       }

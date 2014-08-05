@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -26,7 +26,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KShadowType;
-import com.io7m.renderer.tests.FakeCapabilities;
 import com.io7m.renderer.tests.QuaternionI4FGenerator;
 import com.io7m.renderer.tests.RFakeTextures2DStatic;
 import com.io7m.renderer.tests.types.RVectorI3FGenerator;
@@ -55,14 +54,12 @@ public final class KLightGenerator implements Generator<KLightType>
     final Generator<Texture2DStaticUsableType> in_tex_gen =
       RFakeTextures2DStatic.generator(g, name_gen);
     final Generator<KShadowType> in_shad_gen = new KShadowGenerator();
-    final FakeCapabilities caps = new FakeCapabilities();
 
     this.dir_gen =
       new KLightDirectionalGenerator(in_colour_gen, in_direction_gen);
     this.sph_gen = new KLightSphereGenerator(in_colour_gen, in_position_gen);
     this.pro_gen =
       new KLightProjectiveGenerator(
-        caps,
         in_colour_gen,
         in_position_gen,
         in_quat_gen,

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -35,9 +35,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * Construct a light.
    * </p>
-   * 
-   * @param caps
-   *          The current graphics capabilities.
+   *
    * @return A new light based on all of the parameters given so far.
    * @throws RExceptionUserError
    *           If no texture was specified.
@@ -45,8 +43,7 @@ public interface KLightProjectiveBuilderType
    *           If any other error occurs.
    */
 
-  KLightProjective build(
-    final KGraphicsCapabilitiesType caps)
+  KLightProjective build()
     throws RExceptionUserError,
       RException;
 
@@ -57,7 +54,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default color is full-intensity white.
    * </p>
-   * 
+   *
    * @param color
    *          The color.
    */
@@ -72,7 +69,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default exponent is <code>1.0</code> (linear falloff).
    * </p>
-   * 
+   *
    * @param exponent
    *          The exponent.
    */
@@ -87,7 +84,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default intensity is <code>1.0</code>.
    * </p>
-   * 
+   *
    * @param intensity
    *          The intensity.
    */
@@ -102,7 +99,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default is for the light not to have a shadow.
    * </p>
-   * 
+   *
    * @see #setShadow(KShadowType)
    */
 
@@ -115,7 +112,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default orientation is <code>(0.0, 0.0, 0.0, 1.0)</code>.
    * </p>
-   * 
+   *
    * @param orientation
    *          The orientation.
    */
@@ -130,7 +127,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default position is <code>(0.0, 0.0, 0.0)</code>.
    * </p>
-   * 
+   *
    * @param position
    *          The position.
    */
@@ -142,7 +139,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * Set the projection of the light.
    * </p>
-   * 
+   *
    * @param projection
    *          The projection.
    */
@@ -157,7 +154,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default range is <code>8.0</code>.
    * </p>
-   * 
+   *
    * @param range
    *          The range.
    */
@@ -173,7 +170,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default is for the light not to have a shadow.
    * </p>
-   * 
+   *
    * @see #setNoShadow()
    * @param s
    *          The shadow.
@@ -191,7 +188,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default is for the light not to have a shadow.
    * </p>
-   * 
+   *
    * @see #setShadow(KShadowType)
    * @see #setNoShadow()
    * @param s
@@ -208,7 +205,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * There is no default texture; this parameter is required to be set.
    * </p>
-   * 
+   *
    * @param texture
    *          The texture.
    */

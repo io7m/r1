@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -92,20 +92,17 @@ import com.io7m.renderer.types.RVectorI3F;
       this.shadow = Option.none();
     }
 
-    @Override public KLightProjective build(
-      final KGraphicsCapabilitiesType caps)
+    @Override public KLightProjective build()
       throws RException,
         RExceptionUserError
     {
-      NullCheck.notNull(caps, "Capabilities");
-
       final Texture2DStaticUsableType t = this.texture;
       if (t == null) {
         throw new RExceptionLightMissingTexture(
           "No texture specified for projective light");
       }
 
-      final String c = KLightProjective.getCode(caps, this.shadow);
+      final String c = KLightProjective.getCode(this.shadow);
       return new KLightProjective(
         t,
         this.position,
@@ -188,7 +185,6 @@ import com.io7m.renderer.types.RVectorI3F;
   private static final VectorI3F ONE = new VectorI3F(1.0f, 1.0f, 1.0f);
 
   private static String getCode(
-    final KGraphicsCapabilitiesType caps,
     final OptionType<KShadowType> in_shadow)
   {
     return in_shadow.accept(new OptionVisitorType<KShadowType, String>() {
@@ -207,10 +203,7 @@ import com.io7m.renderer.types.RVectorI3F;
               @Override public String shadowMappedBasic(
                 final KShadowMappedBasic smb)
               {
-                if (caps.getSupportsDepthTextures()) {
-                  return "LProjSMBasic";
-                }
-                return "LProjSMBasic4444";
+                return "LProjSMBasic";
               }
 
               @Override public String shadowMappedVariance(

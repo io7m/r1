@@ -46,8 +46,6 @@ import com.io7m.renderer.shaders.deferred.geometry.RShadersDeferredGeometry;
 import com.io7m.renderer.shaders.deferred.light.RShadersDeferredLight;
 import com.io7m.renderer.shaders.depth_only.RShadersDepth;
 import com.io7m.renderer.shaders.depth_variance.RShadersDepthVariance;
-import com.io7m.renderer.shaders.forward.opaque.lit.RShadersForwardOpaqueLit;
-import com.io7m.renderer.shaders.forward.opaque.unlit.RShadersForwardOpaqueUnlit;
 import com.io7m.renderer.shaders.forward.translucent.lit.RShadersForwardTranslucentLit;
 import com.io7m.renderer.shaders.forward.translucent.unlit.RShadersForwardTranslucentUnlit;
 import com.io7m.renderer.shaders.postprocessing.RShadersPostprocessing;
@@ -118,8 +116,6 @@ public final class VShaderCaches
     final KShaderCacheDeferredLightType in_shader_deferred_light_cache;
     final KShaderCacheDepthType in_shader_depth_cache;
     final KShaderCacheDepthVarianceType in_shader_depth_variance_cache;
-    final KShaderCacheForwardOpaqueLitType in_shader_forward_opaque_lit_cache;
-    final KShaderCacheForwardOpaqueUnlitType in_shader_forward_opaque_unlit_cache;
     final KShaderCacheForwardTranslucentLitType in_shader_forward_translucent_lit_cache;
     final KShaderCacheForwardTranslucentUnlitType in_shader_forward_translucent_unlit_cache;
     final KShaderCachePostprocessingType in_shader_postprocessing_cache;
@@ -196,26 +192,6 @@ public final class VShaderCaches
         fs.mountArchiveFromAnywhere(
           VShaderCaches.makeShaderArchiveNameEclipse(
             config,
-            "forward-opaque-lit"),
-          PathVirtual.ROOT);
-        in_shader_forward_opaque_lit_cache =
-          VShaderCaches.wrapForwardOpaqueLit(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountArchiveFromAnywhere(
-          VShaderCaches.makeShaderArchiveNameEclipse(
-            config,
-            "forward-opaque-unlit"),
-          PathVirtual.ROOT);
-        in_shader_forward_opaque_unlit_cache =
-          VShaderCaches.wrapForwardOpaqueUnlit(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountArchiveFromAnywhere(
-          VShaderCaches.makeShaderArchiveNameEclipse(
-            config,
             "forward-translucent-lit"),
           PathVirtual.ROOT);
         in_shader_forward_translucent_lit_cache =
@@ -274,22 +250,6 @@ public final class VShaderCaches
       {
         final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
         fs.mountClasspathArchive(
-          RShadersForwardOpaqueLit.class,
-          PathVirtual.ROOT);
-        in_shader_forward_opaque_lit_cache =
-          VShaderCaches.wrapForwardOpaqueLit(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountClasspathArchive(
-          RShadersForwardOpaqueUnlit.class,
-          PathVirtual.ROOT);
-        in_shader_forward_opaque_unlit_cache =
-          VShaderCaches.wrapForwardOpaqueUnlit(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountClasspathArchive(
           RShadersForwardTranslucentLit.class,
           PathVirtual.ROOT);
         in_shader_forward_translucent_lit_cache =
@@ -320,8 +280,6 @@ public final class VShaderCaches
       in_shader_deferred_light_cache,
       in_shader_depth_cache,
       in_shader_depth_variance_cache,
-      in_shader_forward_opaque_lit_cache,
-      in_shader_forward_opaque_unlit_cache,
       in_shader_forward_translucent_lit_cache,
       in_shader_forward_translucent_unlit_cache,
       in_shader_postprocessing_cache);
@@ -466,8 +424,6 @@ public final class VShaderCaches
   private final KShaderCacheDeferredLightType           shader_deferred_light_cache;
   private final KShaderCacheDepthType                   shader_depth_cache;
   private final KShaderCacheDepthVarianceType           shader_depth_variance_cache;
-  private final KShaderCacheForwardOpaqueLitType        shader_forward_opaque_lit_cache;
-  private final KShaderCacheForwardOpaqueUnlitType      shader_forward_opaque_unlit_cache;
   private final KShaderCacheForwardTranslucentLitType   shader_forward_translucent_lit_cache;
   private final KShaderCacheForwardTranslucentUnlitType shader_forward_translucent_unlit_cache;
   private final KShaderCachePostprocessingType          shader_postprocessing_cache;
@@ -485,10 +441,6 @@ public final class VShaderCaches
    *          A shader cache
    * @param in_shader_depth_variance_cache
    *          A shader cache
-   * @param in_shader_forward_opaque_lit_cache
-   *          A shader cache
-   * @param in_shader_forward_opaque_unlit_cache
-   *          A shader cache
    * @param in_shader_forward_translucent_lit_cache
    *          A shader cache
    * @param in_shader_postprocessing_cache
@@ -501,8 +453,6 @@ public final class VShaderCaches
     final KShaderCacheDeferredLightType in_shader_deferred_light_cache,
     final KShaderCacheDepthType in_shader_depth_cache,
     final KShaderCacheDepthVarianceType in_shader_depth_variance_cache,
-    final KShaderCacheForwardOpaqueLitType in_shader_forward_opaque_lit_cache,
-    final KShaderCacheForwardOpaqueUnlitType in_shader_forward_opaque_unlit_cache,
     final KShaderCacheForwardTranslucentLitType in_shader_forward_translucent_lit_cache,
     final KShaderCacheForwardTranslucentUnlitType in_shader_forward_translucent_unlit_cache,
     final KShaderCachePostprocessingType in_shader_postprocessing_cache)
@@ -512,9 +462,6 @@ public final class VShaderCaches
     this.shader_deferred_light_cache = in_shader_deferred_light_cache;
     this.shader_depth_cache = in_shader_depth_cache;
     this.shader_depth_variance_cache = in_shader_depth_variance_cache;
-    this.shader_forward_opaque_lit_cache = in_shader_forward_opaque_lit_cache;
-    this.shader_forward_opaque_unlit_cache =
-      in_shader_forward_opaque_unlit_cache;
     this.shader_forward_translucent_lit_cache =
       in_shader_forward_translucent_lit_cache;
     this.shader_forward_translucent_unlit_cache =
@@ -565,26 +512,6 @@ public final class VShaderCaches
   public KShaderCacheDepthVarianceType getShaderDepthVarianceCache()
   {
     return this.shader_depth_variance_cache;
-  }
-
-  /**
-   * @return A shader cache.
-   */
-
-  public KShaderCacheForwardOpaqueLitType getShaderForwardOpaqueLitCache()
-  {
-    return this.shader_forward_opaque_lit_cache;
-  }
-
-  /**
-   * @return A shader cache.
-   */
-
-  public
-    KShaderCacheForwardOpaqueUnlitType
-    getShaderForwardOpaqueUnlitCache()
-  {
-    return this.shader_forward_opaque_unlit_cache;
   }
 
   /**

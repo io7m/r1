@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,19 +25,26 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 
+import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.TextureCubeStaticType;
+import com.io7m.jcanephora.TextureFilterMagnification;
+import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jcanephora.TextureFormat;
 import com.io7m.jcanephora.TextureUnitType;
+import com.io7m.jcanephora.TextureWrapR;
+import com.io7m.jcanephora.TextureWrapS;
+import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.KTextureUnitAllocator;
 import com.io7m.renderer.kernel.KTextureUnitContextInitialType;
 import com.io7m.renderer.kernel.KTextureUnitContextType;
 import com.io7m.renderer.kernel.KTextureUnitWithType;
-import com.io7m.renderer.shaders.core.FakeTexture2DStatic;
-import com.io7m.renderer.shaders.core.FakeTextureCubeStatic;
 import com.io7m.renderer.tests.RFakeGL;
 import com.io7m.renderer.tests.RFakeShaderControllers;
 import com.io7m.renderer.tests.RFakeTextures2DStatic;
@@ -456,7 +463,95 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
 
     Assume.assumeTrue("8 texture units are available", units.size() == 8);
 
-    final Texture2DStaticType t = FakeTexture2DStatic.getDefault();
+    final Texture2DStaticType t = new Texture2DStaticType() {
+      @Override public long resourceGetSizeBytes()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public boolean resourceIsDeleted()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int getGLName()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapT textureGetWrapT()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapS textureGetWrapS()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetWidth()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeY()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeX()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public String textureGetName()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public
+        TextureFilterMinification
+        textureGetMinificationFilter()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public
+        TextureFilterMagnification
+        textureGetMagnificationFilter()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetHeight()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureFormat textureGetFormat()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public AreaInclusive textureGetArea()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+    };
 
     final AtomicBoolean caught = new AtomicBoolean(false);
 
@@ -663,7 +758,101 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
 
     Assume.assumeTrue("8 texture units are available", units.size() == 8);
 
-    final TextureCubeStaticType t = FakeTextureCubeStatic.getDefault();
+    final TextureCubeStaticType t = new TextureCubeStaticType() {
+      @Override public boolean resourceIsDeleted()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public long resourceGetSizeBytes()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int getGLName()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapT textureGetWrapT()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapS textureGetWrapS()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapR textureGetWrapR()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetWidth()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeY()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeX()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public String textureGetName()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public
+        TextureFilterMinification
+        textureGetMinificationFilter()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public
+        TextureFilterMagnification
+        textureGetMagnificationFilter()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetHeight()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureFormat textureGetFormat()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public AreaInclusive textureGetArea()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+    };
 
     final AtomicBoolean caught = new AtomicBoolean(false);
 
