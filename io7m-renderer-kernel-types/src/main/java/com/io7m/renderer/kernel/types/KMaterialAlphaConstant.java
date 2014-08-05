@@ -26,9 +26,15 @@ import com.io7m.renderer.types.RException;
 @EqualityReference public final class KMaterialAlphaConstant implements
   KMaterialAlphaType
 {
+  private static final KMaterialAlphaConstant OPAQUE;
+
+  static {
+    OPAQUE = new KMaterialAlphaConstant(1.0f);
+  }
+
   /**
    * Construct new alpha properties.
-   * 
+   *
    * @param in_opacity
    *          The global surface opacity.
    * @return New material properties.
@@ -38,6 +44,15 @@ import com.io7m.renderer.types.RException;
     final float in_opacity)
   {
     return new KMaterialAlphaConstant(in_opacity);
+  }
+
+  /**
+   * @return Alpha properties representing an opaque surface.
+   */
+
+  public static KMaterialAlphaType opaque()
+  {
+    return KMaterialAlphaConstant.OPAQUE;
   }
 
   private final float opacity;

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -34,8 +34,6 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KSceneBatchedDeferred;
 import com.io7m.renderer.kernel.types.KSceneBatchedDeferredOpaque;
@@ -77,7 +75,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   public static KRendererDeferredType newRenderer(
     final JCGLImplementationType in_g,
     final KShadowMapRendererType in_shadow_renderer,
-    final KTranslucentRendererType in_translucent_renderer,
+    final KTranslucentRendererDeferredType in_translucent_renderer,
     final KRendererDeferredOpaqueType in_opaque_renderer,
     final LogUsableType in_log)
     throws RException
@@ -90,18 +88,18 @@ import com.io7m.renderer.types.RExceptionJCGL;
       in_log);
   }
 
-  private final VectorM4F                   background;
-  private final JCGLImplementationType      g;
-  private final LogUsableType               log;
-  private final KMutableMatrices            matrices;
-  private final KRendererDeferredOpaqueType opaque_renderer;
-  private final KShadowMapRendererType      shadow_renderer;
-  private final KTranslucentRendererType    translucent_renderer;
+  private final VectorM4F                        background;
+  private final JCGLImplementationType           g;
+  private final LogUsableType                    log;
+  private final KMutableMatrices                 matrices;
+  private final KRendererDeferredOpaqueType      opaque_renderer;
+  private final KShadowMapRendererType           shadow_renderer;
+  private final KTranslucentRendererDeferredType translucent_renderer;
 
   private KRendererDeferred(
     final JCGLImplementationType in_g,
     final KShadowMapRendererType in_shadow_renderer,
-    final KTranslucentRendererType in_translucent_renderer,
+    final KTranslucentRendererDeferredType in_translucent_renderer,
     final KRendererDeferredOpaqueType in_opaque_renderer,
     final LogUsableType in_log)
   {
@@ -136,9 +134,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
       this.matrices.withObserver(
         camera.getViewMatrix(),
         camera.getProjection(),
-        new MatricesObserverFunctionType<Unit, JCGLException>() {
+        new KMatricesObserverFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final MatricesObserverType mwo)
+            final KMatricesObserverType mwo)
             throws JCGLException,
               RException
           {
@@ -175,7 +173,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KCamera camera,
     final KFramebufferDeferredUsableType framebuffer,
     final KSceneBatchedDeferred scene,
-    final MatricesObserverType mwo)
+    final KMatricesObserverType mwo)
     throws RException,
       JCacheException
   {
@@ -230,20 +228,14 @@ import com.io7m.renderer.types.RExceptionJCGL;
             mwo,
             opaques.getUnlit());
 
-          gc.framebufferDrawBind(fb);
-          try {
-            final List<KTranslucentType> translucents =
-              scene.getTranslucents();
+          final List<KTranslucentType> translucents = scene.getTranslucents();
 
-            KRendererDeferred.this.translucent_renderer
-              .rendererEvaluateTranslucents(
-                framebuffer,
-                shadow_context,
-                mwo,
-                translucents);
-          } finally {
-            gc.framebufferDrawUnbind();
-          }
+          KRendererDeferred.this.translucent_renderer
+            .rendererEvaluateTranslucents(
+              framebuffer,
+              shadow_context,
+              mwo,
+              translucents);
 
           return Unit.unit();
         }

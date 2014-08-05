@@ -39,13 +39,6 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceWithProjectiveFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceWithProjectiveType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightType;
 import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
@@ -129,7 +122,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private static void renderInstanceTranslucentRegular(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType units,
-    final MatricesInstanceType mwi,
+    final KMatricesInstanceValuesType mwi,
     final JCBProgramType program,
     final KInstanceTranslucentRegular instance)
     throws JCGLException,
@@ -203,7 +196,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KShadowMapContextType shadow_context,
     final KTextureUnitContextType texture_unit_ctx,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KLightType light,
     final JCBProgramType program,
     final KInstanceTranslucentRegular instance)
@@ -237,9 +230,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
       {
         return mwo.withProjectiveLight(
           l,
-          new MatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+          new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
             @Override public Unit run(
-              final MatricesProjectiveLightType mwp)
+              final KMatricesProjectiveLightType mwp)
               throws JCGLException,
 
                 RException
@@ -278,7 +271,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private static void renderInstanceTranslucentRegularLitDirectional(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType texture_unit_ctx,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KLightDirectional l,
     final JCBProgramType program,
     final KInstanceTranslucentRegular instance)
@@ -293,9 +286,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     mwo.withInstance(
       instance,
-      new MatricesInstanceFunctionType<Unit, JCGLException>() {
+      new KMatricesInstanceFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
-          final MatricesInstanceType mwi)
+          final KMatricesInstanceType mwi)
           throws JCGLException,
             RException
         {
@@ -314,7 +307,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KShadowMapContextType shadow_context,
     final KTextureUnitContextType texture_unit_ctx,
-    final MatricesProjectiveLightType mwp,
+    final KMatricesProjectiveLightType mwp,
     final KLightProjective light,
     final JCBProgramType program,
     final KInstanceTranslucentRegular instance)
@@ -344,9 +337,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     mwp.withInstance(
       instance,
-      new MatricesInstanceWithProjectiveFunctionType<Unit, JCGLException>() {
+      new KMatricesInstanceWithProjectiveFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
-          final MatricesInstanceWithProjectiveType mwi)
+          final KMatricesInstanceWithProjectiveType mwi)
           throws JCGLException,
             RException
         {
@@ -368,7 +361,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private static void renderInstanceTranslucentRegularLitSpherical(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType texture_unit_ctx,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KLightSphere l,
     final JCBProgramType program,
     final KInstanceTranslucentRegular instance)
@@ -383,9 +376,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     mwo.withInstance(
       instance,
-      new MatricesInstanceFunctionType<Unit, JCGLException>() {
+      new KMatricesInstanceFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
-          final MatricesInstanceType mwi)
+          final KMatricesInstanceType mwi)
           throws JCGLException,
             RException
         {
@@ -403,7 +396,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private static void renderInstanceTranslucentSpecularOnly(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType units,
-    final MatricesInstanceType mwi,
+    final KMatricesInstanceValuesType mwi,
     final JCBProgramType program,
     final KInstanceTranslucentSpecularOnly instance)
     throws JCGLException,
@@ -482,7 +475,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KShadowMapContextType shadow_context,
     final KTextureUnitContextType texture_unit_ctx,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KLightType light,
     final JCBProgramType program,
     final KInstanceTranslucentSpecularOnly instance)
@@ -517,9 +510,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
       {
         return mwo.withProjectiveLight(
           l,
-          new MatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+          new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
             @Override public Unit run(
-              final MatricesProjectiveLightType mwp)
+              final KMatricesProjectiveLightType mwp)
               throws JCGLException,
                 RException
             {
@@ -558,7 +551,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private static void renderInstanceTranslucentSpecularOnlyLitDirectional(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType texture_unit_ctx,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KLightDirectional l,
     final JCBProgramType program,
     final KInstanceTranslucentSpecularOnly instance)
@@ -573,9 +566,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     mwo.withInstance(
       instance,
-      new MatricesInstanceFunctionType<Unit, JCGLException>() {
+      new KMatricesInstanceFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
-          final MatricesInstanceType mwi)
+          final KMatricesInstanceType mwi)
           throws JCGLException,
             RException
         {
@@ -594,7 +587,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KShadowMapContextType shadow_context,
     final KTextureUnitContextType texture_unit_ctx,
-    final MatricesProjectiveLightType mwp,
+    final KMatricesProjectiveLightType mwp,
     final KLightProjective light,
     final JCBProgramType program,
     final KInstanceTranslucentSpecularOnly instance)
@@ -625,9 +618,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     mwp.withInstance(
       instance,
-      new MatricesInstanceWithProjectiveFunctionType<Unit, JCGLException>() {
+      new KMatricesInstanceWithProjectiveFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
-          final MatricesInstanceWithProjectiveType mwi)
+          final KMatricesInstanceWithProjectiveType mwi)
           throws JCGLException,
             RException
         {
@@ -649,7 +642,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private static void renderInstanceTranslucentSpecularOnlyLitSpherical(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType texture_unit_ctx,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KLightSphere l,
     final JCBProgramType program,
     final KInstanceTranslucentSpecularOnly instance)
@@ -664,9 +657,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     mwo.withInstance(
       instance,
-      new MatricesInstanceFunctionType<Unit, JCGLException>() {
+      new KMatricesInstanceFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
-          final MatricesInstanceType mwi)
+          final KMatricesInstanceType mwi)
           throws JCGLException,
             RException
         {
@@ -726,7 +719,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   @Override public void rendererEvaluateTranslucents(
     final KFramebufferForwardUsableType framebuffer,
     final KShadowMapContextType shadow_context,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final List<KTranslucentType> translucents)
     throws RException
   {
@@ -752,7 +745,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private void rendererEvaluateTranslucentsActual(
     final KFramebufferForwardUsableType framebuffer,
     final KShadowMapContextType shadow_context,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final List<KTranslucentType> translucents)
     throws JCGLException,
       JCacheException,
@@ -853,7 +846,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KShadowMapContextType shadow_context,
     final KTranslucentRegularLit t,
-    final MatricesObserverType mwo)
+    final KMatricesObserverType mwo)
     throws RException,
       JCGLException,
       JCacheException
@@ -894,7 +887,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
         gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
       }
 
-      final KProgramType kprogram = this.shader_lit_cache.cacheGetLU(shader_code);
+      final KProgramType kprogram =
+        this.shader_lit_cache.cacheGetLU(shader_code);
 
       kprogram.getExecutable().execRun(
         new JCBExecutorProcedureType<RException>() {
@@ -928,7 +922,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
   private void renderTranslucentRegularUnlit(
     final JCGLInterfaceCommonType gc,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KTextureUnitAllocator unit_allocator,
     final KInstanceTranslucentRegular t)
     throws JCGLException,
@@ -941,7 +935,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
       BlendFunction.BLEND_ONE,
       BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
 
-    final KProgramType kprogram = this.shader_unlit_cache.cacheGetLU(shader_code);
+    final KProgramType kprogram =
+      this.shader_unlit_cache.cacheGetLU(shader_code);
 
     kprogram.getExecutable().execRun(
       new JCBExecutorProcedureType<RException>() {
@@ -958,9 +953,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
             {
               mwo.withInstance(
                 t,
-                new MatricesInstanceFunctionType<Unit, JCGLException>() {
+                new KMatricesInstanceFunctionType<Unit, JCGLException>() {
                   @Override public Unit run(
-                    final MatricesInstanceType mwi)
+                    final KMatricesInstanceType mwi)
                     throws JCGLException,
                       RException
                   {
@@ -987,7 +982,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KShadowMapContextType shadow_context,
     final KTranslucentSpecularOnlyLit t,
-    final MatricesObserverType mwo)
+    final KMatricesObserverType mwo)
     throws RException,
       JCGLException,
       JCacheException
@@ -1022,7 +1017,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
           unit_allocator.getUnitCount());
       }
 
-      final KProgramType kprogram = this.shader_lit_cache.cacheGetLU(shader_code);
+      final KProgramType kprogram =
+        this.shader_lit_cache.cacheGetLU(shader_code);
 
       kprogram.getExecutable().execRun(
         new JCBExecutorProcedureType<RException>() {

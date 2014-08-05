@@ -12,4 +12,3 @@ show_tangents_vertex_eye         : com.io7m.renderer.debug.DebugNormals.show_tan
 show_tangents_vertex_local       : com.io7m.renderer.debug.DebugNormals.show_tangents_vertex_local
 show_uv                          : com.io7m.renderer.debug.Debug.show_uv
 show_vcolor                      : com.io7m.renderer.debug.Debug.show_vcolor
-show_position_reconstruction_eye : com.io7m.renderer.debug.DebugPosition.show_position_reconstruction_eye

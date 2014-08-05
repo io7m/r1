@@ -32,8 +32,6 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KProjectionType;
@@ -148,9 +146,9 @@ import com.io7m.renderer.types.RTransformViewType;
       this.matrices.withObserver(
         camera.getViewMatrix(),
         camera.getProjection(),
-        new MatricesObserverFunctionType<Unit, JCGLException>() {
+        new KMatricesObserverFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final MatricesObserverType mwo)
+            final KMatricesObserverType mwo)
             throws JCGLException,
               RException
           {
@@ -187,7 +185,7 @@ import com.io7m.renderer.types.RTransformViewType;
     final KCamera camera,
     final KFramebufferForwardUsableType framebuffer,
     final KSceneBatchedForward scene,
-    final MatricesObserverType mwo)
+    final KMatricesObserverType mwo)
     throws RException,
       JCacheException
   {

@@ -54,4 +54,10 @@ public interface KGeometryBufferUsableType
    */
 
   Texture2DStaticUsableType geomGetTextureSpecular();
+
+  /**
+   * @return The geometry buffer's linear-depth buffer.
+   */
+
+  Texture2DStaticUsableType geomGetTextureLinearEyeDepth();
 }

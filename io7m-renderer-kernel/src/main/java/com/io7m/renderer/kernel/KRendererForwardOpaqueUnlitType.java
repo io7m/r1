@@ -21,7 +21,6 @@ import java.util.Set;
 
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.types.RException;
 
@@ -67,7 +66,7 @@ public interface KRendererForwardOpaqueUnlitType
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final boolean depth_write,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final Map<String, Set<KInstanceOpaqueType>> batches)
     throws RException;
 }
