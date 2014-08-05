@@ -41,7 +41,7 @@ public interface KRefractionRendererType extends KRendererType
 
   void rendererRefractionEvaluate(
     final KFramebufferForwardUsableType framebuffer,
-    final KMutableMatrices.MatricesObserverType observer,
+    final KMatricesObserverType observer,
     final KInstanceTranslucentRefractive r)
     throws RException;
 }

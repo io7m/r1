@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -47,6 +47,7 @@ import com.io7m.jparasol.lexer.Position;
 import com.io7m.jparasol.typed.ast.TASTShaderNameFlat;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.shaders.deferred.RKDMaterialCases;
 import com.io7m.renderer.shaders.deferred.RKDeferredShader;
 
@@ -58,7 +59,7 @@ import com.io7m.renderer.shaders.deferred.RKDeferredShader;
 {
   /**
    * Main program.
-   * 
+   *
    * @param args
    *          Command line arguments.
    * @throws Exception
@@ -101,12 +102,15 @@ import com.io7m.renderer.shaders.deferred.RKDeferredShader;
       }
     }
 
-    final List<KMaterialOpaqueRegular> cases =
+    final List<KMaterialOpaqueRegular> cases_opaque =
       new RKDMaterialCases().getCasesGeometryOpaqueRegular();
+    final List<KMaterialTranslucentRegular> cases_translucent =
+      new RKDMaterialCases().getCasesGeometryTranslucentRegular();
 
     RShadersDeferredGeometryMakeAll.makeSources(
       log,
-      cases,
+      cases_opaque,
+      cases_translucent,
       out_parasol_dir);
 
     final CompilerBatch batch = CompilerBatch.newBatch();
@@ -115,13 +119,28 @@ import com.io7m.renderer.shaders.deferred.RKDeferredShader;
       final Pair<File, Position> meta =
         Pair.pair(new File("<stdin>"), Position.ZERO);
 
-      for (final KMaterialOpaqueRegular c : cases) {
+      for (final KMaterialOpaqueRegular c : cases_opaque) {
         assert c != null;
-        final String code = c.materialLitGetCodeWithDepth();
+        final String code = c.materialDeferredGetCode();
         final String name =
           String.format(
             "%s.%s.p",
-            RKDeferredShader.PACKAGE_DEFERRED_GEOMETRY_OPAQUE_REGULAR,
+            RKDeferredShader.PACKAGE_DEFERRED_GEOMETRY_REGULAR,
+            code);
+        assert name != null;
+
+        batch.addShaderWithOutputName(
+          TASTShaderNameFlat.parse(name, meta),
+          code);
+      }
+
+      for (final KMaterialTranslucentRegular c : cases_translucent) {
+        assert c != null;
+        final String code = c.materialDeferredGetCode();
+        final String name =
+          String.format(
+            "%s.%s.p",
+            RKDeferredShader.PACKAGE_DEFERRED_GEOMETRY_REGULAR,
             code);
         assert name != null;
 
@@ -190,7 +209,8 @@ import com.io7m.renderer.shaders.deferred.RKDeferredShader;
 
   private static void makeSources(
     final LogUsableType log,
-    final List<KMaterialOpaqueRegular> cases,
+    final List<KMaterialOpaqueRegular> cases_opaque,
+    final List<KMaterialTranslucentRegular> cases_translucent,
     final File dir)
     throws IOException
   {
@@ -198,16 +218,32 @@ import com.io7m.renderer.shaders.deferred.RKDeferredShader;
       throw new IOException(dir + " is not a directory");
     }
 
-    for (final KMaterialOpaqueRegular c : cases) {
+    for (final KMaterialOpaqueRegular c : cases_opaque) {
       assert c != null;
 
-      final String code = c.materialLitGetCodeWithDepth();
+      final String code = c.materialDeferredGetCode();
       final File file = new File(dir, code + ".p");
       log.info("Generating " + file);
 
       final FileWriter writer = new FileWriter(file);
       try {
         writer.append(RKDeferredShader.moduleGeometryOpaqueRegular(c));
+      } finally {
+        writer.flush();
+        writer.close();
+      }
+    }
+
+    for (final KMaterialTranslucentRegular c : cases_translucent) {
+      assert c != null;
+
+      final String code = c.materialDeferredGetCode();
+      final File file = new File(dir, code + ".p");
+      log.info("Generating " + file);
+
+      final FileWriter writer = new FileWriter(file);
+      try {
+        writer.append(RKDeferredShader.moduleGeometryTranslucentRegular(c));
       } finally {
         writer.flush();
         writer.close();

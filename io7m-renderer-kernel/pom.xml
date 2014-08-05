@@ -95,6 +95,11 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-renderer-shaders-deferred-light-translucent</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-renderer-shaders-depth</artifactId>
       <version>${project.version}</version>
     </dependency>

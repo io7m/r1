@@ -19,6 +19,7 @@ package com.io7m.renderer.shaders.deferred.tests;
 import org.junit.Test;
 
 import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
+import com.io7m.renderer.kernel.types.KMaterialAlphaConstant;
 import com.io7m.renderer.kernel.types.KMaterialDepthConstant;
 import com.io7m.renderer.kernel.types.KMaterialEmissiveNone;
 import com.io7m.renderer.kernel.types.KMaterialEnvironmentNone;
@@ -47,7 +48,16 @@ import com.io7m.renderer.types.RTransformTextureType;
         KMaterialNormalVertex.vertex(),
         KMaterialSpecularNone.none());
 
-    RKDeferredShader.fragmentShaderOpaqueRegular(b, m);
+    RKDeferredShader.fragmentShaderGeometryRegular(
+      b,
+      m.materialRegularGetAlbedo(),
+      KMaterialAlphaConstant.opaque(),
+      m.materialOpaqueGetDepth(),
+      m.materialRegularGetEmissive(),
+      m.materialRegularGetEnvironment(),
+      m.materialGetNormal(),
+      m.materialRegularGetSpecular(),
+      m.materialRequiresUVCoordinates());
 
     System.out.println(b.toString());
   }

@@ -51,6 +51,7 @@ import com.io7m.renderer.kernel.KRendererDeferredType;
 import com.io7m.renderer.kernel.KRendererType;
 import com.io7m.renderer.kernel.KShaderCacheDebugType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredGeometryType;
+import com.io7m.renderer.kernel.KShaderCacheDeferredLightTranslucentType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredLightType;
 import com.io7m.renderer.kernel.KShaderCacheDepthType;
 import com.io7m.renderer.kernel.KShaderCacheDepthVarianceType;
@@ -62,8 +63,8 @@ import com.io7m.renderer.kernel.KShadowMapCache;
 import com.io7m.renderer.kernel.KShadowMapCacheType;
 import com.io7m.renderer.kernel.KShadowMapRenderer;
 import com.io7m.renderer.kernel.KShadowMapRendererType;
-import com.io7m.renderer.kernel.KTranslucentRenderer;
-import com.io7m.renderer.kernel.KTranslucentRendererType;
+import com.io7m.renderer.kernel.KTranslucentRendererDeferred;
+import com.io7m.renderer.kernel.KTranslucentRendererDeferredType;
 import com.io7m.renderer.kernel.Kernel;
 import com.io7m.renderer.kernel.types.KFrustumMeshCache;
 import com.io7m.renderer.kernel.types.KFrustumMeshCacheType;
@@ -111,6 +112,7 @@ public final class ExampleRendererDeferredDefault extends
           final KShaderCachePostprocessingType in_shader_postprocessing_cache,
           final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache,
           final KShaderCacheDeferredLightType in_shader_deferred_light_cache,
+          final KShaderCacheDeferredLightTranslucentType in_shader_deferred_light_translucent_cache,
           final JCGLImplementationType gi)
           throws JCGLException,
             RException
@@ -125,6 +127,7 @@ public final class ExampleRendererDeferredDefault extends
           in_shader_postprocessing_cache,
           in_shader_deferred_geo_cache,
           in_shader_deferred_light_cache,
+          in_shader_deferred_light_translucent_cache,
           gi);
       }
     };
@@ -142,6 +145,7 @@ public final class ExampleRendererDeferredDefault extends
       final KShaderCachePostprocessingType in_shader_postprocessing_cache,
       final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache,
       final KShaderCacheDeferredLightType in_shader_deferred_light_cache,
+      final KShaderCacheDeferredLightTranslucentType in_shader_deferred_light_translucent_cache,
       final JCGLImplementationType gi)
       throws JCGLException,
         RException
@@ -241,15 +245,6 @@ public final class ExampleRendererDeferredDefault extends
         bounds_cache,
         bounds_tri_cache);
 
-    final KTranslucentRendererType translucent_renderer =
-      KTranslucentRenderer.newRenderer(
-        gi,
-        in_shader_translucent_unlit_cache,
-        in_shader_translucent_lit_cache,
-        refraction_renderer,
-        caps,
-        log);
-
     final KFrustumMeshCacheType frustum_cache =
       KFrustumMeshCache.newCacheWithCapacity(
         gi.getGLCommon(),
@@ -257,6 +252,16 @@ public final class ExampleRendererDeferredDefault extends
         IndexBufferUpdateUnmapped.newConstructor(),
         BigInteger.valueOf(250),
         log);
+
+    final KTranslucentRendererDeferredType translucent_renderer =
+      KTranslucentRendererDeferred.newRenderer(
+        gi,
+        quad_cache,
+        sphere_cache,
+        frustum_cache,
+        in_shader_debug_cache,
+        in_shader_deferred_geo_cache,
+        in_shader_deferred_light_translucent_cache);
 
     final KRendererDeferredOpaqueType opaque_renderer =
       KRendererDeferredOpaque.newRenderer(

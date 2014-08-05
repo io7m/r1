@@ -40,10 +40,6 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
@@ -102,7 +98,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   private static void renderDepthPassBatch(
     final JCGLInterfaceCommonType gc,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final JCBProgramType jp,
     final List<KInstanceOpaqueType> batch,
     final OptionType<KFaceSelection> faces)
@@ -114,9 +110,9 @@ import com.io7m.renderer.types.RTransformViewType;
 
       mwo.withInstance(
         i,
-        new MatricesInstanceFunctionType<Unit, JCGLException>() {
+        new KMatricesInstanceFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final MatricesInstanceType mwi)
+            final KMatricesInstanceType mwi)
             throws JCGLException,
               RException
           {
@@ -134,7 +130,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   private static void renderDepthPassInstance(
     final JCGLInterfaceCommonType gc,
-    final MatricesInstanceType mwi,
+    final KMatricesInstanceValuesType mwi,
     final JCBProgramType jp,
     final KInstanceOpaqueType i,
     final OptionType<KFaceSelection> faces)
@@ -292,7 +288,7 @@ import com.io7m.renderer.types.RTransformViewType;
   private void renderDepthPassBatches(
     final Map<String, List<KInstanceOpaqueType>> batches,
     final JCGLInterfaceCommonType gc,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
     throws JCGLException,
       RException,
@@ -389,9 +385,9 @@ import com.io7m.renderer.types.RTransformViewType;
       this.matrices.withObserver(
         view,
         projection,
-        new MatricesObserverFunctionType<Unit, JCGLException>() {
+        new KMatricesObserverFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final MatricesObserverType mwo)
+            final KMatricesObserverType mwo)
             throws RException,
               JCGLException
           {
@@ -420,7 +416,7 @@ import com.io7m.renderer.types.RTransformViewType;
   private void renderScene(
     final Map<String, List<KInstanceOpaqueType>> batches,
     final AreaInclusive framebuffer_area,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
     throws JCGLException,
       RException,

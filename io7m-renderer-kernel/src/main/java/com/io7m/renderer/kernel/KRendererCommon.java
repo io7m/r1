@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,7 +28,6 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixReadable4x4FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KFaceSelection;
@@ -100,7 +99,7 @@ import com.io7m.renderer.types.RException;
 
   static void putInstanceMatricesRegular(
     final JCBProgramType program,
-    final MatricesInstanceType mwi,
+    final KMatricesInstanceValuesType mwi,
     final KMaterialRegularType material)
     throws JCGLException,
       RException
@@ -150,7 +149,7 @@ import com.io7m.renderer.types.RException;
 
   static void putInstanceMatricesSpecularOnly(
     final JCBProgramType program,
-    final MatricesInstanceType mwi,
+    final KMatricesInstanceValuesType mwi,
     final KMaterialTranslucentSpecularOnly material)
     throws JCGLException
   {

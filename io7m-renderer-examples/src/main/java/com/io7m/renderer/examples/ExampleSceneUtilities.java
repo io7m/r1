@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -277,6 +277,12 @@ public final class ExampleSceneUtilities
 
   public static final VectorI3F                                      Y_AXIS;
 
+  /**
+   * The standard range of 5 (far) views for a scene.
+   */
+
+  public static final List<ExampleViewType>                          FAR_VIEWS_5;
+
   // CHECKSTYLE:OFF
   static {
     // CHECKSTYLE:ON
@@ -443,6 +449,31 @@ public final class ExampleSceneUtilities
           2.0f,
           4.0f), ExampleSceneUtilities.CENTER));
         STANDARD_VIEW_LEFT = Collections.unmodifiableList(views);
+      }
+
+      {
+        final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -6.0f,
+          4.0f,
+          8.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -3.0f,
+          4.0f,
+          8.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          0.0f,
+          4.0f,
+          8.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          3.0f,
+          4.0f,
+          8.0f), ExampleSceneUtilities.CENTER));
+        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          6.0f,
+          4.0f,
+          8.0f), ExampleSceneUtilities.CENTER));
+        FAR_VIEWS_5 = Collections.unmodifiableList(views);
       }
 
       {
