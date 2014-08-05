@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -43,8 +43,6 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
@@ -108,7 +106,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       final KMeshBoundsCacheType<RSpaceObjectType> bounds_cache,
       final LUCacheType<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException> bounds_triangle_cache,
       final MatrixM4x4F.Context matrix_context,
-      final KMutableMatrices.MatricesInstanceType mi,
+      final KMatricesInstanceValuesType mi,
       final KMeshReadableType mesh,
       final RVectorM3F<RSpaceNDCType> ndc_bounds_lower,
       final RVectorM3F<RSpaceNDCType> ndc_bounds_upper)
@@ -379,7 +377,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
   private static void putInstanceMatrices(
     final JCBProgramType program,
-    final MatricesInstanceType mwi,
+    final KMatricesInstanceValuesType mwi,
     final KMaterialTranslucentRefractive material)
     throws JCGLException
   {
@@ -441,7 +439,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KFramebufferForwardUsableType scene,
     final KFramebufferForwardUsableType temporary,
     final KInstanceTranslucentRefractive r,
-    final KMutableMatrices.MatricesInstanceType mi,
+    final KMatricesInstanceValuesType mi,
     final AreaInclusive window_bounds_area)
     throws RException,
       JCacheException,
@@ -492,7 +490,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KFramebufferForwardUsableType scene,
     final KFramebufferForwardUsableType temporary,
     final KInstanceTranslucentRefractive r,
-    final KMutableMatrices.MatricesInstanceType mi)
+    final KMatricesInstanceValuesType mi)
     throws JCGLException,
       RException,
       JCacheException
@@ -513,7 +511,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KShaderCacheForwardTranslucentUnlitType shader_cache,
     final KFramebufferRGBAUsableType scene_mask,
     final KInstanceTranslucentRefractive r,
-    final MatricesInstanceType mi,
+    final KMatricesInstanceValuesType mi,
     final KMeshReadableType mesh)
     throws RException,
       JCGLException,
@@ -590,7 +588,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
       final KFramebufferRGBAUsableType scene_mask,
       final KFramebufferRGBAUsableType destination,
       final KInstanceTranslucentRefractive r,
-      final MatricesInstanceType mi,
+      final KMatricesInstanceValuesType mi,
       final KMeshReadableType mesh)
       throws JCGLException,
         RException,
@@ -708,7 +706,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
     final KFramebufferForwardUsableType scene,
     final KFramebufferForwardUsableType temporary,
     final KInstanceTranslucentRefractive r,
-    final MatricesInstanceType mi,
+    final KMatricesInstanceValuesType mi,
     final KMeshReadableType mesh)
     throws JCGLException,
       RException,
@@ -872,7 +870,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
   @Override public void rendererRefractionEvaluate(
     final KFramebufferForwardUsableType scene,
-    final KMutableMatrices.MatricesObserverType observer,
+    final KMatricesObserverType observer,
     final KInstanceTranslucentRefractive r)
     throws RException
   {
@@ -889,9 +887,9 @@ import com.io7m.renderer.types.RVectorReadable3FType;
 
       observer.withInstance(
         r,
-        new MatricesInstanceFunctionType<Unit, JCGLException>() {
+        new KMatricesInstanceFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final MatricesInstanceType mi)
+            final KMatricesInstanceType mi)
             throws RException,
               JCGLException
           {
@@ -919,7 +917,7 @@ import com.io7m.renderer.types.RVectorReadable3FType;
   private void rendererRefractionEvaluateForInstance(
     final KFramebufferForwardUsableType scene,
     final KInstanceTranslucentRefractive r,
-    final KMutableMatrices.MatricesInstanceType mi)
+    final KMatricesInstanceValuesType mi)
     throws JCGLException,
       RException,
       JCacheException

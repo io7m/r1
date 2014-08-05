@@ -151,7 +151,7 @@ import com.io7m.renderer.types.RVectorI3F;
       in_specular);
 
     final String code_lit =
-      KMaterialCodes.makeTranslucentSpecularOnlyLitCode(
+      KMaterialCodes.makeCodeTranslucentSpecularOnlyLit(
         in_alpha,
         in_normal,
         in_specular);

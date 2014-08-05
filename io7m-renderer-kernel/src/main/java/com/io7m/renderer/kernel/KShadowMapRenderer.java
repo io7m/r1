@@ -37,10 +37,6 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightType;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapBasic;
 import com.io7m.renderer.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.renderer.kernel.types.KCamera;
@@ -131,7 +127,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   private static void shadowMapRenderProjectiveBasic(
     final JCGLInterfaceCommonType gc,
-    final MatricesProjectiveLightType mwp,
+    final KMatricesProjectiveLightType mwp,
     final Map<String, List<KInstanceOpaqueType>> casters,
     final KDepthRendererType dr,
     final KShadowMapBasic sm)
@@ -171,7 +167,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   private static void shadowMapRenderProjectiveVariance(
     final JCGLInterfaceCommonType gc,
-    final MatricesProjectiveLightType mwp,
+    final KMatricesProjectiveLightType mwp,
     final Map<String, List<KInstanceOpaqueType>> casters,
     final KDepthVarianceRendererType dvr,
     final KPostprocessorBlurDepthVarianceType blur,
@@ -310,7 +306,7 @@ import com.io7m.renderer.types.RTransformViewType;
       final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r,
       final Map<String, List<KInstanceOpaqueType>> casters,
       final JCGLInterfaceCommonType gc,
-      final MatricesObserverType mo)
+      final KMatricesObserverType mo)
       throws RException,
         JCGLException
   {
@@ -330,9 +326,9 @@ import com.io7m.renderer.types.RTransformViewType;
       {
         return mo.withProjectiveLight(
           lp,
-          new MatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+          new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
             @Override public Unit run(
-              final MatricesProjectiveLightType mwp)
+              final KMatricesProjectiveLightType mwp)
               throws JCGLException,
                 RException
             {
@@ -359,7 +355,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
   private void shadowMapRenderProjective(
     final JCGLInterfaceCommonType gc,
-    final MatricesProjectiveLightType mwp,
+    final KMatricesProjectiveLightType mwp,
     final KShadowType shadow,
     final KShadowMapUsableType map,
     final Map<String, List<KInstanceOpaqueType>> casters)
@@ -449,9 +445,9 @@ import com.io7m.renderer.types.RTransformViewType;
       this.matrices.withObserver(
         camera.getViewMatrix(),
         camera.getProjection(),
-        new MatricesObserverFunctionType<Unit, JCGLException>() {
+        new KMatricesObserverFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final MatricesObserverType mo)
+            final KMatricesObserverType mo)
             throws RException,
               JCGLException
           {

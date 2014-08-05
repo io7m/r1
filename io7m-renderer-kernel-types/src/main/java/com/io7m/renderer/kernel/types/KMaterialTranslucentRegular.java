@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -148,7 +148,7 @@ import com.io7m.renderer.types.RTransformTextureType;
 
   /**
    * Construct a new regular translucent material.
-   * 
+   *
    * @param in_uv_matrix
    *          The material-specific UV matrix
    * @param in_normal
@@ -164,7 +164,7 @@ import com.io7m.renderer.types.RTransformTextureType;
    * @param in_alpha
    *          The alpha parameters
    * @return A new material
-   * 
+   *
    * @throws RExceptionMaterialMissingSpecularTexture
    *           If one or more material properties require a specular texture,
    *           but one was not provided.
@@ -192,7 +192,7 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_specular);
 
     final String code_lit =
-      KMaterialCodes.makeTranslucentRegularLitCode(
+      KMaterialCodes.makeCodeTranslucentRegularLit(
         in_albedo,
         in_alpha,
         in_emissive,
@@ -201,16 +201,27 @@ import com.io7m.renderer.types.RTransformTextureType;
         in_specular);
 
     final String code_unlit =
-      KMaterialCodes.makeTranslucentRegularUnlitCode(
+      KMaterialCodes.makeCodeTranslucentRegularUnlit(
         in_albedo,
         in_alpha,
         in_emissive,
         in_environment,
         in_normal);
 
+    final String code_deferred =
+      KMaterialCodes.makeCodeDeferredGeometryRegular(
+        in_alpha,
+        KMaterialDepthConstant.constant(),
+        in_albedo,
+        in_emissive,
+        in_environment,
+        in_normal,
+        in_specular);
+
     return new KMaterialTranslucentRegular(
       code_lit,
       code_unlit,
+      code_deferred,
       in_uv_matrix,
       in_albedo,
       in_alpha,
@@ -222,6 +233,7 @@ import com.io7m.renderer.types.RTransformTextureType;
 
   private final KMaterialAlbedoType                 albedo;
   private final KMaterialAlphaType                  alpha;
+  private final String                              code_deferred;
   private final String                              code_lit;
   private final String                              code_unlit;
   private final KMaterialEmissiveType               emissive;
@@ -235,6 +247,7 @@ import com.io7m.renderer.types.RTransformTextureType;
   private KMaterialTranslucentRegular(
     final String in_code_lit,
     final String in_code_unlit,
+    final String in_code_deferred,
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final KMaterialAlbedoType in_albedo,
     final KMaterialAlphaType in_alpha,
@@ -245,6 +258,7 @@ import com.io7m.renderer.types.RTransformTextureType;
   {
     this.code_lit = NullCheck.notNull(in_code_lit, "Lit code");
     this.code_unlit = NullCheck.notNull(in_code_unlit, "Unlit code");
+    this.code_deferred = NullCheck.notNull(in_code_deferred, "Deferred code");
     this.normal = NullCheck.notNull(in_normal, "Normal");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     this.albedo = NullCheck.notNull(in_albedo, "Albedo");
@@ -284,6 +298,11 @@ import com.io7m.renderer.types.RTransformTextureType;
         RException
   {
     return v.materialTranslucent(this);
+  }
+
+  @Override public String materialDeferredGetCode()
+  {
+    return this.code_deferred;
   }
 
   /**

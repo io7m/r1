@@ -18,7 +18,6 @@ package com.io7m.renderer.kernel;
 
 import java.util.List;
 
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KTranslucentType;
 import com.io7m.renderer.types.RException;
 
@@ -47,7 +46,7 @@ public interface KTranslucentRendererType
   void rendererEvaluateTranslucents(
     final KFramebufferForwardUsableType framebuffer,
     final KShadowMapContextType shadow_context,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final List<KTranslucentType> translucents)
     throws RException;
 }

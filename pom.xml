@@ -28,6 +28,7 @@
     <module>io7m-renderer-shaders-debug</module>
     <module>io7m-renderer-shaders-deferred-geometry</module>
     <module>io7m-renderer-shaders-deferred-light</module>
+    <module>io7m-renderer-shaders-deferred-light-translucent</module>
     <module>io7m-renderer-shaders-deferred</module>
     <module>io7m-renderer-shaders-depth</module>
     <module>io7m-renderer-shaders-depth_variance</module>
