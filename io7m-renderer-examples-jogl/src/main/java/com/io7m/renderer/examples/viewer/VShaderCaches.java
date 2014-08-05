@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -32,7 +32,6 @@ import com.io7m.renderer.kernel.KProgramType;
 import com.io7m.renderer.kernel.KShaderCache;
 import com.io7m.renderer.kernel.KShaderCacheDebugType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredGeometryType;
-import com.io7m.renderer.kernel.KShaderCacheDeferredLightTranslucentType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredLightType;
 import com.io7m.renderer.kernel.KShaderCacheDepthType;
 import com.io7m.renderer.kernel.KShaderCacheDepthVarianceType;
@@ -45,7 +44,6 @@ import com.io7m.renderer.kernel.KShaderCachePostprocessingType;
 import com.io7m.renderer.shaders.debug.RShadersDebug;
 import com.io7m.renderer.shaders.deferred.geometry.RShadersDeferredGeometry;
 import com.io7m.renderer.shaders.deferred.light.RShadersDeferredLight;
-import com.io7m.renderer.shaders.deferred.light.translucent.RShadersDeferredLightTranslucent;
 import com.io7m.renderer.shaders.depth_only.RShadersDepth;
 import com.io7m.renderer.shaders.depth_variance.RShadersDepthVariance;
 import com.io7m.renderer.shaders.forward.opaque.lit.RShadersForwardOpaqueLit;
@@ -118,7 +116,6 @@ public final class VShaderCaches
     final KShaderCacheDebugType in_shader_debug_cache;
     final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache;
     final KShaderCacheDeferredLightType in_shader_deferred_light_cache;
-    final KShaderCacheDeferredLightTranslucentType in_shader_deferred_light_translucent_cache;
     final KShaderCacheDepthType in_shader_depth_cache;
     final KShaderCacheDepthVarianceType in_shader_depth_variance_cache;
     final KShaderCacheForwardOpaqueLitType in_shader_forward_opaque_lit_cache;
@@ -184,20 +181,6 @@ public final class VShaderCaches
           PathVirtual.ROOT);
         in_shader_deferred_light_cache =
           VShaderCaches.wrapDeferredLight(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountArchiveFromAnywhere(
-          VShaderCaches.makeShaderArchiveNameEclipse(
-            config,
-            "deferred-light-translucent"),
-          PathVirtual.ROOT);
-        in_shader_deferred_light_translucent_cache =
-          VShaderCaches.wrapDeferredLightTranslucent(
-            gi,
-            log,
-            cache_config,
-            fs);
       }
       {
         final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
@@ -329,25 +312,12 @@ public final class VShaderCaches
         in_shader_deferred_light_cache =
           VShaderCaches.wrapDeferredLight(gi, log, cache_config, fs);
       }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountClasspathArchive(
-          RShadersDeferredLightTranslucent.class,
-          PathVirtual.ROOT);
-        in_shader_deferred_light_translucent_cache =
-          VShaderCaches.wrapDeferredLightTranslucent(
-            gi,
-            log,
-            cache_config,
-            fs);
-      }
     }
 
     return new VShaderCaches(
       in_shader_debug_cache,
       in_shader_deferred_geo_cache,
       in_shader_deferred_light_cache,
-      in_shader_deferred_light_translucent_cache,
       in_shader_depth_cache,
       in_shader_depth_variance_cache,
       in_shader_forward_opaque_lit_cache,
@@ -394,21 +364,6 @@ public final class VShaderCaches
     final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
     return KShaderCache.wrapDeferredLight(c);
-  }
-
-  private static
-    KShaderCacheDeferredLightTranslucentType
-    wrapDeferredLightTranslucent(
-      final JCGLImplementationType gi,
-      final LogUsableType log,
-      final LRUCacheConfig cache_config,
-      final FilesystemType fs)
-  {
-    final JCacheLoaderType<String, KProgramType, RException> loader =
-      KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
-    final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
-      LRUCacheTrivial.newCache(loader, cache_config);
-    return KShaderCache.wrapDeferredLightTranslucent(c);
   }
 
   private static KShaderCacheDepthType wrapDepth(
@@ -506,17 +461,16 @@ public final class VShaderCaches
     return KShaderCache.wrapPostprocessing(c);
   }
 
-  private final KShaderCacheDebugType                    shader_debug_cache;
-  private final KShaderCacheDeferredGeometryType         shader_deferred_geo_cache;
-  private final KShaderCacheDeferredLightType            shader_deferred_light_cache;
-  private final KShaderCacheDepthType                    shader_depth_cache;
-  private final KShaderCacheDepthVarianceType            shader_depth_variance_cache;
-  private final KShaderCacheForwardOpaqueLitType         shader_forward_opaque_lit_cache;
-  private final KShaderCacheForwardOpaqueUnlitType       shader_forward_opaque_unlit_cache;
-  private final KShaderCacheForwardTranslucentLitType    shader_forward_translucent_lit_cache;
-  private final KShaderCacheForwardTranslucentUnlitType  shader_forward_translucent_unlit_cache;
-  private final KShaderCachePostprocessingType           shader_postprocessing_cache;
-  private final KShaderCacheDeferredLightTranslucentType shader_deferred_light_translucent_cache;
+  private final KShaderCacheDebugType                   shader_debug_cache;
+  private final KShaderCacheDeferredGeometryType        shader_deferred_geo_cache;
+  private final KShaderCacheDeferredLightType           shader_deferred_light_cache;
+  private final KShaderCacheDepthType                   shader_depth_cache;
+  private final KShaderCacheDepthVarianceType           shader_depth_variance_cache;
+  private final KShaderCacheForwardOpaqueLitType        shader_forward_opaque_lit_cache;
+  private final KShaderCacheForwardOpaqueUnlitType      shader_forward_opaque_unlit_cache;
+  private final KShaderCacheForwardTranslucentLitType   shader_forward_translucent_lit_cache;
+  private final KShaderCacheForwardTranslucentUnlitType shader_forward_translucent_unlit_cache;
+  private final KShaderCachePostprocessingType          shader_postprocessing_cache;
 
   /**
    * Construct shader caches.
@@ -545,7 +499,6 @@ public final class VShaderCaches
     final KShaderCacheDebugType in_shader_debug_cache,
     final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache,
     final KShaderCacheDeferredLightType in_shader_deferred_light_cache,
-    final KShaderCacheDeferredLightTranslucentType in_shader_deferred_light_translucent_cache,
     final KShaderCacheDepthType in_shader_depth_cache,
     final KShaderCacheDepthVarianceType in_shader_depth_variance_cache,
     final KShaderCacheForwardOpaqueLitType in_shader_forward_opaque_lit_cache,
@@ -557,8 +510,6 @@ public final class VShaderCaches
     this.shader_debug_cache = in_shader_debug_cache;
     this.shader_deferred_geo_cache = in_shader_deferred_geo_cache;
     this.shader_deferred_light_cache = in_shader_deferred_light_cache;
-    this.shader_deferred_light_translucent_cache =
-      in_shader_deferred_light_translucent_cache;
     this.shader_depth_cache = in_shader_depth_cache;
     this.shader_depth_variance_cache = in_shader_depth_variance_cache;
     this.shader_forward_opaque_lit_cache = in_shader_forward_opaque_lit_cache;
@@ -666,16 +617,4 @@ public final class VShaderCaches
   {
     return this.shader_postprocessing_cache;
   }
-
-  /**
-   * @return A shader cache.
-   */
-
-  public
-    KShaderCacheDeferredLightTranslucentType
-    getShaderDeferredLightTranslucentCache()
-  {
-    return this.shader_deferred_light_translucent_cache;
-  }
-
 }
