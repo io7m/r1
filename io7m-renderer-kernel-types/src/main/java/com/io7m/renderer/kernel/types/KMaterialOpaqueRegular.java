@@ -148,7 +148,7 @@ import com.io7m.renderer.types.RTransformTextureType;
 
   /**
    * Construct a new opaque material.
-   * 
+   *
    * @param in_uv_matrix
    *          The material's UV matrix
    * @param in_depth
@@ -164,7 +164,7 @@ import com.io7m.renderer.types.RTransformTextureType;
    * @param in_specular
    *          The material's specularity properties
    * @return A new material
-   * 
+   *
    * @throws RExceptionMaterialMissingAlbedoTexture
    *           If one or more material properties require an albedo texture,
    *           but one was not provided.
@@ -196,7 +196,7 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_specular);
 
     final String code_lit_without_depth =
-      KMaterialCodes.makeOpaqueRegularLitCodeWithoutDepth(
+      KMaterialCodes.makeCodeOpaqueRegularLitWithoutDepth(
         in_albedo,
         in_emissive,
         in_environment,
@@ -204,7 +204,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         in_specular);
 
     final String code_lit_with_depth =
-      KMaterialCodes.makeOpaqueRegularLitCodeWithDepth(
+      KMaterialCodes.makeCodeOpaqueRegularLitWithDepth(
         in_depth,
         in_albedo,
         in_emissive,
@@ -213,16 +213,27 @@ import com.io7m.renderer.types.RTransformTextureType;
         in_specular);
 
     final String code_unlit =
-      KMaterialCodes.makeOpaqueRegularUnlitCode(
+      KMaterialCodes.makeCodeOpaqueRegularUnlit(
         in_albedo,
         in_emissive,
         in_environment,
         in_normal);
 
+    final String code_deferred =
+      KMaterialCodes.makeCodeDeferredGeometryRegular(
+        KMaterialAlphaConstant.opaque(),
+        in_depth,
+        in_albedo,
+        in_emissive,
+        in_environment,
+        in_normal,
+        in_specular);
+
     return new KMaterialOpaqueRegular(
       code_lit_without_depth,
       code_lit_with_depth,
       code_unlit,
+      code_deferred,
       in_uv_matrix,
       in_albedo,
       in_depth,
@@ -233,6 +244,7 @@ import com.io7m.renderer.types.RTransformTextureType;
   }
 
   private final KMaterialAlbedoType                 albedo;
+  private final String                              code_deferred;
   private final String                              code_lit_with_depth;
   private final String                              code_lit_without_depth;
   private final String                              code_unlit;
@@ -249,6 +261,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     final String in_code_lit_without_depth,
     final String in_code_lit_with_depth,
     final String in_code_unlit,
+    final String in_code_deferred,
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final KMaterialAlbedoType in_albedo,
     final KMaterialDepthType in_depth,
@@ -265,6 +278,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     this.specular = NullCheck.notNull(in_specular, "Specular");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
 
+    this.code_deferred = NullCheck.notNull(in_code_deferred, "Deferred code");
     this.code_lit_without_depth =
       NullCheck.notNull(in_code_lit_without_depth, "Lit code");
     this.code_lit_with_depth =
@@ -303,6 +317,11 @@ import com.io7m.renderer.types.RTransformTextureType;
         RException
   {
     return v.materialOpaque(this);
+  }
+
+  @Override public String materialDeferredGetCode()
+  {
+    return this.code_deferred;
   }
 
   @Override public KMaterialNormalType materialGetNormal()

@@ -37,13 +37,6 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceWithProjectiveFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceWithProjectiveType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueVisitorType;
@@ -94,7 +87,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KShadowMapContextType shadow_context,
     final KTextureUnitAllocator unit_allocator,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KLightType light,
     final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program)
@@ -146,26 +139,27 @@ import com.io7m.renderer.types.RExceptionJCGL;
             throws RException,
               JCGLException
           {
-            return mwo.withProjectiveLight(
-              projective,
-              new MatricesProjectiveLightFunctionType<Unit, JCGLException>() {
-                @Override public Unit run(
-                  final MatricesProjectiveLightType mwp)
-                  throws JCGLException,
-                    RException
-                {
-                  KRendererForwardOpaque
-                    .renderOpaqueLitBatchInstancesWithProjective(
-                      gc,
-                      shadow_context,
-                      unit_context,
-                      mwp,
-                      instances,
-                      program,
-                      projective);
-                  return Unit.unit();
-                }
-              });
+            return mwo
+              .withProjectiveLight(
+                projective,
+                new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+                  @Override public Unit run(
+                    final KMatricesProjectiveLightType mwp)
+                    throws JCGLException,
+                      RException
+                  {
+                    KRendererForwardOpaque
+                      .renderOpaqueLitBatchInstancesWithProjective(
+                        gc,
+                        shadow_context,
+                        unit_context,
+                        mwp,
+                        instances,
+                        program,
+                        projective);
+                    return Unit.unit();
+                  }
+                });
           }
 
           /**
@@ -195,7 +189,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private static void renderOpaqueLitBatchInstancesWithDirectional(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType unit_context,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program,
     final KLightDirectional l)
@@ -215,9 +209,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
       KShadingProgramCommon.putLightDirectionalReuse(program);
       mwo.withInstance(
         i,
-        new MatricesInstanceFunctionType<Unit, JCGLException>() {
+        new KMatricesInstanceFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final MatricesInstanceType mwi)
+            final KMatricesInstanceType mwi)
             throws JCGLException,
               RException
           {
@@ -237,7 +231,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KShadowMapContextType shadow_context,
     final KTextureUnitContextType unit_context,
-    final MatricesProjectiveLightType mwp,
+    final KMatricesProjectiveLightType mwp,
     final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program,
     final KLightProjective light)
@@ -276,9 +270,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
       mwp
         .withInstance(
           i,
-          new MatricesInstanceWithProjectiveFunctionType<Unit, JCGLException>() {
+          new KMatricesInstanceWithProjectiveFunctionType<Unit, JCGLException>() {
             @Override public Unit run(
-              final MatricesInstanceWithProjectiveType mwi)
+              final KMatricesInstanceWithProjectiveType mwi)
               throws JCGLException,
                 RException
             {
@@ -301,7 +295,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   private static void renderOpaqueLitBatchInstancesWithSpherical(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType unit_context,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program,
     final KLightSphere l)
@@ -322,9 +316,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
       KShadingProgramCommon.putLightSphericalReuse(program);
       mwo.withInstance(
         i,
-        new MatricesInstanceFunctionType<Unit, JCGLException>() {
+        new KMatricesInstanceFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final MatricesInstanceType mwi)
+            final KMatricesInstanceType mwi)
             throws JCGLException,
 
               RException
@@ -381,7 +375,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   @Override public void rendererEvaluateOpaqueLit(
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final Map<KLightType, Map<String, Set<KInstanceOpaqueType>>> by_light)
     throws RException
   {
@@ -493,7 +487,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final boolean depth_write,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final Map<String, Set<KInstanceOpaqueType>> batches)
     throws RException
   {

@@ -52,7 +52,7 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_refractive);
 
     final String code_unlit =
-      KMaterialCodes.makeTranslucentRefractiveUnlitCode(
+      KMaterialCodes.makeCodeTranslucentRefractiveUnlit(
         in_normal,
         in_refractive);
 

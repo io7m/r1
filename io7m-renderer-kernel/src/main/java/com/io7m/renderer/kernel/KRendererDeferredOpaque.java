@@ -45,20 +45,12 @@ import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
-import com.io7m.jfunctional.None;
-import com.io7m.jfunctional.OptionPartialVisitorType;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.VectorM2F;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesProjectiveLightType;
 import com.io7m.renderer.kernel.types.KFrustumMeshCacheType;
 import com.io7m.renderer.kernel.types.KFrustumMeshUsableType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
@@ -108,42 +100,6 @@ import com.io7m.renderer.types.RVectorI4F;
     BLACK = new RVectorI4F<RSpaceRGBType>(0.0f, 0.0f, 0.0f, 1.0f);
   }
 
-  private static void configureRenderStateForGeometry(
-    final OptionType<DepthFunction> depth_function,
-    final JCGLInterfaceCommonType gc)
-    throws JCGLExceptionRuntime,
-      JCGLException,
-      JCGLExceptionNoStencilBuffer
-  {
-    gc.blendingDisable();
-    gc.colorBufferMask(true, true, true, true);
-    gc.cullingEnable(
-      FaceSelection.FACE_BACK,
-      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-    gc.depthBufferWriteEnable();
-
-    depth_function
-      .acceptPartial(new OptionPartialVisitorType<DepthFunction, Unit, JCGLException>() {
-        @Override public Unit none(
-          final None<DepthFunction> n)
-          throws JCGLException
-        {
-          gc.depthBufferTestDisable();
-          return Unit.unit();
-        }
-
-        @Override public Unit some(
-          final Some<DepthFunction> s)
-          throws JCGLException
-        {
-          gc.depthBufferTestEnable(s.get());
-          return Unit.unit();
-        }
-      });
-
-    KRendererDeferredOpaque.configureStencilForGeometry(gc);
-  }
-
   private static void configureRenderStateForLightPass(
     final JCGLInterfaceCommonType gc)
     throws JCGLExceptionRuntime,
@@ -176,36 +132,6 @@ import com.io7m.renderer.types.RVectorI4F;
     gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
 
     KRendererDeferredOpaque.configureStencilLightPre(gc);
-  }
-
-  /**
-   * <p>
-   * Configure the stencil buffer for the geometry pass.
-   * </p>
-   * <p>
-   * The stencil buffer is cleared to 0 and configured such that any geometry
-   * drawn will set the corresponding value in the stencil buffer to 1.
-   * </p>
-   */
-
-  private static void configureStencilForGeometry(
-    final JCGLInterfaceCommonType gc)
-    throws JCGLException,
-      JCGLExceptionNoStencilBuffer
-  {
-    gc.stencilBufferEnable();
-    gc.stencilBufferMask(FaceSelection.FACE_FRONT, 0xffffffff);
-    gc.stencilBufferClear(0);
-    gc.stencilBufferFunction(
-      FaceSelection.FACE_FRONT,
-      StencilFunction.STENCIL_ALWAYS,
-      0x1,
-      0xffffffff);
-    gc.stencilBufferOperation(
-      FaceSelection.FACE_FRONT,
-      StencilOperation.STENCIL_OP_KEEP,
-      StencilOperation.STENCIL_OP_KEEP,
-      StencilOperation.STENCIL_OP_REPLACE);
   }
 
   /**
@@ -388,7 +314,7 @@ import com.io7m.renderer.types.RVectorI4F;
   private static void renderGroupGeometryBatchInstances(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitAllocator units,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program)
     throws RException,
@@ -399,9 +325,9 @@ import com.io7m.renderer.types.RVectorI4F;
 
       mwo.withInstance(
         i,
-        new MatricesInstanceFunctionType<Unit, JCGLException>() {
+        new KMatricesInstanceFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final MatricesInstanceType mwi)
+            final KMatricesInstanceType mwi)
             throws JCGLException,
               RException
           {
@@ -428,7 +354,7 @@ import com.io7m.renderer.types.RVectorI4F;
   private static void renderGroupGeometryInstance(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType texture_unit_context,
-    final MatricesInstanceType mwi,
+    final KMatricesInstanceValuesType mwi,
     final JCBProgramType program,
     final KInstanceOpaqueType i)
     throws JCGLException,
@@ -678,7 +604,7 @@ import com.io7m.renderer.types.RVectorI4F;
 
   private void renderDebugGeometryProjective(
     final JCGLInterfaceCommonType gc,
-    final MatricesProjectiveLightType mdp,
+    final KMatricesProjectiveLightType mdp,
     final KLightProjective lp)
     throws RException,
       JCacheException,
@@ -700,9 +626,9 @@ import com.io7m.renderer.types.RVectorI4F;
     mdp.withGenericTransform(
       lp.lightGetTransform(),
       id,
-      new MatricesInstanceFunctionType<Unit, JCGLException>() {
+      new KMatricesInstanceValuesFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
-          final MatricesInstanceType mi)
+          final KMatricesInstanceValuesType mi)
           throws JCGLException,
             RException
         {
@@ -748,7 +674,7 @@ import com.io7m.renderer.types.RVectorI4F;
 
   private void renderDebugGeometrySpherical(
     final JCGLInterfaceCommonType gc,
-    final MatricesInstanceType mwi,
+    final KMatricesInstanceValuesType mwi,
     final KLightSphere ls)
     throws RException,
       JCacheException,
@@ -804,7 +730,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final KFramebufferDeferredUsableType framebuffer,
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final List<Group> groups)
     throws RException
   {
@@ -833,7 +759,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final KFramebufferDeferredUsableType framebuffer,
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final Map<String, Set<KInstanceOpaqueType>> instances)
     throws RException
   {
@@ -879,7 +805,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final KFramebufferDeferredUsableType framebuffer,
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KSceneBatchedDeferredOpaque.Group group)
     throws JCGLException,
       RException,
@@ -983,7 +909,7 @@ import com.io7m.renderer.types.RVectorI4F;
   private void renderGroupGeometry(
     final KFramebufferDeferredUsableType framebuffer,
     final OptionType<DepthFunction> depth_function,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KSceneBatchedDeferredOpaque.Group group)
     throws JCGLException,
       RException,
@@ -998,7 +924,7 @@ import com.io7m.renderer.types.RVectorI4F;
     try {
       gc.framebufferDrawBind(geom_fb);
 
-      KRendererDeferredOpaque.configureRenderStateForGeometry(
+      KRendererDeferredCommon.configureRenderStateForGeometry(
         depth_function,
         gc);
 
@@ -1049,7 +975,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_specular,
     final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KShadowMapContextType shadow_map_context,
     final KTextureUnitContextType texture_unit_context,
     final KLightType light,
@@ -1111,33 +1037,34 @@ import com.io7m.renderer.types.RVectorI4F;
             throws JCGLException,
               RException
           {
-            mwo.withProjectiveLight(
-              lp,
-              new MatricesProjectiveLightFunctionType<Unit, JCGLException>() {
-                @Override public Unit run(
-                  final MatricesProjectiveLightType mdp)
-                  throws JCGLException,
-                    RException
-                {
-                  try {
-                    r.renderGroupLightProjective(
-                      framebuffer,
-                      t_map_albedo,
-                      t_map_depth_stencil,
-                      t_map_normal,
-                      t_map_specular,
-                      t_map_eye_depth,
-                      gc,
-                      mdp,
-                      shadow_map_context,
-                      texture_unit_context_light,
-                      lp);
-                    return Unit.unit();
-                  } catch (final JCacheException e) {
-                    throw new UnreachableCodeException(e);
+            mwo
+              .withProjectiveLight(
+                lp,
+                new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+                  @Override public Unit run(
+                    final KMatricesProjectiveLightType mdp)
+                    throws JCGLException,
+                      RException
+                  {
+                    try {
+                      r.renderGroupLightProjective(
+                        framebuffer,
+                        t_map_albedo,
+                        t_map_depth_stencil,
+                        t_map_normal,
+                        t_map_specular,
+                        t_map_eye_depth,
+                        gc,
+                        mdp,
+                        shadow_map_context,
+                        texture_unit_context_light,
+                        lp);
+                      return Unit.unit();
+                    } catch (final JCacheException e) {
+                      throw new UnreachableCodeException(e);
+                    }
                   }
-                }
-              });
+                });
           }
         });
 
@@ -1154,9 +1081,9 @@ import com.io7m.renderer.types.RVectorI4F;
         return mwo.withGenericTransform(
           ls.lightGetTransform(),
           id,
-          new MatricesInstanceFunctionType<Unit, JCGLException>() {
+          new KMatricesInstanceFunctionType<Unit, JCGLException>() {
             @Override public Unit run(
-              final MatricesInstanceType mwi)
+              final KMatricesInstanceType mwi)
               throws JCGLException,
                 RException
             {
@@ -1189,7 +1116,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_specular,
     final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final KLightDirectional ld)
     throws RException,
       JCacheException,
@@ -1256,7 +1183,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_specular,
     final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
-    final MatricesProjectiveLightType mdp,
+    final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
     final KTextureUnitContextType texture_unit_context,
     final KLightProjective lp)
@@ -1292,7 +1219,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_specular,
     final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
-    final MatricesProjectiveLightType mdp,
+    final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
     final KTextureUnitContextType texture_unit_context,
     final KLightProjective lp)
@@ -1316,9 +1243,9 @@ import com.io7m.renderer.types.RVectorI4F;
     mdp.withGenericTransform(
       lp.lightGetTransform(),
       id,
-      new MatricesInstanceFunctionType<Unit, JCGLException>() {
+      new KMatricesInstanceValuesFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
-          final MatricesInstanceType mi)
+          final KMatricesInstanceValuesType mi)
           throws JCGLException,
             RException
         {
@@ -1390,7 +1317,7 @@ import com.io7m.renderer.types.RVectorI4F;
 
   private void renderGroupLightProjectiveStencilPass(
     final JCGLInterfaceCommonType gc,
-    final MatricesProjectiveLightType mdp,
+    final KMatricesProjectiveLightType mdp,
     final KLightProjective lp)
     throws JCGLException,
       RException,
@@ -1411,9 +1338,9 @@ import com.io7m.renderer.types.RVectorI4F;
     mdp.withGenericTransform(
       lp.lightGetTransform(),
       id,
-      new MatricesInstanceFunctionType<Unit, JCGLException>() {
+      new KMatricesInstanceValuesFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
-          final MatricesInstanceType mi)
+          final KMatricesInstanceValuesType mi)
           throws JCGLException,
             RException
         {
@@ -1454,7 +1381,7 @@ import com.io7m.renderer.types.RVectorI4F;
   private void renderGroupLights(
     final KFramebufferDeferredUsableType framebuffer,
     final KShadowMapContextType shadow_map_context,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final Group group)
     throws JCGLException,
       RException
@@ -1546,7 +1473,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_specular,
     final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
-    final MatricesInstanceType mwi,
+    final KMatricesInstanceValuesType mwi,
     final KLightSphere ls)
     throws RException,
       JCacheException,
@@ -1578,7 +1505,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final TextureUnitType t_map_specular,
     final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
-    final MatricesInstanceType mwi,
+    final KMatricesInstanceValuesType mwi,
     final KLightSphere ls)
     throws RException,
       JCacheException,
@@ -1641,7 +1568,7 @@ import com.io7m.renderer.types.RVectorI4F;
 
   private void renderGroupLightSphericalStencilPass(
     final JCGLInterfaceCommonType gc,
-    final MatricesInstanceType mwi)
+    final KMatricesInstanceValuesType mwi)
     throws JCGLException,
       RException,
       JCacheException
@@ -1750,7 +1677,7 @@ import com.io7m.renderer.types.RVectorI4F;
   private void renderUnlitGeometry(
     final KFramebufferDeferredUsableType framebuffer,
     final OptionType<DepthFunction> depth_function,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final Map<String, Set<KInstanceOpaqueType>> instances)
     throws RException,
       JCacheException,
@@ -1765,7 +1692,7 @@ import com.io7m.renderer.types.RVectorI4F;
     try {
       gc.framebufferDrawBind(geom_fb);
 
-      KRendererDeferredOpaque.configureRenderStateForGeometry(
+      KRendererDeferredCommon.configureRenderStateForGeometry(
         depth_function,
         gc);
 

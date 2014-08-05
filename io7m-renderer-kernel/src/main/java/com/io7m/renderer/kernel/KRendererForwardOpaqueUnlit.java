@@ -36,9 +36,6 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceFunctionType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesInstanceType;
-import com.io7m.renderer.kernel.KMutableMatrices.MatricesObserverType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
@@ -74,7 +71,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   static void renderOpaqueUnlitBatch(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitAllocator units,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final Set<KInstanceOpaqueType> instances,
     final JCBProgramType program)
     throws JCGLException,
@@ -89,9 +86,9 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
       mwo.withInstance(
         instance,
-        new MatricesInstanceFunctionType<Unit, JCGLException>() {
+        new KMatricesInstanceFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
-            final MatricesInstanceType mwi)
+            final KMatricesInstanceType mwi)
             throws JCGLException,
               RException
           {
@@ -139,7 +136,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final boolean depth_write,
-    final MatricesObserverType mwo,
+    final KMatricesObserverType mwo,
     final Map<String, Set<KInstanceOpaqueType>> batches)
     throws RException
   {
