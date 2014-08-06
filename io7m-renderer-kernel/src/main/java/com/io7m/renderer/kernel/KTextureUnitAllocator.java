@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.io7m.jcanephora.JCGLException;
@@ -110,6 +111,9 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
         KTextureUnitAllocator.this.texturesUnitGet(this.first + this.count);
       KTextureUnitAllocator.this.texturesAdded(1);
       ++this.count;
+
+      final int ui = unit.unitGetIndex();
+      KTextureUnitAllocator.this.units_are_cube.set(ui, Boolean.FALSE);
       KTextureUnitAllocator.this.gc_textures2d.texture2DStaticBind(unit, t);
       return unit;
     }
@@ -123,6 +127,9 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
         KTextureUnitAllocator.this.texturesUnitGet(this.first + this.count);
       KTextureUnitAllocator.this.texturesAdded(1);
       ++this.count;
+
+      final int ui = unit.unitGetIndex();
+      KTextureUnitAllocator.this.units_are_cube.set(ui, Boolean.TRUE);
       KTextureUnitAllocator.this.gc_textures_cube.textureCubeStaticBind(
         unit,
         t);
@@ -157,6 +164,7 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
   private final JCGLTextures2DStaticCommonType   gc_textures2d;
   private boolean                                in_use;
   private final List<TextureUnitType>            units;
+  private final List<Boolean>                    units_are_cube;
 
   private <G extends JCGLTextures2DStaticCommonType & JCGLTexturesCubeStaticCommonType & JCGLTextureUnitsType> KTextureUnitAllocator(
     final G in_gc)
@@ -168,6 +176,11 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
     this.units = in_gc.textureGetUnits();
     this.allocated = 0;
     this.in_use = false;
+
+    this.units_are_cube = new ArrayList<Boolean>();
+    for (int index = 0; index < this.units.size(); ++index) {
+      this.units_are_cube.add(Boolean.FALSE);
+    }
   }
 
   @Override public int getTextureCountForContext()
@@ -222,7 +235,15 @@ import com.io7m.renderer.types.RExceptionUnitAllocatorMultipleChildren;
       final int index = first + ((count - 1) - k);
       final TextureUnitType unit = this.units.get(index);
       assert unit != null;
-      this.gc_textures2d.texture2DStaticUnbind(unit);
+
+      final int ui = unit.unitGetIndex();
+      if (this.units_are_cube.get(ui).booleanValue()) {
+        this.units_are_cube.set(ui, Boolean.FALSE);
+        this.gc_textures_cube.textureCubeStaticUnbind(unit);
+      } else {
+        this.gc_textures2d.texture2DStaticUnbind(unit);
+      }
+
       --this.allocated;
     }
   }
