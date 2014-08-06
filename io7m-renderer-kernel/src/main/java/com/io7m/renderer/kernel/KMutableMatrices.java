@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -37,7 +37,8 @@ import com.io7m.renderer.kernel.types.KInstanceTranslucentType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentVisitorType;
 import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.kernel.types.KInstanceVisitorType;
-import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightProjectiveType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
@@ -112,14 +113,12 @@ import com.io7m.renderer.types.RTransformViewType;
   @EqualityReference private final class InstanceFromObserver implements
     KMatricesInstanceType
   {
-    private final RMatrixM4x4F<RTransformDeferredProjectionType> matrix_deferred_proj;
-    private final RMatrixM4x4F<RTransformDeferredProjectionType> matrix_deferred_proj_temp;
-    private final RMatrixM4x4F<RTransformModelType>              matrix_model;
-    private final RMatrixM4x4F<RTransformModelViewType>          matrix_modelview;
-    private final RMatrixM3x3F<RTransformNormalType>             matrix_normal;
-    private final RMatrixM3x3F<RTransformTextureType>            matrix_uv;
-    private final RMatrixM3x3F<RTransformTextureType>            matrix_uv_temp;
-    private final Observer                                       parent;
+    private final RMatrixM4x4F<RTransformModelType>     matrix_model;
+    private final RMatrixM4x4F<RTransformModelViewType> matrix_modelview;
+    private final RMatrixM3x3F<RTransformNormalType>    matrix_normal;
+    private final RMatrixM3x3F<RTransformTextureType>   matrix_uv;
+    private final RMatrixM3x3F<RTransformTextureType>   matrix_uv_temp;
+    private final Observer                              parent;
 
     InstanceFromObserver(
       final Observer in_parent)
@@ -131,10 +130,6 @@ import com.io7m.renderer.types.RTransformViewType;
       this.matrix_normal = new RMatrixM3x3F<RTransformNormalType>();
       this.matrix_uv = new RMatrixM3x3F<RTransformTextureType>();
       this.matrix_uv_temp = new RMatrixM3x3F<RTransformTextureType>();
-      this.matrix_deferred_proj =
-        new RMatrixM4x4F<RTransformDeferredProjectionType>();
-      this.matrix_deferred_proj_temp =
-        new RMatrixM4x4F<RTransformDeferredProjectionType>();
     }
 
     @Override public Context getMatrixContext()
@@ -333,7 +328,7 @@ import com.io7m.renderer.types.RTransformViewType;
     }
 
     @Override public <T, E extends Throwable> T withProjectiveLight(
-      final KLightProjective p,
+      final KLightProjectiveWithoutShadow p,
       final KMatricesInstanceWithProjectiveFunctionType<T, E> f)
       throws RException,
         E
@@ -370,7 +365,6 @@ import com.io7m.renderer.types.RTransformViewType;
     private final RMatrixM3x3F<RTransformTextureType>             matrix_uv;
     private final RMatrixM3x3F<RTransformTextureType>             matrix_uv_temp;
     private final ProjectiveFromObserver                          parent;
-    private final MatrixM4x4F                                     temp;
 
     InstanceFromProjective(
       final ProjectiveFromObserver in_parent)
@@ -386,7 +380,6 @@ import com.io7m.renderer.types.RTransformViewType;
         new RMatrixM4x4F<RTransformProjectiveModelViewType>();
       this.matrix_deferred_projection =
         new RMatrixM4x4F<RTransformDeferredProjectionType>();
-      this.temp = new MatrixM4x4F();
     }
 
     @Override public Context getMatrixContext()
@@ -819,7 +812,7 @@ import com.io7m.renderer.types.RTransformViewType;
     }
 
     @Override public <T, E extends Throwable> T withProjectiveLight(
-      final KLightProjective p,
+      final KLightProjectiveType p,
       final KMatricesProjectiveLightFunctionType<T, E> f)
       throws E,
         RException
@@ -877,7 +870,7 @@ import com.io7m.renderer.types.RTransformViewType;
     }
 
     private void projectiveStart(
-      final KLightProjective p)
+      final KLightProjectiveType p)
     {
       assert KMutableMatrices.this.observerIsActive();
       assert KMutableMatrices.this.instanceIsActive();
@@ -890,15 +883,15 @@ import com.io7m.renderer.types.RTransformViewType;
 
       KMatrices.makeViewMatrixProjective(
         KMutableMatrices.this.transform_context,
-        p.lightGetPosition(),
-        p.lightGetOrientation(),
+        p.lightProjectiveGetPosition(),
+        p.lightProjectiveGetOrientation(),
         this.matrix_projective_view);
 
       /**
        * Produce the eye → clip transformation matrix for the given light.
        */
 
-      final KProjectionType proj = p.lightGetProjection();
+      final KProjectionType proj = p.lightProjectiveGetProjection();
 
       this.projection = proj;
       proj.projectionGetMatrix().makeMatrixM4x4F(
@@ -1165,7 +1158,7 @@ import com.io7m.renderer.types.RTransformViewType;
     }
 
     private void projectiveStart(
-      final KLightProjective p)
+      final KLightProjectiveType p)
     {
       assert KMutableMatrices.this.observerIsActive();
       assert KMutableMatrices.this.projectiveLightIsActive() == false;
@@ -1177,15 +1170,15 @@ import com.io7m.renderer.types.RTransformViewType;
 
       KMatrices.makeViewMatrixProjective(
         KMutableMatrices.this.transform_context,
-        p.lightGetPosition(),
-        p.lightGetOrientation(),
+        p.lightProjectiveGetPosition(),
+        p.lightProjectiveGetOrientation(),
         this.matrix_projective_view);
 
       /**
        * Produce the eye → clip transformation matrix for the given light.
        */
 
-      final KProjectionType proj = p.lightGetProjection();
+      final KProjectionType proj = p.lightProjectiveGetProjection();
 
       this.projection = proj;
       proj.projectionGetMatrix().makeMatrixM4x4F(

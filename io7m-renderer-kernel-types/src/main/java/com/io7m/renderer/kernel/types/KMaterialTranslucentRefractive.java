@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -32,7 +32,7 @@ import com.io7m.renderer.types.RTransformTextureType;
 {
   /**
    * Construct a new regular translucent material.
-   * 
+   *
    * @param in_uv_matrix
    *          The material-specific UV matrix
    * @param in_normal
@@ -63,7 +63,7 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_refractive);
   }
 
-  private final String                              code_unlit;
+  private final String                              code;
   private final KMaterialNormalType                 normal;
   private final KMaterialRefractiveType             refractive;
   private boolean                                   required_uv;
@@ -71,12 +71,12 @@ import com.io7m.renderer.types.RTransformTextureType;
   private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialTranslucentRefractive(
-    final String in_code_unlit,
+    final String in_code,
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final KMaterialNormalType in_normal,
     final KMaterialRefractiveType in_refractive)
   {
-    this.code_unlit = NullCheck.notNull(in_code_unlit, "Unlit code");
+    this.code = NullCheck.notNull(in_code, "Code");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     this.normal = NullCheck.notNull(in_normal, "Normal");
     this.refractive = NullCheck.notNull(in_refractive, "Refractive");
@@ -115,6 +115,11 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.materialTranslucent(this);
   }
 
+  @Override public String materialGetCode()
+  {
+    return this.code;
+  }
+
   @Override public KMaterialNormalType materialGetNormal()
   {
     return this.normal;
@@ -141,11 +146,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.translucentRefractive(this);
   }
 
-  @Override public String materialUnlitGetCode()
-  {
-    return this.code_unlit;
-  }
-
   @Override public int texturesGetRequired()
   {
     return this.textures_required;
@@ -154,8 +154,8 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[KMaterialTranslucentRefractive code_unlit=");
-    b.append(this.code_unlit);
+    b.append("[KMaterialTranslucentRefractive code=");
+    b.append(this.code);
     b.append(" normal=");
     b.append(this.normal);
     b.append(" refractive=");

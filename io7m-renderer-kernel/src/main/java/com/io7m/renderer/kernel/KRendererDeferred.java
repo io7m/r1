@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -75,7 +75,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
   public static KRendererDeferredType newRenderer(
     final JCGLImplementationType in_g,
     final KShadowMapRendererType in_shadow_renderer,
-    final KTranslucentRendererDeferredType in_translucent_renderer,
+    final KTranslucentRendererType in_translucent_renderer,
     final KRendererDeferredOpaqueType in_opaque_renderer,
     final LogUsableType in_log)
     throws RException
@@ -88,18 +88,18 @@ import com.io7m.renderer.types.RExceptionJCGL;
       in_log);
   }
 
-  private final VectorM4F                        background;
-  private final JCGLImplementationType           g;
-  private final LogUsableType                    log;
-  private final KMutableMatrices                 matrices;
-  private final KRendererDeferredOpaqueType      opaque_renderer;
-  private final KShadowMapRendererType           shadow_renderer;
-  private final KTranslucentRendererDeferredType translucent_renderer;
+  private final VectorM4F                   background;
+  private final JCGLImplementationType      g;
+  private final LogUsableType               log;
+  private final KMutableMatrices            matrices;
+  private final KRendererDeferredOpaqueType opaque_renderer;
+  private final KShadowMapRendererType      shadow_renderer;
+  private final KTranslucentRendererType    translucent_renderer;
 
   private KRendererDeferred(
     final JCGLImplementationType in_g,
     final KShadowMapRendererType in_shadow_renderer,
-    final KTranslucentRendererDeferredType in_translucent_renderer,
+    final KTranslucentRendererType in_translucent_renderer,
     final KRendererDeferredOpaqueType in_opaque_renderer,
     final LogUsableType in_log)
   {

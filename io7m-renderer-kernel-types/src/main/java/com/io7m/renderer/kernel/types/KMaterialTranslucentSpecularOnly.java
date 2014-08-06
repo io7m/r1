@@ -127,7 +127,7 @@ import com.io7m.renderer.types.RVectorI3F;
 
   /**
    * Construct a new specular-only translucent material.
-   * 
+   *
    * @param in_uv_matrix
    *          The material-specific UV matrix
    * @param in_alpha
@@ -165,7 +165,7 @@ import com.io7m.renderer.types.RVectorI3F;
   }
 
   private final KMaterialAlphaType                  alpha;
-  private final String                              code_lit;
+  private final String                              code;
   private final KMaterialNormalType                 normal;
   private boolean                                   required_uv;
   private final KMaterialSpecularNotNoneType        specular;
@@ -173,13 +173,13 @@ import com.io7m.renderer.types.RVectorI3F;
   private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialTranslucentSpecularOnly(
-    final String in_code_lit,
+    final String in_code,
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final KMaterialAlphaType in_alpha,
     final KMaterialNormalType in_normal,
     final KMaterialSpecularNotNoneType in_specular)
   {
-    this.code_lit = NullCheck.notNull(in_code_lit, "Lit code");
+    this.code = NullCheck.notNull(in_code, "Code");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     this.alpha = NullCheck.notNull(in_alpha, "Alpha");
     this.normal = NullCheck.notNull(in_normal, "Normal");
@@ -230,6 +230,11 @@ import com.io7m.renderer.types.RVectorI3F;
     return v.materialTranslucent(this);
   }
 
+  @Override public String materialGetCode()
+  {
+    return this.code;
+  }
+
   @Override public KMaterialNormalType materialGetNormal()
   {
     return this.normal;
@@ -238,16 +243,6 @@ import com.io7m.renderer.types.RVectorI3F;
   @Override public RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix()
   {
     return this.uv_matrix;
-  }
-
-  @Override public String materialLitGetCodeWithDepth()
-  {
-    return this.code_lit;
-  }
-
-  @Override public String materialLitGetCodeWithoutDepth()
-  {
-    return this.code_lit;
   }
 
   @Override public boolean materialRequiresUVCoordinates()
@@ -276,8 +271,8 @@ import com.io7m.renderer.types.RVectorI3F;
     final StringBuilder b = new StringBuilder();
     b.append("[KMaterialTranslucentSpecularOnly alpha=");
     b.append(this.alpha);
-    b.append(" code_lit=");
-    b.append(this.code_lit);
+    b.append(" code=");
+    b.append(this.code);
     b.append(" normal=");
     b.append(this.normal);
     b.append(" specular=");

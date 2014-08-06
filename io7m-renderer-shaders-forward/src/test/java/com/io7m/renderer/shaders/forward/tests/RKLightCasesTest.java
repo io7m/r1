@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,11 +24,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.reflections.Reflections;
 
-import com.io7m.jfunctional.Pair;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightWithTransformType;
 import com.io7m.renderer.kernel.types.KShadowType;
-import com.io7m.renderer.shaders.core.FakeImmutableCapabilities;
 import com.io7m.renderer.shaders.forward.RKFLightCases;
 
 @SuppressWarnings("static-method") public final class RKLightCasesTest
@@ -41,8 +39,16 @@ import com.io7m.renderer.shaders.forward.RKFLightCases;
   @Test public void testLightCasesShow()
   {
     final RKFLightCases c = new RKFLightCases();
-    for (final Pair<KLightType, FakeImmutableCapabilities> p : c.getCases()) {
-      System.out.println(p.getLeft().lightGetCode());
+    final Set<String> set = new HashSet<String>();
+
+    for (final KLightType p : c.getCases()) {
+      final String code = p.lightGetCode();
+      System.out.println(code);
+
+      if (set.contains(code)) {
+        Assert.fail(code + " already exists");
+      }
+      set.add(code);
     }
   }
 
@@ -76,14 +82,7 @@ import com.io7m.renderer.shaders.forward.RKFLightCases;
      * One case per light...
      */
 
-    int types = lt.size();
-
-    /**
-     * ... plus one case per shadow, with an extra case for
-     * basic-shadow-mapping-packed-4444.
-     */
-
-    types = types + (st.size() + 1);
+    final int types = lt.size();
 
     final RKFLightCases c = new RKFLightCases();
     Assert.assertEquals(types, c.getCases().size());

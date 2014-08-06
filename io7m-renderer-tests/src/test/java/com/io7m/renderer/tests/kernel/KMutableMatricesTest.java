@@ -57,8 +57,8 @@ import com.io7m.renderer.kernel.KMutableMatrices;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceType;
-import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadowBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.renderer.kernel.types.KMaterialDepthConstant;
 import com.io7m.renderer.kernel.types.KMaterialEmissiveNone;
@@ -73,7 +73,6 @@ import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KTransformOST;
 import com.io7m.renderer.kernel.types.KTransformType;
-import com.io7m.renderer.tests.FakeCapabilities;
 import com.io7m.renderer.tests.RFakeGL;
 import com.io7m.renderer.tests.RFakeShaderControllers;
 import com.io7m.renderer.tests.RFakeTextures2DStatic;
@@ -111,7 +110,7 @@ import com.io7m.renderer.types.RVectorI4F;
 
 @SuppressWarnings({ "synthetic-access", "static-method" }) public final class KMutableMatricesTest
 {
-  private static @NonNull KLightProjective makeKProjective()
+  private static @NonNull KLightProjectiveWithoutShadow makeKProjective()
   {
     try {
       final Texture2DStaticUsableType texture =
@@ -139,10 +138,8 @@ import com.io7m.renderer.types.RVectorI4F;
       final Integer v = Integer.valueOf(23);
       assert v != null;
 
-      final FakeCapabilities caps = new FakeCapabilities();
-
-      final KLightProjectiveBuilderType b =
-        KLightProjective.newBuilder(
+      final KLightProjectiveWithoutShadowBuilderType b =
+        KLightProjectiveWithoutShadow.newBuilder(
           RFakeTextures2DStatic.newAnything(),
           KMutableMatricesTest.arbitraryProjection());
       b.setColor(colour);
@@ -151,9 +148,8 @@ import com.io7m.renderer.types.RVectorI4F;
       b.setOrientation(orientation);
       b.setPosition(position);
       b.setRange(range);
-      b.setShadowOption(shadow);
       b.setTexture(texture);
-      return b.build(caps);
+      return b.build();
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
     }
@@ -634,7 +630,8 @@ import com.io7m.renderer.types.RVectorI4F;
         {
           final AtomicReference<KMatricesProjectiveLightType> saved =
             new AtomicReference<KMatricesProjectiveLightType>();
-          final KLightProjective p = KMutableMatricesTest.makeKProjective();
+          final KLightProjectiveWithoutShadow p =
+            KMutableMatricesTest.makeKProjective();
           final KMatricesProjectiveLightFunctionType<Unit, RException> f =
             new KMatricesProjectiveLightFunctionType<Unit, RException>() {
               @Override public Unit run(
@@ -701,7 +698,8 @@ import com.io7m.renderer.types.RVectorI4F;
         }
       };
 
-    final KLightProjective p = KMutableMatricesTest.makeKProjective();
+    final KLightProjectiveWithoutShadow p =
+      KMutableMatricesTest.makeKProjective();
 
     r.get().withProjectiveLight(p, f);
   }

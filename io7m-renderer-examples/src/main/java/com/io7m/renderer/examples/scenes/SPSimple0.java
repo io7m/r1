@@ -28,8 +28,8 @@ import com.io7m.renderer.examples.ExampleSceneUtilities;
 import com.io7m.renderer.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadowBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
@@ -111,15 +111,9 @@ public final class SPSimple0 implements ExampleSceneType
     final Texture2DStaticUsableType tp =
       scene.textureClamped("projective.png");
 
-    final KLightProjectiveBuilderType b =
-      KLightProjective.newBuilder(tp, KProjectionFrustum.newProjection(
-        this.projection,
-        -0.5f,
-        0.5f,
-        -0.5f,
-        0.5f,
-        1,
-        8.0f));
+    final KLightProjectiveWithoutShadowBuilderType b =
+      KLightProjectiveWithoutShadow.newBuilder(tp, KProjectionFrustum
+        .newProjection(this.projection, -0.5f, 0.5f, -0.5f, 0.5f, 1, 8.0f));
 
     b.setColor(ExampleSceneUtilities.RGB_WHITE);
     b.setRange(8.0f);
@@ -133,7 +127,7 @@ public final class SPSimple0 implements ExampleSceneType
       b.setOrientation(o);
     }
 
-    final KLightProjective kp0 = b.build(scene.capabilities());
+    final KLightProjectiveWithoutShadow kp0 = b.build();
 
     final KSceneLightGroupBuilderType gb = scene.sceneNewLightGroup("g");
     gb.groupAddLight(kp0);

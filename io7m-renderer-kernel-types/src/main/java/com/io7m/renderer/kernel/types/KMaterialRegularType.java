@@ -26,12 +26,6 @@ public interface KMaterialRegularType extends
   KMaterialUnlitType
 {
   /**
-   * @return The deferred rendering code associated with the material.
-   */
-
-  String materialDeferredGetCode();
-
-  /**
    * @return The material albedo properties
    */
 

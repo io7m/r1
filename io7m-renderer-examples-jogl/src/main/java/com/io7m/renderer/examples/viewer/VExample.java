@@ -87,7 +87,6 @@ import com.io7m.renderer.examples.ExampleRendererConstructorType;
 import com.io7m.renderer.examples.ExampleRendererConstructorVisitorType;
 import com.io7m.renderer.examples.ExampleRendererDebugType;
 import com.io7m.renderer.examples.ExampleRendererDeferredType;
-import com.io7m.renderer.examples.ExampleRendererForwardType;
 import com.io7m.renderer.examples.ExampleRendererType;
 import com.io7m.renderer.examples.ExampleRendererVisitorType;
 import com.io7m.renderer.examples.ExampleSceneBuilder;
@@ -105,7 +104,6 @@ import com.io7m.renderer.kernel.KFramebufferType;
 import com.io7m.renderer.kernel.KProgramType;
 import com.io7m.renderer.kernel.KRendererDebugType;
 import com.io7m.renderer.kernel.KRendererDeferredType;
-import com.io7m.renderer.kernel.KRendererForwardType;
 import com.io7m.renderer.kernel.KRendererType;
 import com.io7m.renderer.kernel.KShaderCachePostprocessingType;
 import com.io7m.renderer.kernel.KShadingProgramCommon;
@@ -113,12 +111,9 @@ import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBatchedDeferred;
-import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.kernel.types.KUnitQuad;
 import com.io7m.renderer.kernel.types.KUnitQuadUsableType;
@@ -413,7 +408,6 @@ import com.jogamp.opengl.util.FPSAnimator;
       }
     }
 
-    private @Nullable KGraphicsCapabilitiesType  caps;
     private final ViewerConfig                   config;
     private @Nullable ETextureCubeCache          cube_cache;
     private final AtomicInteger                  current_view_index;
@@ -485,11 +479,9 @@ import com.jogamp.opengl.util.FPSAnimator;
         assert this.cube_cache != null;
         assert this.mesh_cache != null;
         assert this.texture2d_cache != null;
-        assert this.caps != null;
 
         this.example.exampleScene(new ExampleSceneBuilder(
           scene_builder,
-          this.caps,
           this.cube_cache,
           this.mesh_cache,
           this.texture2d_cache));
@@ -547,36 +539,6 @@ import com.jogamp.opengl.util.FPSAnimator;
                 KSceneBatchedDeferred.fromScene(sc);
 
               dr.rendererDeferredEvaluate(fb, batched);
-              VExampleWindowGL.this.renderSceneResults(fb);
-
-              if (VExampleWindowGL.this.want_save.get()) {
-                VExampleWindowGL.this.want_save.set(false);
-                VExampleWindowGL.this.saveImage(drawable, view_index);
-              }
-
-              return Unit.unit();
-            } catch (final JCGLException e) {
-              throw RExceptionJCGL.fromJCGLException(e);
-            } catch (final JCacheException e) {
-              throw new UnreachableCodeException(e);
-            }
-          }
-
-          @Override public Unit visitForward(
-            final ExampleRendererForwardType rf)
-            throws RException
-          {
-            try {
-              final KRendererForwardType fr = rf.rendererGetForward();
-              final KFramebufferForwardType fb =
-                (KFramebufferForwardType) VExampleWindowGL.this.framebuffer;
-              assert fb != null;
-
-              final KScene sc = scene_builder.sceneCreate();
-              final KSceneBatchedForward batched =
-                KSceneBatchedForward.fromScene(sc);
-
-              fr.rendererForwardEvaluate(fb, batched);
               VExampleWindowGL.this.renderSceneResults(fb);
 
               if (VExampleWindowGL.this.want_save.get()) {
@@ -664,8 +626,6 @@ import com.jogamp.opengl.util.FPSAnimator;
         assert g != null;
         this.gi = g;
 
-        this.caps = KGraphicsCapabilities.getCapabilities(g);
-
         this.texture_loader =
           TextureLoaderImageIO
             .newTextureLoaderWithAlphaPremultiplication(this.glog);
@@ -710,13 +670,11 @@ import com.jogamp.opengl.util.FPSAnimator;
                   sc.getShaderDebugCache(),
                   sc.getShaderForwardTranslucentLitCache(),
                   sc.getShaderForwardTranslucentUnlitCache(),
-                  sc.getShaderForwardOpaqueUnlitCache(),
                   sc.getShaderDepthCache(),
                   sc.getShaderDepthVarianceCache(),
                   sc.getShaderPostprocessingCache(),
                   sc.getShaderDeferredGeoCache(),
                   sc.getShaderDeferredLightCache(),
-                  sc.getShaderDeferredLightTranslucentCache(),
                   g);
               }
 
@@ -727,8 +685,6 @@ import com.jogamp.opengl.util.FPSAnimator;
               {
                 return c.newRenderer(
                   VExampleWindowGL.this.glog,
-                  sc.getShaderForwardOpaqueLitCache(),
-                  sc.getShaderForwardOpaqueUnlitCache(),
                   sc.getShaderForwardTranslucentLitCache(),
                   sc.getShaderForwardTranslucentUnlitCache(),
                   sc.getShaderDepthCache(),
@@ -830,13 +786,6 @@ import com.jogamp.opengl.util.FPSAnimator;
                   KFramebufferForwardDescription.newDescription(
                     rgba_description,
                     depth_description));
-              }
-
-              @Override public KFramebufferType visitForward(
-                final ExampleRendererForwardType rf)
-                throws RException
-              {
-                return this.makeForward();
               }
             });
 

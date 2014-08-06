@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,7 +18,6 @@ package com.io7m.renderer.examples;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KSceneBuilderType;
 import com.io7m.renderer.types.RException;
@@ -30,14 +29,8 @@ import com.io7m.renderer.types.RException;
 public interface ExampleSceneBuilderType extends KSceneBuilderType
 {
   /**
-   * @return The current graphics capabilities.
-   */
-
-  KGraphicsCapabilitiesType capabilities();
-
-  /**
    * Load the cube texture with the given name.
-   * 
+   *
    * @param name
    *          The name
    * @return An allocated texture
@@ -51,7 +44,7 @@ public interface ExampleSceneBuilderType extends KSceneBuilderType
 
   /**
    * Load the mesh with the given name.
-   * 
+   *
    * @param name
    *          The name
    * @return An allocated mesh
@@ -65,7 +58,7 @@ public interface ExampleSceneBuilderType extends KSceneBuilderType
 
   /**
    * Load the texture with the given name.
-   * 
+   *
    * @param name
    *          The name
    * @return An allocated texture
@@ -80,7 +73,7 @@ public interface ExampleSceneBuilderType extends KSceneBuilderType
   /**
    * Load the texture with the given name, with the wrapping mode set to
    * {@link com.io7m.jcanephora.TextureWrapS#TEXTURE_WRAP_CLAMP_TO_EDGE}.
-   * 
+   *
    * @param name
    *          The name
    * @return An allocated texture

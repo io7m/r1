@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -67,7 +67,6 @@ import com.io7m.renderer.examples.ExampleRendererConstructorType;
 import com.io7m.renderer.examples.ExampleRendererConstructorVisitorType;
 import com.io7m.renderer.examples.ExampleRendererDebugType;
 import com.io7m.renderer.examples.ExampleRendererDeferredType;
-import com.io7m.renderer.examples.ExampleRendererForwardType;
 import com.io7m.renderer.examples.ExampleRendererType;
 import com.io7m.renderer.examples.ExampleRendererVisitorType;
 import com.io7m.renderer.examples.ExampleRenderers;
@@ -86,7 +85,6 @@ import com.io7m.renderer.kernel.KFramebufferType;
 import com.io7m.renderer.kernel.KProgramType;
 import com.io7m.renderer.kernel.KRendererDebugType;
 import com.io7m.renderer.kernel.KRendererDeferredType;
-import com.io7m.renderer.kernel.KRendererForwardType;
 import com.io7m.renderer.kernel.KShaderCachePostprocessingType;
 import com.io7m.renderer.kernel.KShadingProgramCommon;
 import com.io7m.renderer.kernel.types.KCamera;
@@ -94,18 +92,16 @@ import com.io7m.renderer.kernel.types.KDepthPrecision;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilities;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
 import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.kernel.types.KLightType;
+import com.io7m.renderer.kernel.types.KLightWithShadowType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBatchedDeferred;
-import com.io7m.renderer.kernel.types.KSceneBatchedForward;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.renderer.kernel.types.KTranslucentType;
@@ -115,7 +111,6 @@ import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
-import com.io7m.renderer.types.RExceptionLightMissingShadow;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
@@ -157,18 +152,17 @@ final class ViewerSingleMainWindow implements Runnable
       }
     }
 
-    private final ETexture2DCache           cache_2d;
-    private final ETextureCubeCache         cache_cube;
-    private final EMeshCache                cache_mesh;
-    private final ExampleSceneType          example;
-    private final KFramebufferType          framebuffer;
-    private final JCGLImplementationType    gi;
-    private final TextureLoaderType         loader;
-    private final KUnitQuad                 quad;
-    private final ExampleRendererType       renderer;
-    private int                             view_index;
-    private final KGraphicsCapabilitiesType caps;
-    private final VShaderCaches             shader_caches;
+    private final ETexture2DCache        cache_2d;
+    private final ETextureCubeCache      cache_cube;
+    private final EMeshCache             cache_mesh;
+    private final ExampleSceneType       example;
+    private final KFramebufferType       framebuffer;
+    private final JCGLImplementationType gi;
+    private final TextureLoaderType      loader;
+    private final KUnitQuad              quad;
+    private final ExampleRendererType    renderer;
+    private int                          view_index;
+    private final VShaderCaches          shader_caches;
 
     Runner(
       final GLAutoDrawable drawable,
@@ -189,7 +183,6 @@ final class ViewerSingleMainWindow implements Runnable
       this.cache_2d = new ETexture2DCache(in_gi, this.loader, in_log);
       this.cache_mesh = new EMeshCache(in_gi, in_log);
       this.quad = KUnitQuad.newQuad(in_gi.getGLCommon(), in_log);
-      this.caps = KGraphicsCapabilities.getCapabilities(in_gi);
       this.shader_caches = in_shader_caches;
 
       this.renderer =
@@ -217,13 +210,11 @@ final class ViewerSingleMainWindow implements Runnable
                 in_shader_caches.getShaderDebugCache(),
                 in_shader_caches.getShaderForwardTranslucentLitCache(),
                 in_shader_caches.getShaderForwardTranslucentUnlitCache(),
-                in_shader_caches.getShaderForwardOpaqueUnlitCache(),
                 in_shader_caches.getShaderDepthCache(),
                 in_shader_caches.getShaderDepthVarianceCache(),
                 in_shader_caches.getShaderPostprocessingCache(),
                 in_shader_caches.getShaderDeferredGeoCache(),
                 in_shader_caches.getShaderDeferredLightCache(),
-                in_shader_caches.getShaderDeferredLightTranslucentCache(),
                 in_gi);
             }
 
@@ -234,8 +225,6 @@ final class ViewerSingleMainWindow implements Runnable
             {
               return c.newRenderer(
                 in_log,
-                in_shader_caches.getShaderForwardOpaqueLitCache(),
-                in_shader_caches.getShaderForwardOpaqueUnlitCache(),
                 in_shader_caches.getShaderForwardTranslucentLitCache(),
                 in_shader_caches.getShaderForwardTranslucentUnlitCache(),
                 in_shader_caches.getShaderDepthCache(),
@@ -283,13 +272,6 @@ final class ViewerSingleMainWindow implements Runnable
                 new RangeInclusiveL(0, drawable.getHeight() - 1);
               final AreaInclusive area = new AreaInclusive(range_x, range_y);
               return area;
-            }
-
-            @Override public KFramebufferType visitForward(
-              final ExampleRendererForwardType rf)
-              throws RException
-            {
-              return this.makeForward();
             }
 
             private KFramebufferType makeForward()
@@ -421,9 +403,8 @@ final class ViewerSingleMainWindow implements Runnable
         }
 
         @Override public void sceneAddShadowCaster(
-          final KLightType light,
+          final KLightWithShadowType light,
           final KInstanceOpaqueType instance)
-          throws RExceptionLightMissingShadow
         {
           scene_builder.sceneAddShadowCaster(light, instance);
         }
@@ -459,7 +440,7 @@ final class ViewerSingleMainWindow implements Runnable
         }
 
         @Override public
-          Map<KLightType, Set<KInstanceOpaqueType>>
+          Map<KLightWithShadowType, Set<KInstanceOpaqueType>>
           sceneGetInstancesOpaqueShadowCastingByLight()
         {
           return scene_builder.sceneGetInstancesOpaqueShadowCastingByLight();
@@ -477,7 +458,9 @@ final class ViewerSingleMainWindow implements Runnable
           return scene_builder.sceneGetLights();
         }
 
-        @Override public Set<KLightType> sceneGetLightsShadowCasting()
+        @Override public
+          Set<KLightWithShadowType>
+          sceneGetLightsShadowCasting()
         {
           return scene_builder.sceneGetLightsShadowCasting();
         }
@@ -505,11 +488,6 @@ final class ViewerSingleMainWindow implements Runnable
           } catch (final JCGLException e) {
             throw new RuntimeException(e);
           }
-        }
-
-        @Override public KGraphicsCapabilitiesType capabilities()
-        {
-          return Runner.this.caps;
         }
 
         @Override public Texture2DStaticUsableType textureClamped(
@@ -544,31 +522,6 @@ final class ViewerSingleMainWindow implements Runnable
               KSceneBatchedDeferred.fromScene(sc);
 
             dr.rendererDeferredEvaluate(fb, batched);
-            Runner.this.renderSceneResults(fb);
-
-            return Unit.unit();
-          } catch (final JCGLException e) {
-            throw RExceptionJCGL.fromJCGLException(e);
-          } catch (final JCacheException e) {
-            throw new UnreachableCodeException(e);
-          }
-        }
-
-        @Override public Unit visitForward(
-          final ExampleRendererForwardType rf)
-          throws RException
-        {
-          try {
-            final KRendererForwardType fr = rf.rendererGetForward();
-            final KFramebufferForwardType fb =
-              (KFramebufferForwardType) Runner.this.framebuffer;
-            assert fb != null;
-
-            final KScene sc = scene_builder.sceneCreate();
-            final KSceneBatchedForward batched =
-              KSceneBatchedForward.fromScene(sc);
-
-            fr.rendererForwardEvaluate(fb, batched);
             Runner.this.renderSceneResults(fb);
 
             return Unit.unit();

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,10 +16,14 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.TextureFilterMagnification;
+import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -29,9 +33,39 @@ import com.io7m.renderer.types.RException;
 @EqualityStructural public final class KShadowMapBasicDescription implements
   KShadowMapDescriptionType
 {
+  private static final KShadowMapBasicDescription DEFAULT;
+
+  static {
+    DEFAULT = KShadowMapBasicDescription.makeDefault();
+  }
+
+  /**
+   * @return The default description of a shadow map.
+   */
+
+  public static KShadowMapBasicDescription getDefault()
+  {
+    return KShadowMapBasicDescription.DEFAULT;
+  }
+
+  private static KShadowMapBasicDescription makeDefault()
+  {
+    final AreaInclusive area =
+      new AreaInclusive(new RangeInclusiveL(0, 255), new RangeInclusiveL(
+        0,
+        255));
+    final KFramebufferDepthDescription fdd =
+      KFramebufferDepthDescription.newDescription(
+        area,
+        TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
+        TextureFilterMinification.TEXTURE_FILTER_NEAREST,
+        KDepthPrecision.DEPTH_PRECISION_24);
+    return KShadowMapBasicDescription.newDescription(fdd, 8);
+  }
+
   /**
    * Create a new description of a shadow map.
-   * 
+   *
    * @param in_description
    *          The description of the depth framebuffer
    * @param in_size_exponent

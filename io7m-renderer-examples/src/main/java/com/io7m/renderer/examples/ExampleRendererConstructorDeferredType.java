@@ -21,11 +21,9 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.renderer.kernel.KShaderCacheDebugType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredGeometryType;
-import com.io7m.renderer.kernel.KShaderCacheDeferredLightTranslucentType;
 import com.io7m.renderer.kernel.KShaderCacheDeferredLightType;
 import com.io7m.renderer.kernel.KShaderCacheDepthType;
 import com.io7m.renderer.kernel.KShaderCacheDepthVarianceType;
-import com.io7m.renderer.kernel.KShaderCacheForwardOpaqueUnlitType;
 import com.io7m.renderer.kernel.KShaderCacheForwardTranslucentLitType;
 import com.io7m.renderer.kernel.KShaderCacheForwardTranslucentUnlitType;
 import com.io7m.renderer.kernel.KShaderCachePostprocessingType;
@@ -49,8 +47,6 @@ public interface ExampleRendererConstructorDeferredType extends
    *          A shader cache
    * @param in_shader_translucent_unlit_cache
    *          A shader cache
-   * @param in_shader_forward_opaque_unlit_cache
-   *          A shader cache
    * @param in_shader_depth_cache
    *          A shader cache
    * @param in_shader_depth_variance_cache
@@ -61,8 +57,7 @@ public interface ExampleRendererConstructorDeferredType extends
    *          A shader cache
    * @param in_shader_deferred_light_cache
    *          A shader cache
-   * @param in_shader_deferred_light_translucent_cache
-   *          A shader cache
+   *
    * @param gi
    *          A GL implementation
    * @return A new renderer
@@ -79,13 +74,11 @@ public interface ExampleRendererConstructorDeferredType extends
       final KShaderCacheDebugType in_shader_debug_cache,
       final KShaderCacheForwardTranslucentLitType in_shader_translucent_lit_cache,
       final KShaderCacheForwardTranslucentUnlitType in_shader_translucent_unlit_cache,
-      final KShaderCacheForwardOpaqueUnlitType in_shader_forward_opaque_unlit_cache,
       final KShaderCacheDepthType in_shader_depth_cache,
       final KShaderCacheDepthVarianceType in_shader_depth_variance_cache,
       final KShaderCachePostprocessingType in_shader_postprocessing_cache,
       final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache,
       final KShaderCacheDeferredLightType in_shader_deferred_light_cache,
-      final KShaderCacheDeferredLightTranslucentType in_shader_deferred_light_translucent_cache,
       final JCGLImplementationType gi)
       throws JCGLException,
         RException;

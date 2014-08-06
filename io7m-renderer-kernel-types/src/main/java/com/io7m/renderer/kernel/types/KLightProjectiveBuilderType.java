@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,10 +17,7 @@
 package com.io7m.renderer.kernel.types;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jfunctional.OptionType;
 import com.io7m.jtensors.QuaternionI4F;
-import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RExceptionUserError;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -33,31 +30,12 @@ public interface KLightProjectiveBuilderType
 {
   /**
    * <p>
-   * Construct a light.
-   * </p>
-   * 
-   * @param caps
-   *          The current graphics capabilities.
-   * @return A new light based on all of the parameters given so far.
-   * @throws RExceptionUserError
-   *           If no texture was specified.
-   * @throws RException
-   *           If any other error occurs.
-   */
-
-  KLightProjective build(
-    final KGraphicsCapabilitiesType caps)
-    throws RExceptionUserError,
-      RException;
-
-  /**
-   * <p>
    * Set the color of the light.
    * </p>
    * <p>
    * The default color is full-intensity white.
    * </p>
-   * 
+   *
    * @param color
    *          The color.
    */
@@ -72,7 +50,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default exponent is <code>1.0</code> (linear falloff).
    * </p>
-   * 
+   *
    * @param exponent
    *          The exponent.
    */
@@ -87,7 +65,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default intensity is <code>1.0</code>.
    * </p>
-   * 
+   *
    * @param intensity
    *          The intensity.
    */
@@ -97,25 +75,12 @@ public interface KLightProjectiveBuilderType
 
   /**
    * <p>
-   * Unset the shadow for the light, if any.
-   * </p>
-   * <p>
-   * The default is for the light not to have a shadow.
-   * </p>
-   * 
-   * @see #setShadow(KShadowType)
-   */
-
-  void setNoShadow();
-
-  /**
-   * <p>
    * Set the orientation of the light.
    * </p>
    * <p>
    * The default orientation is <code>(0.0, 0.0, 0.0, 1.0)</code>.
    * </p>
-   * 
+   *
    * @param orientation
    *          The orientation.
    */
@@ -130,7 +95,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default position is <code>(0.0, 0.0, 0.0)</code>.
    * </p>
-   * 
+   *
    * @param position
    *          The position.
    */
@@ -142,7 +107,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * Set the projection of the light.
    * </p>
-   * 
+   *
    * @param projection
    *          The projection.
    */
@@ -157,7 +122,7 @@ public interface KLightProjectiveBuilderType
    * <p>
    * The default range is <code>8.0</code>.
    * </p>
-   * 
+   *
    * @param range
    *          The range.
    */
@@ -168,47 +133,12 @@ public interface KLightProjectiveBuilderType
 
   /**
    * <p>
-   * Set the shadow for the light.
-   * </p>
-   * <p>
-   * The default is for the light not to have a shadow.
-   * </p>
-   * 
-   * @see #setNoShadow()
-   * @param s
-   *          The shadow.
-   */
-
-  void setShadow(
-    final KShadowType s);
-
-  /**
-   * <p>
-   * Set the shadow for the light. Equivalent to {@link #setNoShadow()} for
-   * {@link com.io7m.jfunctional.None} and {@link #setShadow(KShadowType)} for
-   * {@link com.io7m.jfunctional.Some}.
-   * </p>
-   * <p>
-   * The default is for the light not to have a shadow.
-   * </p>
-   * 
-   * @see #setShadow(KShadowType)
-   * @see #setNoShadow()
-   * @param s
-   *          The shadow.
-   */
-
-  void setShadowOption(
-    OptionType<KShadowType> s);
-
-  /**
-   * <p>
    * Set the texture for the light.
    * </p>
    * <p>
    * There is no default texture; this parameter is required to be set.
    * </p>
-   * 
+   *
    * @param texture
    *          The texture.
    */

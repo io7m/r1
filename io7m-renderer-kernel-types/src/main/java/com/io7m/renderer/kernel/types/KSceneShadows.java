@@ -29,10 +29,10 @@ import com.io7m.jnull.Nullable;
 
 @EqualityStructural public final class KSceneShadows
 {
-  private final Map<KLightType, Set<KInstanceOpaqueType>> shadow_casters;
+  private final Map<KLightWithShadowType, Set<KInstanceOpaqueType>> shadow_casters;
 
   KSceneShadows(
-    final Map<KLightType, Set<KInstanceOpaqueType>> in_shadow_casters)
+    final Map<KLightWithShadowType, Set<KInstanceOpaqueType>> in_shadow_casters)
   {
     this.shadow_casters =
       NullCheck.notNull(in_shadow_casters, "Shadow casters");
@@ -58,7 +58,9 @@ import com.io7m.jnull.Nullable;
    * @return The set of shadow casters for each light in the scene.
    */
 
-  public Map<KLightType, Set<KInstanceOpaqueType>> getShadowCasters()
+  public
+    Map<KLightWithShadowType, Set<KInstanceOpaqueType>>
+    getShadowCasters()
   {
     return this.shadow_casters;
   }

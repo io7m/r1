@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -36,7 +36,11 @@ import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable2FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KLightDirectional;
-import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightProjectiveType;
+import com.io7m.renderer.kernel.types.KLightProjectiveVisitorType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
@@ -323,11 +327,11 @@ import com.io7m.renderer.types.RVectorReadable4FType;
   static void bindPutTextureProjection(
     final JCBProgramType program,
     final JCGLTextures2DStaticCommonType gt,
-    final KLightProjective light,
+    final KLightProjectiveType light,
     final TextureUnitType texture_unit)
     throws JCGLException
   {
-    gt.texture2DStaticBind(texture_unit, light.lightGetTexture());
+    gt.texture2DStaticBind(texture_unit, light.lightProjectiveGetTexture());
     KShadingProgramCommon.putTextureProjection(program, texture_unit);
   }
 
@@ -807,7 +811,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     final JCBProgramType program,
     final MatrixM4x4F.Context context,
     final RMatrixReadable4x4FType<RTransformViewType> view,
-    final KLightProjective light)
+    final KLightProjectiveType light)
     throws JCGLException,
       RException
   {
@@ -815,7 +819,7 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       program,
       context,
       view,
-      light.lightGetPosition());
+      light.lightProjectiveGetPosition());
     KShadingProgramCommon.putLightProjectiveColor(
       program,
       light.lightGetColor());
@@ -824,57 +828,46 @@ import com.io7m.renderer.types.RVectorReadable4FType;
       light.lightGetIntensity());
     KShadingProgramCommon.putLightProjectiveFalloff(
       program,
-      light.lightGetFalloff());
+      light.lightProjectiveGetFalloff());
     KShadingProgramCommon.putLightProjectiveRange(
       program,
-      light.lightGetRange());
+      light.lightProjectiveGetRange());
 
-    final OptionType<KShadowType> ls = light.lightGetShadow();
-    ls
-      .acceptPartial(new OptionPartialVisitorType<KShadowType, Unit, RException>() {
-        @Override public Unit none(
-          final None<KShadowType> none)
-          throws RException
+    light
+      .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
+        @Override public Unit projectiveWithoutShadow(
+          final KLightProjectiveWithoutShadow lp)
+          throws RException,
+            JCGLException
         {
           return Unit.unit();
         }
 
-        @Override public Unit some(
-          final Some<KShadowType> some)
-          throws RException
+        @Override public Unit projectiveWithShadowBasic(
+          final KLightProjectiveWithShadowBasic lp)
+          throws RException,
+            JCGLException
         {
-          final KShadowType ks = some.get();
-          try {
-            return ks
-              .shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-                @Override public Unit shadowMappedBasic(
-                  final KShadowMappedBasic s)
-                  throws JCGLException,
-                    RException
-                {
-                  KShadingProgramCommon.putShadowBasic(program, s);
-                  return Unit.unit();
-                }
+          KShadingProgramCommon.putShadowBasic(program, lp.lightGetShadow());
+          return Unit.unit();
+        }
 
-                @Override public Unit shadowMappedVariance(
-                  final KShadowMappedVariance s)
-                  throws JCGLException,
-                    RException
-                {
-                  KShadingProgramCommon.putShadowVariance(program, s);
-                  return Unit.unit();
-                }
-              });
-          } catch (final JCGLException e) {
-            throw RExceptionJCGL.fromJCGLException(e);
-          }
+        @Override public Unit projectiveWithShadowVariance(
+          final KLightProjectiveWithShadowVariance lp)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putShadowVariance(
+            program,
+            lp.lightGetShadow());
+          return Unit.unit();
         }
       });
   }
 
   static void putLightProjectiveWithoutTextureProjectionReuse(
     final JCBProgramType program,
-    final KLightProjective light)
+    final KLightProjectiveType light)
     throws JCGLException,
       RException
   {
@@ -884,43 +877,32 @@ import com.io7m.renderer.types.RVectorReadable4FType;
     KShadingProgramCommon.putLightProjectiveFalloffReuse(program);
     KShadingProgramCommon.putLightProjectiveRangeReuse(program);
 
-    final OptionType<KShadowType> ls = light.lightGetShadow();
-    ls
-      .acceptPartial(new OptionPartialVisitorType<KShadowType, Unit, RException>() {
-        @Override public Unit none(
-          final None<KShadowType> n)
-          throws RException
+    light
+      .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
+        @Override public Unit projectiveWithoutShadow(
+          final KLightProjectiveWithoutShadow lp)
+          throws RException,
+            JCGLException
         {
           return Unit.unit();
         }
 
-        @Override public Unit some(
-          final Some<KShadowType> some)
-          throws RException
+        @Override public Unit projectiveWithShadowBasic(
+          final KLightProjectiveWithShadowBasic lp)
+          throws RException,
+            JCGLException
         {
-          final KShadowType ks = some.get();
-          try {
-            return ks
-              .shadowAccept(new KShadowVisitorType<Unit, JCGLException>() {
-                @Override public Unit shadowMappedBasic(
-                  final KShadowMappedBasic s)
-                  throws JCGLException
-                {
-                  KShadingProgramCommon.putShadowBasicReuse(program);
-                  return Unit.unit();
-                }
+          KShadingProgramCommon.putShadowBasicReuse(program);
+          return Unit.unit();
+        }
 
-                @Override public Unit shadowMappedVariance(
-                  final KShadowMappedVariance s)
-                  throws JCGLException
-                {
-                  KShadingProgramCommon.putShadowVarianceReuse(program);
-                  return Unit.unit();
-                }
-              });
-          } catch (final JCGLException e) {
-            throw RExceptionJCGL.fromJCGLException(e);
-          }
+        @Override public Unit projectiveWithShadowVariance(
+          final KLightProjectiveWithShadowVariance lp)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putShadowVarianceReuse(program);
+          return Unit.unit();
         }
       });
   }
