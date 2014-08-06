@@ -38,8 +38,8 @@ import com.io7m.renderer.kernel.types.KDepthVariancePrecision;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
@@ -147,22 +147,16 @@ public final class SPShadowVarianceDepthAlpha0 implements ExampleSceneType
       ks = b.build();
     }
 
-    final KLightProjective kp0;
+    final KLightProjectiveWithShadowVariance kp0;
 
     {
       final Texture2DStaticUsableType tp =
         scene.textureClamped("projective.png");
 
       MatrixM4x4F.setIdentity(this.projection);
-      final KLightProjectiveBuilderType b =
-        KLightProjective.newBuilder(tp, KProjectionFrustum.newProjection(
-          this.projection,
-          -1.0f,
-          1.0f,
-          -1.0f,
-          1.0f,
-          1,
-          8.0f));
+      final KLightProjectiveWithShadowVarianceBuilderType b =
+        KLightProjectiveWithShadowVariance.newBuilder(tp, KProjectionFrustum
+          .newProjection(this.projection, -1.0f, 1.0f, -1.0f, 1.0f, 1, 8.0f));
 
       final KBlurParametersBuilderType bp = KBlurParameters.newBuilder();
       bp.setBlurSize(1.0f);

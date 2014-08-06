@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,8 +19,8 @@ package com.io7m.renderer.kernel.types;
 import com.io7m.renderer.types.RException;
 
 /**
- * A generic light visitor, returning values of type <code>A</code> and
- * raising exceptions of type <code>E</code>.
+ * A generic light-with-shadow visitor, returning values of type
+ * <code>A</code> and raising exceptions of type <code>E</code>.
  *
  * @param <A>
  *          The return value type of the implementing visitor
@@ -28,30 +28,12 @@ import com.io7m.renderer.types.RException;
  *          The type of exceptions raised by the implementing visitor
  */
 
-public interface KLightVisitorType<A, E extends Throwable>
+public interface KLightWithShadowVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit a directional light.
+   * Visit a projective light with a basic shadow.
    *
-   * @param l
-   *          The directional light
-   * @return A value of type <code>A</code>
-   *
-   * @throws RException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A lightDirectional(
-    final KLightDirectional l)
-    throws RException,
-      E;
-
-  /**
-   * Visit a projective light.
-   *
-   * @param l
+   * @param lp
    *          The projective light
    * @return A value of type <code>A</code>
    *
@@ -61,16 +43,16 @@ public interface KLightVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A lightProjective(
-    final KLightProjectiveType l)
+  A projectiveWithShadowBasic(
+    final KLightProjectiveWithShadowBasic lp)
     throws RException,
       E;
 
   /**
-   * Visit a spherical light.
+   * Visit a projective light with a variance shadow.
    *
-   * @param l
-   *          The spherical light
+   * @param lp
+   *          The projective light
    * @return A value of type <code>A</code>
    *
    * @throws RException
@@ -79,8 +61,8 @@ public interface KLightVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A lightSpherical(
-    final KLightSphere l)
+  A projectiveWithShadowVariance(
+    final KLightProjectiveWithShadowVariance lp)
     throws RException,
       E;
 }

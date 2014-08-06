@@ -14,42 +14,42 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.renderer.types;
+package com.io7m.renderer.kernel.types;
 
-import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionUserError;
 
 /**
- * An exception representing an attempt to add a light to a scene that should
- * cause shadows to be cast, but using a light that does not have an attached
- * shadow.
+ * The type of mutable builders for projective lights that have mapped
+ * variance shadows.
  */
 
-@EqualityReference public final class RExceptionLightMissingShadow extends
-  RExceptionUserError
+public interface KLightProjectiveWithShadowVarianceBuilderType extends
+  KLightProjectiveBuilderType
 {
-  private static final long serialVersionUID;
-
-  static {
-    serialVersionUID = -1247042439663984309L;
-  }
-
   /**
-   * Construct an exception with the given message.
-   * 
-   * @param message
-   *          The message.
+   * <p>
+   * Construct a light.
+   * </p>
+   *
+   * @return A new light based on all of the parameters given so far.
+   * @throws RExceptionUserError
+   *           If no texture was specified.
+   * @throws RException
+   *           If any other error occurs.
    */
 
-  public RExceptionLightMissingShadow(
-    final String message)
-  {
-    super(message);
-  }
+  KLightProjectiveWithShadowVariance build()
+    throws RExceptionUserError,
+      RException;
 
-  @Override <T, E extends Throwable> T exceptionAccept(
-    final RExceptionVisitorType<T, E> v)
-    throws E
-  {
-    return v.exceptionVisitUserErrorException(this);
-  }
+  /**
+   * Set the shadow.
+   * 
+   * @param s
+   *          The shadow.
+   */
+
+  void setShadow(
+    KShadowMappedVariance s);
 }

@@ -115,6 +115,11 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.materialTranslucent(this);
   }
 
+  @Override public String materialGetCode()
+  {
+    return this.code;
+  }
+
   @Override public KMaterialNormalType materialGetNormal()
   {
     return this.normal;
@@ -139,11 +144,6 @@ import com.io7m.renderer.types.RTransformTextureType;
         RException
   {
     return v.translucentRefractive(this);
-  }
-
-  @Override public String materialGetCode()
-  {
-    return this.code;
   }
 
   @Override public int texturesGetRequired()

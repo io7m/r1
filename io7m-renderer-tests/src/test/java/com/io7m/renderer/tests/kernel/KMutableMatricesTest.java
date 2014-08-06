@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -57,8 +57,8 @@ import com.io7m.renderer.kernel.KMutableMatrices;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceType;
-import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadowBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.renderer.kernel.types.KMaterialDepthConstant;
 import com.io7m.renderer.kernel.types.KMaterialEmissiveNone;
@@ -110,7 +110,7 @@ import com.io7m.renderer.types.RVectorI4F;
 
 @SuppressWarnings({ "synthetic-access", "static-method" }) public final class KMutableMatricesTest
 {
-  private static @NonNull KLightProjective makeKProjective()
+  private static @NonNull KLightProjectiveWithoutShadow makeKProjective()
   {
     try {
       final Texture2DStaticUsableType texture =
@@ -138,8 +138,8 @@ import com.io7m.renderer.types.RVectorI4F;
       final Integer v = Integer.valueOf(23);
       assert v != null;
 
-      final KLightProjectiveBuilderType b =
-        KLightProjective.newBuilder(
+      final KLightProjectiveWithoutShadowBuilderType b =
+        KLightProjectiveWithoutShadow.newBuilder(
           RFakeTextures2DStatic.newAnything(),
           KMutableMatricesTest.arbitraryProjection());
       b.setColor(colour);
@@ -148,7 +148,6 @@ import com.io7m.renderer.types.RVectorI4F;
       b.setOrientation(orientation);
       b.setPosition(position);
       b.setRange(range);
-      b.setShadowOption(shadow);
       b.setTexture(texture);
       return b.build();
     } catch (final RException e) {
@@ -631,7 +630,8 @@ import com.io7m.renderer.types.RVectorI4F;
         {
           final AtomicReference<KMatricesProjectiveLightType> saved =
             new AtomicReference<KMatricesProjectiveLightType>();
-          final KLightProjective p = KMutableMatricesTest.makeKProjective();
+          final KLightProjectiveWithoutShadow p =
+            KMutableMatricesTest.makeKProjective();
           final KMatricesProjectiveLightFunctionType<Unit, RException> f =
             new KMatricesProjectiveLightFunctionType<Unit, RException>() {
               @Override public Unit run(
@@ -698,7 +698,8 @@ import com.io7m.renderer.types.RVectorI4F;
         }
       };
 
-    final KLightProjective p = KMutableMatricesTest.makeKProjective();
+    final KLightProjectiveWithoutShadow p =
+      KMutableMatricesTest.makeKProjective();
 
     r.get().withProjectiveLight(p, f);
   }

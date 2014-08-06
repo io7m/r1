@@ -26,6 +26,26 @@ import com.io7m.jranges.RangeCheck;
 
 @EqualityStructural public final class KBlurParameters
 {
+  private static final KBlurParameters DEFAULT;
+
+  static {
+    DEFAULT = KBlurParameters.makeDefault();
+  }
+
+  /**
+   * @return The default blur parameters.
+   */
+
+  public static KBlurParameters getDefault()
+  {
+    return KBlurParameters.DEFAULT;
+  }
+
+  private static KBlurParameters makeDefault()
+  {
+    return KBlurParameters.newBuilder().build();
+  }
+
   /**
    * @return A new parameter builder
    */
@@ -81,6 +101,7 @@ import com.io7m.jranges.RangeCheck;
 
   private final float blur_size;
   private final int   passes;
+
   private final float scale;
 
   private KBlurParameters(

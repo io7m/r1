@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,7 +17,7 @@
 package com.io7m.renderer.kernel;
 
 import com.io7m.renderer.kernel.types.KInstanceType;
-import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightProjectiveType;
 import com.io7m.renderer.kernel.types.KTransformType;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RMatrixI3x3F;
@@ -113,7 +113,7 @@ public interface KMatricesObserverType extends KMatricesObserverValuesType
    */
 
   <T, E extends Throwable> T withProjectiveLight(
-    final KLightProjective p,
+    final KLightProjectiveType p,
     final KMatricesProjectiveLightFunctionType<T, E> f)
     throws RException,
       E;

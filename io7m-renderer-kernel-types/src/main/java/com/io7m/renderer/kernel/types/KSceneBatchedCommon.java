@@ -33,11 +33,6 @@ import com.io7m.renderer.types.RException;
 
 @EqualityReference final class KSceneBatchedCommon
 {
-  private KSceneBatchedCommon()
-  {
-    throw new UnreachableCodeException();
-  }
-
   static Map<String, Set<KInstanceOpaqueType>> makeUnlitBatches(
     final Set<KInstanceOpaqueType> unlits)
     throws RException,
@@ -70,5 +65,10 @@ import com.io7m.renderer.types.RException;
     }
 
     return batches;
+  }
+
+  private KSceneBatchedCommon()
+  {
+    throw new UnreachableCodeException();
   }
 }

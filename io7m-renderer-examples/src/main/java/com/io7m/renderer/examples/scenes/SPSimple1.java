@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,8 +28,8 @@ import com.io7m.renderer.examples.ExampleSceneUtilities;
 import com.io7m.renderer.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadowBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegularBuilderType;
@@ -111,15 +111,9 @@ public final class SPSimple1 implements ExampleSceneType
     final Texture2DStaticUsableType tp =
       scene.textureClamped("projective.png");
 
-    final KLightProjectiveBuilderType b =
-      KLightProjective.newBuilder(tp, KProjectionFrustum.newProjection(
-        this.projection,
-        -1.0f,
-        1.0f,
-        -1.0f,
-        1.0f,
-        1,
-        16.0f));
+    final KLightProjectiveWithoutShadowBuilderType b =
+      KLightProjectiveWithoutShadow.newBuilder(tp, KProjectionFrustum
+        .newProjection(this.projection, -1.0f, 1.0f, -1.0f, 1.0f, 1, 16.0f));
 
     b.setColor(ExampleSceneUtilities.RGB_WHITE);
     b.setRange(16.0f);
@@ -133,7 +127,7 @@ public final class SPSimple1 implements ExampleSceneType
       b.setOrientation(o);
     }
 
-    final KLightProjective kp0 = b.build();
+    final KLightProjectiveWithoutShadow kp0 = b.build();
 
     final KSceneLightGroupBuilderType gb = scene.sceneNewLightGroup("g");
     gb.groupAddLight(kp0);

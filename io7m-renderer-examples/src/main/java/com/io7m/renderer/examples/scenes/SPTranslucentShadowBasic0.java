@@ -37,8 +37,8 @@ import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
-import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.kernel.types.KLightType;
@@ -158,23 +158,17 @@ public final class SPTranslucentShadowBasic0 implements ExampleSceneType
       ks = b.build();
     }
 
-    final KLightProjective kp0;
-    final KLightProjective kp1;
-    final KLightProjective kp2;
+    final KLightProjectiveWithShadowBasic kp0;
+    final KLightProjectiveWithShadowBasic kp1;
+    final KLightProjectiveWithShadowBasic kp2;
 
     {
       final Texture2DStaticUsableType tp =
         scene.textureClamped("projective.png");
 
-      final KLightProjectiveBuilderType b =
-        KLightProjective.newBuilder(tp, KProjectionFrustum.newProjection(
-          this.projection,
-          -1.0f,
-          1.0f,
-          -1.0f,
-          1.0f,
-          1,
-          8.0f));
+      final KLightProjectiveWithShadowBasicBuilderType b =
+        KLightProjectiveWithShadowBasic.newBuilder(tp, KProjectionFrustum
+          .newProjection(this.projection, -1.0f, 1.0f, -1.0f, 1.0f, 1, 8.0f));
 
       final RangeInclusiveL range_x = new RangeInclusiveL(0, 255);
       final RangeInclusiveL range_y = new RangeInclusiveL(0, 255);

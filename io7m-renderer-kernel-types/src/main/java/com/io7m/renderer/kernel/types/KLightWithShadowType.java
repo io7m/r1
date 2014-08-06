@@ -17,16 +17,12 @@
 package com.io7m.renderer.kernel.types;
 
 import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RMatrixI3x3F;
-import com.io7m.renderer.types.RTransformTextureType;
 
 /**
- * The type of materials applied to meshes.
+ * The type of lights that can have shadows.
  */
 
-public interface KMaterialType extends
-  KTexturesRequiredType,
-  KMaterialRequiresUVType
+public interface KLightWithShadowType extends KLightType
 {
   /**
    * Be visited by the given generic visitor.
@@ -48,28 +44,10 @@ public interface KMaterialType extends
    *          A specific visitor subtype
    */
 
-    <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
+    <A, E extends Throwable, V extends KLightWithShadowVisitorType<A, E>>
     A
-    materialAccept(
+    withShadowAccept(
       final V v)
-      throws E,
-        RException;
-
-  /**
-   * @return The code associated with the material.
-   */
-
-  String materialGetCode();
-
-  /**
-   * @return The material values relating to surface normals.
-   */
-
-  KMaterialNormalType materialGetNormal();
-
-  /**
-   * @return The material's UV texture matrix.
-   */
-
-  RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix();
+      throws RException,
+        E;
 }
