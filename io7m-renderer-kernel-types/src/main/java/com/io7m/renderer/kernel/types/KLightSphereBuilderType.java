@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,26 +28,12 @@ public interface KLightSphereBuilderType
 {
   /**
    * <p>
-   * Construct a light.
-   * </p>
-   * <p>
-   * This function can be called as many times as required, yielding new
-   * lights each time it is called.
-   * </p>
-   * 
-   * @return A new light based on all of the parameters given so far.
-   */
-
-  KLightSphere build();
-
-  /**
-   * <p>
    * Set the color of the light.
    * </p>
    * <p>
    * The default color is full-intensity white.
    * </p>
-   * 
+   *
    * @param color
    *          The color.
    */
@@ -62,7 +48,7 @@ public interface KLightSphereBuilderType
    * <p>
    * The default exponent is <code>1.0</code> (linear falloff).
    * </p>
-   * 
+   *
    * @param exponent
    *          The exponent.
    */
@@ -77,7 +63,7 @@ public interface KLightSphereBuilderType
    * <p>
    * The default intensity is <code>1.0</code>.
    * </p>
-   * 
+   *
    * @param intensity
    *          The intensity.
    */
@@ -92,7 +78,7 @@ public interface KLightSphereBuilderType
    * <p>
    * The default position is <code>(0.0, 0.0, 0.0)</code>.
    * </p>
-   * 
+   *
    * @param position
    *          The position.
    */
@@ -107,7 +93,7 @@ public interface KLightSphereBuilderType
    * <p>
    * The default radius is <code>8.0</code>.
    * </p>
-   * 
+   *
    * @param radius
    *          The radius.
    */

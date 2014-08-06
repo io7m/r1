@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,7 +30,7 @@ import com.io7m.renderer.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
-import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
@@ -305,7 +305,7 @@ import com.io7m.renderer.types.RException;
         }
 
         @Override public Unit lightSpherical(
-          final KLightSphere ls)
+          final KLightSphereType ls)
         {
           b.append("  -- Spherical light parameters\n");
           b.append("  parameter light_spherical : Light.t;\n");
@@ -814,7 +814,7 @@ import com.io7m.renderer.types.RException;
         }
 
         @Override public Unit lightSpherical(
-          final KLightSphere ls)
+          final KLightSphereType ls)
         {
           RKForwardShader.fragmentShaderValuesLightSpherical(
             b,
@@ -1340,7 +1340,7 @@ import com.io7m.renderer.types.RException;
         }
 
         @Override public Unit lightSpherical(
-          final KLightSphere ls)
+          final KLightSphereType ls)
         {
           RKForwardShader.fragmentShaderValuesLightSphericalSpecularOnly(
             b,
@@ -2117,7 +2117,7 @@ import com.io7m.renderer.types.RException;
                   }
 
                   @Override public String lightSpherical(
-                    final KLightSphere _)
+                    final KLightSphereType _)
                     throws RException
                   {
                     return m

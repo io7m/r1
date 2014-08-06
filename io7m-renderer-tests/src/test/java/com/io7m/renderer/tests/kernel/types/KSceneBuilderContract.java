@@ -39,7 +39,7 @@ import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
 import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
-import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightWithShadowType;
 import com.io7m.renderer.kernel.types.KProjectionFrustum;
@@ -90,9 +90,9 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
     }
   }
 
-  private static @NonNull KLightSphere getSphericalLight()
+  private static @NonNull KLightSphereWithoutShadow getSphericalLight()
   {
-    return KLightSphere.newBuilder().build();
+    return KLightSphereWithoutShadow.newBuilder().build();
   }
 
   protected abstract @NonNull KInstanceOpaqueType getOpaque(
@@ -224,7 +224,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
   {
     final KSceneBuilderWithCreateType b = this.newBuilder();
     final KSceneLightGroupBuilderType gb = b.sceneNewLightGroup("g");
-    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
+    final KLightSphereWithoutShadow l0 =
+      KSceneBuilderContract.getSphericalLight();
     gb.groupAddLight(l0);
     b.sceneCreate();
   }
@@ -242,7 +243,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
     b.sceneAddOpaqueUnlit(o);
 
     final KSceneLightGroupBuilderType gb = b.sceneNewLightGroup("g");
-    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
+    final KLightSphereWithoutShadow l0 =
+      KSceneBuilderContract.getSphericalLight();
     gb.groupAddLight(l0);
     gb.groupAddInstance(o);
   }
@@ -259,7 +261,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
     final KInstanceOpaqueType o = this.getOpaque(g);
 
     final KSceneLightGroupBuilderType gb = b.sceneNewLightGroup("g");
-    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
+    final KLightSphereWithoutShadow l0 =
+      KSceneBuilderContract.getSphericalLight();
     gb.groupAddLight(l0);
     gb.groupAddInstance(o);
 
@@ -280,7 +283,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
     final KSceneLightGroupBuilderType gb0 = b.sceneNewLightGroup("g0");
     final KSceneLightGroupBuilderType gb1 = b.sceneNewLightGroup("g1");
 
-    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
+    final KLightSphereWithoutShadow l0 =
+      KSceneBuilderContract.getSphericalLight();
     gb0.groupAddLight(l0);
     gb0.groupAddInstance(o);
     gb1.groupAddInstance(o);
@@ -304,7 +308,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
 
     final KSceneBuilderWithCreateType b = this.newBuilder();
     final KSceneLightGroupBuilderType gb = b.sceneNewLightGroup("g");
-    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
+    final KLightSphereWithoutShadow l0 =
+      KSceneBuilderContract.getSphericalLight();
     gb.groupAddLight(l0);
     final KLightType l1 = KSceneBuilderContract.getShadowLight(g);
     gb.groupAddLight(l1);

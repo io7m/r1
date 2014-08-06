@@ -34,18 +34,18 @@ import com.io7m.renderer.types.RVectorI3F;
  * </p>
  */
 
-@EqualityReference public final class KLightSphere implements
-  KLightWithTransformType
+@EqualityReference public final class KLightSphereWithoutShadow implements
+  KLightSphereType
 {
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
-    KLightSphereBuilderType
+    KLightSphereWithoutShadowBuilderType
   {
-    private RVectorI3F<RSpaceRGBType>    color;
-    private float                        exponent;
-    private float                        intensity;
-    private final @Nullable KLightSphere original;
-    private RVectorI3F<RSpaceWorldType>  position;
-    private float                        radius;
+    private RVectorI3F<RSpaceRGBType>                 color;
+    private float                                     exponent;
+    private float                                     intensity;
+    private final @Nullable KLightSphereWithoutShadow original;
+    private RVectorI3F<RSpaceWorldType>               position;
+    private float                                     radius;
 
     Builder()
     {
@@ -58,7 +58,7 @@ import com.io7m.renderer.types.RVectorI3F;
     }
 
     Builder(
-      final KLightSphere in_original)
+      final KLightSphereWithoutShadow in_original)
     {
       this.original = NullCheck.notNull(in_original, "Light");
       this.color = in_original.color;
@@ -68,12 +68,12 @@ import com.io7m.renderer.types.RVectorI3F;
       this.position = in_original.position;
     }
 
-    @Override public KLightSphere build()
+    @Override public KLightSphereWithoutShadow build()
     {
-      final KLightSphere o = this.original;
+      final KLightSphereWithoutShadow o = this.original;
       if (o != null) {
-        final KLightSphere k =
-          new KLightSphere(
+        final KLightSphereWithoutShadow k =
+          new KLightSphereWithoutShadow(
             this.color,
             this.intensity,
             this.position,
@@ -82,7 +82,7 @@ import com.io7m.renderer.types.RVectorI3F;
         return k;
       }
 
-      return new KLightSphere(
+      return new KLightSphereWithoutShadow(
         this.color,
         this.intensity,
         this.position,
@@ -129,7 +129,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return A new light builder.
    */
 
-  public static KLightSphereBuilderType newBuilder()
+  public static KLightSphereWithoutShadowBuilderType newBuilder()
   {
     return new Builder();
   }
@@ -145,8 +145,8 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return A new light builder.
    */
 
-  public static KLightSphereBuilderType newBuilderFrom(
-    final KLightSphere s)
+  public static KLightSphereWithoutShadowBuilderType newBuilderFrom(
+    final KLightSphereWithoutShadow s)
   {
     return new Builder(s);
   }
@@ -167,14 +167,14 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return A new spherical light.
    */
 
-  public static KLightSphere newLight(
+  public static KLightSphereWithoutShadow newLight(
     final RVectorI3F<RSpaceRGBType> in_color,
     final float in_intensity,
     final RVectorI3F<RSpaceWorldType> in_position,
     final float in_radius,
     final float in_falloff)
   {
-    return new KLightSphere(
+    return new KLightSphereWithoutShadow(
       in_color,
       in_intensity,
       in_position,
@@ -189,7 +189,7 @@ import com.io7m.renderer.types.RVectorI3F;
   private final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius;
   private final KTransformType                                                 transform;
 
-  private KLightSphere(
+  private KLightSphereWithoutShadow(
     final RVectorI3F<RSpaceRGBType> in_color,
     final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float in_intensity,
     final RVectorI3F<RSpaceWorldType> in_position,
@@ -234,7 +234,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The falloff exponent for the light
    */
 
-  public float lightGetFalloff()
+  @Override public float lightGetFalloff()
   {
     return this.falloff;
   }
@@ -248,7 +248,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The world position of the light
    */
 
-  public RVectorI3F<RSpaceWorldType> lightGetPosition()
+  @Override public RVectorI3F<RSpaceWorldType> lightGetPosition()
   {
     return this.position;
   }
@@ -257,7 +257,7 @@ import com.io7m.renderer.types.RVectorI3F;
    * @return The radius of the light
    */
 
-  public float lightGetRadius()
+  @Override public float lightGetRadius()
   {
     return this.radius;
   }
@@ -265,6 +265,17 @@ import com.io7m.renderer.types.RVectorI3F;
   @Override public KTransformType lightGetTransform()
   {
     return this.transform;
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KLightSphereVisitorType<A, E>>
+    A
+    sphereAccept(
+      final V v)
+      throws RException,
+        E
+  {
+    return v.sphereWithoutShadow(this);
   }
 
   @Override public int texturesGetRequired()
@@ -275,16 +286,18 @@ import com.io7m.renderer.types.RVectorI3F;
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[KLightSphere color=");
+    b.append("[KLightSphereWithoutShadow color=");
     b.append(this.color);
-    b.append(" falloff=");
+    b.append(", falloff=");
     b.append(this.falloff);
-    b.append(" intensity=");
+    b.append(", intensity=");
     b.append(this.intensity);
-    b.append(" position=");
+    b.append(", position=");
     b.append(this.position);
-    b.append(" radius=");
+    b.append(", radius=");
     b.append(this.radius);
+    b.append(", transform=");
+    b.append(this.transform);
     b.append("]");
     final String r = b.toString();
     assert r != null;

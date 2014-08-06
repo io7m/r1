@@ -23,8 +23,8 @@ import java.util.List;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KLightSphere;
-import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
+import com.io7m.renderer.kernel.types.KLightSphereWithoutShadow;
+import com.io7m.renderer.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.renderer.kernel.types.KMaterialAlphaConstant;
 import com.io7m.renderer.kernel.types.KMaterialDepthConstant;
@@ -101,7 +101,7 @@ public final class ExampleSceneUtilities
    * A large spherical white light and the center of the scene.
    */
 
-  public static final KLightSphere                                   LIGHT_SPHERICAL_LARGE_WHITE;
+  public static final KLightSphereWithoutShadow                      LIGHT_SPHERICAL_LARGE_WHITE;
 
   /**
    * No surface emission.
@@ -477,7 +477,8 @@ public final class ExampleSceneUtilities
       }
 
       {
-        final KLightSphereBuilderType b = KLightSphere.newBuilder();
+        final KLightSphereWithoutShadowBuilderType b =
+          KLightSphereWithoutShadow.newBuilder();
         b.setColor(ExampleSceneUtilities.RGB_WHITE);
         b.setFalloff(1.0f);
         b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f));
