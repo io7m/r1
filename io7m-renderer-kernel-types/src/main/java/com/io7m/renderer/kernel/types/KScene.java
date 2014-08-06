@@ -32,6 +32,7 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionInstanceAlreadyInGroup;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
 import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
@@ -94,13 +95,34 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
       this.message = new StringBuilder();
     }
 
+    private RExceptionInstanceAlreadyInGroup alreadyInGroup(
+      final KInstanceOpaqueType o,
+      final String existing_group,
+      final String new_group)
+    {
+      final StringBuilder m = this.message;
+      m.setLength(0);
+      m
+        .append("Attempted to add an instance to a group, but the instance has already been added previously to a light group.\n");
+      m.append("  Instance: ");
+      m.append(o);
+      m.append("\n");
+      m.append("  Existing group: ");
+      m.append(existing_group);
+      m.append("\n");
+      m.append("  New group: ");
+      m.append(new_group);
+      m.append("\n");
+      return new RExceptionInstanceAlreadyInGroup(m.toString());
+    }
+
     private RExceptionInstanceAlreadyLit alreadyLit(
       final KInstanceOpaqueType instance)
     {
       final StringBuilder m = this.message;
       m.setLength(0);
       m
-        .append("Attempted to add an instance as unlit, but the instance has already been added previously to one or more light groups.\n");
+        .append("Attempted to add an instance as unlit, but the instance has already been added previously to a light group.\n");
       m.append("  Instance: ");
       m.append(instance);
       m.append("\n");
@@ -143,21 +165,23 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
     {
       NullCheck.notNull(instance, "Instance");
 
-      if (this.state.instances_opaque_lit.contains(instance)) {
+      final BuilderState previous = this.state;
+      if (previous.instances_opaque_lit.contains(instance)) {
         throw this.alreadyLit(instance);
       }
 
       this.state =
         new BuilderState(
-          this.state.instances_shadow,
-          this.state.instances_all.plus(instance),
-          this.state.instances_opaque_lit,
-          this.state.instances_opaque_unlit.plus(instance),
-          this.state.lights_all,
-          this.state.lights_shadow,
-          this.state.translucents_ordered,
-          this.state.instances_visible.plus(instance),
-          this.state.light_group_builders);
+          previous.instances_shadow,
+          previous.instances_all.plus(instance),
+          previous.instances_opaque_lit,
+          previous.instances_opaque_unlit.plus(instance),
+          previous.lights_all,
+          previous.lights_shadow,
+          previous.translucents_ordered,
+          previous.instances_visible.plus(instance),
+          previous.light_group_builders,
+          previous.groups_by_instance);
     }
 
     @Override public void sceneAddShadowCaster(
@@ -187,7 +211,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
           previous.lights_shadow.plus(light),
           previous.translucents_ordered,
           previous.instances_visible,
-          previous.light_group_builders);
+          previous.light_group_builders,
+          previous.groups_by_instance);
     }
 
     @Override public void sceneAddTranslucentLit(
@@ -230,7 +255,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
             previous.lights_shadow,
             previous.translucents_ordered.plus(translucent),
             previous.instances_visible.plus(instance),
-            previous.light_group_builders);
+            previous.light_group_builders,
+            previous.groups_by_instance);
 
       } catch (final JCGLException e) {
         throw new UnreachableCodeException(e);
@@ -277,7 +303,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
             previous.lights_shadow,
             previous.translucents_ordered.plus(translucent),
             previous.instances_visible.plus(instance),
-            previous.light_group_builders);
+            previous.light_group_builders,
+            previous.groups_by_instance);
 
       } catch (final JCGLException e) {
         throw new UnreachableCodeException(e);
@@ -318,7 +345,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
               previous.lights_shadow,
               previous.translucents_ordered,
               previous.instances_visible,
-              previous.light_group_builders);
+              previous.light_group_builders,
+              previous.groups_by_instance);
         }
       }
 
@@ -410,7 +438,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
           previous.lights_shadow,
           previous.translucents_ordered,
           previous.instances_visible,
-          previous.light_group_builders.plus(name, g));
+          previous.light_group_builders.plus(name, g),
+          previous.groups_by_instance);
 
       return g;
     }
@@ -419,6 +448,7 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
   @SuppressWarnings({ "null" }) @EqualityReference private static final class BuilderState
   {
     // CHECKSTYLE_VISIBILITY:OFF
+    final HashPMap<KInstanceOpaqueType, LightGroupBuilder>             groups_by_instance;
     final MapPSet<KInstanceType>                                       instances_all;
     final MapPSet<KInstanceOpaqueType>                                 instances_opaque_lit;
     final MapPSet<KInstanceOpaqueType>                                 instances_opaque_unlit;
@@ -442,6 +472,7 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
       this.lights_shadow = HashTreePSet.empty();
       this.translucents_ordered = TreePVector.empty();
       this.light_group_builders = HashTreePMap.empty();
+      this.groups_by_instance = HashTreePMap.empty();
     }
 
     BuilderState(
@@ -453,7 +484,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
       final MapPSet<KLightWithShadowType> in_lights_shadow,
       final PVector<KTranslucentType> in_translucents_ordered,
       final MapPSet<KInstanceType> in_instances_visible,
-      final HashPMap<String, LightGroupBuilder> in_light_groups)
+      final HashPMap<String, LightGroupBuilder> in_light_groups,
+      final HashPMap<KInstanceOpaqueType, LightGroupBuilder> in_groups_by_instance)
     {
       this.instances_shadow = in_instances_shadow;
       this.instances_all = in_instances_all;
@@ -464,6 +496,7 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
       this.translucents_ordered = in_translucents_ordered;
       this.instances_visible = in_instances_visible;
       this.light_group_builders = in_light_groups;
+      this.groups_by_instance = in_groups_by_instance;
     }
   }
 
@@ -485,10 +518,17 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
 
     @Override public void groupAddInstance(
       final KInstanceOpaqueType o)
-      throws RExceptionInstanceAlreadyUnlit
+      throws RExceptionInstanceAlreadyUnlit,
+        RExceptionInstanceAlreadyInGroup
     {
       if (this.parent.state.instances_opaque_unlit.contains(o)) {
         throw this.parent.alreadyUnlit(this.name, o);
+      }
+      if (this.parent.state.groups_by_instance.containsKey(o)) {
+        throw this.parent.alreadyInGroup(
+          o,
+          this.parent.state.groups_by_instance.get(o).name,
+          this.name);
       }
 
       this.group_state =
@@ -508,7 +548,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
           previous.lights_shadow,
           previous.translucents_ordered,
           previous.instances_visible.plus(o),
-          previous.light_group_builders);
+          previous.light_group_builders,
+          previous.groups_by_instance.plus(o, this));
     }
 
     @Override public void groupAddLight(
@@ -527,7 +568,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
             previous.lights_shadow.plus((KLightWithShadowType) light),
             previous.translucents_ordered,
             previous.instances_visible,
-            previous.light_group_builders);
+            previous.light_group_builders,
+            previous.groups_by_instance);
       } else {
         this.parent.state =
           new BuilderState(
@@ -539,7 +581,8 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
             previous.lights_shadow,
             previous.translucents_ordered,
             previous.instances_visible,
-            previous.light_group_builders);
+            previous.light_group_builders,
+            previous.groups_by_instance);
       }
 
       this.group_state =

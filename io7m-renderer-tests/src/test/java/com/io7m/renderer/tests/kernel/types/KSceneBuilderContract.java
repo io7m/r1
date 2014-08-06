@@ -57,6 +57,7 @@ import com.io7m.renderer.tests.RFakeShaderControllers;
 import com.io7m.renderer.tests.RFakeTextures2DStatic;
 import com.io7m.renderer.tests.utilities.TestUtilities;
 import com.io7m.renderer.types.RException;
+import com.io7m.renderer.types.RExceptionInstanceAlreadyInGroup;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
 import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
@@ -263,6 +264,26 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
     gb.groupAddInstance(o);
 
     b.sceneAddOpaqueUnlit(o);
+  }
+
+  @Test(expected = RExceptionInstanceAlreadyInGroup.class) public
+    void
+    testSceneLightGroup_AlreadyInGroup0()
+      throws RException
+  {
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+
+    final KSceneBuilderWithCreateType b = this.newBuilder();
+    final KInstanceOpaqueType o = this.getOpaque(g);
+
+    final KSceneLightGroupBuilderType gb0 = b.sceneNewLightGroup("g0");
+    final KSceneLightGroupBuilderType gb1 = b.sceneNewLightGroup("g1");
+
+    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
+    gb0.groupAddLight(l0);
+    gb0.groupAddInstance(o);
+    gb1.groupAddInstance(o);
   }
 
   @Test(expected = RExceptionLightGroupAlreadyAdded.class) public
