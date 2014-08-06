@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -302,7 +302,7 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
        */
 
       for (final KLightWithShadowType l : this.state.lights_shadow) {
-        final HashPMap<KLightType, MapPSet<KInstanceOpaqueType>> is =
+        final HashPMap<KLightWithShadowType, MapPSet<KInstanceOpaqueType>> is =
           this.state.instances_shadow;
 
         if (is.containsKey(l) == false) {
@@ -359,11 +359,11 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
     }
 
     @Override public
-      Map<KLightType, Set<KInstanceOpaqueType>>
+      Map<KLightWithShadowType, Set<KInstanceOpaqueType>>
       sceneGetInstancesOpaqueShadowCastingByLight()
     {
       final Object o = this.state.instances_shadow;
-      return (Map<KLightType, Set<KInstanceOpaqueType>>) o;
+      return (Map<KLightWithShadowType, Set<KInstanceOpaqueType>>) o;
     }
 
     @Override public Set<KInstanceOpaqueType> sceneGetInstancesOpaqueUnlit()
@@ -419,15 +419,15 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
   @SuppressWarnings({ "null" }) @EqualityReference private static final class BuilderState
   {
     // CHECKSTYLE_VISIBILITY:OFF
-    final MapPSet<KInstanceType>                             instances_all;
-    final MapPSet<KInstanceOpaqueType>                       instances_opaque_lit;
-    final MapPSet<KInstanceOpaqueType>                       instances_opaque_unlit;
-    final HashPMap<KLightType, MapPSet<KInstanceOpaqueType>> instances_shadow;
-    final MapPSet<KInstanceType>                             instances_visible;
-    final HashPMap<String, LightGroupBuilder>                light_group_builders;
-    final MapPSet<KLightType>                                lights_all;
-    final MapPSet<KLightWithShadowType>                      lights_shadow;
-    final PVector<KTranslucentType>                          translucents_ordered;
+    final MapPSet<KInstanceType>                                       instances_all;
+    final MapPSet<KInstanceOpaqueType>                                 instances_opaque_lit;
+    final MapPSet<KInstanceOpaqueType>                                 instances_opaque_unlit;
+    final HashPMap<KLightWithShadowType, MapPSet<KInstanceOpaqueType>> instances_shadow;
+    final MapPSet<KInstanceType>                                       instances_visible;
+    final HashPMap<String, LightGroupBuilder>                          light_group_builders;
+    final MapPSet<KLightType>                                          lights_all;
+    final MapPSet<KLightWithShadowType>                                lights_shadow;
+    final PVector<KTranslucentType>                                    translucents_ordered;
 
     // CHECKSTYLE_VISIBILITY:ON
 
@@ -445,7 +445,7 @@ import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
     }
 
     BuilderState(
-      final HashPMap<KLightType, MapPSet<KInstanceOpaqueType>> in_instances_shadow,
+      final HashPMap<KLightWithShadowType, MapPSet<KInstanceOpaqueType>> in_instances_shadow,
       final MapPSet<KInstanceType> in_instances_all,
       final MapPSet<KInstanceOpaqueType> in_instances_opaque_lit,
       final MapPSet<KInstanceOpaqueType> in_instances_opaque_unlit,
