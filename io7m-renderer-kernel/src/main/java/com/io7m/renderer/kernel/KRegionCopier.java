@@ -66,14 +66,11 @@ import com.io7m.renderer.types.RTransformTextureType;
 {
   private static final EnumSet<FramebufferBlitBuffer> COLOR_ONLY;
   private static final EnumSet<FramebufferBlitBuffer> DEPTH_ONLY;
-
-  private static final String                         SHADER_COPY_DEPTH4444;
   private static final String                         SHADER_COPY_RGBA;
   private static final String                         SHADER_COPY_RGBA_DEPTH;
 
   static {
     SHADER_COPY_RGBA_DEPTH = "copy_rgba_depth";
-    SHADER_COPY_DEPTH4444 = "copy_depth4444";
     SHADER_COPY_RGBA = "copy_rgba";
 
     DEPTH_ONLY =
@@ -175,13 +172,6 @@ import com.io7m.renderer.types.RTransformTextureType;
       final AreaInclusive target_area)
       throws JCGLException
   {
-    assert source.kFramebufferGetDepthIsPackedColor() == false;
-    assert source.kFramebufferGetColorFramebuffer() == source
-      .kFramebufferGetDepthPassFramebuffer();
-    assert target.kFramebufferGetDepthIsPackedColor() == false;
-    assert target.kFramebufferGetColorFramebuffer() == target
-      .kFramebufferGetDepthPassFramebuffer();
-
     gc.framebufferReadBind(source.kFramebufferGetColorFramebuffer());
     try {
       gc.framebufferDrawBind(target.kFramebufferGetColorFramebuffer());
@@ -515,7 +505,6 @@ import com.io7m.renderer.types.RTransformTextureType;
           @Override public Unit implementationIsGL2(
             final JCGLInterfaceGL2Type gl)
             throws JCGLException,
-
               RException
           {
             KRegionCopier.this.copyRGBADepthGL3(
@@ -530,7 +519,6 @@ import com.io7m.renderer.types.RTransformTextureType;
           @Override public Unit implementationIsGL3(
             final JCGLInterfaceGL3Type gl)
             throws JCGLException,
-
               RException
           {
             KRegionCopier.this.copyRGBADepthGL3(
@@ -545,22 +533,14 @@ import com.io7m.renderer.types.RTransformTextureType;
           @Override public Unit implementationIsGLES2(
             final JCGLInterfaceGLES2Type gl)
             throws JCGLException,
-
               RException
           {
-            KRegionCopier.this.copyRGBADepthGLES2(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
+            throw new UnreachableCodeException();
           }
 
           @Override public Unit implementationIsGLES3(
             final JCGLInterfaceGLES3Type gl)
             throws JCGLException,
-
               RException
           {
             KRegionCopier.this.copyRGBADepthGL3(
@@ -697,37 +677,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     }
   }
 
-  private void copyDrawColorDepthPacked(
-    final JCGLInterfaceGLES2Type gl,
-    final KTextureUnitContextType texture_context,
-    final Texture2DStaticUsableType rgba_texture,
-    final Texture2DStaticUsableType depth_texture,
-    final AreaInclusive source_area,
-    final FramebufferUsableType color_framebuffer,
-    final FramebufferUsableType depth_framebuffer,
-    final AreaInclusive target_area)
-    throws RException,
-      JCacheException
-  {
-    this.copyDrawColorOnly(
-      gl,
-      texture_context,
-      rgba_texture,
-      source_area,
-      color_framebuffer,
-      target_area,
-      KRegionCopier.SHADER_COPY_RGBA);
-
-    this.copyDrawDepthOnly(
-      gl,
-      texture_context,
-      depth_texture,
-      source_area,
-      depth_framebuffer,
-      target_area,
-      KRegionCopier.SHADER_COPY_DEPTH4444);
-  }
-
   private void copyDrawColorOnly(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType texture_context,
@@ -788,64 +737,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     }
   }
 
-  private void copyDrawDepthOnly(
-    final JCGLInterfaceCommonType gc,
-    final KTextureUnitContextType texture_context,
-    final Texture2DStaticUsableType source,
-    final AreaInclusive source_select_area,
-    final FramebufferUsableType target,
-    final AreaInclusive target_select_area,
-    final String shader_name)
-    throws RException,
-      JCacheException
-  {
-    try {
-      KRegionCopier.calculateRegionMatrices(
-        source.textureGetArea(),
-        source_select_area,
-        this.matrix_uv);
-
-      final KProgramType kp = this.shader_cache.cacheGetLU(shader_name);
-      gc.framebufferDrawBind(target);
-
-      try {
-        gc.blendingDisable();
-        gc.colorBufferMask(true, true, true, true);
-        gc.cullingDisable();
-
-        gc.depthBufferTestDisable();
-        gc.depthBufferWriteDisable();
-
-        try {
-          gc.scissorEnable(target_select_area);
-          gc.viewportSet(target_select_area);
-
-          final JCBExecutorType e = kp.getExecutable();
-          e.execRun(new JCBExecutorProcedureType<RException>() {
-            @Override public void call(
-              final JCBProgramType p)
-              throws JCGLException,
-                RException
-            {
-              final TextureUnitType unit =
-                texture_context.withTexture2D(source);
-              p.programUniformPutTextureUnit("t_image_depth", unit);
-              KRegionCopier.this.drawQuad(gc, p);
-            }
-          });
-
-        } finally {
-          gc.scissorDisable();
-        }
-      } finally {
-        gc.framebufferDrawUnbind();
-      }
-
-    } catch (final JCGLException x) {
-      throw RExceptionJCGL.fromJCGLException(x);
-    }
-  }
-
   private
     <G extends JCGLInterfaceCommonType & JCGLFramebuffersGL3Type, F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
     void
@@ -858,13 +749,6 @@ import com.io7m.renderer.types.RTransformTextureType;
       throws RException,
         JCGLException
   {
-    assert source.kFramebufferGetDepthIsPackedColor() == false;
-    assert source.kFramebufferGetColorFramebuffer() == source
-      .kFramebufferGetDepthPassFramebuffer();
-    assert target.kFramebufferGetDepthIsPackedColor() == false;
-    assert target.kFramebufferGetColorFramebuffer() == target
-      .kFramebufferGetDepthPassFramebuffer();
-
     if (this.blit) {
       KRegionCopier.copyBlitRGBADepthGL3(
         gl,
@@ -895,67 +779,6 @@ import com.io7m.renderer.types.RTransformTextureType;
         }
       });
     }
-  }
-
-  private
-    <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
-    void
-    copyRGBADepthGLES2(
-      final JCGLInterfaceGLES2Type gl,
-      final F source,
-      final AreaInclusive source_area,
-      final F target,
-      final AreaInclusive target_area)
-      throws RException,
-        JCGLException
-  {
-    assert source.kFramebufferGetDepthIsPackedColor() == target
-      .kFramebufferGetDepthIsPackedColor();
-
-    this.texture_units.withContext(new KTextureUnitWithType() {
-      @Override public void run(
-        final KTextureUnitContextType texture_context)
-        throws JCGLException,
-          RException
-      {
-        try {
-          if (target.kFramebufferGetDepthIsPackedColor()) {
-            assert source.kFramebufferGetColorFramebuffer() != source
-              .kFramebufferGetDepthPassFramebuffer();
-            assert target.kFramebufferGetColorFramebuffer() != target
-              .kFramebufferGetDepthPassFramebuffer();
-
-            KRegionCopier.this.copyDrawColorDepthPacked(
-              gl,
-              texture_context,
-              source.kFramebufferGetRGBATexture(),
-              source.kFramebufferGetDepthTexture(),
-              source_area,
-              target.kFramebufferGetColorFramebuffer(),
-              target.kFramebufferGetDepthPassFramebuffer(),
-              target_area);
-
-          } else {
-            assert source.kFramebufferGetColorFramebuffer() == source
-              .kFramebufferGetDepthPassFramebuffer();
-            assert target.kFramebufferGetColorFramebuffer() == target
-              .kFramebufferGetDepthPassFramebuffer();
-
-            KRegionCopier.this.copyDrawColorDepth(
-              gl,
-              texture_context,
-              source.kFramebufferGetRGBATexture(),
-              source.kFramebufferGetDepthTexture(),
-              source_area,
-              target.kFramebufferGetColorFramebuffer(),
-              target_area,
-              KRegionCopier.SHADER_COPY_RGBA_DEPTH);
-          }
-        } catch (final JCacheException e) {
-          throw new UnreachableCodeException(e);
-        }
-      }
-    });
   }
 
   private

@@ -33,18 +33,20 @@ import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
-import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KGraphicsCapabilitiesType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KLightDirectional;
-import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightProjectiveType;
+import com.io7m.renderer.kernel.types.KLightProjectiveVisitorType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightVisitorType;
@@ -54,7 +56,6 @@ import com.io7m.renderer.kernel.types.KMaterialNormalVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
-import com.io7m.renderer.kernel.types.KShadowType;
 import com.io7m.renderer.kernel.types.KTranslucentRegularLit;
 import com.io7m.renderer.kernel.types.KTranslucentSpecularOnlyLit;
 import com.io7m.renderer.kernel.types.KTranslucentType;
@@ -87,8 +88,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
    *          An unlit shader cache
    * @param in_shader_lit_cache
    *          An lit shader cache
-   * @param in_caps
-   *          The current graphics capabilities
    * @param in_log
    *          A log handle
    * @return A new renderer
@@ -101,7 +100,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShaderCacheForwardTranslucentUnlitType in_shader_unlit_cache,
     final KShaderCacheForwardTranslucentLitType in_shader_lit_cache,
     final KRefractionRendererType in_refraction_renderer,
-    final KGraphicsCapabilitiesType in_caps,
     final LogUsableType in_log)
     throws RException
   {
@@ -110,7 +108,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
       in_shader_unlit_cache,
       in_shader_lit_cache,
       in_refraction_renderer,
-      in_caps,
       in_log);
   }
 
@@ -224,7 +221,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       }
 
       @Override public Unit lightProjective(
-        final KLightProjective l)
+        final KLightProjectiveType l)
         throws RException,
           JCGLException
       {
@@ -308,18 +305,17 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShadowMapContextType shadow_context,
     final KTextureUnitContextType texture_unit_ctx,
     final KMatricesProjectiveLightType mwp,
-    final KLightProjective light,
+    final KLightProjectiveType light,
     final JCBProgramType program,
     final KInstanceTranslucentRegular instance)
     throws JCGLException,
       RException
   {
-    if (light.lightHasShadow()) {
-      final Some<KShadowType> shadow =
-        (Some<KShadowType>) light.lightGetShadow();
-      final KShadowMapUsableType map = shadow_context.getShadowMap(light);
-      KRendererCommon.putShadow(texture_unit_ctx, program, shadow.get(), map);
-    }
+    KTranslucentRenderer.putProjectiveWithShadow(
+      shadow_context,
+      texture_unit_ctx,
+      light,
+      program);
 
     KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
       program,
@@ -333,7 +329,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     KShadingProgramCommon.putTextureProjection(
       program,
-      texture_unit_ctx.withTexture2D(light.lightGetTexture()));
+      texture_unit_ctx.withTexture2D(light.lightProjectiveGetTexture()));
 
     mwp.withInstance(
       instance,
@@ -353,6 +349,52 @@ import com.io7m.renderer.types.RExceptionJCGL;
             mwi,
             program,
             instance);
+          return Unit.unit();
+        }
+      });
+  }
+
+  private static void putProjectiveWithShadow(
+    final KShadowMapContextType shadow_context,
+    final KTextureUnitContextType texture_unit_ctx,
+    final KLightProjectiveType light,
+    final JCBProgramType program)
+    throws RException,
+      JCGLException
+  {
+    light
+      .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
+        @Override public Unit projectiveWithoutShadow(
+          final KLightProjectiveWithoutShadow lp)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasic(
+          final KLightProjectiveWithShadowBasic lp)
+          throws RException,
+            JCGLException
+        {
+          KRendererCommon.putShadow(
+            shadow_context,
+            texture_unit_ctx,
+            program,
+            lp);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowVariance(
+          final KLightProjectiveWithShadowVariance lp)
+          throws RException,
+            JCGLException
+        {
+          KRendererCommon.putShadow(
+            shadow_context,
+            texture_unit_ctx,
+            program,
+            lp);
           return Unit.unit();
         }
       });
@@ -504,7 +546,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       }
 
       @Override public Unit lightProjective(
-        final KLightProjective l)
+        final KLightProjectiveType l)
         throws RException,
           JCGLException
       {
@@ -588,19 +630,48 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShadowMapContextType shadow_context,
     final KTextureUnitContextType texture_unit_ctx,
     final KMatricesProjectiveLightType mwp,
-    final KLightProjective light,
+    final KLightProjectiveType light,
     final JCBProgramType program,
     final KInstanceTranslucentSpecularOnly instance)
     throws JCGLException,
       RException
   {
-    if (light.lightHasShadow()) {
-      KRendererCommon.putShadow(
-        shadow_context,
-        texture_unit_ctx,
-        program,
-        light);
-    }
+    light
+      .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
+        @Override public Unit projectiveWithoutShadow(
+          final KLightProjectiveWithoutShadow lp)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasic(
+          final KLightProjectiveWithShadowBasic lp)
+          throws RException,
+            JCGLException
+        {
+          KRendererCommon.putShadow(
+            shadow_context,
+            texture_unit_ctx,
+            program,
+            lp);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowVariance(
+          final KLightProjectiveWithShadowVariance lp)
+          throws RException,
+            JCGLException
+        {
+          KRendererCommon.putShadow(
+            shadow_context,
+            texture_unit_ctx,
+            program,
+            lp);
+          return Unit.unit();
+        }
+      });
 
     KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
       program,
@@ -614,7 +685,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
     KShadingProgramCommon.putTextureProjection(
       program,
-      texture_unit_ctx.withTexture2D(light.lightGetTexture()));
+      texture_unit_ctx.withTexture2D(light.lightProjectiveGetTexture()));
 
     mwp.withInstance(
       instance,
@@ -674,7 +745,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
       });
   }
 
-  private final KGraphicsCapabilitiesType               caps;
   private final JCGLImplementationType                  g;
   private final LogUsableType                           log;
   private final KRefractionRendererType                 refraction_renderer;
@@ -687,7 +757,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final KShaderCacheForwardTranslucentUnlitType in_shader_unlit_cache,
     final KShaderCacheForwardTranslucentLitType in_shader_lit_cache,
     final KRefractionRendererType in_refraction_renderer,
-    final KGraphicsCapabilitiesType in_caps,
     final LogUsableType in_log)
     throws RException
   {
@@ -703,8 +772,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
       this.texture_units =
         KTextureUnitAllocator.newAllocator(in_g.getGLCommon());
-      this.caps = NullCheck.notNull(in_caps, "Capabilities");
-
       this.refraction_renderer =
         NullCheck.notNull(in_refraction_renderer, "Refraction renderer");
 
@@ -763,6 +830,10 @@ import com.io7m.renderer.types.RExceptionJCGL;
       gc.colorBufferMask(true, true, true, true);
       gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
       gc.depthBufferWriteDisable();
+
+      if (gc.stencilBufferGetBits() > 0) {
+        gc.stencilBufferDisable();
+      }
 
       for (int index = 0; index < translucents.size(); ++index) {
         // Enabled by each translucent instance
@@ -862,7 +933,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
       final KInstanceTranslucentRegular instance = t.translucentGetInstance();
       final KMaterialTranslucentRegular material = instance.getMaterial();
-      final String shader_code = this.shaderCodeFromRegular(light, material);
+      final String shader_code =
+        KTranslucentRenderer.shaderCodeFromRegular(light, material);
 
       final int required =
         light.texturesGetRequired() + material.texturesGetRequired();
@@ -929,7 +1001,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       RException,
       JCacheException
   {
-    final String shader_code = t.getMaterial().materialUnlitGetCode();
+    final String shader_code = t.getMaterial().materialGetCode();
 
     gc.blendingEnable(
       BlendFunction.BLEND_ONE,
@@ -1007,7 +1079,8 @@ import com.io7m.renderer.types.RExceptionJCGL;
       final KInstanceTranslucentSpecularOnly instance =
         t.translucentGetInstance();
 
-      final String shader_code = this.shaderCodeSpecularOnly(light, material);
+      final String shader_code =
+        KTranslucentRenderer.shaderCodeSpecularOnly(light, material);
 
       final int required = material.texturesGetRequired();
       if (unit_allocator.hasEnoughUnits(required) == false) {
@@ -1049,7 +1122,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     }
   }
 
-  private String shaderCodeFromLight(
+  private static String shaderCodeFromLight(
     final KLightType light)
   {
     try {
@@ -1062,16 +1135,10 @@ import com.io7m.renderer.types.RExceptionJCGL;
         }
 
         @Override public String lightProjective(
-          final KLightProjective l)
+          final KLightProjectiveType l)
           throws RException
         {
-          if (KTranslucentRenderer.this.caps.getSupportsDepthTextures()) {
-            return l.lightGetCode();
-          }
-
-          final String r = String.format("%s4444", l.lightGetCode());
-          assert r != null;
-          return r;
+          return l.lightGetCode();
         }
 
         @Override public String lightSpherical(
@@ -1086,12 +1153,12 @@ import com.io7m.renderer.types.RExceptionJCGL;
     }
   }
 
-  private String shaderCodeFromRegular(
+  private static String shaderCodeFromRegular(
     final KLightType light,
     final KMaterialTranslucentRegular material)
   {
-    final String lcode = this.shaderCodeFromLight(light);
-    final String mcode = material.materialLitGetCodeWithoutDepth();
+    final String lcode = KTranslucentRenderer.shaderCodeFromLight(light);
+    final String mcode = material.materialGetCode();
 
     final StringBuilder s = new StringBuilder();
     s.append(lcode);
@@ -1103,12 +1170,12 @@ import com.io7m.renderer.types.RExceptionJCGL;
     return r;
   }
 
-  private String shaderCodeSpecularOnly(
+  private static String shaderCodeSpecularOnly(
     final KLightType light,
     final KMaterialTranslucentSpecularOnly material)
   {
-    final String lcode = this.shaderCodeFromLight(light);
-    final String mcode = material.materialLitGetCodeWithoutDepth();
+    final String lcode = KTranslucentRenderer.shaderCodeFromLight(light);
+    final String mcode = material.materialGetCode();
 
     final StringBuilder s = new StringBuilder();
     s.append(lcode);

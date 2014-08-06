@@ -114,7 +114,7 @@ import com.io7m.renderer.shaders.forward.RKForwardShaderCodes;
 
   /**
    * Main program.
-   * 
+   *
    * @param args
    *          Command line arguments.
    * @throws Exception
@@ -247,7 +247,6 @@ import com.io7m.renderer.shaders.forward.RKForwardShaderCodes;
       final FileWriter writer = new FileWriter(file);
       try {
         writer.append(RKForwardShader.moduleLitTranslucentRegular(
-          c.getCapabilities(),
           c.getLight(),
           c.getMaterial()));
       } finally {
@@ -280,7 +279,6 @@ import com.io7m.renderer.shaders.forward.RKForwardShaderCodes;
       final FileWriter writer = new FileWriter(file);
       try {
         writer.append(RKForwardShader.moduleLitTranslucentSpecularOnly(
-          c.getCapabilities(),
           c.getLight(),
           c.getMaterial()));
       } finally {

@@ -16,10 +16,14 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.TextureFilterMagnification;
+import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -29,9 +33,40 @@ import com.io7m.renderer.types.RException;
 @EqualityStructural public final class KShadowMapVarianceDescription implements
   KShadowMapDescriptionType
 {
+  private static final KShadowMapVarianceDescription DEFAULT;
+
+  static {
+    DEFAULT = KShadowMapVarianceDescription.makeDefault();
+  }
+
+  /**
+   * @return The default description of a depth variance shadow map.
+   */
+
+  public static KShadowMapVarianceDescription getDefault()
+  {
+    return KShadowMapVarianceDescription.DEFAULT;
+  }
+
+  private static KShadowMapVarianceDescription makeDefault()
+  {
+    final AreaInclusive area =
+      new AreaInclusive(new RangeInclusiveL(0, 255), new RangeInclusiveL(
+        0,
+        255));
+    final KFramebufferDepthVarianceDescription dd =
+      KFramebufferDepthVarianceDescription.newDescription(
+        area,
+        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+        KDepthPrecision.DEPTH_PRECISION_24,
+        KDepthVariancePrecision.DEPTH_VARIANCE_PRECISION_32F);
+    return KShadowMapVarianceDescription.newDescription(dd, 8);
+  }
+
   /**
    * Create a new description of a shadow map.
-   * 
+   *
    * @param in_description
    *          The description of the depth/variance framebuffer
    * @param in_size_exponent
@@ -45,8 +80,8 @@ import com.io7m.renderer.types.RException;
   {
     return new KShadowMapVarianceDescription(in_description, in_size_exponent);
   }
-
   private final KFramebufferDepthVarianceDescription description;
+
   private final int                                  size_exponent;
 
   private KShadowMapVarianceDescription(

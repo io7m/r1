@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -191,24 +191,7 @@ import com.io7m.renderer.types.RTransformTextureType;
       in_normal,
       in_specular);
 
-    final String code_lit =
-      KMaterialCodes.makeCodeTranslucentRegularLit(
-        in_albedo,
-        in_alpha,
-        in_emissive,
-        in_environment,
-        in_normal,
-        in_specular);
-
-    final String code_unlit =
-      KMaterialCodes.makeCodeTranslucentRegularUnlit(
-        in_albedo,
-        in_alpha,
-        in_emissive,
-        in_environment,
-        in_normal);
-
-    final String code_deferred =
+    final String code =
       KMaterialCodes.makeCodeDeferredGeometryRegular(
         in_alpha,
         KMaterialDepthConstant.constant(),
@@ -219,9 +202,7 @@ import com.io7m.renderer.types.RTransformTextureType;
         in_specular);
 
     return new KMaterialTranslucentRegular(
-      code_lit,
-      code_unlit,
-      code_deferred,
+      code,
       in_uv_matrix,
       in_albedo,
       in_alpha,
@@ -233,9 +214,7 @@ import com.io7m.renderer.types.RTransformTextureType;
 
   private final KMaterialAlbedoType                 albedo;
   private final KMaterialAlphaType                  alpha;
-  private final String                              code_deferred;
-  private final String                              code_lit;
-  private final String                              code_unlit;
+  private final String                              code;
   private final KMaterialEmissiveType               emissive;
   private final KMaterialEnvironmentType            environment;
   private final KMaterialNormalType                 normal;
@@ -245,9 +224,7 @@ import com.io7m.renderer.types.RTransformTextureType;
   private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialTranslucentRegular(
-    final String in_code_lit,
-    final String in_code_unlit,
-    final String in_code_deferred,
+    final String in_code,
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final KMaterialAlbedoType in_albedo,
     final KMaterialAlphaType in_alpha,
@@ -256,9 +233,7 @@ import com.io7m.renderer.types.RTransformTextureType;
     final KMaterialNormalType in_normal,
     final KMaterialSpecularType in_specular)
   {
-    this.code_lit = NullCheck.notNull(in_code_lit, "Lit code");
-    this.code_unlit = NullCheck.notNull(in_code_unlit, "Unlit code");
-    this.code_deferred = NullCheck.notNull(in_code_deferred, "Deferred code");
+    this.code = NullCheck.notNull(in_code, "Code");
     this.normal = NullCheck.notNull(in_normal, "Normal");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     this.albedo = NullCheck.notNull(in_albedo, "Albedo");
@@ -300,11 +275,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.materialTranslucent(this);
   }
 
-  @Override public String materialDeferredGetCode()
-  {
-    return this.code_deferred;
-  }
-
   /**
    * @return The alpha parameters
    */
@@ -312,6 +282,11 @@ import com.io7m.renderer.types.RTransformTextureType;
   public KMaterialAlphaType materialGetAlpha()
   {
     return this.alpha;
+  }
+
+  @Override public String materialGetCode()
+  {
+    return this.code;
   }
 
   @Override public KMaterialNormalType materialGetNormal()
@@ -322,16 +297,6 @@ import com.io7m.renderer.types.RTransformTextureType;
   @Override public RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix()
   {
     return this.uv_matrix;
-  }
-
-  @Override public String materialLitGetCodeWithDepth()
-  {
-    return this.code_lit;
-  }
-
-  @Override public String materialLitGetCodeWithoutDepth()
-  {
-    return this.code_lit;
   }
 
   @Override public KMaterialAlbedoType materialRegularGetAlbedo()
@@ -370,11 +335,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.translucentRegular(this);
   }
 
-  @Override public String materialUnlitGetCode()
-  {
-    return this.code_unlit;
-  }
-
   @Override public int texturesGetRequired()
   {
     return this.textures_required;
@@ -387,10 +347,8 @@ import com.io7m.renderer.types.RTransformTextureType;
     b.append(this.albedo);
     b.append(" alpha=");
     b.append(this.alpha);
-    b.append(" code_lit=");
-    b.append(this.code_lit);
-    b.append(" code_unlit=");
-    b.append(this.code_unlit);
+    b.append(" code=");
+    b.append(this.code);
     b.append(" emissive=");
     b.append(this.emissive);
     b.append(" environment=");

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,6 +16,7 @@
 
 package com.io7m.renderer.kernel.types;
 
+import com.io7m.renderer.types.RExceptionInstanceAlreadyInGroup;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
 import com.io7m.renderer.types.RExceptionLightGroupLacksInstances;
 import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
@@ -28,21 +29,24 @@ public interface KSceneLightGroupBuilderType
 {
   /**
    * Add an instance to the group.
-   * 
+   *
    * @param o
    *          The instance.
    * @throws RExceptionInstanceAlreadyUnlit
    *           If the given instance has already been added to the scene
    *           without lighting.
+   * @throws RExceptionInstanceAlreadyInGroup
+   *           If the given instance has already been added to a light group.
    */
 
   void groupAddInstance(
     final KInstanceOpaqueType o)
-    throws RExceptionInstanceAlreadyUnlit;
+    throws RExceptionInstanceAlreadyUnlit,
+      RExceptionInstanceAlreadyInGroup;
 
   /**
    * Add a light to the group.
-   * 
+   *
    * @param light
    *          The light.
    */
@@ -52,7 +56,7 @@ public interface KSceneLightGroupBuilderType
 
   /**
    * @return A group consisting of all the instances and lights added so far.
-   * 
+   *
    * @throws RExceptionLightGroupLacksInstances
    *           If no instances have been added.
    * @throws RExceptionLightGroupLacksLights

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -29,9 +29,32 @@ import com.io7m.renderer.types.RException;
 @EqualityStructural public final class KShadowMappedBasic implements
   KShadowType
 {
+  private static final KShadowMappedBasic DEFAULT;
+
+  static {
+    DEFAULT = KShadowMappedBasic.makeDefault();
+  }
+
+  /**
+   * @return The default description of a basic mapped shadow.
+   */
+
+  public static KShadowMappedBasic getDefault()
+  {
+    return KShadowMappedBasic.DEFAULT;
+  }
+
+  private static KShadowMappedBasic makeDefault()
+  {
+    return KShadowMappedBasic.newMappedBasic(
+      0.001f,
+      0.0f,
+      KShadowMapBasicDescription.getDefault());
+  }
+
   /**
    * Construct a new basic mapped shadow.
-   * 
+   *
    * @param depth_bias
    *          The bias to apply to the depth values of geometry to alleviate
    *          shadow acne

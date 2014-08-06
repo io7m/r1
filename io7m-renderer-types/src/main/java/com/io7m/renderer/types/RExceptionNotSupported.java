@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,7 +18,9 @@ package com.io7m.renderer.types;
 
 import java.util.Set;
 
+import com.io7m.jcanephora.JCGLVersion;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jparasol.core.GVersionES;
 import com.io7m.jparasol.core.GVersionFull;
 
@@ -37,9 +39,52 @@ import com.io7m.jparasol.core.GVersionFull;
   }
 
   /**
+   * Construct an exception with an informative message explaining that the
+   * renderer does not support the current version of OpenGL.
+   *
+   * @param v
+   *          The current OpenGL version.
+   * @return A new exception
+   */
+
+  public static RExceptionNotSupported versionNotSupported(
+    final JCGLVersion v)
+  {
+    NullCheck.notNull(v, "Version");
+
+    final StringBuilder m = new StringBuilder();
+    switch (v.getAPI()) {
+      case JCGL_ES:
+      {
+        m.append("OpenGL ES ");
+        m.append(v.getVersionMajor());
+        m.append(".");
+        m.append(v.getVersionMinor());
+        break;
+      }
+      case JCGL_FULL:
+      {
+        m.append("OpenGL ");
+        m.append(v.getVersionMajor());
+        m.append(".");
+        m.append(v.getVersionMinor());
+        break;
+      }
+    }
+
+    m.append(" is not supported.\n");
+    m.append("Rendering is currently supported on:\n");
+    m.append("  OpenGL    >= 3.0 or\n");
+    m.append("  OpenGL ES >= 3.0\n");
+    final String s = m.toString();
+    assert s != null;
+    return new RExceptionNotSupported(s);
+  }
+
+  /**
    * Construct an exception with an informative message explaining why
    * deferred rendering is not available.
-   * 
+   *
    * @return A new exception
    */
 
@@ -58,7 +103,7 @@ import com.io7m.jparasol.core.GVersionFull;
   /**
    * Construct an exception with an informative message explaining why a
    * particular program is not available.
-   * 
+   *
    * @param name
    *          The program name.
    * @param supported_buffers
@@ -92,7 +137,7 @@ import com.io7m.jparasol.core.GVersionFull;
   /**
    * Construct an exception with an informative message explaining why a
    * particular program is not available.
-   * 
+   *
    * @param name
    *          The program name.
    * @param es
@@ -131,7 +176,7 @@ import com.io7m.jparasol.core.GVersionFull;
   /**
    * Construct an exception with an informative message explaining why
    * variance shadow maps are not available.
-   * 
+   *
    * @return A new exception
    */
 

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -31,7 +31,7 @@ import com.io7m.renderer.types.RException;
 /**
  * A set of opaque instances for shadow map rendering, batched by their depth
  * material code.
- * 
+ *
  * @see com.io7m.renderer.kernel.types.KMaterialDepthType
  */
 
@@ -53,7 +53,7 @@ import com.io7m.renderer.types.RException;
 
   /**
    * Construct new batches from the given scene shadows.
-   * 
+   *
    * @param s
    *          The scene shadows.
    * @return New batches.
@@ -63,13 +63,12 @@ import com.io7m.renderer.types.RException;
     final KSceneShadows s)
   {
     try {
-      final Map<KLightType, Set<KInstanceOpaqueType>> ss =
+      final Map<KLightWithShadowType, Set<KInstanceOpaqueType>> ss =
         s.getShadowCasters();
-      final Map<KLightType, Map<String, List<KInstanceOpaqueType>>> batches =
-        new HashMap<KLightType, Map<String, List<KInstanceOpaqueType>>>();
+      final Map<KLightWithShadowType, Map<String, List<KInstanceOpaqueType>>> batches =
+        new HashMap<KLightWithShadowType, Map<String, List<KInstanceOpaqueType>>>();
 
-      for (final KLightType light : ss.keySet()) {
-        assert light.lightHasShadow();
+      for (final KLightWithShadowType light : ss.keySet()) {
         final Set<KInstanceOpaqueType> instances = ss.get(light);
 
         final Map<String, List<KInstanceOpaqueType>> light_batches =
@@ -99,12 +98,12 @@ import com.io7m.renderer.types.RException;
     }
   }
 
-  private final Map<KLightType, Map<String, List<KInstanceOpaqueType>>> batches;
+  private final Map<KLightWithShadowType, Map<String, List<KInstanceOpaqueType>>> batches;
 
   private KSceneBatchedShadow(
-    final Map<KLightType, Map<String, List<KInstanceOpaqueType>>> in_batches)
+    final Map<KLightWithShadowType, Map<String, List<KInstanceOpaqueType>>> in_batches)
   {
-    final Map<KLightType, Map<String, List<KInstanceOpaqueType>>> b =
+    final Map<KLightWithShadowType, Map<String, List<KInstanceOpaqueType>>> b =
       Collections.unmodifiableMap(in_batches);
     assert b != null;
     this.batches = b;
@@ -115,7 +114,9 @@ import com.io7m.renderer.types.RException;
    *         by light and by material code.
    */
 
-  public Map<KLightType, Map<String, List<KInstanceOpaqueType>>> getBatches()
+  public
+    Map<KLightWithShadowType, Map<String, List<KInstanceOpaqueType>>>
+    getBatches()
   {
     return this.batches;
   }

@@ -51,7 +51,7 @@ public interface KSceneBuilderReadableType
    *         in the scene, by light.
    */
 
-    Map<KLightType, Set<KInstanceOpaqueType>>
+    Map<KLightWithShadowType, Set<KInstanceOpaqueType>>
     sceneGetInstancesOpaqueShadowCastingByLight();
 
   /**
@@ -71,7 +71,7 @@ public interface KSceneBuilderReadableType
    * @return A read-only set of the current shadow-casing lights in the scene.
    */
 
-  Set<KLightType> sceneGetLightsShadowCasting();
+  Set<KLightWithShadowType> sceneGetLightsShadowCasting();
 
   /**
    * @return A list of the translucents in the scene, in the order in which

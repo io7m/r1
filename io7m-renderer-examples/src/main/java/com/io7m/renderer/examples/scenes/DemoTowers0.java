@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,8 +30,8 @@ import com.io7m.renderer.examples.ExampleViewLookAt;
 import com.io7m.renderer.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadowBuilderType;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
@@ -225,17 +225,10 @@ public final class DemoTowers0 implements ExampleSceneType
         final KLightSphere s = sb.build();
 
         final MatrixM4x4F temporary = new MatrixM4x4F();
-        final KLightProjectiveBuilderType pb =
-          KLightProjective.newBuilder(
-            scene.textureClamped("projective.png"),
-            KProjectionFrustum.newProjection(
-              temporary,
-              -1.0f,
-              1.0f,
-              -1.0f,
-              1.0f,
-              1.0f,
-              36.0f));
+        final KLightProjectiveWithoutShadowBuilderType pb =
+          KLightProjectiveWithoutShadow.newBuilder(scene
+            .textureClamped("projective.png"), KProjectionFrustum
+            .newProjection(temporary, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 36.0f));
         final RVectorI3F<RSpaceWorldType> pb_origin =
           new RVectorI3F<RSpaceWorldType>(0.0f, 8.0f, 16.0f);
         pb.setColor(ExampleSceneUtilities.RGB_GREEN);
@@ -244,7 +237,7 @@ public final class DemoTowers0 implements ExampleSceneType
         pb.setOrientation(QuaternionI4F.makeFromAxisAngle(
           ExampleSceneUtilities.X_AXIS,
           Math.toRadians(-45.0f)));
-        final KLightProjective p = pb.build(scene.capabilities());
+        final KLightProjectiveWithoutShadow p = pb.build();
 
         gb.groupAddLight(s);
         gb.groupAddLight(p);

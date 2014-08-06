@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -31,7 +31,6 @@ import com.io7m.jlog.LogType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.renderer.examples.scenes.DLSimple0;
 import com.io7m.renderer.kernel.KRendererDeferred;
-import com.io7m.renderer.kernel.KRendererForward;
 import com.io7m.renderer.kernel.KRendererType;
 
 @SuppressWarnings("static-method") public final class ExampleImagesTest
@@ -84,8 +83,7 @@ import com.io7m.renderer.kernel.KRendererType;
 
     final List<Class<? extends KRendererType>> r =
       e.getSceneRenderers(DLSimple0.class);
-    Assert.assertEquals(2, r.size());
+    Assert.assertEquals(1, r.size());
     Assert.assertTrue(r.contains(KRendererDeferred.class));
-    Assert.assertTrue(r.contains(KRendererForward.class));
   }
 }

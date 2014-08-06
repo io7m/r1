@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,7 +20,7 @@ import com.io7m.renderer.types.RException;
 
 /**
  * The type of renderer visitors.
- * 
+ *
  * @param <T>
  *          The type of returned values
  */
@@ -29,11 +29,11 @@ public interface ExampleRendererVisitorType<T>
 {
   /**
    * Visit a debug renderer.
-   * 
+   *
    * @param r
    *          The renderer
    * @return A value of type <code>T</code>
-   * 
+   *
    * @throws RException
    *           If required
    */
@@ -44,31 +44,16 @@ public interface ExampleRendererVisitorType<T>
 
   /**
    * Visit a deferred renderer.
-   * 
+   *
    * @param r
    *          The renderer
    * @return A value of type <code>T</code>
-   * 
+   *
    * @throws RException
    *           If required
    */
 
   T visitDeferred(
     final ExampleRendererDeferredType r)
-    throws RException;
-
-  /**
-   * Visit a forward renderer.
-   * 
-   * @param r
-   *          The renderer
-   * @return A value of type <code>T</code>
-   * 
-   * @throws RException
-   *           If required
-   */
-
-  T visitForward(
-    final ExampleRendererForwardType r)
     throws RException;
 }

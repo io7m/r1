@@ -57,7 +57,11 @@ import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueVisitorType;
 import com.io7m.renderer.kernel.types.KLightDirectional;
-import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightProjectiveType;
+import com.io7m.renderer.kernel.types.KLightProjectiveVisitorType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightVisitorType;
@@ -605,7 +609,7 @@ import com.io7m.renderer.types.RVectorI4F;
   private void renderDebugGeometryProjective(
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mdp,
-    final KLightProjective lp)
+    final KLightProjectiveType lp)
     throws RException,
       JCacheException,
       JCGLExceptionNoStencilBuffer,
@@ -617,7 +621,7 @@ import com.io7m.renderer.types.RVectorI4F;
     gc.stencilBufferDisable();
 
     final KFrustumMeshUsableType s =
-      this.frustum_cache.cacheGetLU(lp.lightGetProjection());
+      this.frustum_cache.cacheGetLU(lp.lightProjectiveGetProjection());
     final ArrayBufferUsableType array = s.getArray();
     final IndexBufferUsableType index = s.getIndices();
 
@@ -1022,7 +1026,7 @@ import com.io7m.renderer.types.RVectorI4F;
       }
 
       @Override public Unit lightProjective(
-        final KLightProjective lp)
+        final KLightProjectiveType lp)
         throws RException,
           JCGLException
       {
@@ -1186,7 +1190,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
     final KTextureUnitContextType texture_unit_context,
-    final KLightProjective lp)
+    final KLightProjectiveType lp)
     throws JCGLException,
       RException,
       JCacheException
@@ -1222,7 +1226,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
     final KTextureUnitContextType texture_unit_context,
-    final KLightProjective lp)
+    final KLightProjectiveType lp)
     throws JCGLException,
       RException,
       JCacheException
@@ -1234,7 +1238,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final JCBExecutorType exec = kp.getExecutable();
 
     final KFrustumMeshUsableType s =
-      this.frustum_cache.cacheGetLU(lp.lightGetProjection());
+      this.frustum_cache.cacheGetLU(lp.lightProjectiveGetProjection());
     final ArrayBufferUsableType array = s.getArray();
     final IndexBufferUsableType index = s.getIndices();
 
@@ -1280,17 +1284,47 @@ import com.io7m.renderer.types.RVectorI4F;
                 program,
                 mdp.getMatrixDeferredProjection());
 
-              if (lp.lightHasShadow()) {
-                KRendererCommon.putShadow(
-                  shadow_map_context,
-                  texture_unit_context,
-                  program,
-                  lp);
-              }
+              lp
+                .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
+                  @Override public Unit projectiveWithoutShadow(
+                    final KLightProjectiveWithoutShadow lpws)
+                    throws RException,
+                      JCGLException
+                  {
+                    return Unit.unit();
+                  }
+
+                  @Override public Unit projectiveWithShadowBasic(
+                    final KLightProjectiveWithShadowBasic lpwsb)
+                    throws RException,
+                      JCGLException
+                  {
+                    KRendererCommon.putShadow(
+                      shadow_map_context,
+                      texture_unit_context,
+                      program,
+                      lpwsb);
+                    return Unit.unit();
+                  }
+
+                  @Override public Unit projectiveWithShadowVariance(
+                    final KLightProjectiveWithShadowVariance lpwsv)
+                    throws RException,
+                      JCGLException
+                  {
+                    KRendererCommon.putShadow(
+                      shadow_map_context,
+                      texture_unit_context,
+                      program,
+                      lpwsv);
+                    return Unit.unit();
+                  }
+                });
 
               KShadingProgramCommon.putTextureProjection(
                 program,
-                texture_unit_context.withTexture2D(lp.lightGetTexture()));
+                texture_unit_context.withTexture2D(lp
+                  .lightProjectiveGetTexture()));
 
               KShadingProgramCommon
                 .putLightProjectiveWithoutTextureProjection(
@@ -1318,7 +1352,7 @@ import com.io7m.renderer.types.RVectorI4F;
   private void renderGroupLightProjectiveStencilPass(
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mdp,
-    final KLightProjective lp)
+    final KLightProjectiveType lp)
     throws JCGLException,
       RException,
       JCacheException
@@ -1329,7 +1363,7 @@ import com.io7m.renderer.types.RVectorI4F;
     final JCBExecutorType exec = kp.getExecutable();
 
     final KFrustumMeshUsableType s =
-      this.frustum_cache.cacheGetLU(lp.lightGetProjection());
+      this.frustum_cache.cacheGetLU(lp.lightProjectiveGetProjection());
     final ArrayBufferUsableType array = s.getArray();
     final IndexBufferUsableType index = s.getIndices();
 
