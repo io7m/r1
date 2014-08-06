@@ -42,8 +42,7 @@ public interface KSceneBuilderType extends KSceneBuilderReadableType
    * @param instance
    *          The shadow-casting instance
    * @throws RExceptionInstanceAlreadyLit
-   *           If the instance has already been added to one or more light
-   *           groups.
+   *           If the instance has already been added to a light group.
    *
    * @see #sceneAddOpaqueLitVisibleWithoutShadow(KLightType,
    *      KInstanceOpaqueType)
