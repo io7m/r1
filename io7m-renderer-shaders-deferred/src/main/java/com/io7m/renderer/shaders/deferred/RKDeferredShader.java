@@ -26,7 +26,7 @@ import com.io7m.renderer.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
-import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoType;
@@ -292,7 +292,7 @@ import com.io7m.renderer.types.RException;
         }
 
         @Override public Unit lightSpherical(
-          final KLightSphere ls)
+          final KLightSphereType ls)
           throws RException
         {
           b.append("  -- Spherical light parameters\n");
@@ -505,7 +505,7 @@ import com.io7m.renderer.types.RException;
         }
 
         @Override public Unit lightSpherical(
-          final KLightSphere ls)
+          final KLightSphereType ls)
           throws RException,
             UnreachableCodeException
         {
@@ -953,7 +953,7 @@ import com.io7m.renderer.types.RException;
         }
 
         @Override public Unit lightSpherical(
-          final KLightSphere ls)
+          final KLightSphereType ls)
           throws RException
         {
           b.append("shader program p is\n");
@@ -1000,7 +1000,7 @@ import com.io7m.renderer.types.RException;
         }
 
         @Override public Unit lightSpherical(
-          final KLightSphere ls)
+          final KLightSphereType ls)
           throws RException
         {
           b.append("shader program p is\n");

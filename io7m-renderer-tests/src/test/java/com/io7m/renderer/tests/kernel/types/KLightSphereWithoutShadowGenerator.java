@@ -20,18 +20,19 @@ import javax.annotation.Nonnull;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.renderer.kernel.types.KLightSphere;
-import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
+import com.io7m.renderer.kernel.types.KLightSphereWithoutShadow;
+import com.io7m.renderer.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
 
-public final class KLightSphereGenerator implements Generator<KLightSphere>
+public final class KLightSphereWithoutShadowGenerator implements
+  Generator<KLightSphereWithoutShadow>
 {
   private final @Nonnull Generator<RVectorI3F<RSpaceRGBType>>   colour_gen;
   private final @Nonnull Generator<RVectorI3F<RSpaceWorldType>> position_gen;
 
-  public KLightSphereGenerator(
+  public KLightSphereWithoutShadowGenerator(
     final @Nonnull Generator<RVectorI3F<RSpaceRGBType>> colour_gen1,
     final @Nonnull Generator<RVectorI3F<RSpaceWorldType>> position_gen1)
   {
@@ -39,7 +40,9 @@ public final class KLightSphereGenerator implements Generator<KLightSphere>
     this.position_gen = position_gen1;
   }
 
-  @SuppressWarnings("null") @Override public @Nonnull KLightSphere next()
+  @SuppressWarnings("null") @Override public @Nonnull
+    KLightSphereWithoutShadow
+    next()
   {
     final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
     final float intensity = (float) Math.random();
@@ -47,7 +50,8 @@ public final class KLightSphereGenerator implements Generator<KLightSphere>
     final float radius = (float) Math.random();
     final float falloff = (float) Math.random();
 
-    final KLightSphereBuilderType b = KLightSphere.newBuilder();
+    final KLightSphereWithoutShadowBuilderType b =
+      KLightSphereWithoutShadow.newBuilder();
     b.setColor(colour);
     b.setIntensity(intensity);
     b.setPosition(position);

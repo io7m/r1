@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -32,8 +32,8 @@ import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadowBuilderType;
-import com.io7m.renderer.kernel.types.KLightSphere;
-import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
+import com.io7m.renderer.kernel.types.KLightSphereWithoutShadow;
+import com.io7m.renderer.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.renderer.kernel.types.KMaterialEnvironmentReflection;
 import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
@@ -219,10 +219,11 @@ public final class DemoTowers0 implements ExampleSceneType
         final KSceneLightGroupBuilderType gb =
           scene.sceneNewLightGroup("all");
 
-        final KLightSphereBuilderType sb = KLightSphere.newBuilder();
+        final KLightSphereWithoutShadowBuilderType sb =
+          KLightSphereWithoutShadow.newBuilder();
         sb.setRadius(64.0f);
         sb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 8.0f, 0.0f));
-        final KLightSphere s = sb.build();
+        final KLightSphereWithoutShadow s = sb.build();
 
         final MatrixM4x4F temporary = new MatrixM4x4F();
         final KLightProjectiveWithoutShadowBuilderType pb =

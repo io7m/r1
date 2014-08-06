@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -29,8 +29,8 @@ import com.io7m.renderer.examples.ExampleSceneUtilities;
 import com.io7m.renderer.examples.ExampleViewType;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.renderer.kernel.types.KLightSphere;
-import com.io7m.renderer.kernel.types.KLightSphereBuilderType;
+import com.io7m.renderer.kernel.types.KLightSphereWithoutShadow;
+import com.io7m.renderer.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
@@ -143,10 +143,11 @@ public final class SOpaque1 implements ExampleSceneType
      * A white light centered on the translucent piece.
      */
 
-    final KLightSphere lb;
+    final KLightSphereWithoutShadow lb;
 
     {
-      final KLightSphereBuilderType b = KLightSphere.newBuilder();
+      final KLightSphereWithoutShadowBuilderType b =
+        KLightSphereWithoutShadow.newBuilder();
       b.setRadius(8.0f);
       b.setFalloff(1.0f);
       b.setIntensity(1.0f);
@@ -159,13 +160,14 @@ public final class SOpaque1 implements ExampleSceneType
      * Coloured lights at each corner of the translucent piece.
      */
 
-    final KLightSphere l0;
-    final KLightSphere l1;
-    final KLightSphere l2;
-    final KLightSphere l3;
+    final KLightSphereWithoutShadow l0;
+    final KLightSphereWithoutShadow l1;
+    final KLightSphereWithoutShadow l2;
+    final KLightSphereWithoutShadow l3;
 
     {
-      final KLightSphereBuilderType b = KLightSphere.newBuilder();
+      final KLightSphereWithoutShadowBuilderType b =
+        KLightSphereWithoutShadow.newBuilder();
       b.setRadius(4.0f);
       b.setFalloff(1.0f);
       b.setIntensity(1.0f);

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -38,7 +38,7 @@ import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadowBuilderType;
-import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KProjectionFrustum;
 import com.io7m.renderer.types.RException;
@@ -163,7 +163,8 @@ import com.io7m.renderer.types.RVectorI3F;
       }
 
       {
-        final KLightType l = KLightSphere.newLight(c, 1.0f, v, 1.0f, 1.0f);
+        final KLightType l =
+          KLightSphereWithoutShadow.newLight(c, 1.0f, v, 1.0f, 1.0f);
         cases.add(l);
       }
 

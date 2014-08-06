@@ -37,7 +37,6 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentSpecularOnly;
@@ -47,7 +46,7 @@ import com.io7m.renderer.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
-import com.io7m.renderer.kernel.types.KLightSphere;
+import com.io7m.renderer.kernel.types.KLightSphereType;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightVisitorType;
 import com.io7m.renderer.kernel.types.KMaterialNormalMapped;
@@ -109,6 +108,52 @@ import com.io7m.renderer.types.RExceptionJCGL;
       in_shader_lit_cache,
       in_refraction_renderer,
       in_log);
+  }
+
+  private static void putProjectiveWithShadow(
+    final KShadowMapContextType shadow_context,
+    final KTextureUnitContextType texture_unit_ctx,
+    final KLightProjectiveType light,
+    final JCBProgramType program)
+    throws RException,
+      JCGLException
+  {
+    light
+      .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
+        @Override public Unit projectiveWithoutShadow(
+          final KLightProjectiveWithoutShadow lp)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasic(
+          final KLightProjectiveWithShadowBasic lp)
+          throws RException,
+            JCGLException
+        {
+          KRendererCommon.putShadow(
+            shadow_context,
+            texture_unit_ctx,
+            program,
+            lp);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowVariance(
+          final KLightProjectiveWithShadowVariance lp)
+          throws RException,
+            JCGLException
+        {
+          KRendererCommon.putShadow(
+            shadow_context,
+            texture_unit_ctx,
+            program,
+            lp);
+          return Unit.unit();
+        }
+      });
   }
 
   /**
@@ -249,7 +294,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       }
 
       @Override public Unit lightSpherical(
-        final KLightSphere l)
+        final KLightSphereType l)
         throws RException,
           JCGLException
       {
@@ -354,57 +399,11 @@ import com.io7m.renderer.types.RExceptionJCGL;
       });
   }
 
-  private static void putProjectiveWithShadow(
-    final KShadowMapContextType shadow_context,
-    final KTextureUnitContextType texture_unit_ctx,
-    final KLightProjectiveType light,
-    final JCBProgramType program)
-    throws RException,
-      JCGLException
-  {
-    light
-      .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
-        @Override public Unit projectiveWithoutShadow(
-          final KLightProjectiveWithoutShadow lp)
-          throws RException,
-            JCGLException
-        {
-          return Unit.unit();
-        }
-
-        @Override public Unit projectiveWithShadowBasic(
-          final KLightProjectiveWithShadowBasic lp)
-          throws RException,
-            JCGLException
-        {
-          KRendererCommon.putShadow(
-            shadow_context,
-            texture_unit_ctx,
-            program,
-            lp);
-          return Unit.unit();
-        }
-
-        @Override public Unit projectiveWithShadowVariance(
-          final KLightProjectiveWithShadowVariance lp)
-          throws RException,
-            JCGLException
-        {
-          KRendererCommon.putShadow(
-            shadow_context,
-            texture_unit_ctx,
-            program,
-            lp);
-          return Unit.unit();
-        }
-      });
-  }
-
   private static void renderInstanceTranslucentRegularLitSpherical(
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType texture_unit_ctx,
     final KMatricesObserverType mwo,
-    final KLightSphere l,
+    final KLightSphereType l,
     final JCBProgramType program,
     final KInstanceTranslucentRegular instance)
     throws JCGLException,
@@ -573,7 +572,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
       }
 
       @Override public Unit lightSpherical(
-        final KLightSphere l)
+        final KLightSphereType l)
         throws RException,
           JCGLException
       {
@@ -714,7 +713,7 @@ import com.io7m.renderer.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc,
     final KTextureUnitContextType texture_unit_ctx,
     final KMatricesObserverType mwo,
-    final KLightSphere l,
+    final KLightSphereType l,
     final JCBProgramType program,
     final KInstanceTranslucentSpecularOnly instance)
     throws JCGLException,
@@ -745,11 +744,45 @@ import com.io7m.renderer.types.RExceptionJCGL;
       });
   }
 
+  private static String shaderCodeFromRegular(
+    final KLightType light,
+    final KMaterialTranslucentRegular material)
+  {
+    final String lcode = light.lightGetCode();
+    final String mcode = material.materialGetCode();
+
+    final StringBuilder s = new StringBuilder();
+    s.append(lcode);
+    s.append("_");
+    s.append(mcode);
+
+    final String r = s.toString();
+    assert r != null;
+    return r;
+  }
+  private static String shaderCodeSpecularOnly(
+    final KLightType light,
+    final KMaterialTranslucentSpecularOnly material)
+  {
+    final String lcode = light.lightGetCode();
+    final String mcode = material.materialGetCode();
+
+    final StringBuilder s = new StringBuilder();
+    s.append(lcode);
+    s.append("_");
+    s.append(mcode);
+
+    final String r = s.toString();
+    assert r != null;
+    return r;
+  }
   private final JCGLImplementationType                  g;
   private final LogUsableType                           log;
   private final KRefractionRendererType                 refraction_renderer;
   private final KShaderCacheForwardTranslucentLitType   shader_lit_cache;
+
   private final KShaderCacheForwardTranslucentUnlitType shader_unlit_cache;
+
   private final KTextureUnitAllocator                   texture_units;
 
   private KTranslucentRenderer(
@@ -1120,70 +1153,5 @@ import com.io7m.renderer.types.RExceptionJCGL;
           }
         });
     }
-  }
-
-  private static String shaderCodeFromLight(
-    final KLightType light)
-  {
-    try {
-      return light.lightAccept(new KLightVisitorType<String, RException>() {
-        @Override public String lightDirectional(
-          final KLightDirectional l)
-          throws RException
-        {
-          return l.lightGetCode();
-        }
-
-        @Override public String lightProjective(
-          final KLightProjectiveType l)
-          throws RException
-        {
-          return l.lightGetCode();
-        }
-
-        @Override public String lightSpherical(
-          final KLightSphere l)
-          throws RException
-        {
-          return l.lightGetCode();
-        }
-      });
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
-  private static String shaderCodeFromRegular(
-    final KLightType light,
-    final KMaterialTranslucentRegular material)
-  {
-    final String lcode = KTranslucentRenderer.shaderCodeFromLight(light);
-    final String mcode = material.materialGetCode();
-
-    final StringBuilder s = new StringBuilder();
-    s.append(lcode);
-    s.append("_");
-    s.append(mcode);
-
-    final String r = s.toString();
-    assert r != null;
-    return r;
-  }
-
-  private static String shaderCodeSpecularOnly(
-    final KLightType light,
-    final KMaterialTranslucentSpecularOnly material)
-  {
-    final String lcode = KTranslucentRenderer.shaderCodeFromLight(light);
-    final String mcode = material.materialGetCode();
-
-    final StringBuilder s = new StringBuilder();
-    s.append(lcode);
-    s.append("_");
-    s.append(mcode);
-
-    final String r = s.toString();
-    assert r != null;
-    return r;
   }
 }
