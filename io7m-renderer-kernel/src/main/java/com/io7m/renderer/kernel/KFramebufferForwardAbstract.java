@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,13 +27,10 @@ import com.io7m.jcanephora.FramebufferStatus;
 import com.io7m.jcanephora.FramebufferType;
 import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.RenderableDepthKind;
-import com.io7m.jcanephora.RenderbufferType;
 import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
-import com.io7m.jcanephora.api.JCGLExtensionESDepthTextureType;
 import com.io7m.jcanephora.api.JCGLFramebuffersGL3Type;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
@@ -45,8 +42,6 @@ import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
 import com.io7m.jcanephora.api.JCGLRenderbuffersGL3ES3Type;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
 import com.io7m.jequality.annotations.EqualityReference;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
@@ -54,6 +49,7 @@ import com.io7m.renderer.kernel.types.KFramebufferForwardDescription;
 import com.io7m.renderer.kernel.types.KFramebufferRGBADescription;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionJCGL;
+import com.io7m.renderer.types.RExceptionNotSupported;
 
 /**
  * Provides the base implementation for {@link KFramebufferForward}.
@@ -62,150 +58,6 @@ import com.io7m.renderer.types.RExceptionJCGL;
 @EqualityReference abstract class KFramebufferForwardAbstract implements
   KFramebufferForwardType
 {
-  @EqualityReference private static final class KFramebufferForwardGL2 extends
-    KFramebufferForwardAbstract
-  {
-    public static KFramebufferForwardType newFramebuffer(
-      final JCGLInterfaceGL2Type gl,
-      final KFramebufferForwardDescription description)
-      throws JCGLException
-    {
-      final KFramebufferRGBADescription desc_rgba =
-        description.getRGBADescription();
-      final KFramebufferDepthDescription desc_depth =
-        description.getDepthDescription();
-      final AreaInclusive area = desc_rgba.getArea();
-      assert area.equals(desc_depth.getArea());
-      final int width = (int) area.getRangeX().getInterval();
-      final int height = (int) area.getRangeY().getInterval();
-
-      final Texture2DStaticType c =
-        gl.texture2DStaticAllocateRGBA8(
-          "color-8",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          desc_rgba.getFilterMinification(),
-          desc_rgba.getFilterMagnification());
-
-      final Texture2DStaticType d =
-        gl.texture2DStaticAllocateDepth24Stencil8(
-          "depth-24",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          desc_depth.getFilterMinification(),
-          desc_depth.getFilterMagnification());
-
-      final List<FramebufferColorAttachmentPointType> points =
-        gl.framebufferGetColorAttachmentPoints();
-      final List<FramebufferDrawBufferType> buffers =
-        gl.framebufferGetDrawBuffers();
-
-      final Map<FramebufferDrawBufferType, FramebufferColorAttachmentPointType> mappings =
-        new HashMap<FramebufferDrawBufferType, FramebufferColorAttachmentPointType>();
-      mappings.put(buffers.get(0), points.get(0));
-
-      final FramebufferType fb = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb);
-      try {
-        gl.framebufferDrawAttachColorTexture2D(fb, c);
-        gl.framebufferDrawAttachDepthTexture2D(fb, d);
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb);
-        KFramebufferCommon.checkFramebufferStatus(status);
-      } finally {
-        gl.framebufferDrawUnbind();
-      }
-
-      return new KFramebufferForwardGL2(c, d, fb, description);
-    }
-
-    private final Texture2DStaticType            color;
-    private final Texture2DStaticType            depth;
-    private final KFramebufferForwardDescription description;
-    private final FramebufferType                framebuffer;
-
-    public KFramebufferForwardGL2(
-      final Texture2DStaticType c,
-      final Texture2DStaticType d,
-      final FramebufferType fb,
-      final KFramebufferForwardDescription in_description)
-    {
-      super(c.textureGetArea(), c.resourceGetSizeBytes()
-        + d.resourceGetSizeBytes());
-      this.color = c;
-      this.depth = d;
-      this.framebuffer = fb;
-      this.description = in_description;
-    }
-
-    @Override public void kFramebufferDelete(
-      final JCGLImplementationType g)
-      throws RException
-    {
-      try {
-        final JCGLInterfaceCommonType gc = g.getGLCommon();
-        gc.framebufferDelete(this.framebuffer);
-        gc.texture2DStaticDelete(this.color);
-        gc.texture2DStaticDelete(this.depth);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
-      } finally {
-        super.setDeleted(true);
-      }
-    }
-
-    @Override public FramebufferUsableType kFramebufferGetColorFramebuffer()
-    {
-      return this.framebuffer;
-    }
-
-    @Override public
-      KFramebufferDepthDescription
-      kFramebufferGetDepthDescription()
-    {
-      return this.description.getDepthDescription();
-    }
-
-    @Override public boolean kFramebufferGetDepthIsPackedColor()
-    {
-      return false;
-    }
-
-    @Override public
-      FramebufferUsableType
-      kFramebufferGetDepthPassFramebuffer()
-    {
-      return this.framebuffer;
-    }
-
-    @Override public Texture2DStaticUsableType kFramebufferGetDepthTexture()
-    {
-      return this.depth;
-    }
-
-    @Override public
-      KFramebufferForwardDescription
-      kFramebufferGetForwardDescription()
-    {
-      return this.description;
-    }
-
-    @Override public
-      KFramebufferRGBADescription
-      kFramebufferGetRGBADescription()
-    {
-      return this.description.getRGBADescription();
-    }
-
-    @Override public Texture2DStaticUsableType kFramebufferGetRGBATexture()
-    {
-      return this.color;
-    }
-  }
-
   @EqualityReference private static final class KFramebufferForwardGL3ES3 extends
     KFramebufferForwardAbstract
   {
@@ -394,322 +246,11 @@ import com.io7m.renderer.types.RExceptionJCGL;
       return this.description.getDepthDescription();
     }
 
-    @Override public boolean kFramebufferGetDepthIsPackedColor()
-    {
-      return false;
-    }
-
     @Override public
       FramebufferUsableType
       kFramebufferGetDepthPassFramebuffer()
     {
       return this.framebuffer;
-    }
-
-    @Override public Texture2DStaticUsableType kFramebufferGetDepthTexture()
-    {
-      return this.depth;
-    }
-
-    @Override public
-      KFramebufferForwardDescription
-      kFramebufferGetForwardDescription()
-    {
-      return this.description;
-    }
-
-    @Override public
-      KFramebufferRGBADescription
-      kFramebufferGetRGBADescription()
-    {
-      return this.description.getRGBADescription();
-    }
-
-    @Override public Texture2DStaticUsableType kFramebufferGetRGBATexture()
-    {
-      return this.color;
-    }
-  }
-
-  @EqualityReference private static final class KFramebufferForwardGLES2WithDepthTexture extends
-    KFramebufferForwardAbstract
-  {
-
-    public static KFramebufferForwardType newFramebuffer(
-      final JCGLInterfaceGLES2Type gl,
-      final KFramebufferForwardDescription description,
-      final JCGLExtensionESDepthTextureType gldt)
-      throws JCGLException
-    {
-      final KFramebufferRGBADescription desc_rgba =
-        description.getRGBADescription();
-      final KFramebufferDepthDescription desc_depth =
-        description.getDepthDescription();
-      final AreaInclusive area = desc_rgba.getArea();
-      assert area.equals(desc_depth.getArea());
-      final int width = (int) area.getRangeX().getInterval();
-      final int height = (int) area.getRangeY().getInterval();
-
-      final Texture2DStaticType c =
-        gl.texture2DStaticAllocateRGBA4444(
-          "color-4444",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          desc_rgba.getFilterMinification(),
-          desc_rgba.getFilterMagnification());
-
-      final Texture2DStaticType d =
-        gldt.texture2DStaticAllocateDepth16(
-          "depth-16",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          desc_depth.getFilterMinification(),
-          desc_depth.getFilterMagnification());
-
-      final FramebufferType fb = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb);
-      try {
-        gl.framebufferDrawAttachColorTexture2D(fb, c);
-        gl.framebufferDrawAttachDepthTexture2D(fb, d);
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb);
-        KFramebufferCommon.checkFramebufferStatus(status);
-      } finally {
-        gl.framebufferDrawUnbind();
-      }
-
-      return new KFramebufferForwardGLES2WithDepthTexture(
-        c,
-        d,
-        fb,
-        description);
-    }
-
-    private final Texture2DStaticType            color;
-    private final Texture2DStaticType            depth;
-    private final KFramebufferForwardDescription description;
-    private final FramebufferType                framebuffer;
-
-    public KFramebufferForwardGLES2WithDepthTexture(
-      final Texture2DStaticType c,
-      final Texture2DStaticType d,
-      final FramebufferType fb,
-      final KFramebufferForwardDescription in_description)
-    {
-      super(c.textureGetArea(), c.resourceGetSizeBytes()
-        + d.resourceGetSizeBytes());
-      this.color = c;
-      this.depth = d;
-      this.framebuffer = fb;
-      this.description = in_description;
-    }
-
-    @Override public void kFramebufferDelete(
-      final JCGLImplementationType g)
-      throws RException
-    {
-      try {
-        final JCGLInterfaceCommonType gc = g.getGLCommon();
-        gc.framebufferDelete(this.framebuffer);
-        gc.texture2DStaticDelete(this.color);
-        gc.texture2DStaticDelete(this.depth);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
-      } finally {
-        super.setDeleted(true);
-      }
-    }
-
-    @Override public FramebufferUsableType kFramebufferGetColorFramebuffer()
-    {
-      return this.framebuffer;
-    }
-
-    @Override public
-      KFramebufferDepthDescription
-      kFramebufferGetDepthDescription()
-    {
-      return this.description.getDepthDescription();
-    }
-
-    @Override public boolean kFramebufferGetDepthIsPackedColor()
-    {
-      return false;
-    }
-
-    @Override public
-      FramebufferUsableType
-      kFramebufferGetDepthPassFramebuffer()
-    {
-      return this.framebuffer;
-    }
-
-    @Override public Texture2DStaticUsableType kFramebufferGetDepthTexture()
-    {
-      return this.depth;
-    }
-
-    @Override public
-      KFramebufferForwardDescription
-      kFramebufferGetForwardDescription()
-    {
-      return this.description;
-    }
-
-    @Override public
-      KFramebufferRGBADescription
-      kFramebufferGetRGBADescription()
-    {
-      return this.description.getRGBADescription();
-    }
-
-    @Override public Texture2DStaticUsableType kFramebufferGetRGBATexture()
-    {
-      return this.color;
-    }
-  }
-
-  @EqualityReference private static final class KFramebufferForwardGLES2WithoutDepthTexture extends
-    KFramebufferForwardAbstract
-  {
-
-    public static KFramebufferForwardType newFramebuffer(
-      final JCGLInterfaceGLES2Type gl,
-      final KFramebufferForwardDescription description)
-      throws JCGLException
-    {
-      final KFramebufferRGBADescription desc_rgba =
-        description.getRGBADescription();
-      final KFramebufferDepthDescription desc_depth =
-        description.getDepthDescription();
-      final AreaInclusive area = desc_rgba.getArea();
-      assert area.equals(desc_depth.getArea());
-      final int width = (int) area.getRangeX().getInterval();
-      final int height = (int) area.getRangeY().getInterval();
-
-      final Texture2DStaticType c =
-        gl.texture2DStaticAllocateRGBA4444(
-          "color-4444",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          desc_rgba.getFilterMinification(),
-          desc_rgba.getFilterMagnification());
-
-      final Texture2DStaticType dt =
-        gl.texture2DStaticAllocateRGBA4444(
-          "color-depth-4444",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          desc_depth.getFilterMinification(),
-          desc_depth.getFilterMagnification());
-
-      final RenderbufferType<RenderableDepthKind> dr =
-        gl.renderbufferAllocateDepth16(width, height);
-
-      final FramebufferType fb_depth = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb_depth);
-      try {
-        gl.framebufferDrawAttachColorTexture2D(fb_depth, dt);
-        gl.framebufferDrawAttachDepthRenderbuffer(fb_depth, dr);
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb_depth);
-        KFramebufferCommon.checkFramebufferStatus(status);
-      } finally {
-        gl.framebufferDrawUnbind();
-      }
-
-      final FramebufferType fb_color = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb_color);
-      try {
-        gl.framebufferDrawAttachColorTexture2D(fb_color, c);
-        gl.framebufferDrawAttachDepthRenderbuffer(fb_color, dr);
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb_color);
-        KFramebufferCommon.checkFramebufferStatus(status);
-      } finally {
-        gl.framebufferDrawUnbind();
-      }
-
-      return new KFramebufferForwardGLES2WithoutDepthTexture(
-        c,
-        dt,
-        dr,
-        fb_depth,
-        fb_color,
-        description);
-    }
-
-    private final Texture2DStaticType                   color;
-    private final Texture2DStaticType                   depth;
-    private final RenderbufferType<RenderableDepthKind> depth_rb;
-    private final KFramebufferForwardDescription        description;
-    private final FramebufferType                       fb_color;
-    private final FramebufferType                       fb_depth;
-
-    private KFramebufferForwardGLES2WithoutDepthTexture(
-      final Texture2DStaticType c,
-      final Texture2DStaticType dt,
-      final RenderbufferType<RenderableDepthKind> dr,
-      final FramebufferType in_fb_depth,
-      final FramebufferType in_fb_color,
-      final KFramebufferForwardDescription in_description)
-    {
-      super(c.textureGetArea(), c.resourceGetSizeBytes()
-        + dt.resourceGetSizeBytes()
-        + dr.resourceGetSizeBytes());
-      this.color = c;
-      this.depth = dt;
-      this.depth_rb = dr;
-      this.fb_depth = in_fb_depth;
-      this.fb_color = in_fb_color;
-      this.description = in_description;
-    }
-
-    @Override public void kFramebufferDelete(
-      final JCGLImplementationType g)
-      throws RException
-    {
-      try {
-        final JCGLInterfaceCommonType gc = g.getGLCommon();
-        gc.framebufferDelete(this.fb_color);
-        gc.framebufferDelete(this.fb_depth);
-        gc.renderbufferDelete(this.depth_rb);
-        gc.texture2DStaticDelete(this.color);
-        gc.texture2DStaticDelete(this.depth);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
-      } finally {
-        super.setDeleted(true);
-      }
-    }
-
-    @Override public FramebufferUsableType kFramebufferGetColorFramebuffer()
-    {
-      return this.fb_color;
-    }
-
-    @Override public
-      KFramebufferDepthDescription
-      kFramebufferGetDepthDescription()
-    {
-      return this.description.getDepthDescription();
-    }
-
-    @Override public boolean kFramebufferGetDepthIsPackedColor()
-    {
-      return true;
-    }
-
-    @Override public
-      FramebufferUsableType
-      kFramebufferGetDepthPassFramebuffer()
-    {
-      return this.fb_depth;
     }
 
     @Override public Texture2DStaticUsableType kFramebufferGetDepthTexture()
@@ -740,19 +281,21 @@ import com.io7m.renderer.types.RExceptionJCGL;
   static KFramebufferForwardType newFramebuffer(
     final JCGLImplementationType gi,
     final KFramebufferForwardDescription description)
-    throws JCGLException
+    throws JCGLException,
+      RException
   {
     NullCheck.notNull(gi, "GL implementation");
     NullCheck.notNull(description, "Description");
 
     return gi
-      .implementationAccept(new JCGLImplementationVisitorType<KFramebufferForwardType, JCGLException>() {
+      .implementationAccept(new JCGLImplementationVisitorType<KFramebufferForwardType, RException>() {
         @Override public KFramebufferForwardType implementationIsGL2(
           final JCGLInterfaceGL2Type gl)
-          throws JCGLException
+          throws JCGLException,
+            RExceptionNotSupported
         {
-          return KFramebufferForwardAbstract.KFramebufferForwardGL2
-            .newFramebuffer(gl, description);
+          throw RExceptionNotSupported.versionNotSupported(gl
+            .metaGetVersion());
         }
 
         @Override public KFramebufferForwardType implementationIsGL3(
@@ -765,20 +308,11 @@ import com.io7m.renderer.types.RExceptionJCGL;
 
         @Override public KFramebufferForwardType implementationIsGLES2(
           final JCGLInterfaceGLES2Type gl)
-          throws JCGLException
+          throws JCGLException,
+            RExceptionNotSupported
         {
-          final OptionType<JCGLExtensionESDepthTextureType> edt =
-            gl.extensionDepthTexture();
-
-          if (edt.isSome()) {
-            final Some<JCGLExtensionESDepthTextureType> some =
-              (Some<JCGLExtensionESDepthTextureType>) edt;
-            return KFramebufferForwardAbstract.KFramebufferForwardGLES2WithDepthTexture
-              .newFramebuffer(gl, description, some.get());
-          }
-
-          return KFramebufferForwardAbstract.KFramebufferForwardGLES2WithoutDepthTexture
-            .newFramebuffer(gl, description);
+          throw RExceptionNotSupported.versionNotSupported(gl
+            .metaGetVersion());
         }
 
         @Override public KFramebufferForwardType implementationIsGLES3(
