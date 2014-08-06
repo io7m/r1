@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,21 +30,12 @@ public interface KFramebufferDepthUsableType extends KFramebufferUsableType
    * <p>
    * Retrieve a description of this framebuffer.
    * </p>
-   * 
+   *
    * @return A description of the framebuffer that can be used to allocate
    *         other framebuffers with the same configuration
    */
 
   KFramebufferDepthDescription kFramebufferGetDepthDescription();
-
-  /**
-   * @return <code>true</code> if the samplable depth data is stored in a
-   *         packed color texture. This is only true on implementations that
-   *         do not support depth textures (only certain implementations of
-   *         OpenGL ES2 lack them).
-   */
-
-  boolean kFramebufferGetDepthIsPackedColor();
 
   /**
    * <p>
@@ -55,7 +46,7 @@ public interface KFramebufferDepthUsableType extends KFramebufferUsableType
    * This framebuffer may share a depth attachment with a color buffer on the
    * framebuffer, so rendering to one will typically affect the other.
    * </p>
-   * 
+   *
    * @see #kFramebufferGetDepthIsPackedColor()
    * @return A reference to the framebuffer
    */
@@ -69,7 +60,7 @@ public interface KFramebufferDepthUsableType extends KFramebufferUsableType
    * be in a packed color format that must be decoded to retrieve the original
    * depths.
    * </p>
-   * 
+   *
    * @return A reference to the texture that backs the depth buffer
    */
 
