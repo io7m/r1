@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,23 +22,30 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NonNull;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadowBuilderType;
 import com.io7m.renderer.kernel.types.KProjectionType;
-import com.io7m.renderer.kernel.types.KShadowType;
+import com.io7m.renderer.kernel.types.KShadowMappedBasic;
+import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
 
 public final class KLightProjectiveGenerator implements
-  Generator<KLightProjective>
+  Generator<KLightProjectiveType>
 {
   private final @NonNull Generator<RVectorI3F<RSpaceRGBType>>   colour_gen;
   private final @NonNull Generator<RVectorI3F<RSpaceWorldType>> position_gen;
   private final @NonNull Generator<QuaternionI4F>               quat_gen;
   private final @NonNull Generator<KProjectionType>             proj_gen;
   private final @NonNull Generator<Texture2DStaticUsableType>   tex_gen;
-  private final @NonNull Generator<KShadowType>                 shad_gen;
+  private final @NonNull Generator<KShadowMappedBasic>          shad_basic_gen;
+  private final @NonNull Generator<KShadowMappedVariance>       shad_variance_gen;
 
   public KLightProjectiveGenerator(
     final @NonNull Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,
@@ -46,36 +53,63 @@ public final class KLightProjectiveGenerator implements
     final @NonNull Generator<QuaternionI4F> in_quat_gen,
     final @NonNull Generator<KProjectionType> in_proj_gen,
     final @NonNull Generator<Texture2DStaticUsableType> in_tex_gen,
-    final @NonNull Generator<KShadowType> in_shad_gen)
+    final @NonNull Generator<KShadowMappedBasic> in_shad_basic_gen,
+    final @NonNull Generator<KShadowMappedVariance> in_shad_variance_gen)
   {
     this.colour_gen = in_colour_gen;
     this.position_gen = in_position_gen;
     this.quat_gen = in_quat_gen;
     this.proj_gen = in_proj_gen;
     this.tex_gen = in_tex_gen;
-    this.shad_gen = in_shad_gen;
+    this.shad_basic_gen = in_shad_basic_gen;
+    this.shad_variance_gen = in_shad_variance_gen;
   }
 
-  @Override public KLightProjective next()
+  @SuppressWarnings("null") @Override public KLightProjectiveType next()
   {
     try {
-      final KLightProjectiveBuilderType b =
-        KLightProjective
-          .newBuilder(this.tex_gen.next(), this.proj_gen.next());
+      if (Math.random() > 0.5) {
+        if (Math.random() > 0.5) {
+          final KLightProjectiveWithShadowBasicBuilderType b =
+            KLightProjectiveWithShadowBasic.newBuilder(
+              this.tex_gen.next(),
+              this.proj_gen.next());
+          b.setColor(this.colour_gen.next());
+          b.setFalloff((float) Math.random());
+          b.setIntensity((float) Math.random());
+          b.setOrientation(this.quat_gen.next());
+          b.setPosition(this.position_gen.next());
+          b.setRange((float) Math.random());
+          b.setShadow(this.shad_basic_gen.next());
+          return b.build();
+        }
+
+        final KLightProjectiveWithShadowVarianceBuilderType b =
+          KLightProjectiveWithShadowVariance.newBuilder(
+            this.tex_gen.next(),
+            this.proj_gen.next());
+        b.setColor(this.colour_gen.next());
+        b.setFalloff((float) Math.random());
+        b.setIntensity((float) Math.random());
+        b.setOrientation(this.quat_gen.next());
+        b.setPosition(this.position_gen.next());
+        b.setRange((float) Math.random());
+        b.setShadow(this.shad_variance_gen.next());
+        return b.build();
+      }
+
+      final KLightProjectiveWithoutShadowBuilderType b =
+        KLightProjectiveWithoutShadow.newBuilder(
+          this.tex_gen.next(),
+          this.proj_gen.next());
       b.setColor(this.colour_gen.next());
       b.setFalloff((float) Math.random());
       b.setIntensity((float) Math.random());
       b.setOrientation(this.quat_gen.next());
       b.setPosition(this.position_gen.next());
       b.setRange((float) Math.random());
-
-      if (Math.random() > 0.5) {
-        b.setShadow(this.shad_gen.next());
-      } else {
-        b.setNoShadow();
-      }
-
       return b.build();
+
     } catch (final Throwable x) {
       throw new UnreachableCodeException(x);
     }

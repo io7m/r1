@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -29,9 +29,36 @@ import com.io7m.renderer.types.RException;
 @EqualityStructural public final class KShadowMappedVariance implements
   KShadowType
 {
+  private static final KShadowMappedVariance DEFAULT;
+
+  static {
+    DEFAULT = KShadowMappedVariance.makeDefault();
+  }
+
+  /**
+   * @return The default description of a mapped variance shadow.
+   */
+
+  public static KShadowMappedVariance getDefault()
+  {
+    return KShadowMappedVariance.DEFAULT;
+  }
+
+  private static KShadowMappedVariance makeDefault()
+  {
+    final KShadowMapVarianceDescription d =
+      KShadowMapVarianceDescription.getDefault();
+    return KShadowMappedVariance.newMappedVariance(
+      0.0f,
+      0.00002f,
+      0.2f,
+      KBlurParameters.getDefault(),
+      d);
+  }
+
   /**
    * Construct a new variance mapped shadow.
-   * 
+   *
    * @param in_blur
    *          The blur parameters for the shadow
    * @param minimum_variance
@@ -65,11 +92,11 @@ import com.io7m.renderer.types.RException;
       in_blur,
       description);
   }
-
   private final KBlurParameters               blur;
   private final KShadowMapVarianceDescription description;
   private final float                         factor_min;
   private final float                         light_bleed_reduction;
+
   private final float                         minimum_variance;
 
   KShadowMappedVariance(

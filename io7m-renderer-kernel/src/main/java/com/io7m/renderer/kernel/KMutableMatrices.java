@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -37,7 +37,8 @@ import com.io7m.renderer.kernel.types.KInstanceTranslucentType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentVisitorType;
 import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.kernel.types.KInstanceVisitorType;
-import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightProjectiveType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueType;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KMaterialTranslucentRegular;
@@ -327,7 +328,7 @@ import com.io7m.renderer.types.RTransformViewType;
     }
 
     @Override public <T, E extends Throwable> T withProjectiveLight(
-      final KLightProjective p,
+      final KLightProjectiveWithoutShadow p,
       final KMatricesInstanceWithProjectiveFunctionType<T, E> f)
       throws RException,
         E
@@ -811,7 +812,7 @@ import com.io7m.renderer.types.RTransformViewType;
     }
 
     @Override public <T, E extends Throwable> T withProjectiveLight(
-      final KLightProjective p,
+      final KLightProjectiveType p,
       final KMatricesProjectiveLightFunctionType<T, E> f)
       throws E,
         RException
@@ -869,7 +870,7 @@ import com.io7m.renderer.types.RTransformViewType;
     }
 
     private void projectiveStart(
-      final KLightProjective p)
+      final KLightProjectiveType p)
     {
       assert KMutableMatrices.this.observerIsActive();
       assert KMutableMatrices.this.instanceIsActive();
@@ -882,15 +883,15 @@ import com.io7m.renderer.types.RTransformViewType;
 
       KMatrices.makeViewMatrixProjective(
         KMutableMatrices.this.transform_context,
-        p.lightGetPosition(),
-        p.lightGetOrientation(),
+        p.lightProjectiveGetPosition(),
+        p.lightProjectiveGetOrientation(),
         this.matrix_projective_view);
 
       /**
        * Produce the eye → clip transformation matrix for the given light.
        */
 
-      final KProjectionType proj = p.lightGetProjection();
+      final KProjectionType proj = p.lightProjectiveGetProjection();
 
       this.projection = proj;
       proj.projectionGetMatrix().makeMatrixM4x4F(
@@ -1157,7 +1158,7 @@ import com.io7m.renderer.types.RTransformViewType;
     }
 
     private void projectiveStart(
-      final KLightProjective p)
+      final KLightProjectiveType p)
     {
       assert KMutableMatrices.this.observerIsActive();
       assert KMutableMatrices.this.projectiveLightIsActive() == false;
@@ -1169,15 +1170,15 @@ import com.io7m.renderer.types.RTransformViewType;
 
       KMatrices.makeViewMatrixProjective(
         KMutableMatrices.this.transform_context,
-        p.lightGetPosition(),
-        p.lightGetOrientation(),
+        p.lightProjectiveGetPosition(),
+        p.lightProjectiveGetOrientation(),
         this.matrix_projective_view);
 
       /**
        * Produce the eye → clip transformation matrix for the given light.
        */
 
-      final KProjectionType proj = p.lightGetProjection();
+      final KProjectionType proj = p.lightProjectiveGetProjection();
 
       this.projection = proj;
       proj.projectionGetMatrix().makeMatrixM4x4F(

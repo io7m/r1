@@ -17,10 +17,7 @@
 package com.io7m.renderer.kernel.types;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jfunctional.OptionType;
 import com.io7m.jtensors.QuaternionI4F;
-import com.io7m.renderer.types.RException;
-import com.io7m.renderer.types.RExceptionUserError;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
 import com.io7m.renderer.types.RVectorI3F;
@@ -31,22 +28,6 @@ import com.io7m.renderer.types.RVectorI3F;
 
 public interface KLightProjectiveBuilderType
 {
-  /**
-   * <p>
-   * Construct a light.
-   * </p>
-   *
-   * @return A new light based on all of the parameters given so far.
-   * @throws RExceptionUserError
-   *           If no texture was specified.
-   * @throws RException
-   *           If any other error occurs.
-   */
-
-  KLightProjective build()
-    throws RExceptionUserError,
-      RException;
-
   /**
    * <p>
    * Set the color of the light.
@@ -91,19 +72,6 @@ public interface KLightProjectiveBuilderType
 
   void setIntensity(
     @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity);
-
-  /**
-   * <p>
-   * Unset the shadow for the light, if any.
-   * </p>
-   * <p>
-   * The default is for the light not to have a shadow.
-   * </p>
-   *
-   * @see #setShadow(KShadowType)
-   */
-
-  void setNoShadow();
 
   /**
    * <p>
@@ -162,41 +130,6 @@ public interface KLightProjectiveBuilderType
     void
     setRange(
       final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float range);
-
-  /**
-   * <p>
-   * Set the shadow for the light.
-   * </p>
-   * <p>
-   * The default is for the light not to have a shadow.
-   * </p>
-   *
-   * @see #setNoShadow()
-   * @param s
-   *          The shadow.
-   */
-
-  void setShadow(
-    final KShadowType s);
-
-  /**
-   * <p>
-   * Set the shadow for the light. Equivalent to {@link #setNoShadow()} for
-   * {@link com.io7m.jfunctional.None} and {@link #setShadow(KShadowType)} for
-   * {@link com.io7m.jfunctional.Some}.
-   * </p>
-   * <p>
-   * The default is for the light not to have a shadow.
-   * </p>
-   *
-   * @see #setShadow(KShadowType)
-   * @see #setNoShadow()
-   * @param s
-   *          The shadow.
-   */
-
-  void setShadowOption(
-    OptionType<KShadowType> s);
 
   /**
    * <p>

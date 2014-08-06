@@ -93,8 +93,8 @@ import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
-import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
 import com.io7m.renderer.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.renderer.kernel.types.KMesh;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
@@ -504,8 +504,8 @@ import com.io7m.renderer.types.RVectorI3F;
 
     final KSceneBuilderWithCreateType sb = KScene.newBuilder(camera);
     final Texture2DStaticUsableType lt = RFakeTextures2DStatic.newAnything(g);
-    final KLightProjectiveBuilderType sl0b =
-      KLightProjective.newBuilder(lt, proj);
+    final KLightProjectiveWithShadowBasicBuilderType sl0b =
+      KLightProjectiveWithShadowBasic.newBuilder(lt, proj);
     final KFramebufferDepthDescription fb_desc =
       KFramebufferDepthDescription.newDescription(
         new AreaInclusive(
@@ -517,9 +517,9 @@ import com.io7m.renderer.types.RVectorI3F;
     final KShadowMapBasicDescription map_desc =
       KShadowMapBasicDescription.newDescription(fb_desc, 2);
     sl0b.setShadow(KShadowMappedBasic.newMappedBasic(0.001f, 0.0f, map_desc));
-    final KLightProjective sl0 = sl0b.build();
-    final KLightProjective sl1 = sl0b.build();
-    final KLightProjective sl2 = sl0b.build();
+    final KLightProjectiveWithShadowBasic sl0 = sl0b.build();
+    final KLightProjectiveWithShadowBasic sl1 = sl0b.build();
+    final KLightProjectiveWithShadowBasic sl2 = sl0b.build();
 
     final KInstanceOpaqueType o1 = this.getOpaque(g);
     sb.sceneAddShadowCaster(sl0, o1);
@@ -651,8 +651,8 @@ import com.io7m.renderer.types.RVectorI3F;
 
     final KSceneBuilderWithCreateType sb = KScene.newBuilder(camera);
     final Texture2DStaticUsableType lt = RFakeTextures2DStatic.newAnything(g);
-    final KLightProjectiveBuilderType sl0b =
-      KLightProjective.newBuilder(lt, proj);
+    final KLightProjectiveWithShadowBasicBuilderType sl0b =
+      KLightProjectiveWithShadowBasic.newBuilder(lt, proj);
     final KFramebufferDepthDescription fb_desc =
       KFramebufferDepthDescription.newDescription(
         new AreaInclusive(
@@ -664,9 +664,9 @@ import com.io7m.renderer.types.RVectorI3F;
     final KShadowMapBasicDescription map_desc =
       KShadowMapBasicDescription.newDescription(fb_desc, 2);
     sl0b.setShadow(KShadowMappedBasic.newMappedBasic(0.001f, 0.0f, map_desc));
-    final KLightProjective sl0 = sl0b.build();
-    final KLightProjective sl1 = sl0b.build();
-    final KLightProjective sl2 = sl0b.build();
+    final KLightProjectiveWithShadowBasic sl0 = sl0b.build();
+    final KLightProjectiveWithShadowBasic sl1 = sl0b.build();
+    final KLightProjectiveWithShadowBasic sl2 = sl0b.build();
 
     final KInstanceOpaqueType o1 = this.getOpaque(g);
     sb.sceneAddShadowCaster(sl0, o1);

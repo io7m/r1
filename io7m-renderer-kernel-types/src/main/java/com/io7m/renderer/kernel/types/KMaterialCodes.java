@@ -49,83 +49,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     return r;
   }
 
-  private static void makeRegularLitCode(
-    final KMaterialAlbedoType in_albedo,
-    final KMaterialEmissiveType in_emissive,
-    final KMaterialEnvironmentType in_environment,
-    final KMaterialNormalType in_normal,
-    final KMaterialSpecularType in_specular,
-    final StringBuilder b)
-  {
-    b.append(in_albedo.codeGet());
-
-    {
-      final String c = in_emissive.codeGet();
-      if (c.isEmpty() == false) {
-        b.append("_");
-        b.append(c);
-      }
-    }
-
-    {
-      final String c = in_environment.codeGet();
-      if (c.isEmpty() == false) {
-        b.append("_");
-        b.append(c);
-      }
-    }
-
-    {
-      final String c = in_normal.codeGet();
-      if (c.isEmpty() == false) {
-        b.append("_");
-        b.append(c);
-      }
-    }
-
-    {
-      final String c = in_specular.codeGet();
-      if (c.isEmpty() == false) {
-        b.append("_");
-        b.append(c);
-      }
-    }
-  }
-
-  private static void makeRegularUnlitCode(
-    final KMaterialAlbedoType in_albedo,
-    final KMaterialEmissiveType in_emissive,
-    final KMaterialEnvironmentType in_environment,
-    final KMaterialNormalType in_normal,
-    final StringBuilder b)
-  {
-    b.append(in_albedo.codeGet());
-
-    {
-      final String c = in_emissive.codeGet();
-      if (c.isEmpty() == false) {
-        b.append("_");
-        b.append(c);
-      }
-    }
-
-    {
-      final String c = in_environment.codeGet();
-      if (c.isEmpty() == false) {
-        b.append("_");
-        b.append(c);
-      }
-    }
-
-    {
-      final String c = in_normal.codeGet();
-      if (c.isEmpty() == false) {
-        b.append("_");
-        b.append(c);
-      }
-    }
-  }
-
   public static String makeCodeTranslucentRefractiveUnlit(
     final KMaterialNormalType in_normal,
     final KMaterialRefractiveType in_refractive)
@@ -221,6 +144,83 @@ import com.io7m.junreachable.UnreachableCodeException;
     final String r = b.toString();
     assert r != null;
     return r;
+  }
+
+  private static void makeRegularLitCode(
+    final KMaterialAlbedoType in_albedo,
+    final KMaterialEmissiveType in_emissive,
+    final KMaterialEnvironmentType in_environment,
+    final KMaterialNormalType in_normal,
+    final KMaterialSpecularType in_specular,
+    final StringBuilder b)
+  {
+    b.append(in_albedo.codeGet());
+
+    {
+      final String c = in_emissive.codeGet();
+      if (c.isEmpty() == false) {
+        b.append("_");
+        b.append(c);
+      }
+    }
+
+    {
+      final String c = in_environment.codeGet();
+      if (c.isEmpty() == false) {
+        b.append("_");
+        b.append(c);
+      }
+    }
+
+    {
+      final String c = in_normal.codeGet();
+      if (c.isEmpty() == false) {
+        b.append("_");
+        b.append(c);
+      }
+    }
+
+    {
+      final String c = in_specular.codeGet();
+      if (c.isEmpty() == false) {
+        b.append("_");
+        b.append(c);
+      }
+    }
+  }
+
+  private static void makeRegularUnlitCode(
+    final KMaterialAlbedoType in_albedo,
+    final KMaterialEmissiveType in_emissive,
+    final KMaterialEnvironmentType in_environment,
+    final KMaterialNormalType in_normal,
+    final StringBuilder b)
+  {
+    b.append(in_albedo.codeGet());
+
+    {
+      final String c = in_emissive.codeGet();
+      if (c.isEmpty() == false) {
+        b.append("_");
+        b.append(c);
+      }
+    }
+
+    {
+      final String c = in_environment.codeGet();
+      if (c.isEmpty() == false) {
+        b.append("_");
+        b.append(c);
+      }
+    }
+
+    {
+      final String c = in_normal.codeGet();
+      if (c.isEmpty() == false) {
+        b.append("_");
+        b.append(c);
+      }
+    }
   }
 
   private KMaterialCodes()

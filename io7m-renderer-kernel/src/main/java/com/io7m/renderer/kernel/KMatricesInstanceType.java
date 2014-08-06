@@ -16,7 +16,7 @@
 
 package com.io7m.renderer.kernel;
 
-import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.renderer.types.RException;
 
 /**
@@ -46,7 +46,7 @@ public interface KMatricesInstanceType extends KMatricesInstanceValuesType
    */
 
   <T, E extends Throwable> T withProjectiveLight(
-    final KLightProjective p,
+    final KLightProjectiveWithoutShadow p,
     final KMatricesInstanceWithProjectiveFunctionType<T, E> f)
     throws RException,
       E;

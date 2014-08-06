@@ -31,21 +31,16 @@ import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KBlurParameters;
-import com.io7m.renderer.kernel.types.KDepthPrecision;
-import com.io7m.renderer.kernel.types.KDepthVariancePrecision;
-import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
-import com.io7m.renderer.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.renderer.kernel.types.KLightDirectional;
-import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadow;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithoutShadowBuilderType;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KProjectionFrustum;
-import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
-import com.io7m.renderer.kernel.types.KShadowMapVarianceDescription;
-import com.io7m.renderer.kernel.types.KShadowMappedBasic;
-import com.io7m.renderer.kernel.types.KShadowMappedVariance;
 import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RSpaceRGBType;
 import com.io7m.renderer.types.RSpaceWorldType;
@@ -152,6 +147,16 @@ import com.io7m.renderer.types.RVectorI3F;
       final RVectorI3F<RSpaceRGBType> c =
         new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
 
+      final KProjectionFrustum projection =
+        KProjectionFrustum.newProjection(
+          new MatrixM4x4F(),
+          -1.0f,
+          1.0f,
+          -1.0f,
+          1.0f,
+          1.0f,
+          100.0f);
+
       {
         final KLightType l = KLightDirectional.newLight(v, c, 1.0f);
         cases.add(l);
@@ -163,75 +168,21 @@ import com.io7m.renderer.types.RVectorI3F;
       }
 
       {
-        final KLightProjectiveBuilderType b =
-          KLightProjective.newBuilder(t, KProjectionFrustum.newProjection(
-            new MatrixM4x4F(),
-            -1.0f,
-            1.0f,
-            -1.0f,
-            1.0f,
-            1.0f,
-            100.0f));
+        final KLightProjectiveWithoutShadowBuilderType b =
+          KLightProjectiveWithoutShadow.newBuilder(t, projection);
+        cases.add(b.build());
+      }
 
-        /**
-         * No shadow.
-         */
+      {
+        final KLightProjectiveWithShadowBasicBuilderType b =
+          KLightProjectiveWithShadowBasic.newBuilder(t, projection);
+        cases.add(b.build());
+      }
 
-        {
-          b.setTexture(t);
-          cases.add(b.build());
-        }
-
-        /**
-         * Basic shadow mapping.
-         */
-
-        {
-          final AreaInclusive a =
-            new AreaInclusive(
-              new RangeInclusiveL(0, 99),
-              new RangeInclusiveL(0, 99));
-          final KFramebufferDepthDescription fd =
-            KFramebufferDepthDescription.newDescription(
-              a,
-              TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
-              TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-              KDepthPrecision.DEPTH_PRECISION_16);
-          final KShadowMapBasicDescription d =
-            KShadowMapBasicDescription.newDescription(fd, 2);
-
-          b.setShadow(KShadowMappedBasic.newMappedBasic(1.0f, 1.0f, d));
-          cases.add(b.build());
-        }
-
-        /**
-         * Variance shadow mapping.
-         */
-
-        {
-          final AreaInclusive a =
-            new AreaInclusive(
-              new RangeInclusiveL(0, 99),
-              new RangeInclusiveL(0, 99));
-          final KBlurParameters kp = KBlurParameters.newBuilder().build();
-          final KFramebufferDepthVarianceDescription fvd =
-            KFramebufferDepthVarianceDescription.newDescription(
-              a,
-              TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
-              TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-              KDepthPrecision.DEPTH_PRECISION_16,
-              KDepthVariancePrecision.DEPTH_VARIANCE_PRECISION_16F);
-          final KShadowMapVarianceDescription description =
-            KShadowMapVarianceDescription.newDescription(fvd, 1);
-          b.setShadow(KShadowMappedVariance.newMappedVariance(
-            1.0f,
-            1.0f,
-            1.0f,
-            kp,
-            description));
-          cases.add(b.build());
-        }
-
+      {
+        final KLightProjectiveWithShadowVarianceBuilderType b =
+          KLightProjectiveWithShadowVariance.newBuilder(t, projection);
+        cases.add(b.build());
       }
 
       return cases;

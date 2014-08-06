@@ -24,37 +24,30 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.TextureFilterMagnification;
-import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheckException;
-import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.renderer.kernel.types.KDepthPrecision;
-import com.io7m.renderer.kernel.types.KFramebufferDepthDescription;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
 import com.io7m.renderer.kernel.types.KInstanceType;
-import com.io7m.renderer.kernel.types.KLightProjective;
-import com.io7m.renderer.kernel.types.KLightProjectiveBuilderType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
+import com.io7m.renderer.kernel.types.KLightWithShadowType;
 import com.io7m.renderer.kernel.types.KProjectionFrustum;
 import com.io7m.renderer.kernel.types.KProjectionType;
 import com.io7m.renderer.kernel.types.KScene;
 import com.io7m.renderer.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.renderer.kernel.types.KSceneLightGroup;
 import com.io7m.renderer.kernel.types.KSceneLightGroupBuilderType;
-import com.io7m.renderer.kernel.types.KShadowMapBasicDescription;
-import com.io7m.renderer.kernel.types.KShadowMappedBasic;
 import com.io7m.renderer.kernel.types.KTranslucentRegularLit;
 import com.io7m.renderer.kernel.types.KTranslucentSpecularOnlyLit;
 import com.io7m.renderer.kernel.types.KTranslucentType;
@@ -69,11 +62,10 @@ import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
 import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
 import com.io7m.renderer.types.RExceptionLightGroupLacksInstances;
 import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
-import com.io7m.renderer.types.RExceptionLightMissingShadow;
 
 @SuppressWarnings({ "unchecked", "null" }) public abstract class KSceneBuilderContract
 {
-  private static KLightProjective getShadowLight(
+  private static KLightWithShadowType getShadowLight(
     final JCGLImplementationType g)
   {
     try {
@@ -87,20 +79,10 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
           1.0f,
           100.0f);
 
-      final KLightProjectiveBuilderType b =
-        KLightProjective.newBuilder(
+      final KLightProjectiveWithShadowBasicBuilderType b =
+        KLightProjectiveWithShadowBasic.newBuilder(
           RFakeTextures2DStatic.newAnything(g),
           projection);
-      final RangeInclusiveL r = new RangeInclusiveL(0, 99);
-      final KFramebufferDepthDescription fbd =
-        KFramebufferDepthDescription.newDescription(
-          new AreaInclusive(r, r),
-          TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
-          TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-          KDepthPrecision.DEPTH_PRECISION_16);
-      final KShadowMapBasicDescription description =
-        KShadowMapBasicDescription.newDescription(fbd, 2);
-      b.setShadow(KShadowMappedBasic.newMappedBasic(0.1f, 0.2f, description));
       return b.build();
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
@@ -126,7 +108,6 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
   @Test(expected = NullCheckException.class) public
     void
     testNullInvisibleWithShadow_0()
-      throws RException
   {
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
@@ -134,16 +115,20 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
     final KSceneBuilderWithCreateType b = this.newBuilder();
     final KInstanceOpaqueType i = this.getOpaque(g);
 
-    b.sceneAddShadowCaster((KLightType) TestUtilities.actuallyNull(), i);
+    b.sceneAddShadowCaster(
+      (KLightWithShadowType) TestUtilities.actuallyNull(),
+      i);
   }
 
   @Test(expected = NullCheckException.class) public
     void
     testNullInvisibleWithShadow_1()
-      throws RException
   {
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+
     final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KLightType l0 = KSceneBuilderContract.getSphericalLight();
+    final KLightWithShadowType l0 = KSceneBuilderContract.getShadowLight(g);
 
     b.sceneAddShadowCaster(
       l0,
@@ -187,36 +172,6 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
       (Set<KLightType>) TestUtilities.actuallyNull());
   }
 
-  @Test(expected = RExceptionLightMissingShadow.class) public
-    void
-    testSceneAddShadowCaster_NoShadow0()
-      throws RException
-  {
-    final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
-
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o = this.getOpaque(g);
-    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
-
-    b.sceneAddShadowCaster(l0, o);
-  }
-
-  @Test(expected = RExceptionLightMissingShadow.class) public
-    void
-    testSceneAddShadowCaster_WithoutShadow0()
-      throws RException
-  {
-    final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
-
-    final KSceneBuilderWithCreateType b = this.newBuilder();
-    final KInstanceOpaqueType o0 = this.getOpaque(g);
-    final KLightSphere l0 = KSceneBuilderContract.getSphericalLight();
-
-    b.sceneAddShadowCaster(l0, o0);
-  }
-
   @Test public void testSceneAddShadowCaster_0()
     throws RException
   {
@@ -225,12 +180,12 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
 
     final KSceneBuilderWithCreateType b = this.newBuilder();
     final KInstanceOpaqueType o0 = this.getOpaque(g);
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight(g);
+    final KLightWithShadowType l0 = KSceneBuilderContract.getShadowLight(g);
 
     b.sceneAddShadowCaster(l0, o0);
     final KScene s = b.sceneCreate();
 
-    final Map<KLightType, Set<KInstanceOpaqueType>> casters =
+    final Map<KLightWithShadowType, Set<KInstanceOpaqueType>> casters =
       s.getShadows().getShadowCasters();
     Assert.assertEquals(1, casters.size());
     Assert.assertTrue(casters.containsKey(l0));
@@ -356,13 +311,13 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
     final KSceneBuilderWithCreateType b = this.newBuilder();
     final KInstanceOpaqueType o0 = this.getOpaque(g);
     final KInstanceOpaqueType o1 = this.getOpaque(g);
-    final KLightProjective l0 = KSceneBuilderContract.getShadowLight(g);
+    final KLightWithShadowType l0 = KSceneBuilderContract.getShadowLight(g);
 
     b.sceneAddShadowCaster(l0, o0);
     b.sceneAddShadowCaster(l0, o1);
     final KScene s = b.sceneCreate();
 
-    final Map<KLightType, Set<KInstanceOpaqueType>> casters =
+    final Map<KLightWithShadowType, Set<KInstanceOpaqueType>> casters =
       s.getShadows().getShadowCasters();
     Assert.assertEquals(1, casters.size());
     Assert.assertTrue(casters.containsKey(l0));

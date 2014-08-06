@@ -31,7 +31,6 @@ import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
@@ -43,10 +42,14 @@ import com.io7m.renderer.kernel.types.KCamera;
 import com.io7m.renderer.kernel.types.KFaceSelection;
 import com.io7m.renderer.kernel.types.KInstanceOpaqueType;
 import com.io7m.renderer.kernel.types.KLightDirectional;
-import com.io7m.renderer.kernel.types.KLightProjective;
+import com.io7m.renderer.kernel.types.KLightProjectiveType;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.renderer.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.renderer.kernel.types.KLightSphere;
 import com.io7m.renderer.kernel.types.KLightType;
 import com.io7m.renderer.kernel.types.KLightVisitorType;
+import com.io7m.renderer.kernel.types.KLightWithShadowType;
+import com.io7m.renderer.kernel.types.KLightWithShadowVisitorType;
 import com.io7m.renderer.kernel.types.KSceneBatchedShadow;
 import com.io7m.renderer.kernel.types.KShadowMapDescriptionType;
 import com.io7m.renderer.kernel.types.KShadowMappedBasic;
@@ -113,7 +116,6 @@ import com.io7m.renderer.types.RTransformViewType;
   private static
     void
     returnReceipts(
-      final LogUsableType log,
       final Map<KLightType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts)
   {
     for (final KLightType light : receipts.keySet()) {
@@ -256,10 +258,10 @@ import com.io7m.renderer.types.RTransformViewType;
     NullCheck.notNull(with, "With");
 
     try {
-      final Map<KLightType, Map<String, List<KInstanceOpaqueType>>> batches_by_light =
+      final Map<KLightWithShadowType, Map<String, List<KInstanceOpaqueType>>> batches_by_light =
         batches.getBatches();
       assert batches_by_light != null;
-      final Set<KLightType> lights = batches_by_light.keySet();
+      final Set<KLightWithShadowType> lights = batches_by_light.keySet();
       assert lights != null;
 
       final Map<KLightType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts =
@@ -283,7 +285,7 @@ import com.io7m.renderer.types.RTransformViewType;
 
         return r;
       } finally {
-        KShadowMapRenderer.returnReceipts(this.log, receipts);
+        KShadowMapRenderer.returnReceipts(receipts);
       }
 
     } catch (final JCGLException e) {
@@ -301,7 +303,7 @@ import com.io7m.renderer.types.RTransformViewType;
   private
     void
     shadowMapRender(
-      final KLightType light,
+      final KLightWithShadowType light,
       final KShadowType shadow,
       final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r,
       final Map<String, List<KInstanceOpaqueType>> casters,
@@ -320,7 +322,7 @@ import com.io7m.renderer.types.RTransformViewType;
       }
 
       @Override public Unit lightProjective(
-        final KLightProjective lp)
+        final KLightProjectiveType lp)
         throws RException,
           JCGLException
       {
@@ -403,17 +405,31 @@ import com.io7m.renderer.types.RTransformViewType;
     void
     shadowMapsRenderAll(
       final KCamera camera,
-      final Map<KLightType, Map<String, List<KInstanceOpaqueType>>> batches_by_light,
-      final Set<KLightType> lights,
+      final Map<KLightWithShadowType, Map<String, List<KInstanceOpaqueType>>> batches_by_light,
+      final Set<KLightWithShadowType> lights,
       final Map<KLightType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts)
       throws RException,
         JCGLException,
         JCacheException
   {
-    for (final KLightType light : lights) {
-      final Some<KShadowType> some =
-        (Some<KShadowType>) light.lightGetShadow();
-      final KShadowType shadow = some.get();
+    for (final KLightWithShadowType light : lights) {
+
+      final KShadowType shadow =
+        light
+          .withShadowAccept(new KLightWithShadowVisitorType<KShadowType, RException>() {
+            @Override public KShadowType projectiveWithShadowBasic(
+              final KLightProjectiveWithShadowBasic lp)
+            {
+              return lp.lightGetShadow();
+            }
+
+            @Override public KShadowType projectiveWithShadowVariance(
+              final KLightProjectiveWithShadowVariance lp)
+            {
+              return lp.lightGetShadow();
+            }
+          });
+
       final KShadowMapDescriptionType desc =
         shadow
           .shadowAccept(new KShadowVisitorType<KShadowMapDescriptionType, RException>() {

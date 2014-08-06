@@ -275,11 +275,6 @@ import com.io7m.renderer.types.RTransformTextureType;
     return v.materialTranslucent(this);
   }
 
-  @Override public String materialGetCode()
-  {
-    return this.code;
-  }
-
   /**
    * @return The alpha parameters
    */
@@ -287,6 +282,11 @@ import com.io7m.renderer.types.RTransformTextureType;
   public KMaterialAlphaType materialGetAlpha()
   {
     return this.alpha;
+  }
+
+  @Override public String materialGetCode()
+  {
+    return this.code;
   }
 
   @Override public KMaterialNormalType materialGetNormal()

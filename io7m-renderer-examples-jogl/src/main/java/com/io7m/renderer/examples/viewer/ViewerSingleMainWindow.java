@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -97,6 +97,7 @@ import com.io7m.renderer.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.renderer.kernel.types.KInstanceTranslucentUnlitType;
 import com.io7m.renderer.kernel.types.KInstanceType;
 import com.io7m.renderer.kernel.types.KLightType;
+import com.io7m.renderer.kernel.types.KLightWithShadowType;
 import com.io7m.renderer.kernel.types.KMeshReadableType;
 import com.io7m.renderer.kernel.types.KRGBAPrecision;
 import com.io7m.renderer.kernel.types.KScene;
@@ -110,7 +111,6 @@ import com.io7m.renderer.types.RException;
 import com.io7m.renderer.types.RExceptionInstanceAlreadyLit;
 import com.io7m.renderer.types.RExceptionJCGL;
 import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
-import com.io7m.renderer.types.RExceptionLightMissingShadow;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
@@ -403,9 +403,8 @@ final class ViewerSingleMainWindow implements Runnable
         }
 
         @Override public void sceneAddShadowCaster(
-          final KLightType light,
+          final KLightWithShadowType light,
           final KInstanceOpaqueType instance)
-          throws RExceptionLightMissingShadow
         {
           scene_builder.sceneAddShadowCaster(light, instance);
         }
@@ -459,7 +458,9 @@ final class ViewerSingleMainWindow implements Runnable
           return scene_builder.sceneGetLights();
         }
 
-        @Override public Set<KLightType> sceneGetLightsShadowCasting()
+        @Override public
+          Set<KLightWithShadowType>
+          sceneGetLightsShadowCasting()
         {
           return scene_builder.sceneGetLightsShadowCasting();
         }

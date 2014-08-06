@@ -37,7 +37,6 @@ import com.io7m.renderer.types.RExceptionInstanceAlreadyUnlit;
 import com.io7m.renderer.types.RExceptionLightGroupAlreadyAdded;
 import com.io7m.renderer.types.RExceptionLightGroupLacksInstances;
 import com.io7m.renderer.types.RExceptionLightGroupLacksLights;
-import com.io7m.renderer.types.RExceptionLightMissingShadow;
 
 /**
  * <p>
@@ -138,23 +137,6 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
       return new RExceptionInstanceAlreadyUnlit(m.toString());
     }
 
-    private RExceptionLightMissingShadow missingShadow(
-      final KLightType light,
-      final KInstanceOpaqueType instance)
-    {
-      final StringBuilder m = this.message;
-      m.setLength(0);
-      m
-        .append("Attempted to add a shadow-casting light and instance to the scene but using a light that has no shadow.\n");
-      m.append("  Light: ");
-      m.append(light);
-      m.append("\n");
-      m.append("  Instance: ");
-      m.append(instance);
-      m.append("\n");
-      return new RExceptionLightMissingShadow(m.toString());
-    }
-
     @Override public void sceneAddOpaqueUnlit(
       final KInstanceOpaqueType instance)
       throws RExceptionInstanceAlreadyLit
@@ -179,16 +161,11 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
     }
 
     @Override public void sceneAddShadowCaster(
-      final KLightType light,
+      final KLightWithShadowType light,
       final KInstanceOpaqueType instance)
-      throws RExceptionLightMissingShadow
     {
       NullCheck.notNull(light, "Light");
       NullCheck.notNull(instance, "Instance");
-
-      if (light.lightHasShadow() == false) {
-        throw this.missingShadow(light, instance);
-      }
 
       MapPSet<KInstanceOpaqueType> instances_shadow =
         this.state.instances_shadow.get(light);
@@ -324,31 +301,29 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
        * instances map).
        */
 
-      for (final KLightType l : this.state.lights_shadow) {
-        if (l.lightHasShadow()) {
-          final HashPMap<KLightType, MapPSet<KInstanceOpaqueType>> is =
-            this.state.instances_shadow;
+      for (final KLightWithShadowType l : this.state.lights_shadow) {
+        final HashPMap<KLightType, MapPSet<KInstanceOpaqueType>> is =
+          this.state.instances_shadow;
 
-          if (is.containsKey(l) == false) {
-            final BuilderState previous = this.state;
-            final MapPSet<KInstanceOpaqueType> none = HashTreePSet.empty();
-            this.state =
-              new BuilderState(
-                previous.instances_shadow.plus(l, none),
-                previous.instances_all,
-                previous.instances_opaque_lit,
-                previous.instances_opaque_unlit,
-                previous.lights_all,
-                previous.lights_shadow,
-                previous.translucents_ordered,
-                previous.instances_visible,
-                previous.light_group_builders);
-          }
+        if (is.containsKey(l) == false) {
+          final BuilderState previous = this.state;
+          final MapPSet<KInstanceOpaqueType> none = HashTreePSet.empty();
+          this.state =
+            new BuilderState(
+              previous.instances_shadow.plus(l, none),
+              previous.instances_all,
+              previous.instances_opaque_lit,
+              previous.instances_opaque_unlit,
+              previous.lights_all,
+              previous.lights_shadow,
+              previous.translucents_ordered,
+              previous.instances_visible,
+              previous.light_group_builders);
         }
       }
 
-      final Map<KLightType, Set<KInstanceOpaqueType>> instances_shadow =
-        (Map<KLightType, Set<KInstanceOpaqueType>>) ((Object) this.state.instances_shadow);
+      final Map<KLightWithShadowType, Set<KInstanceOpaqueType>> instances_shadow =
+        (Map<KLightWithShadowType, Set<KInstanceOpaqueType>>) ((Object) this.state.instances_shadow);
       final KSceneShadows in_shadows = new KSceneShadows(instances_shadow);
 
       HashPMap<String, KSceneLightGroup> gs = HashTreePMap.empty();
@@ -401,7 +376,7 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
       return this.state.lights_all;
     }
 
-    @Override public Set<KLightType> sceneGetLightsShadowCasting()
+    @Override public Set<KLightWithShadowType> sceneGetLightsShadowCasting()
     {
       return this.state.lights_shadow;
     }
@@ -451,7 +426,7 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
     final MapPSet<KInstanceType>                             instances_visible;
     final HashPMap<String, LightGroupBuilder>                light_group_builders;
     final MapPSet<KLightType>                                lights_all;
-    final MapPSet<KLightType>                                lights_shadow;
+    final MapPSet<KLightWithShadowType>                      lights_shadow;
     final PVector<KTranslucentType>                          translucents_ordered;
 
     // CHECKSTYLE_VISIBILITY:ON
@@ -475,7 +450,7 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
       final MapPSet<KInstanceOpaqueType> in_instances_opaque_lit,
       final MapPSet<KInstanceOpaqueType> in_instances_opaque_unlit,
       final MapPSet<KLightType> in_lights_all,
-      final MapPSet<KLightType> in_lights_shadow,
+      final MapPSet<KLightWithShadowType> in_lights_shadow,
       final PVector<KTranslucentType> in_translucents_ordered,
       final MapPSet<KInstanceType> in_instances_visible,
       final HashPMap<String, LightGroupBuilder> in_light_groups)
@@ -541,19 +516,31 @@ import com.io7m.renderer.types.RExceptionLightMissingShadow;
     {
       final BuilderState previous = this.parent.state;
 
-      this.parent.state =
-        new BuilderState(
-          previous.instances_shadow,
-          previous.instances_all,
-          previous.instances_opaque_lit,
-          previous.instances_opaque_unlit,
-          previous.lights_all.plus(light),
-          light.lightHasShadow()
-            ? previous.lights_shadow.plus(light)
-            : previous.lights_shadow,
-          previous.translucents_ordered,
-          previous.instances_visible,
-          previous.light_group_builders);
+      if (light instanceof KLightWithShadowType) {
+        this.parent.state =
+          new BuilderState(
+            previous.instances_shadow,
+            previous.instances_all,
+            previous.instances_opaque_lit,
+            previous.instances_opaque_unlit,
+            previous.lights_all.plus(light),
+            previous.lights_shadow.plus((KLightWithShadowType) light),
+            previous.translucents_ordered,
+            previous.instances_visible,
+            previous.light_group_builders);
+      } else {
+        this.parent.state =
+          new BuilderState(
+            previous.instances_shadow,
+            previous.instances_all,
+            previous.instances_opaque_lit,
+            previous.instances_opaque_unlit,
+            previous.lights_all.plus(light),
+            previous.lights_shadow,
+            previous.translucents_ordered,
+            previous.instances_visible,
+            previous.light_group_builders);
+      }
 
       this.group_state =
         new LightGroupState(
