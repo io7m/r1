@@ -1,0 +1,8 @@
+gaussian_blur_horizontal_4f : com.io7m.r1.postprocessing.PostprocessingBlur.blur_horizontal_4f
+gaussian_blur_vertical_4f   : com.io7m.r1.postprocessing.PostprocessingBlur.blur_vertical_4f
+gaussian_blur_horizontal_2f : com.io7m.r1.postprocessing.PostprocessingBlur.blur_horizontal_2f
+gaussian_blur_vertical_2f   : com.io7m.r1.postprocessing.PostprocessingBlur.blur_vertical_2f
+fog                         : com.io7m.r1.postprocessing.PostprocessingFog.fog
+copy_rgba                   : com.io7m.r1.core.Copy.copy_rgba
+copy_rgba_depth             : com.io7m.r1.core.Copy.copy_rgba_depth
+copy_depth4444              : com.io7m.r1.core.Copy.copy_depth4444
