@@ -1,4 +1,0 @@
-DepC     : com.io7m.renderer.depth_only.Depth.depth_DepC
-DepC4444 : com.io7m.renderer.depth_only.Depth.depth_DepC4444
-DepA     : com.io7m.renderer.depth_only.Depth.depth_DepA
-DepA4444 : com.io7m.renderer.depth_only.Depth.depth_DepA4444
