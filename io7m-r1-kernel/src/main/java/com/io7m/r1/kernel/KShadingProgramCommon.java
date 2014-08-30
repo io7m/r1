@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -733,24 +733,24 @@ import com.io7m.r1.types.RVectorReadable4FType;
     e.programUniformUseExisting("light_projective.color");
   }
 
-  static void putLightProjectiveFalloff(
-
+  static void putLightProjectiveFalloffInverse(
     final JCBProgramType e,
-    final float falloff)
+    final float inverse_falloff)
     throws JCGLException
   {
-    e.programUniformPutFloat("light_projective.falloff", falloff);
+    e.programUniformPutFloat(
+      "light_projective.inverse_falloff",
+      inverse_falloff);
   }
 
-  static void putLightProjectiveFalloffReuse(
+  static void putLightProjectiveFalloffInverseReuse(
     final JCBProgramType e)
     throws JCGLException
   {
-    e.programUniformUseExisting("light_projective.falloff");
+    e.programUniformUseExisting("light_projective.inverse_falloff");
   }
 
   static void putLightProjectiveIntensity(
-
     final JCBProgramType e,
     final float intensity)
     throws JCGLException
@@ -792,19 +792,19 @@ import com.io7m.r1.types.RVectorReadable4FType;
     program.programUniformUseExisting("light_projective.position");
   }
 
-  static void putLightProjectiveRange(
+  static void putLightProjectiveRangeInverse(
     final JCBProgramType e,
     final float range)
     throws JCGLException
   {
-    e.programUniformPutFloat("light_projective.range", range);
+    e.programUniformPutFloat("light_projective.inverse_range", range);
   }
 
-  static void putLightProjectiveRangeReuse(
+  static void putLightProjectiveRangeInverseReuse(
     final JCBProgramType e)
     throws JCGLException
   {
-    e.programUniformUseExisting("light_projective.range");
+    e.programUniformUseExisting("light_projective.inverse_range");
   }
 
   static void putLightProjectiveWithoutTextureProjection(
@@ -826,12 +826,12 @@ import com.io7m.r1.types.RVectorReadable4FType;
     KShadingProgramCommon.putLightProjectiveIntensity(
       program,
       light.lightGetIntensity());
-    KShadingProgramCommon.putLightProjectiveFalloff(
+    KShadingProgramCommon.putLightProjectiveFalloffInverse(
       program,
-      light.lightProjectiveGetFalloff());
-    KShadingProgramCommon.putLightProjectiveRange(
+      light.lightProjectiveGetFalloffInverse());
+    KShadingProgramCommon.putLightProjectiveRangeInverse(
       program,
-      light.lightProjectiveGetRange());
+      light.lightProjectiveGetRangeInverse());
 
     light
       .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
@@ -874,8 +874,8 @@ import com.io7m.r1.types.RVectorReadable4FType;
     KShadingProgramCommon.putLightProjectivePositionReuse(program);
     KShadingProgramCommon.putLightProjectiveColorReuse(program);
     KShadingProgramCommon.putLightProjectiveIntensityReuse(program);
-    KShadingProgramCommon.putLightProjectiveFalloffReuse(program);
-    KShadingProgramCommon.putLightProjectiveRangeReuse(program);
+    KShadingProgramCommon.putLightProjectiveFalloffInverseReuse(program);
+    KShadingProgramCommon.putLightProjectiveRangeInverseReuse(program);
 
     light
       .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
@@ -924,10 +924,10 @@ import com.io7m.r1.types.RVectorReadable4FType;
     KShadingProgramCommon.putLightSphericalColor(program, color);
     final float intensity = light.lightGetIntensity();
     KShadingProgramCommon.putLightSphericalIntensity(program, intensity);
-    final float radius = light.lightGetRadius();
-    KShadingProgramCommon.putLightSphericalRange(program, radius);
-    final float falloff = light.lightGetFalloff();
-    KShadingProgramCommon.putLightSphericalFalloff(program, falloff);
+    final float radius = light.lightGetRadiusInverse();
+    KShadingProgramCommon.putLightSphericalRangeInverse(program, radius);
+    final float falloff = light.lightGetFalloffInverse();
+    KShadingProgramCommon.putLightSphericalFalloffInverse(program, falloff);
   }
 
   static void putLightSphericalColor(
@@ -945,19 +945,21 @@ import com.io7m.r1.types.RVectorReadable4FType;
     program.programUniformUseExisting("light_spherical.color");
   }
 
-  static void putLightSphericalFalloff(
+  static void putLightSphericalFalloffInverse(
     final JCBProgramType program,
-    final float falloff)
+    final float inverse_falloff)
     throws JCGLException
   {
-    program.programUniformPutFloat("light_spherical.falloff", falloff);
+    program.programUniformPutFloat(
+      "light_spherical.inverse_falloff",
+      inverse_falloff);
   }
 
-  static void putLightSphericalFalloffReuse(
+  static void putLightSphericalFalloffInverseReuse(
     final JCBProgramType program)
     throws JCGLException
   {
-    program.programUniformUseExisting("light_spherical.falloff");
+    program.programUniformUseExisting("light_spherical.inverse_falloff");
   }
 
   static void putLightSphericalIntensity(
@@ -1003,19 +1005,21 @@ import com.io7m.r1.types.RVectorReadable4FType;
     program.programUniformUseExisting("light_spherical.position");
   }
 
-  static void putLightSphericalRange(
+  static void putLightSphericalRangeInverse(
     final JCBProgramType program,
-    final float range)
+    final float inverse_range)
     throws JCGLException
   {
-    program.programUniformPutFloat("light_spherical.range", range);
+    program.programUniformPutFloat(
+      "light_spherical.inverse_range",
+      inverse_range);
   }
 
-  static void putLightSphericalRangeReuse(
+  static void putLightSphericalRangeInverseReuse(
     final JCBProgramType program)
     throws JCGLException
   {
-    program.programUniformUseExisting("light_spherical.range");
+    program.programUniformUseExisting("light_spherical.inverse_range");
   }
 
   static void putLightSphericalReuse(
@@ -1025,8 +1029,8 @@ import com.io7m.r1.types.RVectorReadable4FType;
     KShadingProgramCommon.putLightSphericalPositionReuse(program);
     KShadingProgramCommon.putLightSphericalColorReuse(program);
     KShadingProgramCommon.putLightSphericalIntensityReuse(program);
-    KShadingProgramCommon.putLightSphericalRangeReuse(program);
-    KShadingProgramCommon.putLightSphericalFalloffReuse(program);
+    KShadingProgramCommon.putLightSphericalRangeInverseReuse(program);
+    KShadingProgramCommon.putLightSphericalFalloffInverseReuse(program);
   }
 
   static void putMaterialAlbedoColor(

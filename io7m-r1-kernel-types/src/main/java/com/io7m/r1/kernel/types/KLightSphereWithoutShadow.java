@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,6 +19,7 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.r1.types.RException;
@@ -183,25 +184,40 @@ import com.io7m.r1.types.RVectorI3F;
       in_falloff);
   }
 
-  private final RVectorI3F<RSpaceRGBType>                                      color;
-  private final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float           falloff;
-  private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float            intensity;
-  private final RVectorI3F<RSpaceWorldType>                                    position;
-  private final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float radius;
-  private final KTransformType                                                 transform;
+  private final RVectorI3F<RSpaceRGBType>                                         color;
+  private final @KSuggestedRangeF(lower = 0.0001f, upper = 64.0f) float           falloff;
+  private final float                                                             falloff_inverse;
+  private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float               intensity;
+  private final RVectorI3F<RSpaceWorldType>                                       position;
+  private final @KSuggestedRangeF(lower = 0.0001f, upper = Float.MAX_VALUE) float radius;
+  private final float                                                             radius_inverse;
+  private final KTransformType                                                    transform;
 
   private KLightSphereWithoutShadow(
     final RVectorI3F<RSpaceRGBType> in_color,
     final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float in_intensity,
     final RVectorI3F<RSpaceWorldType> in_position,
-    final @KSuggestedRangeF(lower = 1.0f, upper = Float.MAX_VALUE) float in_radius,
-    final @KSuggestedRangeF(lower = 1.0f, upper = 64.0f) float in_falloff)
+    final @KSuggestedRangeF(lower = 0.0001f, upper = Float.MAX_VALUE) float in_radius,
+    final @KSuggestedRangeF(lower = 0.0001f, upper = 64.0f) float in_falloff)
   {
     this.color = NullCheck.notNull(in_color, "Color");
     this.intensity = in_intensity;
     this.position = NullCheck.notNull(in_position, "Position");
-    this.radius = in_radius;
-    this.falloff = in_falloff;
+
+    this.radius =
+      (float) RangeCheck.checkGreaterDouble(
+        in_radius,
+        "Radius",
+        0.0,
+        "Minimum radius");
+    this.falloff =
+      (float) RangeCheck.checkGreaterDouble(
+        in_falloff,
+        "Falloff",
+        0.0,
+        "Minimum falloff");
+    this.radius_inverse = 1.0f / this.radius;
+    this.falloff_inverse = 1.0f / this.falloff;
 
     final VectorI3F scale =
       new VectorI3F(this.radius, this.radius, this.radius);
@@ -240,6 +256,11 @@ import com.io7m.r1.types.RVectorI3F;
     return this.falloff;
   }
 
+  @Override public float lightGetFalloffInverse()
+  {
+    return this.falloff_inverse;
+  }
+
   @Override public float lightGetIntensity()
   {
     return this.intensity;
@@ -261,6 +282,11 @@ import com.io7m.r1.types.RVectorI3F;
   @Override public float lightGetRadius()
   {
     return this.radius;
+  }
+
+  @Override public float lightGetRadiusInverse()
+  {
+    return this.radius_inverse;
   }
 
   @Override public KTransformType lightGetTransform()

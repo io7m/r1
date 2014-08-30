@@ -20,6 +20,7 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.r1.types.RException;
@@ -188,11 +189,13 @@ import com.io7m.r1.types.RVectorI3F;
 
   private final RVectorI3F<RSpaceRGBType>   color;
   private final float                       falloff;
+  private final float                       falloff_inverse;
   private final float                       intensity;
   private final QuaternionI4F               orientation;
   private final RVectorI3F<RSpaceWorldType> position;
   private final KProjectionType             projection;
   private final float                       range;
+  private final float                       range_inverse;
   private final Texture2DStaticUsableType   texture;
   private final int                         textures;
   private final KTransformType              transform;
@@ -211,10 +214,23 @@ import com.io7m.r1.types.RVectorI3F;
     this.color = NullCheck.notNull(in_color, "Color");
     this.position = NullCheck.notNull(in_position, "Position");
     this.orientation = NullCheck.notNull(in_orientation, "Orientation");
-    this.range = in_range;
-    this.falloff = in_falloff;
     this.projection = NullCheck.notNull(in_projection, "Projection");
     this.texture = NullCheck.notNull(in_texture, "Texture");
+
+    this.range =
+      (float) RangeCheck.checkGreaterDouble(
+        in_range,
+        "Range",
+        0.0,
+        "Minimum range");
+    this.falloff =
+      (float) RangeCheck.checkGreaterDouble(
+        in_falloff,
+        "Falloff",
+        0.0,
+        "Minimum falloff");
+    this.range_inverse = 1.0f / this.range;
+    this.falloff_inverse = 1.0f / this.falloff;
 
     this.transform =
       KTransformOST.newTransform(
@@ -265,6 +281,11 @@ import com.io7m.r1.types.RVectorI3F;
     return this.falloff;
   }
 
+  @Override public float lightProjectiveGetFalloffInverse()
+  {
+    return this.falloff_inverse;
+  }
+
   @Override public QuaternionI4F lightProjectiveGetOrientation()
   {
     return this.orientation;
@@ -283,6 +304,11 @@ import com.io7m.r1.types.RVectorI3F;
   @Override public float lightProjectiveGetRange()
   {
     return this.range;
+  }
+
+  @Override public float lightProjectiveGetRangeInverse()
+  {
+    return this.range_inverse;
   }
 
   @Override public Texture2DStaticUsableType lightProjectiveGetTexture()

@@ -26,34 +26,32 @@ module Light is
   import com.io7m.parasol.Vector3f as V3;
 
   --
-  -- A basic colored light with a position, maximum range, intensity,
-  -- and falloff exponent.
+  -- A basic colored light with a position, maximum range r (given as 1 / r), 
+  -- intensity, and falloff exponent f (given as 1 / f).
   --
 
   type t is record
-    color     : vector_3f,
-    position  : vector_3f,
-    intensity : float,
-    range     : float,
-    falloff   : float
+    color           : vector_3f,
+    position        : vector_3f,
+    intensity       : float,
+    inverse_range   : float,
+    inverse_falloff : float
   end;
 
   --
-  -- Given a light with range [light_range] and falloff exponent 
-  -- [light_falloff], at [distance] from the current point on the 
-  -- lit surface, calculate the amount of attenuation.
+  -- Given a light with inverse range [light_range_inverse] and inverse
+  -- falloff exponent [light_falloff_inverse], at [distance] from the 
+  -- current point on the lit surface, calculate the amount of attenuation.
   --
 
-  function attenuation (
-    light_range   : float,
-    light_falloff : float,
-    distance      : float
+  function attenuation_from_inverses (
+    light_range_inverse   : float,
+    light_falloff_inverse : float,
+    distance              : float
   ) : float =
     let
-      value inv_range   = F.divide (1.0, light_range);
-      value linear      = F.multiply (distance, inv_range);
-      value falloff_inv = F.divide (1.0, light_falloff);
-      value exponential = F.power (linear, falloff_inv);
+      value linear      = F.multiply (distance, light_range_inverse);
+      value exponential = F.power (linear, light_falloff_inverse);
       value clamped     = F.clamp (exponential, 0.0, 1.0);
     in
       F.subtract (1.0, clamped)
@@ -117,7 +115,11 @@ module Light is
     let value v = vectors (k.position, p, n); in
       record r {
         vectors     = v,
-        attenuation = attenuation (k.range, k.falloff, v.distance)
+        attenuation = attenuation_from_inverses (
+          k.inverse_range,
+          k.inverse_falloff,
+          v.distance
+        )
       }
     end;
 

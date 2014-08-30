@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -40,6 +40,13 @@ public interface KLightSphereType extends KLightWithTransformType
   float lightGetFalloff();
 
   /**
+   * @return The inverse falloff exponent for the light (1.0 /
+   *         {@link #lightGetFalloff()}).
+   */
+
+  float lightGetFalloffInverse();
+
+  /**
    * @return The world position of the light
    */
 
@@ -50,6 +57,13 @@ public interface KLightSphereType extends KLightWithTransformType
    */
 
   float lightGetRadius();
+
+  /**
+   * @return The inverse radius of the light (1.0 / {@link #lightGetRadius()}
+   *         ).
+   */
+
+  float lightGetRadiusInverse();
 
   /**
    * Be visited by the given generic visitor.
