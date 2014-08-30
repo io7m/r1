@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.materials-regular"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Regular Materials</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.materials-regular.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">${project.parent.name}</s:term> package uses
+      a loose categorization for certain materials, based on observations taken
+      whilst studying the range of surface types used in the average commercial
+      3D game circa 2014. Basically, a material is 
+      <s:term s:type="term">regular</s:term> if it allows for control over
+      the surface <s:link s:target="r1.dai.materials-regular.albedo-properties">albedo</s:link>,
+      <s:link s:target="r1.dai.materials-regular.emission-properties">emission</s:link>,
+      <s:link s:target="r1.dai.materials-regular.normal-properties">normal</s:link>,
+      <s:link s:target="r1.dai.materials-regular.specular-properties">specular</s:link>,
+      and <s:link s:target="r1.dai.materials-regular.environment-properties">environment</s:link>
+      properties. This combination of five properties is sufficient for expressing the
+      vast majority of surface materials implemented in most computer games. 
+      The type of <s:term s:type="term">regular</s:term> materials is
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialRegularType.html">KMaterialRegularType</s:link-external>.
+      The type of <s:term s:type="term">opaque</s:term> <s:term s:type="term">regular</s:term>
+      materials is
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialOpaqueRegular.html">KMaterialOpaqueRegular</s:link-external>.
+      The type of <s:term s:type="term">translucent</s:term> <s:term s:type="term">regular</s:term>
+      materials is
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRegular.html">KMaterialTranslucentRegular</s:link-external>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.materials-regular.albedo-properties">
+    <s:subsection-title>Albedo Properties</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="term">albedo</s:term> of a surface is defined
+      as the coefficient of <s:term s:type="term">diffuse reflectivity</s:term>
+      of a surface. In practical terms, it can be thought of as the
+      color that a given surface will appear when lit with a pure white
+      light, prior to the application of any other surface-modifying
+      effects such as <s:link s:target="r1.dai.materials-regular.environment-properties">environment mapping</s:link>.
+      As an example, an object with a pure red albedo will appear to be
+      red when lit with a white light; conceptually, all other parts
+      of the light are absorbed by the surface.
+    </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">${project.parent.name}</s:term> package,
+      the albedo for a surface can be defined as a simple <s:term s:type="term">base color</s:term>
+      (<s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoUntextured.html">KMaterialAlbedoUntextured</s:link-external>),
+      or as a configurable mix (linear interpolation) between a 
+      <s:term s:type="term">base color</s:term> and a 
+      <s:term s:type="term">texture</s:term>
+      (<s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoTextured.html">KMaterialAlbedoTextured</s:link-external>).
+    </s:paragraph>
+    <s:paragraph>
+      An example square lit by a white light, with an untextured
+      albedo with a red base color and no other surface properties:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Red albedo (Result)</s:formal-item-title>
+      <s:image s:source="images/albedo_plain_red_0.png">Red albedo (Result)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The same square and light, but with a textured albedo mixing in 
+      <s:term s:type="constant">100%</s:term>
+      of the texture, effectively replacing the base color:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Albedo texture</s:formal-item-title>
+      <s:image s:source="images/specular_tiles_albedo.png">Albedo texture</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Textured albedo (Result)</s:formal-item-title>
+      <s:image s:source="images/albedo_plain_tiles.png">Textured albedo (Result)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The same sphere and light with a textured albedo mixing in <s:term s:type="constant">100%</s:term>
+      of the texture, but using a texture that has an alpha channel so that transparent parts of
+      the texture can show the underlying base color:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Albedo texture</s:formal-item-title>
+      <s:image s:source="images/albedo_plain_red_mix_0_texture.png">Albedo texture</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Textured albedo (Result)</s:formal-item-title>
+      <s:image s:source="images/albedo_plain_red_mix_0.png">Textured albedo (Result)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The same sphere and light with a textured albedo mixing in <s:term s:type="constant">50%</s:term>
+      of the texture (indicating a simple linear interpolation between the texture and base color):
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Albedo texture</s:formal-item-title>
+      <s:image s:source="images/specular_tiles_albedo.png">Albedo texture</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Textured albedo (Result)</s:formal-item-title>
+      <s:image s:source="images/albedo_plain_tiles_mix.png">Textured albedo (Result)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Specifically, the albedo of a given surface is given by <s:term s:type="function">albedo</s:term>
+      [<s:link-external s:target="haskell/Albedo.hs">Albedo.hs</s:link-external>]:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Albedo</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/Albedo.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.materials-regular.emission-properties">
+    <s:subsection-title>Emission Properties</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="term">emission</s:term> properties of a surface
+      specify to what degree the surface appears to emit light. The color
+      of the light is equal to the final surface color. Emission is implemented as a 
+      <s:link s:target="r1.dai.postproc.emission">postprocess</s:link> and
+      therefore emissive surfaces do not represent true
+      <s:link s:target="r1.dai.lighting">light sources</s:link>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.materials-regular.normal-properties">
+    <s:subsection-title>Normal Properties</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="term">normal</s:term> properties of a surface
+      define whether the surface normal vectors will be taken directly
+      from the vertex data of the associated mesh
+      (<s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialNormalVertex.html">KMaterialNormalVertex</s:link-external>),
+      or sampled from
+      a texture to perform <s:link s:target="r1.dai.normal-mapping">normal mapping</s:link>
+      (<s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialNormalMapped.html">KMaterialNormalMapped</s:link-external>).
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.materials-regular.specular-properties">
+    <s:subsection-title>Specular Properties</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="term">specular</s:term> properties of a surface
+      define how that surface reflects the 
+      <s:link s:target="r1.dai.lighting.diffuse-specular.specular">specular term</s:link>
+      of any given light source. Surfaces can absorb the specular term and
+      not reflect it at all
+      (<s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialSpecularNone.html">KMaterialSpecularNone</s:link-external>),
+      or can multiply the incoming light with a constant color
+      (<s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialSpecularConstant.html">KMaterialSpecularConstant</s:link-external>),
+      or can multiply the incoming light with a color sampled from a provided texture
+      (<s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialSpecularMapped.html">KMaterialSpecularMapped</s:link-external>).
+      Each of the constant or mapped options also require the specification of
+      a <s:link s:target="r1.dai.lighting.diffuse-specular.specular-exponent">specular exponent</s:link>.
+    </s:paragraph>
+    <s:paragraph>
+      The purpose of the specular color coefficients serve two purposes: A pure
+      black coefficient means that the surface does not reflect any specular light
+      (simulating a rough surface). A pure white coefficient means that the surface 
+      reflects specular light exactly as received (simulating a shiny surface). 
+      When these values are sampled from a texture, it becomes possible
+      to control the "shininess" of a texture on a per-pixel basis. A good
+      example would be that of a bathroom tile texture: The faces of the tiles themselves
+      should be shiny, but the cement between the tiles should appear to be rough. A
+      simple greyscale specular map achieves this effect:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Tiles (Albedo)</s:formal-item-title>
+      <s:image s:source="images/specular_tiles_albedo.png">Tiles (Albedo)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Tiles (Normal map)</s:formal-item-title>
+      <s:image s:source="images/specular_tiles_normal.png">Tiles (Normal map)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Tiles (Specular map)</s:formal-item-title>
+      <s:image s:source="images/specular_tiles_specular.png">Tiles (Specular map)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Tiles (Result)</s:formal-item-title>
+      <s:image s:source="images/specular_tiles.png">Tiles (Result)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Note how the black pixels in the specular map effectively prevent the areas
+      between the tiles from receiving specular highlights, whereas the faces of tiles
+      receive full highlights.
+    </s:paragraph>
+    <s:paragraph>
+      Using a specular map that contains colors other than shades of grey is often
+      useful for modelling metals. Materials such as plastic and paint consist of
+      layers, the topmost of which will ordinarily reflect light as it is received.
+      This usually means that an orange plastic will reflect a white specular highlight
+      when lit with a pure white light. Metals, however, often have specular 
+      reflections similar in color to their diffuse reflection; An orange or gold
+      metal will have orange/gold specular highlights when lit with a pure white
+      light. Specular maps containing bizarre combinations of colors can be used
+      to create materials that are supernatural and alien in appearance:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Tiles (Strange specular map)</s:formal-item-title>
+      <s:image s:source="images/specular_tiles_alien_specular.png">Tiles (Strange specular map)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Tiles (Strange result)</s:formal-item-title>
+      <s:image s:source="images/specular_tiles_strange.png">Tiles (Strange result)</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.materials-regular.environment-properties">
+    <s:subsection-title>Environment Properties</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="term">environment</s:term> properties of a surface
+      specify a <s:link s:target="r1.dai.environment-mapping.cube-maps">cube map</s:link>
+      and some properties controlling how the resulting
+      <s:link s:target="r1.dai.environment-mapping.reflection">environment-mapped reflection</s:link>
+      is combined with the surface color defined by all of the previously
+      specified material parameters.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>
