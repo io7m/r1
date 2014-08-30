@@ -22,7 +22,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 @EqualityReference final class KMaterialCodes
 {
   public static String makeCodeDeferredGeometryRegular(
-    final KMaterialAlphaType in_alpha,
     final KMaterialDepthType in_depth,
     final KMaterialAlbedoType in_albedo,
     final KMaterialEmissiveType in_emissive,
@@ -31,12 +30,10 @@ import com.io7m.junreachable.UnreachableCodeException;
     final KMaterialSpecularType in_specular)
   {
     final StringBuilder b = new StringBuilder();
-    b.append(in_alpha.codeGet());
-    b.append("_");
     b.append(in_depth.codeGet());
     b.append("_");
 
-    KMaterialCodes.makeRegularLitCode(
+    KMaterialCodes.makeRegularLitCodeWithEmission(
       in_albedo,
       in_emissive,
       in_environment,
@@ -73,7 +70,6 @@ import com.io7m.junreachable.UnreachableCodeException;
   public static String makeCodeTranslucentRegularLit(
     final KMaterialAlbedoType in_albedo,
     final KMaterialAlphaType in_alpha,
-    final KMaterialEmissiveType in_emissive,
     final KMaterialEnvironmentType in_environment,
     final KMaterialNormalType in_normal,
     final KMaterialSpecularType in_specular)
@@ -83,7 +79,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     b.append("_");
     KMaterialCodes.makeRegularLitCode(
       in_albedo,
-      in_emissive,
       in_environment,
       in_normal,
       in_specular,
@@ -147,6 +142,40 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private static void makeRegularLitCode(
+    final KMaterialAlbedoType in_albedo,
+    final KMaterialEnvironmentType in_environment,
+    final KMaterialNormalType in_normal,
+    final KMaterialSpecularType in_specular,
+    final StringBuilder b)
+  {
+    b.append(in_albedo.codeGet());
+
+    {
+      final String c = in_environment.codeGet();
+      if (c.isEmpty() == false) {
+        b.append("_");
+        b.append(c);
+      }
+    }
+
+    {
+      final String c = in_normal.codeGet();
+      if (c.isEmpty() == false) {
+        b.append("_");
+        b.append(c);
+      }
+    }
+
+    {
+      final String c = in_specular.codeGet();
+      if (c.isEmpty() == false) {
+        b.append("_");
+        b.append(c);
+      }
+    }
+  }
+
+  private static void makeRegularLitCodeWithEmission(
     final KMaterialAlbedoType in_albedo,
     final KMaterialEmissiveType in_emissive,
     final KMaterialEnvironmentType in_environment,

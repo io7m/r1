@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -117,67 +117,76 @@ public final class DLMulti1 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
+    final KLightDirectional l0;
+    final KLightDirectional l1;
+    final KLightDirectional l2;
+
+    {
+      final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
+      final VectorI3F d_raw =
+        VectorI3F.normalize(new VectorI3F(0.0f, -1.0f, 0.0f));
+      final RVectorI3F<RSpaceWorldType> dir =
+        new RVectorI3F<RSpaceWorldType>(
+          d_raw.getXF(),
+          d_raw.getYF(),
+          d_raw.getZF());
+      b.setColor(new RVectorI3F<RSpaceRGBType>(0.0f, 1.0f, 0.0f));
+      b.setDirection(dir);
+      l0 = b.build();
+    }
+
+    {
+      final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
+      final VectorI3F d_raw =
+        VectorI3F.normalize(new VectorI3F(1.0f, 0.0f, 0.0f));
+      final RVectorI3F<RSpaceWorldType> dir =
+        new RVectorI3F<RSpaceWorldType>(
+          d_raw.getXF(),
+          d_raw.getYF(),
+          d_raw.getZF());
+      b.setColor(new RVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f));
+      b.setDirection(dir);
+      l1 = b.build();
+    }
+
+    {
+      final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
+      final VectorI3F d_raw =
+        VectorI3F.normalize(new VectorI3F(-1.0f, 0.0f, 0.0f));
+      final RVectorI3F<RSpaceWorldType> dir =
+        new RVectorI3F<RSpaceWorldType>(
+          d_raw.getXF(),
+          d_raw.getYF(),
+          d_raw.getZF());
+      b.setColor(new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f));
+      b.setDirection(dir);
+      l2 = b.build();
+    }
+
     {
       final KSceneLightGroupBuilderType gb0 = scene.sceneNewLightGroup("g0");
-      gb0.groupAddInstance(i);
       gb0.groupAddInstance(m0);
-
-      final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
-
-      {
-        final VectorI3F d_raw =
-          VectorI3F.normalize(new VectorI3F(0.0f, -1.0f, 0.0f));
-        final RVectorI3F<RSpaceWorldType> dir =
-          new RVectorI3F<RSpaceWorldType>(
-            d_raw.getXF(),
-            d_raw.getYF(),
-            d_raw.getZF());
-        b.setColor(new RVectorI3F<RSpaceRGBType>(0.0f, 1.0f, 0.0f));
-        b.setDirection(dir);
-        gb0.groupAddLight(b.build());
-      }
+      gb0.groupAddLight(l0);
     }
 
     {
       final KSceneLightGroupBuilderType gb1 = scene.sceneNewLightGroup("g1");
-      gb1.groupAddInstance(i);
       gb1.groupAddInstance(m1);
-
-      final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
-
-      {
-        final VectorI3F d_raw =
-          VectorI3F.normalize(new VectorI3F(1.0f, 0.0f, 0.0f));
-        final RVectorI3F<RSpaceWorldType> dir =
-          new RVectorI3F<RSpaceWorldType>(
-            d_raw.getXF(),
-            d_raw.getYF(),
-            d_raw.getZF());
-        b.setColor(new RVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f));
-        b.setDirection(dir);
-        gb1.groupAddLight(b.build());
-      }
+      gb1.groupAddLight(l1);
     }
 
     {
       final KSceneLightGroupBuilderType gb2 = scene.sceneNewLightGroup("g2");
-      gb2.groupAddInstance(i);
       gb2.groupAddInstance(m2);
+      gb2.groupAddLight(l2);
+    }
 
-      final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
-
-      {
-        final VectorI3F d_raw =
-          VectorI3F.normalize(new VectorI3F(-1.0f, 0.0f, 0.0f));
-        final RVectorI3F<RSpaceWorldType> dir =
-          new RVectorI3F<RSpaceWorldType>(
-            d_raw.getXF(),
-            d_raw.getYF(),
-            d_raw.getZF());
-        b.setColor(new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f));
-        b.setDirection(dir);
-        gb2.groupAddLight(b.build());
-      }
+    {
+      final KSceneLightGroupBuilderType gb3 = scene.sceneNewLightGroup("g3");
+      gb3.groupAddInstance(i);
+      gb3.groupAddLight(l0);
+      gb3.groupAddLight(l1);
+      gb3.groupAddLight(l2);
     }
   }
 

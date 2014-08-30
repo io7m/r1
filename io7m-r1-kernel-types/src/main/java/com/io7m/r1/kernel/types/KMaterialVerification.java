@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -66,7 +66,7 @@ import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
   /**
    * If alpha-to-depth rendering is specified, check that an albedo texture is
    * provided.
-   * 
+   *
    * @param in_albedo
    *          The albedo.
    * @param in_depth
@@ -87,7 +87,7 @@ import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
   /**
    * If specular-mapped environment is specified, check that a specular
    * texture is provided.
-   * 
+   *
    * @param in_environment
    *          The environment.
    * @param in_specular
@@ -108,7 +108,7 @@ import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
   /**
    * Check whether or not the given combination of material properties is
    * valid.
-   * 
+   *
    * @param in_depth
    *          The material's depth rendering properties
    * @param in_normal
@@ -121,7 +121,7 @@ import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
    *          The material's environment mapping properties
    * @param in_specular
    *          The material's specularity properties
-   * 
+   *
    * @throws RExceptionMaterialMissingAlbedoTexture
    *           If one or more material properties require an albedo texture,
    *           but one was not provided.
@@ -159,7 +159,7 @@ import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
   /**
    * Check whether or not the given combination of material properties is
    * valid.
-   * 
+   *
    * @param in_normal
    *          The material's normal mapping properties
    * @param in_refractive
@@ -177,20 +177,18 @@ import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
   /**
    * Check whether or not the given combination of material properties is
    * valid.
-   * 
+   *
    * @param in_alpha
    *          The material's alpha properties
    * @param in_normal
    *          The material's normal mapping properties
    * @param in_albedo
    *          The material's albedo properties
-   * @param in_emissive
-   *          The material's emissive properties
    * @param in_environment
    *          The material's environment mapping properties
    * @param in_specular
    *          The material's specularity properties
-   * 
+   *
    * @throws RExceptionMaterialMissingSpecularTexture
    *           If one or more material properties require a specular texture,
    *           but one was not provided.
@@ -201,7 +199,6 @@ import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
   public static void materialVerifyTranslucentRegular(
     final KMaterialAlbedoType in_albedo,
     final KMaterialAlphaType in_alpha,
-    final KMaterialEmissiveType in_emissive,
     final KMaterialEnvironmentType in_environment,
     final KMaterialNormalType in_normal,
     final KMaterialSpecularType in_specular)
@@ -210,7 +207,6 @@ import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
   {
     NullCheck.notNull(in_albedo, "Albedo");
     NullCheck.notNull(in_alpha, "Alpha");
-    NullCheck.notNull(in_emissive, "Emissive");
     NullCheck.notNull(in_environment, "Environment");
     NullCheck.notNull(in_normal, "Normal");
     NullCheck.notNull(in_specular, "Specular");
@@ -223,7 +219,7 @@ import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
   /**
    * Check whether or not the given combination of material properties is
    * valid.
-   * 
+   *
    * @param in_alpha
    *          The material's alpha properties
    * @param in_normal

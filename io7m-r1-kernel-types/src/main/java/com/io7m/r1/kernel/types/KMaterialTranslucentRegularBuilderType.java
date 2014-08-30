@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,7 +28,7 @@ public interface KMaterialTranslucentRegularBuilderType extends
 {
   /**
    * Set the albedo of the material.
-   * 
+   *
    * @param albedo
    *          The albedo properties.
    */
@@ -38,7 +38,7 @@ public interface KMaterialTranslucentRegularBuilderType extends
 
   /**
    * Set the alpha properties of the material.
-   * 
+   *
    * @param alpha
    *          The alpha properties.
    */
@@ -47,18 +47,8 @@ public interface KMaterialTranslucentRegularBuilderType extends
     final KMaterialAlphaType alpha);
 
   /**
-   * Set the emissive properties of the material.
-   * 
-   * @param emissive
-   *          The emissive properties.
-   */
-
-  void setEmissive(
-    final KMaterialEmissiveType emissive);
-
-  /**
    * Set the environment properties of the material.
-   * 
+   *
    * @param environment
    *          The environment properties.
    */
@@ -68,7 +58,7 @@ public interface KMaterialTranslucentRegularBuilderType extends
 
   /**
    * Set the normal properties of the material.
-   * 
+   *
    * @param normal
    *          The normal properties.
    */
@@ -78,7 +68,7 @@ public interface KMaterialTranslucentRegularBuilderType extends
 
   /**
    * Set the specular properties of the material.
-   * 
+   *
    * @param specular
    *          The specular properties.
    */
@@ -88,7 +78,7 @@ public interface KMaterialTranslucentRegularBuilderType extends
 
   /**
    * Set the UV matrix of the material.
-   * 
+   *
    * @param uv_matrix
    *          The UV matrix.
    */

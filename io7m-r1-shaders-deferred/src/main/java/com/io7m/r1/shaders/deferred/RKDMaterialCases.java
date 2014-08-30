@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -132,7 +132,6 @@ import com.io7m.r1.types.RVectorI3F;
     List<KMaterialTranslucentRegular>
     makeCasesGeometryTranslucentRegular(
       final List<KMaterialAlbedoType> cases_albedo,
-      final List<KMaterialEmissiveType> cases_emissive,
       final List<KMaterialEnvironmentType> cases_env,
       final List<KMaterialNormalType> cases_normal,
       final List<KMaterialSpecularType> cases_specular)
@@ -145,32 +144,29 @@ import com.io7m.r1.types.RVectorI3F;
 
       for (final KMaterialAlbedoType a : cases_albedo) {
         assert a != null;
-        for (final KMaterialEmissiveType e : cases_emissive) {
-          assert e != null;
-          for (final KMaterialEnvironmentType ev : cases_env) {
-            assert ev != null;
-            for (final KMaterialNormalType n : cases_normal) {
-              assert n != null;
-              for (final KMaterialSpecularType s : cases_specular) {
-                assert s != null;
 
-                if (RKDMaterialCases.valid(
-                  ev,
-                  s,
-                  KMaterialDepthConstant.constant(),
-                  a) == false) {
-                  continue;
-                }
+        for (final KMaterialEnvironmentType ev : cases_env) {
+          assert ev != null;
+          for (final KMaterialNormalType n : cases_normal) {
+            assert n != null;
+            for (final KMaterialSpecularType s : cases_specular) {
+              assert s != null;
 
-                cases.add(KMaterialTranslucentRegular.newMaterial(
-                  uv_matrix,
-                  a,
-                  KMaterialAlphaOneMinusDot.oneMinusDot(1.0f),
-                  e,
-                  ev,
-                  n,
-                  s));
+              if (RKDMaterialCases.valid(
+                ev,
+                s,
+                KMaterialDepthConstant.constant(),
+                a) == false) {
+                continue;
               }
+
+              cases.add(KMaterialTranslucentRegular.newMaterial(
+                uv_matrix,
+                a,
+                KMaterialAlphaOneMinusDot.oneMinusDot(1.0f),
+                ev,
+                n,
+                s));
             }
           }
         }
@@ -474,7 +470,6 @@ import com.io7m.r1.types.RVectorI3F;
     this.cases_geom_translucent_regular =
       RKDMaterialCases.makeCasesGeometryTranslucentRegular(
         this.cases_albedo,
-        this.cases_emissive,
         this.cases_env,
         this.cases_normal,
         this.cases_specular);

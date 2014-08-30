@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -37,7 +37,6 @@ import com.io7m.r1.types.RTransformTextureType;
   {
     private KMaterialAlbedoType                 albedo;
     private KMaterialAlphaType                  alpha;
-    private KMaterialEmissiveType               emissive;
     private KMaterialEnvironmentType            environment;
     private KMaterialNormalType                 normal;
     private KMaterialSpecularType               specular;
@@ -48,7 +47,6 @@ import com.io7m.r1.types.RTransformTextureType;
       this.uv_matrix = RMatrixI3x3F.identity();
       this.albedo = KMaterialAlbedoUntextured.white();
       this.alpha = KMaterialAlphaConstant.constant(1.0f);
-      this.emissive = KMaterialEmissiveNone.none();
       this.environment = KMaterialEnvironmentNone.none();
       this.normal = KMaterialNormalVertex.vertex();
       this.specular = KMaterialSpecularNone.none();
@@ -61,7 +59,6 @@ import com.io7m.r1.types.RTransformTextureType;
       this.uv_matrix = in_previous.uv_matrix;
       this.alpha = in_previous.alpha;
       this.albedo = in_previous.albedo;
-      this.emissive = in_previous.emissive;
       this.environment = in_previous.environment;
       this.normal = in_previous.normal;
       this.specular = in_previous.specular;
@@ -76,7 +73,6 @@ import com.io7m.r1.types.RTransformTextureType;
         this.uv_matrix,
         this.albedo,
         this.alpha,
-        this.emissive,
         this.environment,
         this.normal,
         this.specular);
@@ -92,12 +88,6 @@ import com.io7m.r1.types.RTransformTextureType;
       final KMaterialAlphaType in_alpha)
     {
       this.alpha = NullCheck.notNull(in_alpha, "Alpha");
-    }
-
-    @Override public void setEmissive(
-      final KMaterialEmissiveType in_emissive)
-    {
-      this.emissive = NullCheck.notNull(in_emissive, "Emissive");
     }
 
     @Override public void setEnvironment(
@@ -155,8 +145,6 @@ import com.io7m.r1.types.RTransformTextureType;
    *          The normal mapping parameters
    * @param in_albedo
    *          The albedo parameters
-   * @param in_emissive
-   *          The emission parameters
    * @param in_environment
    *          The environment mapping parameters
    * @param in_specular
@@ -176,7 +164,6 @@ import com.io7m.r1.types.RTransformTextureType;
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final KMaterialAlbedoType in_albedo,
     final KMaterialAlphaType in_alpha,
-    final KMaterialEmissiveType in_emissive,
     final KMaterialEnvironmentType in_environment,
     final KMaterialNormalType in_normal,
     final KMaterialSpecularType in_specular)
@@ -186,17 +173,14 @@ import com.io7m.r1.types.RTransformTextureType;
     KMaterialVerification.materialVerifyTranslucentRegular(
       in_albedo,
       in_alpha,
-      in_emissive,
       in_environment,
       in_normal,
       in_specular);
 
     final String code =
-      KMaterialCodes.makeCodeDeferredGeometryRegular(
-        in_alpha,
-        KMaterialDepthConstant.constant(),
+      KMaterialCodes.makeCodeTranslucentRegularLit(
         in_albedo,
-        in_emissive,
+        in_alpha,
         in_environment,
         in_normal,
         in_specular);
@@ -206,7 +190,6 @@ import com.io7m.r1.types.RTransformTextureType;
       in_uv_matrix,
       in_albedo,
       in_alpha,
-      in_emissive,
       in_environment,
       in_normal,
       in_specular);
@@ -215,7 +198,6 @@ import com.io7m.r1.types.RTransformTextureType;
   private final KMaterialAlbedoType                 albedo;
   private final KMaterialAlphaType                  alpha;
   private final String                              code;
-  private final KMaterialEmissiveType               emissive;
   private final KMaterialEnvironmentType            environment;
   private final KMaterialNormalType                 normal;
   private boolean                                   required_uv;
@@ -228,7 +210,6 @@ import com.io7m.r1.types.RTransformTextureType;
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final KMaterialAlbedoType in_albedo,
     final KMaterialAlphaType in_alpha,
-    final KMaterialEmissiveType in_emissive,
     final KMaterialEnvironmentType in_environment,
     final KMaterialNormalType in_normal,
     final KMaterialSpecularType in_specular)
@@ -237,7 +218,6 @@ import com.io7m.r1.types.RTransformTextureType;
     this.normal = NullCheck.notNull(in_normal, "Normal");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     this.albedo = NullCheck.notNull(in_albedo, "Albedo");
-    this.emissive = NullCheck.notNull(in_emissive, "Emissive");
     this.environment = NullCheck.notNull(in_environment, "Environment");
     this.specular = NullCheck.notNull(in_specular, "Specular");
     this.alpha = NullCheck.notNull(in_alpha, "Alpha");
@@ -245,7 +225,6 @@ import com.io7m.r1.types.RTransformTextureType;
     {
       int req = 0;
       req += in_albedo.texturesGetRequired();
-      req += in_emissive.texturesGetRequired();
       req += in_environment.texturesGetRequired();
       req += in_normal.texturesGetRequired();
       req += in_specular.texturesGetRequired();
@@ -256,7 +235,6 @@ import com.io7m.r1.types.RTransformTextureType;
       boolean req = false;
       req |= in_albedo.materialRequiresUVCoordinates();
       req |= in_alpha.materialRequiresUVCoordinates();
-      req |= in_emissive.materialRequiresUVCoordinates();
       req |= in_environment.materialRequiresUVCoordinates();
       req |= in_normal.materialRequiresUVCoordinates();
       req |= in_specular.materialRequiresUVCoordinates();
@@ -304,11 +282,6 @@ import com.io7m.r1.types.RTransformTextureType;
     return this.albedo;
   }
 
-  @Override public KMaterialEmissiveType materialRegularGetEmissive()
-  {
-    return this.emissive;
-  }
-
   @Override public KMaterialEnvironmentType materialRegularGetEnvironment()
   {
     return this.environment;
@@ -349,8 +322,6 @@ import com.io7m.r1.types.RTransformTextureType;
     b.append(this.alpha);
     b.append(" code=");
     b.append(this.code);
-    b.append(" emissive=");
-    b.append(this.emissive);
     b.append(" environment=");
     b.append(this.environment);
     b.append(" normal=");

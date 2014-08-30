@@ -55,7 +55,6 @@ import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialNormalType;
 import com.io7m.r1.kernel.types.KMaterialNormalVertex;
 import com.io7m.r1.kernel.types.KMaterialNormalVisitorType;
-import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialRefractiveMasked;
 import com.io7m.r1.kernel.types.KMaterialRefractiveType;
 import com.io7m.r1.kernel.types.KMaterialRefractiveUnmasked;
@@ -430,7 +429,6 @@ import com.io7m.r1.types.RException;
     final KMaterialAlphaType alpha = m.materialGetAlpha();
     final KMaterialNormalType normal = m.materialGetNormal();
     final KMaterialAlbedoType albedo = m.materialRegularGetAlbedo();
-    final KMaterialEmissiveType emissive = m.materialRegularGetEmissive();
     final KMaterialEnvironmentType envi = m.materialRegularGetEnvironment();
     final KMaterialSpecularType specular = m.materialRegularGetSpecular();
 
@@ -439,17 +437,15 @@ import com.io7m.r1.types.RException;
     RKForwardShader.fragmentShaderDeclarationsLight(b, l);
     RKForwardShader.fragmentShaderDeclarationsAlpha(b);
     RKForwardShader.fragmentShaderDeclarationsAlbedo(b, albedo);
-    RKForwardShader.fragmentShaderDeclarationsEmissive(b, emissive);
     RKForwardShader.fragmentShaderDeclarationsNormal(b, normal);
     RKForwardShader.fragmentShaderDeclarationsSpecular(b, specular);
     RKForwardShader.fragmentShaderDeclarationsEnvironment(b, envi);
     b.append("with\n");
     RKForwardShader.fragmentShaderValuesNormal(b, normal);
     RKForwardShader.fragmentShaderValuesAlpha(b, alpha);
-    RKForwardShader.fragmentShaderValuesEmission(b, emissive);
     RKForwardShader.fragmentShaderValuesSpecular(b, specular);
     RKForwardShader.fragmentShaderValuesEnvironment(b, envi);
-    RKForwardShader.fragmentShaderValuesLight(b, l, emissive, specular);
+    RKForwardShader.fragmentShaderValuesLight(b, l, specular);
     RKForwardShader.fragmentShaderValuesAlbedoTranslucent(b, albedo);
     RKForwardShader.fragmentShaderValuesSurfaceTranslucent(b, envi);
     RKForwardShader.fragmentShaderValuesRGBATranslucentLit(b, specular);
@@ -482,68 +478,6 @@ import com.io7m.r1.types.RException;
     RKForwardShader.fragmentShaderValuesRGBATranslucentLitSpecularOnly(
       b,
       specular);
-    b.append("as\n");
-    b.append("  out out_0 = rgba;\n");
-    b.append("end;\n");
-    b.append("\n");
-  }
-
-  public static void fragmentShaderOpaqueLit(
-    final StringBuilder b,
-    final KLightType l,
-    final KMaterialOpaqueRegular m)
-  {
-    final KMaterialNormalType normal = m.materialGetNormal();
-    final KMaterialAlbedoType albedo = m.materialRegularGetAlbedo();
-    final KMaterialEmissiveType emissive = m.materialRegularGetEmissive();
-    final KMaterialEnvironmentType envi = m.materialRegularGetEnvironment();
-    final KMaterialSpecularType specular = m.materialRegularGetSpecular();
-
-    b.append("shader fragment f is\n");
-    RKForwardShader.fragmentShaderDeclarationsCommon(b, m);
-    RKForwardShader.fragmentShaderDeclarationsLight(b, l);
-    RKForwardShader.fragmentShaderDeclarationsAlbedo(b, albedo);
-    RKForwardShader.fragmentShaderDeclarationsEmissive(b, emissive);
-    RKForwardShader.fragmentShaderDeclarationsNormal(b, normal);
-    RKForwardShader.fragmentShaderDeclarationsSpecular(b, specular);
-    RKForwardShader.fragmentShaderDeclarationsEnvironment(b, envi);
-    b.append("with\n");
-    RKForwardShader.fragmentShaderValuesNormal(b, normal);
-    RKForwardShader.fragmentShaderValuesEmission(b, emissive);
-    RKForwardShader.fragmentShaderValuesSpecular(b, specular);
-    RKForwardShader.fragmentShaderValuesEnvironment(b, envi);
-    RKForwardShader.fragmentShaderValuesLight(b, l, emissive, specular);
-    RKForwardShader.fragmentShaderValuesAlbedoOpaque(b, albedo);
-    RKForwardShader.fragmentShaderValuesSurfaceOpaque(b, envi);
-    RKForwardShader.fragmentShaderValuesRGBAOpaqueLit(b, specular);
-    b.append("as\n");
-    b.append("  out out_0 = rgba;\n");
-    b.append("end;\n");
-    b.append("\n");
-  }
-
-  public static void fragmentShaderOpaqueUnlit(
-    final StringBuilder b,
-    final KMaterialOpaqueRegular m)
-  {
-    final KMaterialAlbedoType albedo = m.materialRegularGetAlbedo();
-    final KMaterialNormalType normal = m.materialGetNormal();
-    final KMaterialSpecularNone specular = KMaterialSpecularNone.none();
-    final KMaterialEnvironmentType envi = m.materialRegularGetEnvironment();
-
-    b.append("shader fragment f is\n");
-    RKForwardShader.fragmentShaderDeclarationsCommon(b, m);
-    RKForwardShader.fragmentShaderDeclarationsAlbedo(b, albedo);
-    RKForwardShader.fragmentShaderDeclarationsNormal(b, normal);
-    RKForwardShader.fragmentShaderDeclarationsSpecular(b, specular);
-    RKForwardShader.fragmentShaderDeclarationsEnvironment(b, envi);
-    b.append("with\n");
-    RKForwardShader.fragmentShaderValuesNormal(b, normal);
-    RKForwardShader.fragmentShaderValuesSpecular(b, specular);
-    RKForwardShader.fragmentShaderValuesEnvironment(b, envi);
-    RKForwardShader.fragmentShaderValuesAlbedoOpaque(b, albedo);
-    RKForwardShader.fragmentShaderValuesSurfaceOpaque(b, envi);
-    RKForwardShader.fragmentShaderValuesRGBAOpaqueUnlit(b);
     b.append("as\n");
     b.append("  out out_0 = rgba;\n");
     b.append("end;\n");
@@ -700,42 +634,6 @@ import com.io7m.r1.types.RException;
     }
   }
 
-  public static void fragmentShaderValuesEmission(
-    final StringBuilder b,
-    final KMaterialEmissiveType emissive)
-  {
-    try {
-      emissive
-        .emissiveAccept(new KMaterialEmissiveVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit constant(
-            final KMaterialEmissiveConstant m)
-          {
-            return Unit.unit();
-          }
-
-          @Override public Unit mapped(
-            final KMaterialEmissiveMapped m)
-          {
-            b.append("  -- Emission mapping\n");
-            b.append("  value p_emission = record Emission.t {\n");
-            b
-              .append("    amount = F.multiply (p_emission.amount, S.texture (t_emission, f_uv) [x])\n");
-            b.append("  };\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit none(
-            final KMaterialEmissiveNone m)
-          {
-            return Unit.unit();
-          }
-        });
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
   public static void fragmentShaderValuesEnvironment(
     final StringBuilder b,
     final KMaterialEnvironmentType envi)
@@ -787,7 +685,6 @@ import com.io7m.r1.types.RException;
   public static void fragmentShaderValuesLight(
     final StringBuilder b,
     final KLightType l,
-    final KMaterialEmissiveType emissive,
     final KMaterialSpecularType specular)
   {
     try {
@@ -795,31 +692,22 @@ import com.io7m.r1.types.RException;
         @Override public Unit lightDirectional(
           final KLightDirectional ld)
         {
-          RKForwardShader.fragmentShaderValuesLightDirectional(
-            b,
-            emissive,
-            specular);
+          RKForwardShader.fragmentShaderValuesLightDirectional(b, specular);
           return Unit.unit();
         }
 
         @Override public Unit lightProjective(
           final KLightProjectiveType lp)
         {
-          RKForwardShader.fragmentShaderValuesLightProjective(
-            b,
-            lp,
-            emissive,
-            specular);
+          RKForwardShader
+            .fragmentShaderValuesLightProjective(b, lp, specular);
           return Unit.unit();
         }
 
         @Override public Unit lightSpherical(
           final KLightSphereType ls)
         {
-          RKForwardShader.fragmentShaderValuesLightSpherical(
-            b,
-            emissive,
-            specular);
+          RKForwardShader.fragmentShaderValuesLightSpherical(b, specular);
           return Unit.unit();
         }
       });
@@ -830,7 +718,6 @@ import com.io7m.r1.types.RException;
 
   public static void fragmentShaderValuesLightDirectional(
     final StringBuilder b,
-    final KMaterialEmissiveType emissive,
     final KMaterialSpecularType specular)
   {
     try {
@@ -842,51 +729,13 @@ import com.io7m.r1.types.RException;
       b.append("      n\n");
       b.append("    );\n");
       b.append("\n");
-
-      emissive
-        .emissiveAccept(new KMaterialEmissiveVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit constant(
-            final KMaterialEmissiveConstant m)
-          {
-            b.append("  -- Directional emissive diffuse light term\n");
-            b.append("  value light_diffuse : vector_3f =\n");
-            b.append("    DirectionalLight.diffuse_color (\n");
-            b.append("      light_directional,\n");
-            b.append("      light_vectors,\n");
-            b.append("      p_emission.amount\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit mapped(
-            final KMaterialEmissiveMapped m)
-          {
-            b.append("  -- Directional emissive diffuse light term\n");
-            b.append("  value light_diffuse : vector_3f =\n");
-            b.append("    DirectionalLight.diffuse_color (\n");
-            b.append("      light_directional,\n");
-            b.append("      light_vectors,\n");
-            b.append("      p_emission.amount\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit none(
-            final KMaterialEmissiveNone m)
-          {
-            b.append("  -- Directional non-emissive diffuse light term\n");
-            b.append("  value light_diffuse : vector_3f =\n");
-            b.append("    DirectionalLight.diffuse_color (\n");
-            b.append("      light_directional,\n");
-            b.append("      light_vectors,\n");
-            b.append("      0.0\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-        });
+      b.append("  -- Directional diffuse light term\n");
+      b.append("  value light_diffuse : vector_3f =\n");
+      b.append("    DirectionalLight.diffuse_color (\n");
+      b.append("      light_directional,\n");
+      b.append("      light_vectors\n");
+      b.append("    );\n");
+      b.append("\n");
 
       specular
         .specularAccept(new KMaterialSpecularVisitorType<Unit, UnreachableCodeException>() {
@@ -992,7 +841,6 @@ import com.io7m.r1.types.RException;
   public static void fragmentShaderValuesLightProjective(
     final StringBuilder b,
     final KLightProjectiveType lp,
-    final KMaterialEmissiveType emissive,
     final KMaterialSpecularType specular)
   {
     try {
@@ -1067,54 +915,14 @@ import com.io7m.r1.types.RException;
           }
         });
 
-      emissive
-        .emissiveAccept(new KMaterialEmissiveVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit constant(
-            final KMaterialEmissiveConstant m)
-          {
-            b.append("  -- Projective emissive diffuse light term\n");
-            b.append("  value light_diffuse_unattenuated : vector_3f =\n");
-            b.append("    ProjectiveLight.diffuse_color (\n");
-            b.append("      light_projective,\n");
-            b.append("      light_vectors.vectors,\n");
-            b.append("      light_color,\n");
-            b.append("      p_emission.amount\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit mapped(
-            final KMaterialEmissiveMapped m)
-          {
-            b.append("  -- Projective emissive diffuse light term\n");
-            b.append("  value light_diffuse_unattenuated : vector_3f =\n");
-            b.append("    ProjectiveLight.diffuse_color (\n");
-            b.append("      light_projective,\n");
-            b.append("      light_vectors.vectors,\n");
-            b.append("      light_color,\n");
-            b.append("      p_emission.amount\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit none(
-            final KMaterialEmissiveNone m)
-          {
-            b.append("  -- Projective non-emissive diffuse light term\n");
-            b.append("  value light_diffuse_unattenuated : vector_3f =\n");
-            b.append("    ProjectiveLight.diffuse_color (\n");
-            b.append("      light_projective,\n");
-            b.append("      light_vectors.vectors,\n");
-            b.append("      light_color,\n");
-            b.append("      0.0\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-        });
-
+      b.append("  -- Projective diffuse light term\n");
+      b.append("  value light_diffuse_unattenuated : vector_3f =\n");
+      b.append("    ProjectiveLight.diffuse_color (\n");
+      b.append("      light_projective,\n");
+      b.append("      light_vectors.vectors,\n");
+      b.append("      light_color\n");
+      b.append("    );\n");
+      b.append("\n");
       b.append("  value light_diffuse : vector_3f =\n");
       b.append("    V3.multiply_scalar (\n");
       b.append("      light_diffuse_unattenuated,\n");
@@ -1355,7 +1163,6 @@ import com.io7m.r1.types.RException;
 
   public static void fragmentShaderValuesLightSpherical(
     final StringBuilder b,
-    final KMaterialEmissiveType emissive,
     final KMaterialSpecularType specular)
   {
     try {
@@ -1367,52 +1174,13 @@ import com.io7m.r1.types.RException;
       b.append("      n\n");
       b.append("    );\n");
       b.append("\n");
-
-      emissive
-        .emissiveAccept(new KMaterialEmissiveVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit constant(
-            final KMaterialEmissiveConstant m)
-          {
-            b.append("  -- Spherical emissive diffuse light term\n");
-            b.append("  value light_diffuse_unattenuated : vector_3f =\n");
-            b.append("    SphericalLight.diffuse_color (\n");
-            b.append("      light_spherical,\n");
-            b.append("      light_vectors.vectors,\n");
-            b.append("      p_emission.amount\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit mapped(
-            final KMaterialEmissiveMapped m)
-          {
-            b.append("  -- Spherical emissive diffuse light term\n");
-            b.append("  value light_diffuse_unattenuated : vector_3f =\n");
-            b.append("    SphericalLight.diffuse_color (\n");
-            b.append("      light_spherical,\n");
-            b.append("      light_vectors.vectors,\n");
-            b.append("      p_emission.amount\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit none(
-            final KMaterialEmissiveNone m)
-          {
-            b.append("  -- Spherical non-emissive diffuse light term\n");
-            b.append("  value light_diffuse_unattenuated : vector_3f =\n");
-            b.append("    SphericalLight.diffuse_color (\n");
-            b.append("      light_spherical,\n");
-            b.append("      light_vectors.vectors,\n");
-            b.append("      0.0\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-        });
-
+      b.append("  -- Spherical diffuse light term\n");
+      b.append("  value light_diffuse_unattenuated : vector_3f =\n");
+      b.append("    SphericalLight.diffuse_color (\n");
+      b.append("      light_spherical,\n");
+      b.append("      light_vectors.vectors\n");
+      b.append("    );\n");
+      b.append("\n");
       b.append("  value light_diffuse : vector_3f =\n");
       b.append("    V3.multiply_scalar (\n");
       b.append("      light_diffuse_unattenuated,\n");

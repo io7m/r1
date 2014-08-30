@@ -27,7 +27,6 @@ module Depth is
   import com.io7m.parasol.Fragment;
 
   import com.io7m.r1.core.Albedo;
-  import com.io7m.r1.core.Pack;
 
   shader vertex depth_simple_v is
     in v_position              : vector_3f;
@@ -69,26 +68,6 @@ module Depth is
   shader program depth_DepC is
     vertex   depth_simple_v;
     fragment depth_DepC_f;
-  end;
-
-  --
-  -- Rendering of the depth values of constant-depth objects into the color buffer,
-  -- packed into four 4-bit cells. This is for use on platforms that do not
-  -- have depth textures.
-  --
-
-  shader fragment depth_DepC4444_f is
-    in f_position : vector_4f;
-    out out_0     : vector_4f as 0;
-  with
-    value rgba = Pack.pack4444 (Fragment.coordinate [z]);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program depth_DepC4444 is
-    vertex   depth_simple_v;
-    fragment depth_DepC4444_f;
   end;
 
   --
@@ -150,37 +129,6 @@ module Depth is
   shader program depth_DepA is
     vertex   depth_textured_v;
     fragment depth_DepA_f;
-  end;
-
-  --
-  -- Rendering of the depth values of mapped-depth objects 
-  -- into the color buffer, packed into four 4-bit cells. This is for use on 
-  -- platforms that do not have depth textures.
-  --
-
-  shader fragment depth_DepA4444_f is
-    in f_uv                 : vector_2f;
-    in f_position           : vector_4f;
-    out out_0               : vector_4f as 0;
-    parameter p_albedo      : Albedo.t;
-    parameter p_alpha_depth : float;
-    parameter t_albedo      : sampler_2d;
-  with
-    value albedo : vector_4f =
-      Albedo.textured (
-        t_albedo,
-        f_uv,
-        p_albedo
-      );
-    discard (F.lesser (albedo [w], p_alpha_depth));
-    value rgba = Pack.pack4444 (Fragment.coordinate [z]);
-  as
-    out out_0 = rgba;
-  end;
-
-  shader program depth_DepA4444 is
-    vertex   depth_textured_v;
-    fragment depth_DepA4444_f;
   end;
 
 end;

@@ -25,7 +25,6 @@ module ShadowBasic is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S2;
 
-  import com.io7m.r1.core.Pack;
   import com.io7m.r1.core.Transform;
 
   --
@@ -56,38 +55,6 @@ module ShadowBasic is
           Transform.clip_to_texture (p);
         value map_depth =
           S2.texture (t_shadow, current_tex [x y]) [x];
-        value map_depth_adjusted =
-          F.add (map_depth, shadow.depth_bias);
-      in
-        if F.lesser (current_tex [z], map_depth_adjusted) then
-          1.0
-        else
-          shadow.factor_min
-        end
-      end
-    end;
-
-  --
-  -- Given a packed RGBA4444 shadow map [t_shadow], and clip-coordinates [p], 
-  -- return the amount of light that could be reaching [p] (where
-  -- 0.0 is fully shadowed and 1.0 is fully lit).
-  --
-
-  function factor_packed4444 (
-    shadow   : t,
-    t_shadow : sampler_2d,
-    p        : vector_4f
-  ) : float =
-    if F.lesser (p [w], 0.0) then
-      0.0
-    else
-      let
-        value current_tex =
-          Transform.clip_to_texture (p);
-        value rgba =
-          S2.texture (t_shadow, current_tex [x y]);
-        value map_depth =
-          Pack.unpack4444 (rgba);
         value map_depth_adjusted =
           F.add (map_depth, shadow.depth_bias);
       in

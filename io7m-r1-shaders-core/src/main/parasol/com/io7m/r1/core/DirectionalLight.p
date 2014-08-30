@@ -74,21 +74,18 @@ module DirectionalLight is
 
   --
   -- Given a directional light [light], calculate the diffuse
-  -- color based on [d], with minimum emission [e].
+  -- color based on [d].
   --
 
   function diffuse_color (
     light : t,
-    d     : vectors,
-    e     : float
+    d     : vectors
   ) : vector_3f =
     let
       value factor =
         F.maximum (0.0, V3.dot (d.stl, d.normal));
-      value factor_e =
-        F.maximum (factor, e);
       value color =
-        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor_e);
+        V3.multiply_scalar (V3.multiply_scalar (light.color, light.intensity), factor);
     in
       color
     end;
