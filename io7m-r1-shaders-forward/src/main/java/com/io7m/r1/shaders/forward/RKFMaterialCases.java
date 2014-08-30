@@ -41,10 +41,6 @@ import com.io7m.r1.kernel.types.KMaterialAlphaType;
 import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
 import com.io7m.r1.kernel.types.KMaterialDepthConstant;
 import com.io7m.r1.kernel.types.KMaterialDepthType;
-import com.io7m.r1.kernel.types.KMaterialEmissiveConstant;
-import com.io7m.r1.kernel.types.KMaterialEmissiveMapped;
-import com.io7m.r1.kernel.types.KMaterialEmissiveNone;
-import com.io7m.r1.kernel.types.KMaterialEmissiveType;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentNone;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflection;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflectionMapped;
@@ -52,7 +48,6 @@ import com.io7m.r1.kernel.types.KMaterialEnvironmentType;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialNormalType;
 import com.io7m.r1.kernel.types.KMaterialNormalVertex;
-import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialRefractiveMasked;
 import com.io7m.r1.kernel.types.KMaterialRefractiveType;
 import com.io7m.r1.kernel.types.KMaterialRefractiveUnmasked;
@@ -93,64 +88,11 @@ import com.io7m.r1.types.RVectorI3F;
     return cases;
   }
 
-  private static List<KMaterialOpaqueRegular> makeCasesLitOpaqueRegular(
-    final List<KMaterialAlbedoType> cases_albedo,
-    final List<KMaterialEmissiveType> cases_emissive,
-    final List<KMaterialEnvironmentType> cases_env,
-    final List<KMaterialNormalType> cases_normal,
-    final List<KMaterialSpecularType> cases_specular)
-  {
-    try {
-      final List<KMaterialOpaqueRegular> cases =
-        new ArrayList<KMaterialOpaqueRegular>();
-      final RMatrixI3x3F<RTransformTextureType> uv_matrix =
-        RMatrixI3x3F.identity();
-
-      for (final KMaterialAlbedoType a : cases_albedo) {
-        assert a != null;
-        for (final KMaterialEmissiveType e : cases_emissive) {
-          assert e != null;
-          for (final KMaterialEnvironmentType ev : cases_env) {
-            assert ev != null;
-            for (final KMaterialNormalType n : cases_normal) {
-              assert n != null;
-              for (final KMaterialSpecularType s : cases_specular) {
-                assert s != null;
-
-                if (RKFMaterialCases.validOpaque(
-                  ev,
-                  s,
-                  KMaterialDepthConstant.constant(),
-                  a) == false) {
-                  continue;
-                }
-
-                cases.add(KMaterialOpaqueRegular.newMaterial(
-                  uv_matrix,
-                  a,
-                  KMaterialDepthConstant.constant(),
-                  e,
-                  ev,
-                  n,
-                  s));
-              }
-            }
-          }
-        }
-      }
-
-      return cases;
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
   private static
     List<KMaterialTranslucentRegular>
     makeCasesLitTranslucentRegular(
       final List<KMaterialAlbedoType> cases_albedo,
       final List<KMaterialAlphaType> cases_alpha,
-      final List<KMaterialEmissiveType> cases_emissive,
       final List<KMaterialEnvironmentType> cases_env,
       final List<KMaterialNormalType> cases_normal,
       final List<KMaterialSpecularType> cases_specular)
@@ -163,33 +105,30 @@ import com.io7m.r1.types.RVectorI3F;
 
       for (final KMaterialAlbedoType a : cases_albedo) {
         assert a != null;
-        for (final KMaterialEmissiveType e : cases_emissive) {
-          assert e != null;
-          for (final KMaterialAlphaType al : cases_alpha) {
-            assert al != null;
-            for (final KMaterialEnvironmentType ev : cases_env) {
-              assert ev != null;
-              for (final KMaterialNormalType n : cases_normal) {
-                assert n != null;
-                for (final KMaterialSpecularType s : cases_specular) {
-                  assert s != null;
+        for (final KMaterialAlphaType al : cases_alpha) {
+          assert al != null;
+          for (final KMaterialEnvironmentType ev : cases_env) {
+            assert ev != null;
+            for (final KMaterialNormalType n : cases_normal) {
+              assert n != null;
+              for (final KMaterialSpecularType s : cases_specular) {
+                assert s != null;
 
-                  if (RKFMaterialCases.validTranslucent(ev, s) == false) {
-                    continue;
-                  }
-
-                  cases.add(KMaterialTranslucentRegular.newMaterial(
-                    uv_matrix,
-                    a,
-                    al,
-                    e,
-                    ev,
-                    n,
-                    s));
+                if (RKFMaterialCases.validTranslucent(ev, s) == false) {
+                  continue;
                 }
+
+                cases.add(KMaterialTranslucentRegular.newMaterial(
+                  uv_matrix,
+                  a,
+                  al,
+                  ev,
+                  n,
+                  s));
               }
             }
           }
+
         }
       }
 
@@ -228,50 +167,6 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     return cases;
-  }
-
-  private static List<KMaterialOpaqueRegular> makeCasesUnlitOpaqueRegular(
-    final List<KMaterialAlbedoType> cases_albedo,
-    final List<KMaterialEnvironmentType> cases_env,
-    final List<KMaterialNormalType> cases_normal)
-  {
-    try {
-      final RMatrixI3x3F<RTransformTextureType> uv_matrix =
-        RMatrixI3x3F.identity();
-      final List<KMaterialOpaqueRegular> cases =
-        new ArrayList<KMaterialOpaqueRegular>();
-
-      for (final KMaterialAlbedoType a : cases_albedo) {
-        assert a != null;
-        for (final KMaterialEnvironmentType ev : cases_env) {
-          assert ev != null;
-          for (final KMaterialNormalType n : cases_normal) {
-            assert n != null;
-
-            if (RKFMaterialCases.validOpaque(
-              ev,
-              KMaterialSpecularNone.none(),
-              KMaterialDepthConstant.constant(),
-              a) == false) {
-              continue;
-            }
-
-            cases.add(KMaterialOpaqueRegular.newMaterial(
-              uv_matrix,
-              a,
-              KMaterialDepthConstant.constant(),
-              KMaterialEmissiveNone.none(),
-              ev,
-              n,
-              KMaterialSpecularNone.none()));
-          }
-        }
-      }
-
-      return cases;
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
   }
 
   private static
@@ -336,7 +231,6 @@ import com.io7m.r1.types.RVectorI3F;
                 uv_matrix,
                 a,
                 al,
-                KMaterialEmissiveNone.none(),
                 ev,
                 n,
                 KMaterialSpecularNone.none()));
@@ -357,17 +251,6 @@ import com.io7m.r1.types.RVectorI3F;
       new ArrayList<KMaterialDepthType>();
     cases.add(KMaterialDepthAlpha.alpha(1.0f));
     cases.add(KMaterialDepthConstant.constant());
-    return cases;
-  }
-
-  private static List<KMaterialEmissiveType> makeEmissiveCases(
-    final Texture2DStaticType t)
-  {
-    final List<KMaterialEmissiveType> cases =
-      new ArrayList<KMaterialEmissiveType>();
-    cases.add(KMaterialEmissiveNone.none());
-    cases.add(KMaterialEmissiveConstant.constant(1.0f));
-    cases.add(KMaterialEmissiveMapped.mapped(1.0f, t));
     return cases;
   }
 
@@ -426,27 +309,6 @@ import com.io7m.r1.types.RVectorI3F;
     return cases;
   }
 
-  /**
-   * @see KMaterialVerification
-   */
-
-  private static boolean validOpaque(
-    final KMaterialEnvironmentType ev,
-    final KMaterialSpecularType s,
-    final KMaterialDepthType d,
-    final KMaterialAlbedoType a)
-  {
-    if (KMaterialVerification.isValidEnvironmentSpecular(ev, s) == false) {
-      return false;
-    }
-
-    if (KMaterialVerification.isValidDepthMaterial(a, d) == false) {
-      return false;
-    }
-
-    return true;
-  }
-
   private static boolean validTranslucent(
     final KMaterialEnvironmentType ev,
     final KMaterialSpecularType s)
@@ -461,16 +323,13 @@ import com.io7m.r1.types.RVectorI3F;
   private final List<KMaterialAlbedoType>              cases_albedo;
   private final List<KMaterialAlphaType>               cases_alpha;
   private final List<KMaterialDepthType>               cases_depth;
-  private final List<KMaterialEmissiveType>            cases_emissive;
   private final List<KMaterialEnvironmentType>         cases_env;
-  private final List<KMaterialOpaqueRegular>           cases_lit_opaque_regular;
   private final List<KMaterialTranslucentRegular>      cases_lit_translucent_regular;
   private final List<KMaterialTranslucentSpecularOnly> cases_lit_translucent_specular_only;
   private final List<KMaterialNormalType>              cases_normal;
   private final List<KMaterialRefractiveType>          cases_refractive;
   private final List<KMaterialSpecularType>            cases_specular;
   private final List<KMaterialSpecularNotNoneType>     cases_specular_not_none;
-  private final List<KMaterialOpaqueRegular>           cases_unlit_opaque_regular;
   private final List<KMaterialTranslucentRefractive>   cases_unlit_translucent_refractive;
   private final List<KMaterialTranslucentRegular>      cases_unlit_translucent_regular;
 
@@ -664,7 +523,6 @@ import com.io7m.r1.types.RVectorI3F;
 
     this.cases_albedo = RKFMaterialCases.makeAlbedoCases(t);
     this.cases_alpha = RKFMaterialCases.makeAlphaCases();
-    this.cases_emissive = RKFMaterialCases.makeEmissiveCases(t);
     this.cases_depth = RKFMaterialCases.makeDepthCases();
     this.cases_env = RKFMaterialCases.makeEnvironmentCases(tc);
     this.cases_normal = RKFMaterialCases.makeNormalCases(t);
@@ -673,28 +531,13 @@ import com.io7m.r1.types.RVectorI3F;
       RKFMaterialCases.makeSpecularNotNoneCases(t);
     this.cases_refractive = RKFMaterialCases.makeRefractiveCases();
 
-    this.cases_lit_opaque_regular =
-      RKFMaterialCases.makeCasesLitOpaqueRegular(
-        this.cases_albedo,
-        this.cases_emissive,
-        this.cases_env,
-        this.cases_normal,
-        this.cases_specular);
-
     this.cases_lit_translucent_regular =
       RKFMaterialCases.makeCasesLitTranslucentRegular(
         this.cases_albedo,
         this.cases_alpha,
-        this.cases_emissive,
         this.cases_env,
         this.cases_normal,
         this.cases_specular);
-
-    this.cases_unlit_opaque_regular =
-      RKFMaterialCases.makeCasesUnlitOpaqueRegular(
-        this.cases_albedo,
-        this.cases_env,
-        this.cases_normal);
 
     this.cases_unlit_translucent_regular =
       RKFMaterialCases.makeCasesUnlitTranslucentRegular(
@@ -725,19 +568,9 @@ import com.io7m.r1.types.RVectorI3F;
     return this.cases_depth;
   }
 
-  public List<KMaterialEmissiveType> getCasesEmissive()
-  {
-    return this.cases_emissive;
-  }
-
   public List<KMaterialEnvironmentType> getCasesEnvironment()
   {
     return this.cases_env;
-  }
-
-  public List<KMaterialOpaqueRegular> getCasesLitOpaqueRegular()
-  {
-    return this.cases_lit_opaque_regular;
   }
 
   public List<KMaterialTranslucentRegular> getCasesLitTranslucentRegular()
@@ -765,11 +598,6 @@ import com.io7m.r1.types.RVectorI3F;
   public List<KMaterialSpecularType> getCasesSpecular()
   {
     return this.cases_specular;
-  }
-
-  public List<KMaterialOpaqueRegular> getCasesUnlitOpaqueRegular()
-  {
-    return this.cases_unlit_opaque_regular;
   }
 
   public

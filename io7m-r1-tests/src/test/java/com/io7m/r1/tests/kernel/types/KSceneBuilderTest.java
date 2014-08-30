@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -189,7 +189,6 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
           1.0f,
           1.0f,
           1.0f));
-      final KMaterialEmissiveType emissive = KMaterialEmissiveNone.none();
       final KMaterialEnvironmentType env = KMaterialEnvironmentNone.none();
       final KMaterialSpecularType spec = KMaterialSpecularNone.none();
       final KMaterialAlphaType alpha = KMaterialAlphaConstant.constant(1.0f);
@@ -198,7 +197,6 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
           uv_m,
           albedo,
           alpha,
-          emissive,
           env,
           normal,
           spec);
@@ -267,7 +265,6 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
           1.0f,
           1.0f,
           1.0f));
-      final KMaterialEmissiveType emissive = KMaterialEmissiveNone.none();
       final KMaterialEnvironmentType env = KMaterialEnvironmentNone.none();
       final KMaterialSpecularType spec = KMaterialSpecularNone.none();
       final KMaterialAlphaType alpha = KMaterialAlphaConstant.constant(1.0f);
@@ -276,7 +273,6 @@ public final class KSceneBuilderTest extends KSceneBuilderContract
           uv_m,
           albedo,
           alpha,
-          emissive,
           env,
           normal,
           spec);

@@ -68,6 +68,10 @@ import com.io7m.r1.kernel.types.KLightVisitorType;
 import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
 import com.io7m.r1.kernel.types.KMaterialDepthConstant;
 import com.io7m.r1.kernel.types.KMaterialDepthVisitorType;
+import com.io7m.r1.kernel.types.KMaterialEmissiveConstant;
+import com.io7m.r1.kernel.types.KMaterialEmissiveMapped;
+import com.io7m.r1.kernel.types.KMaterialEmissiveNone;
+import com.io7m.r1.kernel.types.KMaterialEmissiveVisitorType;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialNormalVertex;
 import com.io7m.r1.kernel.types.KMaterialNormalVisitorType;
@@ -75,12 +79,12 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.kernel.types.KSceneBatchedDeferredOpaque;
+import com.io7m.r1.kernel.types.KSceneBatchedDeferredOpaque.Group;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.kernel.types.KUnitSphereCacheType;
 import com.io7m.r1.kernel.types.KUnitSpherePrecision;
 import com.io7m.r1.kernel.types.KUnitSphereUsableType;
-import com.io7m.r1.kernel.types.KSceneBatchedDeferredOpaque.Group;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RMatrixI3x3F;
@@ -388,11 +392,42 @@ import com.io7m.r1.types.RVectorI4F;
       program,
       material);
     KRendererCommon.putMaterialRegular(program, material);
-    KShadingProgramCommon.putMaterialAlphaOpacity(program, 1.0f);
 
     KShadingProgramCommon.putFarClipDistance(program, mwi
       .getProjection()
       .projectionGetZFar());
+
+    material.materialGetEmissive().emissiveAccept(
+      new KMaterialEmissiveVisitorType<Unit, JCGLException>() {
+        @Override public Unit constant(
+          final KMaterialEmissiveConstant m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putMaterialEmissiveConstant(program, m);
+          return Unit.unit();
+        }
+
+        @Override public Unit mapped(
+          final KMaterialEmissiveMapped m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putMaterialEmissiveMapped(program, m);
+          KShadingProgramCommon.putTextureEmissive(
+            program,
+            texture_unit_context.withTexture2D(m.getTexture()));
+          return Unit.unit();
+        }
+
+        @Override public Unit none(
+          final KMaterialEmissiveNone m)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+      });
 
     material.materialOpaqueGetDepth().depthAccept(
       new KMaterialDepthVisitorType<Unit, JCGLException>() {

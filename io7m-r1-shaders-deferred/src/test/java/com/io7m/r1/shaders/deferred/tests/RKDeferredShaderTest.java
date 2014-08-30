@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,7 +19,6 @@ package com.io7m.r1.shaders.deferred.tests;
 import org.junit.Test;
 
 import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
-import com.io7m.r1.kernel.types.KMaterialAlphaConstant;
 import com.io7m.r1.kernel.types.KMaterialDepthConstant;
 import com.io7m.r1.kernel.types.KMaterialEmissiveNone;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentNone;
@@ -51,9 +50,8 @@ import com.io7m.r1.types.RTransformTextureType;
     RKDeferredShader.fragmentShaderGeometryRegular(
       b,
       m.materialRegularGetAlbedo(),
-      KMaterialAlphaConstant.opaque(),
       m.materialOpaqueGetDepth(),
-      m.materialRegularGetEmissive(),
+      m.materialGetEmissive(),
       m.materialRegularGetEnvironment(),
       m.materialGetNormal(),
       m.materialRegularGetSpecular(),

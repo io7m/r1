@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,7 +16,6 @@
 
 package com.io7m.r1.shaders.forward.tests;
 
-import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -25,10 +24,8 @@ import org.reflections.Reflections;
 
 import com.io7m.r1.kernel.types.KMaterialAlbedoType;
 import com.io7m.r1.kernel.types.KMaterialDepthType;
-import com.io7m.r1.kernel.types.KMaterialEmissiveType;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentType;
 import com.io7m.r1.kernel.types.KMaterialNormalType;
-import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialRefractiveType;
 import com.io7m.r1.kernel.types.KMaterialSpecularNotNoneType;
 import com.io7m.r1.kernel.types.KMaterialSpecularType;
@@ -71,16 +68,6 @@ import com.io7m.r1.shaders.forward.RKFMaterialCases;
     Assert.assertEquals(st.size(), c.getCasesNormal().size());
   }
 
-  @Test public void testEmissiveCases()
-  {
-    final Reflections r = RKMaterialCasesTest.getReflections();
-    final Set<Class<? extends KMaterialEmissiveType>> st =
-      r.getSubTypesOf(KMaterialEmissiveType.class);
-
-    final RKFMaterialCases c = new RKFMaterialCases();
-    Assert.assertEquals(st.size(), c.getCasesEmissive().size());
-  }
-
   @Test public void testEnvironmentCases()
   {
     final Reflections r = RKMaterialCasesTest.getReflections();
@@ -89,42 +76,6 @@ import com.io7m.r1.shaders.forward.RKFMaterialCases;
 
     final RKFMaterialCases c = new RKFMaterialCases();
     Assert.assertEquals(st.size(), c.getCasesEnvironment().size());
-  }
-
-  @Test public void testOpaqueLitCases()
-  {
-    final Reflections r = RKMaterialCasesTest.getReflections();
-
-    final int count;
-    {
-      final Set<Class<? extends KMaterialAlbedoType>> a =
-        r.getSubTypesOf(KMaterialAlbedoType.class);
-      final Set<Class<? extends KMaterialEmissiveType>> e =
-        r.getSubTypesOf(KMaterialEmissiveType.class);
-      final Set<Class<? extends KMaterialNormalType>> n =
-        r.getSubTypesOf(KMaterialNormalType.class);
-      final Set<Class<? extends KMaterialEnvironmentType>> ev =
-        r.getSubTypesOf(KMaterialEnvironmentType.class);
-      final Set<Class<? extends KMaterialSpecularType>> s =
-        r.getSubTypesOf(KMaterialSpecularType.class);
-      s.remove(KMaterialSpecularNotNoneType.class);
-
-      count = a.size() * e.size() * ev.size() * s.size() * n.size();
-    }
-
-    final RKFMaterialCases c = new RKFMaterialCases();
-    final List<KMaterialOpaqueRegular> oc = c.getCasesLitOpaqueRegular();
-
-    System.out.println("Expected cases : " + oc.size());
-    System.out.println("Types          : " + count);
-
-    Assert.assertTrue(oc.size() > 1);
-    Assert.assertTrue(oc.size() < count);
-    Assert.assertTrue(oc.size() > (count / 2));
-
-    for (final KMaterialOpaqueRegular o : oc) {
-      System.out.println(o.materialGetCode());
-    }
   }
 
   @Test public void testRefractiveCases()
