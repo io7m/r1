@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -40,6 +40,7 @@ import com.io7m.r1.kernel.types.KInstanceType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
+import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
@@ -151,7 +152,8 @@ import com.io7m.r1.types.RExceptionLightGroupLacksLights;
     testNullTranslucentLit_0()
   {
     final KSceneBuilderWithCreateType b = this.newBuilder();
-    final HashSet<KLightType> s = new HashSet<KLightType>();
+    final HashSet<KLightTranslucentType> s =
+      new HashSet<KLightTranslucentType>();
 
     b.sceneAddTranslucentLit(
       (KInstanceTranslucentLitType) TestUtilities.actuallyNull(),
@@ -170,7 +172,7 @@ import com.io7m.r1.types.RExceptionLightGroupLacksLights;
 
     b.sceneAddTranslucentLit(
       i,
-      (Set<KLightType>) TestUtilities.actuallyNull());
+      (Set<KLightTranslucentType>) TestUtilities.actuallyNull());
   }
 
   @Test public void testSceneAddShadowCaster_0()
@@ -362,7 +364,8 @@ import com.io7m.r1.types.RExceptionLightGroupLacksLights;
     final KSceneBuilderWithCreateType b = this.newBuilder();
     final KInstanceTranslucentLitType t = this.getTranslucent(g);
 
-    final Set<KLightType> lights = new HashSet<KLightType>();
+    final Set<KLightTranslucentType> lights =
+      new HashSet<KLightTranslucentType>();
     lights.add(KSceneBuilderContract.getSphericalLight());
     lights.add(KSceneBuilderContract.getSphericalLight());
     lights.add(KSceneBuilderContract.getSphericalLight());

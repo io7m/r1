@@ -20,7 +20,6 @@ import java.util.List;
 
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.DepthFunction;
-import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
@@ -193,13 +192,6 @@ import com.io7m.r1.types.RExceptionJCGL;
             RException,
             JCacheException
         {
-          /**
-           * Render scene with rendered shadow maps.
-           */
-
-          final FramebufferUsableType fb =
-            framebuffer.kFramebufferGetColorFramebuffer();
-
           gc.viewportSet(framebuffer.kFramebufferGetArea());
 
           gc.colorBufferMask(true, true, true, true);
@@ -231,11 +223,7 @@ import com.io7m.r1.types.RExceptionJCGL;
           final List<KTranslucentType> translucents = scene.getTranslucents();
 
           KRendererDeferred.this.translucent_renderer
-            .rendererEvaluateTranslucents(
-              framebuffer,
-              shadow_context,
-              mwo,
-              translucents);
+            .rendererEvaluateTranslucents(framebuffer, mwo, translucents);
 
           return Unit.unit();
         }

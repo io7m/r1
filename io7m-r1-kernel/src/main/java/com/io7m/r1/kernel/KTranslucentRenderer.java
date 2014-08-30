@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -41,14 +41,11 @@ import com.io7m.r1.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.r1.kernel.types.KInstanceTranslucentSpecularOnly;
 import com.io7m.r1.kernel.types.KLightDirectional;
-import com.io7m.r1.kernel.types.KLightProjectiveType;
-import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
-import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
+import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
+import com.io7m.r1.kernel.types.KLightTranslucentType;
+import com.io7m.r1.kernel.types.KLightTranslucentVisitorType;
 import com.io7m.r1.kernel.types.KLightType;
-import com.io7m.r1.kernel.types.KLightVisitorType;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialNormalVertex;
 import com.io7m.r1.kernel.types.KMaterialNormalVisitorType;
@@ -108,52 +105,6 @@ import com.io7m.r1.types.RExceptionJCGL;
       in_shader_lit_cache,
       in_refraction_renderer,
       in_log);
-  }
-
-  private static void putProjectiveWithShadow(
-    final KShadowMapContextType shadow_context,
-    final KTextureUnitContextType texture_unit_ctx,
-    final KLightProjectiveType light,
-    final JCBProgramType program)
-    throws RException,
-      JCGLException
-  {
-    light
-      .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
-        @Override public Unit projectiveWithoutShadow(
-          final KLightProjectiveWithoutShadow lp)
-          throws RException,
-            JCGLException
-        {
-          return Unit.unit();
-        }
-
-        @Override public Unit projectiveWithShadowBasic(
-          final KLightProjectiveWithShadowBasic lp)
-          throws RException,
-            JCGLException
-        {
-          KRendererCommon.putShadow(
-            shadow_context,
-            texture_unit_ctx,
-            program,
-            lp);
-          return Unit.unit();
-        }
-
-        @Override public Unit projectiveWithShadowVariance(
-          final KLightProjectiveWithShadowVariance lp)
-          throws RException,
-            JCGLException
-        {
-          KRendererCommon.putShadow(
-            shadow_context,
-            texture_unit_ctx,
-            program,
-            lp);
-          return Unit.unit();
-        }
-      });
   }
 
   /**
@@ -236,10 +187,9 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   private static void renderInstanceTranslucentRegularLit(
     final JCGLInterfaceCommonType gc,
-    final KShadowMapContextType shadow_context,
     final KTextureUnitContextType texture_unit_ctx,
     final KMatricesObserverType mwo,
-    final KLightType light,
+    final KLightTranslucentType light,
     final JCBProgramType program,
     final KInstanceTranslucentRegular instance)
     throws JCGLException,
@@ -249,65 +199,39 @@ import com.io7m.r1.types.RExceptionJCGL;
       program,
       mwo.getMatrixProjection());
 
-    light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
-      @Override public Unit lightDirectional(
-        final KLightDirectional l)
-        throws RException,
-          JCGLException
-      {
-        KTranslucentRenderer.renderInstanceTranslucentRegularLitDirectional(
-          gc,
-          texture_unit_ctx,
-          mwo,
-          l,
-          program,
-          instance);
-        return Unit.unit();
-      }
+    light
+      .lightTranslucentAccept(new KLightTranslucentVisitorType<Unit, JCGLException>() {
+        @Override public Unit lightTranslucentDirectional(
+          final KLightDirectional l)
+          throws RException,
+            JCGLException
+        {
+          KTranslucentRenderer
+            .renderInstanceTranslucentRegularLitDirectional(
+              gc,
+              texture_unit_ctx,
+              mwo,
+              l,
+              program,
+              instance);
+          return Unit.unit();
+        }
 
-      @Override public Unit lightProjective(
-        final KLightProjectiveType l)
-        throws RException,
-          JCGLException
-      {
-        return mwo.withProjectiveLight(
-          l,
-          new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
-            @Override public Unit run(
-              final KMatricesProjectiveLightType mwp)
-              throws JCGLException,
-
-                RException
-            {
-              KTranslucentRenderer
-                .renderInstanceTranslucentRegularLitProjective(
-                  gc,
-                  shadow_context,
-                  texture_unit_ctx,
-                  mwp,
-                  l,
-                  program,
-                  instance);
-              return Unit.unit();
-            }
-          });
-      }
-
-      @Override public Unit lightSpherical(
-        final KLightSphereType l)
-        throws RException,
-          JCGLException
-      {
-        KTranslucentRenderer.renderInstanceTranslucentRegularLitSpherical(
-          gc,
-          texture_unit_ctx,
-          mwo,
-          l,
-          program,
-          instance);
-        return Unit.unit();
-      }
-    });
+        @Override public Unit lightTranslucentSphericalWithoutShadow(
+          final KLightSphereWithoutShadow l)
+          throws RException,
+            JCGLException
+        {
+          KTranslucentRenderer.renderInstanceTranslucentRegularLitSpherical(
+            gc,
+            texture_unit_ctx,
+            mwo,
+            l,
+            program,
+            instance);
+          return Unit.unit();
+        }
+      });
   }
 
   private static void renderInstanceTranslucentRegularLitDirectional(
@@ -334,60 +258,6 @@ import com.io7m.r1.types.RExceptionJCGL;
           throws JCGLException,
             RException
         {
-          KTranslucentRenderer.renderInstanceTranslucentRegular(
-            gc,
-            texture_unit_ctx,
-            mwi,
-            program,
-            instance);
-          return Unit.unit();
-        }
-      });
-  }
-
-  private static void renderInstanceTranslucentRegularLitProjective(
-    final JCGLInterfaceCommonType gc,
-    final KShadowMapContextType shadow_context,
-    final KTextureUnitContextType texture_unit_ctx,
-    final KMatricesProjectiveLightType mwp,
-    final KLightProjectiveType light,
-    final JCBProgramType program,
-    final KInstanceTranslucentRegular instance)
-    throws JCGLException,
-      RException
-  {
-    KTranslucentRenderer.putProjectiveWithShadow(
-      shadow_context,
-      texture_unit_ctx,
-      light,
-      program);
-
-    KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
-      program,
-      mwp.getMatrixContext(),
-      mwp.getMatrixView(),
-      light);
-
-    KShadingProgramCommon.putMatrixProjectiveProjection(
-      program,
-      mwp.getMatrixProjectiveProjection());
-
-    KShadingProgramCommon.putTextureProjection(
-      program,
-      texture_unit_ctx.withTexture2D(light.lightProjectiveGetTexture()));
-
-    mwp.withInstance(
-      instance,
-      new KMatricesInstanceWithProjectiveFunctionType<Unit, JCGLException>() {
-        @Override public Unit run(
-          final KMatricesInstanceWithProjectiveType mwi)
-          throws JCGLException,
-            RException
-        {
-          KShadingProgramCommon.putMatrixProjectiveModelView(
-            program,
-            mwi.getMatrixProjectiveModelView());
-
           KTranslucentRenderer.renderInstanceTranslucentRegular(
             gc,
             texture_unit_ctx,
@@ -514,10 +384,9 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   private static void renderInstanceTranslucentSpecularOnlyLit(
     final JCGLInterfaceCommonType gc,
-    final KShadowMapContextType shadow_context,
     final KTextureUnitContextType texture_unit_ctx,
     final KMatricesObserverType mwo,
-    final KLightType light,
+    final KLightTranslucentType light,
     final JCBProgramType program,
     final KInstanceTranslucentSpecularOnly instance)
     throws JCGLException,
@@ -527,66 +396,40 @@ import com.io7m.r1.types.RExceptionJCGL;
       program,
       mwo.getMatrixProjection());
 
-    light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
-      @Override public Unit lightDirectional(
-        final KLightDirectional l)
-        throws RException,
-          JCGLException
-      {
-        KTranslucentRenderer
-          .renderInstanceTranslucentSpecularOnlyLitDirectional(
-            gc,
-            texture_unit_ctx,
-            mwo,
-            l,
-            program,
-            instance);
-        return Unit.unit();
-      }
+    light
+      .lightTranslucentAccept(new KLightTranslucentVisitorType<Unit, JCGLException>() {
+        @Override public Unit lightTranslucentDirectional(
+          final KLightDirectional l)
+          throws RException,
+            JCGLException
+        {
+          KTranslucentRenderer
+            .renderInstanceTranslucentSpecularOnlyLitDirectional(
+              gc,
+              texture_unit_ctx,
+              mwo,
+              l,
+              program,
+              instance);
+          return Unit.unit();
+        }
 
-      @Override public Unit lightProjective(
-        final KLightProjectiveType l)
-        throws RException,
-          JCGLException
-      {
-        return mwo.withProjectiveLight(
-          l,
-          new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
-            @Override public Unit run(
-              final KMatricesProjectiveLightType mwp)
-              throws JCGLException,
-                RException
-            {
-              KTranslucentRenderer
-                .renderInstanceTranslucentSpecularOnlyLitProjective(
-                  gc,
-                  shadow_context,
-                  texture_unit_ctx,
-                  mwp,
-                  l,
-                  program,
-                  instance);
-              return Unit.unit();
-            }
-          });
-      }
-
-      @Override public Unit lightSpherical(
-        final KLightSphereType l)
-        throws RException,
-          JCGLException
-      {
-        KTranslucentRenderer
-          .renderInstanceTranslucentSpecularOnlyLitSpherical(
-            gc,
-            texture_unit_ctx,
-            mwo,
-            l,
-            program,
-            instance);
-        return Unit.unit();
-      }
-    });
+        @Override public Unit lightTranslucentSphericalWithoutShadow(
+          final KLightSphereWithoutShadow l)
+          throws RException,
+            JCGLException
+        {
+          KTranslucentRenderer
+            .renderInstanceTranslucentSpecularOnlyLitSpherical(
+              gc,
+              texture_unit_ctx,
+              mwo,
+              l,
+              program,
+              instance);
+          return Unit.unit();
+        }
+      });
   }
 
   private static void renderInstanceTranslucentSpecularOnlyLitDirectional(
@@ -613,91 +456,6 @@ import com.io7m.r1.types.RExceptionJCGL;
           throws JCGLException,
             RException
         {
-          KTranslucentRenderer.renderInstanceTranslucentSpecularOnly(
-            gc,
-            texture_unit_ctx,
-            mwi,
-            program,
-            instance);
-          return Unit.unit();
-        }
-      });
-  }
-
-  private static void renderInstanceTranslucentSpecularOnlyLitProjective(
-    final JCGLInterfaceCommonType gc,
-    final KShadowMapContextType shadow_context,
-    final KTextureUnitContextType texture_unit_ctx,
-    final KMatricesProjectiveLightType mwp,
-    final KLightProjectiveType light,
-    final JCBProgramType program,
-    final KInstanceTranslucentSpecularOnly instance)
-    throws JCGLException,
-      RException
-  {
-    light
-      .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
-        @Override public Unit projectiveWithoutShadow(
-          final KLightProjectiveWithoutShadow lp)
-          throws RException,
-            JCGLException
-        {
-          return Unit.unit();
-        }
-
-        @Override public Unit projectiveWithShadowBasic(
-          final KLightProjectiveWithShadowBasic lp)
-          throws RException,
-            JCGLException
-        {
-          KRendererCommon.putShadow(
-            shadow_context,
-            texture_unit_ctx,
-            program,
-            lp);
-          return Unit.unit();
-        }
-
-        @Override public Unit projectiveWithShadowVariance(
-          final KLightProjectiveWithShadowVariance lp)
-          throws RException,
-            JCGLException
-        {
-          KRendererCommon.putShadow(
-            shadow_context,
-            texture_unit_ctx,
-            program,
-            lp);
-          return Unit.unit();
-        }
-      });
-
-    KShadingProgramCommon.putLightProjectiveWithoutTextureProjection(
-      program,
-      mwp.getMatrixContext(),
-      mwp.getMatrixView(),
-      light);
-
-    KShadingProgramCommon.putMatrixProjectiveProjection(
-      program,
-      mwp.getMatrixProjectiveProjection());
-
-    KShadingProgramCommon.putTextureProjection(
-      program,
-      texture_unit_ctx.withTexture2D(light.lightProjectiveGetTexture()));
-
-    mwp.withInstance(
-      instance,
-      new KMatricesInstanceWithProjectiveFunctionType<Unit, JCGLException>() {
-        @Override public Unit run(
-          final KMatricesInstanceWithProjectiveType mwi)
-          throws JCGLException,
-            RException
-        {
-          KShadingProgramCommon.putMatrixProjectiveModelView(
-            program,
-            mwi.getMatrixProjectiveModelView());
-
           KTranslucentRenderer.renderInstanceTranslucentSpecularOnly(
             gc,
             texture_unit_ctx,
@@ -760,6 +518,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     assert r != null;
     return r;
   }
+
   private static String shaderCodeSpecularOnly(
     final KLightType light,
     final KMaterialTranslucentSpecularOnly material)
@@ -776,6 +535,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     assert r != null;
     return r;
   }
+
   private final JCGLImplementationType                  g;
   private final LogUsableType                           log;
   private final KRefractionRendererType                 refraction_renderer;
@@ -818,22 +578,16 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   @Override public void rendererEvaluateTranslucents(
     final KFramebufferForwardUsableType framebuffer,
-    final KShadowMapContextType shadow_context,
     final KMatricesObserverType mwo,
     final List<KTranslucentType> translucents)
     throws RException
   {
     try {
       NullCheck.notNull(framebuffer, "Framebuffer");
-      NullCheck.notNull(shadow_context, "Shadow map context");
       NullCheck.notNull(mwo, "Matrices");
       NullCheck.notNull(translucents, "Translucents");
 
-      this.rendererEvaluateTranslucentsActual(
-        framebuffer,
-        shadow_context,
-        mwo,
-        translucents);
+      this.rendererEvaluateTranslucentsActual(framebuffer, mwo, translucents);
 
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
@@ -844,7 +598,6 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   private void rendererEvaluateTranslucentsActual(
     final KFramebufferForwardUsableType framebuffer,
-    final KShadowMapContextType shadow_context,
     final KMatricesObserverType mwo,
     final List<KTranslucentType> translucents)
     throws JCGLException,
@@ -897,7 +650,6 @@ import com.io7m.r1.types.RExceptionJCGL;
 
               KTranslucentRenderer.this.renderTranslucentRegularLit(
                 gc,
-                shadow_context,
                 t,
                 mwo);
               return Unit.unit();
@@ -933,7 +685,6 @@ import com.io7m.r1.types.RExceptionJCGL;
 
               KTranslucentRenderer.this.renderTranslucentSpecularOnlyLit(
                 gc,
-                shadow_context,
                 t,
                 mwo);
               return Unit.unit();
@@ -948,7 +699,6 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   private void renderTranslucentRegularLit(
     final JCGLInterfaceCommonType gc,
-    final KShadowMapContextType shadow_context,
     final KTranslucentRegularLit t,
     final KMatricesObserverType mwo)
     throws RException,
@@ -956,12 +706,12 @@ import com.io7m.r1.types.RExceptionJCGL;
       JCacheException
   {
     final KTextureUnitAllocator unit_allocator = this.texture_units;
-    final Set<KLightType> lights = t.translucentGetLights();
+    final Set<KLightTranslucentType> lights = t.translucentGetLights();
 
     boolean first = true;
-    final Iterator<KLightType> iter = lights.iterator();
+    final Iterator<KLightTranslucentType> iter = lights.iterator();
     while (iter.hasNext()) {
-      final KLightType light = iter.next();
+      final KLightTranslucentType light = iter.next();
       assert light != null;
 
       final KInstanceTranslucentRegular instance = t.translucentGetInstance();
@@ -1010,7 +760,6 @@ import com.io7m.r1.types.RExceptionJCGL;
               {
                 KTranslucentRenderer.renderInstanceTranslucentRegularLit(
                   gc,
-                  shadow_context,
                   texture_unit_ctx,
                   mwo,
                   light,
@@ -1085,7 +834,6 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   private void renderTranslucentSpecularOnlyLit(
     final JCGLInterfaceCommonType gc,
-    final KShadowMapContextType shadow_context,
     final KTranslucentSpecularOnlyLit t,
     final KMatricesObserverType mwo)
     throws RException,
@@ -1093,7 +841,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       JCacheException
   {
     final KTextureUnitAllocator unit_allocator = this.texture_units;
-    final Set<KLightType> lights = t.translucentGetLights();
+    final Set<KLightTranslucentType> lights = t.translucentGetLights();
 
     /**
      * Specular-only materials are always rendered in purely additive mode.
@@ -1104,9 +852,9 @@ import com.io7m.r1.types.RExceptionJCGL;
     final KMaterialTranslucentSpecularOnly material =
       t.translucentGetInstance().getMaterial();
 
-    final Iterator<KLightType> iter = lights.iterator();
+    final Iterator<KLightTranslucentType> iter = lights.iterator();
     while (iter.hasNext()) {
-      final KLightType light = iter.next();
+      final KLightTranslucentType light = iter.next();
       assert light != null;
 
       final KInstanceTranslucentSpecularOnly instance =
@@ -1142,7 +890,6 @@ import com.io7m.r1.types.RExceptionJCGL;
                 KTranslucentRenderer
                   .renderInstanceTranslucentSpecularOnlyLit(
                     gc,
-                    shadow_context,
                     texture_unit_ctx,
                     mwo,
                     light,

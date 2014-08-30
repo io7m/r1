@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,9 +24,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.reflections.Reflections;
 
+import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KLightType;
-import com.io7m.r1.kernel.types.KLightWithTransformType;
-import com.io7m.r1.kernel.types.KShadowType;
 import com.io7m.r1.shaders.forward.RKFLightCases;
 
 @SuppressWarnings("static-method") public final class RKLightCasesTest
@@ -55,16 +54,11 @@ import com.io7m.r1.shaders.forward.RKFLightCases;
   @Test public void testLightCases()
   {
     final Reflections r = RKLightCasesTest.getReflections();
-    final Set<Class<? extends KLightType>> lt0 =
-      r.getSubTypesOf(KLightType.class);
-    final Set<Class<? extends KLightWithTransformType>> lt1 =
-      r.getSubTypesOf(KLightWithTransformType.class);
-    final Set<Class<? extends KShadowType>> st =
-      r.getSubTypesOf(KShadowType.class);
+    final Set<Class<? extends KLightTranslucentType>> lt0 =
+      r.getSubTypesOf(KLightTranslucentType.class);
 
     final Set<Class<?>> lt = new HashSet<Class<?>>();
     lt.addAll(lt0);
-    lt.addAll(lt1);
 
     /**
      * Remove any non-concrete types.

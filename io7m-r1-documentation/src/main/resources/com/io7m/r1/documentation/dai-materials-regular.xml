@@ -135,7 +135,8 @@
       of the light is equal to the final surface color. Emission is implemented as a 
       <s:link s:target="r1.dai.postproc.emission">postprocess</s:link> and
       therefore emissive surfaces do not represent true
-      <s:link s:target="r1.dai.lighting">light sources</s:link>.
+      <s:link s:target="r1.dai.lighting">light sources</s:link>. Additionally,
+      emission is not supported for translucent objects.
     </s:paragraph>
   </s:subsection>
 
