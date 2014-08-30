@@ -5,4 +5,3 @@ gaussian_blur_vertical_2f   : com.io7m.r1.postprocessing.PostprocessingBlur.blur
 fog                         : com.io7m.r1.postprocessing.PostprocessingFog.fog
 copy_rgba                   : com.io7m.r1.core.Copy.copy_rgba
 copy_rgba_depth             : com.io7m.r1.core.Copy.copy_rgba_depth
-copy_depth4444              : com.io7m.r1.core.Copy.copy_depth4444
