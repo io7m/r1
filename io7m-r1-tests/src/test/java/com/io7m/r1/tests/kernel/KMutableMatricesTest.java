@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -121,9 +121,9 @@ import com.io7m.r1.types.RVectorI4F;
       final QuaternionI4F orientation = new QuaternionI4F();
       final RVectorI3F<RSpaceRGBType> colour =
         new RVectorI3F<RSpaceRGBType>(0, 0, 0);
-      final float intensity = 0.0f;
-      final float range = 0.0f;
-      final float falloff = 0.0f;
+      final float intensity = 1.0f;
+      final float range = 1.0f;
+      final float falloff = 1.0f;
 
       final RMatrixM4x4F<RTransformProjectionType> m_projection =
         new RMatrixM4x4F<RTransformProjectionType>();

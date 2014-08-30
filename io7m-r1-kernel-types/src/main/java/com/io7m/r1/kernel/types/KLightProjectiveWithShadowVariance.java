@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,6 +20,7 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.r1.types.RException;
@@ -219,6 +220,8 @@ import com.io7m.r1.types.RVectorI3F;
   private final Texture2DStaticUsableType   texture;
   private final int                         textures;
   private final KTransformType              transform;
+  private final float                       range_inverse;
+  private final float                       falloff_inverse;
 
   private KLightProjectiveWithShadowVariance(
     final Texture2DStaticUsableType in_texture,
@@ -235,11 +238,24 @@ import com.io7m.r1.types.RVectorI3F;
     this.color = NullCheck.notNull(in_color, "Color");
     this.position = NullCheck.notNull(in_position, "Position");
     this.orientation = NullCheck.notNull(in_orientation, "Orientation");
-    this.range = in_range;
-    this.falloff = in_falloff;
     this.projection = NullCheck.notNull(in_projection, "Projection");
     this.texture = NullCheck.notNull(in_texture, "Texture");
     this.shadow = NullCheck.notNull(in_shadow, "Shadow");
+
+    this.range =
+      (float) RangeCheck.checkGreaterDouble(
+        in_range,
+        "range",
+        0.0,
+        "Minimum range");
+    this.falloff =
+      (float) RangeCheck.checkGreaterDouble(
+        in_falloff,
+        "Falloff",
+        0.0,
+        "Minimum falloff");
+    this.range_inverse = 1.0f / this.range;
+    this.falloff_inverse = 1.0f / this.falloff;
 
     this.transform =
       KTransformOST.newTransform(
@@ -340,5 +356,15 @@ import com.io7m.r1.types.RVectorI3F;
         E
   {
     return v.projectiveWithShadowVariance(this);
+  }
+
+  @Override public float lightProjectiveGetFalloffInverse()
+  {
+    return this.falloff_inverse;
+  }
+
+  @Override public float lightProjectiveGetRangeInverse()
+  {
+    return this.range_inverse;
   }
 }
