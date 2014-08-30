@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.concepts"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <s:section-title>Concepts</s:section-title>
+  <s:section-contents/>
+  <s:subsection xml:id="r1.dai.concepts.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      This section attempts to provide a rough overview of the concepts
+      present in the <s:term s:type="package">${project.parent.name}</s:term> package.
+      Specific implementation details, mathematics, and other technical information
+      is given in later sections that focus on each concept in detail.
+    </s:paragraph>
+  </s:subsection>
+  <s:subsection xml:id="r1.dai.concepts.renderers">
+    <s:subsection-title>Renderers</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">${project.parent.name}</s:term> package
+      consists of a set of <s:term s:type="term">renderers</s:term>. A
+      <s:term s:type="term">renderer</s:term> consumes an immutable
+      <s:link s:target="r1.dai.concepts.scenes">scene</s:link>
+      and produces an image, writing the image to a given
+      <s:link s:target="r1.dai.concepts.framebuffers">framebuffer</s:link>.
+    </s:paragraph>
+    <s:paragraph>
+      The renderers expose
+      an interface of <s:term s:type="term">conceptually</s:term> pure 
+      functions from scenes to images. That is, the renderers should be
+      considered to simply take scenes as input and return images as output.
+      In reality, because the Java language is not pure and because the code
+      is required to perform I/O in order to speak to the GPU, the renderer
+      functions are not <s:term s:type="term">really</s:term> pure. Nevertheless,
+      for the sake of ease of use, lack of surprising results, and correctness,
+      the renderers at least attempt to adhere to the idea of pure functional
+      rendering! This means that the renderers are very easy to integrate into
+      any existing system: They are simply functions that are evaluated whenever
+      the programmer wants an image. The renderers do not have their own "main loop",
+      they do not have any concept of time, do not remember any images that they
+      have produced previously, do not maintain any state of their own,
+      and simply write their results to a programmer-provided 
+      <s:link s:target="r1.dai.concepts.framebuffers">framebuffer</s:link>.
+      Passing the same immutable scene to a renderer multiple times should 
+      result in the same image each time.
+    </s:paragraph>
+  </s:subsection>
+  <s:subsection xml:id="r1.dai.concepts.scenes">
+    <s:subsection-title>Scenes</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">scene</s:term> is an immutable snapshot
+      of all <s:link s:target="r1.dai.concepts.instances">instances</s:link>
+      and <s:link s:target="r1.dai.concepts.lights">lights</s:link>
+      that contribute to an image. Note that a renderer expects to receive only those
+      instances and lights that are actually visible from the perspective of the
+      observer. This is a conscious design decision that frees the renderer from
+      the complicated task of trying to decide which objects are visible and
+      which are not. A programmer using the renderer is expected to be using
+      some sort of spatial partitioning data structure
+        <s:footnote>
+          The <s:link-external s:target="http://mvn.io7m.com/io7m-jspatial">jspatial</s:link-external>
+          package is intended to provide exactly these sorts of data structures.
+        </s:footnote>
+      to efficiently decide
+      which objects are visible for the current rendering call. This is essentially
+      the same approach taken by the OpenGL API: The API draws what it is told to draw,
+      and does not try (beyond clipping primitives based on the viewing frustum), to
+      intelligently decide what should and should not be drawn.
+    </s:paragraph>
+  </s:subsection>
+  <s:subsection xml:id="r1.dai.concepts.framebuffers">
+    <s:subsection-title>Framebuffers</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">framebuffer</s:term> is a
+      rectangular region of memory allocated on the GPU that can accept 
+      the results of rendering.
+      The programmer typically allocates one framebuffer, passes it to
+      a <s:term s:type="term">renderer</s:term> along with a
+      <s:link s:target="r1.dai.concepts.scenes">scene</s:link>,
+      and the renderer populates the given framebuffer with an image
+      of the rendered scene. The programmer can then copy the contents of
+      this framebuffer to the screen for viewing, pass it on to a separate
+      <s:link s:target="r1.dai.concepts.postprocessors">postprocessor</s:link>
+      for extra visual effects, use it as a texture to be applied to objects
+      in further rendered scenes, etc.
+    </s:paragraph>
+  </s:subsection>
+  <s:subsection xml:id="r1.dai.concepts.meshes">
+    <s:subsection-title>Meshes</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">mesh</s:term> is a collection of vertices 
+      that define a polyhedral object, along with a list of indices
+      that describe how to make triangles out of the given vertices.
+    </s:paragraph>
+    <s:paragraph>
+      Meshes are allocated on the GPU and can be shared between any number
+      of <s:link s:target="r1.dai.concepts.instances">instances</s:link> (meaning
+      that rendering 100 identical objects does not require storing 100 copies
+      of the mesh data).
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.concepts.transforms">
+    <s:subsection-title>Transforms</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">transform</s:term> moves coordinates in
+      one <s:link s:target="r1.dai.coords">coordinate space</s:link>
+      to another. Essentially, a transform is used to position and orient a
+      <s:link s:target="r1.dai.concepts.meshes">mesh</s:link> inside
+      a <s:term s:type="term">scene</s:term>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.concepts.camera">
+    <s:subsection-title>Camera</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">camera</s:term> defines both the
+      <s:term s:type="term">viewing position</s:term> and
+      <s:term s:type="term">viewing projection</s:term> for the
+      scene. The <s:term s:type="term">viewing projection</s:term>
+      describes the <s:term s:type="term">orthographic</s:term>
+      or <s:term s:type="term">perspective</s:term> projection used to
+      render the scene, and the <s:term s:type="term">viewing position</s:term>
+      is used to <s:link s:target="r1.dai.concepts.transforms">transform</s:link>
+      all instances and lights in the scene to
+      <s:link s:target="r1.dai.coords.eye-space">eye-space</s:link>
+      during rendering. The camera is represented by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KCamera.html">KCamera</s:link-external>
+      type.
+    </s:paragraph>
+    <s:paragraph>
+      A scene always contains a single <s:term s:type="term">camera</s:term>,
+      because, as mentioned earlier, a scene is supposed to represent the
+      instances and lights that are visible from the observation point that
+      the camera describes.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.concepts.materials">
+    <s:subsection-title>Materials</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">material</s:term> describes the surface properties
+      of an object. A <s:term s:type="term">material</s:term> may either be
+      <s:term s:type="term">opaque</s:term> or
+      <s:term s:type="term">translucent</s:term>. An object with a 
+      <s:term s:type="term">opaque</s:term>
+      material completely occludes the pixels of all other objects that appear
+      behind it. An object with a <s:term s:type="term">translucent</s:term>
+      material is blended with the objects that appear behind it.
+    </s:paragraph>  
+    <s:paragraph>  
+      Materials consist of a multitude
+      of different properties describing different aspects of the surface. For example,
+      most opaque materials have data describing all of the following:
+    </s:paragraph>
+    <s:formal-item s:kind="lists">
+      <s:formal-item-title>Opaque material data</s:formal-item-title>
+      <s:list-unordered>
+        <s:list-item>
+          The surface <s:term s:type="term">albedo</s:term>;  
+          the basic color of the surface prior to any lighting.
+        </s:list-item>
+        <s:list-item>
+          The surface <s:term s:type="term">depth</s:term> properties;  
+          to give per-pixel control over "transparency" without requiring
+          the overhead of making the material translucent.
+        </s:list-item>
+        <s:list-item>
+          The surface <s:term s:type="term">emissive</s:term> properties;  
+          to present the illusion of surfaces emitting light.
+        </s:list-item>
+        <s:list-item>
+          The surface <s:term s:type="term">environment</s:term> properties;  
+          to provide environment-mapped reflections and other effects.
+        </s:list-item>
+        <s:list-item>
+          The surface <s:term s:type="term">normal</s:term> properties;  
+          to provide per-pixel control of surface normal vectors ("normal mapping").
+        </s:list-item>
+        <s:list-item>
+          The surface <s:term s:type="term">specular</s:term> properties;  
+          to provide per-pixel control of surface specularity.
+        </s:list-item>
+      </s:list-unordered>
+    </s:formal-item>
+    <s:paragraph>
+      An extremely trivial material (with a simple red albedo and no other properties) 
+      applied to a square, lit by a directional light:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Material with plain red albedo</s:formal-item-title>
+      <s:image s:source="images/albedo_red.png">Plain red albedo</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      A complex material (with mapped normals, specular highlights, an environment map, and a textured albedo) 
+      applied to the same square, lit by a spherical light:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Complex material</s:formal-item-title>
+      <s:image s:source="images/material_complex.png">Complex material</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Materials are immutable once created, but are created through the use
+      of mutable builder types. This allows renderers to effectively support
+      "animated" materials without actually needing to know anything about them; 
+      the renderers see ordinary immutable materials, but the programmer is supplying
+      new materials each time the renderer is called, giving the illusion that one 
+      material is changing over time. As an example, the type of builders for 
+      opaque materials is
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialOpaqueBuilderType.html">KMaterialOpaqueBuilderType</s:link-external>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.concepts.instances">
+    <s:subsection-title>Instances</s:subsection-title>
+    <s:paragraph>
+      An <s:term s:type="term">instance</s:term> is essentially
+      a reference to a <s:link s:target="r1.dai.concepts.meshes">mesh</s:link>,
+      a <s:link s:target="r1.dai.concepts.transforms">transform</s:link> (to
+      position that mesh in the scene), and a
+      <s:link s:target="r1.dai.concepts.materials">material</s:link> to define
+      the appearance of the mesh surface.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.concepts.lights">
+    <s:subsection-title>Lights</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">light</s:term> describes a light source
+      within a scene. There are many different types of lights, each
+      with different behaviours. Lights may or may not cast shadows,
+      depending on their type. All lighting in the 
+      <s:term s:type="package">${project.parent.name}</s:term> package
+      is completely dynamic; there is no support for static lighting
+      in any form. Shadows are exclusively provided via
+      <s:term s:type="term">shadow-mapping</s:term>, resulting in
+      efficient per-pixel shadows.
+    </s:paragraph>
+    <s:paragraph>  
+      Types of lights include:
+    </s:paragraph>
+    <s:formal-item s:kind="lists">
+      <s:formal-item-title>Light types</s:formal-item-title>
+      <s:list-unordered>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightDirectional.html">KLightDirectional</s:link-external>
+          - a <s:term s:type="term">directional</s:term> light that 
+          simulates parallel light rays without any origin.
+          Directional lights cannot cast shadows (because directional lights do not have origins).
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSphereWithoutShadow.html">KLightSphereWithoutShadow</s:link-external>
+          - a <s:term s:type="term">spherical</s:term> light. A spherical
+          light casts light in all directions from a  given position in 
+          world-space, up to a given 
+          <s:term s:type="term">radius</s:term>. The emitted light is
+          attenuated over distance based on a configurable 
+          <s:term s:type="term">falloff</s:term> value. This type of light
+          is often referred to as a <s:term s:type="term">point</s:term> light
+          in other renderers.
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithoutShadow.html">KLightProjectiveWithoutShadow</s:link-external>
+          - a <s:term s:type="term">projective</s:term> light. 
+          A projective light effectively projects a given image onto the
+          scene from a  given position in world-space, up to a given 
+          <s:term s:type="term">radius</s:term>. The emitted light is
+          attenuated over distance based on a configurable 
+          <s:term s:type="term">falloff</s:term> value.
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowBasic.html">KLightProjectiveWithShadowBasic</s:link-external>
+          - a <s:term s:type="term">projective</s:term> light that can
+          also cast <s:term s:type="term">basic shadows</s:term>.
+          Basic shadows are very cheap to compute, but can suffer from
+          aliasing issues (resulting in sharp edges to shadows).
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowVariance.html">KLightProjectiveWithShadowVariance</s:link-external>
+          - a <s:term s:type="term">projective</s:term> light that can
+          also cast <s:term s:type="term">variance shadows</s:term>.
+          Variance shadows are slightly more expensive to compute than
+          <s:term s:type="term">basic shadows</s:term>, but can be filtered
+          by hardware, resulting in attractive soft shadows.
+        </s:list-item>
+      </s:list-unordered>
+    </s:formal-item>
+    <s:paragraph>
+      As with <s:link s:target="r1.dai.concepts.materials">materials</s:link> 
+      (and indeed, all other objects in the <s:term s:type="package">${project.parent.name}</s:term> package),
+      all lights are immutable once created, but are created through the use
+      of mutable builder types. This allows renderers to effectively support
+      "animated" lights without actually needing to know anything about them; 
+      the renderers see ordinary immutable lights, but the programmer is supplying
+      new lights each time the renderer is called, giving the illusion that lights are changing
+      over time. As an example, the type of builders for spherical lights
+      without shadows is
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSphereWithoutShadowBuilderType.html">KLightSphereWithoutShadowBuilderType</s:link-external>.
+    </s:paragraph>
+  </s:subsection>
+  <s:subsection xml:id="r1.dai.concepts.light_groups">
+    <s:subsection-title>Light groups</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Light groups</s:term> are a means to partition
+      a scene into separate lighting environments. An 
+      <s:term s:type="term">instance</s:term> belongs to exactly one
+      <s:term s:type="term">light group</s:term>, but a given 
+      <s:term s:type="term">light</s:term> can be placed into any number
+      of light groups.
+    </s:paragraph>
+    <s:paragraph>
+      The <s:term s:type="package">${project.parent.name}</s:term> package,
+      due to the current state of graphics hardware, implements purely
+      <s:term s:type="term">local illumination</s:term>
+      <s:footnote>
+        That is, each surface is rendered as if it was the only surface
+        in the scene. There are no light bounces between surfaces, and
+        shadows are created by explicit shadow mapping, rather than occuring
+        naturally as part of a physically accurate 
+        <s:term s:type="term">global illumination</s:term> algorithm.
+      </s:footnote>. Because of this,
+      when using lights that do not project shadows, it is possible for
+      lights to "bleed" through objects that would normally occlude their 
+      radiance had the renderer implemented physically correct lighting. As
+      an example:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Room without groups</s:formal-item-title>
+      <s:image s:source="images/room_no_groups.png">Room without groups</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The scene contains three lights: A red spherical light 
+      <s:term s:type="expression">s0</s:term> in the left room,
+      a white spherical light 
+      <s:term s:type="expression">s1</s:term> in the middle room, 
+      and a blue spherical light <s:term s:type="expression">s2</s:term>
+      in the right room. The scene contains four instances: The left room 
+      <s:term s:type="expression">i0</s:term>,
+      the middle room  <s:term s:type="expression">i1</s:term>, 
+      a piece of furniture <s:term s:type="expression">i2</s:term>
+      in the middle room, and the right room <s:term s:type="expression">i3</s:term>. 
+      None of the lights are configured to cast shadows. Note
+      that the red and blue lights bleed into the center room as if the two
+      dividing walls were not even there! Light groups can help to
+      solve this issue (without requiring shadow mapping).
+    </s:paragraph>
+    <s:paragraph>
+      First, three light groups are created:
+      <s:term s:type="expression">g0</s:term>, 
+      <s:term s:type="expression">g1</s:term>, and
+      <s:term s:type="expression">g2</s:term>. The light
+      <s:term s:type="expression">s0</s:term> and instance
+      <s:term s:type="expression">i0</s:term>, are added to
+      <s:term s:type="expression">g0</s:term>. The light
+      <s:term s:type="expression">s1</s:term> and instances
+      <s:term s:type="expression">i1</s:term> and
+      <s:term s:type="expression">i2</s:term>, are added to
+      <s:term s:type="expression">g1</s:term>. Finally,
+      light <s:term s:type="expression">s2</s:term> and
+      instance <s:term s:type="expression">i3</s:term> are
+      added to <s:term s:type="expression">g2</s:term>. With these
+      groups configured, the renderer produces the following image:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Room with groups</s:formal-item-title>
+      <s:image s:source="images/room_groups.png">Room with groups</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Instances <s:term s:type="expression">i1</s:term> and
+      <s:term s:type="expression">i2</s:term> are no longer affected
+      by lights <s:term s:type="expression">s0</s:term> and
+      <s:term s:type="expression">s2</s:term>, and so on. The image
+      looks more physically correct, at the expense of having somewhat
+      hard transitions between the rooms, without actually having to 
+      calculate any shadows
+      <s:footnote>
+        The believability of this effect is obviously
+        very scene-specific. Shadow mapping gives results that look
+        much more physically accurate, at the cost of being much more
+        computationally expensive.
+      </s:footnote>.
+    </s:paragraph>
+    <s:paragraph>
+      Light groups can also be used for other miscellaneous visual effects.
+      For example, an object in a scene could be highlighted by placing it
+      in its own light group, and adding a strong red directional light
+      to that group. No other objects in the scene would be affected by the
+      light and the object would, as a result, be displayed very conspicuously!
+    </s:paragraph>
+    <s:paragraph>
+      The majority of scenes will contain only a single light group. They
+      are intended to assist with working around the lack of 
+      <s:term s:type="term">global illumination</s:term>, and with 
+      implementing specific visual effects.
+    </s:paragraph>
+  </s:subsection>
+  <s:subsection xml:id="r1.dai.concepts.postprocessors">
+    <s:subsection-title>Postprocessors</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">postprocessor</s:term> is similar to a
+      <s:link s:target="r1.dai.concepts.renderers">renderer</s:link>
+      except that it accepts
+      a <s:link s:target="r1.dai.concepts.framebuffers">framebuffer</s:link>
+      as input
+      (as opposed to a <s:link s:target="r1.dai.concepts.scenes">scene</s:link>),
+      processes the image in the framebuffer in some manner, and
+      then writes the results to an output framebuffer (possibly the same
+      as the input framebuffer). It is used to provide visual effects such
+      as full-screen <s:term s:type="term">blurring</s:term>,
+      <s:term s:type="term">color-correction</s:term>, 
+      <s:term s:type="term">screen-space ambient occlusion</s:term>, and
+      others.
+    </s:paragraph>
+    <s:paragraph>
+      Typically, a <s:term s:type="term">postprocessor</s:term> accepts
+      a framebuffer that was populated by a 
+      <s:term s:type="term">deferred renderer</s:term>, and therefore has
+      access to much more per-pixel data than a typical image processor. For
+      example, for each pixel in the scene, a framebuffer from a deferred
+      renderer will contain at least the linear
+       <s:term s:type="term">depth</s:term>
+      value of that pixel, and the <s:term s:type="term">normal vector</s:term>
+      of the surface at that pixel. If the postprocessor also has access to the
+      <s:term s:type="term">viewing projection</s:term> that was used to produce
+      the scene, then it can actually efficiently reconstruct the original
+      <s:link s:target="r1.dai.coords.eye-space">eye-space</s:link>
+      position of the pixel! This allows for interesting effects
+      such as <s:term s:type="term">fog</s:term> and
+      <s:term s:type="term">depth-of-field</s:term> simulation, that rely on
+      knowing the original positions of objects within the scene - information
+      that would not usually be available to a simple image-based postprocessor.
+    </s:paragraph>
+  </s:subsection>
+</s:section>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.process"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Process</s:section-title>
+
+  <s:paragraph>
+    This section attempts to give a high-level view of the rendering
+    process as it occurs in the <s:term s:type="package">${project.parent.name}</s:term> 
+    package.
+  </s:paragraph>
+
+  <s:paragraph>
+    A rough diagram of the rendering process for a typical program is as follows,
+    with red nodes indicating actions taken by the programmer, and blue nodes
+    indicating actions performed by the 
+    <s:term s:type="package">${project.parent.name}</s:term> package:
+  </s:paragraph>
+
+  <s:formal-item s:kind="diagram">
+    <s:formal-item-title>Rendering Flow Chart</s:formal-item-title>
+    <s:image s:source="images/process_flow.png">Rendering Flow Chart</s:image>
+  </s:formal-item>
+
+  <s:paragraph>
+    During the <s:term s:type="term">initialization</s:term> stage, the
+    programmer is required to create a <s:term s:type="term">framebuffer</s:term>
+    that will contain the results of rendering. Then, the programmer loads
+    all of the <s:link s:target="r1.dai.meshes">meshes</s:link> that will be
+    used during rendering <s:footnote>
+      Of course, it may be that the programmer actually loads many more
+      meshes during the lifetime of the application in question. This step
+      is just included for the purposes of the process description.
+    </s:footnote>. Then, the programmer creates instances of any
+    <s:term s:type="term">renderers</s:term> and/or 
+    <s:term s:type="term">postprocessors</s:term> that will be used during
+    rendering.
+  </s:paragraph>
+  
+  <s:paragraph>
+    Most applications will enter into some form of 
+    <s:term s:type="term">rendering loop</s:term>, where a new image is
+    produced onto the screen at a rate of sixty or so per second. The
+    <s:term s:type="package">${project.parent.name}</s:term> package does
+    not have its own rendering loop: The programmer is simply required to
+    call the renderers provided by the package whenever a new image is
+    needed.
+  </s:paragraph>
+
+  <s:paragraph>
+    Ordinarily, the programmer will be rendering a scene of some description.
+    Most 3D simulations contain some sort of representation of a world containing
+    objects and entities, with at least one observer placed within that world,
+    with images produced of that world from the perspective of the observer. Almost
+    certainly, the world contains some sort of 
+    <s:term s:type="term">spatial data structure</s:term> that partitions
+    the world into sections in order to efficiently implement collision detection
+    algorithms, physics simulations, and for determining exactly which objects are
+    potentially visible from the perspective of the observer. The
+    <s:term s:type="package">${project.parent.name}</s:term> package remains
+    completely ignorant of these details: It expects the programmer to pass it
+    a list of objects and light sources to render, and does not make any attempt
+    to do any spatial partitioning or visibility calculations of its own. Therefore,
+    the first step taken by the programmer in most rendering loops is to work out
+    exactly what needs to be rendered, and then put together a list of things that
+    need to be rendered in a form that the 
+    <s:term s:type="package">${project.parent.name}</s:term> package can use.
+    Concretely, the programmer constructs
+    <s:link s:target="r1.dai.instances">instances</s:link> (associated with
+    <s:link s:target="r1.dai.materials">materials</s:link>) and
+    <s:link s:target="r1.dai.lighting">lights</s:link>, placing them into
+    an immutable snapshot known as a <s:link s:target="r1.dai.scenes">scene</s:link>.
+    Because all objects in the <s:term s:type="package">${project.parent.name}</s:term> package
+    are immutable, it may be that instances, materials, and lights are re-used from the
+    previous loop iteration (or submitted again with minor modifications via the use of mutable 
+    builders). This is how the illusion of animated materials, lights, and instances
+    are achieved in the <s:term s:type="package">${project.parent.name}</s:term> package:
+    If the programmer has created a light <s:term s:type="variable">L0</s:term> in
+    the previous rendering loop iteration, and submits a light <s:term s:type="variable">L1</s:term>
+    in the current loop iteration that is structurally identical to 
+    <s:term s:type="variable">L0</s:term> but with a slightly different intensity, then
+    there will appear to be a single light in the scene with an intensity that varies over 
+    time. The <s:term s:type="package">${project.parent.name}</s:term> package remains 
+    completely ignorant of the passage of time and doesn't need to be concerned with 
+    keeping any sort of internal state to handle animation - simplifying the 
+    implementation drastically.
+  </s:paragraph>
+  
+  <s:paragraph>
+    The <s:term s:type="package">${project.parent.name}</s:term> package takes the
+    immutable scene produced by the programmer and efficiently batches all of the
+    instances by material, aiming to reduce the number of state changes required
+    to render all of the given instances. The instances in the scene are also
+    separated into <s:term s:type="term">translucent</s:term> and 
+    <s:term s:type="term">opaque</s:term> groups. The programmer then passes
+    this batched scene to whichever renderer is currently being used. The renderer
+    generates any shadow maps required for the lights in the scene and then renders
+    all of the opaque instances to the given framebuffer. The programmer can then
+    optionally pass this framebuffer to a postprocessor if desired (to allow for
+    the application of effects such as 
+    <s:term s:type="term">screen space ambient occlusion</s:term>). Then, the
+    programmer submits the same batched scene to the renderer in order to allow
+    it to render the remaining translucent instances. Again, the programmer can
+    optionally pass the framebuffer to another postprocessor, or the contents of
+    the framebuffer can simply be copied to the screen for display.
+  </s:paragraph>
+
+  <s:paragraph>
+    Of course, the above process is simply one possible way to use the
+    <s:term s:type="package">${project.parent.name}</s:term> package. Real
+    applications might use the renderers to produce images that will then
+    be re-used in further scenes. For example, if a scene uses materials that
+    use <s:link s:target="r1.dai.environment-mapping">environment mapping</s:link>,
+    the programmer might pass six drastically simplified versions of a scene
+    to the renderer in order to produce the six faces of a 
+    <s:term s:type="term">cube map</s:term>.
+    This cube map may then be used in materials that are used with instances
+    to render a scene that will actually be displayed to the screen.
+  </s:paragraph>
+
+</s:section>

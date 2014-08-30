@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:document
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:document-title>${project.parent.name} ${project.version} Documentation</s:document-title>
+  <s:document-style>documentation.css</s:document-style>
+  <s:document-contents/>
+
+  <s:part>
+    <s:part-title>Package Information</s:part-title>
+    <s:part-contents />
+    <s:section>
+      <s:section-title>Orientation</s:section-title>
+      <s:subsection>
+        <s:subsection-title>Overview</s:subsection-title>
+        <s:paragraph>
+          The <s:term s:type="package">${project.parent.name}</s:term> package 
+          implements an aggressively minimalist 3D renderer.
+        </s:paragraph>
+      </s:subsection>
+      <s:subsection>
+        <s:subsection-title>Features</s:subsection-title>
+        <s:formal-item s:kind="marketing">
+          <s:formal-item-title>Features</s:formal-item-title>
+          <s:list-unordered>
+            <s:list-item>
+              A <s:term s:type="term">deferred rendering</s:term> core for 
+              <s:term s:type="term">opaque</s:term> objects.
+            </s:list-item>
+            <s:list-item>
+              A <s:term s:type="term">forward renderer</s:term>, supporting
+              a subset of the features of the 
+              <s:term s:type="term">deferred renderer</s:term>, for 
+              rendering <s:term s:type="term">translucent</s:term> objects.
+            </s:list-item>
+            <s:list-item>
+              A full dynamic lighting system, including both
+              <s:term s:type="term">basic</s:term> and
+              <s:term s:type="term">variance</s:term> shadow mapping. The use
+              of <s:term s:type="term">deferred rendering</s:term> allows for
+              potentially hundreds of dynamic lights per scene.
+            </s:list-item>
+            <s:list-item>
+              A detailed material system, allowing for artists and developers
+              to create surfaces with a wide variety of effects such as 
+              <s:term s:type="term">normal mapping</s:term>,
+              <s:term s:type="term">environment-mapped reflections</s:term>,
+              <s:term s:type="term">generic refraction</s:term>,
+              <s:term s:type="term">surface emission</s:term>,
+              <s:term s:type="term">mapped specular highlights</s:term>, etc,
+              without writing a single line of shader code. All materials are
+              immutable but are created via simple mutable builders in code, and so
+              are effectively dynamic
+                <s:footnote>
+                  All materials are immutable once created, but if a material
+                  is recreated every frame with varying parameters, the material
+                  becomes effectively dynamic.
+                </s:footnote>.
+            </s:list-item>
+            <s:list-item>
+              A variety of postprocessing effects such as 
+              <s:term s:type="term">box blurring</s:term>, 
+              <s:term s:type="term">fast approximate antialiasing (FXAA)</s:term>,
+              <s:term s:type="term">color correction</s:term>,
+              <s:term s:type="term">bloom</s:term>,
+              <s:term s:type="term">screen-space ambient occlusion (SSAO)</s:term>, etc.
+              Effects can be applied in any order.
+            </s:list-item>
+            <s:list-item>
+              Explicit control over all resource loading and caching. For
+              all <s:term s:type="term">transient</s:term> resources
+              <s:footnote>
+                Such as <s:term s:type="term">shaders</s:term>, 
+                <s:term s:type="term">temporary framebuffers</s:term>,
+                <s:term s:type="term">shadow maps</s:term>, etc.
+              </s:footnote>, the
+              programmer is required to provide the renderer with explicit 
+              <s:term s:type="term">caches</s:term>, and the caches themselves
+              are responsible for allocating and loading resources.
+            </s:list-item>
+            <s:list-item>
+              Extensive use of immutable objects for the purposes of correctness.
+              One of the driving design concepts is that the programmer passes
+              an immutable "snapshot" of the scene to be rendered to a rendering
+              function, and that rendering function will always return the same
+              image for that snapshot.
+            </s:list-item>
+            <s:list-item>
+              Simplicity. The implementation consists of a few thousand shaders
+              generated at compile-time from the Java <s:term s:type="term">material</s:term> 
+              and <s:term s:type="term">light</s:term> types defined in the renderer's
+              API. All of the usual bugs that plague programmers using 3D renderers that
+              directly expose shaders (such as passing incorrect parameters to shaders,
+              forgetting to pass required parameters, etc), are simply not present. The
+              system knows every possible <s:term s:type="term">light</s:term> and
+              <s:term s:type="term">material</s:term> combination, statically, and
+              knows how to pass the right parameters to the shaders that implement them.
+              The programmer doesn't have to worry about it.
+            </s:list-item>
+            <s:list-item>
+              Extensive use of static types. As with all
+              <s:link-external s:target="http://io7m.com">io7m</s:link-external> packages,
+              there is extreme emphasis on using the type system to make it difficult to
+              use the APIs incorrectly.
+            </s:list-item>
+            <s:list-item>
+              Portability. The renderer will run on any system supporting either
+              OpenGL <s:term s:type="constant">&gt;= 3.0</s:term> or
+              OpenGL ES <s:term s:type="constant">&gt;= 3</s:term>.
+            </s:list-item>
+          </s:list-unordered>
+        </s:formal-item>
+      </s:subsection>
+      <s:subsection>
+        <s:subsection-title>Non-features</s:subsection-title>
+        <s:paragraph>
+          The intention of the <s:term s:type="package">${project.parent.name}</s:term> 
+          package is to essentially expose an advanced <s:term s:type="term">fixed-function</s:term>
+          rendering pipeline that just happens to provide all of the advanced rendering
+          techniques expected of a modern computer game. Features specifically not implemented
+          by the package include:
+        </s:paragraph>
+        <s:formal-item s:kind="marketing">
+          <s:formal-item-title>Non-features</s:formal-item-title>
+          <s:list-unordered>
+            <s:list-item>
+              A scene graph. The renderer expects the programmer to provide
+              a set of <s:term s:type="term">instances</s:term> (with associated
+              <s:term s:type="term">materials</s:term>) and 
+              <s:term s:type="term">lights</s:term> once per frame, and the
+              renderer will obediently draw exactly those instances. This frees
+              the programmer from having to interact with a clumsy and type-unsafe
+              "object-oriented" scene graph as with other 3D engines, and from 
+              having to try to crowbar their own program's data structures into 
+              an existing graph system.
+            </s:list-item>
+            <s:list-item>
+              Spatial partitioning. The renderer knows nothing of the world
+              the programmer is trying to render. The programmer is expected to
+              have done the work of deciding which <s:term s:type="term">instances</s:term>
+              and <s:term s:type="term">lights</s:term> contribute to the current
+              image, and to provide only those <s:term s:type="term">lights</s:term>
+              and <s:term s:type="term">instances</s:term> for the current frame.
+              This means that the programmer is free to use any spatial
+              partitioning system desired.
+            </s:list-item>
+            <s:list-item>
+              Input handling. The renderer knows nothing about keyboards, mice, joysticks.
+              The programmer passes an immutable snapshot of a scene to the renderer, and
+              the renderer returns an image. This means that the programmer is free to use any 
+              input system desired without having to painfully integrate their own code with
+              an existing input system as with other 3D engines.
+            </s:list-item>
+            <s:list-item>
+              Audio. The renderer makes images, not sounds. This allows programmers to use
+              any audio system they want in their programs.
+            </s:list-item>
+            <s:list-item>
+              Skeletal animation. The input to the renderer is a set of triangle
+              <s:term s:type="term">meshes</s:term> in the form of
+              <s:term s:type="term">vertex buffer objects</s:term>. This means that
+              the programmer is free to use any skeletal animation system desired,
+              providing that the system is capable of producing 
+              <s:term s:type="term">vertex buffer objects</s:term> of the correct type
+              as a result.
+            </s:list-item>
+            <s:list-item>
+              Model loading. The input to the renderer is a set of triangle
+              <s:term s:type="term">meshes</s:term> in the form of
+              <s:term s:type="term">vertex buffer objects</s:term>. This means that
+              the programmer is free to use any model loading system desired,
+              providing that the system is capable of producing 
+              <s:term s:type="term">vertex buffer objects</s:term> of the correct type
+              as a result
+                <s:footnote>
+                  The renderer does define two brutally simple on-disk static
+                  <s:term s:type="term">mesh</s:term> formats for the sake of convenience,
+                  the test suite, and to store some of its own rendering resources
+                  <s:footnote>
+                    Such as the mesh shapes required to represent light volumes when
+                    performing deferred rendering.
+                  </s:footnote>, and provides tools to convert to those formats from
+                  <s:term s:type="term">COLLADA</s:term> documents, but the programmer
+                  is absolutely not required to use them.
+                </s:footnote>.
+            </s:list-item>
+            <s:list-item>
+              Future proofing. The average lifetime of a rendering system is about
+              five years. Due to the extremely rapid pace of advancement in graphics
+              hardware, the methods use to render graphics
+              <s:term s:type="term">today</s:term> will bear almost no relation to those
+              used five years into the future. The <s:term s:type="package">${project.parent.name}</s:term>
+              package is under no illusion that it will still be relevant in a decade's
+              time. It is designed to get work done <s:term s:type="term">today</s:term>,
+              using exactly those techniques that are relevant <s:term s:type="term">today</s:term>.
+              It will not be indefinitely expanded and grown organically, as this would
+              directly contradict the goal of having a 
+              <s:term s:type="term">minimalist</s:term> and <s:term s:type="term">correct</s:term> 
+              rendering system.
+            </s:list-item>
+            <s:list-item>
+              OpenGL ES 2 support. The ES 2 standard was written as a reaction to the
+              insane committee politics that plagued the OpenGL 2.* standards. It is
+              crippled to the point that it essentially cannot support almost any of
+              the rendering techniques present in the 
+              <s:term s:type="package">${project.parent.name}</s:term> package, and is
+              becoming increasingly irrelevant as the much saner ES 3 is adopted by
+              hardware vendors.
+            </s:list-item>
+          </s:list-unordered>
+        </s:formal-item>
+      </s:subsection>
+    </s:section>
+
+    <s:section>
+      <s:section-title>Installation</s:section-title>
+      <s:subsection>
+        <s:subsection-title>Source compilation</s:subsection-title>
+        <s:paragraph>
+          The project can be compiled and installed with
+          <s:link-external s:target="http://maven.apache.org">Maven</s:link-external>:
+        </s:paragraph>
+        <s:paragraph>
+          <s:verbatim s:type="example"><![CDATA[$ mvn -C clean install]]></s:verbatim>
+        </s:paragraph>
+      </s:subsection>
+
+      <s:subsection>
+        <s:subsection-title>Maven</s:subsection-title>
+        <s:paragraph>
+          Regular releases are made to the
+          <s:link-external s:target="http://search.maven.org/#search%7Cga%7C1%7C${project.parent.name}">Central Repository</s:link-external>,
+          so it's possible to use the <s:term s:type="package">${project.parent.name}</s:term>
+          package in your projects with the following Maven dependency:
+        </s:paragraph>
+        <s:paragraph>
+          <s:verbatim s:type="example"><![CDATA[<dependency>
+  <groupId>${project.groupId}</groupId>
+  <artifactId>${project.parent.artifactId}-kernel</artifactId>
+  <version>${project.version}</version>
+</dependency>]]></s:verbatim>
+        </s:paragraph>
+        <s:paragraph>
+          All <s:link-external s:target="http://io7m.com">io7m.com</s:link-external>
+          packages use Semantic Versioning
+          <s:footnote>
+            <s:link-external s:target="http://semver.org">http://semver.org</s:link-external>
+          </s:footnote>, which implies that it is always safe to use version ranges
+          with an exclusive upper bound equal to the next major version - the API of
+          the package will not change in a backwards-incompatible manner before the
+          next major version.
+        </s:paragraph>
+      </s:subsection>
+    </s:section>
+
+    <s:section>
+      <s:section-title>Platform Specific Issues</s:section-title>
+      <s:paragraph>
+        There are currently no known platform-specific issues.
+      </s:paragraph>
+    </s:section>
+
+    <s:section>
+      <s:section-title>License</s:section-title>
+      <s:paragraph>
+        All files distributed with the <s:term s:type="package">${project.parent.name}</s:term>
+        package are placed under the following license:
+        <s:verbatim s:type="license"><![CDATA[Copyright © 2014 <code@io7m.com> http://io7m.com
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.]]>
+        </s:verbatim>
+      </s:paragraph>
+    </s:section>
+  </s:part>
+
+  <s:part xml:id="r1.dai">
+    <s:part-title>Design and Implementation</s:part-title>
+    <s:part-contents/>
+
+    <xi:include href="dai-conventions.xml"/>
+    <xi:include href="dai-concepts.xml"/>
+    <xi:include href="dai-coords.xml"/>
+    <xi:include href="dai-process.xml"/>
+    <xi:include href="dai-materials.xml"/>
+    <xi:include href="dai-materials-regular.xml"/>
+    <xi:include href="dai-meshes.xml"/>
+    <xi:include href="dai-transforms.xml"/>
+    <xi:include href="dai-instances.xml"/>
+    <xi:include href="dai-scenes.xml"/>
+    <xi:include href="dai-deferred.xml"/>
+    <xi:include href="dai-forward-translucents.xml"/>
+    <xi:include href="dai-normal-mapping.xml"/>
+    <xi:include href="dai-environment-mapping.xml"/>
+    <xi:include href="dai-lighting.xml"/>
+    <xi:include href="dai-lighting-directional.xml"/>
+    <xi:include href="dai-lighting-spherical.xml"/>
+    <xi:include href="dai-lighting-projective.xml"/>
+    <xi:include href="dai-shadow-mapping-basic.xml"/>
+    <xi:include href="dai-shadow-mapping-variance.xml"/>
+    <xi:include href="dai-generic-refraction.xml"/>
+    <xi:include href="dai-postproc-emission.xml"/>
+  </s:part>
+
+  <s:part>
+    <s:part-title>API Reference</s:part-title>
+    <s:part-contents/>
+    <s:section>
+      <s:section-title>Javadoc</s:section-title>
+      <s:paragraph>
+        API documentation for the package is provided via the
+        included <s:link-external s:target="apidocs">Javadoc</s:link-external>.
+      </s:paragraph>
+    </s:section>
+  </s:part>
+
+</s:document>

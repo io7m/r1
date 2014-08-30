@@ -22,7 +22,7 @@ import com.io7m.jtensors.VectorI3F;
 /**
  * An immutable 3D vector type indexed by the coordinate space of the
  * components.
- * 
+ *
  * @param <T>
  *          A phantom type parameter describing the coordinate space
  */
@@ -36,6 +36,22 @@ import com.io7m.jtensors.VectorI3F;
   static {
     ZERO_FIELD = new RVectorI3F<RSpaceType>(0.0f, 0.0f, 0.0f);
     ONE_FIELD = new RVectorI3F<RSpaceType>(1.0f, 1.0f, 1.0f);
+  }
+
+  /**
+   * Construct a vector from the given vector.
+   *
+   * @param <U>
+   *          A phantom type parameter describing the coordinate space.
+   * @param v
+   *          A vector.
+   * @return A new vector.
+   */
+
+  public static final <U extends RSpaceType> RVectorI3F<U> fromI3F(
+    final VectorI3F v)
+  {
+    return new RVectorI3F<U>(v.getXF(), v.getYF(), v.getZF());
   }
 
   /**
@@ -68,7 +84,7 @@ import com.io7m.jtensors.VectorI3F;
 
   /**
    * Construct a new vector.
-   * 
+   *
    * @param ix
    *          The x component
    * @param iy
@@ -87,7 +103,7 @@ import com.io7m.jtensors.VectorI3F;
 
   /**
    * Construct a new vector.
-   * 
+   *
    * @param v
    *          The readable vector from which to take values
    */
