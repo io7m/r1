@@ -40,10 +40,6 @@ import com.io7m.r1.kernel.types.KMaterialAlbedoVisitorType;
 import com.io7m.r1.kernel.types.KMaterialAlphaConstant;
 import com.io7m.r1.kernel.types.KMaterialAlphaOneMinusDot;
 import com.io7m.r1.kernel.types.KMaterialAlphaVisitorType;
-import com.io7m.r1.kernel.types.KMaterialEmissiveConstant;
-import com.io7m.r1.kernel.types.KMaterialEmissiveMapped;
-import com.io7m.r1.kernel.types.KMaterialEmissiveNone;
-import com.io7m.r1.kernel.types.KMaterialEmissiveVisitorType;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentNone;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflection;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflectionMapped;
@@ -215,34 +211,6 @@ import com.io7m.r1.types.RException;
         }
       });
 
-    material.materialRegularGetEmissive().emissiveAccept(
-      new KMaterialEmissiveVisitorType<Unit, JCGLException>() {
-        @Override public Unit constant(
-          final KMaterialEmissiveConstant m)
-          throws RException
-        {
-          return Unit.unit();
-        }
-
-        @Override public Unit mapped(
-          final KMaterialEmissiveMapped m)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putTextureEmissive(
-            program,
-            units.withTexture2D(m.getTexture()));
-          return Unit.unit();
-        }
-
-        @Override public Unit none(
-          final KMaterialEmissiveNone m)
-          throws RException
-        {
-          return Unit.unit();
-        }
-      });
-
     material.materialRegularGetSpecular().specularAccept(
       new KMaterialSpecularVisitorType<Unit, JCGLException>() {
         @Override public Unit constant(
@@ -390,35 +358,6 @@ import com.io7m.r1.types.RException;
             JCGLException
         {
           KShadingProgramCommon.putMaterialAlbedoUntextured(program, m);
-          return Unit.unit();
-        }
-      });
-
-    material.materialRegularGetEmissive().emissiveAccept(
-      new KMaterialEmissiveVisitorType<Unit, JCGLException>() {
-        @Override public Unit constant(
-          final KMaterialEmissiveConstant m)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putMaterialEmissiveConstant(program, m);
-          return Unit.unit();
-        }
-
-        @Override public Unit mapped(
-          final KMaterialEmissiveMapped m)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putMaterialEmissiveMapped(program, m);
-          return Unit.unit();
-        }
-
-        @Override public Unit none(
-          final KMaterialEmissiveNone m)
-          throws RException,
-            JCGLException
-        {
           return Unit.unit();
         }
       });
