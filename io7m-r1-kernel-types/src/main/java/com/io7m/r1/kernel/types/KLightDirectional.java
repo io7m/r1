@@ -30,7 +30,8 @@ import com.io7m.r1.types.RVectorI3F;
  * </p>
  */
 
-@EqualityReference public final class KLightDirectional implements KLightType
+@EqualityReference public final class KLightDirectional implements
+  KLightTranslucentType
 {
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightDirectionalBuilderType
@@ -186,6 +187,17 @@ import com.io7m.r1.types.RVectorI3F;
   @Override public float lightGetIntensity()
   {
     return this.intensity;
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KLightTranslucentVisitorType<A, E>>
+    A
+    lightTranslucentAccept(
+      final V v)
+      throws RException,
+        E
+  {
+    return v.lightTranslucentDirectional(this);
   }
 
   @Override public int texturesGetRequired()

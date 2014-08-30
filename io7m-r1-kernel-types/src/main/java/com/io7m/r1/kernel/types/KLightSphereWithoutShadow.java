@@ -35,7 +35,8 @@ import com.io7m.r1.types.RVectorI3F;
  */
 
 @EqualityReference public final class KLightSphereWithoutShadow implements
-  KLightSphereType
+  KLightSphereType,
+  KLightTranslucentType
 {
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightSphereWithoutShadowBuilderType
@@ -265,6 +266,17 @@ import com.io7m.r1.types.RVectorI3F;
   @Override public KTransformType lightGetTransform()
   {
     return this.transform;
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KLightTranslucentVisitorType<A, E>>
+    A
+    lightTranslucentAccept(
+      final V v)
+      throws RException,
+        E
+  {
+    return v.lightTranslucentSphericalWithoutShadow(this);
   }
 
   @Override public

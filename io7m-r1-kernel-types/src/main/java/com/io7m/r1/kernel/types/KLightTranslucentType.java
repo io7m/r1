@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -14,36 +14,40 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel;
+package com.io7m.r1.kernel.types;
 
-import java.util.List;
-
-import com.io7m.r1.kernel.types.KTranslucentType;
 import com.io7m.r1.types.RException;
 
 /**
- * The type of renderers that can render translucent objects.
+ * The type of lights that can be applied to translucent instances.
  */
 
-public interface KTranslucentRendererType
+public interface KLightTranslucentType extends KLightType
 {
   /**
-   * Evaluate the given list of translucent instances.
+   * Be visited by the given generic visitor.
    *
-   * @param framebuffer
-   *          The framebuffer
-   * @param mwo
-   *          The current observer matrices
-   * @param translucents
-   *          The list of translucents
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
    *
    * @throws RException
-   *           If an error occurs.
+   *           Iff the visitor raises {@link RException}
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   *
+   * @param <A>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          A specific visitor subtype
    */
 
-  void rendererEvaluateTranslucents(
-    final KFramebufferForwardUsableType framebuffer,
-    final KMatricesObserverType mwo,
-    final List<KTranslucentType> translucents)
-    throws RException;
+    <A, E extends Throwable, V extends KLightTranslucentVisitorType<A, E>>
+    A
+    lightTranslucentAccept(
+      final V v)
+      throws RException,
+        E;
 }
