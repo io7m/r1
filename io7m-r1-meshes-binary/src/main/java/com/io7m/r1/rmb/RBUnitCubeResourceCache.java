@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -32,13 +32,12 @@ import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLArrayBuffersType;
 import com.io7m.jcanephora.api.JCGLIndexBuffersType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.kernel.types.KUnitSphere;
-import com.io7m.r1.kernel.types.KUnitSphereCacheType;
-import com.io7m.r1.kernel.types.KUnitSpherePrecision;
-import com.io7m.r1.kernel.types.KUnitSphereUsableType;
+import com.io7m.r1.kernel.types.KUnitCube;
+import com.io7m.r1.kernel.types.KUnitCubeCacheType;
+import com.io7m.r1.kernel.types.KUnitCubeUsableType;
 import com.io7m.r1.meshes.RMeshParserEventsVBO;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionIO;
@@ -46,16 +45,16 @@ import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * A cache that can load compressed and uncompressed binary meshes
- * representing unit spheres.
+ * representing unit cubes.
  */
 
-@EqualityReference public final class RBUnitSphereResourceCache extends
-  LRUCacheAbstract<KUnitSpherePrecision, KUnitSphereUsableType, KUnitSphere, RException> implements
-  KUnitSphereCacheType
+@EqualityReference public final class RBUnitCubeResourceCache extends
+  LRUCacheAbstract<Unit, KUnitCubeUsableType, KUnitCube, RException> implements
+  KUnitCubeCacheType
 {
   private static
     <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
-    KUnitSphere
+    KUnitCube
     fromStream(
       final G g,
       final InputStream stream,
@@ -66,12 +65,12 @@ import com.io7m.r1.types.RExceptionJCGL;
     final RMeshParserEventsVBO<G> events =
       RMeshParserEventsVBO.newEvents(g, UsageHint.USAGE_STATIC_DRAW);
     RBImporter.parseFromStream(stream, events, log);
-    return KUnitSphere.newSphere(events.getArray(), events.getIndices());
+    return KUnitCube.newCube(events.getArray(), events.getIndices());
   }
 
   private static
     <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
-    KUnitSphere
+    KUnitCube
     loadResource(
       final G g,
       final Class<?> base,
@@ -87,14 +86,14 @@ import com.io7m.r1.types.RExceptionJCGL;
         final InputStream is = base.getResourceAsStream(compressed);
         if (is != null) {
           s = new GZIPInputStream(is);
-          return RBUnitSphereResourceCache.fromStream(g, s, log);
+          return RBUnitCubeResourceCache.fromStream(g, s, log);
         }
       }
 
       {
         s = base.getResourceAsStream(uncompressed);
         if (s != null) {
-          return RBUnitSphereResourceCache.fromStream(g, s, log);
+          return RBUnitCubeResourceCache.fromStream(g, s, log);
         }
       }
 
@@ -139,7 +138,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   public static
     <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
-    KUnitSphereCacheType
+    KUnitCubeCacheType
     newCache(
       final G g,
       final Class<?> base,
@@ -152,7 +151,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
     final LRUCacheConfig config =
       LRUCacheConfig.empty().withMaximumCapacity(maximum_size);
-    return RBUnitSphereResourceCache.newCacheWithConfig(g, base, config, log);
+    return RBUnitCubeResourceCache.newCacheWithConfig(g, base, config, log);
   }
 
   /**
@@ -176,7 +175,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   public static
     <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
-    KUnitSphereCacheType
+    KUnitCubeCacheType
     newCacheWithConfig(
       final G g,
       final Class<?> base,
@@ -187,12 +186,12 @@ import com.io7m.r1.types.RExceptionJCGL;
     NullCheck.notNull(base, "Class");
     NullCheck.notNull(config, "Cache config");
 
-    final LRUCacheTrivial<KUnitSpherePrecision, KUnitSphereUsableType, KUnitSphere, RException> c =
+    final LRUCacheTrivial<Unit, KUnitCubeUsableType, KUnitCube, RException> c =
       LRUCacheTrivial.newCache(
-        RBUnitSphereResourceCache.newLoader(g, base, log),
+        RBUnitCubeResourceCache.newLoader(g, base, log),
         config);
 
-    return new RBUnitSphereResourceCache(c);
+    return new RBUnitCubeResourceCache(c);
   }
 
   /**
@@ -201,12 +200,11 @@ import com.io7m.r1.types.RExceptionJCGL;
    * resources of the package to which <code>base</code> belongs.
    * </p>
    * <p>
-   * Concretely, if given a class <code>x.y.Z</code> and precision
-   * {@link KUnitSpherePrecision#KUNIT_SPHERE_32}, the loader will attempt to
-   * load meshes from resources (in order of precedence):
+   * Concretely, if given a class <code>x.y.Z</code>, the loader will attempt
+   * to load meshes from resources (in order of precedence):
    * <ul>
-   * <li><code>/x/y/sphere32.rmbz</code> (a compressed mesh)</li>
-   * <li><code>/x/y/sphere32.rmb</code> (an uncompressed mesh)</li>
+   * <li><code>/x/y/cube.rmbz</code> (a compressed mesh)</li>
+   * <li><code>/x/y/cube.rmb</code> (an uncompressed mesh)</li>
    * </ul>
    * </p>
    *
@@ -219,12 +217,12 @@ import com.io7m.r1.types.RExceptionJCGL;
    * @param log
    *          A log interface
    *
-   * @return A unit sphere instance
+   * @return A unit cube instance
    */
 
   public static
     <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
-    JCacheLoaderType<KUnitSpherePrecision, KUnitSphere, RException>
+    JCacheLoaderType<Unit, KUnitCube, RException>
     newLoader(
       final G g,
       final Class<?> base,
@@ -234,9 +232,9 @@ import com.io7m.r1.types.RExceptionJCGL;
     NullCheck.notNull(base, "Class");
     NullCheck.notNull(log, "Log");
 
-    return new JCacheLoaderType<KUnitSpherePrecision, KUnitSphere, RException>() {
+    return new JCacheLoaderType<Unit, KUnitCube, RException>() {
       @Override public void cacheValueClose(
-        final KUnitSphere v)
+        final KUnitCube v)
         throws RException
       {
         try {
@@ -247,46 +245,21 @@ import com.io7m.r1.types.RExceptionJCGL;
       }
 
       @SuppressWarnings("synthetic-access") @Override public
-        KUnitSphere
+        KUnitCube
         cacheValueLoad(
-          final KUnitSpherePrecision key)
+          final Unit key)
           throws RException
       {
-        switch (key) {
-          case KUNIT_SPHERE_16:
-          {
-            return RBUnitSphereResourceCache.loadResource(
-              g,
-              base,
-              "sphere16.rmbz",
-              "sphere16.rmb",
-              log);
-          }
-          case KUNIT_SPHERE_32:
-          {
-            return RBUnitSphereResourceCache.loadResource(
-              g,
-              base,
-              "sphere32.rmbz",
-              "sphere32.rmb",
-              log);
-          }
-          case KUNIT_SPHERE_64:
-          {
-            return RBUnitSphereResourceCache.loadResource(
-              g,
-              base,
-              "sphere64.rmbz",
-              "sphere64.rmb",
-              log);
-          }
-        }
-
-        throw new UnreachableCodeException();
+        return RBUnitCubeResourceCache.loadResource(
+          g,
+          base,
+          "cube.rmbz",
+          "cube.rmb",
+          log);
       }
 
       @Override public BigInteger cacheValueSizeOf(
-        final KUnitSphere v)
+        final KUnitCube v)
       {
         return BigInteger.ONE;
       }
@@ -302,15 +275,15 @@ import com.io7m.r1.types.RExceptionJCGL;
    */
 
   public static
-    KUnitSphereCacheType
+    KUnitCubeCacheType
     wrap(
-      final LRUCacheType<KUnitSpherePrecision, KUnitSphereUsableType, KUnitSphere, RException> in_cache)
+      final LRUCacheType<Unit, KUnitCubeUsableType, KUnitCube, RException> in_cache)
   {
-    return new RBUnitSphereResourceCache(NullCheck.notNull(in_cache, "Cache"));
+    return new RBUnitCubeResourceCache(NullCheck.notNull(in_cache, "Cache"));
   }
 
-  private RBUnitSphereResourceCache(
-    final LRUCacheType<KUnitSpherePrecision, KUnitSphereUsableType, KUnitSphere, RException> in_cache)
+  private RBUnitCubeResourceCache(
+    final LRUCacheType<Unit, KUnitCubeUsableType, KUnitCube, RException> in_cache)
   {
     super(in_cache);
   }
