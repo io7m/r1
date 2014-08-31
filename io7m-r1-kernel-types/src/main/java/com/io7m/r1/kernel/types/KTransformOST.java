@@ -34,7 +34,7 @@ import com.io7m.r1.types.RVectorI3F;
 {
   /**
    * Construct a new transform.
-   * 
+   *
    * @param orientation
    *          The orientation
    * @param scale
@@ -138,12 +138,19 @@ import com.io7m.r1.types.RVectorI3F;
     MatrixM4x4F.setIdentity(m);
     MatrixM4x4F.translateByVector3FInPlace(m, this.translation);
 
-    MatrixM4x4F.set(m, 0, 0, m.get(0, 0) * this.scale.getXF());
-    MatrixM4x4F.set(m, 1, 1, m.get(1, 1) * this.scale.getYF());
-    MatrixM4x4F.set(m, 2, 2, m.get(2, 2) * this.scale.getZF());
+    {
+      final MatrixM4x4F temporary = context.getTemporaryMatrix4x4();
+      QuaternionM4F.makeRotationMatrix4x4(this.orientation, temporary);
+      MatrixM4x4F.multiplyInPlace(m, temporary);
+    }
 
-    final MatrixM4x4F temporary = context.getTemporaryMatrix4x4();
-    QuaternionM4F.makeRotationMatrix4x4(this.orientation, temporary);
-    MatrixM4x4F.multiplyInPlace(m, temporary);
+    {
+      final MatrixM4x4F temporary = context.getTemporaryMatrix4x4();
+      MatrixM4x4F.setIdentity(temporary);
+      MatrixM4x4F.set(temporary, 0, 0, this.scale.getXF());
+      MatrixM4x4F.set(temporary, 1, 1, this.scale.getYF());
+      MatrixM4x4F.set(temporary, 2, 2, this.scale.getZF());
+      MatrixM4x4F.multiplyInPlace(m, temporary);
+    }
   }
 }
