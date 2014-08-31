@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -372,12 +372,12 @@ final class ViewerSingleMainWindow implements Runnable
         KScene.newBuilder(view.getCamera());
 
       final ExampleSceneBuilderType b = new ExampleSceneBuilderType() {
-        @Override public TextureCubeStaticUsableType cubeTexture(
+        @Override public TextureCubeStaticUsableType cubeTextureClamped(
           final String name)
           throws RException
         {
           try {
-            return Runner.this.cache_cube.loadCube(name);
+            return Runner.this.cache_cube.loadCubeClamped(name);
           } catch (final ValidityException e) {
             throw new RuntimeException(e);
           } catch (final IOException e) {
@@ -500,6 +500,23 @@ final class ViewerSingleMainWindow implements Runnable
           } catch (final IOException e) {
             throw new RuntimeException(e);
           } catch (final JCGLException e) {
+            throw new RuntimeException(e);
+          }
+        }
+
+        @Override public TextureCubeStaticUsableType cubeTextureRepeated(
+          final String name)
+          throws RException
+        {
+          try {
+            return Runner.this.cache_cube.loadCubeRepeat(name);
+          } catch (final ValidityException e) {
+            throw new RuntimeException(e);
+          } catch (final IOException e) {
+            throw new RuntimeException(e);
+          } catch (final JCGLException e) {
+            throw new RuntimeException(e);
+          } catch (final ParsingException e) {
             throw new RuntimeException(e);
           }
         }
