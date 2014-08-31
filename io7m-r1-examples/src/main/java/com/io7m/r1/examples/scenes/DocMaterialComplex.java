@@ -85,7 +85,7 @@ public final class DocMaterialComplex implements ExampleSceneType
       .texture("tiles_normal.png")));
     material_b.setEnvironment(KMaterialEnvironmentReflection.reflection(
       0.4f,
-      scene.cubeTexture("toronto/cube.rxc")));
+      scene.cubeTextureClamped("toronto/cube.rxc")));
     material_b.setSpecular(KMaterialSpecularConstant.constant(
       new RVectorI3F<RSpaceRGBType>(0.0f, 1.0f, 1.0f),
       128.0f));

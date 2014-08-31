@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -29,8 +29,8 @@ import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
-import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
+import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
+import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflection;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
@@ -48,13 +48,13 @@ import com.io7m.r1.types.RVectorI3F;
  * A demo room.
  */
 
-public final class DemoRoom0 implements ExampleSceneType
+public final class DemoRoom1 implements ExampleSceneType
 {
   /**
    * Construct the example.
    */
 
-  public DemoRoom0()
+  public DemoRoom1()
   {
 
   }
@@ -159,22 +159,24 @@ public final class DemoRoom0 implements ExampleSceneType
         KFaceSelection.FACE_RENDER_FRONT);
 
     {
-      final KLightSphereWithoutShadowBuilderType door_sb =
-        KLightSphereWithoutShadow.newBuilder();
+      final KLightSphereTexturedCubeWithoutShadowBuilderType door_sb =
+        KLightSphereTexturedCubeWithoutShadow.newBuilder(scene
+          .cubeTextureRepeated("toronto/cube.rxc"));
       door_sb.setRadius(3.0f);
       door_sb.setPosition(new RVectorI3F<RSpaceWorldType>(-4.0f, 1.0f, 1.0f));
       door_sb.setColor(ExampleSceneUtilities.RGB_RED);
-      final KLightSphereWithoutShadow door_s_red = door_sb.build();
+      final KLightSphereTexturedCubeWithoutShadow door_s_red = door_sb.build();
 
       door_sb.setPosition(new RVectorI3F<RSpaceWorldType>(4.0f, 1.0f, 1.0f));
       door_sb.setColor(ExampleSceneUtilities.RGB_BLUE);
-      final KLightSphereWithoutShadow door_s_blue = door_sb.build();
+      final KLightSphereTexturedCubeWithoutShadow door_s_blue = door_sb.build();
 
       {
         final KSceneLightGroupBuilderType gb =
           scene.sceneNewLightGroup("room_center_group");
-        final KLightSphereWithoutShadowBuilderType sb =
-          KLightSphereWithoutShadow.newBuilder();
+        final KLightSphereTexturedCubeWithoutShadowBuilderType sb =
+          KLightSphereTexturedCubeWithoutShadow.newBuilder(scene
+            .cubeTextureRepeated("toronto/cube.rxc"));
         sb.setRadius(32.0f);
         sb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 2.0f, 0.0f));
 
@@ -188,8 +190,9 @@ public final class DemoRoom0 implements ExampleSceneType
       {
         final KSceneLightGroupBuilderType gb =
           scene.sceneNewLightGroup("room_left_group");
-        final KLightSphereWithoutShadowBuilderType sb =
-          KLightSphereWithoutShadow.newBuilder();
+        final KLightSphereTexturedCubeWithoutShadowBuilderType sb =
+          KLightSphereTexturedCubeWithoutShadow.newBuilder(scene
+            .cubeTextureRepeated("toronto/cube.rxc"));
         sb.setRadius(32.0f);
         sb.setColor(ExampleSceneUtilities.RGB_RED);
         sb.setPosition(new RVectorI3F<RSpaceWorldType>(-6.0f, 2.0f, 0.0f));
@@ -202,8 +205,9 @@ public final class DemoRoom0 implements ExampleSceneType
       {
         final KSceneLightGroupBuilderType gb =
           scene.sceneNewLightGroup("room_right_group");
-        final KLightSphereWithoutShadowBuilderType sb =
-          KLightSphereWithoutShadow.newBuilder();
+        final KLightSphereTexturedCubeWithoutShadowBuilderType sb =
+          KLightSphereTexturedCubeWithoutShadow.newBuilder(scene
+            .cubeTextureRepeated("toronto/cube.rxc"));
         sb.setRadius(32.0f);
         sb.setColor(ExampleSceneUtilities.RGB_BLUE);
         sb.setPosition(new RVectorI3F<RSpaceWorldType>(6.0f, 2.0f, 0.0f));

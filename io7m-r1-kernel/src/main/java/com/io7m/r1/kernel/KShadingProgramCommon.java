@@ -102,6 +102,8 @@ import com.io7m.r1.types.RVectorReadable4FType;
 {
   private static final String MATRIX_NAME_DEFERRED_PROJECTION        =
                                                                        "m_deferred_projective";
+  private static final String MATRIX_NAME_LIGHT_SPHERICAL            =
+                                                                       "m_light_spherical";
   private static final String MATRIX_NAME_MODEL                      =
                                                                        "m_model";
   private static final String MATRIX_NAME_MODELVIEW                  =
@@ -137,6 +139,8 @@ import com.io7m.r1.types.RVectorReadable4FType;
                                                                        "t_emission";
   private static final String TEXTURE_NAME_ENVIRONMENT               =
                                                                        "t_environment";
+  private static final String TEXTURE_NAME_LIGHT_SPHERICAL           =
+                                                                       "t_light_spherical";
   private static final String TEXTURE_NAME_NORMAL                    =
                                                                        "t_normal";
   private static final String TEXTURE_NAME_PROJECTION                =
@@ -1247,6 +1251,16 @@ import com.io7m.r1.types.RVectorReadable4FType;
       m);
   }
 
+  static void putMatrixLightSpherical(
+    final JCBProgramType program,
+    final RMatrixReadable3x3FType<RTransformTextureType> m)
+    throws JCGLException
+  {
+    program.programUniformPutMatrix3x3f(
+      KShadingProgramCommon.MATRIX_NAME_LIGHT_SPHERICAL,
+      m);
+  }
+
   static void putMatrixModel(
     final JCBProgramType program,
     final RMatrixReadable4x4FType<RTransformModelType> m)
@@ -1662,6 +1676,16 @@ import com.io7m.r1.types.RVectorReadable4FType;
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_ENVIRONMENT,
+      unit);
+  }
+
+  static void putTextureLightSpherical(
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_LIGHT_SPHERICAL,
       unit);
   }
 

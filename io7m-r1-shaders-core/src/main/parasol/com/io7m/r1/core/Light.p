@@ -65,6 +65,7 @@ module Light is
   type vectors is record
     ots        : vector_3f, -- Direction from observer to surface ("V")
     normal     : vector_3f, -- Surface normal ("N")
+    lts        : vector_3f, -- Direction from light source ("L") to surface
     stl        : vector_3f, -- Direction from surface to light source ("L")
     distance   : float,     -- Distance between light and surface
     reflection : vector_3f  -- Reflection between observer and normal ("R")
@@ -85,13 +86,16 @@ module Light is
     let
       value position_diff =
         V3.subtract (surface_position, light_position);
+      value lts =
+        V3.normalize (position_diff);
       value ots =
         V3.normalize (surface_position);
     in
       record vectors {
         ots        = ots,
         normal     = surface_normal,
-        stl        = V3.normalize (V3.negate (position_diff)),
+        lts        = lts,
+        stl        = V3.negate (lts),
         distance   = V3.magnitude (position_diff),
         reflection = V3.reflect (ots, surface_normal)
       }

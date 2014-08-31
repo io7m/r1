@@ -85,14 +85,33 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
     this.texture2d_cache = in_texture2d_cache;
   }
 
-  @Override public TextureCubeStaticUsableType cubeTexture(
+  @Override public TextureCubeStaticUsableType cubeTextureClamped(
     final String name)
     throws RException
   {
     try {
       final ETextureCubeCache cc = this.cube_cache;
       assert cc != null;
-      return cc.loadCube(name);
+      return cc.loadCubeClamped(name);
+    } catch (final ValidityException e) {
+      throw RXMLException.validityException(e);
+    } catch (final IOException e) {
+      throw RExceptionIO.fromIOException(e);
+    } catch (final JCGLException e) {
+      throw RExceptionJCGL.fromJCGLException(e);
+    } catch (final ParsingException e) {
+      throw RXMLException.parsingException(e);
+    }
+  }
+
+  @Override public TextureCubeStaticUsableType cubeTextureRepeated(
+    final String name)
+    throws RException
+  {
+    try {
+      final ETextureCubeCache cc = this.cube_cache;
+      assert cc != null;
+      return cc.loadCubeRepeat(name);
     } catch (final ValidityException e) {
       throw RXMLException.validityException(e);
     } catch (final IOException e) {

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -56,9 +56,9 @@ import com.io7m.r1.xml.cubemap.CubeMap;
 public final class ETextureCubeCache
 {
   private final Map<String, TextureCubeStaticUsableType> cube_textures;
+  private final JCGLImplementationType                   gi;
   private final LogUsableType                            glog;
   private final TextureLoaderType                        texture_loader;
-  private final JCGLImplementationType                   gi;
 
   /**
    * Initialize the cache.
@@ -83,6 +83,38 @@ public final class ETextureCubeCache
     this.cube_textures = new HashMap<String, TextureCubeStaticUsableType>();
   }
 
+  private TextureCubeStaticType loadCubeActual(
+    final String name,
+    final TextureWrapR wrap_r,
+    final TextureWrapS wrap_s,
+    final TextureWrapT wrap_t,
+    final CubeMapFaceInputStream<CMFPositiveZKind> positive_z,
+    final CubeMapFaceInputStream<CMFPositiveYKind> positive_y,
+    final CubeMapFaceInputStream<CMFPositiveXKind> positive_x,
+    final CubeMapFaceInputStream<CMFNegativeZKind> negative_z,
+    final CubeMapFaceInputStream<CMFNegativeYKind> negative_y,
+    final CubeMapFaceInputStream<CMFNegativeXKind> negative_x,
+    final TextureLoaderType tl,
+    final JCGLImplementationType g)
+    throws IOException,
+      JCGLException
+  {
+    return tl.loadCubeRHStaticInferred(
+      g,
+      wrap_r,
+      wrap_s,
+      wrap_t,
+      TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+      TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+      positive_z,
+      negative_z,
+      positive_y,
+      negative_y,
+      positive_x,
+      negative_x,
+      name);
+  }
+
   /**
    * Load a cube texture with the given name.
    *
@@ -101,7 +133,7 @@ public final class ETextureCubeCache
    *           On XML errors.
    */
 
-  public TextureCubeStaticUsableType loadCube(
+  public TextureCubeStaticUsableType loadCubeClamped(
     final String name)
     throws IOException,
       JCGLException,
@@ -109,8 +141,75 @@ public final class ETextureCubeCache
       ParsingException,
       RXMLException
   {
-    if (this.cube_textures.containsKey(name)) {
-      return this.cube_textures.get(name);
+    return this.loadCubeWithWrap(
+      name,
+      TextureWrapR.TEXTURE_WRAP_CLAMP_TO_EDGE,
+      TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+      TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE);
+  }
+
+  /**
+   * Load a cube texture with the given name.
+   *
+   * @param name
+   *          The name.
+   * @return A cube texture.
+   * @throws IOException
+   *           On I/O errors.
+   * @throws JCGLException
+   *           On GL errors.
+   * @throws ValidityException
+   *           On XML errors.
+   * @throws ParsingException
+   *           On XML errors.
+   * @throws RXMLException
+   *           On XML errors.
+   */
+
+  public TextureCubeStaticUsableType loadCubeRepeat(
+    final String name)
+    throws IOException,
+      JCGLException,
+      ValidityException,
+      ParsingException,
+      RXMLException
+  {
+    return this.loadCubeWithWrap(
+      name,
+      TextureWrapR.TEXTURE_WRAP_REPEAT,
+      TextureWrapS.TEXTURE_WRAP_REPEAT,
+      TextureWrapT.TEXTURE_WRAP_REPEAT);
+  }
+
+  private TextureCubeStaticUsableType loadCubeWithWrap(
+    final String name,
+    final TextureWrapR wrap_r,
+    final TextureWrapS wrap_s,
+    final TextureWrapT wrap_t)
+    throws ParsingException,
+      ValidityException,
+      IOException,
+      RXMLException,
+      JCGLException
+  {
+    /**
+     * Store the name along with the wrapping modes in the cache, to allow for
+     * textures with the same name but different wrapping modes to be cached
+     * correctly.
+     */
+
+    final StringBuilder name_with_wrap = new StringBuilder();
+    name_with_wrap.append(name);
+    name_with_wrap.append(":");
+    name_with_wrap.append(wrap_r);
+    name_with_wrap.append(":");
+    name_with_wrap.append(wrap_s);
+    name_with_wrap.append(":");
+    name_with_wrap.append(wrap_t);
+
+    final String name_with_wrap_actual = name_with_wrap.toString();
+    if (this.cube_textures.containsKey(name_with_wrap_actual)) {
+      return this.cube_textures.get(name_with_wrap_actual);
     }
 
     final StringBuilder message = new StringBuilder();
@@ -162,21 +261,20 @@ public final class ETextureCubeCache
       assert g != null;
 
       final TextureCubeStaticType t =
-        tl.loadCubeRHStaticInferred(
-          g,
+        this.loadCubeActual(
+          name,
           TextureWrapR.TEXTURE_WRAP_CLAMP_TO_EDGE,
           TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
           TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-          TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
           positive_z,
-          negative_z,
           positive_y,
-          negative_y,
           positive_x,
+          negative_z,
+          negative_y,
           negative_x,
-          name);
-      this.cube_textures.put(name, t);
+          tl,
+          g);
+      this.cube_textures.put(name_with_wrap_actual, t);
       return t;
     } finally {
       stream.close();

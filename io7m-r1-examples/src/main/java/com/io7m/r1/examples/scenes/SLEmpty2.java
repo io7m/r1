@@ -19,6 +19,7 @@ package com.io7m.r1.examples.scenes;
 import java.util.List;
 
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -27,30 +28,24 @@ import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
-import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
-import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
-import com.io7m.r1.kernel.types.KMaterialEnvironmentReflection;
-import com.io7m.r1.kernel.types.KMaterialNormalMapped;
-import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
-import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
+import com.io7m.r1.kernel.types.KTransformOST;
+import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceWorldType;
 import com.io7m.r1.types.RVectorI3F;
 
 /**
- * A demonstration that specular lighting with multiple lights and a
- * depth-to-alpha material looks correct.
+ * An empty example.
  */
 
-public final class SLAlphaDepth0 implements ExampleSceneType
+public final class SLEmpty2 implements ExampleSceneType
 {
   /**
    * Construct the example.
    */
 
-  public SLAlphaDepth0()
+  public SLEmpty2()
   {
 
   }
@@ -64,65 +59,70 @@ public final class SLAlphaDepth0 implements ExampleSceneType
     final ExampleSceneBuilderType scene)
     throws RException
   {
-    final KMaterialOpaqueRegular material;
-    {
-      final KMaterialOpaqueRegularBuilderType b =
-        KMaterialOpaqueRegular
-          .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
-      b.setDepth(KMaterialDepthAlpha.alpha(0.5f));
-      b.setAlbedo(KMaterialAlbedoTextured.textured(
-        ExampleSceneUtilities.RGBA_NOTHING,
-        1.0f,
-        scene.texture("metalgrid_albedo.png")));
-      b.setEnvironment(KMaterialEnvironmentReflection.reflection(
-        0.2f,
-        scene.cubeTextureClamped("toronto/cube.rxc")));
-      b.setSpecular(KMaterialSpecularConstant.constant(
-        ExampleSceneUtilities.RGB_WHITE,
-        64.0f));
-      b.setNormal(KMaterialNormalMapped.mapped(scene
-        .texture("metalgrid_normal.png")));
-      material = b.build();
-    }
-
-    final KInstanceOpaqueRegular i =
+    final KInstanceOpaqueRegular i_floor =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        material,
+        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    final KSceneLightGroupBuilderType g = scene.sceneNewLightGroup("g");
-    g.groupAddInstance(i);
+    final RVectorI3F<RSpaceWorldType> north_trans =
+      new RVectorI3F<RSpaceWorldType>(0.0f, 2.0f, -2.0f);
+    final QuaternionI4F north_orient =
+      QuaternionI4F.makeFromAxisAngle(
+        ExampleSceneUtilities.X_AXIS,
+        Math.toRadians(90.0f));
+    final KTransformType north_t =
+      KTransformOST.newTransform(
+        north_orient,
+        ExampleSceneUtilities.IDENTITY_SCALE,
+        north_trans);
+    final KInstanceOpaqueRegular i_north =
+      KInstanceOpaqueRegular.newInstance(
+        scene.mesh("plane2x2.rmx"),
+        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        north_t,
+        ExampleSceneUtilities.IDENTITY_UV,
+        KFaceSelection.FACE_RENDER_FRONT);
 
-    {
-      final KLightSphereWithoutShadowBuilderType b =
-        KLightSphereWithoutShadow.newBuilder();
-      b.setRadius(2.0f);
-      b.setFalloff(1.0f);
-      b.setIntensity(1.0f);
-
-      b.setColor(ExampleSceneUtilities.RGB_RED);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(-0.5f, 1.0f, 1.0f));
-      g.groupAddLight(b.build());
-
-      b.setColor(ExampleSceneUtilities.RGB_BLUE);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.5f, 1.0f, -1.0f));
-      g.groupAddLight(b.build());
-    }
+    final RVectorI3F<RSpaceWorldType> east_trans =
+      new RVectorI3F<RSpaceWorldType>(2.0f, 2.0f, 0.0f);
+    final QuaternionI4F east_orient =
+      QuaternionI4F.makeFromAxisAngle(
+        ExampleSceneUtilities.Z_AXIS,
+        Math.toRadians(90.0f));
+    final KTransformType east_t =
+      KTransformOST.newTransform(
+        east_orient,
+        ExampleSceneUtilities.IDENTITY_SCALE,
+        east_trans);
+    final KInstanceOpaqueRegular i_east =
+      KInstanceOpaqueRegular.newInstance(
+        scene.mesh("plane2x2.rmx"),
+        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        east_t,
+        ExampleSceneUtilities.IDENTITY_UV,
+        KFaceSelection.FACE_RENDER_FRONT);
 
     {
       final KLightSphereWithoutShadowBuilderType b =
         KLightSphereWithoutShadow
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setPosition(ExampleSceneUtilities.CENTER);
-      g.groupAddLight(b.build());
+
+      {
+        final KSceneLightGroupBuilderType gb = scene.sceneNewLightGroup("g");
+        gb.groupAddLight(b.build());
+        gb.groupAddInstance(i_floor);
+        gb.groupAddInstance(i_north);
+        gb.groupAddInstance(i_east);
+      }
     }
   }
 
   @Override public List<ExampleViewType> exampleViewpoints()
   {
-    return ExampleSceneUtilities.STANDARD_VIEWS_CLOSE_3;
+    return ExampleSceneUtilities.STANDARD_VIEWS_5;
   }
 }
