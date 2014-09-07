@@ -29,7 +29,8 @@ import com.io7m.r1.types.RException;
 public interface ExampleSceneBuilderType extends KSceneBuilderType
 {
   /**
-   * Load the cube texture with the given name.
+   * Load the cube texture with the given name, with all wrapping modes set to
+   * clamping.
    *
    * @param name
    *          The name
@@ -38,7 +39,22 @@ public interface ExampleSceneBuilderType extends KSceneBuilderType
    *           If an error occurs
    */
 
-  TextureCubeStaticUsableType cubeTexture(
+  TextureCubeStaticUsableType cubeTextureClamped(
+    final String name)
+    throws RException;
+
+  /**
+   * Load the cube texture with the given name, with all wrapping modes set to
+   * repeating.
+   *
+   * @param name
+   *          The name
+   * @return An allocated texture
+   * @throws RException
+   *           If an error occurs
+   */
+
+  TextureCubeStaticUsableType cubeTextureRepeated(
     final String name)
     throws RException;
 

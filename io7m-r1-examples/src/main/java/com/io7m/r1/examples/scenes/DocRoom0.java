@@ -91,7 +91,7 @@ public final class DocRoom0 implements ExampleSceneType
       room_specular));
     room_mat_b.setEnvironment(KMaterialEnvironmentReflection.reflection(
       0.15f,
-      scene.cubeTexture("toronto/cube.rxc")));
+      scene.cubeTextureClamped("toronto/cube.rxc")));
 
     final KMaterialOpaqueRegular room_mat = room_mat_b.build();
 

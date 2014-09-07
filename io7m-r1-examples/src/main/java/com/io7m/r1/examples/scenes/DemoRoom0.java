@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -45,7 +45,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 import com.io7m.r1.types.RVectorI3F;
 
 /**
- * A simple example with a slightly more complex mesh.
+ * A demo room.
  */
 
 public final class DemoRoom0 implements ExampleSceneType
@@ -91,7 +91,7 @@ public final class DemoRoom0 implements ExampleSceneType
       room_specular));
     room_mat_b.setEnvironment(KMaterialEnvironmentReflection.reflection(
       0.15f,
-      scene.cubeTexture("toronto/cube.rxc")));
+      scene.cubeTextureClamped("toronto/cube.rxc")));
 
     final KMaterialOpaqueRegular room_mat = room_mat_b.build();
 

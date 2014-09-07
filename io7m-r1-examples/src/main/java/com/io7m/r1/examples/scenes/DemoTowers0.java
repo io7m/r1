@@ -78,7 +78,7 @@ public final class DemoTowers0 implements ExampleSceneType
         .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
     towers_mat_b.setEnvironment(KMaterialEnvironmentReflection.reflection(
       0.3f,
-      scene.cubeTexture("toronto/cube.rxc")));
+      scene.cubeTextureClamped("toronto/cube.rxc")));
     towers_mat_b.setNormal(KMaterialNormalMapped.mapped(scene
       .texture("towers_normal.png")));
 
