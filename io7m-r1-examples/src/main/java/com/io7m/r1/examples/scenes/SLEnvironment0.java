@@ -64,7 +64,7 @@ public final class SLEnvironment0 implements ExampleSceneType
           .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
       b.setEnvironment(KMaterialEnvironmentReflection.reflection(
         1.0f,
-        scene.cubeTexture("toronto/cube.rxc")));
+        scene.cubeTextureClamped("toronto/cube.rxc")));
       material = b.build();
     }
 

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,6 +22,7 @@ import java.util.List;
 
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
@@ -283,6 +284,12 @@ public final class ExampleSceneUtilities
 
   public static final List<ExampleViewType>                          FAR_VIEWS_5;
 
+  /**
+   * A vector representing the global Z axis.
+   */
+
+  public static final VectorReadable3FType                           Z_AXIS;
+
   // CHECKSTYLE:OFF
   static {
     // CHECKSTYLE:ON
@@ -488,8 +495,8 @@ public final class ExampleSceneUtilities
       }
 
       X_AXIS = new VectorI3F(1.0f, 0.0f, 0.0f);
-
       Y_AXIS = new VectorI3F(0.0f, 1.0f, 0.0f);
+      Z_AXIS = new VectorI3F(0.0f, 0.0f, 1.0f);
 
     } catch (final RException e) {
       throw new UnreachableCodeException(e);

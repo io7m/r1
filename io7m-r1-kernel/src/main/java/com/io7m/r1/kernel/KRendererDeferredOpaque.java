@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -37,6 +37,7 @@ import com.io7m.jcanephora.JCGLExceptionRuntime;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.StencilFunction;
 import com.io7m.jcanephora.StencilOperation;
+import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
@@ -49,6 +50,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorM2F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFrustumMeshCacheType;
@@ -62,7 +64,10 @@ import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
+import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
+import com.io7m.r1.kernel.types.KLightSphereVisitorType;
+import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightVisitorType;
 import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
@@ -89,7 +94,6 @@ import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RMatrixReadable3x3FType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RVectorI3F;
@@ -507,16 +511,17 @@ import com.io7m.r1.types.RVectorI4F;
     return debug_only_geometry;
   }
 
-  private final KFrustumMeshCacheType                          frustum_cache;
-  private final JCGLImplementationType                         g;
-  private final KUnitQuadCacheType                             quad_cache;
-  private final KShaderCacheDebugType                          shader_debug_cache;
-  private final KShaderCacheDeferredGeometryType               shader_geo_cache;
-  private final KShaderCacheDeferredLightType                  shader_light_cache;
-  private final VectorM2F                                      size;
-  private final KUnitSphereCacheType                           sphere_cache;
-  private final KTextureUnitAllocator                          texture_units;
-  private final RMatrixReadable3x3FType<RTransformTextureType> uv_id;
+  private final KFrustumMeshCacheType               frustum_cache;
+  private final JCGLImplementationType              g;
+  private final KUnitQuadCacheType                  quad_cache;
+  private final KShaderCacheDebugType               shader_debug_cache;
+  private final KShaderCacheDeferredGeometryType    shader_geo_cache;
+  private final KShaderCacheDeferredLightType       shader_light_cache;
+  private final VectorM2F                           size;
+  private final KUnitSphereCacheType                sphere_cache;
+  private final KTextureUnitAllocator               texture_units;
+  private final RMatrixM3x3F<RTransformTextureType> uv_id;
+  private final RMatrixM3x3F<RTransformTextureType> uv_light_spherical;
 
   private KRendererDeferredOpaque(
     final JCGLImplementationType in_g,
@@ -548,6 +553,7 @@ import com.io7m.r1.types.RVectorI4F;
 
       this.size = new VectorM2F();
       this.uv_id = new RMatrixM3x3F<RTransformTextureType>();
+      this.uv_light_spherical = new RMatrixM3x3F<RTransformTextureType>();
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
@@ -1115,34 +1121,45 @@ import com.io7m.r1.types.RVectorI4F;
         throws RException,
           JCGLException
       {
-        final RMatrixI3x3F<RTransformTextureType> id =
-          RMatrixI3x3F.identity();
-        return mwo.withGenericTransform(
-          ls.lightGetTransform(),
-          id,
-          new KMatricesInstanceFunctionType<Unit, JCGLException>() {
-            @Override public Unit run(
-              final KMatricesInstanceType mwi)
-              throws JCGLException,
-                RException
-            {
-              try {
-                r.renderGroupLightSpherical(
-                  framebuffer,
-                  t_map_albedo,
-                  t_map_depth_stencil,
-                  t_map_normal,
-                  t_map_specular,
-                  t_map_eye_depth,
-                  gc,
-                  mwi,
-                  ls);
-                return Unit.unit();
-              } catch (final JCacheException e) {
-                throw new UnreachableCodeException(e);
-              }
-            }
-          });
+        texture_unit_context.withContext(new KTextureUnitWithType() {
+          @Override public void run(
+            final KTextureUnitContextType texture_unit_context_light)
+            throws JCGLException,
+              RException
+          {
+            final RMatrixI3x3F<RTransformTextureType> id =
+              RMatrixI3x3F.identity();
+            mwo.withGenericTransform(
+              ls.lightGetTransform(),
+              id,
+              new KMatricesInstanceFunctionType<Unit, JCGLException>() {
+                @Override public Unit run(
+                  final KMatricesInstanceType mwi)
+                  throws JCGLException,
+                    RException
+                {
+                  try {
+                    r.renderGroupLightSpherical(
+                      framebuffer,
+                      t_map_albedo,
+                      t_map_depth_stencil,
+                      t_map_normal,
+                      t_map_specular,
+                      t_map_eye_depth,
+                      texture_unit_context_light,
+                      gc,
+                      mwi,
+                      ls);
+                    return Unit.unit();
+                  } catch (final JCacheException e) {
+                    throw new UnreachableCodeException(e);
+                  }
+                }
+              });
+          }
+        });
+
+        return Unit.unit();
       }
     });
   }
@@ -1541,6 +1558,7 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
     final TextureUnitType t_map_eye_depth,
+    final KTextureUnitContextType texture_unit_context,
     final JCGLInterfaceCommonType gc,
     final KMatricesInstanceValuesType mwi,
     final KLightSphereType ls)
@@ -1561,6 +1579,7 @@ import com.io7m.r1.types.RVectorI4F;
       t_map_normal,
       t_map_specular,
       t_map_eye_depth,
+      texture_unit_context,
       gc,
       mwi,
       ls);
@@ -1573,6 +1592,7 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
     final TextureUnitType t_map_eye_depth,
+    final KTextureUnitContextType texture_unit_context,
     final JCGLInterfaceCommonType gc,
     final KMatricesInstanceValuesType mwi,
     final KLightSphereType ls)
@@ -1599,6 +1619,40 @@ import com.io7m.r1.types.RVectorI4F;
       {
         gc.arrayBufferBind(array);
         KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+
+        ls.sphereAccept(new KLightSphereVisitorType<Unit, JCGLException>() {
+          @Override public Unit sphereWithoutShadow(
+            final KLightSphereWithoutShadow lsws)
+            throws RException,
+              JCGLException
+          {
+            return Unit.unit();
+          }
+
+          @Override public Unit sphereTexturedCubeWithoutShadow(
+            final KLightSphereTexturedCubeWithoutShadow lstcws)
+            throws RException,
+              JCGLException
+          {
+            final TextureCubeStaticUsableType texture =
+              lstcws.lightGetTexture();
+
+            QuaternionI4F.makeRotationMatrix3x3(
+              lstcws.lightGetTextureOrientation(),
+              KRendererDeferredOpaque.this.uv_light_spherical);
+
+            KShadingProgramCommon.putMatrixLightSpherical(
+              program,
+              KRendererDeferredOpaque.this.uv_light_spherical);
+            KShadingProgramCommon.putMatrixInverseView(
+              program,
+              mwi.getMatrixViewInverse());
+            KShadingProgramCommon.putTextureLightSphericalCube(
+              program,
+              texture_unit_context.withTextureCube(texture));
+            return Unit.unit();
+          }
+        });
 
         final KProjectionType projection = mwi.getProjection();
         KRendererDeferredOpaque.this.putDeferredParameters(

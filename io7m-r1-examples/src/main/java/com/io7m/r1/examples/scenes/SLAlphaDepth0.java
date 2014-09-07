@@ -76,7 +76,7 @@ public final class SLAlphaDepth0 implements ExampleSceneType
         scene.texture("metalgrid_albedo.png")));
       b.setEnvironment(KMaterialEnvironmentReflection.reflection(
         0.2f,
-        scene.cubeTexture("toronto/cube.rxc")));
+        scene.cubeTextureClamped("toronto/cube.rxc")));
       b.setSpecular(KMaterialSpecularConstant.constant(
         ExampleSceneUtilities.RGB_WHITE,
         64.0f));
