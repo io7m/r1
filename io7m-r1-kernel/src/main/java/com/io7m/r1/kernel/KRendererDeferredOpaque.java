@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -37,7 +37,6 @@ import com.io7m.jcanephora.JCGLExceptionRuntime;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.StencilFunction;
 import com.io7m.jcanephora.StencilOperation;
-import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
@@ -51,7 +50,6 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
-import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorM2F;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -66,7 +64,6 @@ import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
-import com.io7m.r1.kernel.types.KLightSphereTextured2DWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightSphereVisitorType;
@@ -1653,34 +1650,6 @@ import com.io7m.r1.types.RVectorI4F;
             KShadingProgramCommon.putTextureLightSphericalCube(
               program,
               texture_unit_context.withTextureCube(texture));
-            return Unit.unit();
-          }
-
-          @Override public Unit sphereTextured2DWithoutShadow(
-            final KLightSphereTextured2DWithoutShadow lst2dws)
-            throws RException,
-              JCGLException
-          {
-            final Texture2DStaticUsableType texture =
-              lst2dws.lightGetTexture();
-            final RMatrixI3x3F<RTransformTextureType> uvm =
-              lst2dws.lightGetUVMatrix();
-            final RMatrixM3x3F<RTransformTextureType> ouv =
-              KRendererDeferredOpaque.this.uv_light_spherical;
-
-            for (int y = 0; y < 3; ++y) {
-              for (int x = 0; x < 3; ++x) {
-                MatrixM3x3F.set(ouv, x, y, uvm.getRowColumnF(x, y));
-              }
-            }
-
-            KShadingProgramCommon.putMatrixLightSpherical(program, ouv);
-            KShadingProgramCommon.putMatrixInverseView(
-              program,
-              mwi.getMatrixViewInverse());
-            KShadingProgramCommon.putTextureLightSpherical2D(
-              program,
-              texture_unit_context.withTexture2D(texture));
             return Unit.unit();
           }
         });

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -41,16 +41,13 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowBuilderType;
-import com.io7m.r1.kernel.types.KLightSphereTextured2DWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RVectorI3F;
 
 @EqualityReference public final class RKDLightCases
@@ -282,20 +279,6 @@ import com.io7m.r1.types.RVectorI3F;
             1.0f,
             tc,
             QuaternionI4F.IDENTITY);
-        cases.add(l);
-      }
-
-      {
-        final RMatrixI3x3F<RTransformTextureType> m = RMatrixI3x3F.identity();
-        final KLightType l =
-          KLightSphereTextured2DWithoutShadow.newLight(
-            c,
-            1.0f,
-            v,
-            1.0f,
-            1.0f,
-            t,
-            m);
         cases.add(l);
       }
 
