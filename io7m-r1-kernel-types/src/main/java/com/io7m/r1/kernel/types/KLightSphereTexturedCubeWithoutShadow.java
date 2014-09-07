@@ -396,7 +396,7 @@ import com.io7m.r1.types.RVectorI3F;
       throws RException,
         E
   {
-    return v.sphereMappedWithoutShadow(this);
+    return v.sphereTexturedCubeWithoutShadow(this);
   }
 
   @Override public int texturesGetRequired()

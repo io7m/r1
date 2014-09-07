@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -139,8 +139,10 @@ import com.io7m.r1.types.RVectorReadable4FType;
                                                                        "t_emission";
   private static final String TEXTURE_NAME_ENVIRONMENT               =
                                                                        "t_environment";
-  private static final String TEXTURE_NAME_LIGHT_SPHERICAL           =
-                                                                       "t_light_spherical";
+  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_2D        =
+                                                                       "t_light_spherical_2d";
+  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_CUBE      =
+                                                                       "t_light_spherical_cube";
   private static final String TEXTURE_NAME_NORMAL                    =
                                                                        "t_normal";
   private static final String TEXTURE_NAME_PROJECTION                =
@@ -1679,13 +1681,23 @@ import com.io7m.r1.types.RVectorReadable4FType;
       unit);
   }
 
-  static void putTextureLightSpherical(
+  static void putTextureLightSphericalCube(
     final JCBProgramType program,
     final TextureUnitType unit)
     throws JCGLException
   {
     program.programUniformPutTextureUnit(
-      KShadingProgramCommon.TEXTURE_NAME_LIGHT_SPHERICAL,
+      KShadingProgramCommon.TEXTURE_NAME_LIGHT_SPHERICAL_CUBE,
+      unit);
+  }
+
+  static void putTextureLightSpherical2D(
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_LIGHT_SPHERICAL_2D,
       unit);
   }
 
