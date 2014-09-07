@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -26,6 +26,7 @@ import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
+import com.io7m.r1.kernel.types.KLightSphereTextured2DWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightSphereVisitorType;
@@ -290,14 +291,29 @@ import com.io7m.r1.types.RException;
                 return Unit.unit();
               }
 
-              @Override public Unit sphereMappedWithoutShadow(
-                final KLightSphereTexturedCubeWithoutShadow lsmws)
+              @Override public Unit sphereTexturedCubeWithoutShadow(
+                final KLightSphereTexturedCubeWithoutShadow lstcws)
                 throws RException
               {
                 b.append("  -- Spherical light parameters\n");
-                b.append("  parameter light_spherical   : Light.t;\n");
-                b.append("  parameter t_light_spherical : sampler_cube;\n");
-                b.append("  parameter m_light_spherical : matrix_3x3f;\n");
+                b.append("  parameter light_spherical        : Light.t;\n");
+                b
+                  .append("  parameter t_light_spherical_cube : sampler_cube;\n");
+                b
+                  .append("  parameter m_light_spherical      : matrix_3x3f;\n");
+                b.append("\n");
+                return Unit.unit();
+              }
+
+              @Override public Unit sphereTextured2DWithoutShadow(
+                final KLightSphereTextured2DWithoutShadow lst2ws)
+                throws RException,
+                  RException
+              {
+                b.append("  -- Spherical light parameters\n");
+                b.append("  parameter light_spherical      : Light.t;\n");
+                b.append("  parameter t_light_spherical_2d : sampler_2d;\n");
+                b.append("  parameter m_light_spherical    : matrix_3x3f;\n");
                 b.append("\n");
                 return Unit.unit();
               }
@@ -314,7 +330,6 @@ import com.io7m.r1.types.RException;
       b.append("      screen_position\n");
       b.append("    );\n");
       b.append("\n");
-
       b.append("  -- Reconstruct eye-space position.\n");
       b.append("  value normalized_depth_sample = \n");
       b.append("    S.texture (t_map_eye_depth, map_position) [x];\n");
@@ -325,19 +340,16 @@ import com.io7m.r1.types.RException;
       b.append("      normalized_depth_sample\n");
       b.append("    );\n");
       b.append("\n");
-
       b.append("  -- Get surface normal\n");
       b.append("  value normal_sample =\n");
       b.append("    S.texture (t_map_normal, map_position) [x y];\n");
       b.append("  value normal =\n");
       b.append("    Normals.decompress (normal_sample);\n");
       b.append("\n");
-
       b.append("  -- Get surface albedo\n");
       b.append("  value albedo =\n");
       b.append("    S.texture (t_map_albedo, map_position);\n");
       b.append("\n");
-
       b.append("  -- Get surface specular\n");
       b.append("  value specular_sample =\n");
       b.append("    S.texture (t_map_specular, map_position);\n");
@@ -359,14 +371,14 @@ import com.io7m.r1.types.RException;
           b.append("      eye_position [x y z],\n");
           b.append("      normal\n");
           b.append("    );\n");
-
+          b.append("\n");
           b.append("  -- Directional emissive diffuse light term\n");
           b.append("  value light_diffuse : vector_3f =\n");
           b.append("    DirectionalLight.diffuse_color (\n");
           b.append("      light_directional,\n");
           b.append("      light_vectors\n");
           b.append("     );\n");
-
+          b.append("\n");
           b.append("  -- Directional specular light term\n");
           b.append("  value light_specular : vector_3f =\n");
           b.append("    DirectionalLight.specular_color (\n");
@@ -433,6 +445,7 @@ import com.io7m.r1.types.RException;
                 b.append("      t_shadow_basic,\n");
                 b.append("      position_light_clip\n");
                 b.append("    );\n");
+                b.append("\n");
                 b.append("  value light_attenuation =\n");
                 b.append("    F.multiply (\n");
                 b.append("      light_shadow,\n");
@@ -453,6 +466,7 @@ import com.io7m.r1.types.RException;
                 b.append("      t_shadow_variance,\n");
                 b.append("      position_light_clip\n");
                 b.append("    );\n");
+                b.append("\n");
                 b.append("  value light_attenuation =\n");
                 b.append("    F.multiply (\n");
                 b.append("      light_shadow,\n");
@@ -485,6 +499,7 @@ import com.io7m.r1.types.RException;
           b.append("      light_color,\n");
           b.append("      specular\n");
           b.append("    );\n");
+          b.append("\n");
           b.append("  value light_specular : vector_3f =\n");
           b.append("    V3.multiply_scalar (\n");
           b.append("      light_specular_unattenuated,\n");
@@ -516,7 +531,7 @@ import com.io7m.r1.types.RException;
                 return Unit.unit();
               }
 
-              @Override public Unit sphereMappedWithoutShadow(
+              @Override public Unit sphereTexturedCubeWithoutShadow(
                 final KLightSphereTexturedCubeWithoutShadow lsmws)
                 throws RException
               {
@@ -536,8 +551,55 @@ import com.io7m.r1.types.RException;
                 b.append("\n");
                 b.append("  value light_color : vector_3f =\n");
                 b.append("    CubeMap.texture (\n");
-                b.append("      t_light_spherical,\n");
+                b.append("      t_light_spherical_cube,\n");
                 b.append("      light_sample_vector\n");
+                b.append("    ) [x y z];\n");
+                b.append("\n");
+                b.append("  value light_spherical =\n");
+                b.append("    record Light.t {\n");
+                b
+                  .append("      color           = V3.multiply (light_color, light_spherical.color),\n");
+                b
+                  .append("      position        = light_spherical.position,\n");
+                b
+                  .append("      intensity       = light_spherical.intensity,\n");
+                b
+                  .append("      inverse_range   = light_spherical.inverse_range,\n");
+                b
+                  .append("      inverse_falloff = light_spherical.inverse_falloff\n");
+                b.append("    };\n");
+                b.append("\n");
+                return Unit.unit();
+              }
+
+              @Override public Unit sphereTextured2DWithoutShadow(
+                final KLightSphereTextured2DWithoutShadow lst2ws)
+                throws RException,
+                  UnreachableCodeException
+              {
+                b.append("  -- Sample 2D texture\n");
+                b.append("  value light_sample_vector_raw : vector_4f =\n");
+                b.append("    M4.multiply_vector (\n");
+                b.append("      m_view_inv,\n");
+                b
+                  .append("      new vector_4f (light_vectors.vectors.lts, 0.0)\n");
+                b.append("    );\n");
+                b.append("\n");
+                b.append("  value light_uv_raw : vector_2f =\n");
+                b.append("    PseudoCubeMap.coordinates (\n");
+                b.append("      light_sample_vector_raw [x y z]\n");
+                b.append("    );\n");
+                b.append("\n");
+                b.append("  value light_uv : vector_2f =\n");
+                b.append("    M3.multiply_vector (\n");
+                b.append("      m_light_spherical,\n");
+                b.append("      new vector_3f (light_uv_raw, 1.0)\n");
+                b.append("    ) [x y];\n");
+                b.append("\n");
+                b.append("  value light_color : vector_3f =\n");
+                b.append("    S.texture (\n");
+                b.append("      t_light_spherical_2d,\n");
+                b.append("      light_uv\n");
                 b.append("    ) [x y z];\n");
                 b.append("\n");
                 b.append("  value light_spherical =\n");
@@ -929,15 +991,18 @@ import com.io7m.r1.types.RException;
     b.append("import com.io7m.r1.core.Albedo;\n");
     b.append("import com.io7m.r1.core.CubeMap;\n");
     b.append("import com.io7m.r1.core.DirectionalLight;\n");
+    b.append("import com.io7m.r1.core.DualParaboloidMap;\n");
     b.append("import com.io7m.r1.core.Emission;\n");
     b.append("import com.io7m.r1.core.Environment;\n");
     b.append("import com.io7m.r1.core.Light;\n");
     b.append("import com.io7m.r1.core.Normals;\n");
     b.append("import com.io7m.r1.core.ProjectiveLight;\n");
+    b.append("import com.io7m.r1.core.PseudoCubeMap;\n");
     b.append("import com.io7m.r1.core.Refraction;\n");
     b.append("import com.io7m.r1.core.ShadowBasic;\n");
     b.append("import com.io7m.r1.core.ShadowVariance;\n");
     b.append("import com.io7m.r1.core.Specular;\n");
+    b.append("import com.io7m.r1.core.SphereMap;\n");
     b.append("import com.io7m.r1.core.SphericalLight;\n");
     b.append("import com.io7m.r1.core.Transform;\n");
     b.append("import com.io7m.r1.core.VectorAux;\n");
