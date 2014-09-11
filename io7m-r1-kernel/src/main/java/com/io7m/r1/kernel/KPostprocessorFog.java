@@ -113,7 +113,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     final KProgramType fog = this.shader_cache.cacheGetLU("fog");
 
     try {
-      gc.framebufferDrawBind(output.kFramebufferGetColorFramebuffer());
+      gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
 
       gc.blendingDisable();
       gc.colorBufferMask(true, true, true, true);
@@ -146,7 +146,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
             gc.texture2DStaticBind(
               image_unit,
-              input.kFramebufferGetRGBATexture());
+              input.rgbaGetTexture());
             gc.texture2DStaticBind(
               depth_unit,
               input.kFramebufferGetDepthTexture());
@@ -191,7 +191,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
     try {
       final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt =
-        this.rgba_cache.bluCacheGet(input.kFramebufferGetRGBADescription());
+        this.rgba_cache.bluCacheGet(input.rgbaGetDescription());
 
       try {
         final KFramebufferRGBAUsableType temp = receipt.getValue();

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -58,6 +58,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
@@ -78,6 +79,8 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.VectorI4F;
+import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.examples.ExampleImages;
 import com.io7m.r1.examples.ExampleRendererConstructorDebugType;
@@ -87,6 +90,7 @@ import com.io7m.r1.examples.ExampleRendererConstructorType;
 import com.io7m.r1.examples.ExampleRendererConstructorVisitorType;
 import com.io7m.r1.examples.ExampleRendererDebugType;
 import com.io7m.r1.examples.ExampleRendererDeferredType;
+import com.io7m.r1.examples.ExampleRendererName;
 import com.io7m.r1.examples.ExampleRendererType;
 import com.io7m.r1.examples.ExampleRendererVisitorType;
 import com.io7m.r1.examples.ExampleSceneBuilder;
@@ -98,13 +102,9 @@ import com.io7m.r1.examples.tools.ETexture2DCache;
 import com.io7m.r1.examples.tools.ETextureCubeCache;
 import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
-import com.io7m.r1.kernel.KFramebufferForward;
-import com.io7m.r1.kernel.KFramebufferForwardType;
-import com.io7m.r1.kernel.KFramebufferType;
+import com.io7m.r1.kernel.KFramebufferRGBAUsableType;
 import com.io7m.r1.kernel.KProgramType;
 import com.io7m.r1.kernel.KRendererDebugType;
-import com.io7m.r1.kernel.KRendererDeferredType;
-import com.io7m.r1.kernel.KRendererType;
 import com.io7m.r1.kernel.KShaderCachePostprocessingType;
 import com.io7m.r1.kernel.KShadingProgramCommon;
 import com.io7m.r1.kernel.types.KDepthPrecision;
@@ -125,31 +125,41 @@ import com.jogamp.opengl.util.FPSAnimator;
 @SuppressWarnings("synthetic-access") final class VExample implements
   Callable<Unit>
 {
+  static final int                  CLEAR_STENCIL;
+  static final VectorReadable4FType CLEAR_COLOR;
+  static final float                CLEAR_DEPTH;
+
+  static {
+    CLEAR_STENCIL = 0;
+    CLEAR_COLOR = new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f);
+    CLEAR_DEPTH = 1.0f;
+  }
+
   private static final class VExampleWindow extends JFrame
   {
-    private static final long                               serialVersionUID;
+    private static final long                    serialVersionUID;
 
     static {
       serialVersionUID = 2157518454345881373L;
     }
 
-    private final GLJPanel                                  canvas;
-    private final JLabel                                    canvas_label;
-    private final ViewerConfig                              config;
-    private final AtomicInteger                             current_view_index;
-    private final ExampleSceneType                          example;
-    private final VExpectedImage                            expected;
-    private final JLabel                                    expected_label;
-    private final JComboBox<Class<? extends KRendererType>> expected_selector;
-    private final Timer                                     fps_update_timer;
-    private final VExampleWindowGL                          gl_events;
-    private final JLabel                                    label_example;
-    private final JLabel                                    label_fps;
-    private final JLabel                                    label_renderer;
-    private final JLabel                                    label_view;
-    private final LogUsableType                             log;
-    private final JLabel                                    renderer_label;
-    private final AtomicBoolean                             want_save;
+    private final GLJPanel                       canvas;
+    private final JLabel                         canvas_label;
+    private final ViewerConfig                   config;
+    private final AtomicInteger                  current_view_index;
+    private final ExampleSceneType               example;
+    private final VExpectedImage                 expected;
+    private final JLabel                         expected_label;
+    private final JComboBox<ExampleRendererName> expected_selector;
+    private final Timer                          fps_update_timer;
+    private final VExampleWindowGL               gl_events;
+    private final JLabel                         label_example;
+    private final JLabel                         label_fps;
+    private final JLabel                         label_renderer;
+    private final JLabel                         label_view;
+    private final LogUsableType                  log;
+    private final JLabel                         renderer_label;
+    private final AtomicBoolean                  want_save;
 
     public VExampleWindow(
       final LogUsableType in_log,
@@ -207,26 +217,25 @@ import com.jogamp.opengl.util.FPSAnimator;
       this.expected_label = new JLabel("Expected");
       this.canvas_label = new JLabel("OpenGL");
 
-      this.expected_selector =
-        new JComboBox<Class<? extends KRendererType>>();
+      this.expected_selector = new JComboBox<ExampleRendererName>();
 
       {
-        final List<Class<? extends KRendererType>> renderer_results =
+        final List<ExampleRendererName> renderer_results =
           in_example_images.getSceneRenderers(in_example.getClass());
-        for (final Class<? extends KRendererType> rc : renderer_results) {
+        for (final ExampleRendererName rc : renderer_results) {
           this.expected_selector.addItem(rc);
         }
+
         this.expected_selector.addActionListener(new ActionListener() {
           @Override public void actionPerformed(
             @Nullable final ActionEvent _)
           {
             try {
-              @SuppressWarnings("unchecked") final Class<? extends KRendererType> i =
-                (Class<? extends KRendererType>) VExampleWindow.this.expected_selector
+              final ExampleRendererName name =
+                (ExampleRendererName) VExampleWindow.this.expected_selector
                   .getSelectedItem();
 
-              VExampleWindow.this.expected.update(i);
-
+              VExampleWindow.this.expected.update(name);
             } catch (final Exception e) {
               throw new UnreachableCodeException(e);
             }
@@ -351,16 +360,6 @@ import com.jogamp.opengl.util.FPSAnimator;
       this.label_view.setText(this.getViewText(next, max));
     }
 
-    private void rendererInitialized(
-      final Class<? extends KRendererType> i)
-      throws Exception
-    {
-      this.log.debug("Renderer started");
-      this.renderer_label.setText(i.getCanonicalName());
-      this.expected_selector.setSelectedItem(i);
-      this.expected.update(i);
-    }
-
     @SuppressWarnings({ "static-method", "boxing" }) private
       String
       getViewText(
@@ -371,6 +370,17 @@ import com.jogamp.opengl.util.FPSAnimator;
         String.format("%d of %d", view_index + 1, max_views);
       assert text != null;
       return text;
+    }
+
+    private void rendererInitialized(
+      final ExampleRendererType i)
+      throws Exception
+    {
+      this.log.debug("Renderer started");
+      final ExampleRendererName name = i.exampleRendererGetName();
+      this.renderer_label.setText(name.toString());
+      this.expected_selector.setSelectedItem(i);
+      this.expected.update(name);
     }
   }
 
@@ -413,7 +423,7 @@ import com.jogamp.opengl.util.FPSAnimator;
     private final AtomicInteger                  current_view_index;
     private final ExampleSceneType               example;
     private final VExampleWindow                 example_window;
-    private @Nullable KFramebufferType           framebuffer;
+    private @Nullable KFramebufferDeferredType   framebuffer;
     private @Nullable JCGLImplementationType     gi;
     private final LogUsableType                  glog;
     private @Nullable EMeshCache                 mesh_cache;
@@ -502,8 +512,8 @@ import com.jogamp.opengl.util.FPSAnimator;
           {
             try {
               final KRendererDebugType dr = rd.rendererGetDebug();
-              final KFramebufferForwardType fb =
-                (KFramebufferForwardType) VExampleWindowGL.this.framebuffer;
+              final KFramebufferDeferredType fb =
+                VExampleWindowGL.this.framebuffer;
               assert fb != null;
 
               final KScene sc = scene_builder.sceneCreate();
@@ -529,16 +539,20 @@ import com.jogamp.opengl.util.FPSAnimator;
             throws RException
           {
             try {
-              final KRendererDeferredType dr = rd.rendererGetDeferred();
               final KFramebufferDeferredType fb =
-                (KFramebufferDeferredType) VExampleWindowGL.this.framebuffer;
+                VExampleWindowGL.this.framebuffer;
               assert fb != null;
 
               final KScene sc = scene_builder.sceneCreate();
               final KSceneBatchedDeferred batched =
                 KSceneBatchedDeferred.fromScene(sc);
 
-              dr.rendererDeferredEvaluate(fb, batched);
+              fb.deferredFramebufferClear(
+                g.getGLCommon(),
+                ViewerSingleMainWindow.CLEAR_COLOR,
+                ViewerSingleMainWindow.CLEAR_DEPTH,
+                ViewerSingleMainWindow.CLEAR_STENCIL);
+              rd.rendererDeferredEvaluateFull(fb, batched);
               VExampleWindowGL.this.renderSceneResults(fb);
 
               if (VExampleWindowGL.this.want_save.get()) {
@@ -699,8 +713,7 @@ import com.jogamp.opengl.util.FPSAnimator;
           @Override public void run()
           {
             try {
-              VExampleWindowGL.this.example_window.rendererInitialized(r
-                .rendererGetActualClass());
+              VExampleWindowGL.this.example_window.rendererInitialized(r);
             } catch (final Exception e) {
               throw new UnreachableCodeException(e);
             }
@@ -710,13 +723,14 @@ import com.jogamp.opengl.util.FPSAnimator;
         SwingUtilities.invokeLater(new Runnable() {
           @Override public void run()
           {
-            VExampleWindowGL.this.renderer_label.setText(r.rendererGetName());
+            final ExampleRendererName name = r.exampleRendererGetName();
+            VExampleWindowGL.this.renderer_label.setText(name.toString());
           }
         });
 
         this.framebuffer =
           r
-            .rendererAccept(new ExampleRendererVisitorType<KFramebufferType>() {
+            .rendererAccept(new ExampleRendererVisitorType<KFramebufferDeferredType>() {
               private AreaInclusive makeArea()
               {
                 final RangeInclusiveL range_x =
@@ -728,41 +742,8 @@ import com.jogamp.opengl.util.FPSAnimator;
                 return area;
               }
 
-              private KFramebufferType makeForward()
-                throws RException
-              {
-                final AreaInclusive area = this.makeArea();
-
-                final KFramebufferRGBADescription rgba_description =
-                  KFramebufferRGBADescription.newDescription(
-                    area,
-                    TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-                    TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-                    KRGBAPrecision.RGBA_PRECISION_8);
-
-                final KFramebufferDepthDescription depth_description =
-                  KFramebufferDepthDescription.newDescription(
-                    area,
-                    TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
-                    TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-                    KDepthPrecision.DEPTH_PRECISION_24);
-
-                return KFramebufferForward.newFramebuffer(
-                  g,
-                  KFramebufferForwardDescription.newDescription(
-                    rgba_description,
-                    depth_description));
-              }
-
-              @Override public KFramebufferType visitDebug(
-                final ExampleRendererDebugType rd)
-                throws RException
-              {
-                return this.makeForward();
-              }
-
-              @Override public KFramebufferType visitDeferred(
-                final ExampleRendererDeferredType rd)
+              private KFramebufferDeferredType makeDeferred(
+                final JCGLImplementationType in_g)
                 throws RException
               {
                 final AreaInclusive area = this.makeArea();
@@ -782,10 +763,24 @@ import com.jogamp.opengl.util.FPSAnimator;
                     KDepthPrecision.DEPTH_PRECISION_24);
 
                 return KFramebufferDeferred.newFramebuffer(
-                  g,
+                  in_g,
                   KFramebufferForwardDescription.newDescription(
                     rgba_description,
                     depth_description));
+              }
+
+              @Override public KFramebufferDeferredType visitDebug(
+                final ExampleRendererDebugType rd)
+                throws RException
+              {
+                return this.makeDeferred(g);
+              }
+
+              @Override public KFramebufferDeferredType visitDeferred(
+                final ExampleRendererDeferredType rd)
+                throws RException
+              {
+                return this.makeDeferred(g);
               }
             });
 
@@ -797,7 +792,7 @@ import com.jogamp.opengl.util.FPSAnimator;
     }
 
     private void renderSceneResults(
-      final KFramebufferForwardType fb)
+      final KFramebufferRGBAUsableType fb)
       throws JCGLException,
         RException,
         JCacheException
@@ -824,6 +819,11 @@ import com.jogamp.opengl.util.FPSAnimator;
           gc.depthBufferWriteDisable();
         }
 
+        if (gc.stencilBufferGetBits() > 0) {
+          gc.stencilBufferDisable();
+          gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0);
+        }
+
         gc.viewportSet(fb.kFramebufferGetArea());
 
         final JCBExecutorType e = kp.getExecutable();
@@ -835,7 +835,7 @@ import com.jogamp.opengl.util.FPSAnimator;
             final List<TextureUnitType> units = gc.textureGetUnits();
             final TextureUnitType unit = units.get(0);
 
-            gc.texture2DStaticBind(unit, fb.kFramebufferGetRGBATexture());
+            gc.texture2DStaticBind(unit, fb.rgbaGetTexture());
             p.programUniformPutTextureUnit("t_image", unit);
             final KUnitQuad q = VExampleWindowGL.this.quad;
             assert q != null;
@@ -967,7 +967,8 @@ import com.jogamp.opengl.util.FPSAnimator;
   {
     final File f0 = config.getReplacementResultsDirectory();
     final File f1 = new File(f0, example.exampleGetName());
-    final File f2 = new File(f1, renderer.rendererGetName());
+    final File f2 =
+      new File(f1, renderer.exampleRendererGetName().toString());
     final File f3 = new File(f2, String.format("%d.png", view_index));
     return f3;
   }

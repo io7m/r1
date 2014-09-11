@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,32 +27,27 @@ import com.io7m.jnull.Nullable;
 
 @EqualityStructural public final class KCopyParameters
 {
-  private final boolean       blit;
   private final AreaInclusive source_select;
   private final AreaInclusive target_select;
 
   /**
    * Construct new parameters.
-   * 
+   *
    * @param in_source_select
    *          The inclusive area that will be copied from the source.
    * @param in_target_select
    *          The inclusive area that will contain the data copied on the
    *          target.
-   * @param in_blit
-   *          If blitting should be used (may be ignored if not supported)
    */
 
   public KCopyParameters(
     final AreaInclusive in_source_select,
-    final AreaInclusive in_target_select,
-    final boolean in_blit)
+    final AreaInclusive in_target_select)
   {
     this.source_select =
       NullCheck.notNull(in_source_select, "Source selection");
     this.target_select =
       NullCheck.notNull(in_target_select, "Target selection");
-    this.blit = in_blit;
   }
 
   @Override public boolean equals(
@@ -68,8 +63,7 @@ import com.io7m.jnull.Nullable;
       return false;
     }
     final KCopyParameters other = (KCopyParameters) obj;
-    return (this.blit == other.blit)
-      && (this.source_select.equals(other.source_select))
+    return (this.source_select.equals(other.source_select))
       && (this.target_select.equals(other.target_select));
   }
 
@@ -95,18 +89,8 @@ import com.io7m.jnull.Nullable;
   {
     final int prime = 31;
     int result = 1;
-    result = (prime * result) + (this.blit ? 1231 : 1237);
     result = (prime * result) + this.source_select.hashCode();
     result = (prime * result) + this.target_select.hashCode();
     return result;
-  }
-
-  /**
-   * @return <code>true</code> if blitting is requested
-   */
-
-  public boolean useBlitting()
-  {
-    return this.blit;
   }
 }

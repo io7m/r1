@@ -23,21 +23,21 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.r1.kernel.types.KFramebufferForwardDescription;
+import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.types.RException;
 
 /**
- * A cache loader that can construct forward-rendering framebuffers of type
- * {@link KFramebufferForwardType} based on the given
- * {@link KFramebufferForwardDescription}.
+ * A cache loader that can construct RGBA framebuffers of type
+ * {@link KFramebufferRGBAWithDepthType} based on the given
+ * {@link KFramebufferRGBADescription}.
  */
 
-@EqualityReference public final class KFramebufferForwardCacheLoader implements
-  JCacheLoaderType<KFramebufferForwardDescription, KFramebufferForwardType, RException>
+@EqualityReference public final class KFramebufferRGBAWithDepthCacheLoader implements
+  JCacheLoaderType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthType, RException>
 {
   /**
    * Construct a new cache loader.
-   * 
+   *
    * @param gi
    *          The OpenGL implementation
    * @param log
@@ -46,43 +46,43 @@ import com.io7m.r1.types.RException;
    */
 
   public static
-    JCacheLoaderType<KFramebufferForwardDescription, KFramebufferForwardType, RException>
+    JCacheLoaderType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthType, RException>
     newLoader(
       final JCGLImplementationType gi,
       final LogUsableType log)
   {
-    return new KFramebufferForwardCacheLoader(gi, log);
+    return new KFramebufferRGBAWithDepthCacheLoader(gi, log);
   }
 
   private final JCGLImplementationType                    gi;
   @SuppressWarnings("unused") private final LogUsableType log;
 
-  private KFramebufferForwardCacheLoader(
+  private KFramebufferRGBAWithDepthCacheLoader(
     final JCGLImplementationType in_gi,
     final LogUsableType in_log)
   {
     this.log =
-
-    NullCheck.notNull(in_log, "Log").with("framebuffer-forward-cache");
+      NullCheck.notNull(in_log, "Log").with(
+        "framebuffer-rgba-with-depth-cache");
     this.gi = NullCheck.notNull(in_gi, "OpenGL implementation");
   }
 
   @Override public void cacheValueClose(
-    final KFramebufferForwardType v)
+    final KFramebufferRGBAWithDepthType v)
     throws RException
   {
     v.kFramebufferDelete(this.gi);
   }
 
-  @Override public KFramebufferForwardType cacheValueLoad(
-    final KFramebufferForwardDescription key)
+  @Override public KFramebufferRGBAWithDepthType cacheValueLoad(
+    final KFramebufferRGBADescription key)
     throws RException
   {
-    return KFramebufferForward.newFramebuffer(this.gi, key);
+    return KFramebufferRGBAWithDepth.newFramebuffer(this.gi, key);
   }
 
   @Override public BigInteger cacheValueSizeOf(
-    final KFramebufferForwardType v)
+    final KFramebufferRGBAWithDepthType v)
   {
     final BigInteger r = BigInteger.valueOf(v.kFramebufferGetSizeBytes());
     assert r != null;

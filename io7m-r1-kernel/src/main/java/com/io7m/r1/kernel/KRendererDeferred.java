@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,43 +21,50 @@ import java.util.List;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.api.JCGLImplementationType;
-import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.VectorM4F;
-import com.io7m.jtensors.VectorReadable4FType;
-import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
 import com.io7m.r1.kernel.types.KSceneBatchedDeferredOpaque;
 import com.io7m.r1.kernel.types.KTranslucentType;
 import com.io7m.r1.types.RException;
+import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * The primary forward renderer.
  */
 
-@SuppressWarnings("synthetic-access") @EqualityReference public final class KRendererDeferred implements
+@EqualityReference public final class KRendererDeferred implements
   KRendererDeferredType
 {
-  private static final String NAME;
+  private static final String                                                            NAME;
+  private static final PartialProcedureType<KRendererDeferredControlType, RException> RENDER_PROCEDURE;
 
   static {
     NAME = "deferred";
+
+    RENDER_PROCEDURE =
+      new PartialProcedureType<KRendererDeferredControlType, RException>() {
+        @Override public void call(
+          final KRendererDeferredControlType r)
+          throws RException
+        {
+          r.rendererEvaluateOpaques();
+          r.rendererEvaluateTranslucents();
+        }
+      };
   }
 
   /**
-   * Construct a new forward renderer.
+   * Construct a new renderer.
    *
-   * @param in_g
-   *          The OpenGL implementation
    * @param in_shadow_renderer
    *          A shadow map renderer
    * @param in_translucent_renderer
@@ -72,7 +79,6 @@ import com.io7m.r1.types.RExceptionJCGL;
    */
 
   public static KRendererDeferredType newRenderer(
-    final JCGLImplementationType in_g,
     final KShadowMapRendererType in_shadow_renderer,
     final KTranslucentRendererType in_translucent_renderer,
     final KRendererDeferredOpaqueType in_opaque_renderer,
@@ -80,15 +86,12 @@ import com.io7m.r1.types.RExceptionJCGL;
     throws RException
   {
     return new KRendererDeferred(
-      in_g,
       in_shadow_renderer,
       in_translucent_renderer,
       in_opaque_renderer,
       in_log);
   }
 
-  private final VectorM4F                   background;
-  private final JCGLImplementationType      g;
   private final LogUsableType               log;
   private final KMutableMatrices            matrices;
   private final KRendererDeferredOpaqueType opaque_renderer;
@@ -96,14 +99,12 @@ import com.io7m.r1.types.RExceptionJCGL;
   private final KTranslucentRendererType    translucent_renderer;
 
   private KRendererDeferred(
-    final JCGLImplementationType in_g,
     final KShadowMapRendererType in_shadow_renderer,
     final KTranslucentRendererType in_translucent_renderer,
     final KRendererDeferredOpaqueType in_opaque_renderer,
     final LogUsableType in_log)
   {
     this.log = NullCheck.notNull(in_log, "Log").with(KRendererDeferred.NAME);
-    this.g = NullCheck.notNull(in_g, "GL implementation");
 
     this.shadow_renderer =
       NullCheck.notNull(in_shadow_renderer, "Shadow renderer");
@@ -111,24 +112,37 @@ import com.io7m.r1.types.RExceptionJCGL;
       NullCheck.notNull(in_translucent_renderer, "Translucent renderer");
     this.opaque_renderer =
       NullCheck.notNull(in_opaque_renderer, "Opaque renderer");
-
     this.matrices = KMutableMatrices.newMatrices();
-    this.background = new VectorM4F();
 
     if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
       this.log.debug("initialized");
     }
   }
 
-  @Override public void rendererDeferredEvaluate(
-    final KFramebufferDeferredUsableType framebuffer,
-    final KSceneBatchedDeferred scene)
-    throws RException
+  @Override public
+    void
+    rendererDeferredEvaluate(
+      final KFramebufferDeferredUsableType framebuffer,
+      final KSceneBatchedDeferred scene,
+      final PartialProcedureType<KRendererDeferredControlType, RException> procedure)
+      throws RException
   {
     NullCheck.notNull(framebuffer, "Framebuffer");
     NullCheck.notNull(scene, "Scene");
+    NullCheck.notNull(procedure, "Procedure");
 
+    final KShadowMapRendererType smr = this.shadow_renderer;
     final KCamera camera = scene.getCamera();
+    final List<KTranslucentType> translucents = scene.getTranslucents();
+    final KSceneBatchedDeferredOpaque opaques = scene.getDeferredOpaques();
+    final OptionType<DepthFunction> depth_function =
+      Option.some(DepthFunction.DEPTH_LESS_THAN);
+
+    final KTranslucentRendererType tr =
+      KRendererDeferred.this.translucent_renderer;
+    final KRendererDeferredOpaqueType or =
+      KRendererDeferred.this.opaque_renderer;
+
     try {
       this.matrices.withObserver(
         camera.getViewMatrix(),
@@ -140,14 +154,66 @@ import com.io7m.r1.types.RExceptionJCGL;
               RException
           {
             try {
-              KRendererDeferred.this.renderScene(
+              /**
+               * Render shadow maps.
+               */
+
+              return smr.rendererEvaluateShadowMaps(
                 camera,
-                framebuffer,
-                scene,
-                mwo);
-              return Unit.unit();
+                scene.getShadows(),
+                new KShadowMapWithType<Unit, JCacheException>() {
+                  @Override public Unit withMaps(
+                    final KShadowMapContextType shadow_context)
+                    throws JCGLException,
+                      RException
+                  {
+                    procedure.call(new KRendererDeferredControlType() {
+                      @Override public void rendererEvaluateOpaques()
+                        throws RException
+                      {
+                        or.rendererEvaluateOpaqueLit(
+                          framebuffer,
+                          shadow_context,
+                          depth_function,
+                          mwo,
+                          opaques.getGroups());
+
+                        or.rendererEvaluateOpaqueUnlit(
+                          framebuffer,
+                          shadow_context,
+                          depth_function,
+                          mwo,
+                          opaques.getUnlit());
+                      }
+
+                      @Override public void rendererEvaluateTranslucents()
+                        throws RException
+                      {
+                        tr.rendererEvaluateTranslucents(
+                          framebuffer,
+                          mwo,
+                          translucents);
+                      }
+
+                      @Override public
+                        KMatricesObserverType
+                        rendererGetObserver()
+                      {
+                        return mwo;
+                      }
+
+                      @Override public
+                        KShadowMapContextType
+                        rendererGetShadowMapContext()
+                      {
+                        return shadow_context;
+                      }
+                    });
+                    return Unit.unit();
+                  }
+                });
             } catch (final JCacheException e) {
-              throw new UnreachableCodeException(e);
+              throw RExceptionCache.fromJCacheException(e);
             }
           }
         });
@@ -156,77 +222,19 @@ import com.io7m.r1.types.RExceptionJCGL;
     }
   }
 
-  @Override public void rendererDeferredSetBackgroundRGBA(
-    final VectorReadable4FType rgba)
+  @Override public void rendererDeferredEvaluateFull(
+    final KFramebufferDeferredUsableType framebuffer,
+    final KSceneBatchedDeferred scene)
+    throws RException
   {
-    NullCheck.notNull(rgba, "Color");
-    VectorM4F.copy(rgba, this.background);
+    this.rendererDeferredEvaluate(
+      framebuffer,
+      scene,
+      KRendererDeferred.RENDER_PROCEDURE);
   }
 
   @Override public String rendererGetName()
   {
     return KRendererDeferred.NAME;
-  }
-
-  private void renderScene(
-    final KCamera camera,
-    final KFramebufferDeferredUsableType framebuffer,
-    final KSceneBatchedDeferred scene,
-    final KMatricesObserverType mwo)
-    throws RException,
-      JCacheException
-  {
-    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-
-    /**
-     * Render shadow maps.
-     */
-
-    this.shadow_renderer.rendererEvaluateShadowMaps(
-      camera,
-      scene.getShadows(),
-      new KShadowMapWithType<Unit, JCacheException>() {
-        @Override public Unit withMaps(
-          final KShadowMapContextType shadow_context)
-          throws JCGLException,
-            RException,
-            JCacheException
-        {
-          gc.viewportSet(framebuffer.kFramebufferGetArea());
-
-          gc.colorBufferMask(true, true, true, true);
-          gc.colorBufferClearV4f(KRendererDeferred.this.background);
-
-          gc.depthBufferWriteEnable();
-          gc.depthBufferClear(1.0f);
-
-          final KSceneBatchedDeferredOpaque opaques =
-            scene.getDeferredOpaques();
-
-          final OptionType<DepthFunction> depth_function =
-            Option.some(DepthFunction.DEPTH_LESS_THAN);
-
-          KRendererDeferred.this.opaque_renderer.rendererEvaluateOpaqueLit(
-            framebuffer,
-            shadow_context,
-            depth_function,
-            mwo,
-            opaques.getGroups());
-
-          KRendererDeferred.this.opaque_renderer.rendererEvaluateOpaqueUnlit(
-            framebuffer,
-            shadow_context,
-            depth_function,
-            mwo,
-            opaques.getUnlit());
-
-          final List<KTranslucentType> translucents = scene.getTranslucents();
-
-          KRendererDeferred.this.translucent_renderer
-            .rendererEvaluateTranslucents(framebuffer, mwo, translucents);
-
-          return Unit.unit();
-        }
-      });
   }
 }

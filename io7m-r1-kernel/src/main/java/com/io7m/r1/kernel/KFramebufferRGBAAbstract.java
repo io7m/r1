@@ -41,10 +41,10 @@ import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
 import com.io7m.jequality.annotations.EqualityReference;
-import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
+import com.io7m.r1.types.RExceptionNotSupported;
 
 @EqualityReference abstract class KFramebufferRGBAAbstract implements
   KFramebufferRGBAType
@@ -123,19 +123,17 @@ import com.io7m.r1.types.RExceptionJCGL;
       }
     }
 
-    @Override public FramebufferUsableType kFramebufferGetColorFramebuffer()
+    @Override public FramebufferUsableType rgbaGetColorFramebuffer()
     {
       return this.framebuffer;
     }
 
-    @Override public
-      KFramebufferRGBADescription
-      kFramebufferGetRGBADescription()
+    @Override public KFramebufferRGBADescription rgbaGetDescription()
     {
       return this.description;
     }
 
-    @Override public Texture2DStaticUsableType kFramebufferGetRGBATexture()
+    @Override public Texture2DStaticUsableType rgbaGetTexture()
     {
       return this.color;
     }
@@ -254,112 +252,17 @@ import com.io7m.r1.types.RExceptionJCGL;
       }
     }
 
-    @Override public FramebufferUsableType kFramebufferGetColorFramebuffer()
+    @Override public FramebufferUsableType rgbaGetColorFramebuffer()
     {
       return this.framebuffer;
     }
 
-    @Override public
-      KFramebufferRGBADescription
-      kFramebufferGetRGBADescription()
+    @Override public KFramebufferRGBADescription rgbaGetDescription()
     {
       return this.description;
     }
 
-    @Override public Texture2DStaticUsableType kFramebufferGetRGBATexture()
-    {
-      return this.color;
-    }
-  }
-
-  @EqualityReference private static final class KFramebufferRGBA_GLES2 extends
-    KFramebufferRGBAAbstract
-  {
-
-    public static KFramebufferRGBA_GLES2 newRGBA(
-      final JCGLInterfaceGLES2Type gl,
-      final KFramebufferRGBADescription desc)
-      throws JCGLException
-    {
-      final AreaInclusive area = desc.getArea();
-      final int width = (int) area.getRangeX().getInterval();
-      final int height = (int) area.getRangeY().getInterval();
-
-      final Texture2DStaticType c =
-        gl.texture2DStaticAllocateRGBA4444(
-          "color-4444",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          desc.getFilterMinification(),
-          desc.getFilterMagnification());
-
-      final List<FramebufferColorAttachmentPointType> points =
-        gl.framebufferGetColorAttachmentPoints();
-      final List<FramebufferDrawBufferType> buffers =
-        gl.framebufferGetDrawBuffers();
-
-      final Map<FramebufferDrawBufferType, FramebufferColorAttachmentPointType> mappings =
-        new HashMap<FramebufferDrawBufferType, FramebufferColorAttachmentPointType>();
-      mappings.put(buffers.get(0), points.get(0));
-
-      final FramebufferType fb = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb);
-      try {
-        gl.framebufferDrawAttachColorTexture2D(fb, c);
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb);
-        KFramebufferCommon.checkFramebufferStatus(status);
-      } finally {
-        gl.framebufferDrawUnbind();
-      }
-
-      return new KFramebufferRGBA_GLES2(c, fb, desc);
-    }
-
-    private final Texture2DStaticType         color;
-    private final KFramebufferRGBADescription description;
-    private final FramebufferType             framebuffer;
-
-    private KFramebufferRGBA_GLES2(
-      final Texture2DStaticType c,
-      final FramebufferType fb,
-      final KFramebufferRGBADescription desc)
-    {
-      super(desc.getArea(), c.resourceGetSizeBytes());
-      this.color = c;
-      this.framebuffer = fb;
-      this.description = desc;
-    }
-
-    @Override public void kFramebufferDelete(
-      final JCGLImplementationType g)
-      throws RException
-    {
-      try {
-        final JCGLInterfaceCommonType gc = g.getGLCommon();
-        gc.framebufferDelete(this.framebuffer);
-        gc.texture2DStaticDelete(this.color);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
-      } finally {
-        super.setDeleted(true);
-      }
-    }
-
-    @Override public FramebufferUsableType kFramebufferGetColorFramebuffer()
-    {
-      return this.framebuffer;
-    }
-
-    @Override public
-      KFramebufferRGBADescription
-      kFramebufferGetRGBADescription()
-    {
-      return this.description;
-    }
-
-    @Override public Texture2DStaticUsableType kFramebufferGetRGBATexture()
+    @Override public Texture2DStaticUsableType rgbaGetTexture()
     {
       return this.color;
     }
@@ -368,10 +271,11 @@ import com.io7m.r1.types.RExceptionJCGL;
   static KFramebufferRGBAAbstract newRGBA(
     final JCGLImplementationType gi,
     final KFramebufferRGBADescription desc)
-    throws JCGLException
+    throws JCGLException,
+      RException
   {
     return gi
-      .implementationAccept(new JCGLImplementationVisitorType<KFramebufferRGBAAbstract, UnreachableCodeException>() {
+      .implementationAccept(new JCGLImplementationVisitorType<KFramebufferRGBAAbstract, RException>() {
         @Override public KFramebufferRGBAAbstract implementationIsGL2(
           final JCGLInterfaceGL2Type gl)
           throws JCGLException
@@ -388,9 +292,11 @@ import com.io7m.r1.types.RExceptionJCGL;
 
         @Override public KFramebufferRGBAAbstract implementationIsGLES2(
           final JCGLInterfaceGLES2Type gl)
-          throws JCGLException
+          throws JCGLException,
+            RExceptionNotSupported
         {
-          return KFramebufferRGBA_GLES2.newRGBA(gl, desc);
+          throw RExceptionNotSupported.versionNotSupported(gl
+            .metaGetVersion());
         }
 
         @Override public KFramebufferRGBAAbstract implementationIsGLES3(
