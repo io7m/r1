@@ -24,16 +24,18 @@ import com.io7m.jcanephora.ArrayBufferUpdateUnmapped;
 import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
 import com.io7m.r1.kernel.KDepthVarianceRendererType;
+import com.io7m.r1.kernel.KFramebufferDeferredUsableType;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCache;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
-import com.io7m.r1.kernel.KFramebufferForwardCache;
-import com.io7m.r1.kernel.KFramebufferForwardCacheType;
+import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCache;
+import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCacheType;
 import com.io7m.r1.kernel.KMeshBoundsCache;
 import com.io7m.r1.kernel.KMeshBoundsCacheType;
 import com.io7m.r1.kernel.KMeshBoundsTrianglesCache;
@@ -45,6 +47,7 @@ import com.io7m.r1.kernel.KRefractionRendererType;
 import com.io7m.r1.kernel.KRegionCopier;
 import com.io7m.r1.kernel.KRegionCopierType;
 import com.io7m.r1.kernel.KRendererDeferred;
+import com.io7m.r1.kernel.KRendererDeferredControlType;
 import com.io7m.r1.kernel.KRendererDeferredOpaque;
 import com.io7m.r1.kernel.KRendererDeferredOpaqueType;
 import com.io7m.r1.kernel.KRendererDeferredType;
@@ -66,6 +69,7 @@ import com.io7m.r1.kernel.KTranslucentRendererType;
 import com.io7m.r1.kernel.Kernel;
 import com.io7m.r1.kernel.types.KFrustumMeshCache;
 import com.io7m.r1.kernel.types.KFrustumMeshCacheType;
+import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
 import com.io7m.r1.kernel.types.KUnitQuadCache;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitSphereCacheType;
@@ -97,7 +101,7 @@ public final class ExampleRendererDeferredDefault extends
       }
 
       @SuppressWarnings("synthetic-access") @Override public
-        ExampleRendererType
+        ExampleRendererDeferredType
         newRenderer(
           final LogUsableType log,
           final KShaderCacheDebugType in_shader_debug_cache,
@@ -127,6 +131,16 @@ public final class ExampleRendererDeferredDefault extends
     };
   }
 
+  /**
+   * @return The renderer name.
+   */
+
+  public static ExampleRendererName getName()
+  {
+    return new ExampleRendererName(
+      ExampleRendererDeferredDefault.class.getCanonicalName());
+  }
+
   @SuppressWarnings("null") private static
     ExampleRendererDeferredType
     make(
@@ -154,12 +168,7 @@ public final class ExampleRendererDeferredDefault extends
         BigInteger.ONE,
         log);
 
-    final KRegionCopierType copier =
-      KRegionCopier.newCopier(
-        gi,
-        log,
-        in_shader_postprocessing_cache,
-        quad_cache);
+    final KRegionCopierType copier = KRegionCopier.newCopier(gi, log);
 
     final KDepthRendererType depth_renderer =
       KDepthRenderer.newRenderer(gi, in_shader_depth_cache, log);
@@ -204,15 +213,16 @@ public final class ExampleRendererDeferredDefault extends
         shadow_cache,
         log);
 
-    final BLUCacheConfig forward_cache_config =
+    final BLUCacheConfig rgba_cache_config =
       BLUCacheConfig
         .empty()
         .withMaximumBorrowsPerKey(BigInteger.TEN)
         .withMaximumCapacity(BigInteger.valueOf(640 * 480 * 4 * 128));
-    final KFramebufferForwardCacheType forward_cache =
-      KFramebufferForwardCache.newCacheWithConfig(
+
+    final KFramebufferRGBAWithDepthCacheType rgba_cache =
+      KFramebufferRGBAWithDepthCache.newCacheWithConfig(
         gi,
-        forward_cache_config,
+        rgba_cache_config,
         log);
 
     final LRUCacheConfig bounds_cache_config =
@@ -230,7 +240,7 @@ public final class ExampleRendererDeferredDefault extends
         gi,
         copier,
         in_shader_translucent_unlit_cache,
-        forward_cache,
+        rgba_cache,
         bounds_cache,
         bounds_tri_cache);
 
@@ -261,7 +271,6 @@ public final class ExampleRendererDeferredDefault extends
         in_shader_deferred_light_cache);
 
     return new ExampleRendererDeferredDefault(KRendererDeferred.newRenderer(
-      gi,
       shadow_renderer,
       translucent_renderer,
       opaque_renderer,
@@ -284,18 +293,40 @@ public final class ExampleRendererDeferredDefault extends
     return v.visitDeferred(this);
   }
 
-  @Override public Class<? extends KRendererType> rendererGetActualClass()
+  @Override public
+    void
+    rendererDeferredEvaluate(
+      final KFramebufferDeferredUsableType framebuffer,
+      final KSceneBatchedDeferred scene,
+      final PartialProcedureType<KRendererDeferredControlType, RException> procedure)
+      throws RException
+  {
+    this.actual.rendererDeferredEvaluate(framebuffer, scene, procedure);
+  }
+
+  @Override public void rendererDeferredEvaluateFull(
+    final KFramebufferDeferredUsableType framebuffer,
+    final KSceneBatchedDeferred scene)
+    throws RException
+  {
+    this.actual.rendererDeferredEvaluateFull(framebuffer, scene);
+  }
+
+  @Override public
+    Class<? extends KRendererType>
+    exampleRendererGetActualClass()
   {
     return this.actual.getClass();
   }
 
-  @Override public KRendererDeferredType rendererGetDeferred()
+  @Override public ExampleRendererName exampleRendererGetName()
   {
-    return this.actual;
+    return new ExampleRendererName(
+      ExampleRendererDeferredDefault.class.getCanonicalName());
   }
 
   @Override public String rendererGetName()
   {
-    return this.actual.getClass().getCanonicalName();
+    return this.exampleRendererGetName().toString();
   }
 }

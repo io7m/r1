@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -50,16 +50,16 @@ public final class ExampleRenderers
     b.append(ExampleRendererConstructorType.class.getPackage().getName());
     b.append(".");
     b.append(name);
-    final String c_name = b.toString();
+    final ExampleRendererName c_name = new ExampleRendererName(b.toString());
     assert c_name != null;
 
-    final SortedMap<String, ExampleRendererConstructorType> rc =
+    final SortedMap<ExampleRendererName, ExampleRendererConstructorType> rc =
       ExampleRenderers.getRenderers();
     if (rc.containsKey(c_name)) {
       return rc.get(c_name);
     }
 
-    throw new ClassNotFoundException(c_name);
+    throw new ClassNotFoundException(c_name.toString());
   }
 
   /**
@@ -67,17 +67,23 @@ public final class ExampleRenderers
    */
 
   public static
-    SortedMap<String, ExampleRendererConstructorType>
+    SortedMap<ExampleRendererName, ExampleRendererConstructorType>
     getRenderers()
   {
-    final SortedMap<String, ExampleRendererConstructorType> r =
-      new TreeMap<String, ExampleRendererConstructorType>();
+    final SortedMap<ExampleRendererName, ExampleRendererConstructorType> r =
+      new TreeMap<ExampleRendererName, ExampleRendererConstructorType>();
 
     r.put(
-      ExampleRendererDeferredDefault.class.getCanonicalName(),
+      ExampleRendererDeferredDefault.getName(),
       ExampleRendererDeferredDefault.get());
+    r.put(
+      ExampleRendererDeferredWithEmission.getName(),
+      ExampleRendererDeferredWithEmission.get());
+    r.put(
+      ExampleRendererDeferredWithEmissionGlow.getName(),
+      ExampleRendererDeferredWithEmissionGlow.get());
 
-    final SortedMap<String, ExampleRendererConstructorType> ur =
+    final SortedMap<ExampleRendererName, ExampleRendererConstructorType> ur =
       Collections.unmodifiableSortedMap(r);
 
     assert ur != null;

@@ -57,6 +57,8 @@ import com.io7m.jlog.LogType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.VectorI4F;
+import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.r1.examples.ExampleClasses;
@@ -79,12 +81,9 @@ import com.io7m.r1.examples.tools.ETexture2DCache;
 import com.io7m.r1.examples.tools.ETextureCubeCache;
 import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
-import com.io7m.r1.kernel.KFramebufferForward;
-import com.io7m.r1.kernel.KFramebufferForwardType;
-import com.io7m.r1.kernel.KFramebufferType;
+import com.io7m.r1.kernel.KFramebufferRGBAUsableType;
 import com.io7m.r1.kernel.KProgramType;
 import com.io7m.r1.kernel.KRendererDebugType;
-import com.io7m.r1.kernel.KRendererDeferredType;
 import com.io7m.r1.kernel.KShaderCachePostprocessingType;
 import com.io7m.r1.kernel.KShadingProgramCommon;
 import com.io7m.r1.kernel.types.KCamera;
@@ -119,8 +118,19 @@ import com.jogamp.opengl.util.FPSAnimator;
 
 final class ViewerSingleMainWindow implements Runnable
 {
+  static final int                  CLEAR_STENCIL;
+  static final VectorReadable4FType CLEAR_COLOR;
+  static final float                CLEAR_DEPTH;
+
+  static {
+    CLEAR_STENCIL = 0;
+    CLEAR_COLOR = new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f);
+    CLEAR_DEPTH = 1.0f;
+  }
+
   private static final class Runner
   {
+
     private static void drawQuad(
       final JCGLInterfaceCommonType gc,
       final KUnitQuadUsableType quad,
@@ -153,17 +163,17 @@ final class ViewerSingleMainWindow implements Runnable
       }
     }
 
-    private final ETexture2DCache        cache_2d;
-    private final ETextureCubeCache      cache_cube;
-    private final EMeshCache             cache_mesh;
-    private final ExampleSceneType       example;
-    private final KFramebufferType       framebuffer;
-    private final JCGLImplementationType gi;
-    private final TextureLoaderType      loader;
-    private final KUnitQuad              quad;
-    private final ExampleRendererType    renderer;
-    private int                          view_index;
-    private final VShaderCaches          shader_caches;
+    private final ETexture2DCache          cache_2d;
+    private final ETextureCubeCache        cache_cube;
+    private final EMeshCache               cache_mesh;
+    private final ExampleSceneType         example;
+    private final KFramebufferDeferredType framebuffer;
+    private final JCGLImplementationType   gi;
+    private final TextureLoaderType        loader;
+    private final KUnitQuad                quad;
+    private final ExampleRendererType      renderer;
+    private int                            view_index;
+    private final VShaderCaches            shader_caches;
 
     Runner(
       final GLAutoDrawable drawable,
@@ -237,9 +247,15 @@ final class ViewerSingleMainWindow implements Runnable
 
       this.framebuffer =
         this.renderer
-          .rendererAccept(new ExampleRendererVisitorType<KFramebufferType>() {
-            @Override public KFramebufferType visitDeferred(
+          .rendererAccept(new ExampleRendererVisitorType<KFramebufferDeferredType>() {
+            @Override public KFramebufferDeferredType visitDeferred(
               final ExampleRendererDeferredType r)
+              throws RException
+            {
+              return this.makeDeferred();
+            }
+
+            private KFramebufferDeferredType makeDeferred()
               throws RException
             {
               final AreaInclusive area = this.makeArea();
@@ -275,43 +291,17 @@ final class ViewerSingleMainWindow implements Runnable
               return area;
             }
 
-            private KFramebufferType makeForward()
-              throws RException
-            {
-              final AreaInclusive area = this.makeArea();
-
-              final KFramebufferRGBADescription rgba_description =
-                KFramebufferRGBADescription.newDescription(
-                  area,
-                  TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-                  TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-                  KRGBAPrecision.RGBA_PRECISION_8);
-
-              final KFramebufferDepthDescription depth_description =
-                KFramebufferDepthDescription.newDescription(
-                  area,
-                  TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
-                  TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-                  KDepthPrecision.DEPTH_PRECISION_24);
-
-              return KFramebufferForward.newFramebuffer(
-                Runner.this.gi,
-                KFramebufferForwardDescription.newDescription(
-                  rgba_description,
-                  depth_description));
-            }
-
-            @Override public KFramebufferType visitDebug(
+            @Override public KFramebufferDeferredType visitDebug(
               final ExampleRendererDebugType r)
               throws RException
             {
-              return this.makeForward();
+              return this.makeDeferred();
             }
           });
     }
 
     private void renderSceneResults(
-      final KFramebufferForwardType fb)
+      final KFramebufferRGBAUsableType fb)
       throws JCGLException,
         RException,
         JCacheException
@@ -352,7 +342,7 @@ final class ViewerSingleMainWindow implements Runnable
             final List<TextureUnitType> units = gc.textureGetUnits();
             final TextureUnitType unit = units.get(0);
 
-            gc.texture2DStaticBind(unit, fb.kFramebufferGetRGBATexture());
+            gc.texture2DStaticBind(unit, fb.rgbaGetTexture());
             p.programUniformPutTextureUnit("t_image", unit);
             Runner.drawQuad(gc, Runner.this.quad, p);
           }
@@ -530,16 +520,19 @@ final class ViewerSingleMainWindow implements Runnable
           throws RException
         {
           try {
-            final KRendererDeferredType dr = rd.rendererGetDeferred();
-            final KFramebufferDeferredType fb =
-              (KFramebufferDeferredType) Runner.this.framebuffer;
+            final KFramebufferDeferredType fb = Runner.this.framebuffer;
             assert fb != null;
 
             final KScene sc = scene_builder.sceneCreate();
             final KSceneBatchedDeferred batched =
               KSceneBatchedDeferred.fromScene(sc);
 
-            dr.rendererDeferredEvaluate(fb, batched);
+            fb.deferredFramebufferClear(
+              Runner.this.gi.getGLCommon(),
+              ViewerSingleMainWindow.CLEAR_COLOR,
+              ViewerSingleMainWindow.CLEAR_DEPTH,
+              ViewerSingleMainWindow.CLEAR_STENCIL);
+            rd.rendererDeferredEvaluateFull(fb, batched);
             Runner.this.renderSceneResults(fb);
 
             return Unit.unit();
@@ -556,8 +549,7 @@ final class ViewerSingleMainWindow implements Runnable
         {
           try {
             final KRendererDebugType dr = rd.rendererGetDebug();
-            final KFramebufferForwardType fb =
-              (KFramebufferForwardType) Runner.this.framebuffer;
+            final KFramebufferDeferredType fb = Runner.this.framebuffer;
             assert fb != null;
 
             final KScene sc = scene_builder.sceneCreate();

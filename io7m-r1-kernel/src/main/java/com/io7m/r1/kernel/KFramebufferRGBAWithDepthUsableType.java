@@ -16,22 +16,13 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.r1.kernel.types.KFramebufferForwardDescription;
-
 /**
- * The type of usable forward-rendering framebuffers.
+ * The type of usable "image-only" RGBA framebuffers that also have
+ * (non-sampleable, rendering-only) depth components.
  */
 
-public interface KFramebufferForwardUsableType extends
-  KFramebufferRGBAUsableType,
-  KFramebufferDepthUsableType
+public interface KFramebufferRGBAWithDepthUsableType extends
+  KFramebufferRGBAUsableType
 {
-  /**
-   * Retrieve a description of this framebuffer.
-   * 
-   * @return A description of the framebuffer that can be used to allocate
-   *         other framebuffers with the same configuration
-   */
-
-  KFramebufferForwardDescription kFramebufferGetForwardDescription();
+  // No extra functions.
 }

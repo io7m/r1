@@ -31,7 +31,6 @@ import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.FilesystemError.Code;
 import com.io7m.jvvfs.FilesystemType;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.r1.kernel.KRendererType;
 
 /**
  * Available example images.
@@ -96,7 +95,7 @@ public final class ExampleImages<T>
    */
 
   public synchronized OptionType<T> getImage(
-    final Class<? extends KRendererType> renderer,
+    final ExampleRendererName renderer,
     final Class<? extends ExampleSceneType> scene,
     final int view)
     throws Exception
@@ -104,7 +103,7 @@ public final class ExampleImages<T>
     final PathVirtual path_scene =
       ExampleImages.SCENES_BASE.appendName(scene.getCanonicalName());
     final PathVirtual path_renderer =
-      path_scene.appendName(renderer.getCanonicalName());
+      path_scene.appendName(renderer.toString());
     final PathVirtual path_view =
       path_renderer.appendName(String.format("%d.png", view));
 
@@ -136,7 +135,7 @@ public final class ExampleImages<T>
    *           On errors.
    */
 
-  public synchronized List<Class<? extends KRendererType>> getSceneRenderers(
+  public synchronized List<ExampleRendererName> getSceneRenderers(
     final Class<? extends ExampleSceneType> scene)
     throws Exception
   {
@@ -146,21 +145,20 @@ public final class ExampleImages<T>
       final SortedSet<String> renderers =
         this.filesystem.listDirectory(path_scene);
 
-      final List<Class<? extends KRendererType>> classes =
-        new ArrayList<Class<? extends KRendererType>>();
+      final List<ExampleRendererName> names =
+        new ArrayList<ExampleRendererName>();
 
       for (final String r : renderers) {
-        final Class<?> c = Class.forName(r);
-        classes.add((Class<? extends KRendererType>) c);
+        names.add(new ExampleRendererName(r));
       }
 
-      return classes;
+      return names;
     } catch (final FilesystemError e) {
       if (e.getCode() != Code.FS_ERROR_NONEXISTENT) {
         throw e;
       }
     }
 
-    return new ArrayList<Class<? extends KRendererType>>();
+    return new ArrayList<ExampleRendererName>();
   }
 }

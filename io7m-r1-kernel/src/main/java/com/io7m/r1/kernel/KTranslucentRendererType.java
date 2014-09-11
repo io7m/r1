@@ -42,7 +42,7 @@ public interface KTranslucentRendererType
    */
 
   void rendererEvaluateTranslucents(
-    final KFramebufferForwardUsableType framebuffer,
+    final KFramebufferRGBAWithDepthUsableType framebuffer,
     final KMatricesObserverType mwo,
     final List<KTranslucentType> translucents)
     throws RException;

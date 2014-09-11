@@ -112,9 +112,11 @@ module Normals is
     b        : vector_3f,
     uv       : vector_2f
   ) : vector_3f =
-    M3.multiply_vector (
-      m_normal,
-      bump_local (t_normal, n, t, b, uv)
+    V3.normalize (
+      M3.multiply_vector (
+        m_normal,
+        bump_local (t_normal, n, t, b, uv)
+      )
     );
 
   --

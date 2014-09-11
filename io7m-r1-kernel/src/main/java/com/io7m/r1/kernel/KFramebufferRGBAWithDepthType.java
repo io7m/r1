@@ -17,17 +17,13 @@
 package com.io7m.r1.kernel;
 
 /**
- * <p>
- * The type of framebuffer configurations suitable for forward rendering, with
- * a depth buffer that can be sampled (for shadow mapping and similar
- * techniques).
- * </p>
+ * The type of "image-only" RGBA framebuffers that also have (non-sampleable,
+ * rendering-only) depth components.
  */
 
-public interface KFramebufferForwardType extends
-  KFramebufferRGBAType,
-  KFramebufferDepthType,
-  KFramebufferForwardUsableType
+public interface KFramebufferRGBAWithDepthType extends
+  KFramebufferType,
+  KFramebufferRGBAWithDepthUsableType
 {
   // No extras.
 }

@@ -17,8 +17,14 @@
 package com.io7m.r1.kernel;
 
 import com.io7m.jcache.BLUCacheAbstract;
+import com.io7m.jcache.BLUCacheConfig;
+import com.io7m.jcache.BLUCacheTrivial;
 import com.io7m.jcache.BLUCacheType;
+import com.io7m.jcache.JCacheLoaderType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.types.RException;
 
@@ -30,6 +36,35 @@ import com.io7m.r1.types.RException;
   BLUCacheAbstract<KFramebufferRGBADescription, KFramebufferRGBAUsableType, KFramebufferRGBAType, RException> implements
   KFramebufferRGBACacheType
 {
+  /**
+   * Construct a trivial cache with the given cache config.
+   *
+   * @param gi
+   *          The OpenGL implementation
+   * @param config
+   *          The config
+   * @param log
+   *          A log interface
+   * @return A cache
+   */
+
+  public static KFramebufferRGBACacheType newCacheWithConfig(
+    final JCGLImplementationType gi,
+    final BLUCacheConfig config,
+    final LogUsableType log)
+  {
+    NullCheck.notNull(gi, "OpenGL implementation");
+    NullCheck.notNull(config, "Config");
+    NullCheck.notNull(log, "Log");
+
+    final JCacheLoaderType<KFramebufferRGBADescription, KFramebufferRGBAType, RException> loader =
+      KFramebufferRGBACacheLoader.newLoader(gi, log);
+    final BLUCacheType<KFramebufferRGBADescription, KFramebufferRGBAUsableType, KFramebufferRGBAType, RException> c =
+      BLUCacheTrivial.newCache(loader, config);
+
+    return new KFramebufferRGBACache(c);
+  }
+
   /**
    * Wrap the given cache and expose a {@link KFramebufferRGBACacheType}
    * interface.
