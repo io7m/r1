@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -43,7 +43,7 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.kernel.types.KFramebufferForwardDescription;
+import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialNormalVertex;
@@ -309,7 +309,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
    *          A region copier
    * @param shader_cache
    *          A shader cache
-   * @param forward_cache
+   * @param rgba_cache
    *          A framebuffer cache
    * @param bounds_cache
    *          A bounds cache
@@ -325,7 +325,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
     final JCGLImplementationType gl,
     final KRegionCopierType copier,
     final KShaderCacheForwardTranslucentUnlitType shader_cache,
-    final KFramebufferForwardCacheType forward_cache,
+    final KFramebufferRGBAWithDepthCacheType rgba_cache,
     final KMeshBoundsCacheType<RSpaceObjectType> bounds_cache,
     final KMeshBoundsTrianglesCacheType<RSpaceObjectType> bounds_tri_cache)
     throws RException
@@ -334,7 +334,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
       gl,
       copier,
       shader_cache,
-      forward_cache,
+      rgba_cache,
       bounds_cache,
       bounds_tri_cache);
   }
@@ -393,11 +393,11 @@ import com.io7m.r1.types.RVectorReadable3FType;
   }
 
   private static
-    <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
+    <F extends KFramebufferRGBAWithDepthUsableType & KFramebufferDepthUsableType>
     void
     putTextures(
       final KMaterialTranslucentRefractive material,
-      final KFramebufferRGBAUsableType scene,
+      final KFramebufferRGBAWithDepthUsableType scene,
       final JCBProgramType program,
       final KTextureUnitContextType context)
       throws JCGLException,
@@ -427,17 +427,17 @@ import com.io7m.r1.types.RVectorReadable3FType;
 
     KShadingProgramCommon.putRefractionTextureScene(
       program,
-      context.withTexture2D(scene.kFramebufferGetRGBATexture()));
+      context.withTexture2D(scene.rgbaGetTexture()));
   }
 
   private static void rendererRefractionEvaluateForInstanceMasked(
     final JCGLImplementationType g,
-    final KFramebufferForwardCacheType forward_cache,
+    final KFramebufferRGBAWithDepthCacheType rgba_cache,
     final KShaderCacheForwardTranslucentUnlitType shader_cache,
     final KTextureUnitAllocator unit_allocator,
     final KRegionCopierType copier,
-    final KFramebufferForwardUsableType scene,
-    final KFramebufferForwardUsableType temporary,
+    final KFramebufferRGBAWithDepthUsableType scene,
+    final KFramebufferRGBAWithDepthUsableType temporary,
     final KInstanceTranslucentRefractive r,
     final KMatricesInstanceValuesType mi,
     final AreaInclusive window_bounds_area)
@@ -447,11 +447,11 @@ import com.io7m.r1.types.RVectorReadable3FType;
   {
     final KMeshReadableType mesh = r.instanceGetMesh();
 
-    final BLUCacheReceiptType<KFramebufferForwardDescription, KFramebufferForwardUsableType> scene_mask =
-      forward_cache.bluCacheGet(scene.kFramebufferGetForwardDescription());
+    final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthUsableType> scene_mask =
+      rgba_cache.bluCacheGet(scene.rgbaGetDescription());
 
     try {
-      final KFramebufferForwardUsableType mask = scene_mask.getValue();
+      final KFramebufferRGBAWithDepthUsableType mask = scene_mask.getValue();
 
       copier.copierCopyRGBAWithDepth(
         scene,
@@ -487,8 +487,8 @@ import com.io7m.r1.types.RVectorReadable3FType;
     final JCGLImplementationType g,
     final KShaderCacheForwardTranslucentUnlitType shader_cache,
     final KTextureUnitAllocator unit_allocator,
-    final KFramebufferForwardUsableType scene,
-    final KFramebufferForwardUsableType temporary,
+    final KFramebufferRGBAWithDepthUsableType scene,
+    final KFramebufferRGBAWithDepthUsableType temporary,
     final KInstanceTranslucentRefractive r,
     final KMatricesInstanceValuesType mi)
     throws JCGLException,
@@ -509,7 +509,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
   private static void rendererRefractionEvaluateRenderMask(
     final JCGLImplementationType g,
     final KShaderCacheForwardTranslucentUnlitType shader_cache,
-    final KFramebufferRGBAUsableType scene_mask,
+    final KFramebufferRGBAWithDepthUsableType scene_mask,
     final KInstanceTranslucentRefractive r,
     final KMatricesInstanceValuesType mi,
     final KMeshReadableType mesh)
@@ -528,8 +528,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
             RException
         {
           try {
-            gc.framebufferDrawBind(scene_mask
-              .kFramebufferGetColorFramebuffer());
+            gc.framebufferDrawBind(scene_mask.rgbaGetColorFramebuffer());
 
             program.programUniformPutVector4f(
               "f_ccolor",
@@ -577,22 +576,19 @@ import com.io7m.r1.types.RVectorReadable3FType;
       });
   }
 
-  private static
-    <F extends KFramebufferRGBAUsableType & KFramebufferDepthUsableType>
-    void
-    rendererRefractionEvaluateRenderMasked(
-      final JCGLImplementationType g,
-      final KShaderCacheForwardTranslucentUnlitType shader_cache,
-      final KTextureUnitAllocator unit_allocator,
-      final KFramebufferRGBAUsableType scene,
-      final KFramebufferRGBAUsableType scene_mask,
-      final KFramebufferRGBAUsableType destination,
-      final KInstanceTranslucentRefractive r,
-      final KMatricesInstanceValuesType mi,
-      final KMeshReadableType mesh)
-      throws JCGLException,
-        RException,
-        JCacheException
+  private static void rendererRefractionEvaluateRenderMasked(
+    final JCGLImplementationType g,
+    final KShaderCacheForwardTranslucentUnlitType shader_cache,
+    final KTextureUnitAllocator unit_allocator,
+    final KFramebufferRGBAWithDepthUsableType scene,
+    final KFramebufferRGBAWithDepthUsableType scene_mask,
+    final KFramebufferRGBAWithDepthUsableType destination,
+    final KInstanceTranslucentRefractive r,
+    final KMatricesInstanceValuesType mi,
+    final KMeshReadableType mesh)
+    throws JCGLException,
+      RException,
+      JCacheException
   {
     final KMaterialTranslucentRefractive material = r.getMaterial();
     final String shader_code = material.materialGetCode();
@@ -610,8 +606,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
             RException
         {
           try {
-            gc.framebufferDrawBind(destination
-              .kFramebufferGetColorFramebuffer());
+            gc.framebufferDrawBind(destination.rgbaGetColorFramebuffer());
 
             gc.blendingDisable();
 
@@ -644,8 +639,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
 
                 KShadingProgramCommon.putRefractionTextureSceneMask(
                   program,
-                  context.withTexture2D(scene_mask
-                    .kFramebufferGetRGBATexture()));
+                  context.withTexture2D(scene_mask.rgbaGetTexture()));
 
                 material.getRefractive().refractiveAccept(
                   new KMaterialRefractiveVisitorType<Unit, JCGLException>() {
@@ -702,8 +696,8 @@ import com.io7m.r1.types.RVectorReadable3FType;
     final JCGLImplementationType g,
     final KShaderCacheForwardTranslucentUnlitType shader_cache,
     final KTextureUnitAllocator unit_allocator,
-    final KFramebufferForwardUsableType scene,
-    final KFramebufferForwardUsableType temporary,
+    final KFramebufferRGBAWithDepthUsableType scene,
+    final KFramebufferRGBAWithDepthUsableType temporary,
     final KInstanceTranslucentRefractive r,
     final KMatricesInstanceValuesType mi,
     final KMeshReadableType mesh)
@@ -727,8 +721,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
             RException
         {
           try {
-            gc.framebufferDrawBind(temporary
-              .kFramebufferGetColorFramebuffer());
+            gc.framebufferDrawBind(temporary.rgbaGetColorFramebuffer());
 
             gc.blendingDisable();
 
@@ -813,7 +806,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
   private final KMeshBoundsCacheType<RSpaceObjectType>          bounds_cache;
   private final KMeshBoundsTrianglesCacheType<RSpaceObjectType> bounds_tri_cache;
   private final KRegionCopierType                               copier;
-  private final KFramebufferForwardCacheType                    forward_cache;
+  private final KFramebufferRGBAWithDepthCacheType              rgba_cache;
   private final JCGLImplementationType                          g;
   private final MatrixM4x4F.Context                             matrix_context;
   private final RVectorM3F<RSpaceNDCType>                       ndc_bounds_lower;
@@ -827,7 +820,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
     final JCGLImplementationType gl,
     final KRegionCopierType in_copier,
     final KShaderCacheForwardTranslucentUnlitType in_shader_cache,
-    final KFramebufferForwardCacheType in_forward_cache,
+    final KFramebufferRGBAWithDepthCacheType in_forward_cache,
     final KMeshBoundsCacheType<RSpaceObjectType> in_bounds_cache,
     final KMeshBoundsTrianglesCacheType<RSpaceObjectType> in_bounds_tri_cache)
     throws RException
@@ -835,7 +828,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
     try {
       this.g = NullCheck.notNull(gl, "OpenGL implementation");
       this.copier = NullCheck.notNull(in_copier, "Copier");
-      this.forward_cache =
+      this.rgba_cache =
         NullCheck.notNull(in_forward_cache, "Forward framebuffer cache");
       this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
       this.bounds_cache = NullCheck.notNull(in_bounds_cache, "Bounds cache");
@@ -861,7 +854,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
   }
 
   @Override public void rendererRefractionEvaluate(
-    final KFramebufferForwardUsableType scene,
+    final KFramebufferRGBAWithDepthUsableType scene,
     final KMatricesObserverType observer,
     final KInstanceTranslucentRefractive r)
     throws RException
@@ -873,7 +866,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
     try {
       final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 
-      if (gc.framebufferDrawIsBound(scene.kFramebufferGetColorFramebuffer()) == false) {
+      if (gc.framebufferDrawIsBound(scene.rgbaGetColorFramebuffer()) == false) {
         throw new RExceptionFramebufferNotBound("Framebuffer is not bound");
       }
 
@@ -897,7 +890,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
           }
         });
 
-      if (gc.framebufferDrawIsBound(scene.kFramebufferGetColorFramebuffer()) == false) {
+      if (gc.framebufferDrawIsBound(scene.rgbaGetColorFramebuffer()) == false) {
         throw new RExceptionFramebufferNotBound("Framebuffer is not bound");
       }
 
@@ -907,7 +900,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
   }
 
   private void rendererRefractionEvaluateForInstance(
-    final KFramebufferForwardUsableType scene,
+    final KFramebufferRGBAWithDepthUsableType scene,
     final KInstanceTranslucentRefractive r,
     final KMatricesInstanceValuesType mi)
     throws JCGLException,
@@ -937,9 +930,8 @@ import com.io7m.r1.types.RVectorReadable3FType;
         this.window_bounds_lower,
         this.window_bounds_upper);
 
-      final BLUCacheReceiptType<KFramebufferForwardDescription, KFramebufferForwardUsableType> temporary =
-        this.forward_cache.bluCacheGet(scene
-          .kFramebufferGetForwardDescription());
+      final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthUsableType> temporary =
+        this.rgba_cache.bluCacheGet(scene.rgbaGetDescription());
 
       try {
         final float lo_x = this.window_bounds_lower.getXF();
@@ -973,7 +965,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
                 KRefractionRenderer
                   .rendererRefractionEvaluateForInstanceMasked(
                     KRefractionRenderer.this.g,
-                    KRefractionRenderer.this.forward_cache,
+                    KRefractionRenderer.this.rgba_cache,
                     KRefractionRenderer.this.shader_cache,
                     KRefractionRenderer.this.texture_units,
                     KRefractionRenderer.this.copier,
@@ -1020,7 +1012,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
         temporary.returnToCache();
       }
 
-      gc.framebufferDrawBind(scene.kFramebufferGetColorFramebuffer());
+      gc.framebufferDrawBind(scene.rgbaGetColorFramebuffer());
     }
   }
 }

@@ -31,6 +31,9 @@ import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jcanephora.api.JCGLColorBufferType;
+import com.io7m.jcanephora.api.JCGLDepthBufferType;
+import com.io7m.jcanephora.api.JCGLFramebuffersCommonType;
 import com.io7m.jcanephora.api.JCGLFramebuffersGL3Type;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
@@ -40,9 +43,11 @@ import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
 import com.io7m.jcanephora.api.JCGLRenderbuffersGL3ES3Type;
+import com.io7m.jcanephora.api.JCGLStencilBufferType;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
 import com.io7m.r1.kernel.types.KFramebufferForwardDescription;
@@ -192,54 +197,51 @@ import com.io7m.r1.types.RExceptionNotSupported;
       }
     }
 
-    @Override public FramebufferUsableType kFramebufferGetColorFramebuffer()
+    @Override public FramebufferUsableType rgbaGetColorFramebuffer()
     {
       return this.framebuffer;
     }
 
-    @Override public
-      KFramebufferDepthDescription
-      kFramebufferGetDepthDescription()
-    {
-      return this.description.getDepthDescription();
-    }
-
-    @Override public
-      FramebufferUsableType
-      kFramebufferGetDepthPassFramebuffer()
-    {
-      return this.framebuffer;
-    }
-
-    @Override public Texture2DStaticUsableType kFramebufferGetDepthTexture()
-    {
-      return this.depth;
-    }
-
-    @Override public
-      KFramebufferForwardDescription
-      kFramebufferGetForwardDescription()
-    {
-      return this.description;
-    }
-
-    @Override public
-      KGeometryBufferUsableType
-      kFramebufferGetGeometryBuffer()
+    @Override public KGeometryBufferUsableType deferredGetGeometryBuffer()
     {
       return this.gbuffer;
     }
 
-    @Override public
-      KFramebufferRGBADescription
-      kFramebufferGetRGBADescription()
+    @Override public KFramebufferRGBADescription rgbaGetDescription()
     {
       return this.description.getRGBADescription();
     }
 
-    @Override public Texture2DStaticUsableType kFramebufferGetRGBATexture()
+    @Override public Texture2DStaticUsableType rgbaGetTexture()
     {
       return this.color;
+    }
+
+    @Override public
+      <G extends JCGLColorBufferType & JCGLDepthBufferType & JCGLStencilBufferType & JCGLFramebuffersCommonType>
+      void
+      deferredFramebufferClear(
+        final G in_gc,
+        final VectorReadable4FType in_color,
+        final float in_depth,
+        final int in_stencil)
+        throws RException
+    {
+      NullCheck.notNull(in_gc, "OpenGL");
+      NullCheck.notNull(in_color, "Color");
+
+      try {
+        try {
+          this.gbuffer.geomClear(in_gc);
+          in_gc.framebufferDrawBind(this.framebuffer);
+          in_gc.colorBufferMask(true, true, true, true);
+          in_gc.colorBufferClearV4f(in_color);
+        } finally {
+          in_gc.framebufferDrawUnbind();
+        }
+      } catch (final JCGLException e) {
+        throw RExceptionJCGL.fromJCGLException(e);
+      }
     }
   }
 

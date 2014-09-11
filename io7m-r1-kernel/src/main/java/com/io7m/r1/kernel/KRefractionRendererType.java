@@ -27,20 +27,20 @@ public interface KRefractionRendererType extends KRendererType
 {
   /**
    * Render the given refractive instance.
-   * 
+   *
    * @param framebuffer
    *          The current scene
    * @param observer
    *          The current observer matrices
    * @param r
    *          The refractive instance
-   * 
+   *
    * @throws RException
    *           If an error occurs
    */
 
   void rendererRefractionEvaluate(
-    final KFramebufferForwardUsableType framebuffer,
+    final KFramebufferRGBAWithDepthUsableType framebuffer,
     final KMatricesObserverType observer,
     final KInstanceTranslucentRefractive r)
     throws RException;

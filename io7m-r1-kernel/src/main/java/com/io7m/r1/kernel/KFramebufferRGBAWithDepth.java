@@ -20,44 +20,43 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.kernel.types.KFramebufferForwardDescription;
+import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
 
 /**
- * <p>
- * A framebuffer configuration suitable for forward rendering, with a depth
- * buffer that can be sampled (for shadow mapping and similar techniques).
- * </p>
+ * A simple RGBA "image-only" framebuffer with a depth and stencil
+ * attachments.
  */
 
-@EqualityReference public final class KFramebufferForward
+@EqualityReference public final class KFramebufferRGBAWithDepth
 {
   /**
    * Construct a new framebuffer from the given description.
-   * 
+   *
    * @param gi
    *          The OpenGL implementation
    * @param description
    *          The framebuffer description
    * @return A new framebuffer
+   *
    * @throws RException
    *           If an error occurs during creation
    */
 
-  public static KFramebufferForwardType newFramebuffer(
+  public static KFramebufferRGBAWithDepthType newFramebuffer(
     final JCGLImplementationType gi,
-    final KFramebufferForwardDescription description)
+    final KFramebufferRGBADescription description)
     throws RException
   {
     try {
-      return KFramebufferForwardAbstract.newFramebuffer(gi, description);
+      return KFramebufferRGBAWithDepthAbstract.newRGBA(gi, description);
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
-  private KFramebufferForward()
+  private KFramebufferRGBAWithDepth()
   {
     throw new UnreachableCodeException();
   }

@@ -57,6 +57,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.r1.examples.ExampleImages;
 import com.io7m.r1.examples.ExampleList;
 import com.io7m.r1.examples.ExampleRendererConstructorType;
+import com.io7m.r1.examples.ExampleRendererName;
 import com.io7m.r1.examples.ExampleRenderers;
 import com.io7m.r1.examples.ExampleSceneType;
 
@@ -134,12 +135,12 @@ final class ViewerMainWindow extends JFrame
     return cb;
   }
 
-  private final JList<String>                                  example_list;
-  private final Map<String, Class<? extends ExampleSceneType>> examples;
-  private final LogType                                        logx;
-  private final JMenuBar                                       menu_bar;
-  private final JComboBox<String>                              renderer_list;
-  private final Map<String, ExampleRendererConstructorType>    renderers;
+  private final JList<String>                                            example_list;
+  private final Map<String, Class<? extends ExampleSceneType>>           examples;
+  private final LogType                                                  logx;
+  private final JMenuBar                                                 menu_bar;
+  private final JComboBox<ExampleRendererName>                           renderer_list;
+  private final Map<ExampleRendererName, ExampleRendererConstructorType> renderers;
 
   /**
    * Construct a new menu window.
@@ -206,8 +207,8 @@ final class ViewerMainWindow extends JFrame
     });
 
     this.renderers = ExampleRenderers.getRenderers();
-    this.renderer_list = new JComboBox<String>();
-    for (final String name : this.renderers.keySet()) {
+    this.renderer_list = new JComboBox<ExampleRendererName>();
+    for (final ExampleRendererName name : this.renderers.keySet()) {
       this.renderer_list.addItem(name);
     }
 
@@ -229,9 +230,11 @@ final class ViewerMainWindow extends JFrame
         actionPerformed(
           final @Nullable ActionEvent e)
       {
-        final JComboBox<String> rlist = ViewerMainWindow.this.renderer_list;
+        final JComboBox<ExampleRendererName> rlist =
+          ViewerMainWindow.this.renderer_list;
         final JList<String> elist = ViewerMainWindow.this.example_list;
-        final String renderer_name = (String) rlist.getSelectedItem();
+        final ExampleRendererName renderer_name =
+          (ExampleRendererName) rlist.getSelectedItem();
         final String example_name = elist.getSelectedValue();
 
         final ExampleRendererConstructorType r =

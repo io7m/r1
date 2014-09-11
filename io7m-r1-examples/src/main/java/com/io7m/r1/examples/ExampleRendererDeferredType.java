@@ -22,11 +22,9 @@ import com.io7m.r1.kernel.KRendererDeferredType;
  * The type of example deferred renderers.
  */
 
-public interface ExampleRendererDeferredType extends ExampleRendererType
+public interface ExampleRendererDeferredType extends
+  ExampleRendererType,
+  KRendererDeferredType
 {
-  /**
-   * @return The actual deferred renderer
-   */
-
-  KRendererDeferredType rendererGetDeferred();
+  // No extra functions.
 }

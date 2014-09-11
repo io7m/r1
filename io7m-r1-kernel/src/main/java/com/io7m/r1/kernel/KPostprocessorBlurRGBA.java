@@ -156,9 +156,9 @@ import com.io7m.r1.types.RExceptionJCGL;
       parameters.getBlurSize(),
       this.quad_cache,
       this.shader_cache.cacheGetLU("gaussian_blur_horizontal_4f"),
-      source.kFramebufferGetRGBATexture(),
+      source.rgbaGetTexture(),
       source.kFramebufferGetArea(),
-      temporary.kFramebufferGetColorFramebuffer(),
+      temporary.rgbaGetColorFramebuffer(),
       temporary.kFramebufferGetArea(),
       false);
 
@@ -167,9 +167,9 @@ import com.io7m.r1.types.RExceptionJCGL;
       this.quad_cache,
       parameters.getBlurSize(),
       this.shader_cache.cacheGetLU("gaussian_blur_vertical_4f"),
-      temporary.kFramebufferGetRGBATexture(),
+      temporary.rgbaGetTexture(),
       temporary.kFramebufferGetArea(),
-      target.kFramebufferGetColorFramebuffer(),
+      target.rgbaGetColorFramebuffer(),
       target.kFramebufferGetArea(),
       false);
   }
@@ -186,7 +186,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
     try {
       final KFramebufferRGBADescription desc =
-        input.kFramebufferGetRGBADescription();
+        input.rgbaGetDescription();
       final KFramebufferRGBADescription new_desc =
         KPostprocessorBlurRGBA.makeScaledDescription(parameters, desc);
 

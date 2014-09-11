@@ -32,8 +32,8 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.r1.examples.ExampleImages;
+import com.io7m.r1.examples.ExampleRendererName;
 import com.io7m.r1.examples.ExampleSceneType;
-import com.io7m.r1.kernel.KRendererType;
 
 /**
  * A simple image display that caches loaded images.
@@ -52,7 +52,7 @@ final class VExpectedImage extends JLabel
   private final LogUsableType                      rlog;
   private final ExampleSceneType                   scene;
   private final ExampleImages<BufferedImage>       example_images;
-  private @Nullable Class<? extends KRendererType> previous;
+  private @Nullable ExampleRendererName            previous;
 
   public VExpectedImage(
     final LogUsableType in_log,
@@ -79,10 +79,10 @@ final class VExpectedImage extends JLabel
   }
 
   public void update(
-    final Class<? extends KRendererType> i)
+    final ExampleRendererName name)
     throws Exception
   {
-    this.previous = NullCheck.notNull(i, "Renderer");
+    this.previous = NullCheck.notNull(name, "Renderer");
 
     final int view_index = this.current_view_index.get();
     final Class<? extends ExampleSceneType> sc = this.scene.getClass();
@@ -90,10 +90,10 @@ final class VExpectedImage extends JLabel
     this.rlog.debug(String.format(
       "Switching to view %d for renderer %s",
       view_index,
-      i));
+      name));
 
     final StringBuilder b = new StringBuilder();
-    b.append(i.getCanonicalName());
+    b.append(name);
     b.append(":");
     b.append(sc.getCanonicalName());
     b.append(":");
@@ -106,7 +106,7 @@ final class VExpectedImage extends JLabel
       this.setIcon(new ImageIcon(r));
     } else {
       final OptionType<BufferedImage> r =
-        this.example_images.getImage(i, sc, view_index);
+        this.example_images.getImage(name, sc, view_index);
       r.accept(new OptionVisitorType<BufferedImage, Unit>() {
         @Override public Unit none(
           final None<BufferedImage> n)

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FramebufferColorAttachmentPointType;
 import com.io7m.jcanephora.FramebufferDrawBufferType;
 import com.io7m.jcanephora.FramebufferStatus;
@@ -34,6 +35,9 @@ import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jcanephora.api.JCGLColorBufferType;
+import com.io7m.jcanephora.api.JCGLDepthBufferType;
+import com.io7m.jcanephora.api.JCGLFramebuffersCommonType;
 import com.io7m.jcanephora.api.JCGLFramebuffersGL3Type;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
@@ -42,6 +46,7 @@ import com.io7m.jcanephora.api.JCGLInterfaceGL2Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
+import com.io7m.jcanephora.api.JCGLStencilBufferType;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
@@ -245,6 +250,30 @@ import com.io7m.r1.types.RExceptionNotSupported;
     @Override public Texture2DStaticUsableType geomGetTextureSpecular()
     {
       return this.specular;
+    }
+
+    @Override public
+      <G extends JCGLColorBufferType & JCGLDepthBufferType & JCGLStencilBufferType & JCGLFramebuffersCommonType>
+      void
+      geomClear(
+        final G gc)
+        throws RException
+    {
+      try {
+        try {
+          gc.framebufferDrawBind(this.fb);
+          gc.colorBufferMask(true, true, true, true);
+          gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+          gc.depthBufferWriteEnable();
+          gc.depthBufferClear(1.0f);
+          gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xffffffff);
+          gc.stencilBufferClear(0);
+        } finally {
+          gc.framebufferDrawUnbind();
+        }
+      } catch (final JCGLException e) {
+        throw RExceptionJCGL.fromJCGLException(e);
+      }
     }
   }
 
