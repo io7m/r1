@@ -25,19 +25,19 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.r1.kernel.types.KFramebufferForwardDescription;
+import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.types.RException;
 
 /**
- * Forward-rendering framebuffer caches.
+ * RGBA (with depth) framebuffer caches.
  */
 
-@EqualityReference public final class KFramebufferForwardCache extends
-  BLUCacheAbstract<KFramebufferForwardDescription, KFramebufferForwardUsableType, KFramebufferForwardType, RException> implements
-  KFramebufferForwardCacheType
+@EqualityReference public final class KFramebufferRGBAWithDepthCache extends
+  BLUCacheAbstract<KFramebufferRGBADescription, KFramebufferRGBAWithDepthUsableType, KFramebufferRGBAWithDepthType, RException> implements
+  KFramebufferRGBAWithDepthCacheType
 {
   /**
-   * Construct a trivial borrowing cache with the given cache config.
+   * Construct a trivial cache with the given cache config.
    *
    * @param gi
    *          The OpenGL implementation
@@ -48,7 +48,7 @@ import com.io7m.r1.types.RException;
    * @return A cache
    */
 
-  public static KFramebufferForwardCacheType newCacheWithConfig(
+  public static KFramebufferRGBAWithDepthCacheType newCacheWithConfig(
     final JCGLImplementationType gi,
     final BLUCacheConfig config,
     final LogUsableType log)
@@ -57,17 +57,17 @@ import com.io7m.r1.types.RException;
     NullCheck.notNull(config, "Config");
     NullCheck.notNull(log, "Log");
 
-    final JCacheLoaderType<KFramebufferForwardDescription, KFramebufferForwardType, RException> loader =
-      KFramebufferForwardCacheLoader.newLoader(gi, log);
-    final BLUCacheType<KFramebufferForwardDescription, KFramebufferForwardUsableType, KFramebufferForwardType, RException> c =
+    final JCacheLoaderType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthType, RException> loader =
+      KFramebufferRGBAWithDepthCacheLoader.newLoader(gi, log);
+    final BLUCacheType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthUsableType, KFramebufferRGBAWithDepthType, RException> c =
       BLUCacheTrivial.newCache(loader, config);
 
-    return new KFramebufferForwardCache(c);
+    return new KFramebufferRGBAWithDepthCache(c);
   }
 
   /**
-   * Wrap the given cache and expose a {@link KFramebufferForwardCacheType}
-   * interface.
+   * Wrap the given cache and expose a
+   * {@link KFramebufferRGBAWithDepthCacheType} interface.
    *
    * @param c
    *          The cache
@@ -75,15 +75,15 @@ import com.io7m.r1.types.RException;
    */
 
   public static
-    KFramebufferForwardCacheType
+    KFramebufferRGBAWithDepthCacheType
     wrap(
-      final BLUCacheType<KFramebufferForwardDescription, KFramebufferForwardUsableType, KFramebufferForwardType, RException> c)
+      final BLUCacheType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthUsableType, KFramebufferRGBAWithDepthType, RException> c)
   {
-    return new KFramebufferForwardCache(c);
+    return new KFramebufferRGBAWithDepthCache(c);
   }
 
-  private KFramebufferForwardCache(
-    final BLUCacheType<KFramebufferForwardDescription, KFramebufferForwardUsableType, KFramebufferForwardType, RException> c)
+  private KFramebufferRGBAWithDepthCache(
+    final BLUCacheType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthUsableType, KFramebufferRGBAWithDepthType, RException> c)
   {
     super(c);
   }

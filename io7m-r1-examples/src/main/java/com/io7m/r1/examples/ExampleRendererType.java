@@ -46,11 +46,11 @@ public interface ExampleRendererType
    * @return The class that the renderer uses for rendering.
    */
 
-  Class<? extends KRendererType> rendererGetActualClass();
+  Class<? extends KRendererType> exampleRendererGetActualClass();
 
   /**
    * @return The name of the renderer
    */
 
-  String rendererGetName();
+  ExampleRendererName exampleRendererGetName();
 }
