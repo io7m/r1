@@ -17,15 +17,24 @@
 package com.io7m.r1.kernel.types;
 
 /**
- * The type of mutable builders for directional variance shadow maps.
+ * The common functions shared by shadow builders.
  */
 
-public interface KShadowMapDescriptionDirectionalVarianceBuilderType extends
-  KShadowMapDescriptionVarianceBuilderType
+public interface KShadowBuilderType
 {
   /**
-   * @return A description based on the most recently given parameters.
+   * <p>
+   * Set the minimum shadow factor. This is the effectively the minimum level
+   * of brightness to which a shadow can attenuate a light source. For
+   * example, if <code>f == 0.0</code>, then the shadow can completely
+   * attenuate a light source. If <code>f == 1.0</code>, then the shadow is
+   * invisible.
+   * </p>
+   *
+   * @param f
+   *          The minimum shadow factor.
    */
 
-  KShadowMapDescriptionDirectionalVariance build();
+  void setMinimumFactor(
+    float f);
 }

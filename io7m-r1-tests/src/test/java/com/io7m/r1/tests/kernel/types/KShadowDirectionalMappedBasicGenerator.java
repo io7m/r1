@@ -23,8 +23,8 @@ import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.r1.kernel.types.KDepthPrecision;
 import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
 import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasicBuilderType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBuilderType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasic;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasicBuilderType;
 import com.io7m.r1.tests.EnumGenerator;
 
 public final class KShadowDirectionalMappedBasicGenerator implements
@@ -57,7 +57,7 @@ public final class KShadowDirectionalMappedBasicGenerator implements
     final int exponent = (int) ((Math.random() * 32) + 1);
     final float depth_bias = (float) Math.random();
 
-    final KShadowMapDescriptionDirectionalBasicBuilderType smb_map_b =
+    final KShadowMapDescriptionBuilderType smb_map_b =
       KShadowMapDescriptionDirectionalBasic.newBuilder();
     smb_map_b.setDepthPrecision(in_precision_depth);
     smb_map_b.setMagnificationFilter(in_filter_mag);

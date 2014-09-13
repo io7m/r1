@@ -151,7 +151,7 @@ import com.io7m.r1.types.RException;
    */
 
   public static
-    KShadowMapDescriptionDirectionalVarianceBuilderType
+    KShadowMapDescriptionVarianceBuilderType
     newBuilderFrom(
       final KShadowMapDescriptionDirectionalVariance d)
   {

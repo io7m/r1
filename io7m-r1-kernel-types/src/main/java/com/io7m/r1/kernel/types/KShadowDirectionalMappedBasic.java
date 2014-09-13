@@ -111,7 +111,7 @@ import com.io7m.r1.types.RException;
    *         the given shadow.
    */
 
-  public static KShadowDirectionalMappedBasicBuilderType newBuilderFrom(
+  public static KShadowBuilderType newBuilderFrom(
     final KShadowDirectionalMappedBasic s)
   {
     return new Builder(s);

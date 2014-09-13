@@ -17,15 +17,20 @@
 package com.io7m.r1.kernel.types;
 
 /**
- * The type of mutable builders for directional variance shadow maps.
+ * The type of mutable builders for variance shadow maps.
  */
 
-public interface KShadowMapDescriptionDirectionalVarianceBuilderType extends
-  KShadowMapDescriptionVarianceBuilderType
+public interface KShadowMapDescriptionVarianceBuilderType extends
+  KShadowMapDescriptionBuilderType
 {
   /**
-   * @return A description based on the most recently given parameters.
+   * Set the depth variance precision for the map
+   *
+   * @param p
+   *          The precision
    */
 
-  KShadowMapDescriptionDirectionalVariance build();
+  void setDepthVariancePrecision(
+    KDepthVariancePrecision p);
+
 }

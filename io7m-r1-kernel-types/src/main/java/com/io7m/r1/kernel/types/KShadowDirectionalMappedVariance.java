@@ -133,7 +133,7 @@ import com.io7m.r1.types.RException;
    */
 
   public static
-    KShadowDirectionalMappedVarianceBuilderType
+    KShadowMappedVarianceBuilderType
     newBuilderFrom(
       final KShadowDirectionalMappedVariance s)
   {
