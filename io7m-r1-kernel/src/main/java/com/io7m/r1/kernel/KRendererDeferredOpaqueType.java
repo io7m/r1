@@ -54,7 +54,7 @@ public interface KRendererDeferredOpaqueType
 
   void rendererEvaluateOpaqueLit(
     final KFramebufferDeferredUsableType framebuffer,
-    final KNewShadowMapContextType shadow_context,
+    final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
     final List<Group> groups)
@@ -82,7 +82,7 @@ public interface KRendererDeferredOpaqueType
 
   void rendererEvaluateOpaqueUnlit(
     final KFramebufferDeferredUsableType framebuffer,
-    final KNewShadowMapContextType shadow_context,
+    final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
     final Map<String, Set<KInstanceOpaqueType>> instances)

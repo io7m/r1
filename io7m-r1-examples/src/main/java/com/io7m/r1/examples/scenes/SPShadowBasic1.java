@@ -38,10 +38,10 @@ import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
-import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedBasic;
-import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedBasicBuilderType;
-import com.io7m.r1.kernel.types.KNewShadowMapDescriptionDirectionalBasic;
-import com.io7m.r1.kernel.types.KNewShadowMapDescriptionDirectionalBasicBuilderType;
+import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
+import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasicBuilderType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasicBuilderType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
@@ -141,23 +141,23 @@ public final class SPShadowBasic1 implements ExampleSceneType
         KLightProjectiveWithShadowBasic.newBuilder(tp, KProjectionFrustum
           .newProjection(this.projection, -1.0f, 1.0f, -1.0f, 1.0f, 1, 8.0f));
 
-      final KNewShadowMapDescriptionDirectionalBasicBuilderType smb_map_b =
-        KNewShadowMapDescriptionDirectionalBasic.newBuilder();
+      final KShadowMapDescriptionDirectionalBasicBuilderType smb_map_b =
+        KShadowMapDescriptionDirectionalBasic.newBuilder();
       smb_map_b.setDepthPrecision(KDepthPrecision.DEPTH_PRECISION_24);
       smb_map_b
         .setMagnificationFilter(TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
       smb_map_b
         .setMinificationFilter(TextureFilterMinification.TEXTURE_FILTER_NEAREST);
       smb_map_b.setSizeExponent(8);
-      final KNewShadowMapDescriptionDirectionalBasic smb_map =
+      final KShadowMapDescriptionDirectionalBasic smb_map =
         smb_map_b.build();
 
-      final KNewShadowDirectionalMappedBasicBuilderType smb_b =
-        KNewShadowDirectionalMappedBasic.newBuilder();
+      final KShadowDirectionalMappedBasicBuilderType smb_b =
+        KShadowDirectionalMappedBasic.newBuilder();
       smb_b.setDepthBias(0.001f);
       smb_b.setMinimumFactor(0.0f);
       smb_b.setMapDescription(smb_map);
-      final KNewShadowDirectionalMappedBasic smb = smb_b.build();
+      final KShadowDirectionalMappedBasic smb = smb_b.build();
 
       b.setShadow(smb);
       b.setColor(ExampleSceneUtilities.RGB_RED);

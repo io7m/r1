@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -43,12 +43,12 @@ import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
-import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedVariance;
-import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedVarianceBuilderType;
-import com.io7m.r1.kernel.types.KNewShadowMapDescriptionDirectionalVariance;
-import com.io7m.r1.kernel.types.KNewShadowMapDescriptionDirectionalVarianceBuilderType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
+import com.io7m.r1.kernel.types.KShadowDirectionalMappedVariance;
+import com.io7m.r1.kernel.types.KShadowDirectionalMappedVarianceBuilderType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalVariance;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalVarianceBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.types.RException;
@@ -162,8 +162,8 @@ public final class SPShadowVarianceDepthAlpha0 implements ExampleSceneType
       bp.setPasses(1);
       bp.setScale(1.0f);
 
-      final KNewShadowMapDescriptionDirectionalVarianceBuilderType smv_map_b =
-        KNewShadowMapDescriptionDirectionalVariance.newBuilder();
+      final KShadowMapDescriptionDirectionalVarianceBuilderType smv_map_b =
+        KShadowMapDescriptionDirectionalVariance.newBuilder();
       smv_map_b.setDepthPrecision(KDepthPrecision.DEPTH_PRECISION_24);
       smv_map_b
         .setDepthVariancePrecision(KDepthVariancePrecision.DEPTH_VARIANCE_PRECISION_32F);
@@ -171,18 +171,18 @@ public final class SPShadowVarianceDepthAlpha0 implements ExampleSceneType
         .setMagnificationFilter(TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
       smv_map_b
         .setMinificationFilter(TextureFilterMinification.TEXTURE_FILTER_LINEAR);
-      smv_map_b.setSizeExponent(9);
-      final KNewShadowMapDescriptionDirectionalVariance smv_map =
+      smv_map_b.setSizeExponent(8);
+      final KShadowMapDescriptionDirectionalVariance smv_map =
         smv_map_b.build();
 
-      final KNewShadowDirectionalMappedVarianceBuilderType smv_b =
-        KNewShadowDirectionalMappedVariance.newBuilder();
+      final KShadowDirectionalMappedVarianceBuilderType smv_b =
+        KShadowDirectionalMappedVariance.newBuilder();
       smv_b.setBlurParameters(bp.build());
       smv_b.setMinimumFactor(0.0f);
       smv_b.setMinimumVariance(0.0001f);
       smv_b.setLightBleedReduction(0.1f);
       smv_b.setMapDescription(smv_map);
-      final KNewShadowDirectionalMappedVariance smv = smv_b.build();
+      final KShadowDirectionalMappedVariance smv = smv_b.build();
 
       b.setShadow(smv);
       b.setColor(ExampleSceneUtilities.RGB_WHITE);

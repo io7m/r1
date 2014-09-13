@@ -79,7 +79,7 @@ import com.io7m.r1.types.RExceptionJCGL;
    */
 
   public static KRendererDeferredType newRenderer(
-    final KNewShadowMapRendererType in_shadow_renderer,
+    final KShadowMapRendererType in_shadow_renderer,
     final KTranslucentRendererType in_translucent_renderer,
     final KRendererDeferredOpaqueType in_opaque_renderer,
     final LogUsableType in_log)
@@ -95,11 +95,11 @@ import com.io7m.r1.types.RExceptionJCGL;
   private final LogUsableType               log;
   private final KMutableMatrices            matrices;
   private final KRendererDeferredOpaqueType opaque_renderer;
-  private final KNewShadowMapRendererType   shadow_renderer;
+  private final KShadowMapRendererType   shadow_renderer;
   private final KTranslucentRendererType    translucent_renderer;
 
   private KRendererDeferred(
-    final KNewShadowMapRendererType in_shadow_renderer,
+    final KShadowMapRendererType in_shadow_renderer,
     final KTranslucentRendererType in_translucent_renderer,
     final KRendererDeferredOpaqueType in_opaque_renderer,
     final LogUsableType in_log)
@@ -131,7 +131,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     NullCheck.notNull(scene, "Scene");
     NullCheck.notNull(procedure, "Procedure");
 
-    final KNewShadowMapRendererType smr = this.shadow_renderer;
+    final KShadowMapRendererType smr = this.shadow_renderer;
     final KCamera camera = scene.getCamera();
     final List<KTranslucentType> translucents = scene.getTranslucents();
     final KSceneBatchedDeferredOpaque opaques = scene.getDeferredOpaques();
@@ -161,9 +161,9 @@ import com.io7m.r1.types.RExceptionJCGL;
               return smr.rendererEvaluateShadowMaps(
                 camera,
                 scene.getShadows(),
-                new KNewShadowMapWithType<Unit, JCacheException>() {
+                new KShadowMapWithType<Unit, JCacheException>() {
                   @Override public Unit withMaps(
-                    final KNewShadowMapContextType shadow_context)
+                    final KShadowMapContextType shadow_context)
                     throws JCGLException,
                       RException
                   {
@@ -203,7 +203,7 @@ import com.io7m.r1.types.RExceptionJCGL;
                       }
 
                       @Override public
-                        KNewShadowMapContextType
+                        KShadowMapContextType
                         rendererGetShadowMapContext()
                       {
                         return shadow_context;

@@ -53,7 +53,7 @@ import com.io7m.r1.types.RVectorI3F;
     private RVectorI3F<RSpaceWorldType>         position;
     private KProjectionType                     projection;
     private float                               range;
-    private KNewShadowDirectionalMappedBasic    shadow;
+    private KShadowDirectionalMappedBasic    shadow;
     private @Nullable Texture2DStaticUsableType texture;
 
     Builder(
@@ -83,7 +83,7 @@ import com.io7m.r1.types.RVectorI3F;
       this.projection = NullCheck.notNull(in_projection, "Projection");
       this.range = 8.0f;
       this.texture = NullCheck.notNull(in_texture, "Texture");
-      this.shadow = KNewShadowDirectionalMappedBasic.getDefault();
+      this.shadow = KShadowDirectionalMappedBasic.getDefault();
     }
 
     @Override public KLightProjectiveWithShadowBasic build()
@@ -151,7 +151,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setShadow(
-      final KNewShadowDirectionalMappedBasic s)
+      final KShadowDirectionalMappedBasic s)
     {
       this.shadow = NullCheck.notNull(s, "Shadow");
     }
@@ -211,7 +211,7 @@ import com.io7m.r1.types.RVectorI3F;
   private final KProjectionType                  projection;
   private final float                            range;
   private final float                            range_inverse;
-  private final KNewShadowDirectionalMappedBasic shadow;
+  private final KShadowDirectionalMappedBasic shadow;
   private final Texture2DStaticUsableType        texture;
   private final int                              textures;
   private final KTransformType                   transform;
@@ -225,7 +225,7 @@ import com.io7m.r1.types.RVectorI3F;
     final float in_range,
     final float in_falloff,
     final KProjectionType in_projection,
-    final KNewShadowDirectionalMappedBasic in_shadow)
+    final KShadowDirectionalMappedBasic in_shadow)
   {
     this.intensity = in_intensity;
     this.color = NullCheck.notNull(in_color, "Color");
@@ -289,7 +289,7 @@ import com.io7m.r1.types.RVectorI3F;
     return this.intensity;
   }
 
-  @Override public KNewShadowType lightGetShadow()
+  @Override public KShadowType lightGetShadow()
   {
     return this.shadow;
   }
@@ -298,7 +298,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The shadow.
    */
 
-  public KNewShadowDirectionalMappedBasic lightGetShadowBasic()
+  public KShadowDirectionalMappedBasic lightGetShadowBasic()
   {
     return this.shadow;
   }

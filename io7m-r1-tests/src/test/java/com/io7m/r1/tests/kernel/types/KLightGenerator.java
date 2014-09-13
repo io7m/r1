@@ -24,7 +24,7 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightType;
-import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedBasic;
+import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
@@ -53,10 +53,10 @@ public final class KLightGenerator implements Generator<KLightType>
     final Generator<String> name_gen = new StringGenerator();
     final Generator<Texture2DStaticUsableType> in_tex_gen =
       RFakeTextures2DStatic.generator(g, name_gen);
-    final Generator<KNewShadowDirectionalMappedBasic> in_shad_basic_gen =
-      new KNewShadowDirectionalMappedBasicGenerator();
-    final KNewShadowDirectionalMappedVarianceGenerator in_shad_variance_gen =
-      new KNewShadowDirectionalMappedVarianceGenerator();
+    final Generator<KShadowDirectionalMappedBasic> in_shad_basic_gen =
+      new KShadowDirectionalMappedBasicGenerator();
+    final KShadowDirectionalMappedVarianceGenerator in_shad_variance_gen =
+      new KShadowDirectionalMappedVarianceGenerator();
 
     this.dir_gen =
       new KLightDirectionalGenerator(in_colour_gen, in_direction_gen);

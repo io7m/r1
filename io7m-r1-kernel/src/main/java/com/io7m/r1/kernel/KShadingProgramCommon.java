@@ -52,8 +52,8 @@ import com.io7m.r1.kernel.types.KMaterialRefractiveUnmasked;
 import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KMeshAttributes;
-import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedBasic;
-import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedVariance;
+import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
+import com.io7m.r1.kernel.types.KShadowDirectionalMappedVariance;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RMatrixM3x3F;
 import com.io7m.r1.types.RMatrixReadable3x3FType;
@@ -1667,7 +1667,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putShadowDirectionalBasic(
     final JCBProgramType program,
-    final KNewShadowDirectionalMappedBasic s)
+    final KShadowDirectionalMappedBasic s)
     throws JCGLException
   {
     KShadingProgramCommon.putShadowBasicDepthBias(program, s.getDepthBias());
@@ -1678,7 +1678,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putShadowDirectionalVariance(
     final JCBProgramType program,
-    final KNewShadowDirectionalMappedVariance s)
+    final KShadowDirectionalMappedVariance s)
     throws JCGLException
   {
     KShadingProgramCommon.putShadowVarianceMinimumVariance(

@@ -68,7 +68,7 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialSpecularNone;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KMeshAttributes;
-import com.io7m.r1.kernel.types.KNewShadowType;
+import com.io7m.r1.kernel.types.KShadowType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.kernel.types.KTransformOST;
@@ -134,7 +134,7 @@ import com.io7m.r1.types.RVectorI4F;
       final RMatrixI4x4F<RTransformProjectionType> projection =
         RMatrixI4x4F.newFromReadable(m_projection);
 
-      final OptionType<KNewShadowType> shadow = Option.none();
+      final OptionType<KShadowType> shadow = Option.none();
       final Integer v = Integer.valueOf(23);
       assert v != null;
 

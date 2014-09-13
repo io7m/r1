@@ -506,7 +506,7 @@ import com.io7m.r1.types.RException;
   }
 
   static void putShadow(
-    final KNewShadowMapContextType shadow_context,
+    final KShadowMapContextType shadow_context,
     final KTextureUnitContextType unit_context,
     final JCBProgramType program,
     final KLightWithShadowType light)
@@ -520,8 +520,8 @@ import com.io7m.r1.types.RException;
           throws RException,
             JCGLException
         {
-          final KNewShadowMapDirectionalBasic map =
-            (KNewShadowMapDirectionalBasic) shadow_context.getShadowMap(lp);
+          final KShadowMapDirectionalBasic map =
+            (KShadowMapDirectionalBasic) shadow_context.getShadowMap(lp);
           final KFramebufferDepth framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
@@ -541,8 +541,8 @@ import com.io7m.r1.types.RException;
           throws RException,
             JCGLException
         {
-          final KNewShadowMapDirectionalVariance map =
-            (KNewShadowMapDirectionalVariance) shadow_context
+          final KShadowMapDirectionalVariance map =
+            (KShadowMapDirectionalVariance) shadow_context
               .getShadowMap(lp);
           final KFramebufferDepthVariance framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
