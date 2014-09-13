@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,8 +24,8 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightType;
+import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedBasic;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.types.RVectorI3FGenerator;
@@ -35,9 +35,9 @@ import com.io7m.r1.types.RVectorI3F;
 
 public final class KLightGenerator implements Generator<KLightType>
 {
-  private final KLightDirectionalGenerator dir_gen;
-  private final KLightSphereWithoutShadowGenerator      sph_gen;
-  private final KLightProjectiveGenerator  pro_gen;
+  private final KLightDirectionalGenerator         dir_gen;
+  private final KLightSphereWithoutShadowGenerator sph_gen;
+  private final KLightProjectiveGenerator          pro_gen;
 
   public KLightGenerator(
     final JCGLImplementationType g)
@@ -53,14 +53,15 @@ public final class KLightGenerator implements Generator<KLightType>
     final Generator<String> name_gen = new StringGenerator();
     final Generator<Texture2DStaticUsableType> in_tex_gen =
       RFakeTextures2DStatic.generator(g, name_gen);
-    final Generator<KShadowMappedBasic> in_shad_basic_gen =
-      new KShadowMappedBasicGenerator();
-    final KShadowMappedVarianceGenerator in_shad_variance_gen =
-      new KShadowMappedVarianceGenerator();
+    final Generator<KNewShadowDirectionalMappedBasic> in_shad_basic_gen =
+      new KNewShadowDirectionalMappedBasicGenerator();
+    final KNewShadowDirectionalMappedVarianceGenerator in_shad_variance_gen =
+      new KNewShadowDirectionalMappedVarianceGenerator();
 
     this.dir_gen =
       new KLightDirectionalGenerator(in_colour_gen, in_direction_gen);
-    this.sph_gen = new KLightSphereWithoutShadowGenerator(in_colour_gen, in_position_gen);
+    this.sph_gen =
+      new KLightSphereWithoutShadowGenerator(in_colour_gen, in_position_gen);
     this.pro_gen =
       new KLightProjectiveGenerator(
         in_colour_gen,

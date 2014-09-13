@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,20 +25,21 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
+import com.io7m.r1.kernel.types.KNewShadowMapDescriptionType;
 import com.io7m.r1.types.RException;
 
 /**
  * Shadow map caches.
  */
 
-@EqualityReference public final class KShadowMapCache extends
-  BLUCacheAbstract<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> implements
-  KShadowMapCacheType
+@EqualityReference public final class KNewShadowMapCache extends
+  BLUCacheAbstract<KNewShadowMapDescriptionType, KNewShadowMapUsableType, KNewShadowMapType, RException> implements
+  KNewShadowMapCacheType
 {
 
   /**
-   * Wrap the given cache and expose a {@link KShadowMapCacheType} interface.
+   * Wrap the given cache and expose a {@link KNewShadowMapCacheType}
+   * interface.
    *
    * @param c
    *          The cache
@@ -46,15 +47,15 @@ import com.io7m.r1.types.RException;
    */
 
   public static
-    KShadowMapCacheType
+    KNewShadowMapCacheType
     wrap(
-      final BLUCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> c)
+      final BLUCacheType<KNewShadowMapDescriptionType, KNewShadowMapUsableType, KNewShadowMapType, RException> c)
   {
-    return new KShadowMapCache(c);
+    return new KNewShadowMapCache(c);
   }
 
-  private KShadowMapCache(
-    final BLUCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> in_cache)
+  private KNewShadowMapCache(
+    final BLUCacheType<KNewShadowMapDescriptionType, KNewShadowMapUsableType, KNewShadowMapType, RException> in_cache)
   {
     super(in_cache);
   }
@@ -71,7 +72,7 @@ import com.io7m.r1.types.RException;
    * @return A cache
    */
 
-  public static KShadowMapCacheType newCacheWithConfig(
+  public static KNewShadowMapCacheType newCacheWithConfig(
     final JCGLImplementationType gi,
     final BLUCacheConfig config,
     final LogUsableType log)
@@ -80,11 +81,11 @@ import com.io7m.r1.types.RException;
     NullCheck.notNull(config, "Config");
     NullCheck.notNull(log, "Log");
 
-    final JCacheLoaderType<KShadowMapDescriptionType, KShadowMapType, RException> loader =
-      KShadowMapCacheLoader.newLoader(gi, log);
-    final BLUCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> c =
+    final JCacheLoaderType<KNewShadowMapDescriptionType, KNewShadowMapType, RException> loader =
+      KNewShadowMapCacheLoader.newLoader(gi, log);
+    final BLUCacheType<KNewShadowMapDescriptionType, KNewShadowMapUsableType, KNewShadowMapType, RException> c =
       BLUCacheTrivial.newCache(loader, config);
 
-    return new KShadowMapCache(c);
+    return new KNewShadowMapCache(c);
   }
 }

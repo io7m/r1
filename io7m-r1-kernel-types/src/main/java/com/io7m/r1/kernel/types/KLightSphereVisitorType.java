@@ -31,24 +31,6 @@ import com.io7m.r1.types.RException;
 public interface KLightSphereVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit a spherical light without a shadow.
-   *
-   * @param ls
-   *          The spherical light
-   * @return A value of type <code>A</code>
-   *
-   * @throws RException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A sphereWithoutShadow(
-    final KLightSphereWithoutShadow ls)
-    throws RException,
-      E;
-
-  /**
    * Visit a cube-map textured spherical light without a shadow.
    *
    * @param ls
@@ -63,6 +45,24 @@ public interface KLightSphereVisitorType<A, E extends Throwable>
 
   A sphereTexturedCubeWithoutShadow(
     final KLightSphereTexturedCubeWithoutShadow ls)
+    throws RException,
+      E;
+
+  /**
+   * Visit a spherical light without a shadow.
+   *
+   * @param ls
+   *          The spherical light
+   * @return A value of type <code>A</code>
+   *
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  A sphereWithoutShadow(
+    final KLightSphereWithoutShadow ls)
     throws RException,
       E;
 }

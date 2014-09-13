@@ -283,6 +283,15 @@ import com.io7m.r1.types.RTransformTextureType;
     return this.code;
   }
 
+  /**
+   * @return The emission properties for the surface.
+   */
+
+  public KMaterialEmissiveType materialGetEmissive()
+  {
+    return this.emissive;
+  }
+
   @Override public KMaterialNormalType materialGetNormal()
   {
     return this.normal;
@@ -301,15 +310,6 @@ import com.io7m.r1.types.RTransformTextureType;
   @Override public KMaterialAlbedoType materialRegularGetAlbedo()
   {
     return this.albedo;
-  }
-
-  /**
-   * @return The emission properties for the surface.
-   */
-
-  public KMaterialEmissiveType materialGetEmissive()
-  {
-    return this.emissive;
   }
 
   @Override public KMaterialEnvironmentType materialRegularGetEnvironment()

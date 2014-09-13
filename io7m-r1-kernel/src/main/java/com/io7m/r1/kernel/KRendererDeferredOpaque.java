@@ -504,7 +504,7 @@ import com.io7m.r1.types.RVectorI4F;
 
   @Override public void rendererEvaluateOpaqueLit(
     final KFramebufferDeferredUsableType framebuffer,
-    final KShadowMapContextType shadow_context,
+    final KNewShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
     final List<Group> groups)
@@ -535,7 +535,7 @@ import com.io7m.r1.types.RVectorI4F;
 
   @Override public void rendererEvaluateOpaqueUnlit(
     final KFramebufferDeferredUsableType framebuffer,
-    final KShadowMapContextType shadow_context,
+    final KNewShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
     final Map<String, Set<KInstanceOpaqueType>> instances)
@@ -582,7 +582,7 @@ import com.io7m.r1.types.RVectorI4F;
 
   private void renderGroup(
     final KFramebufferDeferredUsableType framebuffer,
-    final KShadowMapContextType shadow_context,
+    final KNewShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
     final KSceneBatchedDeferredOpaque.Group group)
@@ -765,7 +765,7 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
-    final KShadowMapContextType shadow_map_context,
+    final KNewShadowMapContextType shadow_map_context,
     final KTextureUnitContextType texture_unit_context,
     final KLightType light)
     throws RException,
@@ -971,7 +971,7 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mdp,
-    final KShadowMapContextType shadow_map_context,
+    final KNewShadowMapContextType shadow_map_context,
     final KTextureUnitContextType texture_unit_context,
     final KLightProjectiveType lp)
     throws JCGLException,
@@ -1001,7 +1001,7 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mdp,
-    final KShadowMapContextType shadow_map_context,
+    final KNewShadowMapContextType shadow_map_context,
     final KTextureUnitContextType texture_unit_context,
     final KLightProjectiveType lp)
     throws JCGLException,
@@ -1126,7 +1126,7 @@ import com.io7m.r1.types.RVectorI4F;
 
   private void renderGroupLights(
     final KFramebufferDeferredUsableType framebuffer,
-    final KShadowMapContextType shadow_map_context,
+    final KNewShadowMapContextType shadow_map_context,
     final KMatricesObserverType mwo,
     final Group group)
     throws JCGLException,

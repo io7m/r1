@@ -16,16 +16,26 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.jcache.BLUCacheType;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
+import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.types.RException;
 
 /**
- * The type of shadow map caches.
+ * The type of shadow map contexts.
  */
 
-public interface KShadowMapCacheType extends
-  BLUCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException>
+public interface KNewShadowMapContextType
 {
-  // No extra functions
+  /**
+   * Fetch the current shadow map for the given light.
+   *
+   * @param light
+   *          The light.
+   * @return A shadow map.
+   * @throws RException
+   *           On errors.
+   */
+
+  KNewShadowMapUsableType getShadowMap(
+    final KLightWithShadowType light)
+    throws RException;
 }

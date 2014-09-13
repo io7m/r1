@@ -14,28 +14,40 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel;
+package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.kernel.types.KLightType;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
- * The type of shadow map contexts.
+ * The type of shadow map descriptions.
  */
 
-public interface KShadowMapContextType
+public interface KNewShadowMapDescriptionType
 {
   /**
-   * Fetch the current shadow map for the given light.
-   * 
-   * @param light
-   *          The light.
-   * @return A shadow map.
+   * Be visited by the given generic visitor.
+   *
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   *
    * @throws RException
-   *           On errors.
+   *           Iff the visitor raises {@link RException}
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * @throws JCGLException
+   *           Iff the visitor raises {@link JCGLException}
+   *
+   * @param <T>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
    */
 
-  KShadowMapUsableType getShadowMap(
-    final KLightType light)
-    throws RException;
+  <T, E extends Throwable> T shadowMapDescriptionAccept(
+    final KNewShadowMapDescriptionVisitorType<T, E> v)
+    throws E,
+      JCGLException,
+      RException;
 }

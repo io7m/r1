@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,55 +20,34 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
- * A generic shadow visitor, returning values of type <code>T</code> and
- * raising exceptions of type <code>E</code>.
- * 
- * @param <T>
- *          The return value type of the implementing visitor
- * @param <E>
- *          The type of exceptions raised by the implementing visitor
+ * The type of descriptions for omnidirectional shadow maps.
  */
 
-public interface KShadowVisitorType<T, E extends Throwable>
+public interface KNewShadowMapDescriptionOmnidirectionalType extends
+  KNewShadowType
 {
   /**
-   * Visit a basic mapped shadow.
-   * 
-   * @param s
-   *          The mapped shadow
-   * @return A value of type <code>A</code>
-   * 
-   * @throws JCGLException
-   *           If required
+   * Be visited by the given generic visitor.
+   *
+   * @param v
+   *          The visitor
+   * @return The value returned by the visitor
+   *
    * @throws RException
-   *           If required
+   *           Iff the visitor raises {@link RException}
    * @throws E
-   *           If required
+   *           Iff the visitor raises <code>E</code
+   * @throws JCGLException
+   *           Iff the visitor raises {@link JCGLException}
+   *
+   * @param <T>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
    */
 
-  T shadowMappedBasic(
-    final KShadowMappedBasic s)
-    throws E,
-      JCGLException,
-      RException;
-
-  /**
-   * Visit a variance mapped shadow.
-   * 
-   * @param s
-   *          The mapped shadow
-   * @return A value of type <code>A</code>
-   * 
-   * @throws JCGLException
-   *           If required
-   * @throws RException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  T shadowMappedVariance(
-    final KShadowMappedVariance s)
+  <T, E extends Throwable> T shadowMapDescriptionOmnidirectionalAccept(
+    final KNewShadowMapDescriptionOmnidirectionalVisitorType<T, E> v)
     throws E,
       JCGLException,
       RException;

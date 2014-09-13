@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -14,42 +14,27 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel.types;
+package com.io7m.r1.kernel;
 
+import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionUserError;
 
 /**
- * The type of mutable builders for projective lights that have mapped basic
- * shadows.
+ * The type of shadow maps.
  */
 
-public interface KLightProjectiveWithShadowBasicBuilderType extends
-  KLightProjectiveBuilderType
+public interface KNewShadowMapType extends KNewShadowMapUsableType
 {
   /**
-   * <p>
-   * Construct a light.
-   * </p>
+   * Delete the current shadow map.
    *
-   * @return A new light based on all of the parameters given so far.
-   * @throws RExceptionUserError
-   *           If no texture was specified.
+   * @param g
+   *          The OpenGL interface
    * @throws RException
-   *           If any other error occurs.
+   *           If an error occurs
    */
 
-  KLightProjectiveWithShadowBasic build()
-    throws RExceptionUserError,
-      RException;
-
-  /**
-   * Set the shadow.
-   *
-   * @param s
-   *          A shadow.
-   */
-
-  void setShadow(
-    KNewShadowDirectionalMappedBasic s);
+  void shadowMapDelete(
+    JCGLImplementationType g)
+    throws RException;
 }

@@ -14,54 +14,59 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel;
+package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.kernel.KShadowMap.KShadowMapBasic;
-import com.io7m.r1.kernel.KShadowMap.KShadowMapVariance;
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
- * The type of shadow map visitors.
- * 
+ * The type of shadow visitors.
+ *
  * @param <A>
  *          The type of returned values
  * @param <E>
  *          The type of raised exceptions
  */
 
-public interface KShadowMapVisitorType<A, E extends Throwable>
+public interface KNewShadowVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit a basic shadow map
-   * 
-   * @param sm
-   *          The map
-   * @return A value of type <code>A</code>
-   * @throws E
-   *           If required
+   * Visit a directional shadow.
+   *
+   * @param s
+   *          The shadow
+   * @return A value of <code>A</code>
    * @throws RException
+   *           If required
+   * @throws JCGLException
+   *           If required
+   * @throws E
    *           If required
    */
 
-  A shadowMapVisitBasic(
-    final KShadowMapBasic sm)
-    throws E,
-      RException;
+  A directional(
+    final KNewShadowDirectionalType s)
+    throws RException,
+      JCGLException,
+      E;
 
   /**
-   * Visit a variance shadow map
-   * 
-   * @param sm
-   *          The map
-   * @return A value of type <code>A</code>
-   * @throws E
-   *           If required
+   * Visit an omnidirectional shadow.
+   *
+   * @param s
+   *          The shadow
+   * @return A value of <code>A</code>
    * @throws RException
+   *           If required
+   * @throws JCGLException
+   *           If required
+   * @throws E
    *           If required
    */
 
-  A shadowMapVisitVariance(
-    final KShadowMapVariance sm)
-    throws E,
-      RException;
+  A omnidirectional(
+    final KNewShadowOmnidirectionalType s)
+    throws RException,
+      JCGLException,
+      E;
 }
