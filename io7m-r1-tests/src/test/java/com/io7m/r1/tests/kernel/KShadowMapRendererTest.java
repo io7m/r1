@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -31,7 +31,6 @@ import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcache.LRUCacheType;
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferType;
 import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.FragmentShaderType;
@@ -44,8 +43,6 @@ import com.io7m.jcanephora.ProgramType;
 import com.io7m.jcanephora.ProgramUniformType;
 import com.io7m.jcanephora.ProgramUsableType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jcanephora.TextureFilterMagnification;
-import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.VertexShaderType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
@@ -64,7 +61,6 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jparasol.core.JPFragmentShaderMetaType;
 import com.io7m.jparasol.core.JPUncompactedProgramShaderMeta;
 import com.io7m.jparasol.core.JPVertexShaderMetaType;
-import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -73,24 +69,22 @@ import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
 import com.io7m.r1.kernel.KDepthVarianceRendererType;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceUsableType;
+import com.io7m.r1.kernel.KNewShadowMapCache;
+import com.io7m.r1.kernel.KNewShadowMapCacheType;
+import com.io7m.r1.kernel.KNewShadowMapContextType;
+import com.io7m.r1.kernel.KNewShadowMapRenderer;
+import com.io7m.r1.kernel.KNewShadowMapRendererType;
+import com.io7m.r1.kernel.KNewShadowMapType;
+import com.io7m.r1.kernel.KNewShadowMapUsableType;
+import com.io7m.r1.kernel.KNewShadowMapWithType;
 import com.io7m.r1.kernel.KPostprocessorBlurDepthVarianceType;
 import com.io7m.r1.kernel.KProgramType;
 import com.io7m.r1.kernel.KShaderCache;
 import com.io7m.r1.kernel.KShaderCacheDepthType;
 import com.io7m.r1.kernel.KShaderCacheDepthVarianceType;
-import com.io7m.r1.kernel.KShadowMapCache;
-import com.io7m.r1.kernel.KShadowMapCacheType;
-import com.io7m.r1.kernel.KShadowMapContextType;
-import com.io7m.r1.kernel.KShadowMapRenderer;
-import com.io7m.r1.kernel.KShadowMapRendererType;
-import com.io7m.r1.kernel.KShadowMapType;
-import com.io7m.r1.kernel.KShadowMapUsableType;
-import com.io7m.r1.kernel.KShadowMapWithType;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KCamera;
-import com.io7m.r1.kernel.types.KDepthPrecision;
 import com.io7m.r1.kernel.types.KFaceSelection;
-import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
@@ -98,14 +92,16 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KMeshReadableType;
+import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedBasic;
+import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedBasicBuilderType;
+import com.io7m.r1.kernel.types.KNewShadowMapDescriptionDirectionalBasic;
+import com.io7m.r1.kernel.types.KNewShadowMapDescriptionDirectionalBasicBuilderType;
+import com.io7m.r1.kernel.types.KNewShadowMapDescriptionType;
 import com.io7m.r1.kernel.types.KProjectionFOV;
 import com.io7m.r1.kernel.types.KScene;
 import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
 import com.io7m.r1.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
-import com.io7m.r1.kernel.types.KShadowMapBasicDescription;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
-import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KTransformMatrix4x4;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.tests.RFakeGL;
@@ -130,9 +126,9 @@ import com.io7m.r1.types.RVectorI3F;
 {
   private static final class TestRenderer
   {
-    private AtomicInteger          cache_loads;
-    private AtomicInteger          cache_retrieves;
-    private KShadowMapRendererType shadow_map_renderer;
+    private AtomicInteger             cache_loads;
+    private AtomicInteger             cache_retrieves;
+    private KNewShadowMapRendererType shadow_map_renderer;
 
     public TestRenderer(
       final JCGLImplementationType g,
@@ -320,16 +316,16 @@ import com.io7m.r1.types.RVectorI3F;
           .empty()
           .withMaximumBorrowsPerKey(BigInteger.valueOf(32))
           .withMaximumCapacity(BigInteger.valueOf(128 * 32));
-      final KShadowMapCacheType shadow_cache =
-        KShadowMapCache.newCacheWithConfig(g, shadow_cache_config, log);
+      final KNewShadowMapCacheType shadow_cache =
+        KNewShadowMapCache.newCacheWithConfig(g, shadow_cache_config, log);
 
       this.cache_loads = new AtomicInteger(0);
       this.cache_retrieves = new AtomicInteger(0);
       shadow_cache
-        .cacheEventsSubscribe(new JCacheEventsType<KShadowMapDescriptionType, KShadowMapType>() {
+        .cacheEventsSubscribe(new JCacheEventsType<KNewShadowMapDescriptionType, KNewShadowMapType>() {
           @Override public void cacheEventValueCloseError(
-            final KShadowMapDescriptionType key,
-            final KShadowMapType value,
+            final KNewShadowMapDescriptionType key,
+            final KNewShadowMapType value,
             final BigInteger size,
             final Throwable x)
           {
@@ -337,8 +333,8 @@ import com.io7m.r1.types.RVectorI3F;
           }
 
           @Override public void cacheEventValueEvicted(
-            final KShadowMapDescriptionType key,
-            final KShadowMapType value,
+            final KNewShadowMapDescriptionType key,
+            final KNewShadowMapType value,
             final BigInteger size)
           {
             System.out.printf(
@@ -349,8 +345,8 @@ import com.io7m.r1.types.RVectorI3F;
           }
 
           @Override public void cacheEventValueLoaded(
-            final KShadowMapDescriptionType key,
-            final KShadowMapType value,
+            final KNewShadowMapDescriptionType key,
+            final KNewShadowMapType value,
             final BigInteger size)
           {
             System.out.printf(
@@ -362,8 +358,8 @@ import com.io7m.r1.types.RVectorI3F;
           }
 
           @Override public void cacheEventValueRetrieved(
-            final KShadowMapDescriptionType key,
-            final KShadowMapType value,
+            final KNewShadowMapDescriptionType key,
+            final KNewShadowMapType value,
             final BigInteger size)
           {
             System.out.printf(
@@ -376,7 +372,7 @@ import com.io7m.r1.types.RVectorI3F;
         });
 
       this.shadow_map_renderer =
-        KShadowMapRenderer.newRenderer(
+        KNewShadowMapRenderer.newRenderer(
           g,
           depth_renderer,
           depth_variance_renderer,
@@ -506,17 +502,16 @@ import com.io7m.r1.types.RVectorI3F;
     final Texture2DStaticUsableType lt = RFakeTextures2DStatic.newAnything(g);
     final KLightProjectiveWithShadowBasicBuilderType sl0b =
       KLightProjectiveWithShadowBasic.newBuilder(lt, proj);
-    final KFramebufferDepthDescription fb_desc =
-      KFramebufferDepthDescription.newDescription(
-        new AreaInclusive(
-          new RangeInclusiveL(0, 3),
-          new RangeInclusiveL(0, 3)),
-        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-        KDepthPrecision.DEPTH_PRECISION_16);
-    final KShadowMapBasicDescription map_desc =
-      KShadowMapBasicDescription.newDescription(fb_desc, 2);
-    sl0b.setShadow(KShadowMappedBasic.newMappedBasic(0.001f, 0.0f, map_desc));
+
+    final KNewShadowMapDescriptionDirectionalBasicBuilderType smbm_b =
+      KNewShadowMapDescriptionDirectionalBasic.newBuilder();
+    smbm_b.setSizeExponent(2);
+    final KNewShadowDirectionalMappedBasicBuilderType smb_b =
+      KNewShadowDirectionalMappedBasic.newBuilder();
+    smb_b.setMapDescription(smbm_b.build());
+    final KNewShadowDirectionalMappedBasic smb = smb_b.build();
+
+    sl0b.setShadow(smb);
     final KLightProjectiveWithShadowBasic sl0 = sl0b.build();
     final KLightProjectiveWithShadowBasic sl1 = sl0b.build();
     final KLightProjectiveWithShadowBasic sl2 = sl0b.build();
@@ -532,15 +527,15 @@ import com.io7m.r1.types.RVectorI3F;
     r.shadow_map_renderer.rendererEvaluateShadowMaps(
       camera,
       sbd.getShadows(),
-      new KShadowMapWithType<Unit, UnreachableCodeException>() {
+      new KNewShadowMapWithType<Unit, UnreachableCodeException>() {
         @Override public Unit withMaps(
-          final KShadowMapContextType context)
+          final KNewShadowMapContextType context)
           throws JCGLException,
             RException
         {
-          final KShadowMapUsableType m0 = context.getShadowMap(sl0);
-          final KShadowMapUsableType m1 = context.getShadowMap(sl1);
-          final KShadowMapUsableType m2 = context.getShadowMap(sl2);
+          final KNewShadowMapUsableType m0 = context.getShadowMap(sl0);
+          final KNewShadowMapUsableType m1 = context.getShadowMap(sl1);
+          final KNewShadowMapUsableType m2 = context.getShadowMap(sl2);
 
           Assert.assertNotNull(m0);
           Assert.assertNotNull(m1);
@@ -556,15 +551,15 @@ import com.io7m.r1.types.RVectorI3F;
     r.shadow_map_renderer.rendererEvaluateShadowMaps(
       camera,
       sbd.getShadows(),
-      new KShadowMapWithType<Unit, UnreachableCodeException>() {
+      new KNewShadowMapWithType<Unit, UnreachableCodeException>() {
         @Override public Unit withMaps(
-          final KShadowMapContextType context)
+          final KNewShadowMapContextType context)
           throws JCGLException,
             RException
         {
-          final KShadowMapUsableType m0 = context.getShadowMap(sl0);
-          final KShadowMapUsableType m1 = context.getShadowMap(sl1);
-          final KShadowMapUsableType m2 = context.getShadowMap(sl2);
+          final KNewShadowMapUsableType m0 = context.getShadowMap(sl0);
+          final KNewShadowMapUsableType m1 = context.getShadowMap(sl1);
+          final KNewShadowMapUsableType m2 = context.getShadowMap(sl2);
 
           Assert.assertNotNull(m0);
           Assert.assertNotNull(m1);
@@ -651,19 +646,20 @@ import com.io7m.r1.types.RVectorI3F;
 
     final KSceneBuilderWithCreateType sb = KScene.newBuilder(camera);
     final Texture2DStaticUsableType lt = RFakeTextures2DStatic.newAnything(g);
+
     final KLightProjectiveWithShadowBasicBuilderType sl0b =
       KLightProjectiveWithShadowBasic.newBuilder(lt, proj);
-    final KFramebufferDepthDescription fb_desc =
-      KFramebufferDepthDescription.newDescription(
-        new AreaInclusive(
-          new RangeInclusiveL(0, 3),
-          new RangeInclusiveL(0, 3)),
-        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-        KDepthPrecision.DEPTH_PRECISION_16);
-    final KShadowMapBasicDescription map_desc =
-      KShadowMapBasicDescription.newDescription(fb_desc, 2);
-    sl0b.setShadow(KShadowMappedBasic.newMappedBasic(0.001f, 0.0f, map_desc));
+
+    final KNewShadowMapDescriptionDirectionalBasicBuilderType smbm_b =
+      KNewShadowMapDescriptionDirectionalBasic.newBuilder();
+    smbm_b.setSizeExponent(2);
+    final KNewShadowDirectionalMappedBasicBuilderType smb_b =
+      KNewShadowDirectionalMappedBasic.newBuilder();
+    smb_b.setMapDescription(smbm_b.build());
+    final KNewShadowDirectionalMappedBasic smb = smb_b.build();
+
+    sl0b.setShadow(smb);
+
     final KLightProjectiveWithShadowBasic sl0 = sl0b.build();
     final KLightProjectiveWithShadowBasic sl1 = sl0b.build();
     final KLightProjectiveWithShadowBasic sl2 = sl0b.build();
@@ -683,15 +679,15 @@ import com.io7m.r1.types.RVectorI3F;
     r.shadow_map_renderer.rendererEvaluateShadowMaps(
       camera,
       sbd.getShadows(),
-      new KShadowMapWithType<Unit, UnreachableCodeException>() {
+      new KNewShadowMapWithType<Unit, UnreachableCodeException>() {
         @Override public Unit withMaps(
-          final KShadowMapContextType context)
+          final KNewShadowMapContextType context)
           throws JCGLException,
             RException
         {
-          final KShadowMapUsableType m0 = context.getShadowMap(sl0);
-          final KShadowMapUsableType m1 = context.getShadowMap(sl1);
-          final KShadowMapUsableType m2 = context.getShadowMap(sl2);
+          final KNewShadowMapUsableType m0 = context.getShadowMap(sl0);
+          final KNewShadowMapUsableType m1 = context.getShadowMap(sl1);
+          final KNewShadowMapUsableType m2 = context.getShadowMap(sl2);
 
           Assert.assertNotNull(m0);
           Assert.assertNotNull(m1);
@@ -707,15 +703,15 @@ import com.io7m.r1.types.RVectorI3F;
     r.shadow_map_renderer.rendererEvaluateShadowMaps(
       camera,
       sbd.getShadows(),
-      new KShadowMapWithType<Unit, UnreachableCodeException>() {
+      new KNewShadowMapWithType<Unit, UnreachableCodeException>() {
         @Override public Unit withMaps(
-          final KShadowMapContextType context)
+          final KNewShadowMapContextType context)
           throws JCGLException,
             RException
         {
-          final KShadowMapUsableType m0 = context.getShadowMap(sl0);
-          final KShadowMapUsableType m1 = context.getShadowMap(sl1);
-          final KShadowMapUsableType m2 = context.getShadowMap(sl2);
+          final KNewShadowMapUsableType m0 = context.getShadowMap(sl0);
+          final KNewShadowMapUsableType m1 = context.getShadowMap(sl1);
+          final KNewShadowMapUsableType m2 = context.getShadowMap(sl2);
 
           Assert.assertNotNull(m0);
           Assert.assertNotNull(m1);

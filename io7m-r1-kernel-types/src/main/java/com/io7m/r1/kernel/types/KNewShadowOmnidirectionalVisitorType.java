@@ -16,40 +16,16 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionUserError;
-
 /**
- * The type of mutable builders for projective lights that have mapped basic
- * shadows.
+ * The type of omnidirectional shadow visitors.
+ *
+ * @param <A>
+ *          The type of returned values
+ * @param <E>
+ *          The type of raised exceptions
  */
 
-public interface KLightProjectiveWithShadowBasicBuilderType extends
-  KLightProjectiveBuilderType
+public interface KNewShadowOmnidirectionalVisitorType<A, E extends Throwable>
 {
-  /**
-   * <p>
-   * Construct a light.
-   * </p>
-   *
-   * @return A new light based on all of the parameters given so far.
-   * @throws RExceptionUserError
-   *           If no texture was specified.
-   * @throws RException
-   *           If any other error occurs.
-   */
 
-  KLightProjectiveWithShadowBasic build()
-    throws RExceptionUserError,
-      RException;
-
-  /**
-   * Set the shadow.
-   *
-   * @param s
-   *          A shadow.
-   */
-
-  void setShadow(
-    KNewShadowDirectionalMappedBasic s);
 }

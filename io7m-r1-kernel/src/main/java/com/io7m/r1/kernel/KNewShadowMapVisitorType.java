@@ -14,55 +14,52 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel.types;
+package com.io7m.r1.kernel;
 
 import com.io7m.r1.types.RException;
 
 /**
- * A generic shadow map description visitor, returning values of type
- * <code>A</code> and raising exceptions of type <code>E</code>.
- * 
+ * The type of shadow map visitors.
+ *
  * @param <A>
- *          The return value type of the implementing visitor
+ *          The type of returned values
  * @param <E>
- *          The type of exceptions raised by the implementing visitor
+ *          The type of raised exceptions
  */
 
-public interface KShadowMapDescriptionVisitorType<A, E extends Throwable>
+public interface KNewShadowMapVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit a basic shadow map description.
-   * 
-   * @param sm
-   *          The map description
-   * @return A value of type <code>A</code>
-   * 
+   * Visit a directional shadow map.
+   *
+   * @param s
+   *          The shadow map
+   * @return A value of <code>A</code>
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  A shadowMapDescriptionBasic(
-    final KShadowMapBasicDescription sm)
-    throws E,
-      RException;
+  A directional(
+    final KNewShadowMapDirectionalType s)
+    throws RException,
+      E;
 
   /**
-   * Visit a variance shadow map description.
-   * 
-   * @param sm
-   *          The map description
-   * @return A value of type <code>A</code>
-   * 
+   * Visit an omnidirectional shadow map.
+   *
+   * @param s
+   *          The shadow map
+   * @return A value of <code>A</code>
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  A shadowMapDescriptionVariance(
-    final KShadowMapVarianceDescription sm)
-    throws E,
-      RException;
+  A omnidirectional(
+    final KNewShadowMapOmnidirectionalType s)
+    throws RException,
+      E;
 }

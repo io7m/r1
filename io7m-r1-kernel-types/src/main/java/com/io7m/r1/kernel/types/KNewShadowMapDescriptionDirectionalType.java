@@ -20,38 +20,35 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
- * The type of shadows.
+ * The type of descriptions for directional shadow maps.
  */
 
-public interface KShadowType
+public interface KNewShadowMapDescriptionDirectionalType extends
+  KNewShadowMapDescriptionType
 {
   /**
    * Be visited by the given generic visitor.
-   * 
+   *
    * @param v
    *          The visitor
    * @return The value returned by the visitor
-   * 
+   *
    * @throws RException
    *           Iff the visitor raises {@link RException}
    * @throws E
    *           Iff the visitor raises <code>E</code
    * @throws JCGLException
    *           Iff the visitor raises {@link JCGLException}
-   * 
+   *
    * @param <T>
    *          The return type of the visitor
    * @param <E>
    *          The type of exceptions raised by the visitor
-   * @param <V>
-   *          A specific visitor subtype
    */
 
-    <T, E extends Throwable, V extends KShadowVisitorType<T, E>>
-    T
-    shadowAccept(
-      final V v)
-      throws E,
-        JCGLException,
-        RException;
+  <T, E extends Throwable> T shadowMapDescriptionDirectionalAccept(
+    final KNewShadowMapDescriptionDirectionalVisitorType<T, E> v)
+    throws E,
+      JCGLException,
+      RException;
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,33 +16,16 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.r1.kernel.types.KShadowType;
+import com.io7m.jcache.BLUCacheType;
+import com.io7m.r1.kernel.types.KNewShadowMapDescriptionType;
+import com.io7m.r1.types.RException;
 
 /**
- * Optional debugging interface supported by renderers.
+ * The type of shadow map caches.
  */
 
-public interface KRendererDebuggingType
+public interface KNewShadowMapCacheType extends
+  BLUCacheType<KNewShadowMapDescriptionType, KNewShadowMapUsableType, KNewShadowMapType, RException>
 {
-  /**
-   * The type of shadow map receivers.
-   */
-
-  interface DebugShadowMapReceiverType
-  {
-    void receive(
-      final KShadowType shadow,
-      final KShadowMap map);
-  }
-
-  /**
-   * Request that the renderer pass any generated shadow maps to
-   * <code>receiver</code> on the next evaluation.
-   * 
-   * @param receiver
-   *          The receiver
-   */
-
-  void debugForEachShadowMap(
-    final DebugShadowMapReceiverType receiver);
+  // No extra functions
 }

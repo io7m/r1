@@ -14,62 +14,52 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel.types;
+package com.io7m.r1.kernel;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
- * A generic light-with-shadow visitor, returning values of type
- * <code>A</code> and raising exceptions of type <code>E</code>.
+ * The type of directional shadow map visitors.
  *
  * @param <A>
- *          The return value type of the implementing visitor
+ *          The type of returned values
  * @param <E>
- *          The type of exceptions raised by the implementing visitor
+ *          The type of raised exceptions
  */
 
-public interface KLightWithShadowVisitorType<A, E extends Throwable>
+public interface KNewShadowMapDirectionalVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit a projective light with a basic shadow.
+   * Visit a basic shadow map.
    *
-   * @param lp
-   *          The projective light
-   * @return A value of type <code>A</code>
-   *
+   * @param m
+   *          The shadow map
+   * @return A value of <code>A</code>
    * @throws RException
    *           If required
    * @throws E
    *           If required
-   * @throws JCGLException
-   *           If required
    */
 
-  A projectiveWithShadowBasic(
-    final KLightProjectiveWithShadowBasic lp)
+  A basic(
+    KNewShadowMapDirectionalBasic m)
     throws RException,
-      JCGLException,
       E;
 
   /**
-   * Visit a projective light with a variance shadow.
+   * Visit a variance shadow map.
    *
-   * @param lp
-   *          The projective light
-   * @return A value of type <code>A</code>
-   *
+   * @param m
+   *          The shadow map
+   * @return A value of <code>A</code>
    * @throws RException
    *           If required
    * @throws E
    *           If required
-   * @throws JCGLException
-   *           If required
    */
 
-  A projectiveWithShadowVariance(
-    final KLightProjectiveWithShadowVariance lp)
+  A variance(
+    KNewShadowMapDirectionalVariance m)
     throws RException,
-      E,
-      JCGLException;
+      E;
 }

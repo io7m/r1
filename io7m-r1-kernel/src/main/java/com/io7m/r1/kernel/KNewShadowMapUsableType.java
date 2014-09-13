@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -14,47 +14,48 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel.types;
+package com.io7m.r1.kernel;
 
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLResourceUsableType;
 import com.io7m.r1.types.RException;
 
 /**
- * The type of shadow maps.
+ * The type of usable shadow maps.
  */
 
-public interface KShadowMapDescriptionType
+public interface KNewShadowMapUsableType extends JCGLResourceUsableType
 {
   /**
+   * @return The number of bytes consumed by all resources that make up the
+   *         shadow map.
+   */
+
+  long shadowMapGetSizeBytes();
+
+  /**
    * Be visited by the given generic visitor.
-   * 
+   *
    * @param v
    *          The visitor
    * @return The value returned by the visitor
-   * @throws E
-   *           Iff the visitor raises <code>E</code
+   *
    * @throws RException
    *           Iff the visitor raises {@link RException}
-   * 
-   * @param <A>
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * @throws JCGLException
+   *           Iff the visitor raises {@link JCGLException}
+   *
+   * @param <T>
    *          The return type of the visitor
    * @param <E>
    *          The type of exceptions raised by the visitor
-   * @param <V>
-   *          A specific visitor subtype
    */
 
-    <A, E extends Throwable, V extends KShadowMapDescriptionVisitorType<A, E>>
-    A
-    mapDescriptionAccept(
-      final V v)
-      throws E,
-        RException;
-
-  /**
-   * @return The size exponent of the map, where the width and height of the
-   *         map will be <code>2 ^ {@link #mapGetSizeExponent()}</code>, where
-   *         {@link #mapGetSizeExponent()}<code> >= 1</code>.
-   */
-
-  int mapGetSizeExponent();
+  <T, E extends Throwable> T shadowMapAccept(
+    KNewShadowMapVisitorType<T, E> v)
+    throws E,
+      JCGLException,
+      RException;
 }

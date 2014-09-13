@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -40,6 +40,10 @@ import com.io7m.r1.kernel.KMeshBoundsCache;
 import com.io7m.r1.kernel.KMeshBoundsCacheType;
 import com.io7m.r1.kernel.KMeshBoundsTrianglesCache;
 import com.io7m.r1.kernel.KMeshBoundsTrianglesCacheType;
+import com.io7m.r1.kernel.KNewShadowMapCache;
+import com.io7m.r1.kernel.KNewShadowMapCacheType;
+import com.io7m.r1.kernel.KNewShadowMapRenderer;
+import com.io7m.r1.kernel.KNewShadowMapRendererType;
 import com.io7m.r1.kernel.KPostprocessorBlurDepthVariance;
 import com.io7m.r1.kernel.KPostprocessorBlurDepthVarianceType;
 import com.io7m.r1.kernel.KRefractionRenderer;
@@ -60,10 +64,6 @@ import com.io7m.r1.kernel.KShaderCacheDepthVarianceType;
 import com.io7m.r1.kernel.KShaderCacheForwardTranslucentLitType;
 import com.io7m.r1.kernel.KShaderCacheForwardTranslucentUnlitType;
 import com.io7m.r1.kernel.KShaderCachePostprocessingType;
-import com.io7m.r1.kernel.KShadowMapCache;
-import com.io7m.r1.kernel.KShadowMapCacheType;
-import com.io7m.r1.kernel.KShadowMapRenderer;
-import com.io7m.r1.kernel.KShadowMapRendererType;
 import com.io7m.r1.kernel.KTranslucentRenderer;
 import com.io7m.r1.kernel.KTranslucentRendererType;
 import com.io7m.r1.kernel.Kernel;
@@ -201,11 +201,11 @@ public final class ExampleRendererDeferredDefault extends
         .withMaximumBorrowsPerKey(BigInteger.valueOf(256))
         .withMaximumCapacity(BigInteger.valueOf(1024 * 1024 * 8 * 128));
 
-    final KShadowMapCacheType shadow_cache =
-      KShadowMapCache.newCacheWithConfig(gi, shadow_cache_config, log);
+    final KNewShadowMapCacheType shadow_cache =
+      KNewShadowMapCache.newCacheWithConfig(gi, shadow_cache_config, log);
 
-    final KShadowMapRendererType shadow_renderer =
-      KShadowMapRenderer.newRenderer(
+    final KNewShadowMapRendererType shadow_renderer =
+      KNewShadowMapRenderer.newRenderer(
         gi,
         depth_renderer,
         depth_variance_renderer,

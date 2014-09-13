@@ -20,17 +20,11 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
- * The type of lights that can have shadows.
+ * The type of directional shadows.
  */
 
-public interface KLightWithShadowType extends KLightType
+public interface KNewShadowDirectionalType extends KNewShadowType
 {
-  /**
-   * @return The light's shadow.
-   */
-
-  KNewShadowType lightGetShadow();
-
   /**
    * Be visited by the given generic visitor.
    *
@@ -42,19 +36,18 @@ public interface KLightWithShadowType extends KLightType
    *           Iff the visitor raises {@link RException}
    * @throws E
    *           Iff the visitor raises <code>E</code
+   * @throws JCGLException
+   *           Iff the visitor raises {@link JCGLException}
    *
-   * @param <A>
+   * @param <T>
    *          The return type of the visitor
    * @param <E>
    *          The type of exceptions raised by the visitor
-   * 
-   * @throws JCGLException
-   *           Iff the visitor raises {@link JCGLException}
    */
 
-  <A, E extends Throwable> A withShadowAccept(
-    final KLightWithShadowVisitorType<A, E> v)
-    throws RException,
-      E,
-      JCGLException;
+  <T, E extends Throwable> T shadowDirectionalAccept(
+    final KNewShadowDirectionalVisitorType<T, E> v)
+    throws E,
+      JCGLException,
+      RException;
 }

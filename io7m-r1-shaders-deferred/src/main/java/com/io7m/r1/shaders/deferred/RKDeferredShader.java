@@ -253,8 +253,8 @@ import com.io7m.r1.types.RException;
               {
                 b
                   .append("  -- Projective light (shadow mapping) parameters\n");
-                b.append("  parameter t_shadow_basic   : sampler_2d;\n");
-                b.append("  parameter shadow_basic     : ShadowBasic.t;\n");
+                b.append("  parameter t_shadow_dir_basic : sampler_2d;\n");
+                b.append("  parameter shadow_basic       : ShadowBasic.t;\n");
                 b.append("\n");
                 return Unit.unit();
               }
@@ -265,7 +265,7 @@ import com.io7m.r1.types.RException;
               {
                 b
                   .append("  -- Projective light (variance shadow mapping) parameters\n");
-                b.append("  parameter t_shadow_variance : sampler_2d;\n");
+                b.append("  parameter t_shadow_dir_variance : sampler_2d;\n");
                 b
                   .append("  parameter shadow_variance   : ShadowVariance.t;\n");
                 b.append("\n");
@@ -428,7 +428,7 @@ import com.io7m.r1.types.RException;
                 b.append("  value light_shadow =\n");
                 b.append("    ShadowBasic.factor (\n");
                 b.append("      shadow_basic,\n");
-                b.append("      t_shadow_basic,\n");
+                b.append("      t_shadow_dir_basic,\n");
                 b.append("      position_light_clip\n");
                 b.append("    );\n");
                 b.append("\n");
@@ -449,7 +449,7 @@ import com.io7m.r1.types.RException;
                 b.append("  value light_shadow =\n");
                 b.append("    ShadowVariance.factor (\n");
                 b.append("      shadow_variance,\n");
-                b.append("      t_shadow_variance,\n");
+                b.append("      t_shadow_dir_variance,\n");
                 b.append("      position_light_clip\n");
                 b.append("    );\n");
                 b.append("\n");

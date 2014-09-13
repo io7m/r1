@@ -47,6 +47,21 @@ public interface KGlowParametersBuilderType
 
   /**
    * <p>
+   * The factor by which to multiply the final glow effect.
+   * </p>
+   * <p>
+   * The default is <code>1</code>.
+   * </p>
+   *
+   * @param factor
+   *          The factor by which to multiply the final glow effect
+   */
+
+  void setFactor(
+    final float factor);
+
+  /**
+   * <p>
    * Set the number of passes. A greater number of passes will strengthen the
    * effect of the blur at the cost of processing time. A value of
    * <code>0</code> will result in no blur being applied at all.
@@ -80,19 +95,4 @@ public interface KGlowParametersBuilderType
 
   void setScale(
     final float scale);
-
-  /**
-   * <p>
-   * The factor by which to multiply the final glow effect.
-   * </p>
-   * <p>
-   * The default is <code>1</code>.
-   * </p>
-   *
-   * @param factor
-   *          The factor by which to multiply the final glow effect
-   */
-
-  void setFactor(
-    final float factor);
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,24 +18,23 @@ package com.io7m.r1.tests.kernel.types;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
-import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.r1.kernel.types.KDepthPrecision;
-import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
-import com.io7m.r1.kernel.types.KShadowMapBasicDescription;
-import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedBasic;
+import com.io7m.r1.kernel.types.KNewShadowDirectionalMappedBasicBuilderType;
+import com.io7m.r1.kernel.types.KNewShadowMapDescriptionDirectionalBasic;
+import com.io7m.r1.kernel.types.KNewShadowMapDescriptionDirectionalBasicBuilderType;
 import com.io7m.r1.tests.EnumGenerator;
 
-public final class KShadowMappedBasicGenerator implements
-  Generator<KShadowMappedBasic>
+public final class KNewShadowDirectionalMappedBasicGenerator implements
+  Generator<KNewShadowDirectionalMappedBasic>
 {
   private final EnumGenerator<TextureFilterMagnification> filter_mag_gen;
   private final EnumGenerator<TextureFilterMinification>  filter_min_gen;
   private final EnumGenerator<KDepthPrecision>            depth_prec_gen;
 
-  public KShadowMappedBasicGenerator()
+  public KNewShadowDirectionalMappedBasicGenerator()
   {
     this.filter_mag_gen =
       new EnumGenerator<TextureFilterMagnification>(
@@ -47,7 +46,7 @@ public final class KShadowMappedBasicGenerator implements
       new EnumGenerator<KDepthPrecision>(KDepthPrecision.class);
   }
 
-  @Override public KShadowMappedBasic next()
+  @Override public KNewShadowDirectionalMappedBasic next()
   {
     final TextureFilterMagnification in_filter_mag =
       this.filter_mag_gen.next();
@@ -56,24 +55,19 @@ public final class KShadowMappedBasicGenerator implements
     final KDepthPrecision in_precision_depth = this.depth_prec_gen.next();
 
     final int exponent = (int) ((Math.random() * 32) + 1);
-    final int r = (int) Math.pow(2, exponent);
-
-    final KFramebufferDepthDescription in_description =
-      KFramebufferDepthDescription.newDescription(
-        new AreaInclusive(new RangeInclusiveL(0, r - 1), new RangeInclusiveL(
-          0,
-          r - 1)),
-        in_filter_mag,
-        in_filter_min,
-        in_precision_depth);
     final float depth_bias = (float) Math.random();
 
-    final KShadowMapBasicDescription description =
-      KShadowMapBasicDescription.newDescription(in_description, exponent);
+    final KNewShadowMapDescriptionDirectionalBasicBuilderType smb_map_b =
+      KNewShadowMapDescriptionDirectionalBasic.newBuilder();
+    smb_map_b.setDepthPrecision(in_precision_depth);
+    smb_map_b.setMagnificationFilter(in_filter_mag);
+    smb_map_b.setMinificationFilter(in_filter_min);
+    smb_map_b.setSizeExponent(exponent);
 
-    return KShadowMappedBasic.newMappedBasic(
-      depth_bias,
-      (float) Math.random(),
-      description);
+    final KNewShadowDirectionalMappedBasicBuilderType bb =
+      KNewShadowDirectionalMappedBasic.newBuilder();
+    bb.setDepthBias(depth_bias);
+    bb.setMinimumFactor((float) Math.random());
+    return bb.build();
   }
 }
