@@ -29,7 +29,7 @@ public interface KLightWithShadowType extends KLightType
    * @return The light's shadow.
    */
 
-  KNewShadowType lightGetShadow();
+  KShadowType lightGetShadow();
 
   /**
    * Be visited by the given generic visitor.

@@ -40,10 +40,10 @@ import com.io7m.r1.kernel.KMeshBoundsCache;
 import com.io7m.r1.kernel.KMeshBoundsCacheType;
 import com.io7m.r1.kernel.KMeshBoundsTrianglesCache;
 import com.io7m.r1.kernel.KMeshBoundsTrianglesCacheType;
-import com.io7m.r1.kernel.KNewShadowMapCache;
-import com.io7m.r1.kernel.KNewShadowMapCacheType;
-import com.io7m.r1.kernel.KNewShadowMapRenderer;
-import com.io7m.r1.kernel.KNewShadowMapRendererType;
+import com.io7m.r1.kernel.KShadowMapCache;
+import com.io7m.r1.kernel.KShadowMapCacheType;
+import com.io7m.r1.kernel.KShadowMapRenderer;
+import com.io7m.r1.kernel.KShadowMapRendererType;
 import com.io7m.r1.kernel.KPostprocessorBlurDepthVariance;
 import com.io7m.r1.kernel.KPostprocessorBlurDepthVarianceType;
 import com.io7m.r1.kernel.KRefractionRenderer;
@@ -201,11 +201,11 @@ public final class ExampleRendererDeferredDefault extends
         .withMaximumBorrowsPerKey(BigInteger.valueOf(256))
         .withMaximumCapacity(BigInteger.valueOf(1024 * 1024 * 8 * 128));
 
-    final KNewShadowMapCacheType shadow_cache =
-      KNewShadowMapCache.newCacheWithConfig(gi, shadow_cache_config, log);
+    final KShadowMapCacheType shadow_cache =
+      KShadowMapCache.newCacheWithConfig(gi, shadow_cache_config, log);
 
-    final KNewShadowMapRendererType shadow_renderer =
-      KNewShadowMapRenderer.newRenderer(
+    final KShadowMapRendererType shadow_renderer =
+      KShadowMapRenderer.newRenderer(
         gi,
         depth_renderer,
         depth_variance_renderer,

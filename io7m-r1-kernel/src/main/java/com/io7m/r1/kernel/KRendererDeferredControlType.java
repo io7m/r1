@@ -54,5 +54,5 @@ public interface KRendererDeferredControlType
    * @return The current shadow maps.
    */
 
-  KNewShadowMapContextType rendererGetShadowMapContext();
+  KShadowMapContextType rendererGetShadowMapContext();
 }

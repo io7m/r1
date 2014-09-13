@@ -51,5 +51,5 @@ public interface KLightProjectiveWithShadowVarianceBuilderType extends
    */
 
   void setShadow(
-    KNewShadowDirectionalMappedVariance s);
+    KShadowDirectionalMappedVariance s);
 }

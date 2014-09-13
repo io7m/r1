@@ -51,5 +51,5 @@ public interface KLightProjectiveWithShadowBasicBuilderType extends
    */
 
   void setShadow(
-    KNewShadowDirectionalMappedBasic s);
+    KShadowDirectionalMappedBasic s);
 }
