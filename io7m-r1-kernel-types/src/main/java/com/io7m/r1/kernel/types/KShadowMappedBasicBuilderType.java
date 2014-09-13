@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,15 +17,24 @@
 package com.io7m.r1.kernel.types;
 
 /**
- * The type of mutable builders for directional variance shadow maps.
+ * The common functions shared by directional and omnidirectional basic mapped
+ * shadow builders.
  */
 
-public interface KShadowMapDescriptionDirectionalVarianceBuilderType extends
-  KShadowMapDescriptionVarianceBuilderType
+public interface KShadowMappedBasicBuilderType extends KShadowBuilderType
 {
   /**
-   * @return A description based on the most recently given parameters.
+   * <p>
+   * Set the depth bias value. This is a small value added to the depth of all
+   * shadow casting objects to alleviate "shadow acne" caused by objects
+   * shadowing themselves. A value of <tt>0.001f</tt> tends to work well for
+   * most scenes, and is the default.
+   * </p>
+   *
+   * @param b
+   *          The depth bias.
    */
 
-  KShadowMapDescriptionDirectionalVariance build();
+  void setDepthBias(
+    float b);
 }

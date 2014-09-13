@@ -138,7 +138,7 @@ import com.io7m.r1.types.RException;
    */
 
   public static
-    KShadowMapDescriptionDirectionalBasicBuilderType
+    KShadowMapDescriptionBuilderType
     newBuilderFrom(
       final KShadowMapDescriptionDirectionalBasic d)
   {

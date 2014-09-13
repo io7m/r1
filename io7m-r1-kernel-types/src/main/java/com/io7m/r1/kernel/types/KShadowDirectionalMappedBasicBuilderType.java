@@ -20,28 +20,13 @@ package com.io7m.r1.kernel.types;
  * The type of mutable builders for directional basic mapped shadows.
  */
 
-public interface KShadowDirectionalMappedBasicBuilderType
+public interface KShadowDirectionalMappedBasicBuilderType extends KShadowMappedBasicBuilderType
 {
   /**
    * @return A shadow based on the most recent parameters given.
    */
 
   KShadowDirectionalMappedBasic build();
-
-  /**
-   * <p>
-   * Set the depth bias value. This is a small value added to the depth of all
-   * shadow casting objects to alleviate "shadow acne" caused by objects
-   * shadowing themselves. A value of <tt>0.001f</tt> tends to work well for
-   * most scenes, and is the default.
-   * </p>
-   *
-   * @param b
-   *          The depth bias.
-   */
-
-  void setDepthBias(
-    final @KSuggestedRangeF(lower = 0.0f, upper = 0.001f) float b);
 
   /**
    * <p>
@@ -55,20 +40,4 @@ public interface KShadowDirectionalMappedBasicBuilderType
 
   void setMapDescription(
     final KShadowMapDescriptionDirectionalBasic m);
-
-  /**
-   * <p>
-   * Set the minimum shadow factor. This is the effectively the minimum level
-   * of brightness to which a shadow can attenuate a light source. For
-   * example, if <code>f == 0.0</code>, then the shadow can completely
-   * attenuate a light source. If <code>f == 1.0</code>, then the shadow is
-   * invisible.
-   * </p>
-   *
-   * @param f
-   *          The minimum shadow factor.
-   */
-
-  void setMinimumFactor(
-    final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float f);
 }
