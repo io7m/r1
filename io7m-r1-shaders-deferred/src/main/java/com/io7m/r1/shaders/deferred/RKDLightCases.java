@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -42,9 +42,11 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
+import com.io7m.r1.kernel.types.KLightSphereWithDualParaboloidShadowBasic;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
+import com.io7m.r1.kernel.types.KShadowOmnidirectionalDualParaboloidMappedBasic;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
@@ -279,6 +281,20 @@ import com.io7m.r1.types.RVectorI3F;
             1.0f,
             tc,
             QuaternionI4F.IDENTITY);
+        cases.add(l);
+      }
+
+      {
+        final KShadowOmnidirectionalDualParaboloidMappedBasic s =
+          KShadowOmnidirectionalDualParaboloidMappedBasic.getDefault();
+        final KLightType l =
+          KLightSphereWithDualParaboloidShadowBasic.newLight(
+            c,
+            1.0f,
+            v,
+            1.0f,
+            1.0f,
+            s);
         cases.add(l);
       }
 

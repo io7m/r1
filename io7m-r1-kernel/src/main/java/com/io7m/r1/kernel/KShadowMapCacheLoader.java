@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,12 +25,14 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasic;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalVariance;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalVisitorType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionOmnidirectionalCubeBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionOmnidirectionalDualParaboloidBasic;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionOmnidirectionalType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionOmnidirectionalVisitorType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionVisitorType;
 import com.io7m.r1.types.RException;
@@ -38,8 +40,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * A cache loader that constructs and caches shadow maps of type
- * {@link KShadowMapType} from the given
- * {@link KShadowMapDescriptionType}.
+ * {@link KShadowMapType} from the given {@link KShadowMapDescriptionType}.
  */
 
 @EqualityReference public final class KShadowMapCacheLoader implements
@@ -146,10 +147,61 @@ import com.io7m.r1.types.RExceptionJCGL;
 
           @Override public KShadowMapType omnidirectional(
             final KShadowMapDescriptionOmnidirectionalType sdo)
-            throws RException
+            throws RException,
+              JCGLException
           {
-            // TODO Auto-generated method stub
-            throw new UnimplementedCodeException();
+            return sdo
+              .shadowMapDescriptionOmnidirectionalAccept(new KShadowMapDescriptionOmnidirectionalVisitorType<KShadowMapType, JCGLException>() {
+                @Override public KShadowMapType cubeBasic(
+                  final KShadowMapDescriptionOmnidirectionalCubeBasic m)
+                  throws RException,
+                    JCGLException
+                {
+                  if (lg.wouldLog(LogLevel.LOG_DEBUG)) {
+                    final int size = (int) Math.pow(2, m.getSizeExponent());
+                    ms.setLength(0);
+                    ms.append("Allocating omnidirectional basic cube map (");
+                    ms.append(size);
+                    ms.append("x");
+                    ms.append(size);
+                    ms.append("x");
+                    ms.append(size);
+                    ms.append(")");
+                    final String mss = ms.toString();
+                    assert mss != null;
+                    lg.debug(mss);
+                  }
+
+                  return KShadowMapOmnidirectionalCubeBasic.newMap(g, m);
+                }
+
+                @Override public
+                  KShadowMapType
+                  dualParaboloidBasic(
+                    final KShadowMapDescriptionOmnidirectionalDualParaboloidBasic m)
+                    throws RException,
+                      JCGLException,
+                      JCGLException
+                {
+                  if (lg.wouldLog(LogLevel.LOG_DEBUG)) {
+                    final int size = (int) Math.pow(2, m.getSizeExponent());
+                    ms.setLength(0);
+                    ms
+                      .append("Allocating omnidirectional basic dual paraboloid map (");
+                    ms.append(size);
+                    ms.append("x");
+                    ms.append(size);
+                    ms.append(")");
+                    final String mss = ms.toString();
+                    assert mss != null;
+                    lg.debug(mss);
+                  }
+
+                  return KShadowMapOmnidirectionalDualParaboloidBasic.newMap(
+                    g,
+                    m);
+                }
+              });
           }
         });
     } catch (final JCGLException e) {

@@ -16,6 +16,7 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -160,7 +161,8 @@ import com.io7m.r1.types.RVectorI3F;
     lightAccept(
       final V v)
       throws E,
-        RException
+        RException,
+        JCGLException
   {
     return v.lightDirectional(this);
   }
@@ -189,13 +191,10 @@ import com.io7m.r1.types.RVectorI3F;
     return this.intensity;
   }
 
-  @Override public
-    <A, E extends Throwable, V extends KLightTranslucentVisitorType<A, E>>
-    A
-    lightTranslucentAccept(
-      final V v)
-      throws RException,
-        E
+  @Override public <A, E extends Throwable> A lightTranslucentAccept(
+    final KLightTranslucentVisitorType<A, E> v)
+    throws RException,
+      E
   {
     return v.lightTranslucentDirectional(this);
   }

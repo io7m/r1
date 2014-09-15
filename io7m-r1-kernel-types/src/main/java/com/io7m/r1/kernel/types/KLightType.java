@@ -16,6 +16,7 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RVectorI3F;
@@ -44,12 +45,15 @@ public interface KLightType extends KTexturesRequiredType
    *          The type of exceptions raised by the visitor
    * @param <V>
    *          A specific visitor subtype
+   * @throws JCGLException
+   *           Iff the visitor raises {@link JCGLException}.
    */
 
   <A, E extends Throwable, V extends KLightVisitorType<A, E>> A lightAccept(
     final V v)
     throws RException,
-      E;
+      E,
+      JCGLException;
 
   /**
    * @return The code for the light.

@@ -43,13 +43,6 @@ public interface KMatricesObserverValuesType
   RMatrixReadable4x4FType<RTransformProjectionType> getMatrixProjection();
 
   /**
-   * @return The current inverse projection matrix for an observer
-   */
-
-    RMatrixReadable4x4FType<RTransformProjectionInverseType>
-    getMatrixProjectionInverse();
-
-  /**
    * @return The current view matrix for an observer
    */
 
@@ -66,4 +59,11 @@ public interface KMatricesObserverValuesType
    */
 
   KProjectionType getProjection();
+
+  /**
+   * @return The current inverse projection matrix for an observer
+   */
+
+    RMatrixReadable4x4FType<RTransformProjectionInverseType>
+    getMatrixProjectionInverse();
 }

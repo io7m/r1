@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -104,7 +104,6 @@ import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KFramebufferRGBAUsableType;
 import com.io7m.r1.kernel.KProgramType;
-import com.io7m.r1.kernel.KRendererDebugType;
 import com.io7m.r1.kernel.KShaderCachePostprocessingType;
 import com.io7m.r1.kernel.KShadingProgramCommon;
 import com.io7m.r1.kernel.types.KDepthPrecision;
@@ -116,6 +115,8 @@ import com.io7m.r1.kernel.types.KScene;
 import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
 import com.io7m.r1.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.r1.kernel.types.KUnitQuad;
+import com.io7m.r1.kernel.types.KUnitQuadCache;
+import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
@@ -511,14 +512,13 @@ import com.jogamp.opengl.util.FPSAnimator;
             throws RException
           {
             try {
-              final KRendererDebugType dr = rd.rendererGetDebug();
               final KFramebufferDeferredType fb =
                 VExampleWindowGL.this.framebuffer;
               assert fb != null;
 
               final KScene sc = scene_builder.sceneCreate();
 
-              dr.rendererDebugEvaluate(fb, sc);
+              rd.rendererDebugEvaluate(fb, sc);
               VExampleWindowGL.this.renderSceneResults(fb);
 
               if (VExampleWindowGL.this.want_save.get()) {
@@ -659,6 +659,9 @@ import com.jogamp.opengl.util.FPSAnimator;
         final VShaderCaches sc = this.shader_caches;
         assert sc != null;
 
+        final KUnitQuadCacheType quad_cache =
+          KUnitQuadCache.newCache(gc, this.glog);
+
         final ExampleRendererType r =
           this.renderer_cons
             .matchConstructor(new ExampleRendererConstructorVisitorType<ExampleRendererType, RException>() {
@@ -669,8 +672,10 @@ import com.jogamp.opengl.util.FPSAnimator;
               {
                 return c.newRenderer(
                   VExampleWindowGL.this.glog,
+                  quad_cache,
                   sc.getShaderDepthCache(),
                   sc.getShaderDebugCache(),
+                  sc.getShaderPostprocessingCache(),
                   g);
               }
 

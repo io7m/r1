@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,13 +16,12 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
  * A generic instance visitor, returning values of type <code>A</code> and
  * raising exceptions of type <code>E</code>.
- * 
+ *
  * @param <A>
  *          The return value type of the implementing visitor
  * @param <E>
@@ -33,14 +32,12 @@ public interface KInstanceVisitorType<A, E extends Throwable>
 {
   /**
    * Visit an opaque instance.
-   * 
+   *
    * @param i
    *          The instance
    * @return A value of type <code>A</code>
-   * 
+   *
    * @throws RException
-   *           If required
-   * @throws JCGLException
    *           If required
    * @throws E
    *           If required
@@ -49,19 +46,16 @@ public interface KInstanceVisitorType<A, E extends Throwable>
   A opaque(
     final KInstanceOpaqueType i)
     throws E,
-      RException,
-      JCGLException;
+      RException;
 
   /**
    * Visit a translucent instance.
-   * 
+   *
    * @param i
    *          The instance
    * @return A value of type <code>A</code>
-   * 
+   *
    * @throws RException
-   *           If required
-   * @throws JCGLException
    *           If required
    * @throws E
    *           If required
@@ -70,6 +64,5 @@ public interface KInstanceVisitorType<A, E extends Throwable>
   A translucent(
     final KInstanceTranslucentType i)
     throws E,
-      RException,
-      JCGLException;
+      RException;
 }

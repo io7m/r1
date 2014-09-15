@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,6 +27,8 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.r1.kernel.KDepthParaboloidRenderer;
+import com.io7m.r1.kernel.KDepthParaboloidRendererType;
 import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
@@ -40,10 +42,6 @@ import com.io7m.r1.kernel.KMeshBoundsCache;
 import com.io7m.r1.kernel.KMeshBoundsCacheType;
 import com.io7m.r1.kernel.KMeshBoundsTrianglesCache;
 import com.io7m.r1.kernel.KMeshBoundsTrianglesCacheType;
-import com.io7m.r1.kernel.KShadowMapCache;
-import com.io7m.r1.kernel.KShadowMapCacheType;
-import com.io7m.r1.kernel.KShadowMapRenderer;
-import com.io7m.r1.kernel.KShadowMapRendererType;
 import com.io7m.r1.kernel.KPostprocessorBlurDepthVariance;
 import com.io7m.r1.kernel.KPostprocessorBlurDepthVarianceType;
 import com.io7m.r1.kernel.KRefractionRenderer;
@@ -55,7 +53,6 @@ import com.io7m.r1.kernel.KRendererDeferredControlType;
 import com.io7m.r1.kernel.KRendererDeferredOpaque;
 import com.io7m.r1.kernel.KRendererDeferredOpaqueType;
 import com.io7m.r1.kernel.KRendererDeferredType;
-import com.io7m.r1.kernel.KRendererType;
 import com.io7m.r1.kernel.KShaderCacheDebugType;
 import com.io7m.r1.kernel.KShaderCacheDeferredGeometryType;
 import com.io7m.r1.kernel.KShaderCacheDeferredLightType;
@@ -64,6 +61,10 @@ import com.io7m.r1.kernel.KShaderCacheDepthVarianceType;
 import com.io7m.r1.kernel.KShaderCacheForwardTranslucentLitType;
 import com.io7m.r1.kernel.KShaderCacheForwardTranslucentUnlitType;
 import com.io7m.r1.kernel.KShaderCachePostprocessingType;
+import com.io7m.r1.kernel.KShadowMapCache;
+import com.io7m.r1.kernel.KShadowMapCacheType;
+import com.io7m.r1.kernel.KShadowMapRenderer;
+import com.io7m.r1.kernel.KShadowMapRendererType;
 import com.io7m.r1.kernel.KTranslucentRenderer;
 import com.io7m.r1.kernel.KTranslucentRendererType;
 import com.io7m.r1.kernel.Kernel;
@@ -170,6 +171,8 @@ public final class ExampleRendererDeferredDefault extends
 
     final KRegionCopierType copier = KRegionCopier.newCopier(gi, log);
 
+    final KDepthParaboloidRendererType depth_paraboloid_renderer =
+      KDepthParaboloidRenderer.newRenderer(gi, in_shader_depth_cache, log);
     final KDepthRendererType depth_renderer =
       KDepthRenderer.newRenderer(gi, in_shader_depth_cache, log);
     final KDepthVarianceRendererType depth_variance_renderer =
@@ -208,6 +211,7 @@ public final class ExampleRendererDeferredDefault extends
       KShadowMapRenderer.newRenderer(
         gi,
         depth_renderer,
+        depth_paraboloid_renderer,
         depth_variance_renderer,
         blur,
         shadow_cache,
@@ -310,13 +314,6 @@ public final class ExampleRendererDeferredDefault extends
     throws RException
   {
     this.actual.rendererDeferredEvaluateFull(framebuffer, scene);
-  }
-
-  @Override public
-    Class<? extends KRendererType>
-    exampleRendererGetActualClass()
-  {
-    return this.actual.getClass();
   }
 
   @Override public ExampleRendererName exampleRendererGetName()
