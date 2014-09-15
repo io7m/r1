@@ -36,7 +36,7 @@ public interface KProjectionType
    * @param v
    *          The visitor.
    * @return The value returned by the visitor.
-   * 
+   *
    * @throws RException
    *           If the visitor throws {@link RException}.
    * @throws E
@@ -55,37 +55,13 @@ public interface KProjectionType
   RMatrixI4x4F<RTransformProjectionType> projectionGetMatrix();
 
   /**
-   * @return The rightmost edge of the frustum's near plane.
-   */
-
-  float projectionGetXMaximum();
-
-  /**
-   * @return The leftmost edge of the frustum's near plane.
-   */
-
-  float projectionGetXMinimum();
-
-  /**
-   * @return The topmost edge of the frustum's near plane.
-   */
-
-  float projectionGetYMaximum();
-
-  /**
-   * @return The bottommost edge of the frustum's near plane.
-   */
-
-  float projectionGetYMinimum();
-
-  /**
-   * @return The value of the frustum's near plane.
+   * @return The value of the projection's far plane.
    */
 
   float projectionGetZFar();
 
   /**
-   * @return The value of the frustum's near plane.
+   * @return The value of the projection's near plane.
    */
 
   float projectionGetZNear();

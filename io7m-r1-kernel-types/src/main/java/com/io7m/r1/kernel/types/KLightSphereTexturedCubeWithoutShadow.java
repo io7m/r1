@@ -16,6 +16,7 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
@@ -308,7 +309,8 @@ import com.io7m.r1.types.RVectorI3F;
     lightAccept(
       final V v)
       throws E,
-        RException
+        RException,
+        JCGLException
   {
     return v.lightSpherical(this);
   }
@@ -388,13 +390,10 @@ import com.io7m.r1.types.RVectorI3F;
     return this.transform;
   }
 
-  @Override public
-    <A, E extends Throwable, V extends KLightSphereVisitorType<A, E>>
-    A
-    sphereAccept(
-      final V v)
-      throws RException,
-        E
+  @Override public <A, E extends Throwable> A sphereAccept(
+    final KLightSphereVisitorType<A, E> v)
+    throws RException,
+      E
   {
     return v.sphereTexturedCubeWithoutShadow(this);
   }

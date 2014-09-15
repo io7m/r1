@@ -30,7 +30,7 @@ import com.io7m.r1.types.RTransformProjectionType;
  */
 
 @EqualityStructural public final class KProjectionFrustum implements
-  KProjectionType
+  KProjectionWithShapeType
 {
   /**
    * Construct a new frustum projection.
@@ -194,5 +194,13 @@ import com.io7m.r1.types.RTransformProjectionType;
   @Override public float projectionGetZNear()
   {
     return this.z_near;
+  }
+
+  @Override public <T, E extends Exception> T projectionWithShapeAccept(
+    final KProjectionWithShapeVisitorType<T, E> v)
+    throws RException,
+      E
+  {
+    return v.frustum(this);
   }
 }

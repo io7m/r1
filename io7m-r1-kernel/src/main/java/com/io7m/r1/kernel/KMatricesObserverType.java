@@ -18,6 +18,7 @@ package com.io7m.r1.kernel;
 
 import com.io7m.r1.kernel.types.KInstanceType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
+import com.io7m.r1.kernel.types.KLightSphereWithDualParaboloidShadowBasic;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RMatrixI3x3F;
@@ -115,6 +116,32 @@ public interface KMatricesObserverType extends KMatricesObserverValuesType
   <T, E extends Throwable> T withProjectiveLight(
     final KLightProjectiveType p,
     final KMatricesProjectiveLightFunctionType<T, E> f)
+    throws RException,
+      E;
+
+  /**
+   * Evaluate the given function with the given spherical light.
+   *
+   * @param <T>
+   *          The type of values returned by the function
+   * @param <E>
+   *          The type of exceptions raised by the function
+   * @param s
+   *          The light
+   * @param f
+   *          The function
+   * @return The value returned by the function
+   *
+   * @throws RException
+   *           If the function raises {@link RException}
+   * @throws E
+   *           If the function raises <code>E</code> @ * If any parameter is
+   *           <code>null</code>
+   */
+
+  <T, E extends Throwable> T withSphericalLight(
+    KLightSphereWithDualParaboloidShadowBasic s,
+    KMatricesSphericalDualParaboloidLightFunctionType<T, E> f)
     throws RException,
       E;
 }

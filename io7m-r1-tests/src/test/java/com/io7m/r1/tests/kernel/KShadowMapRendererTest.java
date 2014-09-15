@@ -64,11 +64,18 @@ import com.io7m.jparasol.core.JPVertexShaderMetaType;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.kernel.KDepthParaboloidRenderer;
+import com.io7m.r1.kernel.KDepthParaboloidRendererType;
 import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
 import com.io7m.r1.kernel.KDepthVarianceRendererType;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceUsableType;
+import com.io7m.r1.kernel.KPostprocessorBlurDepthVarianceType;
+import com.io7m.r1.kernel.KProgramType;
+import com.io7m.r1.kernel.KShaderCache;
+import com.io7m.r1.kernel.KShaderCacheDepthType;
+import com.io7m.r1.kernel.KShaderCacheDepthVarianceType;
 import com.io7m.r1.kernel.KShadowMapCache;
 import com.io7m.r1.kernel.KShadowMapCacheType;
 import com.io7m.r1.kernel.KShadowMapContextType;
@@ -77,11 +84,6 @@ import com.io7m.r1.kernel.KShadowMapRendererType;
 import com.io7m.r1.kernel.KShadowMapType;
 import com.io7m.r1.kernel.KShadowMapUsableType;
 import com.io7m.r1.kernel.KShadowMapWithType;
-import com.io7m.r1.kernel.KPostprocessorBlurDepthVarianceType;
-import com.io7m.r1.kernel.KProgramType;
-import com.io7m.r1.kernel.KShaderCache;
-import com.io7m.r1.kernel.KShaderCacheDepthType;
-import com.io7m.r1.kernel.KShaderCacheDepthVarianceType;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
@@ -92,16 +94,16 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KMeshReadableType;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasicBuilderType;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasic;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasicBuilderType;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
 import com.io7m.r1.kernel.types.KProjectionFOV;
 import com.io7m.r1.kernel.types.KScene;
 import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
 import com.io7m.r1.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
+import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
+import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasicBuilderType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasicBuilderType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
 import com.io7m.r1.kernel.types.KTransformMatrix4x4;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.tests.RFakeGL;
@@ -126,8 +128,8 @@ import com.io7m.r1.types.RVectorI3F;
 {
   private static final class TestRenderer
   {
-    private AtomicInteger             cache_loads;
-    private AtomicInteger             cache_retrieves;
+    private AtomicInteger          cache_loads;
+    private AtomicInteger          cache_retrieves;
     private KShadowMapRendererType shadow_map_renderer;
 
     public TestRenderer(
@@ -291,6 +293,8 @@ import com.io7m.r1.types.RVectorI3F;
 
       final KDepthRendererType depth_renderer =
         KDepthRenderer.newRenderer(g, depth_shader_cache, log);
+      final KDepthParaboloidRendererType depth_paraboloid_renderer =
+        KDepthParaboloidRenderer.newRenderer(g, depth_shader_cache, log);
       final KDepthVarianceRendererType depth_variance_renderer =
         KDepthVarianceRenderer.newRenderer(g, depth_variance_shader_cache);
 
@@ -375,6 +379,7 @@ import com.io7m.r1.types.RVectorI3F;
         KShadowMapRenderer.newRenderer(
           g,
           depth_renderer,
+          depth_paraboloid_renderer,
           depth_variance_renderer,
           blur,
           shadow_cache,

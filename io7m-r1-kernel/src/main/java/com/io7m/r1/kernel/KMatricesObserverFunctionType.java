@@ -16,6 +16,7 @@
 
 package com.io7m.r1.kernel;
 
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
@@ -39,10 +40,13 @@ public interface KMatricesObserverFunctionType<T, E extends Throwable>
    *           If required @ * If required
    * @throws RException
    *           If required
+   * @throws JCGLException
+   *           If required
    */
 
   T run(
     final KMatricesObserverType o)
     throws E,
+      JCGLException,
       RException;
 }

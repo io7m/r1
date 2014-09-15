@@ -51,9 +51,9 @@ import com.io7m.r1.types.RVectorI3F;
     private float                               intensity;
     private QuaternionI4F                       orientation;
     private RVectorI3F<RSpaceWorldType>         position;
-    private KProjectionType                     projection;
+    private KProjectionWithShapeType            projection;
     private float                               range;
-    private KShadowDirectionalMappedBasic    shadow;
+    private KShadowDirectionalMappedBasic       shadow;
     private @Nullable Texture2DStaticUsableType texture;
 
     Builder(
@@ -73,7 +73,7 @@ import com.io7m.r1.types.RVectorI3F;
 
     Builder(
       final Texture2DStaticUsableType in_texture,
-      final KProjectionType in_projection)
+      final KProjectionWithShapeType in_projection)
     {
       this.color = RVectorI3F.one();
       this.intensity = 1.0f;
@@ -139,7 +139,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setProjection(
-      final KProjectionType in_projection)
+      final KProjectionWithShapeType in_projection)
     {
       this.projection = NullCheck.notNull(in_projection, "Projection");
     }
@@ -179,7 +179,7 @@ import com.io7m.r1.types.RVectorI3F;
 
   public static KLightProjectiveWithShadowBasicBuilderType newBuilder(
     final Texture2DStaticUsableType in_texture,
-    final KProjectionType in_projection)
+    final KProjectionWithShapeType in_projection)
   {
     return new Builder(in_texture, in_projection);
   }
@@ -201,20 +201,20 @@ import com.io7m.r1.types.RVectorI3F;
     return new Builder(p);
   }
 
-  private final RVectorI3F<RSpaceRGBType>        color;
+  private final RVectorI3F<RSpaceRGBType>     color;
 
-  private final float                            falloff;
-  private final float                            falloff_inverse;
-  private final float                            intensity;
-  private final QuaternionI4F                    orientation;
-  private final RVectorI3F<RSpaceWorldType>      position;
-  private final KProjectionType                  projection;
-  private final float                            range;
-  private final float                            range_inverse;
+  private final float                         falloff;
+  private final float                         falloff_inverse;
+  private final float                         intensity;
+  private final QuaternionI4F                 orientation;
+  private final RVectorI3F<RSpaceWorldType>   position;
+  private final KProjectionWithShapeType      projection;
+  private final float                         range;
+  private final float                         range_inverse;
   private final KShadowDirectionalMappedBasic shadow;
-  private final Texture2DStaticUsableType        texture;
-  private final int                              textures;
-  private final KTransformType                   transform;
+  private final Texture2DStaticUsableType     texture;
+  private final int                           textures;
+  private final KTransformType                transform;
 
   private KLightProjectiveWithShadowBasic(
     final Texture2DStaticUsableType in_texture,
@@ -224,7 +224,7 @@ import com.io7m.r1.types.RVectorI3F;
     final float in_intensity,
     final float in_range,
     final float in_falloff,
-    final KProjectionType in_projection,
+    final KProjectionWithShapeType in_projection,
     final KShadowDirectionalMappedBasic in_shadow)
   {
     this.intensity = in_intensity;
@@ -269,7 +269,8 @@ import com.io7m.r1.types.RVectorI3F;
     lightAccept(
       final V v)
       throws E,
-        RException
+        RException,
+        JCGLException
   {
     return v.lightProjective(this);
   }
@@ -328,7 +329,7 @@ import com.io7m.r1.types.RVectorI3F;
     return this.position;
   }
 
-  @Override public KProjectionType lightProjectiveGetProjection()
+  @Override public KProjectionWithShapeType lightProjectiveGetProjection()
   {
     return this.projection;
   }

@@ -16,7 +16,6 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
@@ -40,8 +39,6 @@ public interface KInstanceTranslucentUnlitVisitorType<A, E extends Throwable>
    * 
    * @throws RException
    *           If required
-   * @throws JCGLException
-   *           If required
    * @throws E
    *           If required
    */
@@ -49,8 +46,7 @@ public interface KInstanceTranslucentUnlitVisitorType<A, E extends Throwable>
   A refractive(
     final KInstanceTranslucentRefractive i)
     throws E,
-      RException,
-      JCGLException;
+      RException;
 
   /**
    * Visit a regular translucent instance.
@@ -61,8 +57,6 @@ public interface KInstanceTranslucentUnlitVisitorType<A, E extends Throwable>
    * 
    * @throws RException
    *           If required
-   * @throws JCGLException
-   *           If required
    * @throws E
    *           If required
    */
@@ -70,6 +64,5 @@ public interface KInstanceTranslucentUnlitVisitorType<A, E extends Throwable>
   A regular(
     final KInstanceTranslucentRegular i)
     throws E,
-      RException,
-      JCGLException;
+      RException;
 }

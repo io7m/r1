@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,8 +24,8 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightType;
+import com.io7m.r1.kernel.types.KProjectionWithShapeType;
 import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
-import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.types.RVectorI3FGenerator;
@@ -49,7 +49,8 @@ public final class KLightGenerator implements Generator<KLightType>
     final Generator<RVectorI3F<RSpaceWorldType>> in_position_gen =
       new RVectorI3FGenerator<RSpaceWorldType>();
     final Generator<QuaternionI4F> in_quat_gen = new QuaternionI4FGenerator();
-    final Generator<KProjectionType> in_proj_gen = new KProjectionGenerator();
+    final Generator<KProjectionWithShapeType> in_proj_gen =
+      new KProjectionGenerator();
     final Generator<String> name_gen = new StringGenerator();
     final Generator<Texture2DStaticUsableType> in_tex_gen =
       RFakeTextures2DStatic.generator(g, name_gen);

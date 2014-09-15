@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,9 +28,9 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowBuilderType;
+import com.io7m.r1.kernel.types.KProjectionWithShapeType;
 import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
 import com.io7m.r1.kernel.types.KShadowDirectionalMappedVariance;
-import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
 import com.io7m.r1.types.RVectorI3F;
@@ -38,11 +38,11 @@ import com.io7m.r1.types.RVectorI3F;
 public final class KLightProjectiveGenerator implements
   Generator<KLightProjectiveType>
 {
-  private final Generator<RVectorI3F<RSpaceRGBType>>           colour_gen;
-  private final Generator<RVectorI3F<RSpaceWorldType>>         position_gen;
-  private final Generator<QuaternionI4F>                       quat_gen;
-  private final Generator<KProjectionType>                     proj_gen;
-  private final Generator<Texture2DStaticUsableType>           tex_gen;
+  private final Generator<RVectorI3F<RSpaceRGBType>>        colour_gen;
+  private final Generator<RVectorI3F<RSpaceWorldType>>      position_gen;
+  private final Generator<QuaternionI4F>                    quat_gen;
+  private final Generator<KProjectionWithShapeType>         proj_gen;
+  private final Generator<Texture2DStaticUsableType>        tex_gen;
   private final Generator<KShadowDirectionalMappedBasic>    shad_basic_gen;
   private final Generator<KShadowDirectionalMappedVariance> shad_variance_gen;
 
@@ -50,7 +50,7 @@ public final class KLightProjectiveGenerator implements
     final Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,
     final Generator<RVectorI3F<RSpaceWorldType>> in_position_gen,
     final Generator<QuaternionI4F> in_quat_gen,
-    final Generator<KProjectionType> in_proj_gen,
+    final Generator<KProjectionWithShapeType> in_proj_gen,
     final Generator<Texture2DStaticUsableType> in_tex_gen,
     final Generator<KShadowDirectionalMappedBasic> in_shad_basic_gen,
     final Generator<KShadowDirectionalMappedVariance> in_shad_variance_gen)

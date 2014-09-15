@@ -26,10 +26,12 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixReadable4x4FType;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.r1.kernel.types.KLightSphereWithDualParaboloidShadowBasic;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KLightWithShadowVisitorType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
@@ -100,10 +102,7 @@ import com.io7m.r1.types.RException;
       program,
       mwi.getMatrixModelView());
     KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
-
-    if (material.materialRequiresUVCoordinates()) {
-      KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
-    }
+    KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
 
     material.materialRegularGetEnvironment().environmentAccept(
       new KMaterialEnvironmentVisitorType<Unit, JCGLException>() {
@@ -542,8 +541,7 @@ import com.io7m.r1.types.RException;
             JCGLException
         {
           final KShadowMapDirectionalVariance map =
-            (KShadowMapDirectionalVariance) shadow_context
-              .getShadowMap(lp);
+            (KShadowMapDirectionalVariance) shadow_context.getShadowMap(lp);
           final KFramebufferDepthVariance framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
@@ -555,6 +553,36 @@ import com.io7m.r1.types.RException;
           KShadingProgramCommon.putTextureShadowMapDirectionalVariance(
             program,
             unit);
+          return Unit.unit();
+        }
+
+        @Override public Unit sphereWithShadowBasic(
+          final KLightSphereWithDualParaboloidShadowBasic ls)
+          throws RException,
+            JCGLException
+        {
+          final KShadowMapOmnidirectionalDualParaboloidBasic map =
+            (KShadowMapOmnidirectionalDualParaboloidBasic) shadow_context
+              .getShadowMap(ls);
+          final KFramebufferDepth nz = map.getFramebufferNegativeZ();
+          final KFramebufferDepth pz = map.getFramebufferPositiveZ();
+
+          final TextureUnitType nzu =
+            unit_context.withTexture2D(nz.kFramebufferGetDepthTexture());
+          final TextureUnitType pzu =
+            unit_context.withTexture2D(pz.kFramebufferGetDepthTexture());
+
+          KShadingProgramCommon.putShadowOmnidirectionalBasic(
+            program,
+            ls.lightGetShadowDualParaboloidMappedBasic());
+          KShadingProgramCommon
+            .putTextureShadowMapOmnidirectionalDualParaboloidBasicNegativeZ(
+              program,
+              nzu);
+          KShadingProgramCommon
+            .putTextureShadowMapOmnidirectionalDualParaboloidBasicPositiveZ(
+              program,
+              pzu);
           return Unit.unit();
         }
       });
@@ -588,6 +616,15 @@ import com.io7m.r1.types.RException;
           KShadingProgramCommon
             .putTextureShadowMapVarianceDirectionalReuse(program);
           return Unit.unit();
+        }
+
+        @Override public Unit sphereWithShadowBasic(
+          final KLightSphereWithDualParaboloidShadowBasic ls)
+          throws RException,
+            JCGLException
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
         }
       });
   }

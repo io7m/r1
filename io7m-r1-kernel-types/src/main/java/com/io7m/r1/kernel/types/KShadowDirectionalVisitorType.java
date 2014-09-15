@@ -16,7 +16,6 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
@@ -38,8 +37,6 @@ public interface KShadowDirectionalVisitorType<A, E extends Throwable>
    * @return A value of <code>A</code>
    * @throws RException
    *           If required
-   * @throws JCGLException
-   *           If required
    * @throws E
    *           If required
    */
@@ -47,7 +44,6 @@ public interface KShadowDirectionalVisitorType<A, E extends Throwable>
   A mappedBasic(
     KShadowDirectionalMappedBasic s)
     throws RException,
-      JCGLException,
       E;
 
   /**
@@ -58,8 +54,6 @@ public interface KShadowDirectionalVisitorType<A, E extends Throwable>
    * @return A value of <code>A</code>
    * @throws RException
    *           If required
-   * @throws JCGLException
-   *           If required
    * @throws E
    *           If required
    */
@@ -67,6 +61,5 @@ public interface KShadowDirectionalVisitorType<A, E extends Throwable>
   A mappedVariance(
     KShadowDirectionalMappedVariance s)
     throws RException,
-      JCGLException,
       E;
 }

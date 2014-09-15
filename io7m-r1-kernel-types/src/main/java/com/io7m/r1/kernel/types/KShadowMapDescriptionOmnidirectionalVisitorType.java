@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -15,6 +15,8 @@
  */
 
 package com.io7m.r1.kernel.types;
+
+import com.io7m.r1.types.RException;
 
 /**
  * The type of omnidirectional shadow map description visitors.
@@ -27,5 +29,38 @@ package com.io7m.r1.kernel.types;
 
 public interface KShadowMapDescriptionOmnidirectionalVisitorType<A, E extends Throwable>
 {
+  /**
+   * Visit a basic shadow map description.
+   *
+   * @param m
+   *          The shadow map description
+   * @return A value of <code>A</code>
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  A cubeBasic(
+    KShadowMapDescriptionOmnidirectionalCubeBasic m)
+    throws RException,
+      E;
+
+  /**
+   * Visit a basic shadow map description.
+   *
+   * @param m
+   *          The shadow map description
+   * @return A value of <code>A</code>
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  A dualParaboloidBasic(
+    KShadowMapDescriptionOmnidirectionalDualParaboloidBasic m)
+    throws RException,
+      E;
 
 }

@@ -68,9 +68,10 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialSpecularNone;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KMeshAttributes;
-import com.io7m.r1.kernel.types.KShadowType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.kernel.types.KProjectionType;
+import com.io7m.r1.kernel.types.KProjectionWithShapeType;
+import com.io7m.r1.kernel.types.KShadowType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.tests.RFakeGL;
@@ -241,7 +242,7 @@ import com.io7m.r1.types.RVectorI4F;
     AtomicReference<KMatricesObserverType>
     saveObserverDangerously(
       final KMutableMatrices mm)
-      throws RException
+      throws Exception
   {
     final KProjectionType projection =
       KMutableMatricesTest.arbitraryProjection();
@@ -271,7 +272,7 @@ import com.io7m.r1.types.RVectorI4F;
       final KMutableMatrices mm,
       final @NonNull KProjectionType projection,
       final @NonNull RMatrixI4x4F<RTransformViewType> view)
-      throws RException
+      throws Exception
   {
     final AtomicReference<KMatricesProjectiveLightType> saved =
       new AtomicReference<KMatricesProjectiveLightType>();
@@ -302,7 +303,7 @@ import com.io7m.r1.types.RVectorI4F;
 
   private AtomicReference<KMatricesInstanceType> saveInstanceDangerously(
     final KMutableMatrices mm)
-    throws RException
+    throws Exception
   {
     final KProjectionType projection =
       KMutableMatricesTest.arbitraryProjection();
@@ -346,7 +347,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test(expected = AssertionError.class) public void testWithInstanceFault0()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final AtomicReference<KMatricesInstanceType> saved =
@@ -355,7 +356,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test(expected = AssertionError.class) public void testWithInstanceFault1()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final AtomicReference<KMatricesInstanceType> saved =
@@ -364,7 +365,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test(expected = AssertionError.class) public void testWithInstanceFault2()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final AtomicReference<KMatricesInstanceType> saved =
@@ -373,7 +374,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test public void testWithInstanceOnce()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final AtomicBoolean instance_once = new AtomicBoolean();
@@ -454,7 +455,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test public void testWithInstanceSerialOK()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -504,7 +505,7 @@ import com.io7m.r1.types.RVectorI4F;
   @Test(expected = RExceptionUserError.class) public
     void
     testWithInstanceTwice()
-      throws RException
+      throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -548,7 +549,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test(expected = AssertionError.class) public void testWithObserverFault0()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final AtomicReference<KMatricesObserverType> saved =
@@ -557,7 +558,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test(expected = AssertionError.class) public void testWithObserverFault1()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final AtomicReference<KMatricesObserverType> saved =
@@ -566,7 +567,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test(expected = AssertionError.class) public void testWithObserverFault2()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final AtomicReference<KMatricesObserverType> saved =
@@ -575,7 +576,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test(expected = AssertionError.class) public void testWithObserverFault3()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final AtomicReference<KMatricesObserverType> saved =
@@ -586,7 +587,7 @@ import com.io7m.r1.types.RVectorI4F;
   @Test(expected = RExceptionMatricesObserverInactive.class) public
     void
     testWithInstanceWithProjectiveObserverInactive()
-      throws RException
+      throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final KProjectionType projection =
@@ -612,7 +613,7 @@ import com.io7m.r1.types.RVectorI4F;
   @Test(expected = RExceptionMatricesProjectiveInactive.class) public
     void
     testWithInstanceWithProjectiveProjectiveInactive()
-      throws RException
+      throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final KProjectionType projection =
@@ -682,7 +683,7 @@ import com.io7m.r1.types.RVectorI4F;
   @Test(expected = RExceptionMatricesObserverInactive.class) public
     void
     testWithProjectiveObserverInactive()
-      throws RException
+      throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final AtomicReference<KMatricesObserverType> r =
@@ -705,7 +706,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test public void testWithObserverOnce()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -801,7 +802,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test public void testWithObserverSerialOK()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -841,7 +842,7 @@ import com.io7m.r1.types.RVectorI4F;
   @Test(expected = RExceptionMatricesObserverActive.class) public
     void
     testWithObserverTwice()
-      throws RException
+      throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -856,7 +857,8 @@ import com.io7m.r1.types.RVectorI4F;
       new KMatricesObserverFunctionType<Unit, NullCheckException>() {
         @Override public Unit run(
           final KMatricesObserverType _)
-          throws RException
+          throws RException,
+            JCGLException
         {
           mm.withObserver(
             view,
@@ -875,7 +877,7 @@ import com.io7m.r1.types.RVectorI4F;
       });
   }
 
-  private static @Nonnull KProjectionType arbitraryProjection()
+  private static @Nonnull KProjectionWithShapeType arbitraryProjection()
   {
     return KProjectionFrustum.newProjection(
       new MatrixM4x4F(),
@@ -890,7 +892,7 @@ import com.io7m.r1.types.RVectorI4F;
   @Test(expected = AssertionError.class) public
     void
     testWithProjectiveFault0()
-      throws RException
+      throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -911,7 +913,7 @@ import com.io7m.r1.types.RVectorI4F;
   @Test(expected = AssertionError.class) public
     void
     testWithProjectiveFault1()
-      throws RException
+      throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -932,7 +934,7 @@ import com.io7m.r1.types.RVectorI4F;
   @Test(expected = RExceptionMatricesProjectiveActive.class) public
     void
     testWithProjectiveObserverTwice()
-      throws RException
+      throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -979,7 +981,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test public void testWithProjectiveInstanceOnce()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -1083,7 +1085,7 @@ import com.io7m.r1.types.RVectorI4F;
   @Test(expected = RExceptionMatricesInstanceActive.class) public
     void
     testWithProjectiveInstanceTwice()
-      throws RException
+      throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -1136,7 +1138,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test public void testWithProjectiveInstanceSerialOK()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -1193,7 +1195,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test public void testWithProjectiveOnce()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
     final AtomicBoolean projective_once = new AtomicBoolean();
@@ -1283,7 +1285,7 @@ import com.io7m.r1.types.RVectorI4F;
   }
 
   @Test public void testWithProjectiveSerialOK()
-    throws RException
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -1333,7 +1335,7 @@ import com.io7m.r1.types.RVectorI4F;
   @Test(expected = RExceptionMatricesProjectiveActive.class) public
     void
     testWithProjectiveTwice()
-      throws RException
+      throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 

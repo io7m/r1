@@ -20,11 +20,12 @@ import net.java.quickcheck.Generator;
 
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
-import com.io7m.r1.kernel.types.KProjectionType;
+import com.io7m.r1.kernel.types.KProjectionWithShapeType;
 
-public final class KProjectionGenerator implements Generator<KProjectionType>
+public final class KProjectionGenerator implements
+  Generator<KProjectionWithShapeType>
 {
-  @Override public KProjectionType next()
+  @Override public KProjectionWithShapeType next()
   {
     return KProjectionFrustum.newProjection(
       new MatrixM4x4F(),
