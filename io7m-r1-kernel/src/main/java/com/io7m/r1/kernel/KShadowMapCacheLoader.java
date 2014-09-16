@@ -25,18 +25,11 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasic;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalType;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalVariance;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalVisitorType;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionOmnidirectionalCubeBasic;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionOmnidirectionalDualParaboloidBasic;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionOmnidirectionalType;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionOmnidirectionalVisitorType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionVisitorType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * A cache loader that constructs and caches shadow maps of type
@@ -93,120 +86,46 @@ import com.io7m.r1.types.RExceptionJCGL;
     final StringBuilder ms = this.message;
     final LogUsableType lg = this.log;
 
-    try {
-      return s
-        .shadowMapDescriptionAccept(new KShadowMapDescriptionVisitorType<KShadowMapType, JCGLException>() {
-          @Override public KShadowMapType directional(
-            final KShadowMapDescriptionDirectionalType smd)
-            throws RException,
-              JCGLException
-          {
-            return smd
-              .shadowMapDescriptionDirectionalAccept(new KShadowMapDescriptionDirectionalVisitorType<KShadowMapType, JCGLException>() {
-                @Override public KShadowMapType basic(
-                  final KShadowMapDescriptionDirectionalBasic m)
-                  throws RException,
-                    JCGLException
-                {
-                  if (lg.wouldLog(LogLevel.LOG_DEBUG)) {
-                    final int size = (int) Math.pow(2, m.getSizeExponent());
-                    ms.setLength(0);
-                    ms.append("Allocating directional basic map (");
-                    ms.append(size);
-                    ms.append("x");
-                    ms.append(size);
-                    ms.append(")");
-                    final String mss = ms.toString();
-                    assert mss != null;
-                    lg.debug(mss);
-                  }
-                  return KShadowMapDirectionalBasic.newMap(g, m);
-                }
-
-                @Override public KShadowMapType variance(
-                  final KShadowMapDescriptionDirectionalVariance m)
-                  throws RException,
-                    JCGLException
-                {
-                  if (lg.wouldLog(LogLevel.LOG_DEBUG)) {
-                    final int size = (int) Math.pow(2, m.getSizeExponent());
-                    ms.setLength(0);
-                    ms.append("Allocating directional variance map (");
-                    ms.append(size);
-                    ms.append("x");
-                    ms.append(size);
-                    ms.append(")");
-                    final String mss = ms.toString();
-                    assert mss != null;
-                    lg.debug(mss);
-                  }
-                  return KShadowMapDirectionalVariance.newMap(g, m);
-                }
-              });
+    return s
+      .shadowMapDescriptionAccept(new KShadowMapDescriptionVisitorType<KShadowMapType, JCGLException>() {
+        @Override public KShadowMapType basic(
+          final KShadowMapDescriptionBasic m)
+          throws RException
+        {
+          if (lg.wouldLog(LogLevel.LOG_DEBUG)) {
+            final int size = (int) Math.pow(2, m.getSizeExponent());
+            ms.setLength(0);
+            ms.append("Allocating basic map (");
+            ms.append(size);
+            ms.append("x");
+            ms.append(size);
+            ms.append(")");
+            final String mss = ms.toString();
+            assert mss != null;
+            lg.debug(mss);
           }
+          return KShadowMapBasic.newMap(g, m);
+        }
 
-          @Override public KShadowMapType omnidirectional(
-            final KShadowMapDescriptionOmnidirectionalType sdo)
-            throws RException,
-              JCGLException
-          {
-            return sdo
-              .shadowMapDescriptionOmnidirectionalAccept(new KShadowMapDescriptionOmnidirectionalVisitorType<KShadowMapType, JCGLException>() {
-                @Override public KShadowMapType cubeBasic(
-                  final KShadowMapDescriptionOmnidirectionalCubeBasic m)
-                  throws RException,
-                    JCGLException
-                {
-                  if (lg.wouldLog(LogLevel.LOG_DEBUG)) {
-                    final int size = (int) Math.pow(2, m.getSizeExponent());
-                    ms.setLength(0);
-                    ms.append("Allocating omnidirectional basic cube map (");
-                    ms.append(size);
-                    ms.append("x");
-                    ms.append(size);
-                    ms.append("x");
-                    ms.append(size);
-                    ms.append(")");
-                    final String mss = ms.toString();
-                    assert mss != null;
-                    lg.debug(mss);
-                  }
-
-                  return KShadowMapOmnidirectionalCubeBasic.newMap(g, m);
-                }
-
-                @Override public
-                  KShadowMapType
-                  dualParaboloidBasic(
-                    final KShadowMapDescriptionOmnidirectionalDualParaboloidBasic m)
-                    throws RException,
-                      JCGLException,
-                      JCGLException
-                {
-                  if (lg.wouldLog(LogLevel.LOG_DEBUG)) {
-                    final int size = (int) Math.pow(2, m.getSizeExponent());
-                    ms.setLength(0);
-                    ms
-                      .append("Allocating omnidirectional basic dual paraboloid map (");
-                    ms.append(size);
-                    ms.append("x");
-                    ms.append(size);
-                    ms.append(")");
-                    final String mss = ms.toString();
-                    assert mss != null;
-                    lg.debug(mss);
-                  }
-
-                  return KShadowMapOmnidirectionalDualParaboloidBasic.newMap(
-                    g,
-                    m);
-                }
-              });
+        @Override public KShadowMapType variance(
+          final KShadowMapDescriptionVariance m)
+          throws RException
+        {
+          if (lg.wouldLog(LogLevel.LOG_DEBUG)) {
+            final int size = (int) Math.pow(2, m.getSizeExponent());
+            ms.setLength(0);
+            ms.append("Allocating variance map (");
+            ms.append(size);
+            ms.append("x");
+            ms.append(size);
+            ms.append(")");
+            final String mss = ms.toString();
+            assert mss != null;
+            lg.debug(mss);
           }
-        });
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+          return KShadowMapVariance.newMap(g, m);
+        }
+      });
   }
 
   @Override public BigInteger cacheValueSizeOf(

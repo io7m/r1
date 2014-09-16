@@ -25,7 +25,6 @@ module ShadowBasic is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S2;
 
-  import com.io7m.r1.core.Paraboloid;
   import com.io7m.r1.core.Transform;
 
   --
@@ -66,61 +65,5 @@ module ShadowBasic is
         end
       end
     end;
-
-  --
-  -- Given two paraboloid shadow map hemispheres [t_shadow_neg_z] and [t_shadow_pos_z], 
-  -- and eye-coordinates [eye], return the amount of light that could be reaching [eye] 
-  -- (where 0.0 is fully shadowed and 1.0 is fully lit).
-  --
-
-  function factor_paraboloid (
-    shadow         : t,
-    t_shadow_neg_z : sampler_2d,
-    t_shadow_pos_z : sampler_2d,
-    eye            : vector_4f,
-    z_near         : float,
-    z_far          : float
-  ) : float =
-  
-    -- If the depth of the current eye space position is negative,
-    -- then it means that the position is closer to positive Z than
-    -- the observer (light), and therefore the positive hemisphere
-    -- map must be inspected for depth values.
-
-    if F.lesser (eye [z], 0.0) then
-      let
-        value pc =
-          Paraboloid.calculate (eye, z_near, z_far);
-        value tc =
-          V2.multiply_scalar (V2.add_scalar (pc [x y], 1.0), 0.5);
-        value map_depth =
-          S2.texture (t_shadow_neg_z, tc) [x];
-        value map_depth_adjusted =
-          F.add (map_depth, shadow.depth_bias);
-      in
-        if F.lesser (pc [z], map_depth_adjusted) then
-          1.0
-        else
-          shadow.factor_min
-        end
-      end
-    else
-      let
-        value pc =
-          Paraboloid.calculate (eye, z_near, z_far);
-        value tc =
-          V2.multiply_scalar (V2.add_scalar (pc [x y], 1.0), 0.5);
-        value map_depth =
-          S2.texture (t_shadow_neg_z, tc) [x];
-        value map_depth_adjusted =
-          F.add (map_depth, shadow.depth_bias);
-      in
-        if F.lesser (pc [z], map_depth_adjusted) then
-          1.0
-        else
-          shadow.factor_min
-        end
-      end
-    end; 
 
 end;

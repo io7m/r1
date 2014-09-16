@@ -25,7 +25,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
 import com.io7m.r1.kernel.types.KProjectionWithShapeType;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedVariance;
+import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
 import com.io7m.r1.types.RVectorI3F;
@@ -38,7 +38,7 @@ public final class KLightProjectiveWithShadowVarianceGenerator implements
   private final @NonNull Generator<QuaternionI4F>                    quat_gen;
   private final @NonNull Generator<KProjectionWithShapeType>         proj_gen;
   private final @NonNull Generator<Texture2DStaticUsableType>        tex_gen;
-  private final @NonNull Generator<KShadowDirectionalMappedVariance> shad_var_gen;
+  private final @NonNull Generator<KShadowMappedVariance> shad_var_gen;
 
   public KLightProjectiveWithShadowVarianceGenerator(
     final @NonNull Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,
@@ -46,7 +46,7 @@ public final class KLightProjectiveWithShadowVarianceGenerator implements
     final @NonNull Generator<QuaternionI4F> in_quat_gen,
     final @NonNull Generator<KProjectionWithShapeType> in_proj_gen,
     final @NonNull Generator<Texture2DStaticUsableType> in_tex_gen,
-    final @NonNull Generator<KShadowDirectionalMappedVariance> in_shad_var_gen)
+    final @NonNull Generator<KShadowMappedVariance> in_shad_var_gen)
   {
     this.colour_gen = in_colour_gen;
     this.position_gen = in_position_gen;

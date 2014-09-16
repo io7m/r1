@@ -29,8 +29,8 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KProjectionWithShapeType;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedVariance;
+import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
 import com.io7m.r1.types.RVectorI3F;
@@ -43,8 +43,8 @@ public final class KLightProjectiveGenerator implements
   private final Generator<QuaternionI4F>                    quat_gen;
   private final Generator<KProjectionWithShapeType>         proj_gen;
   private final Generator<Texture2DStaticUsableType>        tex_gen;
-  private final Generator<KShadowDirectionalMappedBasic>    shad_basic_gen;
-  private final Generator<KShadowDirectionalMappedVariance> shad_variance_gen;
+  private final Generator<KShadowMappedBasic>    shad_basic_gen;
+  private final Generator<KShadowMappedVariance> shad_variance_gen;
 
   public KLightProjectiveGenerator(
     final Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,
@@ -52,8 +52,8 @@ public final class KLightProjectiveGenerator implements
     final Generator<QuaternionI4F> in_quat_gen,
     final Generator<KProjectionWithShapeType> in_proj_gen,
     final Generator<Texture2DStaticUsableType> in_tex_gen,
-    final Generator<KShadowDirectionalMappedBasic> in_shad_basic_gen,
-    final Generator<KShadowDirectionalMappedVariance> in_shad_variance_gen)
+    final Generator<KShadowMappedBasic> in_shad_basic_gen,
+    final Generator<KShadowMappedVariance> in_shad_variance_gen)
   {
     this.colour_gen = in_colour_gen;
     this.position_gen = in_position_gen;

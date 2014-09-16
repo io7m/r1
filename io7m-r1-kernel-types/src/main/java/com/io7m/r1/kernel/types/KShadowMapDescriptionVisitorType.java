@@ -30,9 +30,9 @@ import com.io7m.r1.types.RException;
 public interface KShadowMapDescriptionVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit a directional shadow map description.
+   * Visit a basic shadow map description.
    *
-   * @param s
+   * @param m
    *          The shadow map description
    * @return A value of <code>A</code>
    * @throws RException
@@ -41,15 +41,15 @@ public interface KShadowMapDescriptionVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A directional(
-    final KShadowMapDescriptionDirectionalType s)
+  A basic(
+    KShadowMapDescriptionBasic m)
     throws RException,
       E;
 
   /**
-   * Visit an omnidirectional shadow map description.
+   * Visit a variance shadow map description.
    *
-   * @param s
+   * @param m
    *          The shadow map description
    * @return A value of <code>A</code>
    * @throws RException
@@ -58,8 +58,8 @@ public interface KShadowMapDescriptionVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A omnidirectional(
-    final KShadowMapDescriptionOmnidirectionalType s)
+  A variance(
+    KShadowMapDescriptionVariance m)
     throws RException,
       E;
 }

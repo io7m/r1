@@ -16,25 +16,24 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalVariance;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
 import com.io7m.r1.types.RException;
 
 /**
  * The type of directional variance shadow maps.
  */
 
-@EqualityReference public final class KShadowMapDirectionalVariance implements
-  KShadowMapDirectionalType
+@EqualityReference public final class KShadowMapVariance implements
+  KShadowMapType
 {
-  private final KShadowMapDescriptionDirectionalVariance description;
-  private final KFramebufferDepthVariance                   framebuffer;
+  private final KShadowMapDescriptionVariance description;
+  private final KFramebufferDepthVariance     framebuffer;
 
-  private KShadowMapDirectionalVariance(
-    final KShadowMapDescriptionDirectionalVariance in_description,
+  private KShadowMapVariance(
+    final KShadowMapDescriptionVariance in_description,
     final KFramebufferDepthVariance in_framebuffer)
   {
     this.description = NullCheck.notNull(in_description, "Description");
@@ -45,7 +44,7 @@ import com.io7m.r1.types.RException;
    * @return The shadow map description
    */
 
-  public KShadowMapDescriptionDirectionalVariance getDescription()
+  public KShadowMapDescriptionVariance getDescription()
   {
     return this.description;
   }
@@ -64,15 +63,6 @@ import com.io7m.r1.types.RException;
     return this.framebuffer.resourceIsDeleted();
   }
 
-  @Override public <T, E extends Throwable> T shadowMapAccept(
-    final KShadowMapVisitorType<T, E> v)
-    throws E,
-      JCGLException,
-      RException
-  {
-    return v.directional(this);
-  }
-
   @Override public void shadowMapDelete(
     final JCGLImplementationType g)
     throws RException
@@ -80,10 +70,9 @@ import com.io7m.r1.types.RException;
     this.framebuffer.kFramebufferDelete(g);
   }
 
-  @Override public <T, E extends Throwable> T shadowMapDirectionalAccept(
-    final KShadowMapDirectionalVisitorType<T, E> v)
+  @Override public <T, E extends Throwable> T shadowMapAccept(
+    final KShadowMapVisitorType<T, E> v)
     throws E,
-      JCGLException,
       RException
   {
     return v.variance(this);
@@ -104,15 +93,12 @@ import com.io7m.r1.types.RException;
    * @return A new map
    * @throws RException
    *           If an error occurs
-   * @throws JCGLException
-   *           If an error occurs
    */
 
-  public static KShadowMapDirectionalVariance newMap(
+  public static KShadowMapVariance newMap(
     final JCGLImplementationType g,
-    final KShadowMapDescriptionDirectionalVariance description)
-    throws RException,
-      JCGLException
+    final KShadowMapDescriptionVariance description)
+    throws RException
   {
     NullCheck.notNull(g, "OpenGL implementation");
     NullCheck.notNull(description, "Description");
@@ -121,6 +107,6 @@ import com.io7m.r1.types.RException;
       KFramebufferDepthVariance.newDepthVarianceFramebuffer(
         g,
         description.getFramebufferDescription());
-    return new KShadowMapDirectionalVariance(description, f);
+    return new KShadowMapVariance(description, f);
   }
 }

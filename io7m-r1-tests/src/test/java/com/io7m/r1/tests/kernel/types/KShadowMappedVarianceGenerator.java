@@ -20,21 +20,25 @@ import net.java.quickcheck.Generator;
 
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.r1.kernel.types.KBlurParameters;
+import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
 import com.io7m.r1.kernel.types.KDepthPrecision;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasicBuilderType;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionBuilderType;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasic;
+import com.io7m.r1.kernel.types.KDepthVariancePrecision;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVarianceBuilderType;
+import com.io7m.r1.kernel.types.KShadowMappedVariance;
+import com.io7m.r1.kernel.types.KShadowMappedVarianceBuilderType;
 import com.io7m.r1.tests.EnumGenerator;
 
-public final class KShadowDirectionalMappedBasicGenerator implements
-  Generator<KShadowDirectionalMappedBasic>
+public final class KShadowMappedVarianceGenerator implements
+  Generator<KShadowMappedVariance>
 {
   private final EnumGenerator<TextureFilterMagnification> filter_mag_gen;
   private final EnumGenerator<TextureFilterMinification>  filter_min_gen;
   private final EnumGenerator<KDepthPrecision>            depth_prec_gen;
+  private final EnumGenerator<KDepthVariancePrecision>    depth_var_prec_gen;
 
-  public KShadowDirectionalMappedBasicGenerator()
+  public KShadowMappedVarianceGenerator()
   {
     this.filter_mag_gen =
       new EnumGenerator<TextureFilterMagnification>(
@@ -44,30 +48,43 @@ public final class KShadowDirectionalMappedBasicGenerator implements
         TextureFilterMinification.class);
     this.depth_prec_gen =
       new EnumGenerator<KDepthPrecision>(KDepthPrecision.class);
+    this.depth_var_prec_gen =
+      new EnumGenerator<KDepthVariancePrecision>(
+        KDepthVariancePrecision.class);
   }
 
-  @Override public KShadowDirectionalMappedBasic next()
+  @Override public KShadowMappedVariance next()
   {
     final TextureFilterMagnification in_filter_mag =
       this.filter_mag_gen.next();
     final TextureFilterMinification in_filter_min =
       this.filter_min_gen.next();
     final KDepthPrecision in_precision_depth = this.depth_prec_gen.next();
+    final KDepthVariancePrecision in_var_prec =
+      this.depth_var_prec_gen.next();
 
     final int exponent = (int) ((Math.random() * 32) + 1);
-    final float depth_bias = (float) Math.random();
 
-    final KShadowMapDescriptionBuilderType smb_map_b =
-      KShadowMapDescriptionDirectionalBasic.newBuilder();
+    final KShadowMapDescriptionVarianceBuilderType smb_map_b =
+      KShadowMapDescriptionVariance.newBuilder();
+    smb_map_b.setDepthVariancePrecision(in_var_prec);
     smb_map_b.setDepthPrecision(in_precision_depth);
     smb_map_b.setMagnificationFilter(in_filter_mag);
     smb_map_b.setMinificationFilter(in_filter_min);
     smb_map_b.setSizeExponent(exponent);
 
-    final KShadowDirectionalMappedBasicBuilderType bb =
-      KShadowDirectionalMappedBasic.newBuilder();
-    bb.setDepthBias(depth_bias);
+    final KBlurParametersBuilderType bp_b = KBlurParameters.newBuilder();
+    bp_b.setBlurSize((float) Math.random());
+    bp_b.setPasses((int) (Math.random() * 8));
+    bp_b.setScale((float) Math.random());
+    final KBlurParameters bp = bp_b.build();
+
+    final KShadowMappedVarianceBuilderType bb =
+      KShadowMappedVariance.newBuilder();
+    bb.setLightBleedReduction((float) Math.random());
+    bb.setMinimumVariance((float) Math.random());
     bb.setMinimumFactor((float) Math.random());
+    bb.setBlurParameters(bp);
     return bb.build();
   }
 }

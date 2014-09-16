@@ -16,21 +16,18 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnimplementedCodeException;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasic;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionOmnidirectionalCubeBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
 import com.io7m.r1.types.RException;
 
 /**
- * The type of omnidirectional basic shadow maps.
+ * The type of directional basic shadow maps.
  */
 
-@EqualityReference public final class KShadowMapOmnidirectionalCubeBasic implements
-  KShadowMapOmnidirectionalType
+@EqualityReference public final class KShadowMapBasic implements
+  KShadowMapType
 {
   /**
    * Construct a new shadow map.
@@ -44,70 +41,72 @@ import com.io7m.r1.types.RException;
    *           If an error occurs
    */
 
-  public static KShadowMapOmnidirectionalCubeBasic newMap(
+  public static KShadowMapBasic newMap(
     final JCGLImplementationType g,
-    final KShadowMapDescriptionOmnidirectionalCubeBasic description)
+    final KShadowMapDescriptionBasic description)
     throws RException
   {
     NullCheck.notNull(g, "OpenGL implementation");
     NullCheck.notNull(description, "Description");
 
-    // TODO: XXX
-    throw new UnimplementedCodeException();
+    final KFramebufferDepth f =
+      KFramebufferDepth.newDepthFramebuffer(
+        g,
+        description.getFramebufferDescription());
+    return new KShadowMapBasic(description, f);
   }
 
-  private final KShadowMapDescriptionDirectionalBasic description;
+  private final KShadowMapDescriptionBasic description;
+  private final KFramebufferDepth          framebuffer;
 
-  private KShadowMapOmnidirectionalCubeBasic(
-    final KShadowMapDescriptionDirectionalBasic in_description)
+  private KShadowMapBasic(
+    final KShadowMapDescriptionBasic in_description,
+    final KFramebufferDepth in_framebuffer)
   {
     this.description = NullCheck.notNull(in_description, "Description");
+    this.framebuffer = NullCheck.notNull(in_framebuffer, "Framebuffer");
   }
 
   /**
    * @return The shadow map description
    */
 
-  public KShadowMapDescriptionDirectionalBasic getDescription()
+  public KShadowMapDescriptionBasic getDescription()
   {
     return this.description;
   }
 
-  @Override public boolean resourceIsDeleted()
+  /**
+   * @return The framebuffer
+   */
+
+  public KFramebufferDepth getFramebuffer()
   {
-    // TODO: XXX
-    throw new UnimplementedCodeException();
+    return this.framebuffer;
   }
 
-  @Override public <T, E extends Throwable> T shadowMapAccept(
-    final KShadowMapVisitorType<T, E> v)
-    throws E,
-      JCGLException,
-      RException
+  @Override public boolean resourceIsDeleted()
   {
-    return v.omnidirectional(this);
+    return this.framebuffer.resourceIsDeleted();
   }
 
   @Override public void shadowMapDelete(
     final JCGLImplementationType g)
     throws RException
   {
-    // TODO: XXX
-    throw new UnimplementedCodeException();
+    this.framebuffer.kFramebufferDelete(g);
+  }
+
+  @Override public <T, E extends Throwable> T shadowMapAccept(
+    final KShadowMapVisitorType<T, E> v)
+    throws E,
+      RException
+  {
+    return v.basic(this);
   }
 
   @Override public long shadowMapGetSizeBytes()
   {
-    // TODO: XXX
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public <T, E extends Throwable> T shadowMapOmnidirectionalAccept(
-    final KShadowMapOmnidirectionalVisitorType<T, E> v)
-    throws E,
-      JCGLException,
-      RException
-  {
-    return v.cubeBasic(this);
+    return this.framebuffer.kFramebufferGetSizeBytes();
   }
 }

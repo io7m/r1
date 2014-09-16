@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -64,8 +64,6 @@ import com.io7m.jparasol.core.JPVertexShaderMetaType;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.kernel.KDepthParaboloidRenderer;
-import com.io7m.r1.kernel.KDepthParaboloidRendererType;
 import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
@@ -99,11 +97,11 @@ import com.io7m.r1.kernel.types.KScene;
 import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
 import com.io7m.r1.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasicBuilderType;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasic;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasicBuilderType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasicBuilderType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
+import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedBasicBuilderType;
 import com.io7m.r1.kernel.types.KTransformMatrix4x4;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.tests.RFakeGL;
@@ -293,8 +291,6 @@ import com.io7m.r1.types.RVectorI3F;
 
       final KDepthRendererType depth_renderer =
         KDepthRenderer.newRenderer(g, depth_shader_cache, log);
-      final KDepthParaboloidRendererType depth_paraboloid_renderer =
-        KDepthParaboloidRenderer.newRenderer(g, depth_shader_cache, log);
       final KDepthVarianceRendererType depth_variance_renderer =
         KDepthVarianceRenderer.newRenderer(g, depth_variance_shader_cache);
 
@@ -379,7 +375,6 @@ import com.io7m.r1.types.RVectorI3F;
         KShadowMapRenderer.newRenderer(
           g,
           depth_renderer,
-          depth_paraboloid_renderer,
           depth_variance_renderer,
           blur,
           shadow_cache,
@@ -508,13 +503,13 @@ import com.io7m.r1.types.RVectorI3F;
     final KLightProjectiveWithShadowBasicBuilderType sl0b =
       KLightProjectiveWithShadowBasic.newBuilder(lt, proj);
 
-    final KShadowMapDescriptionDirectionalBasicBuilderType smbm_b =
-      KShadowMapDescriptionDirectionalBasic.newBuilder();
+    final KShadowMapDescriptionBasicBuilderType smbm_b =
+      KShadowMapDescriptionBasic.newBuilder();
     smbm_b.setSizeExponent(2);
-    final KShadowDirectionalMappedBasicBuilderType smb_b =
-      KShadowDirectionalMappedBasic.newBuilder();
+    final KShadowMappedBasicBuilderType smb_b =
+      KShadowMappedBasic.newBuilder();
     smb_b.setMapDescription(smbm_b.build());
-    final KShadowDirectionalMappedBasic smb = smb_b.build();
+    final KShadowMappedBasic smb = smb_b.build();
 
     sl0b.setShadow(smb);
     final KLightProjectiveWithShadowBasic sl0 = sl0b.build();
@@ -655,13 +650,13 @@ import com.io7m.r1.types.RVectorI3F;
     final KLightProjectiveWithShadowBasicBuilderType sl0b =
       KLightProjectiveWithShadowBasic.newBuilder(lt, proj);
 
-    final KShadowMapDescriptionDirectionalBasicBuilderType smbm_b =
-      KShadowMapDescriptionDirectionalBasic.newBuilder();
+    final KShadowMapDescriptionBasicBuilderType smbm_b =
+      KShadowMapDescriptionBasic.newBuilder();
     smbm_b.setSizeExponent(2);
-    final KShadowDirectionalMappedBasicBuilderType smb_b =
-      KShadowDirectionalMappedBasic.newBuilder();
+    final KShadowMappedBasicBuilderType smb_b =
+      KShadowMappedBasic.newBuilder();
     smb_b.setMapDescription(smbm_b.build());
-    final KShadowDirectionalMappedBasic smb = smb_b.build();
+    final KShadowMappedBasic smb = smb_b.build();
 
     sl0b.setShadow(smb);
 

@@ -66,7 +66,6 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightSphereVisitorType;
-import com.io7m.r1.kernel.types.KLightSphereWithDualParaboloidShadowBasic;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightVisitorType;
@@ -831,7 +830,6 @@ import com.io7m.r1.types.RVectorI4F;
                 t_map_normal,
                 t_map_specular,
                 t_map_eye_depth,
-                shadow_map_context,
                 texture_unit_context_light,
                 gc,
                 mwo,
@@ -1195,7 +1193,6 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
     final TextureUnitType t_map_eye_depth,
-    final KShadowMapContextType shadow_map_context,
     final KTextureUnitContextType texture_unit_context,
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
@@ -1244,39 +1241,6 @@ import com.io7m.r1.types.RVectorI4F;
               return Unit.unit();
             }
           });
-      }
-
-      @Override public Unit sphereWithDualParaboloidShadowBasic(
-        final KLightSphereWithDualParaboloidShadowBasic lsdpsb)
-        throws RException
-      {
-        return mwo
-          .withSphericalLight(
-            lsdpsb,
-            new KMatricesSphericalDualParaboloidLightFunctionType<Unit, RException>() {
-              @Override public Unit run(
-                final KMatricesSphericalDualParaboloidType mws)
-                throws RException,
-                  RException
-              {
-                KRendererDeferredOpaque
-                  .renderGroupLightSphericalWithDualParaboloidShadowBasic(
-                    framebuffer,
-                    t_map_albedo,
-                    t_map_depth_stencil,
-                    t_map_normal,
-                    t_map_specular,
-                    t_map_eye_depth,
-                    shadow_map_context,
-                    texture_unit_context,
-                    gc,
-                    mws,
-                    lsdpsb,
-                    s,
-                    kp);
-                return Unit.unit();
-              }
-            });
       }
 
       @Override public Unit sphereWithoutShadow(
@@ -1447,90 +1411,6 @@ import com.io7m.r1.types.RVectorI4F;
           mwi.getMatrixViewInverse());
         KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
         KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
-
-        program.programExecute(new JCBProgramProcedureType<JCGLException>() {
-          @Override public void call()
-            throws JCGLException
-          {
-            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
-          }
-        });
-      }
-    });
-  }
-
-  private static void renderGroupLightSphericalWithDualParaboloidShadowBasic(
-    final KFramebufferDeferredUsableType framebuffer,
-    final TextureUnitType t_map_albedo,
-    final TextureUnitType t_map_depth_stencil,
-    final TextureUnitType t_map_normal,
-    final TextureUnitType t_map_specular,
-    final TextureUnitType t_map_eye_depth,
-    final KShadowMapContextType shadow_map_context,
-    final KTextureUnitContextType texture_unit_context,
-    final JCGLInterfaceCommonType gc,
-    final KMatricesSphericalDualParaboloidValuesType mwi,
-    final KLightSphereWithDualParaboloidShadowBasic ls,
-    final KUnitSphereUsableType s,
-    final KProgramType kp)
-  {
-    final ArrayBufferUsableType array = s.getArray();
-    final IndexBufferUsableType index = s.getIndices();
-    final JCBExecutorType exec = kp.getExecutable();
-
-    exec.execRun(new JCBExecutorProcedureType<RException>() {
-      @Override public void call(
-        final JCBProgramType program)
-        throws RException
-      {
-        gc.arrayBufferBind(array);
-        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
-        KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
-        KShadingProgramCommon.bindAttributeNormal(program, array);
-
-        KRendererCommon.putShadow(
-          shadow_map_context,
-          texture_unit_context,
-          program,
-          ls);
-
-        KRendererDeferredOpaque.putDeferredParameters(
-          framebuffer,
-          t_map_albedo,
-          t_map_depth_stencil,
-          t_map_normal,
-          t_map_specular,
-          t_map_eye_depth,
-          program,
-          mwi.getProjection());
-
-        KShadingProgramCommon.putLightSpherical(
-          program,
-          mwi.getMatrixContext(),
-          mwi.getMatrixView(),
-          ls);
-
-        KShadingProgramCommon.putMatrixLightSphericalViewInverseView(
-          program,
-          mwi.getMatrixSphericalViewInverseView());
-        KShadingProgramCommon.putLightSphericalProjectionZNear(
-          program,
-          KLightSphereWithDualParaboloidShadowBasic.SHADOW_NEAR_PLANE);
-        KShadingProgramCommon.putLightSphericalProjectionZFar(
-          program,
-          ls.lightGetRadius());
-
-        KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
-        KShadingProgramCommon.putMatrixProjection(
-          program,
-          mwi.getMatrixProjection());
-        KShadingProgramCommon.putMatrixModelView(
-          program,
-          mwi.getMatrixModelView());
-        KShadingProgramCommon.putMatrixInverseView(
-          program,
-          mwi.getMatrixViewInverse());
-        KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
 
         program.programExecute(new JCBProgramProcedureType<JCGLException>() {
           @Override public void call()

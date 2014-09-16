@@ -25,7 +25,7 @@ import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KProjectionWithShapeType;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.types.RVectorI3FGenerator;
@@ -54,10 +54,10 @@ public final class KLightGenerator implements Generator<KLightType>
     final Generator<String> name_gen = new StringGenerator();
     final Generator<Texture2DStaticUsableType> in_tex_gen =
       RFakeTextures2DStatic.generator(g, name_gen);
-    final Generator<KShadowDirectionalMappedBasic> in_shad_basic_gen =
-      new KShadowDirectionalMappedBasicGenerator();
-    final KShadowDirectionalMappedVarianceGenerator in_shad_variance_gen =
-      new KShadowDirectionalMappedVarianceGenerator();
+    final Generator<KShadowMappedBasic> in_shad_basic_gen =
+      new KShadowMappedBasicGenerator();
+    final KShadowMappedVarianceGenerator in_shad_variance_gen =
+      new KShadowMappedVarianceGenerator();
 
     this.dir_gen =
       new KLightDirectionalGenerator(in_colour_gen, in_direction_gen);

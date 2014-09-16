@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,7 +30,6 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightSphereVisitorType;
-import com.io7m.r1.kernel.types.KLightSphereWithDualParaboloidShadowBasic;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightVisitorType;
@@ -256,8 +255,8 @@ import com.io7m.r1.types.RException;
               {
                 b
                   .append("  -- Projective light (shadow mapping) parameters\n");
-                b.append("  parameter t_shadow_dir_basic : sampler_2d;\n");
-                b.append("  parameter shadow_basic       : ShadowBasic.t;\n");
+                b.append("  parameter t_shadow_basic : sampler_2d;\n");
+                b.append("  parameter shadow_basic   : ShadowBasic.t;\n");
                 b.append("\n");
                 return Unit.unit();
               }
@@ -268,7 +267,7 @@ import com.io7m.r1.types.RException;
               {
                 b
                   .append("  -- Projective light (variance shadow mapping) parameters\n");
-                b.append("  parameter t_shadow_dir_variance : sampler_2d;\n");
+                b.append("  parameter t_shadow_variance : sampler_2d;\n");
                 b
                   .append("  parameter shadow_variance   : ShadowVariance.t;\n");
                 b.append("\n");
@@ -306,30 +305,6 @@ import com.io7m.r1.types.RException;
                   .append("  parameter t_light_spherical_cube : sampler_cube;\n");
                 b
                   .append("  parameter m_light_spherical      : matrix_3x3f;\n");
-                b.append("\n");
-                return Unit.unit();
-              }
-
-              @Override public Unit sphereWithDualParaboloidShadowBasic(
-                final KLightSphereWithDualParaboloidShadowBasic lsdp)
-                throws RException,
-                  RException
-              {
-                b
-                  .append("  -- Spherical light parameters (dual paraboloid basic shadow)\n");
-                b
-                  .append("  parameter light_spherical_projection : Projection.t;\n");
-                b
-                  .append("  parameter light_spherical            : Light.t;\n");
-                b
-                  .append("  parameter m_spherical_view           : matrix_4x4f;\n");
-                b
-                  .append("  parameter shadow_basic               : ShadowBasic.t;\n");
-                b
-                  .append("  parameter t_shadow_dp_neg_z_basic    : sampler_2d;\n");
-                b
-                  .append("  parameter t_shadow_dp_pos_z_basic    : sampler_2d;\n");
-
                 b.append("\n");
                 return Unit.unit();
               }
@@ -457,7 +432,7 @@ import com.io7m.r1.types.RException;
                 b.append("  value light_shadow =\n");
                 b.append("    ShadowBasic.factor (\n");
                 b.append("      shadow_basic,\n");
-                b.append("      t_shadow_dir_basic,\n");
+                b.append("      t_shadow_basic,\n");
                 b.append("      position_light_clip\n");
                 b.append("    );\n");
                 b.append("\n");
@@ -478,7 +453,7 @@ import com.io7m.r1.types.RException;
                 b.append("  value light_shadow =\n");
                 b.append("    ShadowVariance.factor (\n");
                 b.append("      shadow_variance,\n");
-                b.append("      t_shadow_dir_variance,\n");
+                b.append("      t_shadow_variance,\n");
                 b.append("      position_light_clip\n");
                 b.append("    );\n");
                 b.append("\n");
@@ -589,38 +564,6 @@ import com.io7m.r1.types.RException;
                 b.append("\n");
                 b
                   .append("  value light_attenuation = light_vectors.attenuation;\n");
-                b.append("\n");
-                return Unit.unit();
-              }
-
-              @Override public Unit sphereWithDualParaboloidShadowBasic(
-                final KLightSphereWithDualParaboloidShadowBasic lsdp)
-                throws RException,
-                  UnreachableCodeException
-              {
-                b.append("  -- Spherical light eye-space position\n");
-                b.append("  value position_light_eye =\n");
-                b.append("    M4.multiply_vector (\n");
-                b.append("      m_spherical_view,\n");
-                b.append("      eye_position\n");
-                b.append("   );\n");
-                b.append("\n");
-                b.append("  -- Basic shadow mapping\n");
-                b.append("  value light_shadow =\n");
-                b.append("    ShadowBasic.factor_paraboloid (\n");
-                b.append("      shadow_basic,\n");
-                b.append("      t_shadow_dp_neg_z_basic,\n");
-                b.append("      t_shadow_dp_pos_z_basic,\n");
-                b.append("      position_light_eye,\n");
-                b.append("      light_spherical_projection.z_near,\n");
-                b.append("      light_spherical_projection.z_far\n");
-                b.append("    );\n");
-                b.append("\n");
-                b.append("  value light_attenuation =\n");
-                b.append("    F.multiply (\n");
-                b.append("      light_shadow,\n");
-                b.append("      light_vectors.attenuation\n");
-                b.append("    );\n");
                 b.append("\n");
                 return Unit.unit();
               }
