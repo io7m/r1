@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -33,23 +33,19 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
-import com.io7m.r1.kernel.types.KLightSphereWithDualParaboloidShadowBasic;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KLightWithShadowVisitorType;
 import com.io7m.r1.kernel.types.KSceneBatchedShadow;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedVariance;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasic;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalVariance;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionOmnidirectionalDualParaboloidBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
-import com.io7m.r1.kernel.types.KShadowOmnidirectionalDualParaboloidMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
+import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
@@ -76,8 +72,6 @@ import com.io7m.r1.types.RTransformViewType;
    *          An OpenGL implementation
    * @param in_depth_renderer
    *          A depth renderer
-   * @param in_depth_paraboloid_renderer
-   *          A depth paraboloid renderer
    * @param in_depth_variance_renderer
    *          A depth variance renderer
    * @param in_blur
@@ -92,7 +86,6 @@ import com.io7m.r1.types.RTransformViewType;
   public static KShadowMapRendererType newRenderer(
     final JCGLImplementationType gl,
     final KDepthRendererType in_depth_renderer,
-    final KDepthParaboloidRendererType in_depth_paraboloid_renderer,
     final KDepthVarianceRendererType in_depth_variance_renderer,
     final KPostprocessorBlurDepthVarianceType in_blur,
     final KShadowMapCacheType in_shadow_cache,
@@ -100,7 +93,6 @@ import com.io7m.r1.types.RTransformViewType;
   {
     return new KShadowMapRenderer(
       gl,
-      in_depth_paraboloid_renderer,
       in_depth_renderer,
       in_depth_variance_renderer,
       in_blur,
@@ -113,7 +105,7 @@ import com.io7m.r1.types.RTransformViewType;
     final KMatricesProjectiveLightType mwp,
     final Map<String, List<KInstanceOpaqueType>> casters,
     final KDepthRendererType dr,
-    final KShadowMapDirectionalBasic sm)
+    final KShadowMapBasic sm)
     throws JCGLException,
       RException
   {
@@ -153,12 +145,11 @@ import com.io7m.r1.types.RTransformViewType;
     final KDepthVarianceRendererType dvr,
     final KPostprocessorBlurDepthVarianceType blur,
     final KLightProjectiveWithShadowVariance lp,
-    final KShadowMapDirectionalVariance sm)
+    final KShadowMapVariance sm)
     throws JCGLException,
       RException
   {
-    final KShadowDirectionalMappedVariance shadow =
-      lp.lightGetShadowVariance();
+    final KShadowMappedVariance shadow = lp.lightGetShadowVariance();
     final KFramebufferDepthVariance fb = sm.getFramebuffer();
 
     gc.framebufferDrawBind(fb.kFramebufferGetDepthVariancePassFramebuffer());
@@ -195,85 +186,6 @@ import com.io7m.r1.types.RTransformViewType;
     }
   }
 
-  private static void renderSphereOmnidirectionalDualParaboloidBasic(
-    final JCGLInterfaceCommonType gc,
-    final MatrixM4x4F temporary,
-    final Map<String, List<KInstanceOpaqueType>> casters,
-    final KDepthParaboloidRendererType dpr,
-    final KLightSphereWithDualParaboloidShadowBasic ls,
-    final KShadowMapOmnidirectionalDualParaboloidBasic sm)
-    throws JCGLException,
-      RException
-  {
-    /**
-     * Use an arbitrarily close near plane, and the light's radius for the far
-     * plane.
-     */
-
-    final float z_near =
-      KLightSphereWithDualParaboloidShadowBasic.SHADOW_NEAR_PLANE;
-    final float z_far = ls.lightGetRadius();
-
-    /**
-     * Produce view matrices for each hemisphere of the light: One pointing
-     * towards negative Z and one towards positive Z.
-     */
-
-    ls.lightProduceViewMatrixNegativeZ(temporary);
-    final RMatrixI4x4F<RTransformViewType> view_nz =
-      RMatrixI4x4F.newFromReadable(temporary);
-
-    ls.lightProduceViewMatrixPositiveZ(temporary);
-    final RMatrixI4x4F<RTransformViewType> view_pz =
-      RMatrixI4x4F.newFromReadable(temporary);
-
-    /**
-     * Render negative Z hemisphere.
-     */
-
-    final KFramebufferDepth fb_nz = sm.getFramebufferNegativeZ();
-    gc.framebufferDrawBind(fb_nz.kFramebufferGetDepthPassFramebuffer());
-    try {
-      gc.colorBufferMask(false, false, false, false);
-      gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
-
-      dpr.rendererEvaluateDepthParaboloidWithBoundFramebuffer(
-        view_nz,
-        casters,
-        fb_nz.kFramebufferGetArea(),
-        Option.some(KFaceSelection.FACE_RENDER_BACK),
-        z_near,
-        z_far);
-
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
-
-    /**
-     * Render positive Z hemisphere.
-     */
-
-    final KFramebufferDepth fb_pz = sm.getFramebufferPositiveZ();
-    gc.framebufferDrawBind(fb_pz.kFramebufferGetDepthPassFramebuffer());
-    try {
-      gc.colorBufferMask(false, false, false, false);
-      gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
-
-      dpr.rendererEvaluateDepthParaboloidWithBoundFramebuffer(
-        view_pz,
-        casters,
-        fb_pz.kFramebufferGetArea(),
-        Option.some(KFaceSelection.FACE_RENDER_BACK),
-        z_near,
-        z_far);
-
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
-  }
-
   private static
     void
     returnReceipts(
@@ -289,18 +201,15 @@ import com.io7m.r1.types.RTransformViewType;
   }
 
   private final KPostprocessorBlurDepthVarianceType blur;
-  private final KDepthParaboloidRendererType        depth_paraboloid_renderer;
   private final KDepthRendererType                  depth_renderer;
   private final KDepthVarianceRendererType          depth_variance_renderer;
   private final JCGLImplementationType              g;
   private final LogUsableType                       log;
   private final KMutableMatrices                    matrices;
   private final KShadowMapCacheType                 shadow_cache;
-  private final MatrixM4x4F                         temporary;
 
   private KShadowMapRenderer(
     final JCGLImplementationType gl,
-    final KDepthParaboloidRendererType in_depth_paraboloid_renderer,
     final KDepthRendererType in_depth_renderer,
     final KDepthVarianceRendererType in_depth_variance_renderer,
     final KPostprocessorBlurDepthVarianceType in_blur,
@@ -311,16 +220,12 @@ import com.io7m.r1.types.RTransformViewType;
     this.g = NullCheck.notNull(gl, "OpenGL implementation");
     this.shadow_cache = NullCheck.notNull(in_shadow_cache, "Shadow cache");
 
-    this.temporary = new MatrixM4x4F();
     this.depth_renderer =
       NullCheck.notNull(in_depth_renderer, "Depth renderer");
-    this.depth_paraboloid_renderer =
-      NullCheck.notNull(
-        in_depth_paraboloid_renderer,
-        "Depth paraboloid renderer");
     this.depth_variance_renderer =
       NullCheck
         .notNull(in_depth_variance_renderer, "Depth variance renderer");
+
     this.blur = NullCheck.notNull(in_blur, "Blur postprocessor");
     this.matrices = KMutableMatrices.newMatrices();
 
@@ -416,8 +321,6 @@ import com.io7m.r1.types.RTransformViewType;
     final KDepthRendererType dr = this.depth_renderer;
     final KDepthVarianceRendererType dvr = this.depth_variance_renderer;
     final KPostprocessorBlurDepthVarianceType pb = this.blur;
-    final KDepthParaboloidRendererType dpr = this.depth_paraboloid_renderer;
-    final MatrixM4x4F t = this.temporary;
 
     for (final KLightWithShadowType light : lights) {
       final Map<String, List<KInstanceOpaqueType>> casters =
@@ -432,9 +335,8 @@ import com.io7m.r1.types.RTransformViewType;
               JCacheException,
               JCGLException
           {
-            final KShadowDirectionalMappedBasic shadow =
-              lp.lightGetShadowBasic();
-            final KShadowMapDescriptionDirectionalBasic desc =
+            final KShadowMappedBasic shadow = lp.lightGetShadowBasic();
+            final KShadowMapDescriptionBasic desc =
               shadow.getMapDescription();
             final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
               sc.bluCacheGet(desc);
@@ -442,8 +344,7 @@ import com.io7m.r1.types.RTransformViewType;
             assert receipts.containsKey(light) == false;
             receipts.put(light, r);
 
-            final KShadowMapDirectionalBasic sm =
-              (KShadowMapDirectionalBasic) r.getValue();
+            final KShadowMapBasic sm = (KShadowMapBasic) r.getValue();
 
             return observer
               .withProjectiveLight(
@@ -471,9 +372,8 @@ import com.io7m.r1.types.RTransformViewType;
               JCacheException,
               JCGLException
           {
-            final KShadowDirectionalMappedVariance shadow =
-              lp.lightGetShadowVariance();
-            final KShadowMapDescriptionDirectionalVariance desc =
+            final KShadowMappedVariance shadow = lp.lightGetShadowVariance();
+            final KShadowMapDescriptionVariance desc =
               shadow.getMapDescription();
             final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
               sc.bluCacheGet(desc);
@@ -481,8 +381,7 @@ import com.io7m.r1.types.RTransformViewType;
             assert receipts.containsKey(light) == false;
             receipts.put(light, r);
 
-            final KShadowMapDirectionalVariance sm =
-              (KShadowMapDirectionalVariance) r.getValue();
+            final KShadowMapVariance sm = (KShadowMapVariance) r.getValue();
 
             return observer
               .withProjectiveLight(
@@ -504,36 +403,6 @@ import com.io7m.r1.types.RTransformViewType;
                     return Unit.unit();
                   }
                 });
-          }
-
-          @Override public Unit sphereWithShadowBasic(
-            final KLightSphereWithDualParaboloidShadowBasic ls)
-            throws RException,
-              JCGLException,
-              JCacheException
-          {
-            final KShadowOmnidirectionalDualParaboloidMappedBasic shadow =
-              ls.lightGetShadowDualParaboloidMappedBasic();
-            final KShadowMapDescriptionOmnidirectionalDualParaboloidBasic desc =
-              shadow.getMapDescription();
-            final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
-              sc.bluCacheGet(desc);
-
-            assert receipts.containsKey(light) == false;
-            receipts.put(light, r);
-
-            final KShadowMapOmnidirectionalDualParaboloidBasic sm =
-              (KShadowMapOmnidirectionalDualParaboloidBasic) r.getValue();
-
-            KShadowMapRenderer
-              .renderSphereOmnidirectionalDualParaboloidBasic(
-                gc,
-                t,
-                casters,
-                dpr,
-                ls,
-                sm);
-            return Unit.unit();
           }
         });
     }

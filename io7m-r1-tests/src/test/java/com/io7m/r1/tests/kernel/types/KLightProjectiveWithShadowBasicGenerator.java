@@ -25,7 +25,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
 import com.io7m.r1.kernel.types.KProjectionWithShapeType;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
 import com.io7m.r1.types.RVectorI3F;
@@ -38,7 +38,7 @@ public final class KLightProjectiveWithShadowBasicGenerator implements
   private final @NonNull Generator<QuaternionI4F>                 quat_gen;
   private final @NonNull Generator<KProjectionWithShapeType>      proj_gen;
   private final @NonNull Generator<Texture2DStaticUsableType>     tex_gen;
-  private final @NonNull Generator<KShadowDirectionalMappedBasic> shad_basic_gen;
+  private final @NonNull Generator<KShadowMappedBasic> shad_basic_gen;
 
   public KLightProjectiveWithShadowBasicGenerator(
     final @NonNull Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,
@@ -46,7 +46,7 @@ public final class KLightProjectiveWithShadowBasicGenerator implements
     final @NonNull Generator<QuaternionI4F> in_quat_gen,
     final @NonNull Generator<KProjectionWithShapeType> in_proj_gen,
     final @NonNull Generator<Texture2DStaticUsableType> in_tex_gen,
-    final @NonNull Generator<KShadowDirectionalMappedBasic> in_shad_basic_gen)
+    final @NonNull Generator<KShadowMappedBasic> in_shad_basic_gen)
   {
     this.colour_gen = in_colour_gen;
     this.position_gen = in_position_gen;

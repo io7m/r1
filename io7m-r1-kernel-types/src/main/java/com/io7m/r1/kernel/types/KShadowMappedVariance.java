@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,7 +16,6 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
@@ -27,17 +26,17 @@ import com.io7m.r1.types.RException;
  * The type of directional, basic mapped shadows.
  */
 
-@SuppressWarnings("synthetic-access") @EqualityStructural public final class KShadowDirectionalMappedVariance implements
-  KShadowDirectionalType
+@SuppressWarnings("synthetic-access") @EqualityStructural public final class KShadowMappedVariance implements
+  KShadowType
 {
   @EqualityReference private static final class Builder implements
-    KShadowDirectionalMappedVarianceBuilderType
+    KShadowMappedVarianceBuilderType
   {
-    private KBlurParameters                             blur;
-    private float                                       factor_min;
-    private float                                       light_bleed_reduction;
-    private KShadowMapDescriptionDirectionalVariance map_description;
-    private float                                       minimum_variance;
+    private KBlurParameters                          blur;
+    private float                                    factor_min;
+    private float                                    light_bleed_reduction;
+    private KShadowMapDescriptionVariance map_description;
+    private float                                    minimum_variance;
 
     Builder()
     {
@@ -46,11 +45,11 @@ import com.io7m.r1.types.RException;
       this.light_bleed_reduction = 0.2f;
       this.minimum_variance = 0.00002f;
       this.map_description =
-        KShadowMapDescriptionDirectionalVariance.getDefault();
+        KShadowMapDescriptionVariance.getDefault();
     }
 
     Builder(
-      final KShadowDirectionalMappedVariance s)
+      final KShadowMappedVariance s)
     {
       NullCheck.notNull(s, "Shadow");
       this.blur = s.blur;
@@ -60,9 +59,9 @@ import com.io7m.r1.types.RException;
       this.map_description = s.map_description;
     }
 
-    @Override public KShadowDirectionalMappedVariance build()
+    @Override public KShadowMappedVariance build()
     {
-      return new KShadowDirectionalMappedVariance(
+      return new KShadowMappedVariance(
         this.factor_min,
         this.minimum_variance,
         this.light_bleed_reduction,
@@ -83,7 +82,7 @@ import com.io7m.r1.types.RException;
     }
 
     @Override public void setMapDescription(
-      final KShadowMapDescriptionDirectionalVariance m)
+      final KShadowMapDescriptionVariance m)
     {
       this.map_description = NullCheck.notNull(m, "Map description");
     }
@@ -101,7 +100,7 @@ import com.io7m.r1.types.RException;
     }
   }
 
-  private static final KShadowDirectionalMappedVariance DEFAULT;
+  private static final KShadowMappedVariance DEFAULT;
 
   static {
     DEFAULT = new Builder().build();
@@ -111,16 +110,16 @@ import com.io7m.r1.types.RException;
    * @return A shadow using all the default values.
    */
 
-  public static KShadowDirectionalMappedVariance getDefault()
+  public static KShadowMappedVariance getDefault()
   {
-    return KShadowDirectionalMappedVariance.DEFAULT;
+    return KShadowMappedVariance.DEFAULT;
   }
 
   /**
    * @return A new builder for producing shadows.
    */
 
-  public static KShadowDirectionalMappedVarianceBuilderType newBuilder()
+  public static KShadowMappedVarianceBuilderType newBuilder()
   {
     return new Builder();
   }
@@ -132,26 +131,24 @@ import com.io7m.r1.types.RException;
    *         the given shadow.
    */
 
-  public static
-    KShadowMappedVarianceBuilderType
-    newBuilderFrom(
-      final KShadowDirectionalMappedVariance s)
+  public static KShadowMappedVarianceBuilderType newBuilderFrom(
+    final KShadowMappedVariance s)
   {
     return new Builder(s);
   }
 
-  private final KBlurParameters                             blur;
-  private final float                                       factor_min;
-  private final float                                       light_bleed_reduction;
-  private final KShadowMapDescriptionDirectionalVariance map_description;
-  private final float                                       minimum_variance;
+  private final KBlurParameters                          blur;
+  private final float                                    factor_min;
+  private final float                                    light_bleed_reduction;
+  private final KShadowMapDescriptionVariance map_description;
+  private final float                                    minimum_variance;
 
-  private KShadowDirectionalMappedVariance(
+  private KShadowMappedVariance(
     final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float in_factor_min,
     final @KSuggestedRangeF(lower = 0.0f, upper = 0.0005f) float in_minimum_variance,
     final @KSuggestedRangeF(lower = 0.0f, upper = 0.6f) float in_light_bleed_reduction,
     final KBlurParameters in_blur,
-    final KShadowMapDescriptionDirectionalVariance in_map_description)
+    final KShadowMapDescriptionVariance in_map_description)
   {
     this.map_description =
       NullCheck.notNull(in_map_description, "Map description");
@@ -173,8 +170,7 @@ import com.io7m.r1.types.RException;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KShadowDirectionalMappedVariance other =
-      (KShadowDirectionalMappedVariance) obj;
+    final KShadowMappedVariance other = (KShadowMappedVariance) obj;
     return this.blur.equals(other.blur)
       && (Float.floatToIntBits(this.factor_min) == Float
         .floatToIntBits(other.factor_min))
@@ -216,7 +212,7 @@ import com.io7m.r1.types.RException;
    * @return The description for the map.
    */
 
-  public KShadowMapDescriptionDirectionalVariance getMapDescription()
+  public KShadowMapDescriptionVariance getMapDescription()
   {
     return this.map_description;
   }
@@ -246,16 +242,6 @@ import com.io7m.r1.types.RException;
   @Override public <T, E extends Throwable> T shadowAccept(
     final KShadowVisitorType<T, E> v)
     throws E,
-      JCGLException,
-      RException
-  {
-    return v.directional(this);
-  }
-
-  @Override public <T, E extends Throwable> T shadowDirectionalAccept(
-    final KShadowDirectionalVisitorType<T, E> v)
-    throws E,
-      JCGLException,
       RException
   {
     return v.mappedVariance(this);

@@ -17,12 +17,30 @@
 package com.io7m.r1.kernel.types;
 
 /**
- * The common functions shared by directional and omnidirectional basic mapped
- * shadow builders.
+ * The type of basic mapped shadow builders.
  */
 
 public interface KShadowMappedBasicBuilderType extends KShadowBuilderType
 {
+  /**
+   * @return A shadow based on the most recent parameters given.
+   */
+
+  KShadowMappedBasic build();
+
+  /**
+   * <p>
+   * Set the shadow map description. This controls the physical aspects of the
+   * shadow map such as the size, precision, and filter settings.
+   * </p>
+   *
+   * @param m
+   *          The description.
+   */
+
+  void setMapDescription(
+    final KShadowMapDescriptionBasic m);
+
   /**
    * <p>
    * Set the depth bias value. This is a small value added to the depth of all

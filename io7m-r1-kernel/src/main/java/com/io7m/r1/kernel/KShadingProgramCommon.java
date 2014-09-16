@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -53,9 +53,8 @@ import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KMeshAttributes;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedVariance;
-import com.io7m.r1.kernel.types.KShadowOmnidirectionalDualParaboloidMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RMatrixM3x3F;
 import com.io7m.r1.types.RMatrixM4x4F;
@@ -97,71 +96,65 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
 @EqualityReference public final class KShadingProgramCommon
 {
-  private static final String ATTRIBUTE_NAME_VERTEX_UV                                             =
-                                                                                                     "v_uv";
+  private static final String ATTRIBUTE_NAME_VERTEX_UV               = "v_uv";
 
-  private static final String MATRIX_NAME_DEFERRED_PROJECTION                                      =
-                                                                                                     "m_deferred_projective";
-  private static final String MATRIX_NAME_LIGHT_SPHERICAL                                          =
-                                                                                                     "m_light_spherical";
-  private static final String MATRIX_NAME_MODEL                                                    =
-                                                                                                     "m_model";
-  private static final String MATRIX_NAME_MODELVIEW                                                =
-                                                                                                     "m_modelview";
-  private static final String MATRIX_NAME_NORMAL                                                   =
-                                                                                                     "m_normal";
-  private static final String MATRIX_NAME_POSITION                                                 =
-                                                                                                     "m_position";
-  private static final String MATRIX_NAME_PROJECTION                                               =
-                                                                                                     "m_projection";
-  private static final String MATRIX_NAME_PROJECTION_INVERSE                                       =
-                                                                                                     "m_projection_inv";
-  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW                                     =
-                                                                                                     "m_projective_modelview";
-  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION                                    =
-                                                                                                     "m_projective_projection";
-  private static final String MATRIX_NAME_UV                                                       =
-                                                                                                     "m_uv";
-  private static final String MATRIX_NAME_VIEW_INVERSE                                             =
-                                                                                                     "m_view_inv";
-  private static final String TEXTURE_NAME_ALBEDO                                                  =
-                                                                                                     "t_albedo";
-  private static final String TEXTURE_NAME_DEFERRED_ALBEDO                                         =
-                                                                                                     "t_map_albedo";
-  private static final String TEXTURE_NAME_DEFERRED_DEPTH                                          =
-                                                                                                     "t_map_depth";
-  private static final String TEXTURE_NAME_DEFERRED_LINEAR_EYE_DEPTH                               =
-                                                                                                     "t_map_eye_depth";
-  private static final String TEXTURE_NAME_DEFERRED_NORMAL                                         =
-                                                                                                     "t_map_normal";
-  private static final String TEXTURE_NAME_DEFERRED_SPECULAR                                       =
-                                                                                                     "t_map_specular";
-  private static final String TEXTURE_NAME_EMISSION                                                =
-                                                                                                     "t_emission";
-  private static final String TEXTURE_NAME_ENVIRONMENT                                             =
-                                                                                                     "t_environment";
-  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_2D                                      =
-                                                                                                     "t_light_spherical_2d";
-  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_CUBE                                    =
-                                                                                                     "t_light_spherical_cube";
-  private static final String TEXTURE_NAME_NORMAL                                                  =
-                                                                                                     "t_normal";
-  private static final String TEXTURE_NAME_PROJECTION                                              =
-                                                                                                     "t_projection";
-  private static final String TEXTURE_NAME_REFRACTION_SCENE                                        =
-                                                                                                     "t_refraction_scene";
-  private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK                                   =
-                                                                                                     "t_refraction_scene_mask";
-  private static final String TEXTURE_NAME_SHADOW_DIRECTIONAL_BASIC                                =
-                                                                                                     "t_shadow_dir_basic";
-  private static final String TEXTURE_NAME_SHADOW_DIRECTIONAL_VARIANCE                             =
-                                                                                                     "t_shadow_dir_variance";
-  private static final String TEXTURE_NAME_SHADOW_OMNIDIRECTIONAL_DUAL_PARABOLOID_BASIC_NEGATIVE_Z =
-                                                                                                     "t_shadow_dp_neg_z_basic";
-  private static final String TEXTURE_NAME_SHADOW_OMNIDIRECTIONAL_DUAL_PARABOLOID_BASIC_POSITIVE_Z =
-                                                                                                     "t_shadow_dp_pos_z_basic";
-  private static final String TEXTURE_NAME_SPECULAR                                                =
-                                                                                                     "t_specular";
+  private static final String MATRIX_NAME_DEFERRED_PROJECTION        =
+                                                                       "m_deferred_projective";
+  private static final String MATRIX_NAME_LIGHT_SPHERICAL            =
+                                                                       "m_light_spherical";
+  private static final String MATRIX_NAME_MODEL                      =
+                                                                       "m_model";
+  private static final String MATRIX_NAME_MODELVIEW                  =
+                                                                       "m_modelview";
+  private static final String MATRIX_NAME_NORMAL                     =
+                                                                       "m_normal";
+  private static final String MATRIX_NAME_POSITION                   =
+                                                                       "m_position";
+  private static final String MATRIX_NAME_PROJECTION                 =
+                                                                       "m_projection";
+  private static final String MATRIX_NAME_PROJECTION_INVERSE         =
+                                                                       "m_projection_inv";
+  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW       =
+                                                                       "m_projective_modelview";
+  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION      =
+                                                                       "m_projective_projection";
+  private static final String MATRIX_NAME_UV                         = "m_uv";
+  private static final String MATRIX_NAME_VIEW_INVERSE               =
+                                                                       "m_view_inv";
+  private static final String TEXTURE_NAME_ALBEDO                    =
+                                                                       "t_albedo";
+  private static final String TEXTURE_NAME_DEFERRED_ALBEDO           =
+                                                                       "t_map_albedo";
+  private static final String TEXTURE_NAME_DEFERRED_DEPTH            =
+                                                                       "t_map_depth";
+  private static final String TEXTURE_NAME_DEFERRED_LINEAR_EYE_DEPTH =
+                                                                       "t_map_eye_depth";
+  private static final String TEXTURE_NAME_DEFERRED_NORMAL           =
+                                                                       "t_map_normal";
+  private static final String TEXTURE_NAME_DEFERRED_SPECULAR         =
+                                                                       "t_map_specular";
+  private static final String TEXTURE_NAME_EMISSION                  =
+                                                                       "t_emission";
+  private static final String TEXTURE_NAME_ENVIRONMENT               =
+                                                                       "t_environment";
+  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_2D        =
+                                                                       "t_light_spherical_2d";
+  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_CUBE      =
+                                                                       "t_light_spherical_cube";
+  private static final String TEXTURE_NAME_NORMAL                    =
+                                                                       "t_normal";
+  private static final String TEXTURE_NAME_PROJECTION                =
+                                                                       "t_projection";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE          =
+                                                                       "t_refraction_scene";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK     =
+                                                                       "t_refraction_scene_mask";
+  private static final String TEXTURE_NAME_SHADOW_BASIC              =
+                                                                       "t_shadow_basic";
+  private static final String TEXTURE_NAME_SHADOW_VARIANCE           =
+                                                                       "t_shadow_variance";
+  private static final String TEXTURE_NAME_SPECULAR                  =
+                                                                       "t_specular";
 
   /**
    * Bind the vertex color attribute of the given array to the color attribute
@@ -356,9 +349,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
     throws JCGLException
   {
     gt.texture2DStaticBind(texture_unit, texture);
-    KShadingProgramCommon.putTextureShadowMapDirectionalBasic(
-      program,
-      texture_unit);
+    KShadingProgramCommon.putTextureShadowMapBasic(program, texture_unit);
   }
 
   static void bindPutTextureSpecular(
@@ -872,7 +863,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
           throws RException,
             JCGLException
         {
-          KShadingProgramCommon.putShadowBasicDirectionalReuse(program);
+          KShadingProgramCommon.putShadowBasicReuse(program);
           return Unit.unit();
         }
 
@@ -881,7 +872,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
           throws RException,
             JCGLException
         {
-          KShadingProgramCommon.putShadowVarianceDirectionalReuse(program);
+          KShadingProgramCommon.putShadowVarianceReuse(program);
           return Unit.unit();
         }
       });
@@ -1424,6 +1415,25 @@ import com.io7m.r1.types.RVectorReadable4FType;
       m);
   }
 
+  static void putProjection(
+    final JCBProgramType program,
+    final KProjectionType projection)
+  {
+    KShadingProgramCommon.putProjectionZFar(
+      program,
+      projection.projectionGetZFar());
+    KShadingProgramCommon.putProjectionZNear(
+      program,
+      projection.projectionGetZNear());
+  }
+
+  static void putProjectionReuse(
+    final JCBProgramType program)
+  {
+    KShadingProgramCommon.putProjectionZFarReuse(program);
+    KShadingProgramCommon.putProjectionZNearReuse(program);
+  }
+
   static void putProjectionZFar(
     final JCBProgramType program,
     final float z)
@@ -1431,11 +1441,23 @@ import com.io7m.r1.types.RVectorReadable4FType;
     program.programUniformPutFloat("projection.z_far", z);
   }
 
+  static void putProjectionZFarReuse(
+    final JCBProgramType program)
+  {
+    program.programUniformUseExisting("projection.z_far");
+  }
+
   static void putProjectionZNear(
     final JCBProgramType program,
     final float z)
   {
     program.programUniformPutFloat("projection.z_near", z);
+  }
+
+  static void putProjectionZNearReuse(
+    final JCBProgramType program)
+  {
+    program.programUniformUseExisting("projection.z_near");
   }
 
   static void putRefractionTextureScene(
@@ -1466,6 +1488,17 @@ import com.io7m.r1.types.RVectorReadable4FType;
     program.programUniformPutVector2f("screen_size", size);
   }
 
+  static void putShadowBasic(
+    final JCBProgramType program,
+    final KShadowMappedBasic s)
+    throws JCGLException
+  {
+    KShadingProgramCommon.putShadowBasicDepthBias(program, s.getDepthBias());
+    KShadingProgramCommon.putShadowBasicFactorMinimum(
+      program,
+      s.getFactorMinimum());
+  }
+
   static void putShadowBasicDepthBias(
     final JCBProgramType program,
     final float depth_bias)
@@ -1479,14 +1512,6 @@ import com.io7m.r1.types.RVectorReadable4FType;
     throws JCGLException
   {
     program.programUniformUseExisting("shadow_basic.depth_bias");
-  }
-
-  static void putShadowBasicDirectionalReuse(
-    final JCBProgramType program)
-    throws JCGLException
-  {
-    KShadingProgramCommon.putShadowBasicDepthBiasReuse(program);
-    KShadingProgramCommon.putShadowBasicFactorMinimumReuse(program);
   }
 
   static void putShadowBasicFactorMinimum(
@@ -1505,20 +1530,17 @@ import com.io7m.r1.types.RVectorReadable4FType;
     program.programUniformUseExisting("shadow_basic.factor_min");
   }
 
-  static void putShadowDirectionalBasic(
-    final JCBProgramType program,
-    final KShadowDirectionalMappedBasic s)
+  static void putShadowBasicReuse(
+    final JCBProgramType program)
     throws JCGLException
   {
-    KShadingProgramCommon.putShadowBasicDepthBias(program, s.getDepthBias());
-    KShadingProgramCommon.putShadowBasicFactorMinimum(
-      program,
-      s.getFactorMinimum());
+    KShadingProgramCommon.putShadowBasicDepthBiasReuse(program);
+    KShadingProgramCommon.putShadowBasicFactorMinimumReuse(program);
   }
 
-  static void putShadowDirectionalVariance(
+  static void putShadowVariance(
     final JCBProgramType program,
-    final KShadowDirectionalMappedVariance s)
+    final KShadowMappedVariance s)
     throws JCGLException
   {
     KShadingProgramCommon.putShadowVarianceMinimumVariance(
@@ -1530,26 +1552,6 @@ import com.io7m.r1.types.RVectorReadable4FType;
     KShadingProgramCommon.putShadowVarianceLightBleedReduction(
       program,
       s.getLightBleedReduction());
-  }
-
-  static void putShadowOmnidirectionalBasic(
-    final JCBProgramType program,
-    final KShadowOmnidirectionalDualParaboloidMappedBasic s)
-    throws JCGLException
-  {
-    KShadingProgramCommon.putShadowBasicDepthBias(program, s.getDepthBias());
-    KShadingProgramCommon.putShadowBasicFactorMinimum(
-      program,
-      s.getFactorMinimum());
-  }
-
-  static void putShadowVarianceDirectionalReuse(
-    final JCBProgramType program)
-    throws JCGLException
-  {
-    KShadingProgramCommon.putShadowVarianceMinimumVarianceReuse(program);
-    KShadingProgramCommon.putShadowVarianceFactorMinimumReuse(program);
-    KShadingProgramCommon.putShadowVarianceLightBleedReductionReuse(program);
   }
 
   static void putShadowVarianceFactorMinimum(
@@ -1595,6 +1597,15 @@ import com.io7m.r1.types.RVectorReadable4FType;
     throws JCGLException
   {
     program.programUniformUseExisting("shadow_variance.variance_min");
+  }
+
+  static void putShadowVarianceReuse(
+    final JCBProgramType program)
+    throws JCGLException
+  {
+    KShadingProgramCommon.putShadowVarianceMinimumVarianceReuse(program);
+    KShadingProgramCommon.putShadowVarianceFactorMinimumReuse(program);
+    KShadingProgramCommon.putShadowVarianceLightBleedReductionReuse(program);
   }
 
   /**
@@ -1697,62 +1708,40 @@ import com.io7m.r1.types.RVectorReadable4FType;
       .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_PROJECTION);
   }
 
-  static void putTextureShadowMapDirectionalBasic(
+  static void putTextureShadowMapBasic(
     final JCBProgramType program,
     final TextureUnitType unit)
     throws JCGLException
   {
     program.programUniformPutTextureUnit(
-      KShadingProgramCommon.TEXTURE_NAME_SHADOW_DIRECTIONAL_BASIC,
+      KShadingProgramCommon.TEXTURE_NAME_SHADOW_BASIC,
       unit);
   }
 
-  static void putTextureShadowMapDirectionalBasicReuse(
+  static void putTextureShadowMapBasicReuse(
     final JCBProgramType program)
     throws JCGLException
   {
     program
-      .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_SHADOW_DIRECTIONAL_BASIC);
+      .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_SHADOW_BASIC);
   }
 
-  static void putTextureShadowMapDirectionalVariance(
+  static void putTextureShadowMapVariance(
     final JCBProgramType program,
     final TextureUnitType unit)
     throws JCGLException
   {
     program.programUniformPutTextureUnit(
-      KShadingProgramCommon.TEXTURE_NAME_SHADOW_DIRECTIONAL_VARIANCE,
+      KShadingProgramCommon.TEXTURE_NAME_SHADOW_VARIANCE,
       unit);
   }
 
-  static void putTextureShadowMapOmnidirectionalDualParaboloidBasicNegativeZ(
-    final JCBProgramType program,
-    final TextureUnitType unit)
-    throws JCGLException
-  {
-    program
-      .programUniformPutTextureUnit(
-        KShadingProgramCommon.TEXTURE_NAME_SHADOW_OMNIDIRECTIONAL_DUAL_PARABOLOID_BASIC_NEGATIVE_Z,
-        unit);
-  }
-
-  static void putTextureShadowMapOmnidirectionalDualParaboloidBasicPositiveZ(
-    final JCBProgramType program,
-    final TextureUnitType unit)
-    throws JCGLException
-  {
-    program
-      .programUniformPutTextureUnit(
-        KShadingProgramCommon.TEXTURE_NAME_SHADOW_OMNIDIRECTIONAL_DUAL_PARABOLOID_BASIC_POSITIVE_Z,
-        unit);
-  }
-
-  static void putTextureShadowMapVarianceDirectionalReuse(
+  static void putTextureShadowMapVarianceReuse(
     final JCBProgramType program)
     throws JCGLException
   {
     program
-      .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_SHADOW_DIRECTIONAL_VARIANCE);
+      .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_SHADOW_VARIANCE);
   }
 
   static void putTextureSpecular(
@@ -1768,36 +1757,5 @@ import com.io7m.r1.types.RVectorReadable4FType;
   private KShadingProgramCommon()
   {
     throw new UnreachableCodeException();
-  }
-
-  static void putProjection(
-    final JCBProgramType program,
-    final KProjectionType projection)
-  {
-    KShadingProgramCommon.putProjectionZFar(
-      program,
-      projection.projectionGetZFar());
-    KShadingProgramCommon.putProjectionZNear(
-      program,
-      projection.projectionGetZNear());
-  }
-
-  static void putProjectionReuse(
-    final JCBProgramType program)
-  {
-    KShadingProgramCommon.putProjectionZFarReuse(program);
-    KShadingProgramCommon.putProjectionZNearReuse(program);
-  }
-
-  static void putProjectionZNearReuse(
-    final JCBProgramType program)
-  {
-    program.programUniformUseExisting("projection.z_near");
-  }
-
-  static void putProjectionZFarReuse(
-    final JCBProgramType program)
-  {
-    program.programUniformUseExisting("projection.z_far");
   }
 }

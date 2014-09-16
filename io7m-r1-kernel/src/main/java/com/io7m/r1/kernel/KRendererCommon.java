@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -26,12 +26,10 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixReadable4x4FType;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
-import com.io7m.r1.kernel.types.KLightSphereWithDualParaboloidShadowBasic;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KLightWithShadowVisitorType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
@@ -519,17 +517,17 @@ import com.io7m.r1.types.RException;
           throws RException,
             JCGLException
         {
-          final KShadowMapDirectionalBasic map =
-            (KShadowMapDirectionalBasic) shadow_context.getShadowMap(lp);
+          final KShadowMapBasic map =
+            (KShadowMapBasic) shadow_context.getShadowMap(lp);
           final KFramebufferDepth framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
               .kFramebufferGetDepthTexture());
 
-          KShadingProgramCommon.putShadowDirectionalBasic(
+          KShadingProgramCommon.putShadowBasic(
             program,
             lp.lightGetShadowBasic());
-          KShadingProgramCommon.putTextureShadowMapDirectionalBasic(
+          KShadingProgramCommon.putTextureShadowMapBasic(
             program,
             unit);
           return Unit.unit();
@@ -540,49 +538,19 @@ import com.io7m.r1.types.RException;
           throws RException,
             JCGLException
         {
-          final KShadowMapDirectionalVariance map =
-            (KShadowMapDirectionalVariance) shadow_context.getShadowMap(lp);
+          final KShadowMapVariance map =
+            (KShadowMapVariance) shadow_context.getShadowMap(lp);
           final KFramebufferDepthVariance framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
               .kFramebufferGetDepthVarianceTexture());
 
-          KShadingProgramCommon.putShadowDirectionalVariance(
+          KShadingProgramCommon.putShadowVariance(
             program,
             lp.lightGetShadowVariance());
-          KShadingProgramCommon.putTextureShadowMapDirectionalVariance(
+          KShadingProgramCommon.putTextureShadowMapVariance(
             program,
             unit);
-          return Unit.unit();
-        }
-
-        @Override public Unit sphereWithShadowBasic(
-          final KLightSphereWithDualParaboloidShadowBasic ls)
-          throws RException,
-            JCGLException
-        {
-          final KShadowMapOmnidirectionalDualParaboloidBasic map =
-            (KShadowMapOmnidirectionalDualParaboloidBasic) shadow_context
-              .getShadowMap(ls);
-          final KFramebufferDepth nz = map.getFramebufferNegativeZ();
-          final KFramebufferDepth pz = map.getFramebufferPositiveZ();
-
-          final TextureUnitType nzu =
-            unit_context.withTexture2D(nz.kFramebufferGetDepthTexture());
-          final TextureUnitType pzu =
-            unit_context.withTexture2D(pz.kFramebufferGetDepthTexture());
-
-          KShadingProgramCommon.putShadowOmnidirectionalBasic(
-            program,
-            ls.lightGetShadowDualParaboloidMappedBasic());
-          KShadingProgramCommon
-            .putTextureShadowMapOmnidirectionalDualParaboloidBasicNegativeZ(
-              program,
-              nzu);
-          KShadingProgramCommon
-            .putTextureShadowMapOmnidirectionalDualParaboloidBasicPositiveZ(
-              program,
-              pzu);
           return Unit.unit();
         }
       });
@@ -601,9 +569,9 @@ import com.io7m.r1.types.RException;
           throws RException,
             JCGLException
         {
-          KShadingProgramCommon.putShadowBasicDirectionalReuse(program);
+          KShadingProgramCommon.putShadowBasicReuse(program);
           KShadingProgramCommon
-            .putTextureShadowMapDirectionalBasicReuse(program);
+            .putTextureShadowMapBasicReuse(program);
           return Unit.unit();
         }
 
@@ -612,19 +580,10 @@ import com.io7m.r1.types.RException;
           throws RException,
             JCGLException
         {
-          KShadingProgramCommon.putShadowVarianceDirectionalReuse(program);
+          KShadingProgramCommon.putShadowVarianceReuse(program);
           KShadingProgramCommon
-            .putTextureShadowMapVarianceDirectionalReuse(program);
+            .putTextureShadowMapVarianceReuse(program);
           return Unit.unit();
-        }
-
-        @Override public Unit sphereWithShadowBasic(
-          final KLightSphereWithDualParaboloidShadowBasic ls)
-          throws RException,
-            JCGLException
-        {
-          // TODO Auto-generated method stub
-          throw new UnimplementedCodeException();
         }
       });
   }

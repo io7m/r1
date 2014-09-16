@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,9 +30,9 @@ import com.io7m.r1.types.RException;
 public interface KShadowMapVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit a directional shadow map.
+   * Visit a basic shadow map.
    *
-   * @param s
+   * @param m
    *          The shadow map
    * @return A value of <code>A</code>
    * @throws RException
@@ -41,15 +41,15 @@ public interface KShadowMapVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A directional(
-    final KShadowMapDirectionalType s)
+  A basic(
+    KShadowMapBasic m)
     throws RException,
       E;
 
   /**
-   * Visit an omnidirectional shadow map.
+   * Visit a variance shadow map.
    *
-   * @param s
+   * @param m
    *          The shadow map
    * @return A value of <code>A</code>
    * @throws RException
@@ -58,8 +58,8 @@ public interface KShadowMapVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A omnidirectional(
-    final KShadowMapOmnidirectionalType s)
+  A variance(
+    KShadowMapVariance m)
     throws RException,
       E;
 }

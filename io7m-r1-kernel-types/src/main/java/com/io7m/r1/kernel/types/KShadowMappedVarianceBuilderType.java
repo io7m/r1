@@ -17,12 +17,30 @@
 package com.io7m.r1.kernel.types;
 
 /**
- * The common functions shared by directional and omnidirectional variance
- * mapped shadow builders.
+ * The type of variance mapped shadow builders.
  */
 
-public interface KShadowMappedVarianceBuilderType
+public interface KShadowMappedVarianceBuilderType extends KShadowBuilderType
 {
+  /**
+   * @return A shadow based on the most recently given parameters.
+   */
+
+  KShadowMappedVariance build();
+
+  /**
+   * <p>
+   * Set the shadow map description. This controls the physical aspects of the
+   * shadow map such as the size, precision, and filter settings.
+   * </p>
+   *
+   * @param m
+   *          The description.
+   */
+
+  void setMapDescription(
+    final KShadowMapDescriptionVariance m);
+
   /**
    * <p>
    * Set the blur parameters for the shadow map. These define the parameters

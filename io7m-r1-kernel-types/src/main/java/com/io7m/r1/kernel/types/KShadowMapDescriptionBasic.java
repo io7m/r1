@@ -17,7 +17,6 @@
 package com.io7m.r1.kernel.types;
 
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jequality.annotations.EqualityReference;
@@ -32,11 +31,11 @@ import com.io7m.r1.types.RException;
  * The type of descriptions for directional basic shadow maps.
  */
 
-@SuppressWarnings("synthetic-access") @EqualityStructural public final class KShadowMapDescriptionDirectionalBasic implements
-  KShadowMapDescriptionDirectionalType
+@SuppressWarnings("synthetic-access") @EqualityStructural public final class KShadowMapDescriptionBasic implements
+  KShadowMapDescriptionType
 {
   @EqualityReference private static final class Builder implements
-    KShadowMapDescriptionDirectionalBasicBuilderType
+    KShadowMapDescriptionBasicBuilderType
   {
     private int                        exponent;
     private TextureFilterMagnification filter_mag;
@@ -52,7 +51,7 @@ import com.io7m.r1.types.RException;
     }
 
     Builder(
-      final KShadowMapDescriptionDirectionalBasic d)
+      final KShadowMapDescriptionBasic d)
     {
       NullCheck.notNull(d, "Description");
       this.exponent = d.size_exponent;
@@ -61,12 +60,12 @@ import com.io7m.r1.types.RException;
       this.precision = d.framebuffer_desc.getDepthPrecision();
     }
 
-    @Override public KShadowMapDescriptionDirectionalBasic build()
+    @Override public KShadowMapDescriptionBasic build()
     {
       final RangeInclusiveL range =
         new RangeInclusiveL(0, (long) (Math.pow(2, this.exponent) - 1));
       final AreaInclusive area = new AreaInclusive(range, range);
-      return new KShadowMapDescriptionDirectionalBasic(
+      return new KShadowMapDescriptionBasic(
         this.exponent,
         area,
         this.filter_mag,
@@ -104,26 +103,26 @@ import com.io7m.r1.types.RException;
     }
   }
 
-  private static final KShadowMapDescriptionDirectionalBasic DEFAULT;
+  private static final KShadowMapDescriptionBasic DEFAULT;
 
   static {
-    DEFAULT = KShadowMapDescriptionDirectionalBasic.newBuilder().build();
+    DEFAULT = KShadowMapDescriptionBasic.newBuilder().build();
   }
 
   /**
    * @return The default description of a basic mapped shadow.
    */
 
-  public static KShadowMapDescriptionDirectionalBasic getDefault()
+  public static KShadowMapDescriptionBasic getDefault()
   {
-    return KShadowMapDescriptionDirectionalBasic.DEFAULT;
+    return KShadowMapDescriptionBasic.DEFAULT;
   }
 
   /**
    * @return A new builder for producing map descriptions.
    */
 
-  public static KShadowMapDescriptionDirectionalBasicBuilderType newBuilder()
+  public static KShadowMapDescriptionBasicBuilderType newBuilder()
   {
     return new Builder();
   }
@@ -135,10 +134,8 @@ import com.io7m.r1.types.RException;
    *         values in the given description.
    */
 
-  public static
-    KShadowMapDescriptionDirectionalBasicBuilderType
-    newBuilderFrom(
-      final KShadowMapDescriptionDirectionalBasic d)
+  public static KShadowMapDescriptionBasicBuilderType newBuilderFrom(
+    final KShadowMapDescriptionBasic d)
   {
     return new Builder(d);
   }
@@ -146,7 +143,7 @@ import com.io7m.r1.types.RException;
   private final KFramebufferDepthDescription framebuffer_desc;
   private final int                          size_exponent;
 
-  private KShadowMapDescriptionDirectionalBasic(
+  private KShadowMapDescriptionBasic(
     final int in_size_exponent,
     final AreaInclusive in_area,
     final TextureFilterMagnification in_filter_mag,
@@ -180,8 +177,7 @@ import com.io7m.r1.types.RException;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KShadowMapDescriptionDirectionalBasic other =
-      (KShadowMapDescriptionDirectionalBasic) obj;
+    final KShadowMapDescriptionBasic other = (KShadowMapDescriptionBasic) obj;
     if (!this.framebuffer_desc.equals(other.framebuffer_desc)) {
       return false;
     }
@@ -222,20 +218,7 @@ import com.io7m.r1.types.RException;
   @Override public <T, E extends Throwable> T shadowMapDescriptionAccept(
     final KShadowMapDescriptionVisitorType<T, E> v)
     throws E,
-      JCGLException,
       RException
-  {
-    return v.directional(this);
-  }
-
-  @Override public
-    <T, E extends Throwable>
-    T
-    shadowMapDescriptionDirectionalAccept(
-      final KShadowMapDescriptionDirectionalVisitorType<T, E> v)
-      throws E,
-        JCGLException,
-        RException
   {
     return v.basic(this);
   }

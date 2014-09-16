@@ -16,7 +16,6 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
@@ -27,25 +26,25 @@ import com.io7m.r1.types.RException;
  * The type of directional, basic mapped shadows.
  */
 
-@SuppressWarnings("synthetic-access") @EqualityStructural public final class KShadowDirectionalMappedBasic implements
-  KShadowDirectionalType
+@SuppressWarnings("synthetic-access") @EqualityStructural public final class KShadowMappedBasic implements
+  KShadowType
 {
   @EqualityReference private static final class Builder implements
-    KShadowDirectionalMappedBasicBuilderType
+    KShadowMappedBasicBuilderType
   {
-    private float                                    depth_bias;
-    private float                                    factor_min;
-    private KShadowMapDescriptionDirectionalBasic map_desc;
+    private float                                 depth_bias;
+    private float                                 factor_min;
+    private KShadowMapDescriptionBasic map_desc;
 
     Builder()
     {
-      this.map_desc = KShadowMapDescriptionDirectionalBasic.getDefault();
+      this.map_desc = KShadowMapDescriptionBasic.getDefault();
       this.factor_min = 0.1f;
       this.depth_bias = 0.001f;
     }
 
     Builder(
-      final KShadowDirectionalMappedBasic b)
+      final KShadowMappedBasic b)
     {
       NullCheck.notNull(b, "Shadow");
       this.map_desc = b.map_description;
@@ -53,9 +52,9 @@ import com.io7m.r1.types.RException;
       this.depth_bias = b.depth_bias;
     }
 
-    @Override public KShadowDirectionalMappedBasic build()
+    @Override public KShadowMappedBasic build()
     {
-      return new KShadowDirectionalMappedBasic(
+      return new KShadowMappedBasic(
         this.map_desc,
         this.depth_bias,
         this.factor_min);
@@ -68,7 +67,7 @@ import com.io7m.r1.types.RException;
     }
 
     @Override public void setMapDescription(
-      final KShadowMapDescriptionDirectionalBasic m)
+      final KShadowMapDescriptionBasic m)
     {
       this.map_desc = NullCheck.notNull(m, "Map description");
     }
@@ -80,7 +79,7 @@ import com.io7m.r1.types.RException;
     }
   }
 
-  private static final KShadowDirectionalMappedBasic DEFAULT;
+  private static final KShadowMappedBasic DEFAULT;
 
   static {
     DEFAULT = new Builder().build();
@@ -90,16 +89,16 @@ import com.io7m.r1.types.RException;
    * @return A shadow using all the default values.
    */
 
-  public static KShadowDirectionalMappedBasic getDefault()
+  public static KShadowMappedBasic getDefault()
   {
-    return KShadowDirectionalMappedBasic.DEFAULT;
+    return KShadowMappedBasic.DEFAULT;
   }
 
   /**
    * @return A new builder for producing shadows.
    */
 
-  public static KShadowDirectionalMappedBasicBuilderType newBuilder()
+  public static KShadowMappedBasicBuilderType newBuilder()
   {
     return new Builder();
   }
@@ -112,17 +111,17 @@ import com.io7m.r1.types.RException;
    */
 
   public static KShadowBuilderType newBuilderFrom(
-    final KShadowDirectionalMappedBasic s)
+    final KShadowMappedBasic s)
   {
     return new Builder(s);
   }
 
-  private final float                                    depth_bias;
-  private final float                                    factor_min;
-  private final KShadowMapDescriptionDirectionalBasic map_description;
+  private final float                                 depth_bias;
+  private final float                                 factor_min;
+  private final KShadowMapDescriptionBasic map_description;
 
-  private KShadowDirectionalMappedBasic(
-    final KShadowMapDescriptionDirectionalBasic in_map_description,
+  private KShadowMappedBasic(
+    final KShadowMapDescriptionBasic in_map_description,
     final @KSuggestedRangeF(lower = 0.0f, upper = 0.001f) float in_depth_bias,
     final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float in_factor_min)
   {
@@ -144,8 +143,7 @@ import com.io7m.r1.types.RException;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KShadowDirectionalMappedBasic other =
-      (KShadowDirectionalMappedBasic) obj;
+    final KShadowMappedBasic other = (KShadowMappedBasic) obj;
     return (Float.floatToIntBits(this.depth_bias) == Float
       .floatToIntBits(other.depth_bias))
       && (Float.floatToIntBits(this.factor_min) == Float
@@ -175,7 +173,7 @@ import com.io7m.r1.types.RException;
    * @return The description for the map.
    */
 
-  public KShadowMapDescriptionDirectionalBasic getMapDescription()
+  public KShadowMapDescriptionBasic getMapDescription()
   {
     return this.map_description;
   }
@@ -193,16 +191,6 @@ import com.io7m.r1.types.RException;
   @Override public <T, E extends Throwable> T shadowAccept(
     final KShadowVisitorType<T, E> v)
     throws E,
-      JCGLException,
-      RException
-  {
-    return v.directional(this);
-  }
-
-  @Override public <T, E extends Throwable> T shadowDirectionalAccept(
-    final KShadowDirectionalVisitorType<T, E> v)
-    throws E,
-      JCGLException,
       RException
   {
     return v.mappedBasic(this);

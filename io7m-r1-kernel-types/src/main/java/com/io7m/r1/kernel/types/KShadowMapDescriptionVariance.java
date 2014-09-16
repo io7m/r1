@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,7 +17,6 @@
 package com.io7m.r1.kernel.types;
 
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jequality.annotations.EqualityReference;
@@ -32,11 +31,11 @@ import com.io7m.r1.types.RException;
  * The type of descriptions for directional variance shadow maps.
  */
 
-@SuppressWarnings("synthetic-access") @EqualityStructural public final class KShadowMapDescriptionDirectionalVariance implements
-  KShadowMapDescriptionDirectionalType
+@SuppressWarnings("synthetic-access") @EqualityStructural public final class KShadowMapDescriptionVariance implements
+  KShadowMapDescriptionType
 {
   @EqualityReference private static final class Builder implements
-    KShadowMapDescriptionDirectionalVarianceBuilderType
+    KShadowMapDescriptionVarianceBuilderType
   {
     private int                        exponent;
     private TextureFilterMagnification filter_mag;
@@ -55,7 +54,7 @@ import com.io7m.r1.types.RException;
     }
 
     Builder(
-      final KShadowMapDescriptionDirectionalVariance d)
+      final KShadowMapDescriptionVariance d)
     {
       NullCheck.notNull(d, "Description");
       this.exponent = d.size_exponent;
@@ -66,12 +65,12 @@ import com.io7m.r1.types.RException;
         d.framebuffer_desc.getDepthVariancePrecision();
     }
 
-    @Override public KShadowMapDescriptionDirectionalVariance build()
+    @Override public KShadowMapDescriptionVariance build()
     {
       final RangeInclusiveL range =
         new RangeInclusiveL(0, (long) (Math.pow(2, this.exponent) - 1));
       final AreaInclusive area = new AreaInclusive(range, range);
-      return new KShadowMapDescriptionDirectionalVariance(
+      return new KShadowMapDescriptionVariance(
         this.exponent,
         area,
         this.filter_mag,
@@ -116,28 +115,26 @@ import com.io7m.r1.types.RException;
     }
   }
 
-  private static final KShadowMapDescriptionDirectionalVariance DEFAULT;
+  private static final KShadowMapDescriptionVariance DEFAULT;
 
   static {
-    DEFAULT = KShadowMapDescriptionDirectionalVariance.newBuilder().build();
+    DEFAULT = KShadowMapDescriptionVariance.newBuilder().build();
   }
 
   /**
    * @return The default description of a variance mapped shadow.
    */
 
-  public static KShadowMapDescriptionDirectionalVariance getDefault()
+  public static KShadowMapDescriptionVariance getDefault()
   {
-    return KShadowMapDescriptionDirectionalVariance.DEFAULT;
+    return KShadowMapDescriptionVariance.DEFAULT;
   }
 
   /**
    * @return A new builder for producing map descriptions.
    */
 
-  public static
-    KShadowMapDescriptionDirectionalVarianceBuilderType
-    newBuilder()
+  public static KShadowMapDescriptionVarianceBuilderType newBuilder()
   {
     return new Builder();
   }
@@ -149,10 +146,8 @@ import com.io7m.r1.types.RException;
    *         values in the given description.
    */
 
-  public static
-    KShadowMapDescriptionDirectionalVarianceBuilderType
-    newBuilderFrom(
-      final KShadowMapDescriptionDirectionalVariance d)
+  public static KShadowMapDescriptionVarianceBuilderType newBuilderFrom(
+    final KShadowMapDescriptionVariance d)
   {
     return new Builder(d);
   }
@@ -160,7 +155,7 @@ import com.io7m.r1.types.RException;
   private final KFramebufferDepthVarianceDescription framebuffer_desc;
   private final int                                  size_exponent;
 
-  private KShadowMapDescriptionDirectionalVariance(
+  private KShadowMapDescriptionVariance(
     final int in_size_exponent,
     final AreaInclusive in_area,
     final TextureFilterMagnification in_filter_mag,
@@ -196,8 +191,8 @@ import com.io7m.r1.types.RException;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final KShadowMapDescriptionDirectionalVariance other =
-      (KShadowMapDescriptionDirectionalVariance) obj;
+    final KShadowMapDescriptionVariance other =
+      (KShadowMapDescriptionVariance) obj;
     if (!this.framebuffer_desc.equals(other.framebuffer_desc)) {
       return false;
     }
@@ -238,20 +233,7 @@ import com.io7m.r1.types.RException;
   @Override public <T, E extends Throwable> T shadowMapDescriptionAccept(
     final KShadowMapDescriptionVisitorType<T, E> v)
     throws E,
-      JCGLException,
       RException
-  {
-    return v.directional(this);
-  }
-
-  @Override public
-    <T, E extends Throwable>
-    T
-    shadowMapDescriptionDirectionalAccept(
-      final KShadowMapDescriptionDirectionalVisitorType<T, E> v)
-      throws E,
-        JCGLException,
-        RException
   {
     return v.variance(this);
   }

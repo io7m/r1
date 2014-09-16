@@ -123,8 +123,8 @@ import com.io7m.r1.types.RVectorI3F;
     final Generator<KProjectionWithShapeType> pg = new KProjectionGenerator();
     final Generator<Texture2DStaticUsableType> tg =
       new RFakeTextures2DStaticGenerator();
-    final KShadowDirectionalMappedBasicGenerator shad_gen =
-      new KShadowDirectionalMappedBasicGenerator();
+    final KShadowMappedBasicGenerator shad_gen =
+      new KShadowMappedBasicGenerator();
     final Generator<KLightProjectiveWithShadowBasic> gen =
       new KLightProjectiveWithShadowBasicGenerator(
         colour_gen1,

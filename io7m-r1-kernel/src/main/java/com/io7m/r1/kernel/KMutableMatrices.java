@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -39,7 +39,6 @@ import com.io7m.r1.kernel.types.KInstanceType;
 import com.io7m.r1.kernel.types.KInstanceVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
-import com.io7m.r1.kernel.types.KLightSphereWithDualParaboloidShadowBasic;
 import com.io7m.r1.kernel.types.KMaterialOpaqueType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
@@ -53,7 +52,6 @@ import com.io7m.r1.types.RExceptionMatricesObserverActive;
 import com.io7m.r1.types.RExceptionMatricesObserverInactive;
 import com.io7m.r1.types.RExceptionMatricesProjectiveActive;
 import com.io7m.r1.types.RExceptionMatricesProjectiveInactive;
-import com.io7m.r1.types.RExceptionMatricesSphericalActive;
 import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RMatrixI4x4F;
 import com.io7m.r1.types.RMatrixM3x3F;
@@ -69,7 +67,6 @@ import com.io7m.r1.types.RTransformProjectionType;
 import com.io7m.r1.types.RTransformProjectiveModelViewType;
 import com.io7m.r1.types.RTransformProjectiveProjectionType;
 import com.io7m.r1.types.RTransformProjectiveViewType;
-import com.io7m.r1.types.RTransformSphericalViewInverseViewType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RTransformViewInverseType;
 import com.io7m.r1.types.RTransformViewType;
@@ -843,33 +840,6 @@ import com.io7m.r1.types.RTransformViewType;
         KMutableMatrices.this.projectiveSetStopped();
       }
     }
-
-    @Override public <T, E extends Throwable> T withSphericalLight(
-      final KLightSphereWithDualParaboloidShadowBasic s,
-      final KMatricesSphericalDualParaboloidLightFunctionType<T, E> f)
-      throws RException,
-        E
-    {
-      NullCheck.notNull(s, "Light");
-      NullCheck.notNull(f, "Function");
-
-      if (KMutableMatrices.this.sphericalLightIsActive()) {
-        throw new RExceptionMatricesSphericalActive(
-          "Spherical light is already active");
-      }
-      if (KMutableMatrices.this.instanceIsActive()) {
-        throw new RExceptionMatricesInstanceActive(
-          "Instance is already active");
-      }
-
-      KMutableMatrices.this.spherical_from_observer
-        .sphericalLightStartWithTransform(s);
-      try {
-        return f.run(KMutableMatrices.this.spherical_from_observer);
-      } finally {
-        KMutableMatrices.this.sphericalLightSetStopped();
-      }
-    }
   }
 
   /**
@@ -1286,162 +1256,6 @@ import com.io7m.r1.types.RTransformViewType;
     }
   }
 
-  @EqualityReference private final class SphericalDualParaboloidFromObserver implements
-    KMatricesSphericalDualParaboloidType
-  {
-    private final RMatrixM4x4F<RTransformModelType>                    matrix_model;
-    private final RMatrixM4x4F<RTransformModelViewType>                matrix_modelview;
-    private final RMatrixM3x3F<RTransformNormalType>                   matrix_normal;
-    private final RMatrixM4x4F<RTransformSphericalViewInverseViewType> matrix_spherical_view;
-    private final RMatrixM3x3F<RTransformTextureType>                  matrix_uv;
-    private final Observer                                             parent;
-
-    SphericalDualParaboloidFromObserver(
-      final Observer in_parent)
-    {
-      this.parent = NullCheck.notNull(in_parent, "Parent");
-
-      this.matrix_model = new RMatrixM4x4F<RTransformModelType>();
-      this.matrix_modelview = new RMatrixM4x4F<RTransformModelViewType>();
-      this.matrix_normal = new RMatrixM3x3F<RTransformNormalType>();
-      this.matrix_uv = new RMatrixM3x3F<RTransformTextureType>();
-      this.matrix_spherical_view =
-        new RMatrixM4x4F<RTransformSphericalViewInverseViewType>();
-    }
-
-    @Override public Context getMatrixContext()
-    {
-      return this.parent.getMatrixContext();
-    }
-
-    @Override public
-      RMatrixReadable4x4FType<RTransformModelType>
-      getMatrixModel()
-    {
-      assert KMutableMatrices.this.observerIsActive();
-      assert KMutableMatrices.this.sphericalLightIsActive();
-      return this.matrix_model;
-    }
-
-    @Override public
-      RMatrixReadable4x4FType<RTransformModelViewType>
-      getMatrixModelView()
-    {
-      assert KMutableMatrices.this.observerIsActive();
-      assert KMutableMatrices.this.sphericalLightIsActive();
-      return this.matrix_modelview;
-    }
-
-    @Override public
-      RMatrixReadable3x3FType<RTransformNormalType>
-      getMatrixNormal()
-    {
-      assert KMutableMatrices.this.observerIsActive();
-      assert KMutableMatrices.this.sphericalLightIsActive();
-      return this.matrix_normal;
-    }
-
-    @Override public
-      RMatrixReadable4x4FType<RTransformProjectionType>
-      getMatrixProjection()
-    {
-      assert KMutableMatrices.this.observerIsActive();
-      assert KMutableMatrices.this.sphericalLightIsActive();
-      return this.parent.getMatrixProjection();
-    }
-
-    @Override public
-      RMatrixReadable4x4FType<RTransformProjectionInverseType>
-      getMatrixProjectionInverse()
-    {
-      assert KMutableMatrices.this.observerIsActive();
-      assert KMutableMatrices.this.sphericalLightIsActive();
-      return this.parent.getMatrixProjectionInverse();
-    }
-
-    @Override public
-      RMatrixM4x4F<RTransformSphericalViewInverseViewType>
-      getMatrixSphericalViewInverseView()
-    {
-      assert KMutableMatrices.this.observerIsActive();
-      assert KMutableMatrices.this.sphericalLightIsActive();
-      return this.matrix_spherical_view;
-    }
-
-    @Override public RMatrixM3x3F<RTransformTextureType> getMatrixUV()
-    {
-      assert KMutableMatrices.this.observerIsActive();
-      assert KMutableMatrices.this.sphericalLightIsActive();
-      return this.matrix_uv;
-    }
-
-    @Override public
-      RMatrixReadable4x4FType<RTransformViewType>
-      getMatrixView()
-    {
-      return this.parent.getMatrixView();
-    }
-
-    @Override public
-      RMatrixReadable4x4FType<RTransformViewInverseType>
-      getMatrixViewInverse()
-    {
-      return this.parent.getMatrixViewInverse();
-    }
-
-    @Override public KProjectionType getProjection()
-    {
-      return this.parent.getProjection();
-    }
-
-    private void sphericalLightStartWithTransform(
-      final KLightSphereWithDualParaboloidShadowBasic s)
-    {
-      assert KMutableMatrices.this.observerIsActive();
-      KMutableMatrices.this.sphericalLightSetStarted();
-
-      /**
-       * Calculate model and modelview transforms.
-       */
-
-      final KTransformType transform = s.lightGetTransform();
-
-      transform.transformMakeMatrix4x4F(
-        KMutableMatrices.this.transform_context,
-        this.matrix_model);
-
-      MatrixM4x4F.multiply(
-        this.parent.getMatrixView(),
-        this.matrix_model,
-        this.matrix_modelview);
-
-      KMatrices.makeNormalMatrix(this.matrix_modelview, this.matrix_normal);
-
-      /**
-       * Make UV matrix.
-       */
-
-      MatrixM3x3F.setIdentity(this.matrix_uv);
-
-      /**
-       * Make (world → light eye) matrix.
-       */
-
-      final MatrixM4x4F world_to_light_eye =
-        KMutableMatrices.this.transform_context.getTemporaryMatrix4x4();
-      s.lightProduceViewMatrixNegativeZ(world_to_light_eye);
-
-      /**
-       * Make (eye → world → light eye) matrix.
-       */
-
-      MatrixM4x4F.multiply(
-        world_to_light_eye,
-        this.getMatrixViewInverse(),
-        this.matrix_spherical_view);
-    }
-  }
-
   /**
    * @return A new set of matrices
    */
@@ -1451,18 +1265,16 @@ import com.io7m.r1.types.RTransformViewType;
     return new KMutableMatrices();
   }
 
-  private final AtomicBoolean                       instance_active;
-  private final InstanceFromObserver                instance_from_observer;
-  private final InstanceFromProjective              instance_from_projective;
-  private final MatrixM4x4F.Context                 matrix_context;
-  private final Observer                            observer;
-  private final AtomicBoolean                       observer_active;
-  private final AtomicBoolean                       projective_active;
-  private final ProjectiveFromInstance              projective_from_instance;
-  private final ProjectiveFromObserver              projective_from_observer;
-  private final SphericalDualParaboloidFromObserver spherical_from_observer;
-  private final AtomicBoolean                       spherical_light_active;
-  private final KTransformContext                   transform_context;
+  private final AtomicBoolean          instance_active;
+  private final InstanceFromObserver   instance_from_observer;
+  private final InstanceFromProjective instance_from_projective;
+  private final MatrixM4x4F.Context    matrix_context;
+  private final Observer               observer;
+  private final AtomicBoolean          observer_active;
+  private final AtomicBoolean          projective_active;
+  private final ProjectiveFromInstance projective_from_instance;
+  private final ProjectiveFromObserver projective_from_observer;
+  private final KTransformContext      transform_context;
 
   private KMutableMatrices()
   {
@@ -1473,12 +1285,9 @@ import com.io7m.r1.types.RTransformViewType;
       new ProjectiveFromInstance(this.instance_from_observer);
     this.instance_from_projective =
       new InstanceFromProjective(this.projective_from_observer);
-    this.spherical_from_observer =
-      new SphericalDualParaboloidFromObserver(this.observer);
     this.matrix_context = new MatrixM4x4F.Context();
     this.transform_context = KTransformContext.newContext();
 
-    this.spherical_light_active = new AtomicBoolean();
     this.observer_active = new AtomicBoolean();
     this.projective_active = new AtomicBoolean();
     this.instance_active = new AtomicBoolean();
@@ -1527,23 +1336,6 @@ import com.io7m.r1.types.RTransformViewType;
   {
     assert KMutableMatrices.this.projectiveLightIsActive();
     KMutableMatrices.this.projective_active.set(false);
-  }
-
-  private boolean sphericalLightIsActive()
-  {
-    return this.spherical_light_active.get();
-  }
-
-  private void sphericalLightSetStarted()
-  {
-    assert KMutableMatrices.this.sphericalLightIsActive() == false;
-    KMutableMatrices.this.spherical_light_active.set(true);
-  }
-
-  private void sphericalLightSetStopped()
-  {
-    assert KMutableMatrices.this.sphericalLightIsActive();
-    KMutableMatrices.this.spherical_light_active.set(false);
   }
 
   /**

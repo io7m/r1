@@ -27,8 +27,6 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.r1.kernel.KDepthParaboloidRenderer;
-import com.io7m.r1.kernel.KDepthParaboloidRendererType;
 import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
@@ -171,8 +169,6 @@ public final class ExampleRendererDeferredDefault extends
 
     final KRegionCopierType copier = KRegionCopier.newCopier(gi, log);
 
-    final KDepthParaboloidRendererType depth_paraboloid_renderer =
-      KDepthParaboloidRenderer.newRenderer(gi, in_shader_depth_cache, log);
     final KDepthRendererType depth_renderer =
       KDepthRenderer.newRenderer(gi, in_shader_depth_cache, log);
     final KDepthVarianceRendererType depth_variance_renderer =
@@ -211,7 +207,6 @@ public final class ExampleRendererDeferredDefault extends
       KShadowMapRenderer.newRenderer(
         gi,
         depth_renderer,
-        depth_paraboloid_renderer,
         depth_variance_renderer,
         blur,
         shadow_cache,

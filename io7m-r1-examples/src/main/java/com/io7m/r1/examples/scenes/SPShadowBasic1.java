@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -38,12 +38,12 @@ import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasic;
-import com.io7m.r1.kernel.types.KShadowDirectionalMappedBasicBuilderType;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasic;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionDirectionalBasicBuilderType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasicBuilderType;
+import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedBasicBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.types.RException;
@@ -141,23 +141,22 @@ public final class SPShadowBasic1 implements ExampleSceneType
         KLightProjectiveWithShadowBasic.newBuilder(tp, KProjectionFrustum
           .newProjection(this.projection, -1.0f, 1.0f, -1.0f, 1.0f, 1, 8.0f));
 
-      final KShadowMapDescriptionDirectionalBasicBuilderType smb_map_b =
-        KShadowMapDescriptionDirectionalBasic.newBuilder();
+      final KShadowMapDescriptionBasicBuilderType smb_map_b =
+        KShadowMapDescriptionBasic.newBuilder();
       smb_map_b.setDepthPrecision(KDepthPrecision.DEPTH_PRECISION_24);
       smb_map_b
         .setMagnificationFilter(TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
       smb_map_b
         .setMinificationFilter(TextureFilterMinification.TEXTURE_FILTER_NEAREST);
       smb_map_b.setSizeExponent(8);
-      final KShadowMapDescriptionDirectionalBasic smb_map =
-        smb_map_b.build();
+      final KShadowMapDescriptionBasic smb_map = smb_map_b.build();
 
-      final KShadowDirectionalMappedBasicBuilderType smb_b =
-        KShadowDirectionalMappedBasic.newBuilder();
+      final KShadowMappedBasicBuilderType smb_b =
+        KShadowMappedBasic.newBuilder();
       smb_b.setDepthBias(0.001f);
       smb_b.setMinimumFactor(0.0f);
       smb_b.setMapDescription(smb_map);
-      final KShadowDirectionalMappedBasic smb = smb_b.build();
+      final KShadowMappedBasic smb = smb_b.build();
 
       b.setShadow(smb);
       b.setColor(ExampleSceneUtilities.RGB_RED);
