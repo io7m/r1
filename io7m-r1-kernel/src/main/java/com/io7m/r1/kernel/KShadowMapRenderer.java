@@ -24,8 +24,6 @@ import java.util.Set;
 import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLExceptionNoDepthBuffer;
-import com.io7m.jcanephora.JCGLExceptionRuntime;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jequality.annotations.EqualityReference;
@@ -35,28 +33,21 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.kernel.KShadowMap.KShadowMapBasic;
-import com.io7m.r1.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
-import com.io7m.r1.kernel.types.KLightDirectional;
-import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
-import com.io7m.r1.kernel.types.KLightSphereType;
-import com.io7m.r1.kernel.types.KLightType;
-import com.io7m.r1.kernel.types.KLightVisitorType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KLightWithShadowVisitorType;
 import com.io7m.r1.kernel.types.KSceneBatchedShadow;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
-import com.io7m.r1.kernel.types.KShadowType;
-import com.io7m.r1.kernel.types.KShadowVisitorType;
 import com.io7m.r1.types.RException;
+import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RMatrixI4x4F;
 import com.io7m.r1.types.RTransformViewType;
@@ -77,65 +68,45 @@ import com.io7m.r1.types.RTransformViewType;
   /**
    * Construct a new shadow map renderer.
    *
-   * @param g
-   *          The OpenGL implementation
-   * @param depth_renderer
+   * @param gl
+   *          An OpenGL implementation
+   * @param in_depth_renderer
    *          A depth renderer
-   * @param depth_variance_renderer
-   *          A depth-variance renderer
-   * @param blur
-   *          A blur postprocessor for softening shadow maps
-   * @param shadow_cache
+   * @param in_depth_variance_renderer
+   *          A depth variance renderer
+   * @param in_blur
+   *          A blur postprocessor
+   * @param in_shadow_cache
    *          A shadow map cache
-   * @param log
-   *          A log handle
-   * @return A new depth renderer
-   *
-   * @throws RException
-   *           If an error occurs during initialization
+   * @param in_log
+   *          A log interface
+   * @return A new shadow map renderer
    */
 
   public static KShadowMapRendererType newRenderer(
-    final JCGLImplementationType g,
-    final KDepthRendererType depth_renderer,
-    final KDepthVarianceRendererType depth_variance_renderer,
-    final KPostprocessorBlurDepthVarianceType blur,
-    final KShadowMapCacheType shadow_cache,
-    final LogUsableType log)
-    throws RException
+    final JCGLImplementationType gl,
+    final KDepthRendererType in_depth_renderer,
+    final KDepthVarianceRendererType in_depth_variance_renderer,
+    final KPostprocessorBlurDepthVarianceType in_blur,
+    final KShadowMapCacheType in_shadow_cache,
+    final LogUsableType in_log)
   {
     return new KShadowMapRenderer(
-      g,
-      depth_renderer,
-      depth_variance_renderer,
-      blur,
-      shadow_cache,
-      log);
+      gl,
+      in_depth_renderer,
+      in_depth_variance_renderer,
+      in_blur,
+      in_shadow_cache,
+      in_log);
   }
 
-  private static
-    void
-    returnReceipts(
-      final Map<KLightType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts)
-  {
-    for (final KLightType light : receipts.keySet()) {
-      assert light != null;
-
-      final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
-        receipts.get(light);
-      r.returnToCache();
-    }
-  }
-
-  private static void shadowMapRenderProjectiveBasic(
+  private static void renderProjectiveBasic(
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mwp,
     final Map<String, List<KInstanceOpaqueType>> casters,
     final KDepthRendererType dr,
     final KShadowMapBasic sm)
     throws JCGLException,
-      JCGLExceptionRuntime,
-      JCGLExceptionNoDepthBuffer,
       RException
   {
     final KFramebufferDepth fb = sm.getFramebuffer();
@@ -167,19 +138,18 @@ import com.io7m.r1.types.RTransformViewType;
     }
   }
 
-  private static void shadowMapRenderProjectiveVariance(
+  private static void renderProjectiveVariance(
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mwp,
     final Map<String, List<KInstanceOpaqueType>> casters,
     final KDepthVarianceRendererType dvr,
     final KPostprocessorBlurDepthVarianceType blur,
-    final KShadowMappedVariance shadow,
+    final KLightProjectiveWithShadowVariance lp,
     final KShadowMapVariance sm)
     throws JCGLException,
-      JCGLExceptionRuntime,
-      JCGLExceptionNoDepthBuffer,
       RException
   {
+    final KShadowMappedVariance shadow = lp.lightGetShadowVariance();
     final KFramebufferDepthVariance fb = sm.getFramebuffer();
 
     gc.framebufferDrawBind(fb.kFramebufferGetDepthVariancePassFramebuffer());
@@ -206,10 +176,27 @@ import com.io7m.r1.types.RTransformViewType;
         fb,
         none);
 
-      blur.postprocessorEvaluateDepthVariance(shadow.getBlur(), fb, fb);
+      blur.postprocessorEvaluateDepthVariance(
+        shadow.getBlurParameters(),
+        fb,
+        fb);
 
     } finally {
       gc.framebufferDrawUnbind();
+    }
+  }
+
+  private static
+    void
+    returnReceipts(
+      final Map<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts)
+  {
+    for (final KLightWithShadowType light : receipts.keySet()) {
+      assert light != null;
+
+      final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
+        receipts.get(light);
+      r.returnToCache();
     }
   }
 
@@ -238,6 +225,7 @@ import com.io7m.r1.types.RTransformViewType;
     this.depth_variance_renderer =
       NullCheck
         .notNull(in_depth_variance_renderer, "Depth variance renderer");
+
     this.blur = NullCheck.notNull(in_blur, "Blur postprocessor");
     this.matrices = KMutableMatrices.newMatrices();
 
@@ -264,15 +252,35 @@ import com.io7m.r1.types.RTransformViewType;
       final Set<KLightWithShadowType> lights = batches_by_light.keySet();
       assert lights != null;
 
-      final Map<KLightType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts =
-        new HashMap<KLightType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>>();
+      final Map<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts =
+        new HashMap<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>>();
 
       try {
-        this.shadowMapsRenderAll(camera, batches_by_light, lights, receipts);
+        this.matrices.withObserver(
+          camera.getViewMatrix(),
+          camera.getProjection(),
+          new KMatricesObserverFunctionType<Unit, JCGLException>() {
+            @Override public Unit run(
+              final KMatricesObserverType mo)
+              throws RException,
+                JCGLException
+            {
+              try {
+                KShadowMapRenderer.this.shadowMapsRenderAll(
+                  batches_by_light,
+                  lights,
+                  receipts,
+                  mo);
+                return Unit.unit();
+              } catch (final JCacheException e) {
+                throw RExceptionCache.fromJCacheException(e);
+              }
+            }
+          });
 
         final A r = with.withMaps(new KShadowMapContextType() {
           @Override public KShadowMapUsableType getShadowMap(
-            final KLightType light)
+            final KLightWithShadowType light)
             throws RException
           {
             assert receipts.containsKey(light);
@@ -287,11 +295,8 @@ import com.io7m.r1.types.RTransformViewType;
       } finally {
         KShadowMapRenderer.returnReceipts(receipts);
       }
-
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
-    } catch (final JCacheException e) {
-      throw new UnreachableCodeException(e);
     }
   }
 
@@ -302,179 +307,102 @@ import com.io7m.r1.types.RTransformViewType;
 
   private
     void
-    shadowMapRender(
-      final KLightWithShadowType light,
-      final KShadowType shadow,
-      final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r,
-      final Map<String, List<KInstanceOpaqueType>> casters,
-      final JCGLInterfaceCommonType gc,
-      final KMatricesObserverType mo)
-      throws RException,
-        JCGLException
-  {
-    light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
-      @Override public Unit lightDirectional(
-        final KLightDirectional ld)
-        throws RException,
-          JCGLException
-      {
-        throw new UnreachableCodeException();
-      }
-
-      @Override public Unit lightProjective(
-        final KLightProjectiveType lp)
-        throws RException,
-          JCGLException
-      {
-        return mo.withProjectiveLight(
-          lp,
-          new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
-            @Override public Unit run(
-              final KMatricesProjectiveLightType mwp)
-              throws JCGLException,
-                RException
-            {
-              KShadowMapRenderer.this.shadowMapRenderProjective(
-                gc,
-                mwp,
-                shadow,
-                r.getValue(),
-                casters);
-              return Unit.unit();
-            }
-          });
-      }
-
-      @Override public Unit lightSpherical(
-        final KLightSphereType ls)
-        throws RException,
-          JCGLException
-      {
-        throw new UnreachableCodeException();
-      }
-    });
-  }
-
-  private void shadowMapRenderProjective(
-    final JCGLInterfaceCommonType gc,
-    final KMatricesProjectiveLightType mwp,
-    final KShadowType shadow,
-    final KShadowMapUsableType map,
-    final Map<String, List<KInstanceOpaqueType>> casters)
-    throws JCGLException,
-      RException
-  {
-    final KDepthRendererType dr = this.depth_renderer;
-    final KDepthVarianceRendererType dvr = this.depth_variance_renderer;
-    final KPostprocessorBlurDepthVarianceType dblur = this.blur;
-
-    map.kShadowMapAccept(new KShadowMapVisitorType<Unit, JCGLException>() {
-      @Override public Unit shadowMapVisitBasic(
-        final KShadowMapBasic sm)
-        throws JCGLException,
-          RException
-      {
-        KShadowMapRenderer.shadowMapRenderProjectiveBasic(
-          gc,
-          mwp,
-          casters,
-          dr,
-          sm);
-        return Unit.unit();
-      }
-
-      @Override public Unit shadowMapVisitVariance(
-        final KShadowMapVariance sm)
-        throws JCGLException,
-          RException
-      {
-        KShadowMapRenderer.shadowMapRenderProjectiveVariance(
-          gc,
-          mwp,
-          casters,
-          dvr,
-          dblur,
-          (KShadowMappedVariance) shadow,
-          sm);
-        return Unit.unit();
-      }
-    });
-  }
-
-  private
-    void
     shadowMapsRenderAll(
-      final KCamera camera,
       final Map<KLightWithShadowType, Map<String, List<KInstanceOpaqueType>>> batches_by_light,
       final Set<KLightWithShadowType> lights,
-      final Map<KLightType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts)
+      final Map<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts,
+      final KMatricesObserverType observer)
       throws RException,
-        JCGLException,
-        JCacheException
+        JCacheException,
+        JCGLException
   {
+    final KShadowMapCacheType sc = this.shadow_cache;
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+    final KDepthRendererType dr = this.depth_renderer;
+    final KDepthVarianceRendererType dvr = this.depth_variance_renderer;
+    final KPostprocessorBlurDepthVarianceType pb = this.blur;
+
     for (final KLightWithShadowType light : lights) {
-
-      final KShadowType shadow =
-        light
-          .withShadowAccept(new KLightWithShadowVisitorType<KShadowType, RException>() {
-            @Override public KShadowType projectiveWithShadowBasic(
-              final KLightProjectiveWithShadowBasic lp)
-            {
-              return lp.lightGetShadow();
-            }
-
-            @Override public KShadowType projectiveWithShadowVariance(
-              final KLightProjectiveWithShadowVariance lp)
-            {
-              return lp.lightGetShadow();
-            }
-          });
-
-      final KShadowMapDescriptionType desc =
-        shadow
-          .shadowAccept(new KShadowVisitorType<KShadowMapDescriptionType, RException>() {
-            @Override public KShadowMapDescriptionType shadowMappedBasic(
-              final KShadowMappedBasic s)
-            {
-              return s.getDescription();
-            }
-
-            @Override public KShadowMapDescriptionType shadowMappedVariance(
-              final KShadowMappedVariance s)
-            {
-              return s.getDescription();
-            }
-          });
-
-      final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
-        this.shadow_cache.bluCacheGet(desc);
-
-      assert receipts.containsKey(light) == false;
-      receipts.put(light, r);
-
       final Map<String, List<KInstanceOpaqueType>> casters =
         batches_by_light.get(light);
       assert casters != null;
 
-      final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-
-      this.matrices.withObserver(
-        camera.getViewMatrix(),
-        camera.getProjection(),
-        new KMatricesObserverFunctionType<Unit, JCGLException>() {
-          @Override public Unit run(
-            final KMatricesObserverType mo)
+      light
+        .withShadowAccept(new KLightWithShadowVisitorType<Unit, JCacheException>() {
+          @Override public Unit projectiveWithShadowBasic(
+            final KLightProjectiveWithShadowBasic lp)
             throws RException,
+              JCacheException,
               JCGLException
           {
-            KShadowMapRenderer.this.shadowMapRender(
-              light,
-              shadow,
-              r,
-              casters,
-              gc,
-              mo);
-            return Unit.unit();
+            final KShadowMappedBasic shadow = lp.lightGetShadowBasic();
+            final KShadowMapDescriptionBasic desc =
+              shadow.getMapDescription();
+            final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
+              sc.bluCacheGet(desc);
+
+            assert receipts.containsKey(light) == false;
+            receipts.put(light, r);
+
+            final KShadowMapBasic sm = (KShadowMapBasic) r.getValue();
+
+            return observer
+              .withProjectiveLight(
+                lp,
+                new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+                  @Override public Unit run(
+                    final KMatricesProjectiveLightType mwp)
+                    throws JCGLException,
+                      RException
+                  {
+                    KShadowMapRenderer.renderProjectiveBasic(
+                      gc,
+                      mwp,
+                      casters,
+                      dr,
+                      sm);
+                    return Unit.unit();
+                  }
+                });
+          }
+
+          @Override public Unit projectiveWithShadowVariance(
+            final KLightProjectiveWithShadowVariance lp)
+            throws RException,
+              JCacheException,
+              JCGLException
+          {
+            final KShadowMappedVariance shadow = lp.lightGetShadowVariance();
+            final KShadowMapDescriptionVariance desc =
+              shadow.getMapDescription();
+            final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
+              sc.bluCacheGet(desc);
+
+            assert receipts.containsKey(light) == false;
+            receipts.put(light, r);
+
+            final KShadowMapVariance sm = (KShadowMapVariance) r.getValue();
+
+            return observer
+              .withProjectiveLight(
+                lp,
+                new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+                  @Override public Unit run(
+                    final KMatricesProjectiveLightType mwp)
+                    throws JCGLException,
+                      RException
+                  {
+                    KShadowMapRenderer.renderProjectiveVariance(
+                      gc,
+                      mwp,
+                      casters,
+                      dvr,
+                      pb,
+                      lp,
+                      sm);
+                    return Unit.unit();
+                  }
+                });
           }
         });
     }

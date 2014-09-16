@@ -33,7 +33,7 @@ import com.io7m.r1.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
 import com.io7m.r1.kernel.types.KProjectionFOV;
-import com.io7m.r1.kernel.types.KProjectionType;
+import com.io7m.r1.kernel.types.KProjectionWithShapeType;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.RFakeTextures2DStaticGenerator;
@@ -120,7 +120,7 @@ import com.io7m.r1.types.RVectorI3F;
     final Generator<RVectorI3F<RSpaceWorldType>> position_gen1 =
       new RVectorI3FGenerator<RSpaceWorldType>();
     final Generator<QuaternionI4F> qg = new QuaternionI4FGenerator();
-    final Generator<KProjectionType> pg = new KProjectionGenerator();
+    final Generator<KProjectionWithShapeType> pg = new KProjectionGenerator();
     final Generator<Texture2DStaticUsableType> tg =
       new RFakeTextures2DStaticGenerator();
     final KShadowMappedVarianceGenerator shad_gen =

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,8 +27,6 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixReadable4x4FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.kernel.KShadowMap.KShadowMapBasic;
-import com.io7m.r1.kernel.KShadowMap.KShadowMapVariance;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
@@ -54,9 +52,6 @@ import com.io7m.r1.kernel.types.KMaterialSpecularNone;
 import com.io7m.r1.kernel.types.KMaterialSpecularVisitorType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
-import com.io7m.r1.kernel.types.KShadowMappedBasic;
-import com.io7m.r1.kernel.types.KShadowMappedVariance;
-import com.io7m.r1.kernel.types.KShadowType;
 import com.io7m.r1.types.RException;
 
 /**
@@ -105,10 +100,7 @@ import com.io7m.r1.types.RException;
       program,
       mwi.getMatrixModelView());
     KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
-
-    if (material.materialRequiresUVCoordinates()) {
-      KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
-    }
+    KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
 
     material.materialRegularGetEnvironment().environmentAccept(
       new KMaterialEnvironmentVisitorType<Unit, JCGLException>() {
@@ -526,15 +518,18 @@ import com.io7m.r1.types.RException;
             JCGLException
         {
           final KShadowMapBasic map =
-            (KShadowMapBasic) shadow_context.getShadowMap(light);
-
+            (KShadowMapBasic) shadow_context.getShadowMap(lp);
+          final KFramebufferDepth framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
-            unit_context.withTexture2D(map
-              .getFramebuffer()
+            unit_context.withTexture2D(framebuffer
               .kFramebufferGetDepthTexture());
 
-          KShadingProgramCommon.putShadowBasic(program, lp.lightGetShadow());
-          KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
+          KShadingProgramCommon.putShadowBasic(
+            program,
+            lp.lightGetShadowBasic());
+          KShadingProgramCommon.putTextureShadowMapBasic(
+            program,
+            unit);
           return Unit.unit();
         }
 
@@ -544,73 +539,21 @@ import com.io7m.r1.types.RException;
             JCGLException
         {
           final KShadowMapVariance map =
-            (KShadowMapVariance) shadow_context.getShadowMap(light);
+            (KShadowMapVariance) shadow_context.getShadowMap(lp);
+          final KFramebufferDepthVariance framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
-            unit_context.withTexture2D(map
-              .getFramebuffer()
+            unit_context.withTexture2D(framebuffer
               .kFramebufferGetDepthVarianceTexture());
 
           KShadingProgramCommon.putShadowVariance(
             program,
-            lp.lightGetShadow());
-          KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
+            lp.lightGetShadowVariance());
+          KShadingProgramCommon.putTextureShadowMapVariance(
+            program,
+            unit);
           return Unit.unit();
         }
       });
-  }
-
-  static void putShadow(
-    final KTextureUnitContextType texture_unit_ctx,
-    final JCBProgramType program,
-    final KShadowType shadow,
-    final KShadowMapUsableType map)
-    throws JCGLException,
-      RException
-  {
-    map.kShadowMapAccept(new KShadowMapVisitorType<Unit, JCGLException>() {
-      @Override public Unit shadowMapVisitBasic(
-        final KShadowMapBasic sm)
-        throws JCGLException,
-          RException
-      {
-        assert shadow instanceof KShadowMappedBasic;
-        KRendererCommon.putShadowBasic(
-          texture_unit_ctx,
-          program,
-          (KShadowMappedBasic) shadow,
-          sm);
-        return Unit.unit();
-      }
-
-      @Override public Unit shadowMapVisitVariance(
-        final KShadowMapVariance sm)
-        throws JCGLException,
-          RException
-      {
-        assert shadow instanceof KShadowMappedVariance;
-        KRendererCommon.putShadowVariance(
-          texture_unit_ctx,
-          program,
-          (KShadowMappedVariance) shadow,
-          sm);
-        return Unit.unit();
-      }
-    });
-  }
-
-  static void putShadowBasic(
-    final KTextureUnitContextType texture_unit_ctx,
-    final JCBProgramType program,
-    final KShadowMappedBasic shadow,
-    final KShadowMapBasic map)
-    throws JCGLException,
-      RException
-  {
-    final KFramebufferDepth fb = map.getFramebuffer();
-    final TextureUnitType unit =
-      texture_unit_ctx.withTexture2D(fb.kFramebufferGetDepthTexture());
-    KShadingProgramCommon.putShadowBasic(program, shadow);
-    KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
   }
 
   static void putShadowReuse(
@@ -627,7 +570,8 @@ import com.io7m.r1.types.RException;
             JCGLException
         {
           KShadingProgramCommon.putShadowBasicReuse(program);
-          KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
+          KShadingProgramCommon
+            .putTextureShadowMapBasicReuse(program);
           return Unit.unit();
         }
 
@@ -637,26 +581,11 @@ import com.io7m.r1.types.RException;
             JCGLException
         {
           KShadingProgramCommon.putShadowVarianceReuse(program);
-          KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
+          KShadingProgramCommon
+            .putTextureShadowMapVarianceReuse(program);
           return Unit.unit();
         }
       });
-  }
-
-  static void putShadowVariance(
-    final KTextureUnitContextType texture_unit_ctx,
-    final JCBProgramType program,
-    final KShadowMappedVariance shadow,
-    final KShadowMapVariance map)
-    throws JCGLException,
-      RException
-  {
-    final KFramebufferDepthVariance fb = map.getFramebuffer();
-    final TextureUnitType unit =
-      texture_unit_ctx
-        .withTexture2D(fb.kFramebufferGetDepthVarianceTexture());
-    KShadingProgramCommon.putShadowVariance(program, shadow);
-    KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
   }
 
   /**

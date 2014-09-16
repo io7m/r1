@@ -44,7 +44,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 @EqualityReference public final class KRendererDeferred implements
   KRendererDeferredType
 {
-  private static final String                                                            NAME;
+  private static final String                                                         NAME;
   private static final PartialProcedureType<KRendererDeferredControlType, RException> RENDER_PROCEDURE;
 
   static {
@@ -95,7 +95,7 @@ import com.io7m.r1.types.RExceptionJCGL;
   private final LogUsableType               log;
   private final KMutableMatrices            matrices;
   private final KRendererDeferredOpaqueType opaque_renderer;
-  private final KShadowMapRendererType      shadow_renderer;
+  private final KShadowMapRendererType   shadow_renderer;
   private final KTranslucentRendererType    translucent_renderer;
 
   private KRendererDeferred(

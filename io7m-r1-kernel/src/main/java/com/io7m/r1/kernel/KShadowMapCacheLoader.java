@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,14 +25,11 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.r1.kernel.KShadowMap.KShadowMapBasic;
-import com.io7m.r1.kernel.KShadowMap.KShadowMapVariance;
-import com.io7m.r1.kernel.types.KShadowMapBasicDescription;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionVisitorType;
-import com.io7m.r1.kernel.types.KShadowMapVarianceDescription;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * A cache loader that constructs and caches shadow maps of type
@@ -44,7 +41,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 {
   /**
    * Construct a new cache loader.
-   * 
+   *
    * @param gi
    *          The OpenGL implementation
    * @param log
@@ -78,60 +75,63 @@ import com.io7m.r1.types.RExceptionJCGL;
     final KShadowMapType v)
     throws RException
   {
-    v.kShadowMapDelete(this.gi);
+    v.shadowMapDelete(this.gi);
   }
 
-  @Override public KShadowMap cacheValueLoad(
+  @Override public KShadowMapType cacheValueLoad(
     final KShadowMapDescriptionType s)
     throws RException
   {
-    final long size = 2 << (s.mapGetSizeExponent() - 1);
-    if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
-      this.message.setLength(0);
-      this.message.append("Allocating ");
-      this.message.append(size);
-      this.message.append("x");
-      this.message.append(size);
-      this.message.append(" shadow map");
-      final String r = this.message.toString();
-      assert r != null;
-      this.log.debug(r);
-    }
+    final JCGLImplementationType g = KShadowMapCacheLoader.this.gi;
+    final StringBuilder ms = this.message;
+    final LogUsableType lg = this.log;
 
-    final JCGLImplementationType gli = this.gi;
-    try {
-      return s
-        .mapDescriptionAccept(new KShadowMapDescriptionVisitorType<KShadowMap, JCGLException>() {
-          @Override public KShadowMap shadowMapDescriptionBasic(
-            final KShadowMapBasicDescription sm)
-            throws RException
-          {
-            final KFramebufferDepth framebuffer =
-              KFramebufferDepth.newDepthFramebuffer(gli, sm.getDescription());
-            return new KShadowMapBasic(sm, framebuffer);
+    return s
+      .shadowMapDescriptionAccept(new KShadowMapDescriptionVisitorType<KShadowMapType, JCGLException>() {
+        @Override public KShadowMapType basic(
+          final KShadowMapDescriptionBasic m)
+          throws RException
+        {
+          if (lg.wouldLog(LogLevel.LOG_DEBUG)) {
+            final int size = (int) Math.pow(2, m.getSizeExponent());
+            ms.setLength(0);
+            ms.append("Allocating basic map (");
+            ms.append(size);
+            ms.append("x");
+            ms.append(size);
+            ms.append(")");
+            final String mss = ms.toString();
+            assert mss != null;
+            lg.debug(mss);
           }
+          return KShadowMapBasic.newMap(g, m);
+        }
 
-          @Override public KShadowMap shadowMapDescriptionVariance(
-            final KShadowMapVarianceDescription sm)
-            throws RException,
-              JCGLException
-          {
-            final KFramebufferDepthVariance framebuffer =
-              KFramebufferDepthVariance.newDepthVarianceFramebuffer(
-                gli,
-                sm.getDescription());
-            return new KShadowMapVariance(sm, framebuffer);
+        @Override public KShadowMapType variance(
+          final KShadowMapDescriptionVariance m)
+          throws RException
+        {
+          if (lg.wouldLog(LogLevel.LOG_DEBUG)) {
+            final int size = (int) Math.pow(2, m.getSizeExponent());
+            ms.setLength(0);
+            ms.append("Allocating variance map (");
+            ms.append(size);
+            ms.append("x");
+            ms.append(size);
+            ms.append(")");
+            final String mss = ms.toString();
+            assert mss != null;
+            lg.debug(mss);
           }
-        });
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+          return KShadowMapVariance.newMap(g, m);
+        }
+      });
   }
 
   @Override public BigInteger cacheValueSizeOf(
     final KShadowMapType f)
   {
-    final BigInteger r = BigInteger.valueOf(f.kShadowMapGetSizeBytes());
+    final BigInteger r = BigInteger.valueOf(f.shadowMapGetSizeBytes());
     assert r != null;
     return r;
   }

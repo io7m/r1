@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -95,6 +95,9 @@ public final class DLMulti0 implements ExampleSceneType
       gb.groupAddInstance(m);
 
       final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
+      final KLightDirectional dl0;
+      final KLightDirectional dl1;
+      final KLightDirectional dl2;
 
       {
         final VectorI3F d_raw =
@@ -106,7 +109,8 @@ public final class DLMulti0 implements ExampleSceneType
             d_raw.getZF());
         b.setColor(new RVectorI3F<RSpaceRGBType>(0.0f, 1.0f, 0.0f));
         b.setDirection(dir);
-        gb.groupAddLight(b.build());
+        dl0 = b.build();
+        gb.groupAddLight(dl0);
       }
 
       {
@@ -119,7 +123,8 @@ public final class DLMulti0 implements ExampleSceneType
             d_raw.getZF());
         b.setColor(new RVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f));
         b.setDirection(dir);
-        gb.groupAddLight(b.build());
+        dl1 = b.build();
+        gb.groupAddLight(dl1);
       }
 
       {
@@ -132,7 +137,8 @@ public final class DLMulti0 implements ExampleSceneType
             d_raw.getZF());
         b.setColor(new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f));
         b.setDirection(dir);
-        gb.groupAddLight(b.build());
+        dl2 = b.build();
+        gb.groupAddLight(dl2);
       }
     }
   }

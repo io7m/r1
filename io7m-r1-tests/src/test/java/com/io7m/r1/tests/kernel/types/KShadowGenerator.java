@@ -18,24 +18,26 @@ package com.io7m.r1.tests.kernel.types;
 
 import net.java.quickcheck.Generator;
 
+import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.kernel.types.KShadowType;
 
 public final class KShadowGenerator implements Generator<KShadowType>
 {
-  private final KShadowMappedBasicGenerator    gen_basic;
-  private final KShadowMappedVarianceGenerator gen_var;
+  private final Generator<KShadowMappedBasic>    gen_b;
+  private final Generator<KShadowMappedVariance> gen_v;
 
   public KShadowGenerator()
   {
-    this.gen_basic = new KShadowMappedBasicGenerator();
-    this.gen_var = new KShadowMappedVarianceGenerator();
+    this.gen_b = new KShadowMappedBasicGenerator();
+    this.gen_v = new KShadowMappedVarianceGenerator();
   }
 
   @Override public KShadowType next()
   {
     if (Math.random() > 0.5) {
-      return this.gen_basic.next();
+      return this.gen_b.next();
     }
-    return this.gen_var.next();
+    return this.gen_v.next();
   }
 }

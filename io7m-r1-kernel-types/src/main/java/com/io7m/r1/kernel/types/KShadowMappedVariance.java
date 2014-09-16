@@ -16,27 +16,98 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.jcanephora.JCGLException;
+import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.r1.types.RException;
 
 /**
- * A description of a variance-mapped shadow.
+ * The type of directional, basic mapped shadows.
  */
 
-@EqualityStructural public final class KShadowMappedVariance implements
+@SuppressWarnings("synthetic-access") @EqualityStructural public final class KShadowMappedVariance implements
   KShadowType
 {
+  @EqualityReference private static final class Builder implements
+    KShadowMappedVarianceBuilderType
+  {
+    private KBlurParameters                          blur;
+    private float                                    factor_min;
+    private float                                    light_bleed_reduction;
+    private KShadowMapDescriptionVariance map_description;
+    private float                                    minimum_variance;
+
+    Builder()
+    {
+      this.blur = KBlurParameters.getDefault();
+      this.factor_min = 0.2f;
+      this.light_bleed_reduction = 0.2f;
+      this.minimum_variance = 0.00002f;
+      this.map_description =
+        KShadowMapDescriptionVariance.getDefault();
+    }
+
+    Builder(
+      final KShadowMappedVariance s)
+    {
+      NullCheck.notNull(s, "Shadow");
+      this.blur = s.blur;
+      this.factor_min = s.factor_min;
+      this.light_bleed_reduction = s.light_bleed_reduction;
+      this.minimum_variance = s.minimum_variance;
+      this.map_description = s.map_description;
+    }
+
+    @Override public KShadowMappedVariance build()
+    {
+      return new KShadowMappedVariance(
+        this.factor_min,
+        this.minimum_variance,
+        this.light_bleed_reduction,
+        this.blur,
+        this.map_description);
+    }
+
+    @Override public void setBlurParameters(
+      final KBlurParameters p)
+    {
+      this.blur = NullCheck.notNull(p, "Parameters");
+    }
+
+    @Override public void setLightBleedReduction(
+      final float r)
+    {
+      this.light_bleed_reduction = r;
+    }
+
+    @Override public void setMapDescription(
+      final KShadowMapDescriptionVariance m)
+    {
+      this.map_description = NullCheck.notNull(m, "Map description");
+    }
+
+    @Override public void setMinimumFactor(
+      final float f)
+    {
+      this.factor_min = f;
+    }
+
+    @Override public void setMinimumVariance(
+      final float v)
+    {
+      this.minimum_variance = v;
+    }
+  }
+
   private static final KShadowMappedVariance DEFAULT;
 
   static {
-    DEFAULT = KShadowMappedVariance.makeDefault();
+    DEFAULT = new Builder().build();
   }
 
   /**
-   * @return The default description of a mapped variance shadow.
+   * @return A shadow using all the default values.
    */
 
   public static KShadowMappedVariance getDefault()
@@ -44,71 +115,44 @@ import com.io7m.r1.types.RException;
     return KShadowMappedVariance.DEFAULT;
   }
 
-  private static KShadowMappedVariance makeDefault()
+  /**
+   * @return A new builder for producing shadows.
+   */
+
+  public static KShadowMappedVarianceBuilderType newBuilder()
   {
-    final KShadowMapVarianceDescription d =
-      KShadowMapVarianceDescription.getDefault();
-    return KShadowMappedVariance.newMappedVariance(
-      0.0f,
-      0.00002f,
-      0.2f,
-      KBlurParameters.getDefault(),
-      d);
+    return new Builder();
   }
 
   /**
-   * Construct a new variance mapped shadow.
-   *
-   * @param in_blur
-   *          The blur parameters for the shadow
-   * @param minimum_variance
-   *          The minimum variance value to allow; reduces numeric errors that
-   *          may cause shadow acne. Values of approximately
-   *          <code>0.0005</code> tend to work well for most scenes.
-   * @param light_bleed_reduction
-   *          The amount of light bleed reduction to apply. High values tend
-   *          to darken shadows.
-   * @param factor_min
-   *          The minimum light level of shadowed points (0.0 produces very
-   *          dark shadows)
-   * @param description
-   *          The description of the shadow map
-   * @return A new shadow
+   * @param s
+   *          An existing shadow.
+   * @return A new builder for producing shadows, initialized to the values in
+   *         the given shadow.
    */
 
-  public static
-    KShadowMappedVariance
-    newMappedVariance(
-      final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float factor_min,
-      final @KSuggestedRangeF(lower = 0.0f, upper = 0.0005f) float minimum_variance,
-      final @KSuggestedRangeF(lower = 0.0f, upper = 0.6f) float light_bleed_reduction,
-      final KBlurParameters in_blur,
-      final KShadowMapVarianceDescription description)
+  public static KShadowMappedVarianceBuilderType newBuilderFrom(
+    final KShadowMappedVariance s)
   {
-    return new KShadowMappedVariance(
-      factor_min,
-      minimum_variance,
-      light_bleed_reduction,
-      in_blur,
-      description);
+    return new Builder(s);
   }
-  private final KBlurParameters               blur;
-  private final KShadowMapVarianceDescription description;
-  private final float                         factor_min;
-  private final float                         light_bleed_reduction;
 
-  private final float                         minimum_variance;
+  private final KBlurParameters                          blur;
+  private final float                                    factor_min;
+  private final float                                    light_bleed_reduction;
+  private final KShadowMapDescriptionVariance map_description;
+  private final float                                    minimum_variance;
 
-  KShadowMappedVariance(
-    final float in_factor_min,
-    final float in_minimum_variance,
-    final float in_light_bleed_reduction,
+  private KShadowMappedVariance(
+    final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float in_factor_min,
+    final @KSuggestedRangeF(lower = 0.0f, upper = 0.0005f) float in_minimum_variance,
+    final @KSuggestedRangeF(lower = 0.0f, upper = 0.6f) float in_light_bleed_reduction,
     final KBlurParameters in_blur,
-    final KShadowMapVarianceDescription in_description)
+    final KShadowMapDescriptionVariance in_map_description)
   {
-    this.description = NullCheck.notNull(in_description, "Description");
+    this.map_description =
+      NullCheck.notNull(in_map_description, "Map description");
     this.blur = NullCheck.notNull(in_blur, "Blur");
-
     this.factor_min = in_factor_min;
     this.minimum_variance = in_minimum_variance;
     this.light_bleed_reduction = in_light_bleed_reduction;
@@ -126,38 +170,28 @@ import com.io7m.r1.types.RException;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-
     final KShadowMappedVariance other = (KShadowMappedVariance) obj;
-    return this.description.equals(other.description)
-      && this.blur.equals(other.blur)
+    return this.blur.equals(other.blur)
       && (Float.floatToIntBits(this.factor_min) == Float
         .floatToIntBits(other.factor_min))
       && (Float.floatToIntBits(this.light_bleed_reduction) == Float
         .floatToIntBits(other.light_bleed_reduction))
-      && (Float.floatToIntBits(this.minimum_variance) == Float
+      && this.map_description.equals(other.map_description)
+      && (Float.floatToIntBits(this.minimum_variance) != Float
         .floatToIntBits(other.minimum_variance));
   }
 
   /**
-   * @return The parameters for the blur applied to the shadow map
+   * @return The blur parameters.
    */
 
-  public KBlurParameters getBlur()
+  public KBlurParameters getBlurParameters()
   {
     return this.blur;
   }
 
   /**
-   * @return The description of the shadow map
-   */
-
-  public KShadowMapVarianceDescription getDescription()
-  {
-    return this.description;
-  }
-
-  /**
-   * @return The minimum light level
+   * @return The minimum shadow factor.
    */
 
   public float getFactorMinimum()
@@ -166,7 +200,7 @@ import com.io7m.r1.types.RException;
   }
 
   /**
-   * @return The amount of light bleed reduction to apply
+   * @return The amount of light bleed reduction.
    */
 
   public float getLightBleedReduction()
@@ -175,7 +209,16 @@ import com.io7m.r1.types.RException;
   }
 
   /**
-   * @return The minimum variance level
+   * @return The description for the map.
+   */
+
+  public KShadowMapDescriptionVariance getMapDescription()
+  {
+    return this.map_description;
+  }
+
+  /**
+   * @return The minimum variance.
    */
 
   public float getMinimumVariance()
@@ -188,42 +231,19 @@ import com.io7m.r1.types.RException;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.blur.hashCode();
-    result = (prime * result) + this.description.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.factor_min);
     result =
       (prime * result) + Float.floatToIntBits(this.light_bleed_reduction);
+    result = (prime * result) + this.map_description.hashCode();
     result = (prime * result) + Float.floatToIntBits(this.minimum_variance);
     return result;
   }
 
-  @Override public
-    <T, E extends Throwable, V extends KShadowVisitorType<T, E>>
-    T
-    shadowAccept(
-      final V v)
-      throws E,
-        JCGLException,
-        RException
+  @Override public <T, E extends Throwable> T shadowAccept(
+    final KShadowVisitorType<T, E> v)
+    throws E,
+      RException
   {
-    return v.shadowMappedVariance(this);
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder builder = new StringBuilder();
-    builder.append("[KShadowMappedVariance blur=");
-    builder.append(this.blur);
-    builder.append(" description=");
-    builder.append(this.description);
-    builder.append(" factor_min=");
-    builder.append(this.factor_min);
-    builder.append(" light_bleed_reduction=");
-    builder.append(this.light_bleed_reduction);
-    builder.append(" minimum_variance=");
-    builder.append(this.minimum_variance);
-    builder.append("]");
-    final String r = builder.toString();
-    assert r != null;
-    return r;
+    return v.mappedVariance(this);
   }
 }

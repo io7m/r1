@@ -25,10 +25,6 @@ import com.io7m.jcanephora.api.JCGLTextures2DStaticCommonType;
 import com.io7m.jcanephora.api.JCGLTexturesCubeStaticCommonType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
-import com.io7m.jfunctional.None;
-import com.io7m.jfunctional.OptionPartialVisitorType;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.MatrixM4x4F;
@@ -56,13 +52,12 @@ import com.io7m.r1.kernel.types.KMaterialRefractiveUnmasked;
 import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KMeshAttributes;
+import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
-import com.io7m.r1.kernel.types.KShadowType;
-import com.io7m.r1.kernel.types.KShadowVisitorType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RMatrixM3x3F;
+import com.io7m.r1.types.RMatrixM4x4F;
 import com.io7m.r1.types.RMatrixReadable3x3FType;
 import com.io7m.r1.types.RMatrixReadable4x4FType;
 import com.io7m.r1.types.RSpaceObjectType;
@@ -78,6 +73,7 @@ import com.io7m.r1.types.RTransformProjectionInverseType;
 import com.io7m.r1.types.RTransformProjectionType;
 import com.io7m.r1.types.RTransformProjectiveModelViewType;
 import com.io7m.r1.types.RTransformProjectiveProjectionType;
+import com.io7m.r1.types.RTransformSphericalViewInverseViewType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RTransformViewInverseType;
 import com.io7m.r1.types.RTransformViewType;
@@ -100,6 +96,8 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
 @EqualityReference public final class KShadingProgramCommon
 {
+  private static final String ATTRIBUTE_NAME_VERTEX_UV               = "v_uv";
+
   private static final String MATRIX_NAME_DEFERRED_PROJECTION        =
                                                                        "m_deferred_projective";
   private static final String MATRIX_NAME_LIGHT_SPHERICAL            =
@@ -271,7 +269,9 @@ import com.io7m.r1.types.RVectorReadable4FType;
   {
     final ArrayAttributeType a =
       array.arrayGetAttribute(KMeshAttributes.ATTRIBUTE_UV.getName());
-    program.programAttributeBind("v_uv", a);
+    program.programAttributeBind(
+      KShadingProgramCommon.ATTRIBUTE_NAME_VERTEX_UV,
+      a);
   }
 
   static void bindPutTextureAlbedo(
@@ -384,7 +384,10 @@ import com.io7m.r1.types.RVectorReadable4FType;
   static boolean existsAttributeUV(
     final JCBProgramType e)
   {
-    return e.programGet().programGetAttributes().containsKey("v_uv");
+    return e
+      .programGet()
+      .programGetAttributes()
+      .containsKey(KShadingProgramCommon.ATTRIBUTE_NAME_VERTEX_UV);
   }
 
   static boolean existsLightDirectional(
@@ -579,7 +582,9 @@ import com.io7m.r1.types.RVectorReadable4FType;
     final RVectorI2F<RSpaceTextureType> uv)
     throws JCGLException
   {
-    program.programAttributePutVector2F("v_uv", uv);
+    program.programAttributePutVector2F(
+      KShadingProgramCommon.ATTRIBUTE_NAME_VERTEX_UV,
+      uv);
   }
 
   static void putDeferredMapAlbedo(
@@ -630,14 +635,6 @@ import com.io7m.r1.types.RVectorReadable4FType;
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_DEFERRED_SPECULAR,
       unit);
-  }
-
-  static void putFarClipDistance(
-    final JCBProgramType program,
-    final float distance)
-    throws JCGLException
-  {
-    program.programUniformPutFloat("far_clip_distance", distance);
   }
 
   static void putLightDirectional(
@@ -818,8 +815,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
     final MatrixM4x4F.Context context,
     final RMatrixReadable4x4FType<RTransformViewType> view,
     final KLightProjectiveType light)
-    throws JCGLException,
-      RException
+    throws JCGLException
   {
     KShadingProgramCommon.putLightProjectivePosition(
       program,
@@ -838,37 +834,6 @@ import com.io7m.r1.types.RVectorReadable4FType;
     KShadingProgramCommon.putLightProjectiveRangeInverse(
       program,
       light.lightProjectiveGetRangeInverse());
-
-    light
-      .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
-        @Override public Unit projectiveWithoutShadow(
-          final KLightProjectiveWithoutShadow lp)
-          throws RException,
-            JCGLException
-        {
-          return Unit.unit();
-        }
-
-        @Override public Unit projectiveWithShadowBasic(
-          final KLightProjectiveWithShadowBasic lp)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putShadowBasic(program, lp.lightGetShadow());
-          return Unit.unit();
-        }
-
-        @Override public Unit projectiveWithShadowVariance(
-          final KLightProjectiveWithShadowVariance lp)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putShadowVariance(
-            program,
-            lp.lightGetShadow());
-          return Unit.unit();
-        }
-      });
   }
 
   static void putLightProjectiveWithoutTextureProjectionReuse(
@@ -1009,6 +974,20 @@ import com.io7m.r1.types.RVectorReadable4FType;
     throws JCGLException
   {
     program.programUniformUseExisting("light_spherical.position");
+  }
+
+  static void putLightSphericalProjectionZFar(
+    final JCBProgramType program,
+    final float z)
+  {
+    program.programUniformPutFloat("light_spherical_projection.z_far", z);
+  }
+
+  static void putLightSphericalProjectionZNear(
+    final JCBProgramType program,
+    final float z)
+  {
+    program.programUniformPutFloat("light_spherical_projection.z_near", z);
   }
 
   static void putLightSphericalRangeInverse(
@@ -1263,6 +1242,13 @@ import com.io7m.r1.types.RVectorReadable4FType;
       m);
   }
 
+  static void putMatrixLightSphericalViewInverseView(
+    final JCBProgramType program,
+    final RMatrixM4x4F<RTransformSphericalViewInverseViewType> m)
+  {
+    program.programUniformPutMatrix4x4f("m_spherical_view", m);
+  }
+
   static void putMatrixModel(
     final JCBProgramType program,
     final RMatrixReadable4x4FType<RTransformModelType> m)
@@ -1429,6 +1415,51 @@ import com.io7m.r1.types.RVectorReadable4FType;
       m);
   }
 
+  static void putProjection(
+    final JCBProgramType program,
+    final KProjectionType projection)
+  {
+    KShadingProgramCommon.putProjectionZFar(
+      program,
+      projection.projectionGetZFar());
+    KShadingProgramCommon.putProjectionZNear(
+      program,
+      projection.projectionGetZNear());
+  }
+
+  static void putProjectionReuse(
+    final JCBProgramType program)
+  {
+    KShadingProgramCommon.putProjectionZFarReuse(program);
+    KShadingProgramCommon.putProjectionZNearReuse(program);
+  }
+
+  static void putProjectionZFar(
+    final JCBProgramType program,
+    final float z)
+  {
+    program.programUniformPutFloat("projection.z_far", z);
+  }
+
+  static void putProjectionZFarReuse(
+    final JCBProgramType program)
+  {
+    program.programUniformUseExisting("projection.z_far");
+  }
+
+  static void putProjectionZNear(
+    final JCBProgramType program,
+    final float z)
+  {
+    program.programUniformPutFloat("projection.z_near", z);
+  }
+
+  static void putProjectionZNearReuse(
+    final JCBProgramType program)
+  {
+    program.programUniformUseExisting("projection.z_near");
+  }
+
   static void putRefractionTextureScene(
     final JCBProgramType program,
     final TextureUnitType unit)
@@ -1459,15 +1490,13 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putShadowBasic(
     final JCBProgramType program,
-    final KShadowMappedBasic shadow)
+    final KShadowMappedBasic s)
     throws JCGLException
   {
-    KShadingProgramCommon.putShadowBasicDepthBias(
-      program,
-      shadow.getDepthBias());
+    KShadingProgramCommon.putShadowBasicDepthBias(program, s.getDepthBias());
     KShadingProgramCommon.putShadowBasicFactorMinimum(
       program,
-      shadow.getFactorMinimum());
+      s.getFactorMinimum());
   }
 
   static void putShadowBasicDepthBias(
@@ -1509,70 +1538,20 @@ import com.io7m.r1.types.RVectorReadable4FType;
     KShadingProgramCommon.putShadowBasicFactorMinimumReuse(program);
   }
 
-  static void putShadowReuse(
-    final JCBProgramType program,
-    final OptionType<KShadowType> shadow)
-    throws RException
-  {
-    shadow
-      .acceptPartial(new OptionPartialVisitorType<KShadowType, Unit, RException>() {
-        @Override public Unit none(
-          final None<KShadowType> n)
-          throws RException
-        {
-          return Unit.unit();
-        }
-
-        @Override public Unit some(
-          final Some<KShadowType> some)
-          throws RException
-        {
-          try {
-            return some.get().shadowAccept(
-              new KShadowVisitorType<Unit, JCGLException>() {
-                @Override public Unit shadowMappedBasic(
-                  final KShadowMappedBasic s)
-                  throws JCGLException,
-                    RException
-                {
-                  KShadingProgramCommon.putShadowBasicReuse(program);
-                  KShadingProgramCommon
-                    .putTextureShadowMapBasicReuse(program);
-                  return Unit.unit();
-                }
-
-                @Override public Unit shadowMappedVariance(
-                  final KShadowMappedVariance s)
-                  throws JCGLException,
-                    RException
-                {
-                  KShadingProgramCommon.putShadowVarianceReuse(program);
-                  KShadingProgramCommon
-                    .putTextureShadowMapVarianceReuse(program);
-                  return Unit.unit();
-                }
-              });
-          } catch (final JCGLException e) {
-            throw RExceptionJCGL.fromJCGLException(e);
-          }
-        }
-      });
-  }
-
   static void putShadowVariance(
     final JCBProgramType program,
-    final KShadowMappedVariance shadow)
+    final KShadowMappedVariance s)
     throws JCGLException
   {
     KShadingProgramCommon.putShadowVarianceMinimumVariance(
       program,
-      shadow.getMinimumVariance());
+      s.getMinimumVariance());
     KShadingProgramCommon.putShadowVarianceFactorMinimum(
       program,
-      shadow.getFactorMinimum());
+      s.getFactorMinimum());
     KShadingProgramCommon.putShadowVarianceLightBleedReduction(
       program,
-      shadow.getLightBleedReduction());
+      s.getLightBleedReduction());
   }
 
   static void putShadowVarianceFactorMinimum(
@@ -1681,16 +1660,6 @@ import com.io7m.r1.types.RVectorReadable4FType;
       unit);
   }
 
-  static void putTextureLightSphericalCube(
-    final JCBProgramType program,
-    final TextureUnitType unit)
-    throws JCGLException
-  {
-    program.programUniformPutTextureUnit(
-      KShadingProgramCommon.TEXTURE_NAME_LIGHT_SPHERICAL_CUBE,
-      unit);
-  }
-
   static void putTextureLightSpherical2D(
     final JCBProgramType program,
     final TextureUnitType unit)
@@ -1698,6 +1667,16 @@ import com.io7m.r1.types.RVectorReadable4FType;
   {
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_LIGHT_SPHERICAL_2D,
+      unit);
+  }
+
+  static void putTextureLightSphericalCube(
+    final JCBProgramType program,
+    final TextureUnitType unit)
+    throws JCGLException
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_LIGHT_SPHERICAL_CUBE,
       unit);
   }
 

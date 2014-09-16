@@ -31,7 +31,6 @@ import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcache.LRUCacheType;
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferType;
 import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.FragmentShaderType;
@@ -44,8 +43,6 @@ import com.io7m.jcanephora.ProgramType;
 import com.io7m.jcanephora.ProgramUniformType;
 import com.io7m.jcanephora.ProgramUsableType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jcanephora.TextureFilterMagnification;
-import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.VertexShaderType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
@@ -64,7 +61,6 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jparasol.core.JPFragmentShaderMetaType;
 import com.io7m.jparasol.core.JPUncompactedProgramShaderMeta;
 import com.io7m.jparasol.core.JPVertexShaderMetaType;
-import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -88,9 +84,7 @@ import com.io7m.r1.kernel.KShadowMapUsableType;
 import com.io7m.r1.kernel.KShadowMapWithType;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KCamera;
-import com.io7m.r1.kernel.types.KDepthPrecision;
 import com.io7m.r1.kernel.types.KFaceSelection;
-import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
@@ -103,9 +97,11 @@ import com.io7m.r1.kernel.types.KScene;
 import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
 import com.io7m.r1.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
-import com.io7m.r1.kernel.types.KShadowMapBasicDescription;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasicBuilderType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedBasicBuilderType;
 import com.io7m.r1.kernel.types.KTransformMatrix4x4;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.tests.RFakeGL;
@@ -506,17 +502,16 @@ import com.io7m.r1.types.RVectorI3F;
     final Texture2DStaticUsableType lt = RFakeTextures2DStatic.newAnything(g);
     final KLightProjectiveWithShadowBasicBuilderType sl0b =
       KLightProjectiveWithShadowBasic.newBuilder(lt, proj);
-    final KFramebufferDepthDescription fb_desc =
-      KFramebufferDepthDescription.newDescription(
-        new AreaInclusive(
-          new RangeInclusiveL(0, 3),
-          new RangeInclusiveL(0, 3)),
-        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-        KDepthPrecision.DEPTH_PRECISION_16);
-    final KShadowMapBasicDescription map_desc =
-      KShadowMapBasicDescription.newDescription(fb_desc, 2);
-    sl0b.setShadow(KShadowMappedBasic.newMappedBasic(0.001f, 0.0f, map_desc));
+
+    final KShadowMapDescriptionBasicBuilderType smbm_b =
+      KShadowMapDescriptionBasic.newBuilder();
+    smbm_b.setSizeExponent(2);
+    final KShadowMappedBasicBuilderType smb_b =
+      KShadowMappedBasic.newBuilder();
+    smb_b.setMapDescription(smbm_b.build());
+    final KShadowMappedBasic smb = smb_b.build();
+
+    sl0b.setShadow(smb);
     final KLightProjectiveWithShadowBasic sl0 = sl0b.build();
     final KLightProjectiveWithShadowBasic sl1 = sl0b.build();
     final KLightProjectiveWithShadowBasic sl2 = sl0b.build();
@@ -651,19 +646,20 @@ import com.io7m.r1.types.RVectorI3F;
 
     final KSceneBuilderWithCreateType sb = KScene.newBuilder(camera);
     final Texture2DStaticUsableType lt = RFakeTextures2DStatic.newAnything(g);
+
     final KLightProjectiveWithShadowBasicBuilderType sl0b =
       KLightProjectiveWithShadowBasic.newBuilder(lt, proj);
-    final KFramebufferDepthDescription fb_desc =
-      KFramebufferDepthDescription.newDescription(
-        new AreaInclusive(
-          new RangeInclusiveL(0, 3),
-          new RangeInclusiveL(0, 3)),
-        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-        KDepthPrecision.DEPTH_PRECISION_16);
-    final KShadowMapBasicDescription map_desc =
-      KShadowMapBasicDescription.newDescription(fb_desc, 2);
-    sl0b.setShadow(KShadowMappedBasic.newMappedBasic(0.001f, 0.0f, map_desc));
+
+    final KShadowMapDescriptionBasicBuilderType smbm_b =
+      KShadowMapDescriptionBasic.newBuilder();
+    smbm_b.setSizeExponent(2);
+    final KShadowMappedBasicBuilderType smb_b =
+      KShadowMappedBasic.newBuilder();
+    smb_b.setMapDescription(smbm_b.build());
+    final KShadowMappedBasic smb = smb_b.build();
+
+    sl0b.setShadow(smb);
+
     final KLightProjectiveWithShadowBasic sl0 = sl0b.build();
     final KLightProjectiveWithShadowBasic sl1 = sl0b.build();
     final KLightProjectiveWithShadowBasic sl2 = sl0b.build();

@@ -24,7 +24,7 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightType;
-import com.io7m.r1.kernel.types.KProjectionType;
+import com.io7m.r1.kernel.types.KProjectionWithShapeType;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
@@ -35,9 +35,9 @@ import com.io7m.r1.types.RVectorI3F;
 
 public final class KLightGenerator implements Generator<KLightType>
 {
-  private final KLightDirectionalGenerator dir_gen;
-  private final KLightSphereWithoutShadowGenerator      sph_gen;
-  private final KLightProjectiveGenerator  pro_gen;
+  private final KLightDirectionalGenerator         dir_gen;
+  private final KLightSphereWithoutShadowGenerator sph_gen;
+  private final KLightProjectiveGenerator          pro_gen;
 
   public KLightGenerator(
     final JCGLImplementationType g)
@@ -49,7 +49,8 @@ public final class KLightGenerator implements Generator<KLightType>
     final Generator<RVectorI3F<RSpaceWorldType>> in_position_gen =
       new RVectorI3FGenerator<RSpaceWorldType>();
     final Generator<QuaternionI4F> in_quat_gen = new QuaternionI4FGenerator();
-    final Generator<KProjectionType> in_proj_gen = new KProjectionGenerator();
+    final Generator<KProjectionWithShapeType> in_proj_gen =
+      new KProjectionGenerator();
     final Generator<String> name_gen = new StringGenerator();
     final Generator<Texture2DStaticUsableType> in_tex_gen =
       RFakeTextures2DStatic.generator(g, name_gen);
@@ -60,7 +61,8 @@ public final class KLightGenerator implements Generator<KLightType>
 
     this.dir_gen =
       new KLightDirectionalGenerator(in_colour_gen, in_direction_gen);
-    this.sph_gen = new KLightSphereWithoutShadowGenerator(in_colour_gen, in_position_gen);
+    this.sph_gen =
+      new KLightSphereWithoutShadowGenerator(in_colour_gen, in_position_gen);
     this.pro_gen =
       new KLightProjectiveGenerator(
         in_colour_gen,

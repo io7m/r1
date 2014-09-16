@@ -16,6 +16,7 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
@@ -47,7 +48,7 @@ import com.io7m.r1.types.RVectorI3F;
     private float                               intensity;
     private QuaternionI4F                       orientation;
     private RVectorI3F<RSpaceWorldType>         position;
-    private KProjectionType                     projection;
+    private KProjectionWithShapeType            projection;
     private float                               range;
     private @Nullable Texture2DStaticUsableType texture;
 
@@ -67,7 +68,7 @@ import com.io7m.r1.types.RVectorI3F;
 
     Builder(
       final Texture2DStaticUsableType in_texture,
-      final KProjectionType in_projection)
+      final KProjectionWithShapeType in_projection)
     {
       this.color = RVectorI3F.one();
       this.intensity = 1.0f;
@@ -131,7 +132,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setProjection(
-      final KProjectionType in_projection)
+      final KProjectionWithShapeType in_projection)
     {
       this.projection = NullCheck.notNull(in_projection, "Projection");
     }
@@ -165,7 +166,7 @@ import com.io7m.r1.types.RVectorI3F;
 
   public static KLightProjectiveWithoutShadowBuilderType newBuilder(
     final Texture2DStaticUsableType in_texture,
-    final KProjectionType in_projection)
+    final KProjectionWithShapeType in_projection)
   {
     return new Builder(in_texture, in_projection);
   }
@@ -193,7 +194,7 @@ import com.io7m.r1.types.RVectorI3F;
   private final float                       intensity;
   private final QuaternionI4F               orientation;
   private final RVectorI3F<RSpaceWorldType> position;
-  private final KProjectionType             projection;
+  private final KProjectionWithShapeType    projection;
   private final float                       range;
   private final float                       range_inverse;
   private final Texture2DStaticUsableType   texture;
@@ -208,7 +209,7 @@ import com.io7m.r1.types.RVectorI3F;
     final float in_intensity,
     final float in_range,
     final float in_falloff,
-    final KProjectionType in_projection)
+    final KProjectionWithShapeType in_projection)
   {
     this.intensity = in_intensity;
     this.color = NullCheck.notNull(in_color, "Color");
@@ -251,7 +252,8 @@ import com.io7m.r1.types.RVectorI3F;
     lightAccept(
       final V v)
       throws E,
-        RException
+        RException,
+        JCGLException
   {
     return v.lightProjective(this);
   }
@@ -296,7 +298,7 @@ import com.io7m.r1.types.RVectorI3F;
     return this.position;
   }
 
-  @Override public KProjectionType lightProjectiveGetProjection()
+  @Override public KProjectionWithShapeType lightProjectiveGetProjection()
   {
     return this.projection;
   }

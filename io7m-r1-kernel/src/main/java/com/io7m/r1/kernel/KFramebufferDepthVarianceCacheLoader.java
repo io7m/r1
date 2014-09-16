@@ -39,7 +39,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 {
   /**
    * Construct a new cache loader.
-   * 
+   *
    * @param gi
    *          The OpenGL implementation
    * @param log
@@ -64,8 +64,8 @@ import com.io7m.r1.types.RExceptionJCGL;
     final LogUsableType in_log)
   {
     this.log =
-      NullCheck.notNull(in_log, "LogUsableType").with(
-        "framebuffer-rgba-cache");
+      NullCheck.notNull(in_log, "Log").with(
+        "framebuffer-depth-variance-cache");
     this.gi = NullCheck.notNull(in_gi, "OpenGL implementation");
   }
 

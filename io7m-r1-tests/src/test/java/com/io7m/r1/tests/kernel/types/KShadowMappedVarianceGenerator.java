@@ -18,17 +18,16 @@ package com.io7m.r1.tests.kernel.types;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
-import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
 import com.io7m.r1.kernel.types.KDepthPrecision;
 import com.io7m.r1.kernel.types.KDepthVariancePrecision;
-import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
-import com.io7m.r1.kernel.types.KShadowMapVarianceDescription;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVarianceBuilderType;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
+import com.io7m.r1.kernel.types.KShadowMappedVarianceBuilderType;
 import com.io7m.r1.tests.EnumGenerator;
 
 public final class KShadowMappedVarianceGenerator implements
@@ -61,38 +60,31 @@ public final class KShadowMappedVarianceGenerator implements
     final TextureFilterMinification in_filter_min =
       this.filter_min_gen.next();
     final KDepthPrecision in_precision_depth = this.depth_prec_gen.next();
-    final KDepthVariancePrecision in_precision_depth_variance =
+    final KDepthVariancePrecision in_var_prec =
       this.depth_var_prec_gen.next();
 
     final int exponent = (int) ((Math.random() * 32) + 1);
-    final int r = (int) Math.pow(2, exponent);
 
-    final KFramebufferDepthVarianceDescription in_description =
-      KFramebufferDepthVarianceDescription.newDescription(
-        new AreaInclusive(new RangeInclusiveL(0, r - 1), new RangeInclusiveL(
-          0,
-          r - 1)),
-        in_filter_mag,
-        in_filter_min,
-        in_precision_depth,
-        in_precision_depth_variance);
+    final KShadowMapDescriptionVarianceBuilderType smb_map_b =
+      KShadowMapDescriptionVariance.newBuilder();
+    smb_map_b.setDepthVariancePrecision(in_var_prec);
+    smb_map_b.setDepthPrecision(in_precision_depth);
+    smb_map_b.setMagnificationFilter(in_filter_mag);
+    smb_map_b.setMinificationFilter(in_filter_min);
+    smb_map_b.setSizeExponent(exponent);
 
-    final KShadowMapVarianceDescription description =
-      KShadowMapVarianceDescription.newDescription(in_description, exponent);
+    final KBlurParametersBuilderType bp_b = KBlurParameters.newBuilder();
+    bp_b.setBlurSize((float) Math.random());
+    bp_b.setPasses((int) (Math.random() * 8));
+    bp_b.setScale((float) Math.random());
+    final KBlurParameters bp = bp_b.build();
 
-    final float factor_min = (float) Math.random();
-    final float minimum_variance = (float) Math.random();
-    final float light_bleed_reduction = (float) Math.random();
-    final KBlurParametersBuilderType bb = KBlurParameters.newBuilder();
-    bb.setBlurSize((float) Math.random());
-    bb.setPasses((int) (Math.random() * 32));
-    bb.setScale((float) Math.random());
-
-    return KShadowMappedVariance.newMappedVariance(
-      factor_min,
-      minimum_variance,
-      light_bleed_reduction,
-      bb.build(),
-      description);
+    final KShadowMappedVarianceBuilderType bb =
+      KShadowMappedVariance.newBuilder();
+    bb.setLightBleedReduction((float) Math.random());
+    bb.setMinimumVariance((float) Math.random());
+    bb.setMinimumFactor((float) Math.random());
+    bb.setBlurParameters(bp);
+    return bb.build();
   }
 }

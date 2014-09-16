@@ -18,14 +18,13 @@ package com.io7m.r1.tests.kernel.types;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
-import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.r1.kernel.types.KDepthPrecision;
-import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
-import com.io7m.r1.kernel.types.KShadowMapBasicDescription;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBuilderType;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedBasicBuilderType;
 import com.io7m.r1.tests.EnumGenerator;
 
 public final class KShadowMappedBasicGenerator implements
@@ -56,24 +55,18 @@ public final class KShadowMappedBasicGenerator implements
     final KDepthPrecision in_precision_depth = this.depth_prec_gen.next();
 
     final int exponent = (int) ((Math.random() * 32) + 1);
-    final int r = (int) Math.pow(2, exponent);
-
-    final KFramebufferDepthDescription in_description =
-      KFramebufferDepthDescription.newDescription(
-        new AreaInclusive(new RangeInclusiveL(0, r - 1), new RangeInclusiveL(
-          0,
-          r - 1)),
-        in_filter_mag,
-        in_filter_min,
-        in_precision_depth);
     final float depth_bias = (float) Math.random();
 
-    final KShadowMapBasicDescription description =
-      KShadowMapBasicDescription.newDescription(in_description, exponent);
+    final KShadowMapDescriptionBuilderType smb_map_b =
+      KShadowMapDescriptionBasic.newBuilder();
+    smb_map_b.setDepthPrecision(in_precision_depth);
+    smb_map_b.setMagnificationFilter(in_filter_mag);
+    smb_map_b.setMinificationFilter(in_filter_min);
+    smb_map_b.setSizeExponent(exponent);
 
-    return KShadowMappedBasic.newMappedBasic(
-      depth_bias,
-      (float) Math.random(),
-      description);
+    final KShadowMappedBasicBuilderType bb = KShadowMappedBasic.newBuilder();
+    bb.setDepthBias(depth_bias);
+    bb.setMinimumFactor((float) Math.random());
+    return bb.build();
   }
 }

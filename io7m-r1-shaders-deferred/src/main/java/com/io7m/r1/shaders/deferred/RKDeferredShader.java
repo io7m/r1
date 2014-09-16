@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,6 +16,7 @@
 
 package com.io7m.r1.shaders.deferred;
 
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Unit;
@@ -87,7 +88,7 @@ import com.io7m.r1.types.RException;
     }
 
     b.append("  -- Far clip plane\n");
-    b.append("  parameter far_clip_distance : float;\n");
+    b.append("  parameter projection : Projection.t;\n");
     b.append("\n");
 
     b.append("  -- G-Buffer outputs\n");
@@ -192,6 +193,7 @@ import com.io7m.r1.types.RException;
     final StringBuilder b,
     final KLightType l,
     final FunctionType<StringBuilder, Unit> rgba)
+    throws JCGLException
   {
     try {
       b.append("shader fragment f is\n");
@@ -214,7 +216,7 @@ import com.io7m.r1.types.RException;
       b.append("  out out_0 : vector_4f as 0;\n");
       b.append("\n");
       b.append("  parameter screen_size       : vector_2f;\n");
-      b.append("  parameter far_clip_distance : float;\n");
+      b.append("  parameter projection        : Projection.t;\n");
       b.append("\n");
 
       l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
@@ -253,8 +255,8 @@ import com.io7m.r1.types.RException;
               {
                 b
                   .append("  -- Projective light (shadow mapping) parameters\n");
-                b.append("  parameter t_shadow_basic   : sampler_2d;\n");
-                b.append("  parameter shadow_basic     : ShadowBasic.t;\n");
+                b.append("  parameter t_shadow_basic : sampler_2d;\n");
+                b.append("  parameter shadow_basic   : ShadowBasic.t;\n");
                 b.append("\n");
                 return Unit.unit();
               }
@@ -276,7 +278,8 @@ import com.io7m.r1.types.RException;
 
         @Override public Unit lightSpherical(
           final KLightSphereType ls)
-          throws RException
+          throws RException,
+            JCGLException
         {
           return ls
             .sphereAccept(new KLightSphereVisitorType<Unit, RException>() {
@@ -284,7 +287,8 @@ import com.io7m.r1.types.RException;
                 final KLightSphereWithoutShadow lsws)
                 throws RException
               {
-                b.append("  -- Spherical light parameters\n");
+                b
+                  .append("  -- Spherical light parameters (without shadow)\n");
                 b.append("  parameter light_spherical : Light.t;\n");
                 b.append("\n");
                 return Unit.unit();
@@ -294,7 +298,8 @@ import com.io7m.r1.types.RException;
                 final KLightSphereTexturedCubeWithoutShadow lstcws)
                 throws RException
               {
-                b.append("  -- Spherical light parameters\n");
+                b
+                  .append("  -- Spherical light parameters (textured cube without shadow)\n");
                 b.append("  parameter light_spherical        : Light.t;\n");
                 b
                   .append("  parameter t_light_spherical_cube : sampler_cube;\n");
@@ -322,7 +327,7 @@ import com.io7m.r1.types.RException;
       b.append("  value eye_position =\n");
       b.append("    Transform.reconstruct_eye (\n");
       b.append("      f_position_eye,\n");
-      b.append("      far_clip_distance,\n");
+      b.append("      projection.z_far,\n");
       b.append("      normalized_depth_sample\n");
       b.append("    );\n");
       b.append("\n");
@@ -372,7 +377,6 @@ import com.io7m.r1.types.RException;
           b.append("      light_vectors,\n");
           b.append("      specular\n");
           b.append("    );\n");
-
           return Unit.unit();
         }
 
@@ -492,13 +496,13 @@ import com.io7m.r1.types.RException;
           b.append("      light_attenuation\n");
           b.append("    );\n");
           b.append("\n");
-
           return Unit.unit();
         }
 
         @Override public Unit lightSpherical(
           final KLightSphereType ls)
-          throws RException
+          throws RException,
+            JCGLException
         {
           b.append("  -- Spherical light vectors\n");
           b.append("  value light_vectors =\n");
@@ -514,6 +518,9 @@ import com.io7m.r1.types.RException;
                 final KLightSphereWithoutShadow lsws)
                 throws RException
               {
+                b
+                  .append("  value light_attenuation = light_vectors.attenuation;\n");
+                b.append("\n");
                 return Unit.unit();
               }
 
@@ -555,6 +562,9 @@ import com.io7m.r1.types.RException;
                   .append("      inverse_falloff = light_spherical.inverse_falloff\n");
                 b.append("    };\n");
                 b.append("\n");
+                b
+                  .append("  value light_attenuation = light_vectors.attenuation;\n");
+                b.append("\n");
                 return Unit.unit();
               }
             });
@@ -568,7 +578,7 @@ import com.io7m.r1.types.RException;
           b.append("  value light_diffuse : vector_3f =\n");
           b.append("    V3.multiply_scalar (\n");
           b.append("      light_diffuse_unattenuated,\n");
-          b.append("      light_vectors.attenuation\n");
+          b.append("      light_attenuation\n");
           b.append("    );\n");
           b.append("\n");
           b.append("  -- Spherical specular light term\n");
@@ -581,7 +591,7 @@ import com.io7m.r1.types.RException;
           b.append("  value light_specular : vector_3f =\n");
           b.append("    V3.multiply_scalar (\n");
           b.append("      light_specular_unattenuated,\n");
-          b.append("      light_vectors.attenuation\n");
+          b.append("      light_attenuation\n");
           b.append("    );\n");
           b.append("\n");
           return Unit.unit();
@@ -668,7 +678,7 @@ import com.io7m.r1.types.RException;
   {
     try {
       b.append("  value r_eye_depth =\n");
-      b.append("    F.divide (f_position_eye [z], far_clip_distance);\n");
+      b.append("    F.divide (f_position_eye [z], projection.z_far);\n");
       b.append("\n");
       b.append("  value r_normal =\n");
       b.append("    Normals.compress (n);\n");
@@ -807,6 +817,7 @@ import com.io7m.r1.types.RException;
 
   public static String moduleLight(
     final KLightType l)
+    throws JCGLException
   {
     final String code = l.lightGetCode();
 
@@ -862,6 +873,7 @@ import com.io7m.r1.types.RException;
   public static void moduleProgramLight(
     final StringBuilder b,
     final KLightType l)
+    throws JCGLException
   {
     try {
       l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
@@ -935,6 +947,7 @@ import com.io7m.r1.types.RException;
     b.append("import com.io7m.r1.core.Light;\n");
     b.append("import com.io7m.r1.core.Normals;\n");
     b.append("import com.io7m.r1.core.ProjectiveLight;\n");
+    b.append("import com.io7m.r1.core.Projection;\n");
     b.append("import com.io7m.r1.core.Refraction;\n");
     b.append("import com.io7m.r1.core.ShadowBasic;\n");
     b.append("import com.io7m.r1.core.ShadowVariance;\n");
