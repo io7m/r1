@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -83,7 +83,6 @@ import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KFramebufferRGBAUsableType;
 import com.io7m.r1.kernel.KProgramType;
-import com.io7m.r1.kernel.KRendererDebugType;
 import com.io7m.r1.kernel.KShaderCachePostprocessingType;
 import com.io7m.r1.kernel.KShadingProgramCommon;
 import com.io7m.r1.kernel.types.KCamera;
@@ -106,6 +105,8 @@ import com.io7m.r1.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.r1.kernel.types.KTranslucentType;
 import com.io7m.r1.kernel.types.KUnitQuad;
+import com.io7m.r1.kernel.types.KUnitQuadCache;
+import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionInstanceAlreadyLit;
@@ -196,6 +197,9 @@ final class ViewerSingleMainWindow implements Runnable
       this.quad = KUnitQuad.newQuad(in_gi.getGLCommon(), in_log);
       this.shader_caches = in_shader_caches;
 
+      final KUnitQuadCacheType quad_cache =
+        KUnitQuadCache.newCache(in_gi.getGLCommon(), in_log);
+
       this.renderer =
         in_renderer_cons
           .matchConstructor(new ExampleRendererConstructorVisitorType<ExampleRendererType, RException>() {
@@ -206,8 +210,10 @@ final class ViewerSingleMainWindow implements Runnable
             {
               return c.newRenderer(
                 in_log,
+                quad_cache,
                 in_shader_caches.getShaderDepthCache(),
                 in_shader_caches.getShaderDebugCache(),
+                in_shader_caches.getShaderPostprocessingCache(),
                 in_gi);
             }
 
@@ -520,18 +526,18 @@ final class ViewerSingleMainWindow implements Runnable
           throws RException
         {
           try {
-            final KFramebufferDeferredType fb = Runner.this.framebuffer;
-            assert fb != null;
-
             final KScene sc = scene_builder.sceneCreate();
             final KSceneBatchedDeferred batched =
               KSceneBatchedDeferred.fromScene(sc);
 
+            final KFramebufferDeferredType fb = Runner.this.framebuffer;
+            assert fb != null;
             fb.deferredFramebufferClear(
               Runner.this.gi.getGLCommon(),
               ViewerSingleMainWindow.CLEAR_COLOR,
               ViewerSingleMainWindow.CLEAR_DEPTH,
               ViewerSingleMainWindow.CLEAR_STENCIL);
+
             rd.rendererDeferredEvaluateFull(fb, batched);
             Runner.this.renderSceneResults(fb);
 
@@ -548,13 +554,17 @@ final class ViewerSingleMainWindow implements Runnable
           throws RException
         {
           try {
-            final KRendererDebugType dr = rd.rendererGetDebug();
-            final KFramebufferDeferredType fb = Runner.this.framebuffer;
-            assert fb != null;
-
             final KScene sc = scene_builder.sceneCreate();
 
-            dr.rendererDebugEvaluate(fb, sc);
+            final KFramebufferDeferredType fb = Runner.this.framebuffer;
+            assert fb != null;
+            fb.deferredFramebufferClear(
+              Runner.this.gi.getGLCommon(),
+              ViewerSingleMainWindow.CLEAR_COLOR,
+              ViewerSingleMainWindow.CLEAR_DEPTH,
+              ViewerSingleMainWindow.CLEAR_STENCIL);
+
+            rd.rendererDebugEvaluate(fb, sc);
             Runner.this.renderSceneResults(fb);
 
             return Unit.unit();

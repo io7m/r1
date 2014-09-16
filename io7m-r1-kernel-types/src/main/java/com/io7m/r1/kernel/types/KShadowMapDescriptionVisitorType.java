@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,50 +19,47 @@ package com.io7m.r1.kernel.types;
 import com.io7m.r1.types.RException;
 
 /**
- * A generic shadow map description visitor, returning values of type
- * <code>A</code> and raising exceptions of type <code>E</code>.
- * 
+ * The type of shadow map description visitors.
+ *
  * @param <A>
- *          The return value type of the implementing visitor
+ *          The type of returned values
  * @param <E>
- *          The type of exceptions raised by the implementing visitor
+ *          The type of raised exceptions
  */
 
 public interface KShadowMapDescriptionVisitorType<A, E extends Throwable>
 {
   /**
    * Visit a basic shadow map description.
-   * 
-   * @param sm
-   *          The map description
-   * @return A value of type <code>A</code>
-   * 
+   *
+   * @param m
+   *          The shadow map description
+   * @return A value of <code>A</code>
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  A shadowMapDescriptionBasic(
-    final KShadowMapBasicDescription sm)
-    throws E,
-      RException;
+  A basic(
+    KShadowMapDescriptionBasic m)
+    throws RException,
+      E;
 
   /**
    * Visit a variance shadow map description.
-   * 
-   * @param sm
-   *          The map description
-   * @return A value of type <code>A</code>
-   * 
+   *
+   * @param m
+   *          The shadow map description
+   * @return A value of <code>A</code>
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  A shadowMapDescriptionVariance(
-    final KShadowMapVarianceDescription sm)
-    throws E,
-      RException;
+  A variance(
+    KShadowMapDescriptionVariance m)
+    throws RException,
+      E;
 }

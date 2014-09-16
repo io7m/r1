@@ -16,33 +16,12 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.r1.kernel.types.KShadowType;
-
 /**
- * Optional debugging interface supported by renderers.
+ * Matrices available within the context of a spherical light.
  */
 
-public interface KRendererDebuggingType
+public interface KMatricesSphericalDualParaboloidType extends
+  KMatricesSphericalDualParaboloidValuesType
 {
-  /**
-   * The type of shadow map receivers.
-   */
-
-  interface DebugShadowMapReceiverType
-  {
-    void receive(
-      final KShadowType shadow,
-      final KShadowMap map);
-  }
-
-  /**
-   * Request that the renderer pass any generated shadow maps to
-   * <code>receiver</code> on the next evaluation.
-   * 
-   * @param receiver
-   *          The receiver
-   */
-
-  void debugForEachShadowMap(
-    final DebugShadowMapReceiverType receiver);
+  // No extra functions.
 }

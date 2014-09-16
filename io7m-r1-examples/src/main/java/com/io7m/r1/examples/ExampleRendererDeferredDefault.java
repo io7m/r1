@@ -51,7 +51,6 @@ import com.io7m.r1.kernel.KRendererDeferredControlType;
 import com.io7m.r1.kernel.KRendererDeferredOpaque;
 import com.io7m.r1.kernel.KRendererDeferredOpaqueType;
 import com.io7m.r1.kernel.KRendererDeferredType;
-import com.io7m.r1.kernel.KRendererType;
 import com.io7m.r1.kernel.KShaderCacheDebugType;
 import com.io7m.r1.kernel.KShaderCacheDeferredGeometryType;
 import com.io7m.r1.kernel.KShaderCacheDeferredLightType;
@@ -310,13 +309,6 @@ public final class ExampleRendererDeferredDefault extends
     throws RException
   {
     this.actual.rendererDeferredEvaluateFull(framebuffer, scene);
-  }
-
-  @Override public
-    Class<? extends KRendererType>
-    exampleRendererGetActualClass()
-  {
-    return this.actual.getClass();
   }
 
   @Override public ExampleRendererName exampleRendererGetName()

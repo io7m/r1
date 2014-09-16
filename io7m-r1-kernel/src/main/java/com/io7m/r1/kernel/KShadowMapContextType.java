@@ -16,7 +16,7 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.r1.kernel.types.KLightType;
+import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.types.RException;
 
 /**
@@ -27,7 +27,7 @@ public interface KShadowMapContextType
 {
   /**
    * Fetch the current shadow map for the given light.
-   * 
+   *
    * @param light
    *          The light.
    * @return A shadow map.
@@ -36,6 +36,6 @@ public interface KShadowMapContextType
    */
 
   KShadowMapUsableType getShadowMap(
-    final KLightType light)
+    final KLightWithShadowType light)
     throws RException;
 }

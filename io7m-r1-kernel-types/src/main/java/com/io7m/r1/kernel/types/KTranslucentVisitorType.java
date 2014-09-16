@@ -16,13 +16,12 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
  * A generic translucent visitor, returning values of type <code>A</code> and
  * raising exceptions of type <code>E</code>.
- * 
+ *
  * @param <A>
  *          The return value type of the implementing visitor
  * @param <E>
@@ -33,12 +32,11 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
 {
   /**
    * Visit a refractive instance.
-   * 
+   *
    * @param t
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws JCGLException
-   *           If required
+   * 
    * @throws RException
    *           If required
    * @throws E
@@ -48,17 +46,14 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
   A refractive(
     final KInstanceTranslucentRefractive t)
     throws E,
-      JCGLException,
       RException;
 
   /**
    * Visit a lit regular translucent instance.
-   * 
+   *
    * @param t
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws JCGLException
-   *           If required
    * @throws RException
    *           If required
    * @throws E
@@ -68,17 +63,14 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
   A regularLit(
     final KTranslucentRegularLit t)
     throws E,
-      JCGLException,
       RException;
 
   /**
    * Visit an unlit regular translucent instance.
-   * 
+   *
    * @param t
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws JCGLException
-   *           If required
    * @throws RException
    *           If required
    * @throws E
@@ -88,17 +80,14 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
   A regularUnlit(
     final KInstanceTranslucentRegular t)
     throws E,
-      JCGLException,
       RException;
 
   /**
    * Visit a lit specular-only instance.
-   * 
+   *
    * @param t
    *          The instance
    * @return A value of type <code>A</code>
-   * @throws JCGLException
-   *           If required
    * @throws RException
    *           If required
    * @throws E
@@ -108,6 +97,5 @@ public interface KTranslucentVisitorType<A, E extends Throwable>
   A specularOnly(
     final KTranslucentSpecularOnlyLit t)
     throws E,
-      JCGLException,
       RException;
 }

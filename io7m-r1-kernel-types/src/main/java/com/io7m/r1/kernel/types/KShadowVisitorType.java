@@ -16,60 +16,50 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
 
 /**
- * A generic shadow visitor, returning values of type <code>T</code> and
- * raising exceptions of type <code>E</code>.
- * 
- * @param <T>
- *          The return value type of the implementing visitor
+ * The type of shadow visitors.
+ *
+ * @param <A>
+ *          The type of returned values
  * @param <E>
- *          The type of exceptions raised by the implementing visitor
+ *          The type of raised exceptions
  */
 
-public interface KShadowVisitorType<T, E extends Throwable>
+public interface KShadowVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit a basic mapped shadow.
-   * 
+   * Visit a mapped basic shadow.
+   *
    * @param s
-   *          The mapped shadow
-   * @return A value of type <code>A</code>
-   * 
-   * @throws JCGLException
-   *           If required
+   *          The shadow
+   * @return A value of <code>A</code>
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  T shadowMappedBasic(
-    final KShadowMappedBasic s)
-    throws E,
-      JCGLException,
-      RException;
+  A mappedBasic(
+    KShadowMappedBasic s)
+    throws RException,
+      E;
 
   /**
-   * Visit a variance mapped shadow.
-   * 
+   * Visit a mapped variance shadow.
+   *
    * @param s
-   *          The mapped shadow
-   * @return A value of type <code>A</code>
-   * 
-   * @throws JCGLException
-   *           If required
+   *          The shadow
+   * @return A value of <code>A</code>
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  T shadowMappedVariance(
-    final KShadowMappedVariance s)
-    throws E,
-      JCGLException,
-      RException;
+  A mappedVariance(
+    KShadowMappedVariance s)
+    throws RException,
+      E;
 }

@@ -18,12 +18,10 @@ package com.io7m.r1.examples.scenes;
 
 import java.util.List;
 
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
@@ -36,7 +34,6 @@ import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
 import com.io7m.r1.kernel.types.KDepthPrecision;
 import com.io7m.r1.kernel.types.KDepthVariancePrecision;
 import com.io7m.r1.kernel.types.KFaceSelection;
-import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
@@ -48,8 +45,10 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
-import com.io7m.r1.kernel.types.KShadowMapVarianceDescription;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVarianceBuilderType;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
+import com.io7m.r1.kernel.types.KShadowMappedVarianceBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.types.RException;
@@ -163,24 +162,28 @@ public final class SPShadowVarianceDepthAlpha0 implements ExampleSceneType
       bp.setPasses(1);
       bp.setScale(1.0f);
 
-      final RangeInclusiveL range_x = new RangeInclusiveL(0, 255);
-      final RangeInclusiveL range_y = new RangeInclusiveL(0, 255);
-      final KFramebufferDepthVarianceDescription kfdvd =
-        KFramebufferDepthVarianceDescription.newDescription(
-          new AreaInclusive(range_x, range_y),
-          TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-          KDepthPrecision.DEPTH_PRECISION_24,
-          KDepthVariancePrecision.DEPTH_VARIANCE_PRECISION_32F);
-      final KShadowMapVarianceDescription kvd =
-        KShadowMapVarianceDescription.newDescription(kfdvd, 9);
-      b.setShadow(KShadowMappedVariance.newMappedVariance(
-        0.0f,
-        0.0001f,
-        0.1f,
-        bp.build(),
-        kvd));
+      final KShadowMapDescriptionVarianceBuilderType smv_map_b =
+        KShadowMapDescriptionVariance.newBuilder();
+      smv_map_b.setDepthPrecision(KDepthPrecision.DEPTH_PRECISION_24);
+      smv_map_b
+        .setDepthVariancePrecision(KDepthVariancePrecision.DEPTH_VARIANCE_PRECISION_32F);
+      smv_map_b
+        .setMagnificationFilter(TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+      smv_map_b
+        .setMinificationFilter(TextureFilterMinification.TEXTURE_FILTER_LINEAR);
+      smv_map_b.setSizeExponent(8);
+      final KShadowMapDescriptionVariance smv_map = smv_map_b.build();
 
+      final KShadowMappedVarianceBuilderType smv_b =
+        KShadowMappedVariance.newBuilder();
+      smv_b.setBlurParameters(bp.build());
+      smv_b.setMinimumFactor(0.0f);
+      smv_b.setMinimumVariance(0.0001f);
+      smv_b.setLightBleedReduction(0.1f);
+      smv_b.setMapDescription(smv_map);
+      final KShadowMappedVariance smv = smv_b.build();
+
+      b.setShadow(smv);
       b.setColor(ExampleSceneUtilities.RGB_WHITE);
       b.setRange(8.0f);
 

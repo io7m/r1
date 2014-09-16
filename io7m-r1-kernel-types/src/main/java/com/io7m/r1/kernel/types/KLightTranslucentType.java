@@ -40,14 +40,10 @@ public interface KLightTranslucentType extends KLightType
    *          The return type of the visitor
    * @param <E>
    *          The type of exceptions raised by the visitor
-   * @param <V>
-   *          A specific visitor subtype
    */
 
-    <A, E extends Throwable, V extends KLightTranslucentVisitorType<A, E>>
-    A
-    lightTranslucentAccept(
-      final V v)
-      throws RException,
-        E;
+  <A, E extends Throwable> A lightTranslucentAccept(
+    final KLightTranslucentVisitorType<A, E> v)
+    throws RException,
+      E;
 }

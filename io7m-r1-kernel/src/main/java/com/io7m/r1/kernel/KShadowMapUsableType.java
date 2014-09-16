@@ -16,44 +16,46 @@
 
 package com.io7m.r1.kernel;
 
+import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLResourceUsableType;
 import com.io7m.r1.types.RException;
 
 /**
  * The type of usable shadow maps.
  */
 
-public interface KShadowMapUsableType
+public interface KShadowMapUsableType extends JCGLResourceUsableType
 {
   /**
    * @return The number of bytes consumed by all resources that make up the
    *         shadow map.
    */
 
-  long kShadowMapGetSizeBytes();
+  long shadowMapGetSizeBytes();
 
   /**
-   * Accept a visitor.
+   * Be visited by the given generic visitor.
    *
-   * @param <A>
-   *          The type of values returned by the visitor
-   * @param <E>
-   *          The type of exceptions raised by the visitor
-   * @param <V>
-   *          The type of the visitor
    * @param v
    *          The visitor
    * @return The value returned by the visitor
    *
-   * @throws E
-   *           If the visitor raises <code>E</code>
    * @throws RException
-   *           If the visitor raises an {@link RException}
+   *           Iff the visitor raises {@link RException}
+   * @throws E
+   *           Iff the visitor raises <code>E</code
+   * @throws JCGLException
+   *           Iff the visitor raises {@link JCGLException}
+   *
+   * @param <T>
+   *          The return type of the visitor
+   * @param <E>
+   *          The type of exceptions raised by the visitor
    */
 
-    <A, E extends Throwable, V extends KShadowMapVisitorType<A, E>>
-    A
-    kShadowMapAccept(
-      final V v)
-      throws E,
-        RException;
+  <T, E extends Throwable> T shadowMapAccept(
+    KShadowMapVisitorType<T, E> v)
+    throws E,
+      JCGLException,
+      RException;
 }

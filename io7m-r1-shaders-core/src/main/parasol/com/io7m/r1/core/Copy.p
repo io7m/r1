@@ -62,4 +62,26 @@ module Copy is
     out out_d = depth_sample;
   end;
 
+  --
+  -- Copy depth to the [z] channel of an RGBA image.
+  --
+
+  shader program copy_depth_to_rgba is
+    vertex   VertexShaders.standard_clip;
+    fragment copy_depth_to_rgba_f;
+  end;
+
+  shader fragment copy_depth_to_rgba_f is
+    parameter t_image_depth : sampler_2d;
+    in        f_uv          : vector_2f;
+    out       out_0         : vector_4f as 0;
+  with
+    value z =
+      Sampler2D.texture (t_image_depth, f_uv) [z];
+    value rgba =
+      new vector_4f (z, z, z, 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
 end;
