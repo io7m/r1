@@ -51,7 +51,7 @@
     <s:paragraph>
       Any of the matrix functions that deal with rotations
       assume a right-handed coordinate system. This
-      matches the system used by <s:link-external
+      matches the system conventionally used by <s:link-external
       s:target="http://opengl.org">OpenGL</s:link-external> (and most
       mathematics literature). A right-handed coordinate system
       assumes that if the viewer is standing at the origin and
@@ -268,7 +268,19 @@
     <s:paragraph>
       <s:term s:type="term">Clip space</s:term> is a homogeneous coordinate
       system in which OpenGL performs <s:term s:type="term">clipping</s:term>
-      of primitives (such as triangles). Intuitively, coordinates in
+      of primitives (such as triangles). In OpenGL,
+      <s:term s:type="term">clip space</s:term> is effectively a
+      left-handed coordinate system by default
+      <s:footnote>
+        Because <s:link s:target="r1.dai.coords.normalized-device-space">normalized device space</s:link>
+        is a left-handed system by default, with the viewer looking towards
+        positive Z, and because the transformation from
+        <s:term s:type="term">clip space</s:term> to
+        <s:term s:type="term">normalized device space</s:term> for
+        a given point is the division of the components of that point
+        by the point's own <s:term s:type="expression">w</s:term>
+        component.
+      </s:footnote>. Intuitively, coordinates in
       <s:term s:type="term">eye space</s:term> are transformed with a
       <s:term s:type="term">projection</s:term> (normally either an
       <s:term s:type="term">orthographic</s:term> or
@@ -305,6 +317,13 @@
       <s:image s:source="images/proj_ortho.png">Orthographic projection</s:image>
     </s:formal-item>
     <s:paragraph>
+      Because <s:link s:target="r1.dai.coords.eye-space">eye space</s:link> is
+      a right-handed coordinate system by convention, but by default
+      <s:link s:target="r1.dai.coords.clip-space">clip space</s:link> is
+      left-handed, the projection matrix used will invert the sign of the
+      <s:term s:type="expression">z</s:term> component of any given point.
+    </s:paragraph>
+    <s:paragraph>
       In the <s:term s:type="package">${project.parent.name}</s:term> package,
       the <s:link s:target="r1.dai.concepts.camera">camera</s:link> produces
       a 4x4 <s:term s:type="term">projection matrix</s:term>. The
@@ -319,7 +338,13 @@
   <s:subsection xml:id="r1.dai.coords.normalized-device-space">
     <s:subsection-title>Normalized-device space</s:subsection-title>
     <s:paragraph>
-      <s:term s:type="term">Normalized-device space</s:term> is a coordinate
+      <s:term s:type="term">Normalized-device space</s:term> is, by default, a left-handed
+      <s:footnote>
+        The handedness of the coordinate space is dependent on the
+        <s:link s:target="r1.dai.coords.screen-space.depth-range">depth range</s:link>
+        configured for <s:link s:target="r1.dai.coords.screen-space">screen space</s:link>.
+      </s:footnote>
+      coordinate
       space in which <s:link s:target="r1.dai.coords.clip-space">clip space</s:link>
       coordinates have been divided by their own <s:term s:type="expression">w</s:term>
       component (discarding the resulting <s:term s:type="expression">w = 1</s:term>
@@ -346,7 +371,7 @@
   <s:subsection xml:id="r1.dai.coords.screen-space">
     <s:subsection-title>Screen space</s:subsection-title>
     <s:paragraph>
-      <s:term s:type="term">Screen space</s:term> is a left-handed coordinate
+      <s:term s:type="term">Screen space</s:term> is, by default, a left-handed coordinate
       system representing the screen (or window) that is displaying the actual
       results of rendering. If the screen is of width <s:term s:type="expression">w</s:term>
       and height <s:term s:type="expression">h</s:term>,
@@ -356,7 +381,7 @@
       The origin <s:term s:type="expression">(0, 0, 0)</s:term> is assumed to be at
       the bottom-left corner.
     </s:paragraph>
-    <s:paragraph>
+    <s:paragraph xml:id="r1.dai.coords.screen-space.depth-range">
       The <s:term s:type="term">depth range</s:term> is actually a configurable
       value, but the <s:term s:type="package">${project.parent.name}</s:term> package
       keeps the OpenGL default. From the <s:term s:type="expression">glDepthRange</s:term>
@@ -374,5 +399,10 @@ glDepthRange are both clamped to this range before they are accepted.
 The setting of (0,1) maps the near plane to 0 and the far plane to 1. 
 With this mapping, the depth buffer range is fully utilized.</s:verbatim>
     </s:formal-item>
+    <s:paragraph>
+      As OpenGL, by default, specifies a depth range of 
+      <s:term s:type="expression">[0, 1]</s:term>, the positive Z axis
+      points away from the observer, making the coordinate system left handed.
+    </s:paragraph>
   </s:subsection>
 </s:section>

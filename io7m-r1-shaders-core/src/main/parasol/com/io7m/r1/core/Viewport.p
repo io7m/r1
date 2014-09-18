@@ -1,10 +1,10 @@
 --
 -- Copyright © 2014 <code@io7m.com> http://io7m.com
--- 
+--
 -- Permission to use, copy, modify, and/or distribute this software for any
 -- purpose with or without fee is hereby granted, provided that the above
 -- copyright notice and this permission notice appear in all copies.
--- 
+--
 -- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 -- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 -- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,19 +16,11 @@
 
 package com.io7m.r1.core;
 
---
--- Projection types.
---
-
-module Projection is
+module Viewport is
 
   type t is record
-    near   : float,
-    far    : float,
-    left   : float,
-    right  : float,
-    top    : float,
-    bottom : float
+    inverse_width  : float, -- (1 / width of viewport)
+    inverse_height : float  -- (1 / height of viewport)
   end;
 
 end;
