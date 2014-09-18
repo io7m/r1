@@ -50,7 +50,6 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.QuaternionI4F;
-import com.io7m.jtensors.VectorI2F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFrustumMeshCacheType;
 import com.io7m.r1.kernel.types.KFrustumMeshUsableType;
@@ -446,7 +445,6 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
-    final TextureUnitType t_map_eye_depth,
     final JCBProgramType program,
     final KProjectionType projection)
   {
@@ -455,9 +453,6 @@ import com.io7m.r1.types.RVectorI4F;
     KShadingProgramCommon.putDeferredMapDepth(program, t_map_depth_stencil);
     KShadingProgramCommon.putDeferredMapNormal(program, t_map_normal);
     KShadingProgramCommon.putDeferredMapSpecular(program, t_map_specular);
-    KShadingProgramCommon.putDeferredMapLinearEyeDepth(
-      program,
-      t_map_eye_depth);
     KShadingProgramCommon.putProjection(program, projection);
   }
 
@@ -468,9 +463,11 @@ import com.io7m.r1.types.RVectorI4F;
     final AreaInclusive area = framebuffer.kFramebufferGetArea();
     final RangeInclusiveL range_x = area.getRangeX();
     final RangeInclusiveL range_y = area.getRangeY();
-    final VectorI2F s =
-      new VectorI2F(range_x.getInterval(), range_y.getInterval());
-    KShadingProgramCommon.putScreenSize(program, s);
+
+    KShadingProgramCommon.putViewport(
+      program,
+      1.0f / range_x.getInterval(),
+      1.0f / range_y.getInterval());
   }
 
   @Override public void rendererEvaluateOpaqueLit(
@@ -733,7 +730,6 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
-    final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
     final KShadowMapContextType shadow_map_context,
@@ -755,7 +751,6 @@ import com.io7m.r1.types.RVectorI4F;
             t_map_depth_stencil,
             t_map_normal,
             t_map_specular,
-            t_map_eye_depth,
             gc,
             mwo,
             ld);
@@ -795,7 +790,6 @@ import com.io7m.r1.types.RVectorI4F;
                         t_map_depth_stencil,
                         t_map_normal,
                         t_map_specular,
-                        t_map_eye_depth,
                         gc,
                         mdp,
                         shadow_map_context,
@@ -829,7 +823,6 @@ import com.io7m.r1.types.RVectorI4F;
                 t_map_depth_stencil,
                 t_map_normal,
                 t_map_specular,
-                t_map_eye_depth,
                 texture_unit_context_light,
                 gc,
                 mwo,
@@ -851,7 +844,6 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
-    final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
     final KLightDirectional ld)
@@ -886,7 +878,6 @@ import com.io7m.r1.types.RVectorI4F;
           t_map_depth_stencil,
           t_map_normal,
           t_map_specular,
-          t_map_eye_depth,
           program,
           mwo.getProjection());
 
@@ -923,7 +914,6 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
-    final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
@@ -938,7 +928,6 @@ import com.io7m.r1.types.RVectorI4F;
       t_map_depth_stencil,
       t_map_normal,
       t_map_specular,
-      t_map_eye_depth,
       gc,
       mdp,
       shadow_map_context,
@@ -952,7 +941,6 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
-    final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
@@ -1008,7 +996,6 @@ import com.io7m.r1.types.RVectorI4F;
                 t_map_depth_stencil,
                 t_map_normal,
                 t_map_specular,
-                t_map_eye_depth,
                 program,
                 mdp.getProjection());
 
@@ -1156,9 +1143,6 @@ import com.io7m.r1.types.RVectorI4F;
             texture_context.withTexture2D(gbuffer.geomGetTextureNormal());
           final TextureUnitType t_map_specular =
             texture_context.withTexture2D(gbuffer.geomGetTextureSpecular());
-          final TextureUnitType t_map_eye_depth =
-            texture_context.withTexture2D(gbuffer
-              .geomGetTextureLinearEyeDepth());
 
           for (final KLightType light : group.getLights()) {
             assert light != null;
@@ -1169,7 +1153,6 @@ import com.io7m.r1.types.RVectorI4F;
               t_map_depth_stencil,
               t_map_normal,
               t_map_specular,
-              t_map_eye_depth,
               gc,
               mwo,
               shadow_map_context,
@@ -1192,7 +1175,6 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
-    final TextureUnitType t_map_eye_depth,
     final KTextureUnitContextType texture_unit_context,
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
@@ -1230,7 +1212,6 @@ import com.io7m.r1.types.RVectorI4F;
                   t_map_depth_stencil,
                   t_map_normal,
                   t_map_specular,
-                  t_map_eye_depth,
                   texture_unit_context,
                   gc,
                   mwi,
@@ -1261,7 +1242,6 @@ import com.io7m.r1.types.RVectorI4F;
                 t_map_depth_stencil,
                 t_map_normal,
                 t_map_specular,
-                t_map_eye_depth,
                 gc,
                 mwi,
                 lsws,
@@ -1280,7 +1260,6 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
-    final TextureUnitType t_map_eye_depth,
     final KTextureUnitContextType texture_unit_context,
     final JCGLInterfaceCommonType gc,
     final KMatricesInstanceValuesType mwi,
@@ -1329,7 +1308,6 @@ import com.io7m.r1.types.RVectorI4F;
           t_map_depth_stencil,
           t_map_normal,
           t_map_specular,
-          t_map_eye_depth,
           program,
           projection);
 
@@ -1363,7 +1341,6 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
-    final TextureUnitType t_map_eye_depth,
     final JCGLInterfaceCommonType gc,
     final KMatricesInstanceValuesType mwi,
     final KLightSphereWithoutShadow ls,
@@ -1390,7 +1367,6 @@ import com.io7m.r1.types.RVectorI4F;
           t_map_depth_stencil,
           t_map_normal,
           t_map_specular,
-          t_map_eye_depth,
           program,
           projection);
 
