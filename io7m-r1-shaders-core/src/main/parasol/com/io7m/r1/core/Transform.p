@@ -46,6 +46,30 @@ module Transform is
     V2.multiply_scalar (V2.add_scalar (p, 1.0), 0.5);
 
   --
+  -- Transform NDC Z ([-1.0, 1.0]) to eye-space Z.
+  --
+
+  function ndc_to_eye_z (
+    m_projection : matrix_4x4f,
+    ndc          : float
+  ) : float =
+    let
+      value c2  = column m_projection 2;
+      value c3  = column m_projection 3;
+      value m44 = c3 [w];
+      value m43 = c3 [z];
+      value m34 = c2 [w];
+      value m33 = c2 [z];
+      
+      value z0 = F.multiply (ndc, m44);
+      value z1 = F.multiply (ndc, m34);
+      value num = F.subtract (z0, m43);
+      value den = F.subtract (z1, m33);
+    in
+      F.subtract (0.0, F.divide (num, den))
+    end;
+
+  --
   -- Transform texture coordinates ([0.0, 1.0]) to normalized 
   -- device coordinates ([-1.0, 1.0]).
   --
@@ -72,6 +96,13 @@ module Transform is
       F.multiply (screen_position [x], viewport.inverse_width),
       F.multiply (screen_position [y], viewport.inverse_height)
     );
+
+  --
+  -- Transform screen-space depth ([0.0, 1.0]) to NDC Z ([-1.0, 1.0]).
+  --
+
+  function screen_depth_to_ndc (d : float) : float =
+    F.subtract (F.multiply (d, 2.0), 1.0);
 
   --
   -- Transform clip-space coordinates to normalized device coordinates.
