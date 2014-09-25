@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,6 +27,7 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
@@ -65,6 +66,8 @@ import com.io7m.r1.kernel.KShadowMapRenderer;
 import com.io7m.r1.kernel.KShadowMapRendererType;
 import com.io7m.r1.kernel.KTranslucentRenderer;
 import com.io7m.r1.kernel.KTranslucentRendererType;
+import com.io7m.r1.kernel.KViewRaysCache;
+import com.io7m.r1.kernel.KViewRaysCacheType;
 import com.io7m.r1.kernel.Kernel;
 import com.io7m.r1.kernel.types.KFrustumMeshCache;
 import com.io7m.r1.kernel.types.KFrustumMeshCacheType;
@@ -259,6 +262,12 @@ public final class ExampleRendererDeferredDefault extends
         refraction_renderer,
         log);
 
+    final LRUCacheConfig view_rays_cache_config =
+      LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(60));
+    final KViewRaysCacheType in_view_rays_cache =
+      KViewRaysCache
+        .newCacheWithConfig(new Context(), view_rays_cache_config);
+
     final KRendererDeferredOpaqueType opaque_renderer =
       KRendererDeferredOpaque.newRenderer(
         gi,
@@ -267,7 +276,8 @@ public final class ExampleRendererDeferredDefault extends
         frustum_cache,
         in_shader_debug_cache,
         in_shader_deferred_geo_cache,
-        in_shader_deferred_light_cache);
+        in_shader_deferred_light_cache,
+        in_view_rays_cache);
 
     return new ExampleRendererDeferredDefault(KRendererDeferred.newRenderer(
       shadow_renderer,

@@ -27,89 +27,51 @@ module Reconstruction is
   import com.io7m.parasol.Vector3f as V3;
   import com.io7m.parasol.Vector4f as V4;
 
+  import com.io7m.r1.core.Bilinear;
+  import com.io7m.r1.core.Transform;
   import com.io7m.r1.core.Projection;
   import com.io7m.r1.core.Viewport;
-
-  --
-  -- Reconstruct the eye-space position given by the NDC position [ndc],
-  -- the screen-space depth in the range [0.0, 1.0] and the [projection].
-  --
+  import com.io7m.r1.core.ViewRays;
 
   function reconstruct_eye (
-    ndc          : vector_2f,
     screen_depth : float,
-    projection   : Projection.t
+    screen_uv    : vector_2f,
+    projection   : Projection.t,
+    m_projection : matrix_4x4f,
+    view_rays    : ViewRays.t
   ) : vector_4f =
     let
-      --
-      -- Eye Z is equal to:
-      --
-      --              near * far
-      -- -----------------------------------
-      -- (screen_depth * (far - near)) - far
-      --
+      value origin =
+        Bilinear.interpolate_3f (
+          view_rays.origin_x0y0,
+          view_rays.origin_x1y0,
+          view_rays.origin_x0y1,
+          view_rays.origin_x1y1,
+          screen_uv
+        );
 
-      value fmn =
-        F.subtract (projection.far, projection.near);
-      value db =
-        F.multiply (screen_depth, fmn);
-      value eye_z_num =
-        F.multiply (projection.near, projection.far);
-      value eye_z_den =
-        F.subtract (db, projection.far);
-      value eye_z =
-        F.divide (eye_z_num, eye_z_den);
+      value ray_normal =
+        Bilinear.interpolate_3f (
+          view_rays.ray_x0y0,
+          view_rays.ray_x1y0,
+          view_rays.ray_x0y1,
+          view_rays.ray_x1y1,
+          screen_uv
+        );
 
-      --
-      -- Eye-space x is equal to:
-      --
-      -- (-ndc.x * eye_z) * (right - left)   eye.z * (right + left)
-      -- --------------------------------- - ----------------------
-      --              2 * near                     2 * near
-      --
-
-      value near_2 =
-        F.multiply (2.0, projection.near);
-
-      value eye_x_l_num_l =
-        F.multiply (F.subtract (0.0, ndc [x]), eye_z);
-      value eye_x_l_num_r =
-        F.subtract (projection.right, projection.left);
-      value eye_x_l_num =
-        F.multiply (eye_x_l_num_l, eye_x_l_num_r);
-      value eye_x_r_num =
-        F.multiply (eye_z, F.add (projection.right, projection.left));
-      value eye_x_l =
-        F.divide (eye_x_l_num, near_2);
-      value eye_x_r =
-        F.divide (eye_x_r_num, near_2);
-      value eye_x =
-        F.subtract (eye_x_l, eye_x_r);
-
-      --
-      -- Eye-space y is equal to:
-      --
-      -- (-ndc.y * eye_z) * (top - bottom)   eye.z * (top + bottom)
-      -- --------------------------------- - ----------------------
-      --             2 * near                       2 * near
-      --
-
-      value eye_y_l_num_l =
-        F.multiply (F.subtract (0.0, ndc [y]), eye_z);
-      value eye_y_l_num_r =
-        F.subtract (projection.top, projection.bottom);
-      value eye_y_l_num =
-        F.multiply (eye_y_l_num_l, eye_y_l_num_r);
-      value eye_y_r_num =
-        F.multiply (eye_z, F.add (projection.top, projection.bottom));
-      value eye_y_l =
-        F.divide (eye_y_l_num, near_2);
-      value eye_y_r =
-        F.divide (eye_y_r_num, near_2);
-      value eye_y =
-        F.subtract (eye_y_l, eye_y_r);
+      value linear_z =
+        Transform.ndc_to_eye_z (
+          m_projection,
+          Transform.screen_depth_to_ndc (screen_depth)
+        );
+        
+      value ray =
+        V3.multiply_scalar (
+          ray_normal,
+          linear_z
+        );
     in
-      new vector_4f (eye_x, eye_y, eye_z, 1.0)
+      new vector_4f (V3.add (origin, ray), 1.0)
     end;
 
 end;

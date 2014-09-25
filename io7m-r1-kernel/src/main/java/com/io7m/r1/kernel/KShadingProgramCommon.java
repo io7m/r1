@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -95,63 +95,59 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
 @EqualityReference public final class KShadingProgramCommon
 {
-  private static final String ATTRIBUTE_NAME_VERTEX_UV               = "v_uv";
+  private static final String ATTRIBUTE_NAME_VERTEX_UV           = "v_uv";
 
-  private static final String MATRIX_NAME_DEFERRED_PROJECTION        =
-                                                                       "m_deferred_projective";
-  private static final String MATRIX_NAME_LIGHT_SPHERICAL            =
-                                                                       "m_light_spherical";
-  private static final String MATRIX_NAME_MODEL                      =
-                                                                       "m_model";
-  private static final String MATRIX_NAME_MODELVIEW                  =
-                                                                       "m_modelview";
-  private static final String MATRIX_NAME_NORMAL                     =
-                                                                       "m_normal";
-  private static final String MATRIX_NAME_POSITION                   =
-                                                                       "m_position";
-  private static final String MATRIX_NAME_PROJECTION                 =
-                                                                       "m_projection";
-  private static final String MATRIX_NAME_PROJECTION_INVERSE         =
-                                                                       "m_projection_inv";
-  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW       =
-                                                                       "m_projective_modelview";
-  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION      =
-                                                                       "m_projective_projection";
-  private static final String MATRIX_NAME_UV                         = "m_uv";
-  private static final String MATRIX_NAME_VIEW_INVERSE               =
-                                                                       "m_view_inv";
-  private static final String TEXTURE_NAME_ALBEDO                    =
-                                                                       "t_albedo";
-  private static final String TEXTURE_NAME_DEFERRED_ALBEDO           =
-                                                                       "t_map_albedo";
-  private static final String TEXTURE_NAME_DEFERRED_DEPTH            =
-                                                                       "t_map_depth";
-  private static final String TEXTURE_NAME_DEFERRED_NORMAL           =
-                                                                       "t_map_normal";
-  private static final String TEXTURE_NAME_DEFERRED_SPECULAR         =
-                                                                       "t_map_specular";
-  private static final String TEXTURE_NAME_EMISSION                  =
-                                                                       "t_emission";
-  private static final String TEXTURE_NAME_ENVIRONMENT               =
-                                                                       "t_environment";
-  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_2D        =
-                                                                       "t_light_spherical_2d";
-  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_CUBE      =
-                                                                       "t_light_spherical_cube";
-  private static final String TEXTURE_NAME_NORMAL                    =
-                                                                       "t_normal";
-  private static final String TEXTURE_NAME_PROJECTION                =
-                                                                       "t_projection";
-  private static final String TEXTURE_NAME_REFRACTION_SCENE          =
-                                                                       "t_refraction_scene";
-  private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK     =
-                                                                       "t_refraction_scene_mask";
-  private static final String TEXTURE_NAME_SHADOW_BASIC              =
-                                                                       "t_shadow_basic";
-  private static final String TEXTURE_NAME_SHADOW_VARIANCE           =
-                                                                       "t_shadow_variance";
-  private static final String TEXTURE_NAME_SPECULAR                  =
-                                                                       "t_specular";
+  private static final String MATRIX_NAME_DEFERRED_PROJECTION    =
+                                                                   "m_deferred_projective";
+  private static final String MATRIX_NAME_LIGHT_SPHERICAL        =
+                                                                   "m_light_spherical";
+  private static final String MATRIX_NAME_MODEL                  = "m_model";
+  private static final String MATRIX_NAME_MODELVIEW              =
+                                                                   "m_modelview";
+  private static final String MATRIX_NAME_NORMAL                 = "m_normal";
+  private static final String MATRIX_NAME_POSITION               =
+                                                                   "m_position";
+  private static final String MATRIX_NAME_PROJECTION             =
+                                                                   "m_projection";
+  private static final String MATRIX_NAME_PROJECTION_INVERSE     =
+                                                                   "m_projection_inv";
+  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW   =
+                                                                   "m_projective_modelview";
+  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION  =
+                                                                   "m_projective_projection";
+  private static final String MATRIX_NAME_UV                     = "m_uv";
+  private static final String MATRIX_NAME_VIEW_INVERSE           =
+                                                                   "m_view_inv";
+  private static final String TEXTURE_NAME_ALBEDO                = "t_albedo";
+  private static final String TEXTURE_NAME_DEFERRED_ALBEDO       =
+                                                                   "t_map_albedo";
+  private static final String TEXTURE_NAME_DEFERRED_DEPTH        =
+                                                                   "t_map_depth";
+  private static final String TEXTURE_NAME_DEFERRED_NORMAL       =
+                                                                   "t_map_normal";
+  private static final String TEXTURE_NAME_DEFERRED_SPECULAR     =
+                                                                   "t_map_specular";
+  private static final String TEXTURE_NAME_EMISSION              =
+                                                                   "t_emission";
+  private static final String TEXTURE_NAME_ENVIRONMENT           =
+                                                                   "t_environment";
+  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_2D    =
+                                                                   "t_light_spherical_2d";
+  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_CUBE  =
+                                                                   "t_light_spherical_cube";
+  private static final String TEXTURE_NAME_NORMAL                = "t_normal";
+  private static final String TEXTURE_NAME_PROJECTION            =
+                                                                   "t_projection";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE      =
+                                                                   "t_refraction_scene";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK =
+                                                                   "t_refraction_scene_mask";
+  private static final String TEXTURE_NAME_SHADOW_BASIC          =
+                                                                   "t_shadow_basic";
+  private static final String TEXTURE_NAME_SHADOW_VARIANCE       =
+                                                                   "t_shadow_variance";
+  private static final String TEXTURE_NAME_SPECULAR              =
+                                                                   "t_specular";
 
   /**
    * Bind the vertex color attribute of the given array to the color attribute
@@ -1813,5 +1809,35 @@ import com.io7m.r1.types.RVectorReadable4FType;
   {
     program.programUniformPutFloat("viewport.inverse_width", inverse_width);
     program.programUniformPutFloat("viewport.inverse_height", inverse_height);
+  }
+
+  static void putViewRays(
+    final JCBProgramType program,
+    final KViewRays view_rays)
+  {
+    program.programUniformPutVector3f(
+      "view_rays.origin_x0y0",
+      view_rays.getOriginX0Y0());
+    program.programUniformPutVector3f(
+      "view_rays.origin_x1y0",
+      view_rays.getOriginX1Y0());
+    program.programUniformPutVector3f(
+      "view_rays.origin_x0y1",
+      view_rays.getOriginX0Y1());
+    program.programUniformPutVector3f(
+      "view_rays.origin_x1y1",
+      view_rays.getOriginX1Y1());
+    program.programUniformPutVector3f(
+      "view_rays.ray_x0y0",
+      view_rays.getRayX0Y0());
+    program.programUniformPutVector3f(
+      "view_rays.ray_x1y0",
+      view_rays.getRayX1Y0());
+    program.programUniformPutVector3f(
+      "view_rays.ray_x0y1",
+      view_rays.getRayX0Y1());
+    program.programUniformPutVector3f(
+      "view_rays.ray_x1y1",
+      view_rays.getRayX1Y1());
   }
 }
