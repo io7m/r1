@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -111,26 +111,14 @@ import com.io7m.r1.types.RExceptionNotSupported;
           TextureFilterMinification.TEXTURE_FILTER_LINEAR,
           TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
 
-      final Texture2DStaticType eye_depth =
-        gl.texture2DStaticAllocateR32f(
-          "gbuffer-eye-depth",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-          TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
-
       final List<FramebufferColorAttachmentPointType> points =
         gl.framebufferGetColorAttachmentPoints();
       final FramebufferColorAttachmentPointType attach_0 = points.get(0);
       final FramebufferColorAttachmentPointType attach_1 = points.get(1);
       final FramebufferColorAttachmentPointType attach_2 = points.get(2);
-      final FramebufferColorAttachmentPointType attach_3 = points.get(3);
       assert attach_0 != null;
       assert attach_1 != null;
       assert attach_2 != null;
-      assert attach_3 != null;
 
       final List<FramebufferDrawBufferType> buffers =
         gl.framebufferGetDrawBuffers();
@@ -140,7 +128,6 @@ import com.io7m.r1.types.RExceptionNotSupported;
       mappings.put(buffers.get(0), attach_0);
       mappings.put(buffers.get(1), attach_1);
       mappings.put(buffers.get(2), attach_2);
-      mappings.put(buffers.get(3), attach_3);
 
       final FramebufferType fb = gl.framebufferAllocate();
       gl.framebufferDrawBind(fb);
@@ -150,7 +137,6 @@ import com.io7m.r1.types.RExceptionNotSupported;
         gl.framebufferDrawAttachColorTexture2DAt(fb, attach_0, albedo);
         gl.framebufferDrawAttachColorTexture2DAt(fb, attach_1, normal);
         gl.framebufferDrawAttachColorTexture2DAt(fb, attach_2, specular);
-        gl.framebufferDrawAttachColorTexture2DAt(fb, attach_3, eye_depth);
         gl.framebufferDrawSetBuffers(fb, mappings);
 
         final FramebufferStatus status = gl.framebufferDrawValidate(fb);
@@ -171,18 +157,11 @@ import com.io7m.r1.types.RExceptionNotSupported;
         gl.framebufferDrawUnbind();
       }
 
-      return new KGeometryBuffer_GL3ES3(
-        depth,
-        albedo,
-        normal,
-        specular,
-        eye_depth,
-        fb);
+      return new KGeometryBuffer_GL3ES3(depth, albedo, normal, specular, fb);
     }
 
     private final Texture2DStaticType albedo;
     private final Texture2DStaticType depth;
-    private final Texture2DStaticType eye_depth;
     private final FramebufferType     fb;
     private final Texture2DStaticType normal;
     private final Texture2DStaticType specular;
@@ -192,14 +171,12 @@ import com.io7m.r1.types.RExceptionNotSupported;
       final Texture2DStaticType in_albedo,
       final Texture2DStaticType in_normal,
       final Texture2DStaticType in_specular,
-      final Texture2DStaticType in_eye_depth,
       final FramebufferType in_fb)
     {
       this.depth = NullCheck.notNull(in_depth, "Depth");
       this.albedo = NullCheck.notNull(in_albedo, "Albedo");
       this.normal = NullCheck.notNull(in_normal, "Normal");
       this.specular = NullCheck.notNull(in_specular, "Specular");
-      this.eye_depth = NullCheck.notNull(in_eye_depth, "Eye depth");
       this.fb = NullCheck.notNull(in_fb, "Framebuffer");
     }
 
@@ -214,7 +191,6 @@ import com.io7m.r1.types.RExceptionNotSupported;
         gc.texture2DStaticDelete(this.depth);
         gc.texture2DStaticDelete(this.normal);
         gc.texture2DStaticDelete(this.specular);
-        gc.texture2DStaticDelete(this.eye_depth);
       } catch (final JCGLException e) {
         throw RExceptionJCGL.fromJCGLException(e);
       } finally {
@@ -235,11 +211,6 @@ import com.io7m.r1.types.RExceptionNotSupported;
     @Override public Texture2DStaticUsableType geomGetTextureDepthStencil()
     {
       return this.depth;
-    }
-
-    @Override public Texture2DStaticUsableType geomGetTextureLinearEyeDepth()
-    {
-      return this.eye_depth;
     }
 
     @Override public Texture2DStaticUsableType geomGetTextureNormal()

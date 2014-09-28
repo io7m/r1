@@ -30,7 +30,7 @@ import com.io7m.r1.types.RTransformProjectionType;
  */
 
 @EqualityStructural public final class KProjectionOrthographic implements
-  KProjectionWithShapeType
+  KProjectionType
 {
   /**
    * Construct a new orthographic projection.
@@ -192,13 +192,5 @@ import com.io7m.r1.types.RTransformProjectionType;
   @Override public float projectionGetZNear()
   {
     return this.z_near;
-  }
-
-  @Override public <T, E extends Exception> T projectionWithShapeAccept(
-    final KProjectionWithShapeVisitorType<T, E> v)
-    throws RException,
-      E
-  {
-    return v.orthographic(this);
   }
 }

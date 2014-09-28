@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -51,9 +51,9 @@ import com.io7m.r1.types.RVectorI3F;
     private float                               intensity;
     private QuaternionI4F                       orientation;
     private RVectorI3F<RSpaceWorldType>         position;
-    private KProjectionWithShapeType            projection;
+    private KProjectionType                     projection;
     private float                               range;
-    private KShadowMappedBasic       shadow;
+    private KShadowMappedBasic                  shadow;
     private @Nullable Texture2DStaticUsableType texture;
 
     Builder(
@@ -73,7 +73,7 @@ import com.io7m.r1.types.RVectorI3F;
 
     Builder(
       final Texture2DStaticUsableType in_texture,
-      final KProjectionWithShapeType in_projection)
+      final KProjectionType in_projection)
     {
       this.color = RVectorI3F.one();
       this.intensity = 1.0f;
@@ -139,7 +139,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setProjection(
-      final KProjectionWithShapeType in_projection)
+      final KProjectionType in_projection)
     {
       this.projection = NullCheck.notNull(in_projection, "Projection");
     }
@@ -179,7 +179,7 @@ import com.io7m.r1.types.RVectorI3F;
 
   public static KLightProjectiveWithShadowBasicBuilderType newBuilder(
     final Texture2DStaticUsableType in_texture,
-    final KProjectionWithShapeType in_projection)
+    final KProjectionType in_projection)
   {
     return new Builder(in_texture, in_projection);
   }
@@ -201,20 +201,20 @@ import com.io7m.r1.types.RVectorI3F;
     return new Builder(p);
   }
 
-  private final RVectorI3F<RSpaceRGBType>     color;
+  private final RVectorI3F<RSpaceRGBType>   color;
 
-  private final float                         falloff;
-  private final float                         falloff_inverse;
-  private final float                         intensity;
-  private final QuaternionI4F                 orientation;
-  private final RVectorI3F<RSpaceWorldType>   position;
-  private final KProjectionWithShapeType      projection;
-  private final float                         range;
-  private final float                         range_inverse;
-  private final KShadowMappedBasic shadow;
-  private final Texture2DStaticUsableType     texture;
-  private final int                           textures;
-  private final KTransformType                transform;
+  private final float                       falloff;
+  private final float                       falloff_inverse;
+  private final float                       intensity;
+  private final QuaternionI4F               orientation;
+  private final RVectorI3F<RSpaceWorldType> position;
+  private final KProjectionType             projection;
+  private final float                       range;
+  private final float                       range_inverse;
+  private final KShadowMappedBasic          shadow;
+  private final Texture2DStaticUsableType   texture;
+  private final int                         textures;
+  private final KTransformType              transform;
 
   private KLightProjectiveWithShadowBasic(
     final Texture2DStaticUsableType in_texture,
@@ -224,7 +224,7 @@ import com.io7m.r1.types.RVectorI3F;
     final float in_intensity,
     final float in_range,
     final float in_falloff,
-    final KProjectionWithShapeType in_projection,
+    final KProjectionType in_projection,
     final KShadowMappedBasic in_shadow)
   {
     this.intensity = in_intensity;
@@ -329,7 +329,7 @@ import com.io7m.r1.types.RVectorI3F;
     return this.position;
   }
 
-  @Override public KProjectionWithShapeType lightProjectiveGetProjection()
+  @Override public KProjectionType lightProjectiveGetProjection()
   {
     return this.projection;
   }
