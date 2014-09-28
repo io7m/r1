@@ -104,6 +104,13 @@
       <version>${project.version}</version>
       <classifier>javadoc</classifier>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-r1-shaders-core</artifactId>
+      <version>${project.version}</version>
+      <classifier>shader-sources</classifier>
+      <type>zip</type>
+    </dependency>
   </dependencies>
 
   <reporting>
@@ -152,6 +159,29 @@
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
+      </plugin>
+
+      <!-- Unpack core shader sources -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.8</version>
+        <executions>
+          <execution>
+            <id>unpack-shaders-core-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeGroupIds>${project.groupId}</includeGroupIds>
+              <includeArtifactIds>io7m-r1-shaders-core</includeArtifactIds>
+              <includeClassifiers>shader-sources</includeClassifiers>
+              <includeTypes>zip</includeTypes>
+              <outputDirectory>${project.build.directory}/documentation/parasol/</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- Produce custom manifest in jar files -->
@@ -396,6 +426,19 @@
                     <versionRange>[1.2,)</versionRange>
                     <goals>
                       <goal>instrument</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <versionRange>[2.8,)</versionRange>
+                    <goals>
+                      <goal>unpack-dependencies</goal>
                     </goals>
                   </pluginExecutionFilter>
                   <action>

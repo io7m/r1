@@ -16,6 +16,8 @@ module Vector4f (
   T (V4),
   x, y, z, w,
   add4,
+  dot4,
+  div_s,
   interpolate,
   magnitude,
   magnitude_squared,
@@ -52,6 +54,11 @@ mult4 (V4 x0 y0 z0 w0) (V4 x1 y1 z1 w1) =
 scale :: T -> Float -> T
 scale (V4 x0 y0 z0 w0) s =
   V4 (x0 * s) (y0 * s) (z0 * s) (w0 * s)
+
+-- | Divide vectors by scalars, @v * s@.
+div_s :: T -> Float -> T
+div_s (V4 x0 y0 z0 w0) s =
+  V4 (x0 / s) (y0 / s) (z0 / s) (w0 / s)
 
 -- | Dot product of @v0@ and @v1@.
 dot4 :: T -> T -> Float

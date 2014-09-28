@@ -13,7 +13,7 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 module Vector2f (
-  T (V2),
+  T (V2), x, y,
   add2,
   magnitude,
   magnitude_squared,
@@ -24,9 +24,10 @@ module Vector2f (
   sub2
 ) where
 
-data T =
-  V2 Float Float
-    deriving (Eq, Ord, Show)
+data T = V2 {
+  x :: Float,
+  y :: Float
+} deriving (Eq, Ord, Show)
 
 -- | Add vectors, @v0 + v1@.
 add2 :: T -> T -> T
@@ -75,3 +76,4 @@ normalize v =
 negation :: T -> T
 negation (V2 x y) =
   V2 (0.0 - x) (0.0 - y)
+

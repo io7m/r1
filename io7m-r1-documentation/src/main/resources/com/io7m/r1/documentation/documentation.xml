@@ -315,6 +315,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.]]>
     <xi:include href="dai-instances.xml"/>
     <xi:include href="dai-scenes.xml"/>
     <xi:include href="dai-deferred.xml"/>
+    <xi:include href="dai-deferred-position-recon.xml"/>
     <xi:include href="dai-forward-translucents.xml"/>
     <xi:include href="dai-normal-mapping.xml"/>
     <xi:include href="dai-environment-mapping.xml"/>

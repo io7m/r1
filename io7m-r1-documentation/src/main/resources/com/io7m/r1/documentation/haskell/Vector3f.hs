@@ -13,7 +13,7 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 module Vector3f (
-  T (V3),
+  T (V3), x, y, z,
   add3,
   cross,
   dot3,
@@ -26,9 +26,11 @@ module Vector3f (
   sub3
 ) where
 
-data T =
-  V3 Float Float Float
-    deriving (Eq, Ord, Show)
+data T = V3 {
+  x :: Float,
+  y :: Float,
+  z :: Float
+} deriving (Eq, Ord, Show)
 
 -- | Add vectors, @v0 + v1@.
 add3 :: T -> T -> T

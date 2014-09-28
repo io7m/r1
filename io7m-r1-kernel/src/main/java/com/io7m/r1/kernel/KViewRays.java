@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -62,12 +62,38 @@ public final class KViewRays
     final VectorM4F out_ray,
     final VectorM4F out_origin)
   {
+    /**
+     * Transform NDC → Clip.
+     */
+
     MatrixM4x4F.multiplyVector4FWithContext(c, m, near, temp_near);
     MatrixM4x4F.multiplyVector4FWithContext(c, m, far, temp_far);
+
+    /**
+     * Normalize in terms of w: NDC coordinates would usually be lacking a w
+     * component, but the w component included in the original frustum corners
+     * is necessary in order to multiply by a 4x4 matrix.
+     */
+
     VectorM4F.scaleInPlace(temp_near, 1.0 / temp_near.getWF());
     VectorM4F.scaleInPlace(temp_far, 1.0 / temp_far.getWF());
+
+    /**
+     * Subtract the near corner from the far corner to produce a ray.
+     */
+
     VectorM4F.subtract(temp_far, temp_near, out_ray);
+
+    /**
+     * Normalize the ray in terms of z.
+     */
+
     VectorM4F.scaleInPlace(out_ray, 1.0 / out_ray.getZF());
+
+    /**
+     * Subtract the scaled ray from the near corner to produce an origin.
+     */
+
     VectorM4F.subtract(
       temp_near,
       VectorI4F.scale(out_ray, temp_near.getZF()),
