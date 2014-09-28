@@ -440,8 +440,9 @@
       value of that pixel, and the <s:term s:type="term">normal vector</s:term>
       of the surface at that pixel. If the postprocessor also has access to the
       <s:term s:type="term">viewing projection</s:term> that was used to produce
-      the scene, then it can actually efficiently reconstruct the original
-      <s:link s:target="r1.dai.coords.eye-space">eye-space</s:link>
+      the scene, then it can actually efficiently 
+      <s:link s:target="r1.dai.deferred-position-recon">reconstruct</s:link>
+      the original <s:link s:target="r1.dai.coords.eye-space">eye-space</s:link>
       position of the pixel! This allows for interesting effects
       such as <s:term s:type="term">fog</s:term> and
       <s:term s:type="term">depth-of-field</s:term> simulation, that rely on

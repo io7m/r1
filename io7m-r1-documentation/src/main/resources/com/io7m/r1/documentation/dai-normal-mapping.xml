@@ -211,7 +211,7 @@
     <s:paragraph>
       It is reasonably easy to infer the general directions of vectors from
       a visual inspection of a tangent space normal map alone. In the above
-      image, the flat faces of the bricks are most pale blue. This is because the
+      image, the flat faces of the bricks are mostly pale blue. This is because the
       tangent space normal for that surface is pointing straight towards the
       viewer - mostly towards the positive <s:term s:type="variable">z</s:term>
       direction. The right edges of the bricks in the image are tinted with a
