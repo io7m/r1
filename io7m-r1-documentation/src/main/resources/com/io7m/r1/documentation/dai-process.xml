@@ -20,7 +20,7 @@
   xml:id="r1.dai.process"
   xmlns:s="http://schemas.io7m.com/structural/2.1.0"
   xmlns:xi="http://www.w3.org/2001/XInclude">
-  <s:section-title>Process</s:section-title>
+  <s:section-title>Rendering Process</s:section-title>
 
   <s:paragraph>
     This section attempts to give a high-level view of the rendering

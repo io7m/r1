@@ -29,4 +29,12 @@
       Overview.
     </s:paragraph>
   </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred.g-buffer">
+    <s:subsection-title>G-Buffer</s:subsection-title>
+    <s:paragraph>
+      G-Buffer.
+    </s:paragraph>
+  </s:subsection>
+
 </s:section>
