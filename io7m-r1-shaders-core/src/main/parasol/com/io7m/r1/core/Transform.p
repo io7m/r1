@@ -27,6 +27,83 @@ module Transform is
   import com.io7m.parasol.Vector3f as V3;
   import com.io7m.parasol.Vector4f as V4;
 
+  import com.io7m.r1.core.Projection;
+  import com.io7m.r1.core.Viewport;
+
+  --
+  -- Transform normalized device coordinates ([-1.0, 1.0]) to 
+  -- texture coordinates ([0.0, 1.0]).
+  --
+
+  function ndc_to_texture3 (
+    p : vector_3f
+  ) : vector_3f =
+    V3.multiply_scalar (V3.add_scalar (p, 1.0), 0.5);
+
+  function ndc_to_texture2 (
+    p : vector_2f
+  ) : vector_2f =
+    V2.multiply_scalar (V2.add_scalar (p, 1.0), 0.5);
+
+  --
+  -- Transform NDC Z ([-1.0, 1.0]) to eye-space Z.
+  --
+
+  function ndc_to_eye_z (
+    m_projection : matrix_4x4f,
+    ndc          : float
+  ) : float =
+    let
+      value c2  = column m_projection 2;
+      value c3  = column m_projection 3;
+      value m44 = c3 [w];
+      value m43 = c3 [z];
+      value m34 = c2 [w];
+      value m33 = c2 [z];
+      
+      value z0 = F.multiply (ndc, m44);
+      value z1 = F.multiply (ndc, m34);
+      value num = F.subtract (z0, m43);
+      value den = F.subtract (z1, m33);
+    in
+      F.subtract (0.0, F.divide (num, den))
+    end;
+
+  --
+  -- Transform texture coordinates ([0.0, 1.0]) to normalized 
+  -- device coordinates ([-1.0, 1.0]).
+  --
+
+  function texture_to_ndc3 (
+    p : vector_3f
+  ) : vector_3f =
+    V3.subtract_scalar (V3.multiply_scalar (p, 2.0), 1.0);
+
+  function texture_to_ndc2 (
+    p : vector_2f
+  ) : vector_2f =
+    V2.subtract_scalar (V2.multiply_scalar (p, 2.0), 1.0);
+
+  --
+  -- Transform screen-space coordinates to UV coordinates.
+  --
+  
+  function screen_to_texture2 (
+    viewport        : Viewport.t,
+    screen_position : vector_2f
+  ) : vector_2f =
+    new vector_2f (
+      F.multiply (screen_position [x], viewport.inverse_width),
+      F.multiply (screen_position [y], viewport.inverse_height)
+    );
+
+  --
+  -- Transform screen-space depth ([0.0, 1.0]) to NDC Z ([-1.0, 1.0]).
+  --
+
+  function screen_depth_to_ndc (d : float) : float =
+    F.subtract (F.multiply (d, 2.0), 1.0);
+
   --
   -- Transform clip-space coordinates to normalized device coordinates.
   --
@@ -41,88 +118,12 @@ module Transform is
     );
 
   --
-  -- Transform normalized device coordinates coordinates to texture coordinates.
-  --
-
-  function ndc_to_texture (
-    p : vector_3f
-  ) : vector_3f =
-    let
-      value p_added =
-        V3.add_scalar (p, 1.0);
-      value p_scaled =
-        V3.multiply_scalar (p_added, 0.5);
-    in
-      p_scaled
-    end;
-
-  --
-  -- Transform screen-space coordinates to UV coordinates. So, for a (640, 480)
-  -- screen:
-  --
-  -- screen_to_uv (640, 480) (0,   0)   = (0.0, 0.0)
-  -- screen_to_uv (640, 480) (320, 240) = (0.5, 0.5)
-  -- screen_to_uv (640, 480) (640, 480) = (1.0, 1.0)
-  --
-  
-  function screen_to_texture (
-    screen_size     : vector_2f,
-    screen_position : vector_2f
-  ) : vector_2f =
-    V2.divide (screen_position, screen_size);
-
-  --
   -- Transform clip-space coordinates to texture coordinates.
   --
 
   function clip_to_texture (
     p : vector_4f
   ) : vector_3f =
-    ndc_to_texture (clip_to_ndc (p));
-
-  --
-  -- Calculate the normalized device coordinates of the given 
-  -- screen-space coordinates, assuming a screen of the given 
-  -- [screen_size].
-  --
-
-  function screen_to_ndc (
-    screen_position : vector_2f,
-    screen_size     : vector_2f
-  ) : vector_2f =
-    let
-      value p =
-        V2.divide (screen_position, screen_size);
-    in
-      V2.subtract_scalar (V2.multiply_scalar (p, 2.0), 1.0)
-    end;
-
-  --
-  -- Given a view-space position [v_position_eye] (typically that of a light volume),
-  -- the distance to the far clipping plane [far_clip_distance], and the normalized
-  -- view-space depth of a pixel [normalized_depth], construct the original eye-space 
-  -- position.
-  --
-
-  function reconstruct_eye (
-    v_position_eye    : vector_4f,
-    far_clip_distance : float,
-    normalized_depth  : float
-  ) : vector_4f =
-    let
-      value fcd_over_z =
-        F.divide (far_clip_distance, v_position_eye [z]);
-
-      value view_ray =
-        new vector_3f (
-          V2.multiply_scalar (v_position_eye [x y], fcd_over_z),
-          far_clip_distance
-        );
-    in
-      new vector_4f (
-        V3.multiply_scalar (view_ray, normalized_depth),
-        1.0
-      )
-    end;
+    ndc_to_texture3 (clip_to_ndc (p));
 
 end;

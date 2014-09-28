@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -36,6 +36,7 @@ import com.io7m.jlog.LogPolicyProperties;
 import com.io7m.jlog.LogPolicyType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.Nullable;
+import com.io7m.jparasol.CompilerError;
 import com.io7m.jparasol.core.GVersionES;
 import com.io7m.jparasol.core.GVersionFull;
 import com.io7m.jparasol.frontend.Compiler;
@@ -101,68 +102,79 @@ import com.io7m.r1.shaders.deferred.RKDeferredShader;
       }
     }
 
-    final List<KMaterialOpaqueRegular> cases_opaque =
-      new RKDMaterialCases().getCasesGeometryOpaqueRegular();
-
-    RShadersDeferredGeometryMakeAll.makeSources(
-      log,
-      cases_opaque,
-      out_parasol_dir);
-
-    final CompilerBatch batch = CompilerBatch.newBatch();
-
-    {
-      final Pair<File, Position> meta =
-        Pair.pair(new File("<stdin>"), Position.ZERO);
-
-      for (final KMaterialOpaqueRegular c : cases_opaque) {
-        assert c != null;
-        final String code = c.materialGetCode();
-        final String name =
-          String.format(
-            "%s.%s.p",
-            RKDeferredShader.PACKAGE_DEFERRED_GEOMETRY_REGULAR,
-            code);
-        assert name != null;
-
-        batch.addShaderWithOutputName(
-          TASTShaderNameFlat.parse(name, meta),
-          code);
-      }
-    }
-
-    final List<File> sources =
-      RShadersDeferredGeometryMakeAll.makeSourcesList(out_parasol_dir);
-
-    exec =
-      Executors
-        .newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
-    assert exec != null;
-
     try {
-      final ZipOutputStream archive_stream =
-        CopyZip.copyZip(log, out_archive);
-      final GSerializerType serializer =
-        GSerializerZip.newSerializer(archive_stream, log);
+      final List<KMaterialOpaqueRegular> cases_opaque =
+        new RKDMaterialCases().getCasesGeometryOpaqueRegular();
 
-      final Compiler c = Compiler.newCompiler(log, exec);
-      c.setCompacting(true);
-      c.setGeneratingCode(true);
+      RShadersDeferredGeometryMakeAll.makeSources(
+        log,
+        cases_opaque,
+        out_parasol_dir);
 
-      final SortedSet<GVersionES> es =
-        new TreeSet<GVersionES>(GVersionES.ALL);
-      es.remove(GVersionES.GLSL_ES_100);
+      final CompilerBatch batch = CompilerBatch.newBatch();
 
-      c.setRequiredES(es);
-      c.setRequiredFull(GVersionFull.ALL);
-      c.setSerializer(serializer);
-      c.runForFiles(batch, sources);
+      {
+        final Pair<File, Position> meta =
+          Pair.pair(new File("<stdin>"), Position.ZERO);
 
-      serializer.close();
+        for (final KMaterialOpaqueRegular c : cases_opaque) {
+          assert c != null;
+          final String code = c.materialGetCode();
+          final String name =
+            String.format(
+              "%s.%s.p",
+              RKDeferredShader.PACKAGE_DEFERRED_GEOMETRY_REGULAR,
+              code);
+          assert name != null;
 
-      log.debug("done");
-    } finally {
-      exec.shutdown();
+          batch.addShaderWithOutputName(
+            TASTShaderNameFlat.parse(name, meta),
+            code);
+        }
+      }
+
+      final List<File> sources =
+        RShadersDeferredGeometryMakeAll.makeSourcesList(out_parasol_dir);
+
+      exec =
+        Executors.newFixedThreadPool(Runtime
+          .getRuntime()
+          .availableProcessors() * 2);
+      assert exec != null;
+
+      try {
+        final ZipOutputStream archive_stream =
+          CopyZip.copyZip(log, out_archive);
+        final GSerializerType serializer =
+          GSerializerZip.newSerializer(archive_stream, log);
+
+        final Compiler c = Compiler.newCompiler(log, exec);
+        c.setCompacting(true);
+        c.setGeneratingCode(true);
+
+        final SortedSet<GVersionES> es =
+          new TreeSet<GVersionES>(GVersionES.ALL);
+        es.remove(GVersionES.GLSL_ES_100);
+
+        c.setRequiredES(es);
+        c.setRequiredFull(GVersionFull.ALL);
+        c.setSerializer(serializer);
+        c.runForFiles(batch, sources);
+
+        serializer.close();
+
+        log.debug("done");
+      } finally {
+        exec.shutdown();
+      }
+    } catch (final CompilerError e) {
+      System.err.printf(
+        "%s: %s:%s: %s\n",
+        e,
+        e.getFile(),
+        e.getPosition(),
+        e.getMessage());
+      throw e;
     }
   }
 

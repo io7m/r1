@@ -55,7 +55,7 @@
     <com.io7m.jintegers.versionRange>[1.0.0, 2.0.0)</com.io7m.jintegers.versionRange>
     <com.io7m.jlog.versionRange>[3.1.0, 4.0.0)</com.io7m.jlog.versionRange>
     <com.io7m.jnull.versionRange>[1.0.0, 2.0.0)</com.io7m.jnull.versionRange>
-    <com.io7m.jparasol.versionRange>[0.9.9, 0.10.0)</com.io7m.jparasol.versionRange>
+    <com.io7m.jparasol.versionRange>[0.10.1, 0.11.0)</com.io7m.jparasol.versionRange>
     <com.io7m.jproperties.versionRange>[1.0.0, 2.0.0)</com.io7m.jproperties.versionRange>
     <com.io7m.jranges.versionRange>[1.0.0, 2.0.0)</com.io7m.jranges.versionRange>
     <com.io7m.jtensors.versionRange>[6.0.0, 7.0.0)</com.io7m.jtensors.versionRange>

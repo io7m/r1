@@ -110,14 +110,14 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   public static
     <G extends JCGLArrayBuffersType & JCGLIndexBuffersType>
-    JCacheLoaderType<KProjectionWithShapeType, KFrustumMesh, RException>
+    JCacheLoaderType<KProjectionType, KFrustumMesh, RException>
     newCacheLoader(
       final G g,
       final ArrayBufferUpdateUnmappedConstructorType au_cons,
       final IndexBufferUpdateUnmappedConstructorType iu_cons,
       final LogUsableType log)
   {
-    return new JCacheLoaderType<KProjectionWithShapeType, KFrustumMesh, RException>() {
+    return new JCacheLoaderType<KProjectionType, KFrustumMesh, RException>() {
       @Override public void cacheValueClose(
         final KFrustumMesh m)
         throws RException
@@ -130,7 +130,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       }
 
       @Override public KFrustumMesh cacheValueLoad(
-        final KProjectionWithShapeType p)
+        final KProjectionType p)
         throws RException
       {
         try {
@@ -302,12 +302,12 @@ import com.io7m.r1.types.RExceptionJCGL;
       final G g,
       final ArrayBufferUpdateUnmappedConstructorType au_cons,
       final IndexBufferUpdateUnmappedConstructorType iu_cons,
-      final KProjectionWithShapeType p)
+      final KProjectionType p)
       throws JCGLException
   {
     try {
       return p
-        .projectionWithShapeAccept(new KProjectionWithShapeVisitorType<KFrustumMesh, JCGLException>() {
+        .projectionAccept(new KProjectionVisitorType<KFrustumMesh, JCGLException>() {
           @Override public KFrustumMesh fov(
             final KProjectionFOV pf)
             throws JCGLException

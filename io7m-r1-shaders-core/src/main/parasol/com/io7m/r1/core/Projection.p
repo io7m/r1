@@ -23,8 +23,12 @@ package com.io7m.r1.core;
 module Projection is
 
   type t is record
-    z_near : float,
-    z_far  : float
+    near   : float,
+    far    : float,
+    left   : float,
+    right  : float,
+    top    : float,
+    bottom : float
   end;
 
 end;
