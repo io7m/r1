@@ -73,6 +73,7 @@ import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jcanephora.jogl.JCGLImplementationJOGL;
+import com.io7m.jcanephora.jogl.JCGLImplementationJOGLBuilderType;
 import com.io7m.jcanephora.texload.imageio.TextureLoaderImageIO;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
@@ -633,10 +634,12 @@ import com.jogamp.opengl.util.FPSAnimator;
         assert drawable != null;
         drawable.getContext().setSwapInterval(1);
 
+        final JCGLImplementationJOGLBuilderType gb =
+          JCGLImplementationJOGL.newBuilder();
+        gb.setStateCaching(true);
+
         final JCGLImplementationType g =
-          JCGLImplementationJOGL.newImplementation(
-            drawable.getContext(),
-            this.glog);
+          gb.build(drawable.getContext(), this.glog);
         assert g != null;
         this.gi = g;
 

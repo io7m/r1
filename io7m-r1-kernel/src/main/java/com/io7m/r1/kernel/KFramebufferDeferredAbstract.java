@@ -16,14 +16,7 @@
 
 package com.io7m.r1.kernel;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.FramebufferColorAttachmentPointType;
-import com.io7m.jcanephora.FramebufferDrawBufferType;
-import com.io7m.jcanephora.FramebufferStatus;
 import com.io7m.jcanephora.FramebufferType;
 import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.JCGLException;
@@ -31,8 +24,10 @@ import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jcanephora.api.JCGLClearType;
 import com.io7m.jcanephora.api.JCGLColorBufferType;
 import com.io7m.jcanephora.api.JCGLDepthBufferType;
+import com.io7m.jcanephora.api.JCGLFramebufferBuilderGL3ES3Type;
 import com.io7m.jcanephora.api.JCGLFramebuffersCommonType;
 import com.io7m.jcanephora.api.JCGLFramebuffersGL3Type;
 import com.io7m.jcanephora.api.JCGLImplementationType;
@@ -135,27 +130,12 @@ import com.io7m.r1.types.RExceptionNotSupported;
       final Texture2DStaticUsableType d =
         gbuffer.geomGetTextureDepthStencil();
 
-      final List<FramebufferColorAttachmentPointType> points =
-        gl.framebufferGetColorAttachmentPoints();
-      final List<FramebufferDrawBufferType> buffers =
-        gl.framebufferGetDrawBuffers();
+      final JCGLFramebufferBuilderGL3ES3Type fbb =
+        gl.framebufferNewBuilderGL3ES3();
+      fbb.attachColorTexture2D(c);
+      fbb.attachDepthStencilTexture2D(d);
 
-      final Map<FramebufferDrawBufferType, FramebufferColorAttachmentPointType> mappings =
-        new HashMap<FramebufferDrawBufferType, FramebufferColorAttachmentPointType>();
-      mappings.put(buffers.get(0), points.get(0));
-
-      final FramebufferType fb = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb);
-      try {
-        gl.framebufferDrawAttachColorTexture2D(fb, c);
-        gl.framebufferDrawAttachDepthStencilTexture2D(fb, d);
-        gl.framebufferDrawSetBuffers(fb, mappings);
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb);
-        KFramebufferCommon.checkFramebufferStatus(status);
-      } finally {
-        gl.framebufferDrawUnbind();
-      }
-
+      final FramebufferType fb = gl.framebufferAllocate(fbb);
       return new KFramebufferDeferredGL3ES3(c, d, fb, description, gbuffer);
     }
 
@@ -218,7 +198,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
     }
 
     @Override public
-      <G extends JCGLColorBufferType & JCGLDepthBufferType & JCGLStencilBufferType & JCGLFramebuffersCommonType>
+      <G extends JCGLColorBufferType & JCGLClearType & JCGLDepthBufferType & JCGLStencilBufferType & JCGLFramebuffersCommonType>
       void
       deferredFramebufferClear(
         final G in_gc,

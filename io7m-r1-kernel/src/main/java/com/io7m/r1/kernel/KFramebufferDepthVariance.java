@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,23 +16,16 @@
 
 package com.io7m.r1.kernel;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.FramebufferColorAttachmentPointType;
-import com.io7m.jcanephora.FramebufferDrawBufferType;
-import com.io7m.jcanephora.FramebufferStatus;
 import com.io7m.jcanephora.FramebufferType;
 import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLExceptionRuntime;
-import com.io7m.jcanephora.JCGLExceptionUnsupported;
 import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jcanephora.api.JCGLFramebufferBuilderGL3ES3Type;
 import com.io7m.jcanephora.api.JCGLFramebuffersGL3Type;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
@@ -198,40 +191,11 @@ import com.io7m.r1.types.RExceptionNotSupported;
           height,
           precision);
 
-      final List<FramebufferColorAttachmentPointType> points =
-        gl.framebufferGetColorAttachmentPoints();
-      final List<FramebufferDrawBufferType> buffers =
-        gl.framebufferGetDrawBuffers();
-
-      final Map<FramebufferDrawBufferType, FramebufferColorAttachmentPointType> mappings =
-        new HashMap<FramebufferDrawBufferType, FramebufferColorAttachmentPointType>();
-      mappings.put(buffers.get(0), points.get(0));
-
-      final FramebufferType fb = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb);
-
-      try {
-        gl.framebufferDrawAttachDepthTexture2D(fb, depth);
-        gl.framebufferDrawAttachColorTexture2D(fb, variance);
-        gl.framebufferDrawSetBuffers(fb, mappings);
-
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb);
-        switch (status) {
-          case FRAMEBUFFER_STATUS_COMPLETE:
-            break;
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
-          case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
-          case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
-          case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
-            throw new JCGLExceptionUnsupported(
-              "Could not initialize framebuffer: " + status);
-        }
-
-      } finally {
-        gl.framebufferDrawUnbind();
-      }
+      final JCGLFramebufferBuilderGL3ES3Type fbb =
+        gl.framebufferNewBuilderGL3ES3();
+      fbb.attachDepthTexture2D(depth);
+      fbb.attachColorTexture2D(variance);
+      final FramebufferType fb = gl.framebufferAllocate(fbb);
 
       return new KFramebufferDepthVarianceGL3ES3(
         depth,

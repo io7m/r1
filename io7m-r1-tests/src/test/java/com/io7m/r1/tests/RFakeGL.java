@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -51,7 +51,8 @@ public final class RFakeGL
         FakeDefaultFramebuffer.newFramebuffer(area, 8, 8, 8, 24, 8);
       final FakeContext context =
         FakeContext.newContext(fb, number, api, glsl_version);
-      return JCGLImplementationFake.newImplementation(
+
+      return JCGLImplementationFake.newBuilder().build(
         context,
         shader_control,
         in_log);

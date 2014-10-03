@@ -22,15 +22,14 @@ import java.util.Map;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.FramebufferColorAttachmentPointType;
 import com.io7m.jcanephora.FramebufferDrawBufferType;
-import com.io7m.jcanephora.FramebufferStatus;
 import com.io7m.jcanephora.FramebufferType;
 import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLExceptionUnsupported;
 import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jcanephora.api.JCGLFramebufferBuilderGL3ES3Type;
 import com.io7m.jcanephora.api.JCGLFramebuffersGL3Type;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
@@ -74,31 +73,12 @@ import com.io7m.r1.types.RExceptionNotSupported;
       final Map<FramebufferDrawBufferType, FramebufferColorAttachmentPointType> empty =
         new HashMap<FramebufferDrawBufferType, FramebufferColorAttachmentPointType>();
 
-      final FramebufferType fb = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb);
+      final JCGLFramebufferBuilderGL3ES3Type fbb =
+        gl.framebufferNewBuilderGL3ES3();
+      fbb.attachDepthTexture2D(depth);
+      fbb.setDrawBuffers(empty);
 
-      try {
-        gl.framebufferDrawAttachDepthTexture2D(fb, depth);
-        gl.framebufferDrawSetBuffers(fb, empty);
-
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb);
-        switch (status) {
-          case FRAMEBUFFER_STATUS_COMPLETE:
-            break;
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
-          case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
-          case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
-          case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
-            throw new JCGLExceptionUnsupported(
-              "Could not initialize framebuffer: " + status);
-        }
-
-      } finally {
-        gl.framebufferDrawUnbind();
-      }
-
+      final FramebufferType fb = gl.framebufferAllocate(fbb);
       return new KFramebufferDepthGL2(depth, fb, description);
     }
 
@@ -215,31 +195,12 @@ import com.io7m.r1.types.RExceptionNotSupported;
       final Map<FramebufferDrawBufferType, FramebufferColorAttachmentPointType> empty =
         new HashMap<FramebufferDrawBufferType, FramebufferColorAttachmentPointType>();
 
-      final FramebufferType fb = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb);
+      final JCGLFramebufferBuilderGL3ES3Type fbb =
+        gl.framebufferNewBuilderGL3ES3();
+      fbb.attachDepthTexture2D(depth);
+      fbb.setDrawBuffers(empty);
 
-      try {
-        gl.framebufferDrawAttachDepthTexture2D(fb, depth);
-        gl.framebufferDrawSetBuffers(fb, empty);
-
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb);
-        switch (status) {
-          case FRAMEBUFFER_STATUS_COMPLETE:
-            break;
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
-          case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
-          case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
-          case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
-            throw new JCGLExceptionUnsupported(
-              "Could not initialize framebuffer: " + status);
-        }
-
-      } finally {
-        gl.framebufferDrawUnbind();
-      }
-
+      final FramebufferType fb = gl.framebufferAllocate(fbb);
       return new KFramebufferDepthGL3ES3(depth, fb, description);
     }
 

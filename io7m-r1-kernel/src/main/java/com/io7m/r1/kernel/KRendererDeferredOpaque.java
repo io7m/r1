@@ -440,6 +440,7 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
     final KTextureUnitContextType texture_unit_context,
+    final KViewRays view_rays,
     final JCGLInterfaceCommonType gc,
     final KMatricesInstanceValuesType mwi,
     final KLightSphereTexturedCubeWithoutShadow ls,
@@ -489,6 +490,8 @@ import com.io7m.r1.types.RVectorI4F;
           t_map_specular,
           program,
           projection);
+
+        KShadingProgramCommon.putViewRays(program, view_rays);
 
         KShadingProgramCommon.putLightSpherical(
           program,
@@ -914,6 +917,7 @@ import com.io7m.r1.types.RVectorI4F;
             t_map_depth_stencil,
             t_map_normal,
             t_map_specular,
+            view_rays,
             gc,
             mwo,
             ld);
@@ -953,6 +957,7 @@ import com.io7m.r1.types.RVectorI4F;
                         t_map_depth_stencil,
                         t_map_normal,
                         t_map_specular,
+                        view_rays,
                         gc,
                         mdp,
                         shadow_map_context,
@@ -1008,6 +1013,7 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
+    final KViewRays view_rays,
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
     final KLightDirectional ld)
@@ -1058,6 +1064,8 @@ import com.io7m.r1.types.RVectorI4F;
           program,
           mwo.getMatrixProjection());
 
+        KShadingProgramCommon.putViewRays(program, view_rays);
+
         KShadingProgramCommon.putLightDirectional(
           program,
           mwo.getMatrixContext(),
@@ -1081,6 +1089,7 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
+    final KViewRays view_rays,
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
@@ -1095,6 +1104,7 @@ import com.io7m.r1.types.RVectorI4F;
       t_map_depth_stencil,
       t_map_normal,
       t_map_specular,
+      view_rays,
       gc,
       mdp,
       shadow_map_context,
@@ -1108,6 +1118,7 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
+    final KViewRays view_rays,
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
@@ -1184,6 +1195,8 @@ import com.io7m.r1.types.RVectorI4F;
               KShadingProgramCommon.putMatrixUVUnchecked(
                 program,
                 KMatrices.IDENTITY_UV);
+
+              KShadingProgramCommon.putViewRays(program, view_rays);
 
               lp
                 .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
@@ -1383,6 +1396,7 @@ import com.io7m.r1.types.RVectorI4F;
                   t_map_normal,
                   t_map_specular,
                   texture_unit_context,
+                  view_rays,
                   gc,
                   mwi,
                   lsws,
