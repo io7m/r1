@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -51,6 +51,7 @@ import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jcanephora.jogl.JCGLImplementationJOGL;
+import com.io7m.jcanephora.jogl.JCGLImplementationJOGLBuilderType;
 import com.io7m.jcanephora.texload.imageio.TextureLoaderImageIO;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogType;
@@ -131,7 +132,6 @@ final class ViewerSingleMainWindow implements Runnable
 
   private static final class Runner
   {
-
     private static void drawQuad(
       final JCGLInterfaceCommonType gc,
       final KUnitQuadUsableType quad,
@@ -642,10 +642,13 @@ final class ViewerSingleMainWindow implements Runnable
           assert drawable != null;
           final GLContext ctx = drawable.getContext();
           assert ctx != null;
+
+          final JCGLImplementationJOGLBuilderType gb =
+            JCGLImplementationJOGL.newBuilder();
+          gb.setStateCaching(true);
+
           final JCGLImplementationType gi =
-            JCGLImplementationJOGL.newImplementation(
-              ctx,
-              ViewerSingleMainWindow.this.log);
+            gb.build(ctx, ViewerSingleMainWindow.this.log);
 
           final VShaderCaches caches =
             VShaderCaches.newCachesFromArchives(

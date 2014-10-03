@@ -21,22 +21,24 @@ import java.util.List;
 import java.util.Map;
 
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.ClearSpecification;
+import com.io7m.jcanephora.ClearSpecificationBuilderType;
 import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FramebufferColorAttachmentPointType;
 import com.io7m.jcanephora.FramebufferDrawBufferType;
-import com.io7m.jcanephora.FramebufferStatus;
 import com.io7m.jcanephora.FramebufferType;
 import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLExceptionUnsupported;
 import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jcanephora.api.JCGLClearType;
 import com.io7m.jcanephora.api.JCGLColorBufferType;
 import com.io7m.jcanephora.api.JCGLDepthBufferType;
+import com.io7m.jcanephora.api.JCGLFramebufferBuilderGL3ES3Type;
 import com.io7m.jcanephora.api.JCGLFramebuffersCommonType;
 import com.io7m.jcanephora.api.JCGLFramebuffersGL3Type;
 import com.io7m.jcanephora.api.JCGLImplementationType;
@@ -57,6 +59,17 @@ import com.io7m.r1.types.RExceptionNotSupported;
 @EqualityReference abstract class KGeometryBufferAbstract implements
   KGeometryBufferType
 {
+  static final ClearSpecification CLEAR_SPEC;
+
+  static {
+    final ClearSpecificationBuilderType b = ClearSpecification.newBuilder();
+    b.enableColorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+    b.enableDepthBufferClear(1.0f);
+    b.enableStencilBufferClear(0);
+    b.setStrictChecking(true);
+    CLEAR_SPEC = b.build();
+  }
+
   @EqualityReference private static final class KGeometryBuffer_GL3ES3 extends
     KGeometryBufferAbstract
   {
@@ -129,34 +142,15 @@ import com.io7m.r1.types.RExceptionNotSupported;
       mappings.put(buffers.get(1), attach_1);
       mappings.put(buffers.get(2), attach_2);
 
-      final FramebufferType fb = gl.framebufferAllocate();
-      gl.framebufferDrawBind(fb);
+      final JCGLFramebufferBuilderGL3ES3Type fbb =
+        gl.framebufferNewBuilderGL3ES3();
+      fbb.attachDepthStencilTexture2D(depth);
+      fbb.attachColorTexture2DAt(attach_0, albedo);
+      fbb.attachColorTexture2DAt(attach_1, normal);
+      fbb.attachColorTexture2DAt(attach_2, specular);
+      fbb.setDrawBuffers(mappings);
 
-      try {
-        gl.framebufferDrawAttachDepthStencilTexture2D(fb, depth);
-        gl.framebufferDrawAttachColorTexture2DAt(fb, attach_0, albedo);
-        gl.framebufferDrawAttachColorTexture2DAt(fb, attach_1, normal);
-        gl.framebufferDrawAttachColorTexture2DAt(fb, attach_2, specular);
-        gl.framebufferDrawSetBuffers(fb, mappings);
-
-        final FramebufferStatus status = gl.framebufferDrawValidate(fb);
-        switch (status) {
-          case FRAMEBUFFER_STATUS_COMPLETE:
-            break;
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_ATTACHMENT:
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_DRAW_BUFFER:
-          case FRAMEBUFFER_STATUS_ERROR_INCOMPLETE_READ_BUFFER:
-          case FRAMEBUFFER_STATUS_ERROR_MISSING_IMAGE_ATTACHMENT:
-          case FRAMEBUFFER_STATUS_ERROR_UNKNOWN:
-          case FRAMEBUFFER_STATUS_ERROR_UNSUPPORTED:
-            throw new JCGLExceptionUnsupported(
-              "Could not initialize framebuffer: " + status);
-        }
-
-      } finally {
-        gl.framebufferDrawUnbind();
-      }
-
+      final FramebufferType fb = gl.framebufferAllocate(fbb);
       return new KGeometryBuffer_GL3ES3(depth, albedo, normal, specular, fb);
     }
 
@@ -224,7 +218,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
     }
 
     @Override public
-      <G extends JCGLColorBufferType & JCGLDepthBufferType & JCGLStencilBufferType & JCGLFramebuffersCommonType>
+      <G extends JCGLColorBufferType & JCGLClearType & JCGLDepthBufferType & JCGLStencilBufferType & JCGLFramebuffersCommonType>
       void
       geomClear(
         final G gc)
@@ -234,11 +228,9 @@ import com.io7m.r1.types.RExceptionNotSupported;
         try {
           gc.framebufferDrawBind(this.fb);
           gc.colorBufferMask(true, true, true, true);
-          gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
           gc.depthBufferWriteEnable();
-          gc.depthBufferClear(1.0f);
           gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xffffffff);
-          gc.stencilBufferClear(0);
+          gc.clear(KGeometryBufferAbstract.CLEAR_SPEC);
         } finally {
           gc.framebufferDrawUnbind();
         }
