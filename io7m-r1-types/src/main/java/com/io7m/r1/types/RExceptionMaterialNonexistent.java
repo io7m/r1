@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -14,30 +14,40 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel.types;
+package com.io7m.r1.types;
 
-import com.io7m.r1.types.RExceptionLightGroupLacksInstances;
-import com.io7m.r1.types.RExceptionLightGroupLacksLights;
+import com.io7m.jequality.annotations.EqualityReference;
 
 /**
- * An extension of the {@link KSceneBuilderType} interface that allows for
- * final scene creation.
+ * An exception representing an attempt to specify a nonexistent material.
  */
 
-public interface KSceneBuilderWithCreateType extends KSceneBuilderType
+@EqualityReference public final class RExceptionMaterialNonexistent extends
+  RExceptionUserError
 {
+  private static final long serialVersionUID;
+
+  static {
+    serialVersionUID = -2735763093350550840L;
+  }
+
   /**
-   * Construct a {@link KScene} from the currently added instances and light
-   * groups.
-   * 
-   * @return A newly constructed scene
-   * @throws RExceptionLightGroupLacksLights
-   *           One or more light groups lack lights.
-   * @throws RExceptionLightGroupLacksInstances
-   *           One or more light groups lack instances.
+   * Construct an exception with the given message.
+   *
+   * @param message
+   *          The message.
    */
 
-  KScene sceneCreate()
-    throws RExceptionLightGroupLacksInstances,
-      RExceptionLightGroupLacksLights;
+  public RExceptionMaterialNonexistent(
+    final String message)
+  {
+    super(message);
+  }
+
+  @Override <T, E extends Throwable> T exceptionAccept(
+    final RExceptionVisitorType<T, E> v)
+    throws E
+  {
+    return v.exceptionVisitUserErrorException(this);
+  }
 }

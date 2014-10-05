@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -43,6 +43,7 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.kernel.types.KDepthInstancesType;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
@@ -311,7 +312,7 @@ import com.io7m.r1.types.RTransformViewType;
   }
 
   private void renderDepthPassBatches(
-    final Map<String, List<KInstanceOpaqueType>> batches,
+    final KDepthInstancesType instances,
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
@@ -319,9 +320,10 @@ import com.io7m.r1.types.RTransformViewType;
       RException,
       JCacheException
   {
-    for (final String depth_code : batches.keySet()) {
+    for (final String depth_code : instances.getMaterialCodes()) {
       assert depth_code != null;
-      final List<KInstanceOpaqueType> batch = batches.get(depth_code);
+      final List<KInstanceOpaqueType> batch =
+        instances.getInstancesForMaterial(depth_code);
       assert batch != null;
 
       final String shader_code = this.code_map.get(depth_code);
@@ -348,14 +350,14 @@ import com.io7m.r1.types.RTransformViewType;
   @Override public void rendererEvaluateDepth(
     final RMatrixI4x4F<RTransformViewType> view,
     final KProjectionType projection,
-    final Map<String, List<KInstanceOpaqueType>> batches,
+    final KDepthInstancesType instances,
     final KFramebufferDepthUsableType framebuffer,
     final OptionType<KFaceSelection> faces)
     throws RException
   {
     NullCheck.notNull(view, "View matrix");
     NullCheck.notNull(projection, "Projection matrix");
-    NullCheck.notNull(batches, "Batches");
+    NullCheck.notNull(instances, "Instances");
     NullCheck.notNull(framebuffer, "Framebuffer");
     NullCheck.notNull(faces, "Faces");
 
@@ -369,7 +371,7 @@ import com.io7m.r1.types.RTransformViewType;
         this.rendererEvaluateDepthWithBoundFramebuffer(
           view,
           projection,
-          batches,
+          instances,
           framebuffer.kFramebufferGetArea(),
           faces);
       } finally {
@@ -388,14 +390,14 @@ import com.io7m.r1.types.RTransformViewType;
   @Override public void rendererEvaluateDepthWithBoundFramebuffer(
     final RMatrixI4x4F<RTransformViewType> view,
     final KProjectionType projection,
-    final Map<String, List<KInstanceOpaqueType>> batches,
+    final KDepthInstancesType instances,
     final AreaInclusive framebuffer_area,
     final OptionType<KFaceSelection> faces)
     throws RException
   {
     NullCheck.notNull(view, "View matrix");
     NullCheck.notNull(projection, "Projection matrix");
-    NullCheck.notNull(batches, "Batches");
+    NullCheck.notNull(instances, "Instances");
     NullCheck.notNull(framebuffer_area, "Framebuffer area");
     NullCheck.notNull(faces, "Faces");
 
@@ -414,7 +416,7 @@ import com.io7m.r1.types.RTransformViewType;
             try {
               KDepthRenderer.this.renderScene(
                 gc,
-                batches,
+                instances,
                 framebuffer_area,
                 mwo,
                 faces);
@@ -431,7 +433,7 @@ import com.io7m.r1.types.RTransformViewType;
 
   private void renderScene(
     final JCGLInterfaceCommonType gc,
-    final Map<String, List<KInstanceOpaqueType>> batches,
+    final KDepthInstancesType instances,
     final AreaInclusive area,
     final KMatricesObserverType mwo,
     final OptionType<KFaceSelection> faces)
@@ -448,7 +450,6 @@ import com.io7m.r1.types.RTransformViewType;
     gc.depthBufferClear(1.0f);
     gc.scissorDisable();
     gc.viewportSet(area);
-
-    this.renderDepthPassBatches(batches, gc, mwo, faces);
+    this.renderDepthPassBatches(instances, gc, mwo, faces);
   }
 }

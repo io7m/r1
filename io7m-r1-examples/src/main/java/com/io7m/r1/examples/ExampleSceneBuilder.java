@@ -17,8 +17,6 @@
 package com.io7m.r1.examples;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import nu.xom.ParsingException;
@@ -30,21 +28,18 @@ import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.r1.examples.tools.EMeshCache;
 import com.io7m.r1.examples.tools.ETexture2DCache;
 import com.io7m.r1.examples.tools.ETextureCubeCache;
-import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.r1.kernel.types.KInstanceTranslucentUnlitType;
-import com.io7m.r1.kernel.types.KInstanceType;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
-import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
-import com.io7m.r1.kernel.types.KSceneBuilderWithCreateType;
-import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
-import com.io7m.r1.kernel.types.KTranslucentType;
+import com.io7m.r1.kernel.types.KVisibleSetBuilderWithCreateType;
+import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
+import com.io7m.r1.types.RExceptionBuilderInvalid;
 import com.io7m.r1.types.RExceptionIO;
-import com.io7m.r1.types.RExceptionInstanceAlreadyLit;
+import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
 import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionLightGroupAlreadyAdded;
 import com.io7m.r1.types.RXMLException;
@@ -55,10 +50,10 @@ import com.io7m.r1.types.RXMLException;
 
 public final class ExampleSceneBuilder implements ExampleSceneBuilderType
 {
-  private final ETextureCubeCache           cube_cache;
-  private final EMeshCache                  mesh_cache;
-  private final KSceneBuilderWithCreateType scene_builder;
-  private final ETexture2DCache             texture2d_cache;
+  private final ETextureCubeCache                cube_cache;
+  private final EMeshCache                       mesh_cache;
+  private final KVisibleSetBuilderWithCreateType scene_builder;
+  private final ETexture2DCache                  texture2d_cache;
 
   /**
    * Construct an example scene builder.
@@ -74,7 +69,7 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
    */
 
   public ExampleSceneBuilder(
-    final KSceneBuilderWithCreateType in_scene_builder,
+    final KVisibleSetBuilderWithCreateType in_scene_builder,
     final ETextureCubeCache in_cube_cache,
     final EMeshCache in_mesh_cache,
     final ETexture2DCache in_texture2d_cache)
@@ -132,84 +127,6 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
     return mc.loadMesh(name);
   }
 
-  @Override public void sceneAddOpaqueUnlit(
-    final KInstanceOpaqueType instance)
-    throws RExceptionInstanceAlreadyLit
-  {
-    this.scene_builder.sceneAddOpaqueUnlit(instance);
-  }
-
-  @Override public void sceneAddShadowCaster(
-    final KLightWithShadowType light,
-    final KInstanceOpaqueType instance)
-  {
-    this.scene_builder.sceneAddShadowCaster(light, instance);
-  }
-
-  @Override public void sceneAddTranslucentLit(
-    final KInstanceTranslucentLitType instance,
-    final Set<KLightTranslucentType> lights)
-  {
-    this.scene_builder.sceneAddTranslucentLit(instance, lights);
-  }
-
-  @Override public void sceneAddTranslucentUnlit(
-    final KInstanceTranslucentUnlitType instance)
-  {
-    this.scene_builder.sceneAddTranslucentUnlit(instance);
-  }
-
-  @Override public KCamera sceneGetCamera()
-  {
-    return this.scene_builder.sceneGetCamera();
-  }
-
-  @Override public Set<KInstanceType> sceneGetInstances()
-  {
-    return this.scene_builder.sceneGetInstances();
-  }
-
-  @Override public
-    Set<KInstanceOpaqueType>
-    sceneGetInstancesOpaqueLitVisible()
-  {
-    return this.scene_builder.sceneGetInstancesOpaqueLitVisible();
-  }
-
-  @Override public
-    Map<KLightWithShadowType, Set<KInstanceOpaqueType>>
-    sceneGetInstancesOpaqueShadowCastingByLight()
-  {
-    return this.scene_builder.sceneGetInstancesOpaqueShadowCastingByLight();
-  }
-
-  @Override public Set<KInstanceOpaqueType> sceneGetInstancesOpaqueUnlit()
-  {
-    return this.scene_builder.sceneGetInstancesOpaqueUnlit();
-  }
-
-  @Override public Set<KLightType> sceneGetLights()
-  {
-    return this.scene_builder.sceneGetLights();
-  }
-
-  @Override public Set<KLightWithShadowType> sceneGetLightsShadowCasting()
-  {
-    return this.scene_builder.sceneGetLightsShadowCasting();
-  }
-
-  @Override public List<KTranslucentType> sceneGetTranslucents()
-  {
-    return this.scene_builder.sceneGetTranslucents();
-  }
-
-  @Override public KSceneLightGroupBuilderType sceneNewLightGroup(
-    final String name)
-    throws RExceptionLightGroupAlreadyAdded
-  {
-    return this.scene_builder.sceneNewLightGroup(name);
-  }
-
   @Override public Texture2DStaticUsableType texture(
     final String name)
     throws RException
@@ -238,5 +155,53 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
+  }
+
+  @Override public void visibleOpaqueAddUnlit(
+    final KInstanceOpaqueType instance)
+    throws RExceptionBuilderInvalid,
+      RExceptionInstanceAlreadyVisible
+  {
+    this.scene_builder.visibleOpaqueAddUnlit(instance);
+  }
+
+  @Override public
+    KVisibleSetLightGroupBuilderType
+    visibleOpaqueNewLightGroup(
+      final String name)
+      throws RExceptionLightGroupAlreadyAdded,
+        RExceptionBuilderInvalid
+  {
+    return this.scene_builder.visibleOpaqueNewLightGroup(name);
+  }
+
+  @Override public void visibleShadowsAddCaster(
+    final KLightWithShadowType light,
+    final KInstanceOpaqueType instance)
+    throws RExceptionBuilderInvalid
+  {
+    this.scene_builder.visibleShadowsAddCaster(light, instance);
+  }
+
+  @Override public void visibleShadowsAddLight(
+    final KLightWithShadowType light)
+    throws RExceptionBuilderInvalid
+  {
+    this.scene_builder.visibleShadowsAddLight(light);
+  }
+
+  @Override public void visibleTranslucentsAddLit(
+    final KInstanceTranslucentLitType instance,
+    final Set<KLightTranslucentType> lights)
+    throws RExceptionBuilderInvalid
+  {
+    this.scene_builder.visibleTranslucentsAddLit(instance, lights);
+  }
+
+  @Override public void visibleTranslucentsAddUnlit(
+    final KInstanceTranslucentUnlitType instance)
+    throws RExceptionBuilderInvalid
+  {
+    this.scene_builder.visibleTranslucentsAddUnlit(instance);
   }
 }

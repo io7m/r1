@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,7 +17,6 @@
 package com.io7m.r1.kernel;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.io7m.jcache.JCacheException;
@@ -81,14 +80,14 @@ import com.io7m.r1.kernel.types.KMaterialNormalVisitorType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.kernel.types.KSceneBatchedDeferredOpaque;
-import com.io7m.r1.kernel.types.KSceneBatchedDeferredOpaque.Group;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.kernel.types.KUnitSphereCacheType;
 import com.io7m.r1.kernel.types.KUnitSpherePrecision;
 import com.io7m.r1.kernel.types.KUnitSphereUsableType;
+import com.io7m.r1.kernel.types.KVisibleSetLightGroup;
+import com.io7m.r1.kernel.types.KVisibleSetOpaques;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
@@ -275,11 +274,13 @@ import com.io7m.r1.types.RVectorI4F;
     final JCGLInterfaceCommonType gc,
     final KTextureUnitAllocator units,
     final KMatricesObserverType mwo,
-    final Set<KInstanceOpaqueType> instances,
+    final List<KInstanceOpaqueType> instances,
     final JCBProgramType program)
     throws RException
   {
-    for (final KInstanceOpaqueType i : instances) {
+    final int size = instances.size();
+    for (int index = 0; index < size; ++index) {
+      final KInstanceOpaqueType i = instances.get(index);
       assert i != null;
 
       mwo.withInstance(
@@ -634,7 +635,7 @@ import com.io7m.r1.types.RVectorI4F;
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
-    final List<Group> groups)
+    final KVisibleSetOpaques opaques)
     throws RException
   {
     try {
@@ -644,8 +645,10 @@ import com.io7m.r1.types.RVectorI4F;
       final JCGLInterfaceCommonType gc = this.g.getGLCommon();
       gc.viewportSet(framebuffer.kFramebufferGetArea());
 
-      for (int gindex = 0; gindex < groups.size(); ++gindex) {
-        final KSceneBatchedDeferredOpaque.Group group = groups.get(gindex);
+      final Set<String> group_names = opaques.getGroupNames();
+      for (final String group_name : group_names) {
+        assert group_name != null;
+        final KVisibleSetLightGroup group = opaques.getGroup(group_name);
         assert group != null;
 
         this.renderGroup(
@@ -669,15 +672,16 @@ import com.io7m.r1.types.RVectorI4F;
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
-    final Map<String, Set<KInstanceOpaqueType>> instances)
+    final KVisibleSetOpaques opaques)
     throws RException
   {
     try {
-      if (instances.size() > 0) {
+      final Set<String> unlit_codes = opaques.getUnlitMaterialCodes();
+      if (unlit_codes.size() > 0) {
         final JCGLInterfaceCommonType gc = this.g.getGLCommon();
         gc.viewportSet(framebuffer.kFramebufferGetArea());
 
-        this.renderUnlitGeometry(framebuffer, depth_function, mwo, instances);
+        this.renderUnlitGeometry(framebuffer, depth_function, mwo, opaques);
 
         try {
           final FramebufferUsableType render_fb =
@@ -716,7 +720,7 @@ import com.io7m.r1.types.RVectorI4F;
     final OptionType<DepthFunction> depth_function,
     final KViewRays view_rays,
     final KMatricesObserverType mwo,
-    final KSceneBatchedDeferredOpaque.Group group)
+    final KVisibleSetLightGroup group)
     throws RException,
       JCacheException
   {
@@ -833,7 +837,7 @@ import com.io7m.r1.types.RVectorI4F;
     final KFramebufferDeferredUsableType framebuffer,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
-    final KSceneBatchedDeferredOpaque.Group group)
+    final KVisibleSetLightGroup group)
     throws RException,
       JCacheException
   {
@@ -851,14 +855,12 @@ import com.io7m.r1.types.RVectorI4F;
         depth_function,
         gc);
 
-      final Map<String, Set<KInstanceOpaqueType>> by_material =
-        group.getInstances();
-
-      for (final String shader_code : by_material.keySet()) {
+      final Set<String> material_codes = group.getMaterialCodes();
+      for (final String shader_code : material_codes) {
         assert shader_code != null;
 
-        final Set<KInstanceOpaqueType> instances =
-          by_material.get(shader_code);
+        final List<KInstanceOpaqueType> instances =
+          group.getInstances(shader_code);
         assert instances != null;
 
         final KProgramType kprogram =
@@ -1268,7 +1270,7 @@ import com.io7m.r1.types.RVectorI4F;
     final KShadowMapContextType shadow_map_context,
     final KViewRays view_rays,
     final KMatricesObserverType mwo,
-    final Group group)
+    final KVisibleSetLightGroup group)
     throws RException
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
@@ -1505,7 +1507,7 @@ import com.io7m.r1.types.RVectorI4F;
     final KFramebufferDeferredUsableType framebuffer,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
-    final Map<String, Set<KInstanceOpaqueType>> instances)
+    final KVisibleSetOpaques opaques)
     throws RException,
       JCacheException
   {
@@ -1522,9 +1524,11 @@ import com.io7m.r1.types.RVectorI4F;
         depth_function,
         gc);
 
-      for (final String code : instances.keySet()) {
+      final Set<String> unlit_codes = opaques.getUnlitMaterialCodes();
+      for (final String code : unlit_codes) {
         assert code != null;
-        final Set<KInstanceOpaqueType> batch = instances.get(code);
+        final List<KInstanceOpaqueType> batch =
+          opaques.getUnlitInstancesByCode(code);
         assert batch != null;
 
         final KProgramType kprogram = this.shader_geo_cache.cacheGetLU(code);

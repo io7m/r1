@@ -93,10 +93,6 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KProjectionFOV;
-import com.io7m.r1.kernel.types.KScene;
-import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
-import com.io7m.r1.kernel.types.KSceneBuilderWithCreateType;
-import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionBasicBuilderType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
@@ -104,6 +100,9 @@ import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KShadowMappedBasicBuilderType;
 import com.io7m.r1.kernel.types.KTransformMatrix4x4;
 import com.io7m.r1.kernel.types.KTransformType;
+import com.io7m.r1.kernel.types.KVisibleSet;
+import com.io7m.r1.kernel.types.KVisibleSetBuilderWithCreateType;
+import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.types.RException;
@@ -498,7 +497,8 @@ import com.io7m.r1.types.RVectorI3F;
       KProjectionFOV.newProjection(temp, 90.0f, 1.0f, 1.0f, 100.0f);
     final KCamera camera = KCamera.newCamera(id, proj);
 
-    final KSceneBuilderWithCreateType sb = KScene.newBuilder(camera);
+    final KVisibleSetBuilderWithCreateType sb =
+      KVisibleSet.newBuilder(camera);
     final Texture2DStaticUsableType lt = RFakeTextures2DStatic.newAnything(g);
     final KLightProjectiveWithShadowBasicBuilderType sl0b =
       KLightProjectiveWithShadowBasic.newBuilder(lt, proj);
@@ -517,16 +517,14 @@ import com.io7m.r1.types.RVectorI3F;
     final KLightProjectiveWithShadowBasic sl2 = sl0b.build();
 
     final KInstanceOpaqueType o1 = this.getOpaque(g);
-    sb.sceneAddShadowCaster(sl0, o1);
-    sb.sceneAddShadowCaster(sl1, o1);
-    sb.sceneAddShadowCaster(sl2, o1);
+    sb.visibleShadowsAddCaster(sl0, o1);
+    sb.visibleShadowsAddCaster(sl1, o1);
+    sb.visibleShadowsAddCaster(sl2, o1);
 
-    final KScene s = sb.sceneCreate();
-    final KSceneBatchedDeferred sbd = KSceneBatchedDeferred.fromScene(s);
-
+    final KVisibleSet s = sb.visibleCreate();
     r.shadow_map_renderer.rendererEvaluateShadowMaps(
       camera,
-      sbd.getShadows(),
+      s.getShadows(),
       new KShadowMapWithType<Unit, UnreachableCodeException>() {
         @Override public Unit withMaps(
           final KShadowMapContextType context)
@@ -550,7 +548,7 @@ import com.io7m.r1.types.RVectorI3F;
 
     r.shadow_map_renderer.rendererEvaluateShadowMaps(
       camera,
-      sbd.getShadows(),
+      s.getShadows(),
       new KShadowMapWithType<Unit, UnreachableCodeException>() {
         @Override public Unit withMaps(
           final KShadowMapContextType context)
@@ -644,7 +642,8 @@ import com.io7m.r1.types.RVectorI3F;
       KProjectionFOV.newProjection(temp, 90.0f, 1.0f, 1.0f, 100.0f);
     final KCamera camera = KCamera.newCamera(id, proj);
 
-    final KSceneBuilderWithCreateType sb = KScene.newBuilder(camera);
+    final KVisibleSetBuilderWithCreateType sb =
+      KVisibleSet.newBuilder(camera);
     final Texture2DStaticUsableType lt = RFakeTextures2DStatic.newAnything(g);
 
     final KLightProjectiveWithShadowBasicBuilderType sl0b =
@@ -665,20 +664,20 @@ import com.io7m.r1.types.RVectorI3F;
     final KLightProjectiveWithShadowBasic sl2 = sl0b.build();
 
     final KInstanceOpaqueType o1 = this.getOpaque(g);
-    sb.sceneAddShadowCaster(sl0, o1);
+    sb.visibleShadowsAddCaster(sl0, o1);
 
-    final KSceneLightGroupBuilderType gr0 = sb.sceneNewLightGroup("gr0");
+    final KVisibleSetLightGroupBuilderType gr0 =
+      sb.visibleOpaqueNewLightGroup("gr0");
     gr0.groupAddInstance(o1);
     gr0.groupAddLight(sl0);
     gr0.groupAddLight(sl1);
     gr0.groupAddLight(sl2);
 
-    final KScene s = sb.sceneCreate();
-    final KSceneBatchedDeferred sbd = KSceneBatchedDeferred.fromScene(s);
+    final KVisibleSet s = sb.visibleCreate();
 
     r.shadow_map_renderer.rendererEvaluateShadowMaps(
       camera,
-      sbd.getShadows(),
+      s.getShadows(),
       new KShadowMapWithType<Unit, UnreachableCodeException>() {
         @Override public Unit withMaps(
           final KShadowMapContextType context)
@@ -702,7 +701,7 @@ import com.io7m.r1.types.RVectorI3F;
 
     r.shadow_map_renderer.rendererEvaluateShadowMaps(
       camera,
-      sbd.getShadows(),
+      s.getShadows(),
       new KShadowMapWithType<Unit, UnreachableCodeException>() {
         @Override public Unit withMaps(
           final KShadowMapContextType context)

@@ -112,13 +112,12 @@ import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
 import com.io7m.r1.kernel.types.KFramebufferForwardDescription;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.kernel.types.KRGBAPrecision;
-import com.io7m.r1.kernel.types.KScene;
-import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
-import com.io7m.r1.kernel.types.KSceneBuilderWithCreateType;
 import com.io7m.r1.kernel.types.KUnitQuad;
 import com.io7m.r1.kernel.types.KUnitQuadCache;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
+import com.io7m.r1.kernel.types.KVisibleSet;
+import com.io7m.r1.kernel.types.KVisibleSetBuilderWithCreateType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
 import com.jogamp.common.nio.Buffers;
@@ -485,8 +484,8 @@ import com.jogamp.opengl.util.FPSAnimator;
         final ExampleViewType view = views.get(view_index);
         assert view != null;
 
-        final KSceneBuilderWithCreateType scene_builder =
-          KScene.newBuilder(view.getCamera());
+        final KVisibleSetBuilderWithCreateType scene_builder =
+          KVisibleSet.newBuilder(view.getCamera());
 
         assert this.cube_cache != null;
         assert this.mesh_cache != null;
@@ -517,8 +516,7 @@ import com.jogamp.opengl.util.FPSAnimator;
                 VExampleWindowGL.this.framebuffer;
               assert fb != null;
 
-              final KScene sc = scene_builder.sceneCreate();
-
+              final KVisibleSet sc = scene_builder.visibleCreate();
               rd.rendererDebugEvaluate(fb, sc);
               VExampleWindowGL.this.renderSceneResults(fb);
 
@@ -544,16 +542,13 @@ import com.jogamp.opengl.util.FPSAnimator;
                 VExampleWindowGL.this.framebuffer;
               assert fb != null;
 
-              final KScene sc = scene_builder.sceneCreate();
-              final KSceneBatchedDeferred batched =
-                KSceneBatchedDeferred.fromScene(sc);
-
+              final KVisibleSet sc = scene_builder.visibleCreate();
               fb.deferredFramebufferClear(
                 g.getGLCommon(),
                 ViewerSingleMainWindow.CLEAR_COLOR,
                 ViewerSingleMainWindow.CLEAR_DEPTH,
                 ViewerSingleMainWindow.CLEAR_STENCIL);
-              rd.rendererDeferredEvaluateFull(fb, batched);
+              rd.rendererDeferredEvaluateFull(fb, sc);
               VExampleWindowGL.this.renderSceneResults(fb);
 
               if (VExampleWindowGL.this.want_save.get()) {

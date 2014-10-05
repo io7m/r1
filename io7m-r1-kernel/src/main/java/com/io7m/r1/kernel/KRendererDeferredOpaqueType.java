@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,14 +16,9 @@
 
 package com.io7m.r1.kernel;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.r1.kernel.types.KInstanceOpaqueType;
-import com.io7m.r1.kernel.types.KSceneBatchedDeferredOpaque.Group;
+import com.io7m.r1.kernel.types.KVisibleSetOpaques;
 import com.io7m.r1.types.RException;
 
 /**
@@ -45,8 +40,8 @@ public interface KRendererDeferredOpaqueType
    *          The shadow map context
    * @param mwo
    *          The current observer matrices
-   * @param groups
-   *          The light groups.
+   * @param opaques
+   *          The opaque instances
    *
    * @throws RException
    *           If an error occurs.
@@ -57,7 +52,7 @@ public interface KRendererDeferredOpaqueType
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
-    final List<Group> groups)
+    final KVisibleSetOpaques opaques)
     throws RException;
 
   /**
@@ -73,8 +68,8 @@ public interface KRendererDeferredOpaqueType
    *          The shadow map context
    * @param mwo
    *          The current observer matrices
-   * @param instances
-   *          The instances.
+   * @param opaques
+   *          The opaque instances
    *
    * @throws RException
    *           If an error occurs.
@@ -85,6 +80,6 @@ public interface KRendererDeferredOpaqueType
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
-    final Map<String, Set<KInstanceOpaqueType>> instances)
+    final KVisibleSetOpaques opaques)
     throws RException;
 }

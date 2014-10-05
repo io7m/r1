@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,7 +17,6 @@
 package com.io7m.r1.kernel;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,17 +34,16 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
-import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KLightWithShadowVisitorType;
-import com.io7m.r1.kernel.types.KSceneBatchedShadow;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
+import com.io7m.r1.kernel.types.KVisibleSetShadows;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
@@ -103,8 +101,9 @@ import com.io7m.r1.types.RTransformViewType;
   private static void renderProjectiveBasic(
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mwp,
-    final Map<String, List<KInstanceOpaqueType>> casters,
+    final KVisibleSetShadows shadows,
     final KDepthRendererType dr,
+    final KLightProjectiveWithShadowBasic lp,
     final KShadowMapBasic sm)
     throws JCGLException,
       RException
@@ -129,7 +128,7 @@ import com.io7m.r1.types.RTransformViewType;
       dr.rendererEvaluateDepthWithBoundFramebuffer(
         view,
         mwp.getProjectiveProjection(),
-        casters,
+        shadows.getInstancesForLight(lp),
         fb.kFramebufferGetArea(),
         Option.some(KFaceSelection.FACE_RENDER_BACK));
 
@@ -141,7 +140,7 @@ import com.io7m.r1.types.RTransformViewType;
   private static void renderProjectiveVariance(
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mwp,
-    final Map<String, List<KInstanceOpaqueType>> casters,
+    final KVisibleSetShadows shadows,
     final KDepthVarianceRendererType dvr,
     final KPostprocessorBlurDepthVarianceType blur,
     final KLightProjectiveWithShadowVariance lp,
@@ -172,7 +171,7 @@ import com.io7m.r1.types.RTransformViewType;
       dvr.rendererEvaluateDepthVariance(
         view,
         mwp.getProjectiveProjection(),
-        casters,
+        shadows.getInstancesForLight(lp),
         fb,
         none);
 
@@ -236,22 +235,16 @@ import com.io7m.r1.types.RTransformViewType;
 
   @Override public <A, E extends Throwable> A rendererEvaluateShadowMaps(
     final KCamera camera,
-    final KSceneBatchedShadow batches,
+    final KVisibleSetShadows shadows,
     final KShadowMapWithType<A, E> with)
     throws E,
       RException
   {
     NullCheck.notNull(camera, "Camera");
-    NullCheck.notNull(batches, "Batches");
+    NullCheck.notNull(shadows, "Shadows");
     NullCheck.notNull(with, "With");
 
     try {
-      final Map<KLightWithShadowType, Map<String, List<KInstanceOpaqueType>>> batches_by_light =
-        batches.getBatches();
-      assert batches_by_light != null;
-      final Set<KLightWithShadowType> lights = batches_by_light.keySet();
-      assert lights != null;
-
       final Map<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts =
         new HashMap<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>>();
 
@@ -267,8 +260,7 @@ import com.io7m.r1.types.RTransformViewType;
             {
               try {
                 KShadowMapRenderer.this.shadowMapsRenderAll(
-                  batches_by_light,
-                  lights,
+                  shadows,
                   receipts,
                   mo);
                 return Unit.unit();
@@ -308,8 +300,7 @@ import com.io7m.r1.types.RTransformViewType;
   private
     void
     shadowMapsRenderAll(
-      final Map<KLightWithShadowType, Map<String, List<KInstanceOpaqueType>>> batches_by_light,
-      final Set<KLightWithShadowType> lights,
+      final KVisibleSetShadows shadows,
       final Map<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts,
       final KMatricesObserverType observer)
       throws RException,
@@ -322,10 +313,9 @@ import com.io7m.r1.types.RTransformViewType;
     final KDepthVarianceRendererType dvr = this.depth_variance_renderer;
     final KPostprocessorBlurDepthVarianceType pb = this.blur;
 
+    final Set<KLightWithShadowType> lights = shadows.getLights();
     for (final KLightWithShadowType light : lights) {
-      final Map<String, List<KInstanceOpaqueType>> casters =
-        batches_by_light.get(light);
-      assert casters != null;
+      assert light != null;
 
       light
         .withShadowAccept(new KLightWithShadowVisitorType<Unit, JCacheException>() {
@@ -358,8 +348,9 @@ import com.io7m.r1.types.RTransformViewType;
                     KShadowMapRenderer.renderProjectiveBasic(
                       gc,
                       mwp,
-                      casters,
+                      shadows,
                       dr,
+                      lp,
                       sm);
                     return Unit.unit();
                   }
@@ -395,7 +386,7 @@ import com.io7m.r1.types.RTransformViewType;
                     KShadowMapRenderer.renderProjectiveVariance(
                       gc,
                       mwp,
-                      casters,
+                      shadows,
                       dvr,
                       pb,
                       lp,
