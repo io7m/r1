@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2013 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<r:grammar
+  xmlns:rm="http://schemas.io7m.com/renderer/1.0.0/meshes"
+  xmlns:r="http://relaxng.org/ns/structure/1.0"
+  datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+  <r:include href="types.rng"/>
+
+  <r:start>
+    <r:ref name="io7m.renderer.meshes.mesh"/>
+  </r:start>
+
+  <r:define name="io7m.renderer.meshes.vertex.position-3f">
+    <r:element name="rm:p">
+      <r:attribute name="rm:x"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:y"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:z"><r:data type="float"/></r:attribute>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.meshes.vertex.normal-3f">
+    <r:element name="rm:n">
+      <r:attribute name="rm:x"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:y"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:z"><r:data type="float"/></r:attribute>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.meshes.vertex.tangent-4f">
+    <r:element name="rm:t4">
+      <r:attribute name="rm:x"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:y"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:z"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:w"><r:data type="float"/></r:attribute>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.meshes.vertex.uv-2f">
+    <r:element name="rm:u">
+      <r:attribute name="rm:x"><r:data type="float"/></r:attribute>
+      <r:attribute name="rm:y"><r:data type="float"/></r:attribute>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.meshes.vertex">
+    <r:element name="rm:v">
+      <r:interleave>
+        <r:ref name="io7m.renderer.meshes.vertex.position-3f"/>
+        <r:ref name="io7m.renderer.meshes.vertex.normal-3f"/>
+        <r:ref name="io7m.renderer.meshes.vertex.tangent-4f"/>
+        <r:ref name="io7m.renderer.meshes.vertex.uv-2f"/>
+      </r:interleave>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.meshes.vertices">
+    <r:element name="rm:vertices">
+      <r:attribute name="rm:count"><r:data type="positiveInteger"/></r:attribute>
+      <r:oneOrMore><r:ref name="io7m.renderer.meshes.vertex"/></r:oneOrMore>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.meshes.triangle">
+    <r:element name="rm:tri">
+      <r:attribute name="rm:v0"><r:data type="nonNegativeInteger"/></r:attribute>
+      <r:attribute name="rm:v1"><r:data type="nonNegativeInteger"/></r:attribute>
+      <r:attribute name="rm:v2"><r:data type="nonNegativeInteger"/></r:attribute>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.meshes.triangles">
+    <r:element name="rm:triangles">
+      <r:attribute name="rm:count"><r:data type="positiveInteger"/></r:attribute>
+      <r:oneOrMore><r:ref name="io7m.renderer.meshes.triangle"/></r:oneOrMore>
+    </r:element>
+  </r:define>
+
+  <r:define name="io7m.renderer.meshes.mesh">
+    <r:element name="rm:mesh">
+      <r:attribute name="rm:name"><r:data type="token"/></r:attribute>
+      <r:ref name="io7m.renderer.meshes.vertices"/>
+      <r:ref name="io7m.renderer.meshes.triangles"/>
+    </r:element>
+  </r:define>
+
+</r:grammar>

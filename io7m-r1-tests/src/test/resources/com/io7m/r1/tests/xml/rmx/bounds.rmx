@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<m:mesh xmlns:m="http://schemas.io7m.com/renderer/1.0.0/meshes" m:name="some-mesh">
+  <m:vertices m:count="3">
+    <m:v>
+      <m:p m:x="-23.0" m:y="0.0" m:z="-11.0"/>
+      <m:n m:x="0.0" m:y="0.0" m:z="1.0"/>
+      <m:t4 m:x="1.0" m:y="0.0" m:z="0.0" m:w="1.0"/>
+      <m:u m:x="0.0" m:y="0.0"/>
+    </m:v>
+    <m:v>
+      <m:p m:x="56.0" m:y="-34.0" m:z="0.0"/>
+      <m:n m:x="0.0" m:y="0.0" m:z="1.0"/>
+      <m:t4 m:x="1.0" m:y="0.0" m:z="0.0" m:w="1.0"/>
+      <m:u m:x="0.0" m:y="0.0"/>
+    </m:v>
+    <m:v>
+      <m:p m:x="0.0" m:y="72.0" m:z="4.0"/>
+      <m:n m:x="0.0" m:y="0.0" m:z="1.0"/>
+      <m:t4 m:x="1.0" m:y="0.0" m:z="0.0" m:w="1.0"/>
+      <m:u m:x="0.0" m:y="0.0"/>
+    </m:v>
+  </m:vertices>
+  <m:triangles m:count="3">
+    <m:tri m:v0="0" m:v1="0" m:v2="0"/>
+    <m:tri m:v0="0" m:v1="0" m:v2="0"/>
+    <m:tri m:v0="0" m:v1="0" m:v2="0"/>
+  </m:triangles>
+</m:mesh>

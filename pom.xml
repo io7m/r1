@@ -5,51 +5,64 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.io7m.renderer</groupId>
-  <artifactId>io7m-renderer</artifactId>
+  <groupId>com.io7m.r1</groupId>
+  <artifactId>io7m-r1</artifactId>
   <version>0.9.0</version>
 
   <packaging>pom</packaging>
-  <name>io7m-renderer</name>
+  <name>io7m-r1</name>
   <description>3D renderer</description>
   <url>http://mvn.io7m.com/${project.artifactId}/</url>
 
   <modules>
-    <module>io7m-renderer-kernel-shaders-core</module>
-    <module>io7m-renderer-kernel-shaders-debug</module>
-    <module>io7m-renderer-kernel-shaders-depth</module>
-    <module>io7m-renderer-kernel-shaders-forward</module>
-    <module>io7m-renderer-kernel-shaders-postprocessing</module>
-    <module>io7m-renderer-kernel-types</module>
-    <module>io7m-renderer-kernel</module>
-    <module>io7m-renderer-sandbox-jogl</module>
-    <module>io7m-renderer-tests</module>
-    <module>io7m-renderer-types</module>
-    <module>io7m-renderer-xml</module>
+    <module>io7m-r1-collada</module>
+    <module>io7m-r1-documentation</module>
+    <module>io7m-r1-examples-jogl</module>
+    <module>io7m-r1-examples</module>
+    <module>io7m-r1-kernel-types</module>
+    <module>io7m-r1-kernel</module>
+    <module>io7m-r1-meshes-binary</module>
+    <module>io7m-r1-meshes-tools</module>
+    <module>io7m-r1-meshes-xml</module>
+    <module>io7m-r1-meshes</module>
+    <module>io7m-r1-shaders-core</module>
+    <module>io7m-r1-shaders-debug</module>
+    <module>io7m-r1-shaders-deferred-geometry</module>
+    <module>io7m-r1-shaders-deferred-light</module>
+    <module>io7m-r1-shaders-deferred</module>
+    <module>io7m-r1-shaders-depth</module>
+    <module>io7m-r1-shaders-depth_variance</module>
+    <module>io7m-r1-shaders-forward-translucent-lit</module>
+    <module>io7m-r1-shaders-forward-translucent-unlit</module>
+    <module>io7m-r1-shaders-forward</module>
+    <module>io7m-r1-shaders-postprocessing</module>
+    <module>io7m-r1-tests</module>
+    <module>io7m-r1-types</module>
+    <module>io7m-r1-xml</module>
   </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <siteReposDirectory>/com/io7m/renderer</siteReposDirectory>
-    <siteDocumentationDirectory>/com/io7m/renderer/io7m-renderer-documentation</siteDocumentationDirectory>
+    <siteReposDirectory>/com/io7m/r1</siteReposDirectory>
+    <siteDocumentationDirectory>/com/io7m/r1/io7m-r1-documentation</siteDocumentationDirectory>
 
-    <com.io7m.ieee754b16.versionRange>[0.2.0, 0.3.0]</com.io7m.ieee754b16.versionRange>
-    <com.io7m.jcache.versionRange>[0.5.0, 0.6.0)</com.io7m.jcache.versionRange>
-    <com.io7m.jcanephora.versionRange>0.29.3</com.io7m.jcanephora.versionRange>
-    <com.io7m.jequality.versionRange>[0.3.0, 0.4.0)</com.io7m.jequality.versionRange>
-    <com.io7m.jfunctional.versionRange>[0.3.1, 0.4.0)</com.io7m.jfunctional.versionRange>
-    <com.io7m.jintegers.versionRange>[0.5.0, 0.6.0)</com.io7m.jintegers.versionRange>
-    <com.io7m.jlog.versionRange>[3.0.0, 4.0.0)</com.io7m.jlog.versionRange>
-    <com.io7m.jnull.versionRange>[0.3.1, 0.4.0)</com.io7m.jnull.versionRange>
-    <com.io7m.jparasol.versionRange>[0.5.0, 0.6.0)</com.io7m.jparasol.versionRange>
-    <com.io7m.jproperties.versionRange>[0.1.0, 0.2.0)</com.io7m.jproperties.versionRange>
-    <com.io7m.jranges.versionRange>[0.3.5, 0.4.0)</com.io7m.jranges.versionRange>
+    <com.io7m.ieee754b16.versionRange>[1.0.0, 2.0.0)</com.io7m.ieee754b16.versionRange>
+    <com.io7m.jcache.versionRange>[0.6.0, 0.7.0)</com.io7m.jcache.versionRange>
+    <com.io7m.jcanephora.versionRange>0.34.0</com.io7m.jcanephora.versionRange>
+    <com.io7m.jequality.versionRange>[1.0.1, 2.0.0)</com.io7m.jequality.versionRange>
+    <com.io7m.jfunctional.versionRange>[1.0.0, 2.0.0)</com.io7m.jfunctional.versionRange>
+    <com.io7m.jintegers.versionRange>[1.0.0, 2.0.0)</com.io7m.jintegers.versionRange>
+    <com.io7m.jlog.versionRange>[3.1.0, 4.0.0)</com.io7m.jlog.versionRange>
+    <com.io7m.jnull.versionRange>[1.0.0, 2.0.0)</com.io7m.jnull.versionRange>
+    <com.io7m.jparasol.versionRange>[0.10.1, 0.11.0)</com.io7m.jparasol.versionRange>
+    <com.io7m.jproperties.versionRange>[1.0.0, 2.0.0)</com.io7m.jproperties.versionRange>
+    <com.io7m.jranges.versionRange>[1.0.0, 2.0.0)</com.io7m.jranges.versionRange>
     <com.io7m.jtensors.versionRange>[6.0.0, 7.0.0)</com.io7m.jtensors.versionRange>
-    <com.io7m.junreachable.versionRange>[0.3.0, 0.4.0)</com.io7m.junreachable.versionRange>
+    <com.io7m.junreachable.versionRange>[1.0.0, 2.0.0)</com.io7m.junreachable.versionRange>
     <com.io7m.jvvfs.versionRange>[4.0.0, 5.0.0)</com.io7m.jvvfs.versionRange>
     <com.io7m.xom.versionRange>1.2.10</com.io7m.xom.versionRange>
-    <com.io7m.renderer.joglVersion>2.1.5-01</com.io7m.renderer.joglVersion>
+    <com.io7m.r1.joglVersion>2.1.5-01</com.io7m.r1.joglVersion>
   </properties>
 
   <licenses>
@@ -60,9 +73,9 @@
   </licenses>
 
   <scm>
-    <url>http://fossil.io7m.com/repo.cgi/io7m-renderer</url>
-    <connection>scm:http://fossil.io7m.com/repo.cgi/io7m-renderer</connection>
-    <developerConnection>scm:http://fossil.io7m.com/repo.cgi/io7m-renderer</developerConnection>
+    <url>http://fossil.io7m.com/repo.cgi/io7m-r1</url>
+    <connection>scm:http://fossil.io7m.com/repo.cgi/io7m-r1</connection>
+    <developerConnection>scm:http://fossil.io7m.com/repo.cgi/io7m-r1</developerConnection>
   </scm>
 
   <developers>
@@ -75,7 +88,7 @@
   </developers>
 
   <issueManagement>
-    <url>http://fossil.io7m.com/repo.cgi/io7m-renderer</url>
+    <url>http://fossil.io7m.com/repo.cgi/io7m-r1</url>
     <system>Fossil</system>
   </issueManagement>
 
@@ -89,11 +102,11 @@
 
   <mailingLists>
     <mailingList>
-      <name>io7m-renderer</name>
-      <subscribe>io7m-renderer-join@lists.io7m.com</subscribe>
-      <unsubscribe>io7m-renderer-leave@lists.io7m.com</unsubscribe>
-      <post>io7m-renderer@lists.io7m.com</post>
-      <archive>http://lists.io7m.com/io7m-renderer/archive</archive>
+      <name>io7m-r1</name>
+      <subscribe>io7m-r1-join@lists.io7m.com</subscribe>
+      <unsubscribe>io7m-r1-leave@lists.io7m.com</unsubscribe>
+      <post>io7m-r1@lists.io7m.com</post>
+      <archive>http://lists.io7m.com/io7m-r1/archive</archive>
     </mailingList>
   </mailingLists>
 

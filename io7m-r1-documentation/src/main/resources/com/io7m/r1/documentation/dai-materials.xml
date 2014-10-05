@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.materials"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Materials</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.materials.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      This section attempts to provide information on the
+      <s:term s:type="term">material</s:term> system used in the
+      <s:term s:type="package">${project.parent.name}</s:term> package
+      as well as the rationale for its existence.
+    </s:paragraph>
+    <s:paragraph>
+      In contrast to most other rendering systems, the
+      <s:term s:type="package">${project.parent.name}</s:term> package
+      uses a typed <s:term s:type="term">material</s:term> system configured
+      directly from code, rather than having programmers and artists write 
+      <s:term s:type="term">shaders</s:term> in a shading language directly. It was a
+      conscious design decision to reduce <s:term s:type="term">flexibility</s:term>
+      in order to increase <s:term s:type="term">ease of use</s:term> and
+      <s:term s:type="term">correctness</s:term>. The material system
+      has the following disadvantages:
+    </s:paragraph>
+    <s:formal-item s:kind="lists">
+      <s:formal-item-title>Material system disadvantages</s:formal-item-title>
+      <s:list-unordered>
+        <s:list-item>
+          The material system was designed to accomodate the majority
+          of rendering techniques seen in computer games circa 2014 (such as
+          normal mapping, environment mapped reflections, etc). If the
+          <s:term s:type="package">${project.parent.name}</s:term> package
+          doesn't provide direct support for a technique, then the programmer
+          is required to modify the <s:term s:type="package">${project.parent.name}</s:term> 
+          package to use it.
+        </s:list-item>
+      </s:list-unordered>
+    </s:formal-item>
+    <s:paragraph>
+      However, the design also allows for the following advantages:
+    </s:paragraph>
+    <s:formal-item s:kind="lists">
+      <s:formal-item-title>Material system advantages</s:formal-item-title>
+      <s:list-unordered>
+        <s:list-item>
+          The material system was designed to accomodate the majority
+          of rendering techniques seen in computer games circa 2014 (such as
+          normal mapping, environment mapped reflections, etc). Rather than
+          having to tediously re-implement error-prone techniques such as 
+          normal mapping over and over, the programmer simply enables
+          normal mapping for a material.
+        </s:list-item>
+        <s:list-item>
+          The material system provides enough <s:term s:type="term">metadata</s:term>
+          about a given surface for all renderers in the
+          <s:term s:type="package">${project.parent.name}</s:term> package to
+          give consistently correct results regardless of the lighting in a scene. 
+          For example, other rendering
+          systems that utilize <s:term s:type="term">shadow mapping</s:term>
+          often give incorrect results when a user-written shader conditionally
+          <s:term s:type="term">discards</s:term> pixels. Shadow mapping is implemented
+          by rendering a depth-only image of an object from a different perspective,
+          and so the same pixels have to be discarded when rendering the depth-only 
+          image as when rendering the actual color image. In systems where the
+          user is required to write shaders, the system has no way of knowing that
+          some pixels need to be discarded and often has to fall back to running
+          the full material shader with writes to the color buffer masked.
+          The material system
+          in the <s:term s:type="package">${project.parent.name}</s:term> package
+          indicates <s:term s:type="term">statically</s:term> when this can occur,
+          and so the system simply uses a very efficient depth-only shader to
+          render accurate shadow maps.
+        </s:list-item>
+        <s:list-item>
+          In other rendering systems (particularly those that use 
+          <s:term s:type="term">forward rendering</s:term>), the programmer is
+          required to write one shader per combination of <s:term s:type="term">material</s:term>
+          and <s:term s:type="term">light</s:term>. That is, the programmer
+          is expected to re-implement each of the different lighting techniques
+          for every single material so that each can be used in any possible lighting environment. 
+          Many systems use a shader generation system
+          to work around these sorts of problems, requiring the development of
+          (and the programmer to learn) even more complex tools and development environments.
+          This issue is simply not present with a static material system.
+        </s:list-item>
+        <s:list-item>
+          Because the set of possible material and light types in the
+          <s:term s:type="package">${project.parent.name}</s:term> package is
+          fixed, the system knows exactly how to correctly send data to all
+          of the possible <s:term s:type="term">shaders</s:term>. The programmer
+          is not required to laboriously configure all of the connections between
+          shader parameters and the data that must be supplied to shaders. All of
+          the usual classes of bugs involving forgetting to set parameters, sending
+          parameters of the wrong type, etc, are simply not possible.
+        </s:list-item>
+        <s:list-item>
+          The material system allows for extremely rapid development and
+          previewing of materials. Because the components of the material
+          systems are exposed as simple pseudo-algebraic Java types, it is
+          extremely easy to put together a graphical user interface for
+          configuring materials. Rendering systems that require programmers
+          to write shaders typically end up implementing their own complete
+          integrated development environments!
+        </s:list-item>
+        <s:list-item>
+          Because the GLSL language is fundamentally poorly designed and entirely
+          anti-modular, any rendering system requiring the programmer to write
+          shaders must implement its own custom shading language to give good
+          type errors and to work identically across all of the different possible
+          versions of OpenGL
+          <s:footnote>
+            The <s:term s:type="package">${project.parent.name}</s:term> package
+            actually uses the <s:link-external s:target="http://mvn.io7m.com/io7m-jparasol">Parasol</s:link-external>
+            language internally to avoid the mentioned issues, but does not expose
+            this to programmers using the package.
+          </s:footnote>. It is simply not possible, in the <s:term s:type="package">${project.parent.name}</s:term> package,
+          for the programmer to create a material that will work on some of the
+          supported OpenGL versions and not others.
+        </s:list-item>
+        <s:list-item>
+          The material system has predictable performance characteristics. In
+          systems that require programmers to write their own shaders, it is
+          standard practice for programmers to repeatedly re-visit and do
+          tedious optimization work to get their materials to run faster. The
+          <s:term s:type="package">${project.parent.name}</s:term> package
+          tries to expose a very minimalist material system and delegates the
+          work of, for example, procedural texture generation to external systems
+          <s:footnote>
+            This has the advantage that, if a texture is procedurally generated
+            by an external system, the texture can be cached and re-used by many
+            different surfaces. This is obviously not possible in systems that
+            do all of that work during the actual rendering of an object.
+          </s:footnote>.
+        </s:list-item>
+      </s:list-unordered>
+    </s:formal-item>
+    <s:paragraph>
+      The <s:term s:type="package">${project.parent.name}</s:term> package is
+      generally developed under the assumption that if a programmer is competent
+      enough to write all of their own shading and lighting algorithms, then they
+      might as well have written their own rendering system in the first place
+      <s:footnote>
+        There is a tension in rendering systems between providing something that
+        is restrictive but easy to use, and providing something that is so 
+        generalized that it is capable of anything but barely any easier to use
+        than using the OpenGL API directly.
+      </s:footnote>!
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.materials.types">
+    <s:subsection-title>Types</s:subsection-title>
+    <s:paragraph>
+      All materials implement
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialType.html">KMaterialType</s:link-external>.
+    </s:paragraph>
+    <s:paragraph xml:id="r1.dai.materials.types.matrix">
+      All materials have a 3x3 texture matrix which is concatenated with
+      a per-instance 3x3 texture matrix during rendering. The texture
+      matrix affects all textures (such as the <s:term s:type="term">albedo map</s:term>,
+      <s:term s:type="term">normal map</s:term>, <s:term s:type="term">specular map</s:term>, etc)
+      in the material simultaneously. This allows for the orientation, scale
+      and position of a texture to be set on a per-material basis, and then
+      adjusted on a per-instance basis later.
+    </s:paragraph>
+    <s:paragraph>
+      All materials have a unique <s:term s:type="term">material code</s:term>
+      (a simple string) that allows the rendering system to select a 
+      <s:term s:type="term">shader</s:term> in 
+      <s:term s:type="expression">O(1)</s:term> time to render the material.
+    </s:paragraph>
+    <s:paragraph>
+      All materials take the form <s:term s:type="term">pseudo-algebraic</s:term>
+      data types, with each <s:term s:type="term">case</s:term> (or 
+      <s:term s:type="term">constructor</s:term> in typed functional languages - not used here
+      because the term already exists in Java and means something else) being
+      represented by a single type. For example, the type of
+      <s:term s:type="term">albedo</s:term> material properties is represented
+      by the <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoType.html">KMaterialAlbedoType</s:link-external>
+      type, with specific cases represented by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoTextured.html">KMaterialAlbedoTextured</s:link-external>
+      and
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoUntextured.html">KMaterialAlbedoUntextured</s:link-external>
+      types. When given a value of type
+      <s:term s:type="constant">KMaterialAlbedoType</s:term>, it is necessary to
+      <s:term s:type="term">pattern-match</s:term> on the value to find out which
+      of the specific types the value actually is. This is achieved in Java by the
+      use of <s:term s:type="term">generic visitors</s:term>. As an example:
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Pattern matching</s:formal-item-title>
+      <s:verbatim><xi:include href="examples/Match0.java" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      Essentially, the method <s:term s:type="constant">albedoAccept</s:term> is
+      passed a value <s:term s:type="expression">v</s:term> of type
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoVisitorType.html">KMaterialAlbedoVisitorType</s:link-external>.
+      The <s:term s:type="constant">textured</s:term> method of 
+      <s:term s:type="expression">v</s:term> is called if 
+      <s:term s:type="expression">m</s:term> is of type
+      <s:term s:type="constant">KMaterialAlbedoTextured</s:term>, and
+      the <s:term s:type="constant">untextured</s:term> method of 
+      <s:term s:type="expression">v</s:term> is called if 
+      <s:term s:type="expression">m</s:term> is of type
+      <s:term s:type="constant">KMaterialAlbedoUntextured</s:term>. The
+      methods of <s:term s:type="expression">v</s:term> can return values
+      of type <s:term s:type="expression">A</s:term> (in this case, because
+      the visitor simply prints a message and doesn't return anything, the
+      visitor returns a value of type <s:term s:type="expression">Unit</s:term>),
+      and can raise exceptions of type 
+      <s:term s:type="expression">E</s:term> (in this case, the visitor does
+      not raise any exceptions and so throws an unchecked
+      <s:term s:type="expression">UnreachableCodeException</s:term>).
+    </s:paragraph>
+    <s:paragraph>
+      This method of representing types with a small number of fixed cases
+      is used throughout the <s:term s:type="package">${project.parent.name}</s:term> 
+      package <s:footnote>
+        Please see <s:link-external s:target="http://io7m.com/documents/types/ccat/">A Crash Course in Algebraic Types</s:link-external>,
+        and more or less any software written in a typed functional languages for
+        a description of the immense correctness and maintenance benefits that 
+        algebraic data types provide.
+      </s:footnote>.
+    </s:paragraph>
+    <s:paragraph>
+      Materials are divided into <s:term s:type="term">opaque</s:term> and
+      <s:term s:type="term">translucent</s:term> types, represented by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialOpaqueType.html">KMaterialOpaqueType</s:link-external>
+      and
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentType.html">KMaterialTranslucentType</s:link-external>
+      types. Specific cases of the <s:term s:type="term">translucent</s:term> types
+      allow for effects such as <s:term s:type="term">specular-only</s:term> 
+      rendering (<s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentSpecularOnly.html">KMaterialTranslucentSpecularOnly</s:link-external>)
+      and <s:link s:target="r1.dai.generic-refraction">generic refraction</s:link>
+      (<s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRefractive.html">KMaterialTranslucentRefractive</s:link-external>).
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.materials.shaders">
+    <s:subsection-title>Shaders</s:subsection-title>
+    <s:paragraph>
+      In order to render an object on modern graphics hardware,
+      it's necessary to use one or more <s:term s:type="term">shaders</s:term>
+      (<s:term s:type="term">shading programs</s:term>) to actually
+      render surface details and/or apply lighting.
+    </s:paragraph>
+    <s:paragraph>
+      When performing <s:link s:target="r1.dai.forward-translucents">forward rendering</s:link>,
+      one shader is used per combination of surface material type and
+      <s:link s:target="r1.dai.lighting">light type</s:link>. When performing
+      <s:link s:target="r1.dai.deferred">deferred rendering</s:link>, one
+      shader is used to render the surface properties into a buffer, and another
+      shader is used to calculate lighting using the data in the buffer.
+    </s:paragraph>
+    <s:paragraph>
+      It's therefore necessary to be able to, given an arbitrary material and light,
+      efficiently choose shaders with which to perform rendering. Because
+      all possible material and light combinations in the 
+      <s:term s:type="package">${project.parent.name}</s:term> package are
+      known ahead of time, the <s:term s:type="package">${project.parent.name}</s:term> 
+      package simply picks one from the complete set of possible shaders that were generated
+      when the package was built. When an object with a given material <s:term s:type="variable">m</s:term>
+      is placed into a scene, the <s:term s:type="package">${project.parent.name}</s:term> package
+      reads the <s:term s:type="term">material code</s:term> (a simple unique identifier string)
+      for the material and uses that code to select a shader. The shader is
+      then compiled, loaded, and cached. The next time a material 
+      (or material and light combination) appears with the same code, the 
+      cached shader is re-used.
+    </s:paragraph>
+    <s:paragraph>
+      The advantage of this approach, somewhat ironically, is a reduction
+      in the number of shaders that have to be loaded at any given time. In
+      other rendering systems that equate materials with shaders, a scene
+      containing a thousand different material types requires a thousand
+      different shaders to be loaded (even though many of those shaders may
+      be functionally identical). The same scene using the material system
+      in the <s:term s:type="package">${project.parent.name}</s:term> package
+      may only require dozens of shaders, because a shader essentially 
+      represents a combination of material properties 
+      (such as "normal mapped, environment mapped, textured albedo"), 
+      as opposed to representing an entire material. This also reduces the
+      number of rendering state changes that have to be performed during
+      rendering: If two materials differ structurally only in the actual 
+      textures that they use, then the same shader will be used for both
+      and therefore the rendering system does not need to switch shaders
+      during rendering to render objects using either material.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>
