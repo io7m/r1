@@ -174,7 +174,7 @@
       <s:term s:type="term">Eye space</s:term> represents the coordinate 
       system of the 
       <s:link s:target="r1.dai.concepts.camera">camera</s:link> of
-      a given <s:link s:target="r1.dai.concepts.scenes">scene</s:link>.
+      a given <s:link s:target="r1.dai.concepts.visible-sets">visible set</s:link>.
       In eye space, the observer is implicitly fixed at the origin
       <s:term s:type="expression">(0.0, 0.0, 0.0)</s:term> and is
       looking towards infinity in the negative Z direction.

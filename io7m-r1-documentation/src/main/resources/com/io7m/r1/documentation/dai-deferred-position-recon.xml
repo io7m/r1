@@ -28,13 +28,13 @@
     <s:paragraph>
       Applying lighting during <s:term s:type="term">deferred rendering</s:term>
       is primarily a <s:link s:target="r1.dai.coords.screen-space">screen space</s:link>
-      technique. When the scene has been rendered into the
+      technique. When the visible set has been rendered into the
       <s:link s:target="r1.dai.deferred.g-buffer">g-buffer</s:link>, the
       original <s:link s:target="r1.dai.coords.eye-space">eye space</s:link>
       positions of all of the surfaces that resulted in visible fragments 
       in the scene are lost (unless explicitly saved into the g-buffer). 
       However, given the knowledge of the <s:term s:type="term">projection</s:term> that was
-      used to render the scene (such as perspective or orthographic), it's
+      used to render the visible set (such as perspective or orthographic), it's
       possible to reconstruct the original eye-space position of the
       surfaces that produced each of the fragments in the g-buffer.
     </s:paragraph>
