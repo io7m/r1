@@ -17,13 +17,13 @@
   -->
 
 <s:section 
-  xml:id="r1.dai.scenes"
+  xml:id="r1.dai.visible-sets"
   xmlns:s="http://schemas.io7m.com/structural/2.1.0"
   xmlns:xi="http://www.w3.org/2001/XInclude">
-  <s:section-title>Scenes</s:section-title>
+  <s:section-title>Visible Sets</s:section-title>
   <s:section-contents/>
 
-  <s:subsection xml:id="r1.dai.scenes.overview">
+  <s:subsection xml:id="r1.dai.visible-sets.overview">
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
       Overview.

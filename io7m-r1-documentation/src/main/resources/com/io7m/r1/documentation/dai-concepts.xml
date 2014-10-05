@@ -38,15 +38,15 @@
       The <s:term s:type="package">${project.parent.name}</s:term> package
       consists of a set of <s:term s:type="term">renderers</s:term>. A
       <s:term s:type="term">renderer</s:term> consumes an immutable
-      <s:link s:target="r1.dai.concepts.scenes">scene</s:link>
+      <s:link s:target="r1.dai.concepts.visible-sets">visible set</s:link>
       and produces an image, writing the image to a given
       <s:link s:target="r1.dai.concepts.framebuffers">framebuffer</s:link>.
     </s:paragraph>
     <s:paragraph>
       The renderers expose
       an interface of <s:term s:type="term">conceptually</s:term> pure 
-      functions from scenes to images. That is, the renderers should be
-      considered to simply take scenes as input and return images as output.
+      functions from visible sets to images. That is, the renderers should be
+      considered to simply take visible sets as input and return images as output.
       In reality, because the Java language is not pure and because the code
       is required to perform I/O in order to speak to the GPU, the renderer
       functions are not <s:term s:type="term">really</s:term> pure. Nevertheless,
@@ -59,20 +59,20 @@
       have produced previously, do not maintain any state of their own,
       and simply write their results to a programmer-provided 
       <s:link s:target="r1.dai.concepts.framebuffers">framebuffer</s:link>.
-      Passing the same immutable scene to a renderer multiple times should 
+      Passing the same immutable visible set to a renderer multiple times should 
       result in the same image each time.
     </s:paragraph>
   </s:subsection>
-  <s:subsection xml:id="r1.dai.concepts.scenes">
-    <s:subsection-title>Scenes</s:subsection-title>
+  <s:subsection xml:id="r1.dai.concepts.visible-sets">
+    <s:subsection-title>Visible Sets</s:subsection-title>
     <s:paragraph>
-      A <s:term s:type="term">scene</s:term> is an immutable snapshot
+      A <s:term s:type="term">visible set</s:term> is an immutable snapshot
       of all <s:link s:target="r1.dai.concepts.instances">instances</s:link>
       and <s:link s:target="r1.dai.concepts.lights">lights</s:link>
-      that contribute to an image. Note that a renderer expects to receive only those
-      instances and lights that are actually visible from the perspective of the
-      observer. This is a conscious design decision that frees the renderer from
-      the complicated task of trying to decide which objects are visible and
+      that contribute to an image. The name implies that a renderer expects to 
+      receive only those instances and lights that are actually visible from the 
+      perspective of the observer. This is a conscious design decision that frees 
+      the renderer from the complicated task of trying to decide which objects are visible and
       which are not. A programmer using the renderer is expected to be using
       some sort of spatial partitioning data structure
         <s:footnote>
@@ -94,13 +94,13 @@
       the results of rendering.
       The programmer typically allocates one framebuffer, passes it to
       a <s:term s:type="term">renderer</s:term> along with a
-      <s:link s:target="r1.dai.concepts.scenes">scene</s:link>,
+      <s:link s:target="r1.dai.concepts.visible-sets">visible set</s:link>,
       and the renderer populates the given framebuffer with an image
-      of the rendered scene. The programmer can then copy the contents of
+      of the rendered visible set. The programmer can then copy the contents of
       this framebuffer to the screen for viewing, pass it on to a separate
       <s:link s:target="r1.dai.concepts.postprocessors">postprocessor</s:link>
       for extra visual effects, use it as a texture to be applied to objects
-      in further rendered scenes, etc.
+      in further rendered visible sets, etc.
     </s:paragraph>
   </s:subsection>
   <s:subsection xml:id="r1.dai.concepts.meshes">
@@ -125,7 +125,7 @@
       one <s:link s:target="r1.dai.coords">coordinate space</s:link>
       to another. Essentially, a transform is used to position and orient a
       <s:link s:target="r1.dai.concepts.meshes">mesh</s:link> inside
-      a <s:term s:type="term">scene</s:term>.
+      a <s:term s:type="term">visible set</s:term>.
     </s:paragraph>
   </s:subsection>
 
@@ -135,20 +135,20 @@
       A <s:term s:type="term">camera</s:term> defines both the
       <s:term s:type="term">viewing position</s:term> and
       <s:term s:type="term">viewing projection</s:term> for the
-      scene. The <s:term s:type="term">viewing projection</s:term>
+      visible set. The <s:term s:type="term">viewing projection</s:term>
       describes the <s:term s:type="term">orthographic</s:term>
       or <s:term s:type="term">perspective</s:term> projection used to
-      render the scene, and the <s:term s:type="term">viewing position</s:term>
+      render the visible set, and the <s:term s:type="term">viewing position</s:term>
       is used to <s:link s:target="r1.dai.concepts.transforms">transform</s:link>
-      all instances and lights in the scene to
+      all instances and lights in the visible set to
       <s:link s:target="r1.dai.coords.eye-space">eye-space</s:link>
       during rendering. The camera is represented by the
       <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KCamera.html">KCamera</s:link-external>
       type.
     </s:paragraph>
     <s:paragraph>
-      A scene always contains a single <s:term s:type="term">camera</s:term>,
-      because, as mentioned earlier, a scene is supposed to represent the
+      A visible set always contains a single <s:term s:type="term">camera</s:term>,
+      because, as mentioned earlier, a visible set is supposed to represent the
       instances and lights that are visible from the observation point that
       the camera describes.
     </s:paragraph>
@@ -235,7 +235,7 @@
       An <s:term s:type="term">instance</s:term> is essentially
       a reference to a <s:link s:target="r1.dai.concepts.meshes">mesh</s:link>,
       a <s:link s:target="r1.dai.concepts.transforms">transform</s:link> (to
-      position that mesh in the scene), and a
+      position that mesh in the visible set), and a
       <s:link s:target="r1.dai.concepts.materials">material</s:link> to define
       the appearance of the mesh surface.
     </s:paragraph>
@@ -245,7 +245,7 @@
     <s:subsection-title>Lights</s:subsection-title>
     <s:paragraph>
       A <s:term s:type="term">light</s:term> describes a light source
-      within a scene. There are many different types of lights, each
+      within a visible set. There are many different types of lights, each
       with different behaviours. Lights may or may not cast shadows,
       depending on their type. All lighting in the 
       <s:term s:type="package">${project.parent.name}</s:term> package
@@ -281,7 +281,7 @@
           <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithoutShadow.html">KLightProjectiveWithoutShadow</s:link-external>
           - a <s:term s:type="term">projective</s:term> light. 
           A projective light effectively projects a given image onto the
-          scene from a  given position in world-space, up to a given 
+          visible set from a given position in world-space, up to a given 
           <s:term s:type="term">radius</s:term>. The emitted light is
           attenuated over distance based on a configurable 
           <s:term s:type="term">falloff</s:term> value.
@@ -320,7 +320,7 @@
     <s:subsection-title>Light groups</s:subsection-title>
     <s:paragraph>
       <s:term s:type="term">Light groups</s:term> are a means to partition
-      a scene into separate lighting environments. An 
+      a visible set into separate lighting environments. An 
       <s:term s:type="term">instance</s:term> belongs to exactly one
       <s:term s:type="term">light group</s:term>, but a given 
       <s:term s:type="term">light</s:term> can be placed into any number
@@ -332,7 +332,7 @@
       <s:term s:type="term">local illumination</s:term>
       <s:footnote>
         That is, each surface is rendered as if it was the only surface
-        in the scene. There are no light bounces between surfaces, and
+        in the visible set. There are no light bounces between surfaces, and
         shadows are created by explicit shadow mapping, rather than occuring
         naturally as part of a physically accurate 
         <s:term s:type="term">global illumination</s:term> algorithm.
@@ -347,12 +347,12 @@
       <s:image s:source="images/room_no_groups.png">Room without groups</s:image>
     </s:formal-item>
     <s:paragraph>
-      The scene contains three lights: A red spherical light 
+      The visible set contains three lights: A red spherical light 
       <s:term s:type="expression">s0</s:term> in the left room,
       a white spherical light 
       <s:term s:type="expression">s1</s:term> in the middle room, 
       and a blue spherical light <s:term s:type="expression">s2</s:term>
-      in the right room. The scene contains four instances: The left room 
+      in the right room. The visible set contains four instances: The left room 
       <s:term s:type="expression">i0</s:term>,
       the middle room  <s:term s:type="expression">i1</s:term>, 
       a piece of furniture <s:term s:type="expression">i2</s:term>
@@ -400,13 +400,13 @@
     </s:paragraph>
     <s:paragraph>
       Light groups can also be used for other miscellaneous visual effects.
-      For example, an object in a scene could be highlighted by placing it
+      For example, an object in a visible set could be highlighted by placing it
       in its own light group, and adding a strong red directional light
-      to that group. No other objects in the scene would be affected by the
+      to that group. No other objects in the visible set would be affected by the
       light and the object would, as a result, be displayed very conspicuously!
     </s:paragraph>
     <s:paragraph>
-      The majority of scenes will contain only a single light group. They
+      The majority of visible sets will contain only a single light group. They
       are intended to assist with working around the lack of 
       <s:term s:type="term">global illumination</s:term>, and with 
       implementing specific visual effects.
@@ -420,7 +420,7 @@
       except that it accepts
       a <s:link s:target="r1.dai.concepts.framebuffers">framebuffer</s:link>
       as input
-      (as opposed to a <s:link s:target="r1.dai.concepts.scenes">scene</s:link>),
+      (as opposed to a <s:link s:target="r1.dai.concepts.visible-sets">visible set</s:link>),
       processes the image in the framebuffer in some manner, and
       then writes the results to an output framebuffer (possibly the same
       as the input framebuffer). It is used to provide visual effects such
@@ -434,19 +434,19 @@
       a framebuffer that was populated by a 
       <s:term s:type="term">deferred renderer</s:term>, and therefore has
       access to much more per-pixel data than a typical image processor. For
-      example, for each pixel in the scene, a framebuffer from a deferred
+      example, for each pixel in the image, a framebuffer from a deferred
       renderer will contain at least the linear
        <s:term s:type="term">depth</s:term>
       value of that pixel, and the <s:term s:type="term">normal vector</s:term>
       of the surface at that pixel. If the postprocessor also has access to the
       <s:term s:type="term">viewing projection</s:term> that was used to produce
-      the scene, then it can actually efficiently 
+      the image, then it can actually efficiently 
       <s:link s:target="r1.dai.deferred-position-recon">reconstruct</s:link>
       the original <s:link s:target="r1.dai.coords.eye-space">eye-space</s:link>
       position of the pixel! This allows for interesting effects
       such as <s:term s:type="term">fog</s:term> and
       <s:term s:type="term">depth-of-field</s:term> simulation, that rely on
-      knowing the original positions of objects within the scene - information
+      knowing the original positions of objects within the visible set - information
       that would not usually be available to a simple image-based postprocessor.
     </s:paragraph>
   </s:subsection>
