@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.instances"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Instances</s:section-title>
+  <s:section-contents/>
+  
+  <s:subsection xml:id="r1.dai.instances.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      An <s:term s:type="term">instance</s:term> is a 5-tuple
+      <s:term s:type="expression">(f, m, k, t, u)</s:term>, where:
+    </s:paragraph>
+    <s:formal-item s:kind="spec">
+    <s:formal-item-title>Instance components</s:formal-item-title>
+    <s:list-unordered>
+      <s:list-item>
+        <s:term s:type="expression">f</s:term> is a value of type
+        <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KFaceSelection.html">KFaceSelection</s:link-external>,
+        which indicates which faces in the given <s:term s:type="term">mesh</s:term>
+        will be rendered.
+      </s:list-item>
+      <s:list-item>
+        <s:term s:type="expression">m</s:term> is a
+        <s:link s:target="r1.dai.materials">material</s:link>.
+      </s:list-item>
+      <s:list-item>
+        <s:term s:type="expression">k</s:term> is a reference to
+        a <s:link s:target="r1.dai.meshes">mesh</s:link>.
+      </s:list-item>
+      <s:list-item>
+        <s:term s:type="expression">t</s:term> is a
+        <s:link s:target="r1.dai.concepts.transforms">transform</s:link>.
+      </s:list-item>
+      <s:list-item>
+        <s:term s:type="expression">u</s:term> is a 
+        <s:term s:type="term">texture matrix</s:term>.
+      </s:list-item>
+    </s:list-unordered>
+    </s:formal-item> 
+    <s:paragraph>
+      If <s:term s:type="expression">m</s:term> is an
+      <s:term s:type="term">opaque</s:term> material, then the instance is
+      said to be <s:term s:type="term">opaque</s:term>. If
+      <s:term s:type="expression">m</s:term> is a
+      <s:term s:type="term">translucent</s:term> material, then the instance is
+      said to be <s:term s:type="term">translucent</s:term>. This is actually
+      enforced at the type level: An instance of type
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KInstanceOpaqueRegular.html">KInstanceOpaqueRegular</s:link-external>
+      may only be associated with a material of type
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialOpaqueRegular.html">KMaterialOpaqueRegular</s:link-external>,
+      and so on. Opaque instances implement 
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KInstanceOpaqueType.html">KInstanceOpaqueType</s:link-external>,
+      whilst translucent instances implement
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KInstanceTranslucentType.html">KInstanceTranslucentType</s:link-external>.
+    </s:paragraph>
+    <s:paragraph>
+      The rendering of <s:term s:type="term">opaque</s:term> instances
+      is handled differently from the rendering of 
+      <s:term s:type="term">translucent</s:term> instances. The 
+      <s:term s:type="package">${project.parent.name}</s:term> package
+      uses a <s:link s:target="r1.dai.deferred">deferred renderer</s:link>
+      to efficiently render large numbers of opaque instances lit by potentially hundreds
+      of light sources. However, the nature of the deferred rendering
+      algorithm makes it impossible for deferred renderers to support
+      translucent objects. Therefore, the 
+      <s:term s:type="package">${project.parent.name}</s:term> package
+      provides a 
+      <s:link s:target="r1.dai.forward-translucents">forward renderer</s:link>
+      that implements a subset of the features of the deferred renderer
+      for rendering translucent instances. Keeping the different categories
+      of instances as distinct types ensures that the programmer is statically
+      prevented from accidentally passing an instance with an opaque material
+      where one with a translucent material was expected, and vice versa.
+    </s:paragraph>
+  </s:subsection>
+</s:section>

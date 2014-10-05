@@ -1,0 +1,75 @@
+/*
+ * Copyright © 2014 <code@io7m.com> http://io7m.com
+ * 
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+ * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+package com.io7m.r1.kernel.types;
+
+import com.io7m.r1.types.RExceptionBuilderInvalid;
+import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
+import com.io7m.r1.types.RExceptionLightGroupAlreadyAdded;
+
+/**
+ * A mutable "builder" interface for creating immutable
+ * {@link KVisibleSetOpaques} snapshots.
+ */
+
+public interface KVisibleSetOpaquesBuilderType extends
+  KVisibleSetShadowsBuilderType
+{
+  /**
+   * <p>
+   * Add an instance <code>instance</code> which is expected to have an opaque
+   * material and is unaffected by lighting.
+   * </p>
+   * <p>
+   * Due to depth buffering, opaque instances may be rendered in any order and
+   * therefore the order that they are added to the scene has no effect on the
+   * rendered image.
+   * </p>
+   *
+   * @param instance
+   *          The shadow-casting instance
+   *
+   * @throws RExceptionBuilderInvalid
+   *           If the builder has already been used.
+   * @throws RExceptionInstanceAlreadyVisible
+   *           If the instance is already visible.
+   */
+
+  void visibleOpaqueAddUnlit(
+    final KInstanceOpaqueType instance)
+    throws RExceptionBuilderInvalid,
+      RExceptionInstanceAlreadyVisible;
+
+  /**
+   * <p>
+   * Construct a new builder to construct a light group.
+   * </p>
+   *
+   * @return A new light group builder.
+   * @param name
+   *          The name of the new light group.
+   *
+   * @throws RExceptionLightGroupAlreadyAdded
+   *           A light group already exists with the given name.
+   * @throws RExceptionBuilderInvalid
+   *           If the builder has already been used.
+   */
+
+  KVisibleSetLightGroupBuilderType visibleOpaqueNewLightGroup(
+    final String name)
+    throws RExceptionLightGroupAlreadyAdded,
+      RExceptionBuilderInvalid;
+}

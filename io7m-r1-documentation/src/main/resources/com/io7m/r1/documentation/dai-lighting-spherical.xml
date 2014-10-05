@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.lighting-spherical"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Spherical Lighting</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.lighting-spherical.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">spherical light</s:term> in the 
+      <s:term s:type="package">${project.parent.name}</s:term> package
+      is a light that emits rays of light in all directions from
+      a given <s:term s:type="term">origin</s:term> specified in
+      <s:link s:target="r1.dai.coords.eye-space">eye space</s:link>
+      up to a given maximum <s:term s:type="term">radius</s:term>.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Spherical lighting</s:formal-item-title>
+      <s:image s:source="images/spherical_diagram.png">Spherical lighting</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The term <s:term s:type="term">spherical</s:term> comes from the
+      fact that the light has a defined radius. Most rendering systems
+      instead use <s:term s:type="term">point</s:term> lights that 
+      specify multiple <s:term s:type="term">attenuation</s:term> 
+      constants to control how light is attenuated over distance. The
+      problem with this approach is that it requires solving a quadratic
+      equation to determine a minimum bounding sphere that can contain
+      the light. Essentially, the programmer/artist is forced to determine 
+      "at which radius does the contribution from this light effectively reach
+      zero?". With spherical lights, the maximum radius is declared up
+      front, and a single falloff value is used to determine the
+      attenuation curve within that radius. This makes spherical
+      lights more intuitive to use: The programmer/artist simply places a
+      sphere within the scene and knows exactly from the radius which
+      objects are lit by it. It also means that bounding light volumes
+      can be trivially constructed from unit spheres by simply scaling
+      those spheres by the light radius, when performing
+      <s:link s:target="r1.dai.deferred">deferred rendering</s:link>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-spherical.types">
+    <s:subsection-title>Types</s:subsection-title>
+    <s:paragraph>
+      Spherical lights are represented in the <s:term s:type="package">${project.parent.name}</s:term> 
+      package by the following types:
+    </s:paragraph>
+    <s:formal-item s:kind="listing">
+      <s:formal-item-title>Types</s:formal-item-title>
+      <s:list-unordered>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSphereWithoutShadow.html">KLightSphereWithoutShadow</s:link-external> -
+          a spherical light that does not cast shadows.
+        </s:list-item>
+      </s:list-unordered>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-spherical.attenuation">
+    <s:subsection-title>Attenuation</s:subsection-title>
+    <s:paragraph>
+      The light supports <s:link s:target="r1.dai.lighting.attenuation">attenuation</s:link> 
+      using the <s:term s:type="term">radius</s:term> as the maximum range.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-spherical.application">
+    <s:subsection-title>Application</s:subsection-title>
+    <s:paragraph>
+      The final light applied to the surface is given by <s:term s:type="function">spherical</s:term>
+      [<s:link-external s:target="haskell/Spherical.hs">Spherical.hs</s:link-external>], where
+      <s:term s:type="variable">sr</s:term>, <s:term s:type="variable">sg</s:term>,
+      <s:term s:type="variable">sb</s:term> are the red, green, and blue channels,
+      respectively, of the surface being lit. The surface-to-light vector 
+      <s:term s:type="variable">stl</s:term> is calculated by normalizing the
+      negation of the difference between the the current eye space
+      <s:term s:type="variable">surface_position</s:term> and the eye space
+      origin of the light.
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Spherical lighting (Application)</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/Spherical.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+  </s:subsection>
+
+</s:section>
