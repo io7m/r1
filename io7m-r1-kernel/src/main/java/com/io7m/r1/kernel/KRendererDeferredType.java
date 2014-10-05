@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,7 +17,7 @@
 package com.io7m.r1.kernel;
 
 import com.io7m.jfunctional.PartialProcedureType;
-import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
+import com.io7m.r1.kernel.types.KVisibleSet;
 import com.io7m.r1.types.RException;
 
 /**
@@ -36,8 +36,8 @@ public interface KRendererDeferredType extends KRendererType
    *
    * @param framebuffer
    *          A framebuffer that supports deferrred rendering.
-   * @param scene
-   *          The scene to be rendered.
+   * @param visible
+   *          The visible set to be rendered.
    * @param procedure
    *          A procedure to be evaluated with the intermediate results of
    *          rendering.
@@ -48,7 +48,7 @@ public interface KRendererDeferredType extends KRendererType
     void
     rendererDeferredEvaluate(
       final KFramebufferDeferredUsableType framebuffer,
-      final KSceneBatchedDeferred scene,
+      final KVisibleSet visible,
       final PartialProcedureType<KRendererDeferredControlType, RException> procedure)
       throws RException;
 
@@ -58,8 +58,8 @@ public interface KRendererDeferredType extends KRendererType
    *
    * @param framebuffer
    *          The framebuffer.
-   * @param scene
-   *          The scene.
+   * @param visible
+   *          The visible set to be rendered.
    *
    * @throws RException
    *           If an error occurs.
@@ -67,6 +67,6 @@ public interface KRendererDeferredType extends KRendererType
 
   void rendererDeferredEvaluateFull(
     final KFramebufferDeferredUsableType framebuffer,
-    final KSceneBatchedDeferred scene)
+    final KVisibleSet visible)
     throws RException;
 }

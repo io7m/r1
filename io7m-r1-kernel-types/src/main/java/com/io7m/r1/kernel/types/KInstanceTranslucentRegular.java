@@ -30,12 +30,11 @@ import com.io7m.r1.types.RTransformTextureType;
 
 @EqualityReference public final class KInstanceTranslucentRegular implements
   KInstanceTranslucentUnlitType,
-  KInstanceTranslucentLitType,
-  KTranslucentType
+  KInstanceTranslucentLitType
 {
   /**
    * Construct a new translucent regular instance.
-   * 
+   *
    * @param in_mesh
    *          The mesh
    * @param in_material

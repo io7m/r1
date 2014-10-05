@@ -18,7 +18,6 @@ package com.io7m.r1.examples.viewer;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
@@ -86,7 +85,6 @@ import com.io7m.r1.kernel.KFramebufferRGBAUsableType;
 import com.io7m.r1.kernel.KProgramType;
 import com.io7m.r1.kernel.KShaderCachePostprocessingType;
 import com.io7m.r1.kernel.KShadingProgramCommon;
-import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KDepthPrecision;
 import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
 import com.io7m.r1.kernel.types.KFramebufferForwardDescription;
@@ -94,23 +92,20 @@ import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.r1.kernel.types.KInstanceTranslucentUnlitType;
-import com.io7m.r1.kernel.types.KInstanceType;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
-import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KRGBAPrecision;
-import com.io7m.r1.kernel.types.KScene;
-import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
-import com.io7m.r1.kernel.types.KSceneBuilderWithCreateType;
-import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
-import com.io7m.r1.kernel.types.KTranslucentType;
 import com.io7m.r1.kernel.types.KUnitQuad;
 import com.io7m.r1.kernel.types.KUnitQuadCache;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
+import com.io7m.r1.kernel.types.KVisibleSet;
+import com.io7m.r1.kernel.types.KVisibleSetBuilderWithCreateType;
+import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionInstanceAlreadyLit;
+import com.io7m.r1.types.RExceptionBuilderInvalid;
+import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
 import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionLightGroupAlreadyAdded;
 import com.jogamp.newt.event.WindowAdapter;
@@ -364,8 +359,8 @@ final class ViewerSingleMainWindow implements Runnable
     {
       final ExampleViewType view =
         this.example.exampleViewpoints().get(this.view_index);
-      final KSceneBuilderWithCreateType scene_builder =
-        KScene.newBuilder(view.getCamera());
+      final KVisibleSetBuilderWithCreateType scene_builder =
+        KVisibleSet.newBuilder(view.getCamera());
 
       final ExampleSceneBuilderType b = new ExampleSceneBuilderType() {
         @Override public TextureCubeStaticUsableType cubeTextureClamped(
@@ -390,88 +385,6 @@ final class ViewerSingleMainWindow implements Runnable
           throws RException
         {
           return Runner.this.cache_mesh.loadMesh(name);
-        }
-
-        @Override public void sceneAddOpaqueUnlit(
-          final KInstanceOpaqueType instance)
-          throws RExceptionInstanceAlreadyLit
-        {
-          scene_builder.sceneAddOpaqueUnlit(instance);
-        }
-
-        @Override public void sceneAddShadowCaster(
-          final KLightWithShadowType light,
-          final KInstanceOpaqueType instance)
-        {
-          scene_builder.sceneAddShadowCaster(light, instance);
-        }
-
-        @Override public void sceneAddTranslucentLit(
-          final KInstanceTranslucentLitType instance,
-          final Set<KLightTranslucentType> lights)
-        {
-          scene_builder.sceneAddTranslucentLit(instance, lights);
-        }
-
-        @Override public void sceneAddTranslucentUnlit(
-          final KInstanceTranslucentUnlitType instance)
-        {
-          scene_builder.sceneAddTranslucentUnlit(instance);
-        }
-
-        @Override public KCamera sceneGetCamera()
-        {
-          return scene_builder.sceneGetCamera();
-        }
-
-        @Override public Set<KInstanceType> sceneGetInstances()
-        {
-          return scene_builder.sceneGetInstances();
-        }
-
-        @Override public
-          Set<KInstanceOpaqueType>
-          sceneGetInstancesOpaqueLitVisible()
-        {
-          return scene_builder.sceneGetInstancesOpaqueLitVisible();
-        }
-
-        @Override public
-          Map<KLightWithShadowType, Set<KInstanceOpaqueType>>
-          sceneGetInstancesOpaqueShadowCastingByLight()
-        {
-          return scene_builder.sceneGetInstancesOpaqueShadowCastingByLight();
-        }
-
-        @Override public
-          Set<KInstanceOpaqueType>
-          sceneGetInstancesOpaqueUnlit()
-        {
-          return scene_builder.sceneGetInstancesOpaqueUnlit();
-        }
-
-        @Override public Set<KLightType> sceneGetLights()
-        {
-          return scene_builder.sceneGetLights();
-        }
-
-        @Override public
-          Set<KLightWithShadowType>
-          sceneGetLightsShadowCasting()
-        {
-          return scene_builder.sceneGetLightsShadowCasting();
-        }
-
-        @Override public List<KTranslucentType> sceneGetTranslucents()
-        {
-          return scene_builder.sceneGetTranslucents();
-        }
-
-        @Override public KSceneLightGroupBuilderType sceneNewLightGroup(
-          final String name)
-          throws RExceptionLightGroupAlreadyAdded
-        {
-          return scene_builder.sceneNewLightGroup(name);
         }
 
         @Override public Texture2DStaticUsableType texture(
@@ -516,6 +429,54 @@ final class ViewerSingleMainWindow implements Runnable
             throw new RuntimeException(e);
           }
         }
+
+        @Override public void visibleOpaqueAddUnlit(
+          final KInstanceOpaqueType instance)
+          throws RExceptionBuilderInvalid,
+            RExceptionInstanceAlreadyVisible
+        {
+          scene_builder.visibleOpaqueAddUnlit(instance);
+        }
+
+        @Override public
+          KVisibleSetLightGroupBuilderType
+          visibleOpaqueNewLightGroup(
+            final String name)
+            throws RExceptionLightGroupAlreadyAdded,
+              RExceptionBuilderInvalid
+        {
+          return scene_builder.visibleOpaqueNewLightGroup(name);
+        }
+
+        @Override public void visibleShadowsAddCaster(
+          final KLightWithShadowType light,
+          final KInstanceOpaqueType instance)
+          throws RExceptionBuilderInvalid
+        {
+          scene_builder.visibleShadowsAddCaster(light, instance);
+        }
+
+        @Override public void visibleShadowsAddLight(
+          final KLightWithShadowType light)
+          throws RExceptionBuilderInvalid
+        {
+          scene_builder.visibleShadowsAddLight(light);
+        }
+
+        @Override public void visibleTranslucentsAddLit(
+          final KInstanceTranslucentLitType instance,
+          final Set<KLightTranslucentType> lights)
+          throws RExceptionBuilderInvalid
+        {
+          scene_builder.visibleTranslucentsAddLit(instance, lights);
+        }
+
+        @Override public void visibleTranslucentsAddUnlit(
+          final KInstanceTranslucentUnlitType instance)
+          throws RExceptionBuilderInvalid
+        {
+          scene_builder.visibleTranslucentsAddUnlit(instance);
+        }
       };
 
       this.example.exampleScene(b);
@@ -526,9 +487,7 @@ final class ViewerSingleMainWindow implements Runnable
           throws RException
         {
           try {
-            final KScene sc = scene_builder.sceneCreate();
-            final KSceneBatchedDeferred batched =
-              KSceneBatchedDeferred.fromScene(sc);
+            final KVisibleSet sc = scene_builder.visibleCreate();
 
             final KFramebufferDeferredType fb = Runner.this.framebuffer;
             assert fb != null;
@@ -538,7 +497,7 @@ final class ViewerSingleMainWindow implements Runnable
               ViewerSingleMainWindow.CLEAR_DEPTH,
               ViewerSingleMainWindow.CLEAR_STENCIL);
 
-            rd.rendererDeferredEvaluateFull(fb, batched);
+            rd.rendererDeferredEvaluateFull(fb, sc);
             Runner.this.renderSceneResults(fb);
 
             return Unit.unit();
@@ -554,7 +513,7 @@ final class ViewerSingleMainWindow implements Runnable
           throws RException
         {
           try {
-            final KScene sc = scene_builder.sceneCreate();
+            final KVisibleSet sc = scene_builder.visibleCreate();
 
             final KFramebufferDeferredType fb = Runner.this.framebuffer;
             assert fb != null;

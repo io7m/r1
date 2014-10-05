@@ -16,8 +16,6 @@
 
 package com.io7m.r1.kernel;
 
-import java.util.List;
-
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.JCGLException;
@@ -30,9 +28,9 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.r1.kernel.types.KCamera;
-import com.io7m.r1.kernel.types.KSceneBatchedDeferred;
-import com.io7m.r1.kernel.types.KSceneBatchedDeferredOpaque;
-import com.io7m.r1.kernel.types.KTranslucentType;
+import com.io7m.r1.kernel.types.KVisibleSet;
+import com.io7m.r1.kernel.types.KVisibleSetOpaques;
+import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
@@ -95,7 +93,7 @@ import com.io7m.r1.types.RExceptionJCGL;
   private final LogUsableType               log;
   private final KMutableMatrices            matrices;
   private final KRendererDeferredOpaqueType opaque_renderer;
-  private final KShadowMapRendererType   shadow_renderer;
+  private final KShadowMapRendererType      shadow_renderer;
   private final KTranslucentRendererType    translucent_renderer;
 
   private KRendererDeferred(
@@ -123,18 +121,18 @@ import com.io7m.r1.types.RExceptionJCGL;
     void
     rendererDeferredEvaluate(
       final KFramebufferDeferredUsableType framebuffer,
-      final KSceneBatchedDeferred scene,
+      final KVisibleSet visible,
       final PartialProcedureType<KRendererDeferredControlType, RException> procedure)
       throws RException
   {
     NullCheck.notNull(framebuffer, "Framebuffer");
-    NullCheck.notNull(scene, "Scene");
+    NullCheck.notNull(visible, "Visible set");
     NullCheck.notNull(procedure, "Procedure");
 
     final KShadowMapRendererType smr = this.shadow_renderer;
-    final KCamera camera = scene.getCamera();
-    final List<KTranslucentType> translucents = scene.getTranslucents();
-    final KSceneBatchedDeferredOpaque opaques = scene.getDeferredOpaques();
+    final KCamera camera = visible.getCamera();
+    final KVisibleSetTranslucents translucents = visible.getTranslucents();
+    final KVisibleSetOpaques opaques = visible.getOpaques();
     final OptionType<DepthFunction> depth_function =
       Option.some(DepthFunction.DEPTH_LESS_THAN);
 
@@ -160,7 +158,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
               return smr.rendererEvaluateShadowMaps(
                 camera,
-                scene.getShadows(),
+                visible.getShadows(),
                 new KShadowMapWithType<Unit, JCacheException>() {
                   @Override public Unit withMaps(
                     final KShadowMapContextType shadow_context)
@@ -176,14 +174,14 @@ import com.io7m.r1.types.RExceptionJCGL;
                           shadow_context,
                           depth_function,
                           mwo,
-                          opaques.getGroups());
+                          opaques);
 
                         or.rendererEvaluateOpaqueUnlit(
                           framebuffer,
                           shadow_context,
                           depth_function,
                           mwo,
-                          opaques.getUnlit());
+                          opaques);
                       }
 
                       @Override public void rendererEvaluateTranslucents()
@@ -224,12 +222,12 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   @Override public void rendererDeferredEvaluateFull(
     final KFramebufferDeferredUsableType framebuffer,
-    final KSceneBatchedDeferred scene)
+    final KVisibleSet visible)
     throws RException
   {
     this.rendererDeferredEvaluate(
       framebuffer,
-      scene,
+      visible,
       KRendererDeferred.RENDER_PROCEDURE);
   }
 

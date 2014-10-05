@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -56,6 +56,7 @@ import com.io7m.r1.kernel.types.KTranslucentRegularLit;
 import com.io7m.r1.kernel.types.KTranslucentSpecularOnlyLit;
 import com.io7m.r1.kernel.types.KTranslucentType;
 import com.io7m.r1.kernel.types.KTranslucentVisitorType;
+import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
@@ -579,7 +580,7 @@ import com.io7m.r1.types.RExceptionJCGL;
   @Override public void rendererEvaluateTranslucents(
     final KFramebufferRGBAWithDepthUsableType framebuffer,
     final KMatricesObserverType mwo,
-    final List<KTranslucentType> translucents)
+    final KVisibleSetTranslucents translucents)
     throws RException
   {
     try {
@@ -599,7 +600,7 @@ import com.io7m.r1.types.RExceptionJCGL;
   private void rendererEvaluateTranslucentsActual(
     final KFramebufferRGBAWithDepthUsableType framebuffer,
     final KMatricesObserverType mwo,
-    final List<KTranslucentType> translucents)
+    final KVisibleSetTranslucents translucents)
     throws JCGLException,
       JCacheException,
       RException
@@ -621,11 +622,12 @@ import com.io7m.r1.types.RExceptionJCGL;
         gc.stencilBufferDisable();
       }
 
-      for (int index = 0; index < translucents.size(); ++index) {
+      final List<KTranslucentType> instances = translucents.getInstances();
+      for (int index = 0; index < instances.size(); ++index) {
         // Enabled by each translucent instance
         gc.cullingDisable();
 
-        final KTranslucentType translucent = translucents.get(index);
+        final KTranslucentType translucent = instances.get(index);
 
         translucent
           .translucentAccept(new KTranslucentVisitorType<Unit, JCacheException>() {

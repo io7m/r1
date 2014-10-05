@@ -16,13 +16,10 @@
 
 package com.io7m.r1.kernel;
 
-import java.util.List;
-import java.util.Map;
-
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.r1.kernel.types.KDepthInstancesType;
 import com.io7m.r1.kernel.types.KFaceSelection;
-import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RMatrixI4x4F;
@@ -36,15 +33,15 @@ public interface KDepthRendererType extends KRendererType
 {
   /**
    * Bind the given framebuffer and then call
-   * {@link #rendererEvaluateDepthWithBoundFramebuffer(RMatrixI4x4F, KProjectionType, Map, AreaInclusive, OptionType)}
-   * , unbinding the framebuffer after use.
+   * {@link #rendererEvaluateDepthWithBoundFramebuffer(RMatrixI4x4F, KProjectionType, KDepthInstancesType, AreaInclusive, OptionType)}
+   * .
    *
    * @param view
    *          The current view matrix
    * @param projection
    *          The current projection
-   * @param batches
-   *          The batches
+   * @param instances
+   *          The instances to be rendered
    * @param framebuffer
    *          The output framebuffer
    * @param faces
@@ -57,14 +54,14 @@ public interface KDepthRendererType extends KRendererType
   void rendererEvaluateDepth(
     final RMatrixI4x4F<RTransformViewType> view,
     final KProjectionType projection,
-    final Map<String, List<KInstanceOpaqueType>> batches,
+    final KDepthInstancesType instances,
     final KFramebufferDepthUsableType framebuffer,
     final OptionType<KFaceSelection> faces)
     throws RException;
 
   /**
    * <p>
-   * Evaluate the given batches with the renderer, assuming a depth-only
+   * Evaluate the given instances with the renderer, assuming a depth-only
    * framebuffer is currently bound.
    * </p>
    * <p>
@@ -75,8 +72,8 @@ public interface KDepthRendererType extends KRendererType
    *          The current view matrix
    * @param projection
    *          The current projection
-   * @param batches
-   *          The batches
+   * @param instances
+   *          The instances to be rendered
    * @param framebuffer_area
    *          The inclusive area of the bound framebuffer
    * @param faces
@@ -89,7 +86,7 @@ public interface KDepthRendererType extends KRendererType
   void rendererEvaluateDepthWithBoundFramebuffer(
     final RMatrixI4x4F<RTransformViewType> view,
     final KProjectionType projection,
-    final Map<String, List<KInstanceOpaqueType>> batches,
+    final KDepthInstancesType instances,
     final AreaInclusive framebuffer_area,
     final OptionType<KFaceSelection> faces)
     throws RException;

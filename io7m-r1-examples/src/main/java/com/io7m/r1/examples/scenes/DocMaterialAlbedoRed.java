@@ -32,9 +32,9 @@ import com.io7m.r1.kernel.types.KLightDirectionalBuilderType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
-import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
+import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceWorldType;
@@ -115,7 +115,8 @@ public final class DocMaterialAlbedoRed implements ExampleSceneType
      * Create a new light group containing the created light and instance.
      */
 
-    final KSceneLightGroupBuilderType gb = scene.sceneNewLightGroup("g");
+    final KVisibleSetLightGroupBuilderType gb =
+      scene.visibleOpaqueNewLightGroup("g");
     gb.groupAddLight(b.build());
     gb.groupAddInstance(i);
   }

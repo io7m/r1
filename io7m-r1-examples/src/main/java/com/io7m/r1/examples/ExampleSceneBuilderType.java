@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,14 +19,14 @@ package com.io7m.r1.examples;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
-import com.io7m.r1.kernel.types.KSceneBuilderType;
+import com.io7m.r1.kernel.types.KVisibleSetBuilderType;
 import com.io7m.r1.types.RException;
 
 /**
  * The type of example scene builders.
  */
 
-public interface ExampleSceneBuilderType extends KSceneBuilderType
+public interface ExampleSceneBuilderType extends KVisibleSetBuilderType
 {
   /**
    * Load the cube texture with the given name, with all wrapping modes set to

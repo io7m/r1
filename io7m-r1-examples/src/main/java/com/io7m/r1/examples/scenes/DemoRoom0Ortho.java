@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -40,9 +40,9 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KProjectionOrthographic;
-import com.io7m.r1.kernel.types.KSceneLightGroupBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
+import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceWorldType;
 import com.io7m.r1.types.RVectorI3F;
@@ -174,8 +174,8 @@ public final class DemoRoom0Ortho implements ExampleSceneType
       final KLightSphereWithoutShadow door_s_blue = door_sb.build();
 
       {
-        final KSceneLightGroupBuilderType gb =
-          scene.sceneNewLightGroup("room_center_group");
+        final KVisibleSetLightGroupBuilderType gb =
+          scene.visibleOpaqueNewLightGroup("room_center_group");
         final KLightSphereWithoutShadowBuilderType sb =
           KLightSphereWithoutShadow.newBuilder();
         sb.setRadius(32.0f);
@@ -189,8 +189,8 @@ public final class DemoRoom0Ortho implements ExampleSceneType
       }
 
       {
-        final KSceneLightGroupBuilderType gb =
-          scene.sceneNewLightGroup("room_left_group");
+        final KVisibleSetLightGroupBuilderType gb =
+          scene.visibleOpaqueNewLightGroup("room_left_group");
         final KLightSphereWithoutShadowBuilderType sb =
           KLightSphereWithoutShadow.newBuilder();
         sb.setRadius(32.0f);
@@ -203,8 +203,8 @@ public final class DemoRoom0Ortho implements ExampleSceneType
       }
 
       {
-        final KSceneLightGroupBuilderType gb =
-          scene.sceneNewLightGroup("room_right_group");
+        final KVisibleSetLightGroupBuilderType gb =
+          scene.visibleOpaqueNewLightGroup("room_right_group");
         final KLightSphereWithoutShadowBuilderType sb =
           KLightSphereWithoutShadow.newBuilder();
         sb.setRadius(32.0f);
