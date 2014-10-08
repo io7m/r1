@@ -121,7 +121,7 @@ module Normals is
 
   --
   -- Compress the (normalized) vector [n] into two elements
-  -- using a spheremap transform.
+  -- using a spheremap transform (Lambert Azimuthal Equal-Area).
   --
 
   function compress (n : vector_3f) : vector_2f =
@@ -135,7 +135,7 @@ module Normals is
 
   --
   -- Decompress the given vector, assuming it was encoded with
-  -- a spheremap transform.
+  -- a spheremap transform (Lambert Azimuthal Equal-Area).
   --
 
   function decompress (n : vector_2f) : vector_3f =
