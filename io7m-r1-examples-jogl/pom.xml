@@ -293,18 +293,15 @@
               <outfile>target/viewer.exe</outfile>
               <dontWrapJar>true</dontWrapJar>
               <jar>lib/${project.name}-${project.version}.jar</jar>
-              <icon>src/main/resources/com/io7m/r1/kernel/examples/viewer/icon.ico</icon>
+              <icon>src/main/resources/com/io7m/r1/examples/viewer/icon.ico</icon>
               <errTitle>viewer</errTitle>
               <cmdLine>viewer.conf</cmdLine>
               <classPath>
-                <mainClass>com.io7m.r1.kernel.examples.viewer.ViewerMain</mainClass>
+                <mainClass>com.io7m.r1.examples.viewer.ViewerMain</mainClass>
                 <jarLocation>lib/</jarLocation>
               </classPath>
               <jre>
                 <minVersion>1.6.0</minVersion>
-                <opts>
-                  <opt>-Dcom.io7m.r1.sandbox.no_console=true</opt>
-                </opts>
               </jre>
             </configuration>
           </execution>
@@ -319,18 +316,15 @@
               <outfile>target/viewer-console.exe</outfile>
               <dontWrapJar>true</dontWrapJar>
               <jar>lib/${project.name}-${project.version}.jar</jar>
-              <icon>src/main/resources/com/io7m/r1/kernel/examples/viewer/icon.ico</icon>
+              <icon>src/main/resources/com/io7m/r1/examples/viewer/icon.ico</icon>
               <errTitle>viewer</errTitle>
               <cmdLine>viewer.conf</cmdLine>
               <classPath>
-                <mainClass>com.io7m.r1.kernel.examples.viewer.ViewerMain</mainClass>
+                <mainClass>com.io7m.r1.examples.viewer.ViewerMain</mainClass>
                 <jarLocation>lib/</jarLocation>
               </classPath>
               <jre>
                 <minVersion>1.6.0</minVersion>
-                <opts>
-                  <opt>-Dcom.io7m.r1.sandbox.no_console=true</opt>
-                </opts>
               </jre>
             </configuration>
           </execution>
