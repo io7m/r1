@@ -40,6 +40,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLJPanel;
@@ -72,8 +73,6 @@ import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
-import com.io7m.jcanephora.jogl.JCGLImplementationJOGL;
-import com.io7m.jcanephora.jogl.JCGLImplementationJOGLBuilderType;
 import com.io7m.jcanephora.texload.imageio.TextureLoaderImageIO;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
@@ -627,14 +626,12 @@ import com.jogamp.opengl.util.FPSAnimator;
         this.running = true;
 
         assert drawable != null;
-        drawable.getContext().setSwapInterval(1);
-
-        final JCGLImplementationJOGLBuilderType gb =
-          JCGLImplementationJOGL.newBuilder();
-        gb.setStateCaching(true);
+        final GLContext context = drawable.getContext();
+        assert context != null;
+        context.setSwapInterval(1);
 
         final JCGLImplementationType g =
-          gb.build(drawable.getContext(), this.glog);
+          VGLImplementation.makeGLImplementation(context, this.glog);
         assert g != null;
         this.gi = g;
 
