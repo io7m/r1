@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,11 +17,16 @@
 package com.io7m.r1.kernel;
 
 import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.ClearSpecification;
+import com.io7m.jcanephora.ClearSpecificationBuilderType;
+import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FramebufferType;
 import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jcanephora.TextureFilterMagnification;
+import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.api.JCGLClearType;
@@ -58,6 +63,17 @@ import com.io7m.r1.types.RExceptionNotSupported;
 @EqualityReference abstract class KFramebufferDeferredAbstract implements
   KFramebufferDeferredType
 {
+  static final ClearSpecification CLEAR_SPEC;
+
+  static {
+    final ClearSpecificationBuilderType b = ClearSpecification.newBuilder();
+    b.enableColorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+    b.enableDepthBufferClear(1.0f);
+    b.enableStencilBufferClear(0);
+    b.setStrictChecking(true);
+    CLEAR_SPEC = b.build();
+  }
+
   @EqualityReference private static final class KFramebufferDeferredGL3ES3 extends
     KFramebufferDeferredAbstract
   {
@@ -72,7 +88,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
         case RGBA_PRECISION_16F:
         {
           return gl.texture2DStaticAllocateRGBA16f(
-            "color-16f",
+            "render-color-16f",
             width,
             height,
             TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
@@ -83,7 +99,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
         case RGBA_PRECISION_32F:
         {
           return gl.texture2DStaticAllocateRGBA32f(
-            "color-32f",
+            "render-color-32f",
             width,
             height,
             TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
@@ -94,7 +110,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
         case RGBA_PRECISION_8:
         {
           return gl.texture2DStaticAllocateRGBA8(
-            "color-8888",
+            "render-color-8888",
             width,
             height,
             TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
@@ -127,8 +143,15 @@ import com.io7m.r1.types.RExceptionNotSupported;
 
       final Texture2DStaticType c =
         KFramebufferDeferredGL3ES3.makeRGBA(desc_rgba, width, height, gl);
-      final Texture2DStaticUsableType d =
-        gbuffer.geomGetTextureDepthStencil();
+      final Texture2DStaticType d =
+        gl.texture2DStaticAllocateDepth24Stencil8(
+          "render-d24s8",
+          width,
+          height,
+          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+          TextureFilterMinification.TEXTURE_FILTER_NEAREST,
+          TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
 
       final JCGLFramebufferBuilderGL3ES3Type fbb =
         gl.framebufferNewBuilderGL3ES3();
@@ -140,14 +163,14 @@ import com.io7m.r1.types.RExceptionNotSupported;
     }
 
     private final Texture2DStaticType            color;
-    private final Texture2DStaticUsableType      depth;
+    private final Texture2DStaticType            depth;
     private final KFramebufferForwardDescription description;
     private final FramebufferType                framebuffer;
     private final KGeometryBufferType            gbuffer;
 
     public KFramebufferDeferredGL3ES3(
       final Texture2DStaticType c,
-      final Texture2DStaticUsableType d,
+      final Texture2DStaticType d,
       final FramebufferType fb,
       final KFramebufferForwardDescription in_description,
       final KGeometryBufferType in_gbuffer)
@@ -169,6 +192,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
         final JCGLInterfaceCommonType gc = g.getGLCommon();
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.color);
+        gc.texture2DStaticDelete(this.depth);
         this.gbuffer.geomDelete(g);
       } catch (final JCGLException e) {
         throw RExceptionJCGL.fromJCGLException(e);
@@ -215,7 +239,11 @@ import com.io7m.r1.types.RExceptionNotSupported;
           this.gbuffer.geomClear(in_gc);
           in_gc.framebufferDrawBind(this.framebuffer);
           in_gc.colorBufferMask(true, true, true, true);
-          in_gc.colorBufferClearV4f(in_color);
+          in_gc.depthBufferWriteEnable();
+          in_gc.stencilBufferMask(
+            FaceSelection.FACE_FRONT_AND_BACK,
+            0xffffffff);
+          in_gc.clear(KGeometryBufferAbstract.CLEAR_SPEC);
         } finally {
           in_gc.framebufferDrawUnbind();
         }
