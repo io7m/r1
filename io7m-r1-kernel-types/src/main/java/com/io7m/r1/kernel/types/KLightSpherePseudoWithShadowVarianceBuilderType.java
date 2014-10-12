@@ -20,32 +20,14 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.r1.types.RException;
 
 /**
- * The type of mutable builders for spherical lights with variance shadows.
+ * The type of mutable builders for pseudo-spherical lights with variance
+ * shadows.
  */
 
 public interface KLightSpherePseudoWithShadowVarianceBuilderType extends
-  KLightSphereBuilderType
+  KLightSphereBuilderType,
+  KLightSpherePseudoWithShadowBuilderType
 {
-  /**
-   * <p>
-   * Because projected textures typically have one-pixel black borders with
-   * their wrapping modes set to "clamp to edge", it's often necessary to set
-   * a bias value to slightly enlarge the field of view of the six sub-lights
-   * in order to seamlessly blend the edges of the light contributions
-   * together.
-   * </p>
-   * <p>
-   * The default bias value is <code>0.065</code>, which was simply obtained
-   * through experimentation.
-   * </p>
-   *
-   * @param r
-   *          The number of radians by which to increase the field of view
-   */
-
-  void setFOVCompensationBias(
-    final float r);
-
   /**
    * Construct a light.
    *
@@ -62,66 +44,6 @@ public interface KLightSpherePseudoWithShadowVarianceBuilderType extends
     final KTransformContext context,
     final Texture2DStaticUsableType texture)
     throws RException;
-
-  /**
-   * Enable/disable the negative X sub-light.
-   *
-   * @param enabled
-   *          <code>true</code> if the sub-light should be enabled.
-   */
-
-  void setEnabledNegativeX(
-    boolean enabled);
-
-  /**
-   * Enable/disable the negative Y sub-light.
-   *
-   * @param enabled
-   *          <code>true</code> if the sub-light should be enabled.
-   */
-
-  void setEnabledNegativeY(
-    boolean enabled);
-
-  /**
-   * Enable/disable the negative Z sub-light.
-   *
-   * @param enabled
-   *          <code>true</code> if the sub-light should be enabled.
-   */
-
-  void setEnabledNegativeZ(
-    boolean enabled);
-
-  /**
-   * Enable/disable the positive X sub-light.
-   *
-   * @param enabled
-   *          <code>true</code> if the sub-light should be enabled.
-   */
-
-  void setEnabledPositiveX(
-    boolean enabled);
-
-  /**
-   * Enable/disable the positive Y sub-light.
-   *
-   * @param enabled
-   *          <code>true</code> if the sub-light should be enabled.
-   */
-
-  void setEnabledPositiveY(
-    boolean enabled);
-
-  /**
-   * Enable/disable the positive Z sub-light.
-   *
-   * @param enabled
-   *          <code>true</code> if the sub-light should be enabled.
-   */
-
-  void setEnabledPositiveZ(
-    boolean enabled);
 
   /**
    * Set the shadow.
