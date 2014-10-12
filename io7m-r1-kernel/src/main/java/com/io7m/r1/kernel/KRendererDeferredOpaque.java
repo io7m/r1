@@ -302,7 +302,6 @@ import com.io7m.r1.types.RVectorI4F;
     KShadingProgramCommon.putDeferredMapDepth(program, t_map_depth_stencil);
     KShadingProgramCommon.putDeferredMapNormal(program, t_map_normal);
     KShadingProgramCommon.putDeferredMapSpecular(program, t_map_specular);
-    KShadingProgramCommon.putProjection(program, projection);
   }
 
   private static void putFramebufferScreenSize(
@@ -418,7 +417,6 @@ import com.io7m.r1.types.RVectorI4F;
       program,
       material);
     KRendererCommon.putMaterialRegular(program, material);
-    KShadingProgramCommon.putProjection(program, mwi.getProjection());
 
     material.materialGetEmissive().emissiveAccept(
       new KMaterialEmissiveVisitorType<Unit, JCGLException>() {

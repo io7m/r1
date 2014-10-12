@@ -31,6 +31,7 @@ import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
 import com.io7m.jcanephora.IndexBufferUpdateUnmappedType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLExceptionAttributeDuplicate;
+import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLArrayBuffersType;
 import com.io7m.jcanephora.api.JCGLIndexBuffersType;
@@ -227,8 +228,24 @@ import com.io7m.r1.types.RVectorI4F;
     final ArrayBufferType a = this.array;
     assert a != null;
 
+    /**
+     * AMD's drivers give performance warnings if unsigned bytes are used as
+     * indices.
+     */
+
+    final long index_count = count * 3;
+    final JCGLUnsignedType index_type;
+    if (index_count < 65535) {
+      index_type = JCGLUnsignedType.TYPE_UNSIGNED_SHORT;
+    } else {
+      index_type = JCGLUnsignedType.TYPE_UNSIGNED_INT;
+    }
+
     final IndexBufferType i =
-      this.gl.indexBufferAllocate(a, count * 3, UsageHint.USAGE_STATIC_DRAW);
+      this.gl.indexBufferAllocateType(
+        index_type,
+        index_count,
+        UsageHint.USAGE_STATIC_DRAW);
     assert i != null;
 
     this.indices = i;
