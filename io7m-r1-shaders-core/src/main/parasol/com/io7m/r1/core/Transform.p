@@ -27,7 +27,6 @@ module Transform is
   import com.io7m.parasol.Vector3f as V3;
   import com.io7m.parasol.Vector4f as V4;
 
-  import com.io7m.r1.core.Projection;
   import com.io7m.r1.core.Viewport;
 
   --

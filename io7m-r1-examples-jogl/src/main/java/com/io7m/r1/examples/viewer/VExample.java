@@ -203,7 +203,7 @@ import com.jogamp.opengl.util.FPSAnimator;
           this.expected,
           this.label_renderer);
 
-      final GLProfile profile = GLProfile.getDefault();
+      final GLProfile profile = VGLImplementation.getGLProfile(in_log);
       final GLCapabilities caps = new GLCapabilities(profile);
 
       this.canvas = new GLJPanel(caps);

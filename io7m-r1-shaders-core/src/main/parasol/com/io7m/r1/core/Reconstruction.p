@@ -29,14 +29,12 @@ module Reconstruction is
 
   import com.io7m.r1.core.Bilinear;
   import com.io7m.r1.core.Transform;
-  import com.io7m.r1.core.Projection;
   import com.io7m.r1.core.Viewport;
   import com.io7m.r1.core.ViewRays;
 
   function reconstruct_eye (
     screen_depth : float,
     screen_uv    : vector_2f,
-    projection   : Projection.t,
     m_projection : matrix_4x4f,
     view_rays    : ViewRays.t
   ) : vector_4f =

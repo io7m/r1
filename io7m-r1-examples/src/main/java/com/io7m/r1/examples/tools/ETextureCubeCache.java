@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,7 +16,7 @@
 
 package com.io7m.r1.examples.tools;
 
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -218,42 +218,60 @@ public final class ETextureCubeCache
     message.append(name);
     this.glog.debug(message.toString());
 
-    final File file =
-      new File(String.format("/com/io7m/r1/examples/%s", name));
+    final String file = String.format("/com/io7m/r1/examples/%s", name);
+    final int last_index = file.lastIndexOf('/');
+    assert last_index != -1;
+    final String directory = file.substring(0, last_index);
+
     final InputStream stream =
       ETextureCubeCache.class.getResourceAsStream(file.toString());
+
+    if (stream == null) {
+      throw new FileNotFoundException(String.format(
+        "Unable to open texture: %s",
+        file));
+    }
 
     try {
       final Builder builder = new Builder();
       final Document document = builder.build(stream);
       final CubeMap cube = CubeMap.fromXML(document.getRootElement());
 
-      final File parent = file.getParentFile();
-
+      final String positive_z_name =
+        String.format("%s/%s", directory, cube.getPositiveZ());
       final CubeMapFaceInputStream<CMFPositiveZKind> positive_z =
         new CubeMapFaceInputStream<CMFPositiveZKind>(
-          ETextureCubeCache.class.getResourceAsStream(new File(parent, cube
-            .getPositiveZ()).toString()));
+          ETextureCubeCache.class.getResourceAsStream(positive_z_name));
+
+      final String positive_y_name =
+        String.format("%s/%s", directory, cube.getPositiveY());
       final CubeMapFaceInputStream<CMFPositiveYKind> positive_y =
         new CubeMapFaceInputStream<CMFPositiveYKind>(
-          ETextureCubeCache.class.getResourceAsStream(new File(parent, cube
-            .getPositiveY()).toString()));
+          ETextureCubeCache.class.getResourceAsStream(positive_y_name));
+
+      final String positive_x_name =
+        String.format("%s/%s", directory, cube.getPositiveX());
       final CubeMapFaceInputStream<CMFPositiveXKind> positive_x =
         new CubeMapFaceInputStream<CMFPositiveXKind>(
-          ETextureCubeCache.class.getResourceAsStream(new File(parent, cube
-            .getPositiveX()).toString()));
+          ETextureCubeCache.class.getResourceAsStream(positive_x_name));
+
+      final String negative_z_name =
+        String.format("%s/%s", directory, cube.getNegativeZ());
       final CubeMapFaceInputStream<CMFNegativeZKind> negative_z =
         new CubeMapFaceInputStream<CMFNegativeZKind>(
-          ETextureCubeCache.class.getResourceAsStream(new File(parent, cube
-            .getNegativeZ()).toString()));
+          ETextureCubeCache.class.getResourceAsStream(negative_z_name));
+
+      final String negative_y_name =
+        String.format("%s/%s", directory, cube.getNegativeY());
       final CubeMapFaceInputStream<CMFNegativeYKind> negative_y =
         new CubeMapFaceInputStream<CMFNegativeYKind>(
-          ETextureCubeCache.class.getResourceAsStream(new File(parent, cube
-            .getNegativeY()).toString()));
+          ETextureCubeCache.class.getResourceAsStream(negative_y_name));
+
+      final String negative_x_name =
+        String.format("%s/%s", directory, cube.getNegativeX());
       final CubeMapFaceInputStream<CMFNegativeXKind> negative_x =
         new CubeMapFaceInputStream<CMFNegativeXKind>(
-          ETextureCubeCache.class.getResourceAsStream(new File(parent, cube
-            .getNegativeX()).toString()));
+          ETextureCubeCache.class.getResourceAsStream(negative_x_name));
 
       final TextureLoaderType tl = this.texture_loader;
       assert tl != null;

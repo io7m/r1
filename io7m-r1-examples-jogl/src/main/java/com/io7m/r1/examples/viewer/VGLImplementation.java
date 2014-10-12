@@ -17,6 +17,7 @@
 package com.io7m.r1.examples.viewer;
 
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLProfile;
 
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.jogl.JCGLImplementationJOGL;
@@ -31,6 +32,34 @@ final class VGLImplementation
     throw new UnreachableCodeException();
   }
 
+  static GLProfile getGLProfile(
+    final LogUsableType in_log)
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("Available profiles:\n");
+    for (final String p : GLProfile.GL_PROFILE_LIST_ALL) {
+      if (GLProfile.isAvailable(p)) {
+        b.append("  ");
+        b.append(GLProfile.get(p));
+        b.append("\n");
+      }
+    }
+    in_log.debug(b.toString());
+
+    if (GLProfile.isAvailable(GLProfile.GL3)) {
+      return GLProfile.get(GLProfile.GL3);
+    }
+    if (GLProfile.isAvailable(GLProfile.GLES3)) {
+      return GLProfile.get(GLProfile.GLES3);
+    }
+    if (GLProfile.isAvailable(GLProfile.GL2GL3)) {
+      return GLProfile.get(GLProfile.GL2GL3);
+    }
+
+    in_log.debug("No preferred contexts available, falling back to default");
+    return GLProfile.getDefault();
+  }
+
   static JCGLImplementationType makeGLImplementation(
     final GLContext ctx,
     final LogUsableType in_log)
@@ -38,6 +67,7 @@ final class VGLImplementation
     final JCGLImplementationJOGLBuilderType gb =
       JCGLImplementationJOGL.newBuilder();
     gb.setStateCaching(true);
+    gb.setDebugging(true);
 
     final JCGLImplementationType gi = gb.build(ctx, in_log);
     return gi;
