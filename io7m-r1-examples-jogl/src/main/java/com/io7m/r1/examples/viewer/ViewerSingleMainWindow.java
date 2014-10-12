@@ -564,7 +564,7 @@ final class ViewerSingleMainWindow implements Runnable
 
   @Override public void run()
   {
-    final GLProfile pro = GLProfile.getDefault();
+    final GLProfile pro = VGLImplementation.getGLProfile(this.log);
     final GLCapabilities caps = new GLCapabilities(pro);
     final GLWindow window = GLWindow.create(caps);
 
