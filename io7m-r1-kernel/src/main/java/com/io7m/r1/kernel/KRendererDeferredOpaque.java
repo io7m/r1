@@ -16,6 +16,7 @@
 
 package com.io7m.r1.kernel;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +27,8 @@ import com.io7m.jcanephora.BlendFunction;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FaceWindingOrder;
+import com.io7m.jcanephora.FramebufferBlitBuffer;
+import com.io7m.jcanephora.FramebufferBlitFilter;
 import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
@@ -34,8 +37,14 @@ import com.io7m.jcanephora.StencilFunction;
 import com.io7m.jcanephora.StencilOperation;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.jcanephora.TextureUnitType;
+import com.io7m.jcanephora.api.JCGLFramebuffersGL3Type;
 import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLInterfaceGL2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
@@ -108,7 +117,42 @@ import com.io7m.r1.types.RVectorI4F;
 @SuppressWarnings({ "synthetic-access" }) @EqualityReference public final class KRendererDeferredOpaque implements
   KRendererDeferredOpaqueType
 {
+  @EqualityReference private static final class GetFramebuffersGL3 implements
+    JCGLImplementationVisitorType<JCGLFramebuffersGL3Type, UnreachableCodeException>
+  {
+    public GetFramebuffersGL3()
+    {
+      // Nothing.
+    }
+
+    @Override public JCGLFramebuffersGL3Type implementationIsGL2(
+      final JCGLInterfaceGL2Type gl)
+    {
+      return gl;
+    }
+
+    @Override public JCGLFramebuffersGL3Type implementationIsGL3(
+      final JCGLInterfaceGL3Type gl)
+    {
+      return gl;
+    }
+
+    @Override public JCGLFramebuffersGL3Type implementationIsGLES2(
+      final JCGLInterfaceGLES2Type gl)
+    {
+      throw new UnreachableCodeException();
+    }
+
+    @Override public JCGLFramebuffersGL3Type implementationIsGLES3(
+      final JCGLInterfaceGLES3Type gl)
+    {
+      return gl;
+    }
+  }
+
   private static final RVectorI4F<RSpaceRGBType>     BLACK;
+  private static final Set<FramebufferBlitBuffer>    BLIT_DEPTH_STENCIL;
+  private static final GetFramebuffersGL3            GET_FRAMEBUFFERS_GL3;
   private static final RVectorI3F<RSpaceObjectType>  NORMAL_ZERO;
   private static final RVectorI2F<RSpaceTextureType> UV_ZERO;
 
@@ -116,6 +160,11 @@ import com.io7m.r1.types.RVectorI4F;
     BLACK = new RVectorI4F<RSpaceRGBType>(0.0f, 0.0f, 0.0f, 1.0f);
     UV_ZERO = new RVectorI2F<RSpaceTextureType>(0.0f, 0.0f);
     NORMAL_ZERO = new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f);
+    GET_FRAMEBUFFERS_GL3 = new GetFramebuffersGL3();
+    BLIT_DEPTH_STENCIL =
+      NullCheck.notNull(EnumSet.of(
+        FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_DEPTH,
+        FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_STENCIL));
   }
 
   /**
@@ -253,7 +302,6 @@ import com.io7m.r1.types.RVectorI4F;
     KShadingProgramCommon.putDeferredMapDepth(program, t_map_depth_stencil);
     KShadingProgramCommon.putDeferredMapNormal(program, t_map_normal);
     KShadingProgramCommon.putDeferredMapSpecular(program, t_map_specular);
-    KShadingProgramCommon.putProjection(program, projection);
   }
 
   private static void putFramebufferScreenSize(
@@ -268,6 +316,34 @@ import com.io7m.r1.types.RVectorI4F;
       program,
       1.0f / range_x.getInterval(),
       1.0f / range_y.getInterval());
+  }
+
+  /**
+   * Copy the depth/stencil buffer(s) from the g-buffer to the currently bound
+   * framebuffer.
+   */
+
+  private static void renderCopyGBufferDepthStencil(
+    final JCGLFramebuffersGL3Type gf3,
+    final KFramebufferDeferredUsableType framebuffer)
+  {
+    assert gf3.framebufferDrawIsBound(framebuffer.rgbaGetColorFramebuffer());
+    assert gf3.framebufferReadAnyIsBound() == false;
+
+    final KGeometryBufferUsableType gbuffer =
+      framebuffer.deferredGetGeometryBuffer();
+    final AreaInclusive area = framebuffer.kFramebufferGetArea();
+
+    try {
+      gf3.framebufferReadBind(gbuffer.geomGetFramebuffer());
+      gf3.framebufferBlit(
+        area,
+        area,
+        KRendererDeferredOpaque.BLIT_DEPTH_STENCIL,
+        FramebufferBlitFilter.FRAMEBUFFER_BLIT_FILTER_NEAREST);
+    } finally {
+      gf3.framebufferReadUnbind();
+    }
   }
 
   private static void renderGroupGeometryBatchInstances(
@@ -341,7 +417,6 @@ import com.io7m.r1.types.RVectorI4F;
       program,
       material);
     KRendererCommon.putMaterialRegular(program, material);
-    KShadingProgramCommon.putProjection(program, mwi.getProjection());
 
     material.materialGetEmissive().emissiveAccept(
       new KMaterialEmissiveVisitorType<Unit, JCGLException>() {
@@ -593,6 +668,7 @@ import com.io7m.r1.types.RVectorI4F;
   private final KUnitSphereCacheType                sphere_cache;
   private final KTextureUnitAllocator               texture_units;
   private final RMatrixM3x3F<RTransformTextureType> uv_light_spherical;
+
   private final KViewRaysCacheType                  view_rays_cache;
 
   private KRendererDeferredOpaque(
@@ -678,15 +754,23 @@ import com.io7m.r1.types.RVectorI4F;
     try {
       final Set<String> unlit_codes = opaques.getUnlitMaterialCodes();
       if (unlit_codes.size() > 0) {
-        final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-        gc.viewportSet(framebuffer.kFramebufferGetArea());
 
+        final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+        final JCGLFramebuffersGL3Type gf3 =
+          this.g
+            .implementationAccept(KRendererDeferredOpaque.GET_FRAMEBUFFERS_GL3);
+
+        gc.viewportSet(framebuffer.kFramebufferGetArea());
         this.renderUnlitGeometry(framebuffer, depth_function, mwo, opaques);
 
         try {
           final FramebufferUsableType render_fb =
             framebuffer.rgbaGetColorFramebuffer();
           gc.framebufferDrawBind(render_fb);
+
+          KRendererDeferredOpaque.renderCopyGBufferDepthStencil(
+            gf3,
+            framebuffer);
 
           this.texture_units.withContext(new KTextureUnitWithType() {
             @Override public void run(
@@ -706,6 +790,7 @@ import com.io7m.r1.types.RVectorI4F;
         } finally {
           gc.framebufferDrawUnbind();
         }
+
       }
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
@@ -842,7 +927,6 @@ import com.io7m.r1.types.RVectorI4F;
       JCacheException
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-
     final KGeometryBufferUsableType geom =
       framebuffer.deferredGetGeometryBuffer();
     final FramebufferUsableType geom_fb = geom.geomGetFramebuffer();
@@ -1274,12 +1358,17 @@ import com.io7m.r1.types.RVectorI4F;
     throws RException
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+    final JCGLFramebuffersGL3Type gf3 =
+      this.g
+        .implementationAccept(KRendererDeferredOpaque.GET_FRAMEBUFFERS_GL3);
 
     final FramebufferUsableType render_fb =
       framebuffer.rgbaGetColorFramebuffer();
 
     try {
       gc.framebufferDrawBind(render_fb);
+
+      KRendererDeferredOpaque.renderCopyGBufferDepthStencil(gf3, framebuffer);
 
       KRendererDeferredOpaque.configureStencilForLightRendering(gc);
 

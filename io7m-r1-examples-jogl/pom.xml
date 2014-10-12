@@ -302,6 +302,9 @@
               </classPath>
               <jre>
                 <minVersion>1.6.0</minVersion>
+                <opts>
+                  <opt>-Dcom.io7m.r1.examples.viewer.no_console=true</opt>
+                </opts>
               </jre>
             </configuration>
           </execution>
@@ -325,6 +328,9 @@
               </classPath>
               <jre>
                 <minVersion>1.6.0</minVersion>
+                <opts>
+                  <opt>-Dcom.io7m.r1.examples.viewer.no_console=true</opt>
+                </opts>
               </jre>
             </configuration>
           </execution>

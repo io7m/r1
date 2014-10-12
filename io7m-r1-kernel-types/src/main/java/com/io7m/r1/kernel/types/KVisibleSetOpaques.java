@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -72,14 +72,6 @@ import com.io7m.r1.types.RExceptionMaterialNonexistent;
       }
     }
 
-    @Override public void visibleShadowsAddCaster(
-      final KLightWithShadowType light,
-      final KInstanceOpaqueType instance)
-      throws RExceptionBuilderInvalid
-    {
-      this.shadows.visibleShadowsAddCaster(light, instance);
-    }
-
     @Override public void visibleOpaqueAddUnlit(
       final KInstanceOpaqueType instance)
       throws RExceptionBuilderInvalid,
@@ -118,10 +110,12 @@ import com.io7m.r1.types.RExceptionMaterialNonexistent;
       final Set<String> names = this.group_builders.keySet();
       final Map<String, KVisibleSetLightGroup> groups =
         new HashMap<String, KVisibleSetLightGroup>();
+
       for (final String name : names) {
         final KVisibleSetLightGroupBuilderWithCreateType gb =
           this.group_builders.get(name);
-        groups.put(name, gb.groupCreate());
+        final KVisibleSetLightGroup g = gb.groupCreate();
+        groups.put(name, g);
       }
 
       final KVisibleSetShadows s = this.shadows.visibleShadowsCreate();
@@ -152,6 +146,14 @@ import com.io7m.r1.types.RExceptionMaterialNonexistent;
         KVisibleSetLightGroup.newBuilder(name, this.shadows, this.visible);
       this.group_builders.put(name, g);
       return g;
+    }
+
+    @Override public void visibleShadowsAddCaster(
+      final KLightWithShadowType light,
+      final KInstanceOpaqueType instance)
+      throws RExceptionBuilderInvalid
+    {
+      this.shadows.visibleShadowsAddCaster(light, instance);
     }
 
     @Override public void visibleShadowsAddLight(

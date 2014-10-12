@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,6 +16,7 @@
 
 package com.io7m.r1.examples.tools;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -80,10 +81,15 @@ public final class ETexture2DCache
     message.append(name);
     this.glog.debug(message.toString());
 
+    final String file = String.format("/com/io7m/r1/examples/%s", name);
     final InputStream stream =
-      ETexture2DCache.class.getResourceAsStream(String.format(
-        "/com/io7m/r1/examples/%s",
-        name));
+      ETexture2DCache.class.getResourceAsStream(file);
+
+    if (stream == null) {
+      throw new FileNotFoundException(String.format(
+        "Unable to open texture: %s",
+        file));
+    }
 
     try {
       final TextureLoaderType tl = this.texture_loader;
