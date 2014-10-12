@@ -88,7 +88,6 @@ import com.io7m.r1.kernel.types.KMaterialNormalVertex;
 import com.io7m.r1.kernel.types.KMaterialNormalVisitorType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMeshReadableType;
-import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
@@ -219,6 +218,18 @@ import com.io7m.r1.types.RVectorI4F;
       0xffffffff);
   }
 
+  private static void configureRenderStateForLightVolume(
+    final JCGLInterfaceCommonType gc)
+  {
+    gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+    gc.colorBufferMask(true, true, true, true);
+    gc.cullingEnable(
+      FaceSelection.FACE_FRONT,
+      FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
+    gc.depthBufferWriteDisable();
+    gc.depthBufferTestEnable(DepthFunction.DEPTH_GREATER_THAN_OR_EQUAL);
+  }
+
   /**
    * Configure the stencil buffer such that it is read-only, and only pixels
    * with values exactly equal to 2 will be touched.
@@ -294,8 +305,7 @@ import com.io7m.r1.types.RVectorI4F;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
-    final JCBProgramType program,
-    final KProjectionType projection)
+    final JCBProgramType program)
   {
     KRendererDeferredOpaque.putFramebufferScreenSize(framebuffer, program);
     KShadingProgramCommon.putDeferredMapAlbedo(program, t_map_albedo);
@@ -556,16 +566,13 @@ import com.io7m.r1.types.RVectorI4F;
           program,
           texture_unit_context.withTextureCube(texture));
 
-        final KProjectionType projection = mwi.getProjection();
-
         KRendererDeferredOpaque.putDeferredParameters(
           framebuffer,
           t_map_albedo,
           t_map_depth_stencil,
           t_map_normal,
           t_map_specular,
-          program,
-          projection);
+          program);
 
         KShadingProgramCommon.putViewRays(program, view_rays);
 
@@ -619,15 +626,13 @@ import com.io7m.r1.types.RVectorI4F;
         KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
         KShadingProgramCommon.bindAttributeNormal(program, array);
 
-        final KProjectionType projection = mwi.getProjection();
         KRendererDeferredOpaque.putDeferredParameters(
           framebuffer,
           t_map_albedo,
           t_map_depth_stencil,
           t_map_normal,
           t_map_specular,
-          program,
-          projection);
+          program);
 
         KShadingProgramCommon.putViewRays(program, view_rays);
 
@@ -668,7 +673,6 @@ import com.io7m.r1.types.RVectorI4F;
   private final KUnitSphereCacheType                sphere_cache;
   private final KTextureUnitAllocator               texture_units;
   private final RMatrixM3x3F<RTransformTextureType> uv_light_spherical;
-
   private final KViewRaysCacheType                  view_rays_cache;
 
   private KRendererDeferredOpaque(
@@ -1134,8 +1138,7 @@ import com.io7m.r1.types.RVectorI4F;
           t_map_depth_stencil,
           t_map_normal,
           t_map_specular,
-          program,
-          mwo.getProjection());
+          program);
 
         KShadingProgramCommon.putMatrixInverseProjection(
           program,
@@ -1184,6 +1187,8 @@ import com.io7m.r1.types.RVectorI4F;
     throws RException,
       JCacheException
   {
+    KRendererDeferredOpaque.configureRenderStateForLightVolume(gc);
+
     this.renderGroupLightProjectiveLightPass(
       framebuffer,
       t_map_albedo,
@@ -1260,8 +1265,7 @@ import com.io7m.r1.types.RVectorI4F;
                 t_map_depth_stencil,
                 t_map_normal,
                 t_map_specular,
-                program,
-                mdp.getProjection());
+                program);
 
               KShadingProgramCommon.putMatrixProjection(
                 program,
@@ -1369,7 +1373,6 @@ import com.io7m.r1.types.RVectorI4F;
       gc.framebufferDrawBind(render_fb);
 
       KRendererDeferredOpaque.renderCopyGBufferDepthStencil(gf3, framebuffer);
-
       KRendererDeferredOpaque.configureStencilForLightRendering(gc);
 
       /**
@@ -1377,18 +1380,6 @@ import com.io7m.r1.types.RVectorI4F;
        */
 
       this.renderGroupClearToBlack(gc);
-
-      /**
-       * Configure render state for lights.
-       */
-
-      gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
-      gc.colorBufferMask(true, true, true, true);
-      gc.cullingEnable(
-        FaceSelection.FACE_FRONT,
-        FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
-      gc.depthBufferWriteDisable();
-      gc.depthBufferTestEnable(DepthFunction.DEPTH_GREATER_THAN_OR_EQUAL);
 
       /**
        * Create a new texture unit context for binding g-buffer textures.
@@ -1456,6 +1447,8 @@ import com.io7m.r1.types.RVectorI4F;
     throws RException,
       JCacheException
   {
+    KRendererDeferredOpaque.configureRenderStateForLightVolume(gc);
+
     final KUnitSphereUsableType s =
       this.sphere_cache.cacheGetLU(KUnitSpherePrecision.KUNIT_SPHERE_16);
     final KProgramType kp =
