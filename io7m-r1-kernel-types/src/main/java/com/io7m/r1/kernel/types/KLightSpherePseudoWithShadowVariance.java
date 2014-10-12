@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -23,8 +23,6 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
-import com.io7m.jtensors.VectorI3F;
-import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionUserError;
 import com.io7m.r1.types.RSpaceRGBType;
@@ -43,30 +41,44 @@ import com.io7m.r1.types.RVectorI3F;
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightSpherePseudoWithShadowVarianceBuilderType
   {
-    private static final float                FOV;
-    private static final VectorReadable3FType NEGATIVE_X_TARGET;
-    private static final VectorReadable3FType NEGATIVE_Y_TARGET;
-    private static final VectorReadable3FType NEGATIVE_Z_TARGET;
+    private static final float          FOV_BASE;
+    private static final QuaternionI4F  NEGATIVE_X_ORIENTATION;
+    private static final QuaternionI4F  NEGATIVE_Y_ORIENTATION;
+    private static final QuaternionI4F  NEGATIVE_Z_ORIENTATION;
+    private static final QuaternionI4F  POSITIVE_X_ORIENTATION;
+    private static final QuaternionI4F  POSITIVE_Y_ORIENTATION;
+    private static final QuaternionI4F  POSITIVE_Z_ORIENTATION;
 
     static {
-      FOV = (float) Math.toRadians(90.0);
-      NEGATIVE_X_TARGET = new VectorI3F(-1.0f, 0.0f, 0.0f);
-      NEGATIVE_Y_TARGET = new VectorI3F(0.0f, -1.0f, 0.0f);
-      NEGATIVE_Z_TARGET = new VectorI3F(0.0f, 0.0f, -1.0f);
+      FOV_BASE = (float) Math.toRadians(90.0);
+
+      NEGATIVE_X_ORIENTATION =
+        QuaternionI4F.makeFromAxisAngle(KAxes.AXIS_Y, Math.toRadians(90.0f));
+      NEGATIVE_Y_ORIENTATION =
+        QuaternionI4F.makeFromAxisAngle(KAxes.AXIS_X, Math.toRadians(-90.0f));
+      NEGATIVE_Z_ORIENTATION = QuaternionI4F.IDENTITY;
+
+      POSITIVE_X_ORIENTATION =
+        QuaternionI4F.makeFromAxisAngle(KAxes.AXIS_Y, Math.toRadians(-90.0f));
+      POSITIVE_Y_ORIENTATION =
+        QuaternionI4F.makeFromAxisAngle(KAxes.AXIS_X, Math.toRadians(90.0f));
+      POSITIVE_Z_ORIENTATION =
+        QuaternionI4F.makeFromAxisAngle(KAxes.AXIS_Y, Math.toRadians(180.0f));
     }
 
-    private RVectorI3F<RSpaceRGBType>         color;
-    private float                             exponent;
-    private float                             intensity;
-    private boolean                           negative_x;
-    private boolean                           negative_y;
-    private boolean                           negative_z;
-    private RVectorI3F<RSpaceWorldType>       position;
-    private boolean                           positive_x;
-    private boolean                           positive_y;
-    private boolean                           positive_z;
-    private float                             radius;
-    private KShadowMappedVariance             shadow;
+    private RVectorI3F<RSpaceRGBType>   color;
+    private float                       compensation_bias;
+    private float                       exponent;
+    private float                       intensity;
+    private boolean                     negative_x;
+    private boolean                     negative_y;
+    private boolean                     negative_z;
+    private RVectorI3F<RSpaceWorldType> position;
+    private boolean                     positive_x;
+    private boolean                     positive_y;
+    private boolean                     positive_z;
+    private float                       radius;
+    private KShadowMappedVariance       shadow;
 
     Builder()
     {
@@ -82,6 +94,7 @@ import com.io7m.r1.types.RVectorI3F;
       this.positive_x = true;
       this.positive_y = true;
       this.positive_z = true;
+      this.compensation_bias = (float) Math.toRadians(3.7f);
     }
 
     @Override public KLightSpherePseudoWithShadowVariance build(
@@ -89,40 +102,70 @@ import com.io7m.r1.types.RVectorI3F;
       final Texture2DStaticUsableType texture)
       throws RException
     {
+      final float fov = Builder.FOV_BASE + this.compensation_bias;
+
       final MatrixM4x4F temporary = context.getTemporaryMatrix4x4();
       final KProjectionFOV p =
         KProjectionFOV.newProjection(
           temporary,
-          Builder.FOV,
+          fov,
           1.0f,
           0.0001f,
           this.radius);
 
       final OptionType<KLightProjectiveWithShadowVariance> light_negative_x;
       if (this.negative_x) {
-        final QuaternionI4F orientation =
-          QuaternionI4F.lookAtWithContext(
-            context.getTemporaryQuaternionContext(),
-            VectorI3F.ZERO,
-            Builder.NEGATIVE_X_TARGET,
-            KAxes.AXIS_Y);
         final KLightProjectiveWithShadowVariance k =
-          this.makeProjective(texture, p, orientation);
+          this.makeProjective(texture, p, Builder.NEGATIVE_X_ORIENTATION);
         light_negative_x = Option.some(k);
       } else {
         light_negative_x = Option.none();
       }
 
-      final OptionType<KLightProjectiveWithShadowVariance> light_negative_y =
-        Option.none();
-      final OptionType<KLightProjectiveWithShadowVariance> light_negative_z =
-        Option.none();
-      final OptionType<KLightProjectiveWithShadowVariance> light_positive_x =
-        Option.none();
-      final OptionType<KLightProjectiveWithShadowVariance> light_positive_y =
-        Option.none();
-      final OptionType<KLightProjectiveWithShadowVariance> light_positive_z =
-        Option.none();
+      final OptionType<KLightProjectiveWithShadowVariance> light_negative_y;
+      if (this.negative_y) {
+        final KLightProjectiveWithShadowVariance k =
+          this.makeProjective(texture, p, Builder.NEGATIVE_Y_ORIENTATION);
+        light_negative_y = Option.some(k);
+      } else {
+        light_negative_y = Option.none();
+      }
+
+      final OptionType<KLightProjectiveWithShadowVariance> light_negative_z;
+      if (this.negative_z) {
+        final KLightProjectiveWithShadowVariance k =
+          this.makeProjective(texture, p, Builder.NEGATIVE_Z_ORIENTATION);
+        light_negative_z = Option.some(k);
+      } else {
+        light_negative_z = Option.none();
+      }
+
+      final OptionType<KLightProjectiveWithShadowVariance> light_positive_x;
+      if (this.positive_x) {
+        final KLightProjectiveWithShadowVariance k =
+          this.makeProjective(texture, p, Builder.POSITIVE_X_ORIENTATION);
+        light_positive_x = Option.some(k);
+      } else {
+        light_positive_x = Option.none();
+      }
+
+      final OptionType<KLightProjectiveWithShadowVariance> light_positive_y;
+      if (this.positive_y) {
+        final KLightProjectiveWithShadowVariance k =
+          this.makeProjective(texture, p, Builder.POSITIVE_Y_ORIENTATION);
+        light_positive_y = Option.some(k);
+      } else {
+        light_positive_y = Option.none();
+      }
+
+      final OptionType<KLightProjectiveWithShadowVariance> light_positive_z;
+      if (this.positive_z) {
+        final KLightProjectiveWithShadowVariance k =
+          this.makeProjective(texture, p, Builder.POSITIVE_Z_ORIENTATION);
+        light_positive_z = Option.some(k);
+      } else {
+        light_positive_z = Option.none();
+      }
 
       return new KLightSpherePseudoWithShadowVariance(
         light_negative_x,
@@ -147,6 +190,7 @@ import com.io7m.r1.types.RVectorI3F;
       b.setRange(this.radius);
       b.setFalloff(this.exponent);
       b.setShadow(this.shadow);
+      b.setPosition(this.position);
       b.setOrientation(orientation);
       final KLightProjectiveWithShadowVariance k = b.build();
       return k;
@@ -198,6 +242,12 @@ import com.io7m.r1.types.RVectorI3F;
       final float in_exponent)
     {
       this.exponent = in_exponent;
+    }
+
+    @Override public void setFOVCompensationBias(
+      final float r)
+    {
+      this.compensation_bias = r;
     }
 
     @Override public void setIntensity(
