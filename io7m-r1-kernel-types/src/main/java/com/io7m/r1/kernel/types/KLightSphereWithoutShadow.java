@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,7 +19,6 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
@@ -43,16 +42,14 @@ import com.io7m.r1.types.RVectorI3F;
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightSphereWithoutShadowBuilderType
   {
-    private RVectorI3F<RSpaceRGBType>                 color;
-    private float                                     exponent;
-    private float                                     intensity;
-    private final @Nullable KLightSphereWithoutShadow original;
-    private RVectorI3F<RSpaceWorldType>               position;
-    private float                                     radius;
+    private RVectorI3F<RSpaceRGBType>   color;
+    private float                       exponent;
+    private float                       intensity;
+    private RVectorI3F<RSpaceWorldType> position;
+    private float                       radius;
 
     Builder()
     {
-      this.original = null;
       this.color = RVectorI3F.one();
       this.intensity = 1.0f;
       this.exponent = 1.0f;
@@ -63,7 +60,7 @@ import com.io7m.r1.types.RVectorI3F;
     Builder(
       final KLightSphereWithoutShadow in_original)
     {
-      this.original = NullCheck.notNull(in_original, "Light");
+      NullCheck.notNull(in_original, "Light");
       this.color = in_original.color;
       this.intensity = in_original.intensity;
       this.exponent = in_original.falloff;
@@ -73,18 +70,6 @@ import com.io7m.r1.types.RVectorI3F;
 
     @Override public KLightSphereWithoutShadow build()
     {
-      final KLightSphereWithoutShadow o = this.original;
-      if (o != null) {
-        final KLightSphereWithoutShadow k =
-          new KLightSphereWithoutShadow(
-            this.color,
-            this.intensity,
-            this.position,
-            this.radius,
-            this.exponent);
-        return k;
-      }
-
       return new KLightSphereWithoutShadow(
         this.color,
         this.intensity,

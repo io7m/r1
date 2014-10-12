@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,6 +20,7 @@ import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 
 /**
@@ -40,11 +41,12 @@ import com.io7m.jtensors.QuaternionM4F;
     return new KTransformContext();
   }
 
-  private final MatrixM3x3F         t_matrix3x3;
-  private final MatrixM3x3F.Context t_matrix3x3_context;
-  private final MatrixM4x4F         t_matrix4x4;
-  private final MatrixM4x4F.Context t_matrix4x4_context;
-  private final QuaternionM4F       t_rotation;
+  private final MatrixM3x3F           t_matrix3x3;
+  private final MatrixM3x3F.Context   t_matrix3x3_context;
+  private final MatrixM4x4F           t_matrix4x4;
+  private final MatrixM4x4F.Context   t_matrix4x4_context;
+  private final QuaternionI4F.Context t_quat_context;
+  private final QuaternionM4F         t_rotation;
 
   private KTransformContext()
   {
@@ -53,6 +55,7 @@ import com.io7m.jtensors.QuaternionM4F;
     this.t_matrix4x4_context = new MatrixM4x4F.Context();
     this.t_matrix3x3 = new MatrixM3x3F();
     this.t_matrix3x3_context = new MatrixM3x3F.Context();
+    this.t_quat_context = new QuaternionI4F.Context();
   }
 
   @Override public boolean equals(
@@ -103,6 +106,17 @@ import com.io7m.jtensors.QuaternionM4F;
   public MatrixM4x4F.Context getTemporaryMatrix4x4Context()
   {
     return this.t_matrix4x4_context;
+  }
+
+  /**
+   * @return A reference to a temporary quaternion context. Note that this
+   *         context is <i>not</i> recreated on every call, and the returned
+   *         context is shared between all callers of this function.
+   */
+
+  public QuaternionI4F.Context getTemporaryQuaternionContext()
+  {
+    return this.t_quat_context;
   }
 
   /**

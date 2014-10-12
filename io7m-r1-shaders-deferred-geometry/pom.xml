@@ -83,14 +83,14 @@
       <version>${project.version}</version>
       <classifier>shader-sources</classifier>
       <type>zip</type>
+      <optional>true</optional>
     </dependency>
-
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-r1-shaders-deferred</artifactId>
       <version>${project.version}</version>
+      <optional>true</optional>
     </dependency>
-
     <dependency>
       <groupId>com.io7m.jparasol</groupId>
       <artifactId>io7m-jparasol-compiler-frontend</artifactId>

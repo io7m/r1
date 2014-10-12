@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -32,11 +32,11 @@ import com.io7m.r1.types.RException;
   @EqualityReference private static final class Builder implements
     KShadowMappedVarianceBuilderType
   {
-    private KBlurParameters                          blur;
-    private float                                    factor_min;
-    private float                                    light_bleed_reduction;
+    private KBlurParameters               blur;
+    private float                         factor_min;
+    private float                         light_bleed_reduction;
     private KShadowMapDescriptionVariance map_description;
-    private float                                    minimum_variance;
+    private float                         minimum_variance;
 
     Builder()
     {
@@ -44,8 +44,7 @@ import com.io7m.r1.types.RException;
       this.factor_min = 0.2f;
       this.light_bleed_reduction = 0.2f;
       this.minimum_variance = 0.00002f;
-      this.map_description =
-        KShadowMapDescriptionVariance.getDefault();
+      this.map_description = KShadowMapDescriptionVariance.getDefault();
     }
 
     Builder(
@@ -137,11 +136,11 @@ import com.io7m.r1.types.RException;
     return new Builder(s);
   }
 
-  private final KBlurParameters                          blur;
-  private final float                                    factor_min;
-  private final float                                    light_bleed_reduction;
+  private final KBlurParameters               blur;
+  private final float                         factor_min;
+  private final float                         light_bleed_reduction;
   private final KShadowMapDescriptionVariance map_description;
-  private final float                                    minimum_variance;
+  private final float                         minimum_variance;
 
   private KShadowMappedVariance(
     final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float in_factor_min,
