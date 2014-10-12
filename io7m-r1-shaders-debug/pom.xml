@@ -78,8 +78,8 @@
       <version>${project.version}</version>
       <classifier>shader-sources</classifier>
       <type>zip</type>
+      <optional>true</optional>
     </dependency>
-
     <dependency>
       <groupId>com.io7m.jparasol</groupId>
       <artifactId>io7m-jparasol-compiler-frontend</artifactId>
