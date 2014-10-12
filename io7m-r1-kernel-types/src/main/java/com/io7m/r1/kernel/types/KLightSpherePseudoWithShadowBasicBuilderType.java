@@ -16,13 +16,34 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.r1.types.RException;
+
 /**
  * The type of mutable builders for spherical lights with basic shadows.
  */
 
 public interface KLightSpherePseudoWithShadowBasicBuilderType extends
-  KLightSphereBuilderType
+  KLightSphereBuilderType,
+  KLightSpherePseudoWithShadowBuilderType
 {
+  /**
+   * Construct a light.
+   *
+   * @param context
+   *          The transform context.
+   * @param texture
+   *          The projected texture.
+   * @return A new light
+   * @throws RException
+   *           On errors
+   */
+
+  KLightSpherePseudoWithShadowBasic build(
+    final KTransformContext context,
+    final Texture2DStaticUsableType texture)
+    throws RException;
+
   /**
    * Set the shadow.
    *
