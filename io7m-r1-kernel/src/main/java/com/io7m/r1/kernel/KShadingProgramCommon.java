@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -51,7 +51,6 @@ import com.io7m.r1.kernel.types.KMaterialRefractiveUnmasked;
 import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KMeshAttributes;
-import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.types.RException;
@@ -1396,119 +1395,6 @@ import com.io7m.r1.types.RVectorReadable4FType;
     program.programUniformPutMatrix3x3f(
       KShadingProgramCommon.MATRIX_NAME_UV,
       m);
-  }
-
-  static void putProjection(
-    final JCBProgramType program,
-    final KProjectionType projection)
-  {
-    KShadingProgramCommon.putProjectionFar(
-      program,
-      projection.projectionGetZFar());
-    KShadingProgramCommon.putProjectionNear(
-      program,
-      projection.projectionGetZNear());
-    KShadingProgramCommon.putProjectionLeft(
-      program,
-      projection.projectionGetXMinimum());
-    KShadingProgramCommon.putProjectionRight(
-      program,
-      projection.projectionGetXMaximum());
-    KShadingProgramCommon.putProjectionBottom(
-      program,
-      projection.projectionGetYMinimum());
-    KShadingProgramCommon.putProjectionTop(
-      program,
-      projection.projectionGetYMaximum());
-  }
-
-  static void putProjectionNear(
-    final JCBProgramType program,
-    final float near)
-  {
-    program.programUniformPutFloat("projection.near", near);
-  }
-
-  static void putProjectionFar(
-    final JCBProgramType program,
-    final float far)
-  {
-    program.programUniformPutFloat("projection.far", far);
-  }
-
-  static void putProjectionLeft(
-    final JCBProgramType program,
-    final float left)
-  {
-    program.programUniformPutFloat("projection.left", left);
-  }
-
-  static void putProjectionRight(
-    final JCBProgramType program,
-    final float right)
-  {
-    program.programUniformPutFloat("projection.right", right);
-  }
-
-  static void putProjectionTop(
-    final JCBProgramType program,
-    final float top)
-  {
-    program.programUniformPutFloat("projection.top", top);
-  }
-
-  static void putProjectionBottom(
-    final JCBProgramType program,
-    final float bottom)
-  {
-    program.programUniformPutFloat("projection.bottom", bottom);
-  }
-
-  static void putProjectionReuse(
-    final JCBProgramType program)
-  {
-    KShadingProgramCommon.putProjectionFarReuse(program);
-    KShadingProgramCommon.putProjectionNearReuse(program);
-    KShadingProgramCommon.putProjectionLeftReuse(program);
-    KShadingProgramCommon.putProjectionRightReuse(program);
-    KShadingProgramCommon.putProjectionBottomReuse(program);
-    KShadingProgramCommon.putProjectionTopReuse(program);
-  }
-
-  static void putProjectionNearReuse(
-    final JCBProgramType program)
-  {
-    program.programUniformUseExisting("projection.near");
-  }
-
-  static void putProjectionFarReuse(
-    final JCBProgramType program)
-  {
-    program.programUniformUseExisting("projection.far");
-  }
-
-  static void putProjectionLeftReuse(
-    final JCBProgramType program)
-  {
-    program.programUniformUseExisting("projection.left");
-  }
-
-  static void putProjectionRightReuse(
-    final JCBProgramType program)
-  {
-    program.programUniformUseExisting("projection.right");
-  }
-
-  static void putProjectionTopReuse(
-    final JCBProgramType program)
-  {
-    program.programUniformUseExisting("projection.top");
-  }
-
-  static void putProjectionBottomReuse(
-    final JCBProgramType program)
-  {
-    program.programUniformUseExisting("projection.bottom");
   }
 
   static void putRefractionTextureScene(

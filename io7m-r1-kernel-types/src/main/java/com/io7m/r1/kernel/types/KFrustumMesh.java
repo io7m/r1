@@ -52,12 +52,13 @@ import com.io7m.r1.types.RExceptionJCGL;
 @EqualityReference public final class KFrustumMesh implements
   KFrustumMeshUsableType
 {
-  private static final long            ARRAY_SIZE_BYTES;
-  private static final ArrayDescriptor ARRAY_TYPE;
-  private static final int             ARRAY_VERTEX_COUNT;
-  private static final int             INDICES_COUNT;
-  private static final int             INDICES_SIZE_BYTES;
-  private static final int             INDICES_TRIANGLE_COUNT;
+  private static final JCGLUnsignedType INDICES_TYPE;
+  private static final long             ARRAY_SIZE_BYTES;
+  private static final ArrayDescriptor  ARRAY_TYPE;
+  private static final int              ARRAY_VERTEX_COUNT;
+  private static final int              INDICES_COUNT;
+  private static final int              INDICES_SIZE_BYTES;
+  private static final int              INDICES_TRIANGLE_COUNT;
 
   static {
     try {
@@ -70,12 +71,12 @@ import com.io7m.r1.types.RExceptionJCGL;
         KFrustumMesh.ARRAY_VERTEX_COUNT
           * KFrustumMesh.ARRAY_TYPE.getElementSizeBytes();
 
+      INDICES_TYPE = JCGLUnsignedType.TYPE_UNSIGNED_SHORT;
       INDICES_TRIANGLE_COUNT = 12;
       INDICES_COUNT = KFrustumMesh.INDICES_TRIANGLE_COUNT * 3;
 
       INDICES_SIZE_BYTES =
-        KFrustumMesh.INDICES_COUNT
-          * JCGLUnsignedType.TYPE_UNSIGNED_BYTE.getSizeBytes();
+        KFrustumMesh.INDICES_COUNT * KFrustumMesh.INDICES_TYPE.getSizeBytes();
 
     } catch (final JCGLExceptionAttributeDuplicate e) {
       throw new UnreachableCodeException(e);
@@ -431,7 +432,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
     final IndexBufferType i =
       g.indexBufferAllocateType(
-        JCGLUnsignedType.TYPE_UNSIGNED_BYTE,
+        KFrustumMesh.INDICES_TYPE,
         KFrustumMesh.INDICES_COUNT,
         UsageHint.USAGE_STATIC_DRAW);
 

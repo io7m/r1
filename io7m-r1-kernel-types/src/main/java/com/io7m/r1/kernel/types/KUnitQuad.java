@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -33,6 +33,7 @@ import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
 import com.io7m.jcanephora.IndexBufferUpdateUnmappedType;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.ResourceCheck;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLArrayBuffersType;
@@ -56,7 +57,7 @@ import com.io7m.r1.types.RExceptionJCGL;
   /**
    * Construct a new {@link JCacheLoaderType} that produces new
    * {@link KUnitQuad} instances as required.
-   * 
+   *
    * @param <G>
    *          The precise type of OpenGL interface required
    * @param gl
@@ -108,7 +109,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   /**
    * Construct a new unit quad.
-   * 
+   *
    * @param gl
    *          The OpenGL interface
    * @param log
@@ -175,7 +176,11 @@ import com.io7m.r1.types.RExceptionJCGL;
     gl.arrayBufferUpdate(array_data);
 
     final IndexBufferType indices =
-      gl.indexBufferAllocate(array, 6, UsageHint.USAGE_STATIC_DRAW);
+      gl.indexBufferAllocateType(
+        JCGLUnsignedType.TYPE_UNSIGNED_SHORT,
+        6,
+        UsageHint.USAGE_STATIC_DRAW);
+
     final IndexBufferUpdateUnmappedType indices_data =
       IndexBufferUpdateUnmapped.newReplacing(indices);
 
@@ -211,7 +216,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   /**
    * Delete all resources associated with the quad.
-   * 
+   *
    * @param <G>
    *          The precise type of OpenGL interface required.
    * @param gc
