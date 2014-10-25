@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -115,11 +115,9 @@ import com.io7m.r1.types.RExceptionMeshMissingTangents;
 import com.io7m.r1.types.RExceptionMeshMissingUVs;
 import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RTransformModelType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RTransformViewType;
-import com.io7m.r1.types.RVectorI3F;
 
 @SuppressWarnings("static-method") public class KShadowMapRendererTest
 {
@@ -397,13 +395,10 @@ import com.io7m.r1.types.RVectorI3F;
 
       final ArrayBufferType array =
         gc.arrayBufferAllocate(1, type, UsageHint.USAGE_STATIC_DRAW);
-
       final IndexBufferType indices =
         gc.indexBufferAllocate(array, 1, UsageHint.USAGE_STATIC_DRAW);
-      final RVectorI3F<RSpaceObjectType> bounds_low = RVectorI3F.zero();
-      final RVectorI3F<RSpaceObjectType> bounds_hi = RVectorI3F.one();
-      final KMeshReadableType mesh =
-        KMesh.newMesh(array, indices, bounds_low, bounds_hi);
+      final KMeshReadableType mesh = KMesh.newMesh(array, indices);
+
       return KInstanceOpaqueRegular.newInstance(
         mesh,
         in_material,

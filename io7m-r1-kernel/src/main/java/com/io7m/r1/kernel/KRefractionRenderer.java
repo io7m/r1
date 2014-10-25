@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,13 +16,8 @@
 
 package com.io7m.r1.kernel;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcache.JCacheException;
-import com.io7m.jcache.LUCacheType;
-import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.IndexBufferUsableType;
@@ -34,12 +29,8 @@ import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
-import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.NullCheckException;
-import com.io7m.jranges.RangeInclusiveL;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -52,26 +43,11 @@ import com.io7m.r1.kernel.types.KMaterialRefractiveMasked;
 import com.io7m.r1.kernel.types.KMaterialRefractiveUnmasked;
 import com.io7m.r1.kernel.types.KMaterialRefractiveVisitorType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
-import com.io7m.r1.kernel.types.KMeshBounds;
-import com.io7m.r1.kernel.types.KMeshBoundsTriangles;
 import com.io7m.r1.kernel.types.KMeshReadableType;
-import com.io7m.r1.types.RCoordinates;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionFramebufferNotBound;
 import com.io7m.r1.types.RExceptionJCGL;
-import com.io7m.r1.types.RMatrixReadable4x4FType;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceNDCType;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceWindowType;
-import com.io7m.r1.types.RTransformModelViewType;
-import com.io7m.r1.types.RTransformProjectionType;
-import com.io7m.r1.types.RTriangle4F;
-import com.io7m.r1.types.RVectorI4F;
-import com.io7m.r1.types.RVectorM3F;
-import com.io7m.r1.types.RVectorM4F;
-import com.io7m.r1.types.RVectorReadable3FType;
 
 /**
  * The default implementation of the refraction renderer interface.
@@ -82,222 +58,10 @@ import com.io7m.r1.types.RVectorReadable3FType;
 {
   private static final String               NAME;
   private static final VectorReadable4FType WHITE;
-  private static final int                  WINDOW_BOUNDS_PADDING;
-
-  static {
-    WINDOW_BOUNDS_PADDING = 2;
-    WHITE = new VectorI4F(1.0f, 1.0f, 1.0f, 1.0f);
-  }
 
   static {
     NAME = "refraction";
-  }
-
-  /**
-   * Calculate the bounding box for the given mesh and matrices in normalized
-   * device coordinates.
-   *
-   * @return true If the given mesh is actually visible
-   */
-
-  private static
-    boolean
-    calculateNDCBounds(
-      final KMeshBoundsCacheType<RSpaceObjectType> bounds_cache,
-      final LUCacheType<KMeshBounds<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, KMeshBoundsTriangles<RSpaceObjectType>, RException> bounds_triangle_cache,
-      final MatrixM4x4F.Context matrix_context,
-      final KMatricesInstanceValuesType mi,
-      final KMeshReadableType mesh,
-      final RVectorM3F<RSpaceNDCType> ndc_bounds_lower,
-      final RVectorM3F<RSpaceNDCType> ndc_bounds_upper)
-      throws RException,
-        JCacheException
-  {
-    final RMatrixReadable4x4FType<RTransformModelViewType> mmv =
-      mi.getMatrixModelView();
-    final RMatrixReadable4x4FType<RTransformProjectionType> mp =
-      mi.getMatrixProjection();
-
-    final KMeshBounds<RSpaceObjectType> bounds =
-      bounds_cache.cacheGetLU(mesh);
-    final KMeshBoundsTriangles<RSpaceObjectType> obj_triangles =
-      bounds_triangle_cache.cacheGetLU(bounds);
-
-    /**
-     * Transform the triangles of the bounding box that contains the mesh from
-     * object space to clip space.
-     */
-
-    final RVectorM4F<RSpaceClipType> clip_temp =
-      new RVectorM4F<RSpaceClipType>();
-    final KMeshBoundsTriangles<RSpaceClipType> clip_triangles =
-      obj_triangles
-        .transform(new PartialFunctionType<RTriangle4F<RSpaceObjectType>, RTriangle4F<RSpaceClipType>, NullCheckException>() {
-          @Override public RTriangle4F<RSpaceClipType> call(
-            final RTriangle4F<RSpaceObjectType> ot)
-          {
-            return ot
-              .transform(new PartialFunctionType<RVectorI4F<RSpaceObjectType>, RVectorI4F<RSpaceClipType>, NullCheckException>() {
-                @Override public RVectorI4F<RSpaceClipType> call(
-                  final RVectorI4F<RSpaceObjectType> op)
-                {
-                  clip_temp.copyFrom4F(op);
-
-                  MatrixM4x4F.multiplyVector4FWithContext(
-                    matrix_context,
-                    mmv,
-                    clip_temp,
-                    clip_temp);
-                  MatrixM4x4F.multiplyVector4FWithContext(
-                    matrix_context,
-                    mp,
-                    clip_temp,
-                    clip_temp);
-                  return new RVectorI4F<RSpaceClipType>(clip_temp);
-                }
-              });
-          }
-        });
-
-    /**
-     * Now, clip all of the clip-space triangles produced against the six
-     * homogeneous clipping planes.
-     */
-
-    final List<RTriangle4F<RSpaceClipType>> triangles =
-      new ArrayList<RTriangle4F<RSpaceClipType>>();
-    triangles.add(clip_triangles.getBack0());
-    triangles.add(clip_triangles.getBack1());
-    triangles.add(clip_triangles.getBottom0());
-    triangles.add(clip_triangles.getBottom1());
-    triangles.add(clip_triangles.getFront0());
-    triangles.add(clip_triangles.getFront1());
-    triangles.add(clip_triangles.getLeft0());
-    triangles.add(clip_triangles.getLeft1());
-    triangles.add(clip_triangles.getRight0());
-    triangles.add(clip_triangles.getRight1());
-    triangles.add(clip_triangles.getTop0());
-    triangles.add(clip_triangles.getTop1());
-
-    /**
-     * If clipping any of the triangles actually produces triangles as a
-     * result, then at least one triangle is visible onscreen.
-     */
-
-    ndc_bounds_lower.set3F(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-    ndc_bounds_upper.set3F(
-      -Float.MAX_VALUE,
-      -Float.MAX_VALUE,
-      -Float.MAX_VALUE);
-
-    final RVectorM3F<RSpaceNDCType> ndc_temp =
-      new RVectorM3F<RSpaceNDCType>();
-
-    boolean visible = false;
-    for (int index = 0; index < triangles.size(); ++index) {
-      final RTriangle4F<RSpaceClipType> t = triangles.get(index);
-      assert t != null;
-
-      final List<RTriangle4F<RSpaceClipType>> r =
-        KTriangleClipping.clipTrianglePlanes(t, KTriangleClipping.PLANES);
-
-      if (r.size() > 0) {
-        visible = true;
-
-        /**
-         * For each clipped triangle, accumulate the lower and upper bounds.
-         */
-
-        for (int ki = 0; ki < r.size(); ++ki) {
-          final RTriangle4F<RSpaceClipType> rt = r.get(ki);
-          final RVectorI4F<RSpaceClipType> p0 = rt.getP0();
-          final RVectorI4F<RSpaceClipType> p1 = rt.getP1();
-          final RVectorI4F<RSpaceClipType> p2 = rt.getP2();
-
-          RCoordinates.clipToNDC(p0, ndc_temp);
-          KRefractionRenderer.calculateNDCBoundsAccumulate(
-            ndc_bounds_lower,
-            ndc_bounds_upper,
-            ndc_temp);
-
-          RCoordinates.clipToNDC(p1, ndc_temp);
-          KRefractionRenderer.calculateNDCBoundsAccumulate(
-            ndc_bounds_lower,
-            ndc_bounds_upper,
-            ndc_temp);
-
-          RCoordinates.clipToNDC(p2, ndc_temp);
-          KRefractionRenderer.calculateNDCBoundsAccumulate(
-            ndc_bounds_lower,
-            ndc_bounds_upper,
-            ndc_temp);
-        }
-      }
-    }
-
-    return visible;
-  }
-
-  private static void calculateNDCBoundsAccumulate(
-    final RVectorM3F<RSpaceNDCType> ndc_bounds_lower,
-    final RVectorM3F<RSpaceNDCType> ndc_bounds_upper,
-    final RVectorReadable3FType<RSpaceNDCType> ndc)
-  {
-    final float x = ndc.getXF();
-    final float y = ndc.getYF();
-    final float z = ndc.getZF();
-
-    ndc_bounds_lower.set3F(
-      Math.min(ndc_bounds_lower.getXF(), x),
-      Math.min(ndc_bounds_lower.getYF(), y),
-      Math.min(ndc_bounds_lower.getZF(), z));
-
-    ndc_bounds_upper.set3F(
-      Math.max(ndc_bounds_upper.getXF(), x),
-      Math.max(ndc_bounds_upper.getYF(), y),
-      Math.max(ndc_bounds_upper.getZF(), z));
-  }
-
-  private static void calculateWindowBounds(
-    final AreaInclusive area,
-    final RVectorReadable3FType<RSpaceNDCType> ndc_bounds_lower,
-    final RVectorReadable3FType<RSpaceNDCType> ndc_bounds_upper,
-    final RVectorM3F<RSpaceWindowType> window_bounds_lower,
-    final RVectorM3F<RSpaceWindowType> window_bounds_upper)
-  {
-    RCoordinates.ndcToWindow(
-      ndc_bounds_lower,
-      window_bounds_lower,
-      area,
-      0.0f,
-      1.0f);
-
-    RCoordinates.ndcToWindow(
-      ndc_bounds_upper,
-      window_bounds_upper,
-      area,
-      0.0f,
-      1.0f);
-
-    /**
-     * Due to numerical inaccuracy, the calculated bounds can sometimes be a
-     * pixel or so too small onscreen. The refraction effect doesn't require
-     * accurate bounds, so it's best for the bounds to be slightly too large
-     * than too small.
-     */
-
-    window_bounds_lower
-      .set2F(
-        window_bounds_lower.getXF()
-          - KRefractionRenderer.WINDOW_BOUNDS_PADDING,
-        window_bounds_lower.getYF()
-          - KRefractionRenderer.WINDOW_BOUNDS_PADDING);
-    window_bounds_upper
-      .set2F(
-        window_bounds_upper.getXF()
-          + KRefractionRenderer.WINDOW_BOUNDS_PADDING,
-        window_bounds_upper.getYF()
-          + KRefractionRenderer.WINDOW_BOUNDS_PADDING);
+    WHITE = new VectorI4F(1.0f, 1.0f, 1.0f, 1.0f);
   }
 
   /**
@@ -311,10 +75,6 @@ import com.io7m.r1.types.RVectorReadable3FType;
    *          A shader cache
    * @param rgba_cache
    *          A framebuffer cache
-   * @param bounds_cache
-   *          A bounds cache
-   * @param bounds_tri_cache
-   *          A triangle cache
    * @return A new renderer
    *
    * @throws RException
@@ -325,18 +85,10 @@ import com.io7m.r1.types.RVectorReadable3FType;
     final JCGLImplementationType gl,
     final KRegionCopierType copier,
     final KShaderCacheForwardTranslucentUnlitType shader_cache,
-    final KFramebufferRGBAWithDepthCacheType rgba_cache,
-    final KMeshBoundsCacheType<RSpaceObjectType> bounds_cache,
-    final KMeshBoundsTrianglesCacheType<RSpaceObjectType> bounds_tri_cache)
+    final KFramebufferRGBAWithDepthCacheType rgba_cache)
     throws RException
   {
-    return new KRefractionRenderer(
-      gl,
-      copier,
-      shader_cache,
-      rgba_cache,
-      bounds_cache,
-      bounds_tri_cache);
+    return new KRefractionRenderer(gl, copier, shader_cache, rgba_cache);
   }
 
   private static void putInstanceAttributes(
@@ -437,10 +189,9 @@ import com.io7m.r1.types.RVectorReadable3FType;
     final KTextureUnitAllocator unit_allocator,
     final KRegionCopierType copier,
     final KFramebufferRGBAWithDepthUsableType scene,
-    final KFramebufferRGBAWithDepthUsableType temporary,
+    final KFramebufferRGBAWithDepthUsableType scene_copy,
     final KInstanceTranslucentRefractive r,
-    final KMatricesInstanceValuesType mi,
-    final AreaInclusive window_bounds_area)
+    final KMatricesInstanceValuesType mi)
     throws RException,
       JCacheException,
       JCGLException
@@ -453,11 +204,11 @@ import com.io7m.r1.types.RVectorReadable3FType;
     try {
       final KFramebufferRGBAWithDepthUsableType mask = scene_mask.getValue();
 
-      copier.copierCopyRGBAWithDepth(
+      copier.copierCopyDepthOnly(
         scene,
-        window_bounds_area,
+        scene.kFramebufferGetArea(),
         mask,
-        window_bounds_area);
+        scene.kFramebufferGetArea());
 
       KRefractionRenderer.rendererRefractionEvaluateRenderMask(
         g,
@@ -473,7 +224,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
         unit_allocator,
         scene,
         mask,
-        temporary,
+        scene_copy,
         r,
         mi,
         mesh);
@@ -582,7 +333,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
     final KTextureUnitAllocator unit_allocator,
     final KFramebufferRGBAWithDepthUsableType scene,
     final KFramebufferRGBAWithDepthUsableType scene_mask,
-    final KFramebufferRGBAWithDepthUsableType destination,
+    final KFramebufferRGBAWithDepthUsableType scene_copy,
     final KInstanceTranslucentRefractive r,
     final KMatricesInstanceValuesType mi,
     final KMeshReadableType mesh)
@@ -605,89 +356,81 @@ import com.io7m.r1.types.RVectorReadable3FType;
           throws JCGLException,
             RException
         {
-          try {
-            gc.framebufferDrawBind(destination.rgbaGetColorFramebuffer());
+          gc.framebufferDrawBind(scene.rgbaGetColorFramebuffer());
 
-            gc.blendingDisable();
+          gc.blendingDisable();
 
-            KRendererCommon.renderConfigureFaceCulling(
-              gc,
-              r.instanceGetFaceSelection());
+          KRendererCommon.renderConfigureFaceCulling(
+            gc,
+            r.instanceGetFaceSelection());
 
-            gc.colorBufferMask(true, true, true, true);
-            gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
-            gc.depthBufferWriteDisable();
+          gc.colorBufferMask(true, true, true, true);
+          gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
+          gc.depthBufferWriteDisable();
 
-            unit_allocator.withContext(new KTextureUnitWithType() {
-              @Override public void run(
-                final KTextureUnitContextType context)
-                throws JCGLException,
-                  RException
-              {
-                KShadingProgramCommon.putMatrixProjectionUnchecked(
-                  program,
-                  mi.getMatrixProjection());
+          unit_allocator.withContext(new KTextureUnitWithType() {
+            @Override public void run(
+              final KTextureUnitContextType context)
+              throws JCGLException,
+                RException
+            {
+              KShadingProgramCommon.putMatrixProjectionUnchecked(
+                program,
+                mi.getMatrixProjection());
 
-                KRefractionRenderer
-                  .putInstanceMatrices(program, mi, material);
+              KRefractionRenderer.putInstanceMatrices(program, mi, material);
 
-                KRefractionRenderer.putTextures(
-                  material,
-                  scene,
-                  program,
-                  context);
+              KRefractionRenderer.putTextures(
+                material,
+                scene_copy,
+                program,
+                context);
 
-                KShadingProgramCommon.putRefractionTextureSceneMask(
-                  program,
-                  context.withTexture2D(scene_mask.rgbaGetTexture()));
+              KShadingProgramCommon.putRefractionTextureSceneMask(
+                program,
+                context.withTexture2D(scene_mask.rgbaGetTexture()));
 
-                material.getRefractive().refractiveAccept(
-                  new KMaterialRefractiveVisitorType<Unit, JCGLException>() {
-                    @Override public Unit masked(
-                      final KMaterialRefractiveMasked m)
-                      throws RException,
-                        JCGLException
-                    {
-                      KShadingProgramCommon.putMaterialRefractiveMasked(
-                        program,
-                        m);
-                      return Unit.unit();
-                    }
+              material.getRefractive().refractiveAccept(
+                new KMaterialRefractiveVisitorType<Unit, JCGLException>() {
+                  @Override public Unit masked(
+                    final KMaterialRefractiveMasked m)
+                    throws RException,
+                      JCGLException
+                  {
+                    KShadingProgramCommon.putMaterialRefractiveMasked(
+                      program,
+                      m);
+                    return Unit.unit();
+                  }
 
-                    @Override public Unit unmasked(
-                      final KMaterialRefractiveUnmasked m)
-                      throws RException,
-                        JCGLException
-                    {
-                      KShadingProgramCommon.putMaterialRefractiveUnmasked(
-                        program,
-                        m);
-                      return Unit.unit();
-                    }
-                  });
+                  @Override public Unit unmasked(
+                    final KMaterialRefractiveUnmasked m)
+                    throws RException,
+                      JCGLException
+                  {
+                    KShadingProgramCommon.putMaterialRefractiveUnmasked(
+                      program,
+                      m);
+                    return Unit.unit();
+                  }
+                });
 
-                gc.arrayBufferBind(array);
-                KRefractionRenderer.putInstanceAttributes(
-                  material,
-                  array,
-                  program);
+              gc.arrayBufferBind(array);
+              KRefractionRenderer.putInstanceAttributes(
+                material,
+                array,
+                program);
 
-                program
-                  .programExecute(new JCBProgramProcedureType<JCGLException>() {
-                    @Override public void call()
-                      throws JCGLException
-                    {
-                      gc
-                        .drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                    }
-                  });
-              }
-
-            });
-
-          } finally {
-            gc.framebufferDrawUnbind();
-          }
+              program
+                .programExecute(new JCBProgramProcedureType<JCGLException>() {
+                  @Override public void call()
+                    throws JCGLException
+                  {
+                    gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+                  }
+                });
+            }
+          });
         }
       });
   }
@@ -697,7 +440,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
     final KShaderCacheForwardTranslucentUnlitType shader_cache,
     final KTextureUnitAllocator unit_allocator,
     final KFramebufferRGBAWithDepthUsableType scene,
-    final KFramebufferRGBAWithDepthUsableType temporary,
+    final KFramebufferRGBAWithDepthUsableType scene_copy,
     final KInstanceTranslucentRefractive r,
     final KMatricesInstanceValuesType mi,
     final KMeshReadableType mesh)
@@ -720,109 +463,93 @@ import com.io7m.r1.types.RVectorReadable3FType;
           throws JCGLException,
             RException
         {
-          try {
-            gc.framebufferDrawBind(temporary.rgbaGetColorFramebuffer());
+          gc.framebufferDrawBind(scene.rgbaGetColorFramebuffer());
 
-            gc.blendingDisable();
+          gc.blendingDisable();
 
-            KRendererCommon.renderConfigureFaceCulling(
-              gc,
-              r.instanceGetFaceSelection());
+          KRendererCommon.renderConfigureFaceCulling(
+            gc,
+            r.instanceGetFaceSelection());
 
-            gc.colorBufferMask(true, true, true, true);
-            gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
-            gc.depthBufferWriteDisable();
+          gc.colorBufferMask(true, true, true, true);
+          gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
+          gc.depthBufferWriteDisable();
 
-            unit_allocator.withContext(new KTextureUnitWithType() {
-              @Override public void run(
-                final KTextureUnitContextType context)
-                throws JCGLException,
-                  RException
-              {
-                KShadingProgramCommon.putMatrixProjectionUnchecked(
-                  program,
-                  mi.getMatrixProjection());
+          unit_allocator.withContext(new KTextureUnitWithType() {
+            @Override public void run(
+              final KTextureUnitContextType context)
+              throws JCGLException,
+                RException
+            {
+              KShadingProgramCommon.putMatrixProjectionUnchecked(
+                program,
+                mi.getMatrixProjection());
 
-                KRefractionRenderer
-                  .putInstanceMatrices(program, mi, material);
+              KRefractionRenderer.putInstanceMatrices(program, mi, material);
 
-                KRefractionRenderer.putTextures(
-                  material,
-                  scene,
-                  program,
-                  context);
+              KRefractionRenderer.putTextures(
+                material,
+                scene_copy,
+                program,
+                context);
 
-                material.getRefractive().refractiveAccept(
-                  new KMaterialRefractiveVisitorType<Unit, JCGLException>() {
-                    @Override public Unit masked(
-                      final KMaterialRefractiveMasked m)
-                      throws RException,
-                        JCGLException
-                    {
-                      KShadingProgramCommon.putMaterialRefractiveMasked(
-                        program,
-                        m);
-                      return Unit.unit();
-                    }
+              material.getRefractive().refractiveAccept(
+                new KMaterialRefractiveVisitorType<Unit, JCGLException>() {
+                  @Override public Unit masked(
+                    final KMaterialRefractiveMasked m)
+                    throws RException,
+                      JCGLException
+                  {
+                    KShadingProgramCommon.putMaterialRefractiveMasked(
+                      program,
+                      m);
+                    return Unit.unit();
+                  }
 
-                    @Override public Unit unmasked(
-                      final KMaterialRefractiveUnmasked m)
-                      throws RException,
-                        JCGLException
-                    {
-                      KShadingProgramCommon.putMaterialRefractiveUnmasked(
-                        program,
-                        m);
-                      return Unit.unit();
-                    }
-                  });
+                  @Override public Unit unmasked(
+                    final KMaterialRefractiveUnmasked m)
+                    throws RException,
+                      JCGLException
+                  {
+                    KShadingProgramCommon.putMaterialRefractiveUnmasked(
+                      program,
+                      m);
+                    return Unit.unit();
+                  }
+                });
 
-                gc.arrayBufferBind(array);
-                KRefractionRenderer.putInstanceAttributes(
-                  material,
-                  array,
-                  program);
+              gc.arrayBufferBind(array);
+              KRefractionRenderer.putInstanceAttributes(
+                material,
+                array,
+                program);
 
-                program
-                  .programExecute(new JCBProgramProcedureType<JCGLException>() {
-                    @Override public void call()
-                      throws JCGLException
-                    {
-                      gc
-                        .drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                    }
-                  });
-              }
+              program
+                .programExecute(new JCBProgramProcedureType<JCGLException>() {
+                  @Override public void call()
+                    throws JCGLException
+                  {
+                    gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+                  }
+                });
+            }
 
-            });
-
-          } finally {
-            gc.framebufferDrawUnbind();
-          }
+          });
         }
       });
   }
 
-  private final KMeshBoundsCacheType<RSpaceObjectType>          bounds_cache;
-  private final KMeshBoundsTrianglesCacheType<RSpaceObjectType> bounds_tri_cache;
-  private final KRegionCopierType                               copier;
-  private final KFramebufferRGBAWithDepthCacheType              rgba_cache;
-  private final JCGLImplementationType                          g;
-  private final MatrixM4x4F.Context                             matrix_context;
-  private final RVectorM3F<RSpaceNDCType>                       ndc_bounds_lower;
-  private final RVectorM3F<RSpaceNDCType>                       ndc_bounds_upper;
-  private final KShaderCacheForwardTranslucentUnlitType         shader_cache;
-  private final KTextureUnitAllocator                           texture_units;
-  private final RVectorM3F<RSpaceWindowType>                    window_bounds_lower;
-  private final RVectorM3F<RSpaceWindowType>                    window_bounds_upper;
+  private final KRegionCopierType                       copier;
+  private final KFramebufferRGBAWithDepthCacheType      rgba_cache;
+  private final JCGLImplementationType                  g;
+  private final KShaderCacheForwardTranslucentUnlitType shader_cache;
+  private final KTextureUnitAllocator                   texture_units;
 
   private KRefractionRenderer(
     final JCGLImplementationType gl,
     final KRegionCopierType in_copier,
     final KShaderCacheForwardTranslucentUnlitType in_shader_cache,
-    final KFramebufferRGBAWithDepthCacheType in_forward_cache,
-    final KMeshBoundsCacheType<RSpaceObjectType> in_bounds_cache,
-    final KMeshBoundsTrianglesCacheType<RSpaceObjectType> in_bounds_tri_cache)
+    final KFramebufferRGBAWithDepthCacheType in_forward_cache)
     throws RException
   {
     try {
@@ -831,17 +558,9 @@ import com.io7m.r1.types.RVectorReadable3FType;
       this.rgba_cache =
         NullCheck.notNull(in_forward_cache, "Forward framebuffer cache");
       this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
-      this.bounds_cache = NullCheck.notNull(in_bounds_cache, "Bounds cache");
-      this.bounds_tri_cache =
-        NullCheck.notNull(in_bounds_tri_cache, "Bounds triangle cache");
 
       this.texture_units =
         KTextureUnitAllocator.newAllocator(this.g.getGLCommon());
-      this.window_bounds_lower = new RVectorM3F<RSpaceWindowType>();
-      this.window_bounds_upper = new RVectorM3F<RSpaceWindowType>();
-      this.ndc_bounds_lower = new RVectorM3F<RSpaceNDCType>();
-      this.ndc_bounds_upper = new RVectorM3F<RSpaceNDCType>();
-      this.matrix_context = new MatrixM4x4F.Context();
 
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
@@ -907,112 +626,73 @@ import com.io7m.r1.types.RVectorReadable3FType;
       RException,
       JCacheException
   {
-    final KMeshReadableType mesh = r.instanceGetMesh();
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+    gc.blendingDisable();
 
-    final boolean visible =
-      KRefractionRenderer.calculateNDCBounds(
-        this.bounds_cache,
-        this.bounds_tri_cache,
-        this.matrix_context,
-        mi,
-        mesh,
-        this.ndc_bounds_lower,
-        this.ndc_bounds_upper);
+    final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthUsableType> temporary =
+      this.rgba_cache.bluCacheGet(scene.rgbaGetDescription());
 
-    if (visible == true) {
-      final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-      gc.blendingDisable();
+    try {
+      final KFramebufferRGBAWithDepthUsableType scene_copy =
+        temporary.getValue();
 
-      KRefractionRenderer.calculateWindowBounds(
+      this.copier.copierCopyRGBAOnly(
+        scene,
         scene.kFramebufferGetArea(),
-        this.ndc_bounds_lower,
-        this.ndc_bounds_upper,
-        this.window_bounds_lower,
-        this.window_bounds_upper);
+        scene_copy,
+        scene.kFramebufferGetArea());
 
-      final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthUsableType> temporary =
-        this.rgba_cache.bluCacheGet(scene.rgbaGetDescription());
+      final KMaterialTranslucentRefractive material = r.getMaterial();
 
-      try {
-        final float lo_x = this.window_bounds_lower.getXF();
-        final float hi_x = this.window_bounds_upper.getXF();
-        final float lo_y = this.window_bounds_lower.getYF();
-        final float hi_y = this.window_bounds_upper.getYF();
-
-        final RangeInclusiveL range_x =
-          new RangeInclusiveL((long) lo_x, (long) hi_x);
-        final RangeInclusiveL range_y =
-          new RangeInclusiveL((long) lo_y, (long) hi_y);
-        final AreaInclusive window_bounds_area =
-          new AreaInclusive(range_x, range_y);
-
-        this.copier.copierCopyRGBAWithDepth(
-          scene,
-          window_bounds_area,
-          temporary.getValue(),
-          window_bounds_area);
-
-        final KMaterialTranslucentRefractive material = r.getMaterial();
-
-        material.getRefractive().refractiveAccept(
-          new KMaterialRefractiveVisitorType<Unit, JCGLException>() {
-            @Override public Unit masked(
-              final KMaterialRefractiveMasked m)
-              throws RException,
-                JCGLException
-            {
-              try {
-                KRefractionRenderer
-                  .rendererRefractionEvaluateForInstanceMasked(
-                    KRefractionRenderer.this.g,
-                    KRefractionRenderer.this.rgba_cache,
-                    KRefractionRenderer.this.shader_cache,
-                    KRefractionRenderer.this.texture_units,
-                    KRefractionRenderer.this.copier,
-                    scene,
-                    temporary.getValue(),
-                    r,
-                    mi,
-                    window_bounds_area);
-                return Unit.unit();
-              } catch (final JCacheException e) {
-                throw new UnreachableCodeException(e);
-              }
+      material.getRefractive().refractiveAccept(
+        new KMaterialRefractiveVisitorType<Unit, JCGLException>() {
+          @Override public Unit masked(
+            final KMaterialRefractiveMasked m)
+            throws RException,
+              JCGLException
+          {
+            try {
+              KRefractionRenderer
+                .rendererRefractionEvaluateForInstanceMasked(
+                  KRefractionRenderer.this.g,
+                  KRefractionRenderer.this.rgba_cache,
+                  KRefractionRenderer.this.shader_cache,
+                  KRefractionRenderer.this.texture_units,
+                  KRefractionRenderer.this.copier,
+                  scene,
+                  scene_copy,
+                  r,
+                  mi);
+              return Unit.unit();
+            } catch (final JCacheException e) {
+              throw new UnreachableCodeException(e);
             }
+          }
 
-            @Override public Unit unmasked(
-              final KMaterialRefractiveUnmasked m)
-              throws RException,
-                JCGLException
-            {
-              try {
-                KRefractionRenderer
-                  .rendererRefractionEvaluateForInstanceUnmasked(
-                    KRefractionRenderer.this.g,
-                    KRefractionRenderer.this.shader_cache,
-                    KRefractionRenderer.this.texture_units,
-                    scene,
-                    temporary.getValue(),
-                    r,
-                    mi);
-                return Unit.unit();
-              } catch (final JCacheException e) {
-                throw new UnreachableCodeException(e);
-              }
+          @Override public Unit unmasked(
+            final KMaterialRefractiveUnmasked m)
+            throws RException,
+              JCGLException
+          {
+            try {
+              KRefractionRenderer
+                .rendererRefractionEvaluateForInstanceUnmasked(
+                  KRefractionRenderer.this.g,
+                  KRefractionRenderer.this.shader_cache,
+                  KRefractionRenderer.this.texture_units,
+                  scene,
+                  scene_copy,
+                  r,
+                  mi);
+              return Unit.unit();
+            } catch (final JCacheException e) {
+              throw new UnreachableCodeException(e);
             }
-          });
+          }
+        });
 
-        this.copier.copierCopyRGBAWithDepth(
-          temporary.getValue(),
-          window_bounds_area,
-          scene,
-          window_bounds_area);
-
-      } finally {
-        temporary.returnToCache();
-      }
-
-      gc.framebufferDrawBind(scene.rgbaGetColorFramebuffer());
+    } finally {
+      temporary.returnToCache();
     }
   }
 }
