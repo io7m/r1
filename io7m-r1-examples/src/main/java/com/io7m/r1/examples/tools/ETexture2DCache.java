@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -79,7 +79,11 @@ public final class ETexture2DCache
     message.setLength(0);
     message.append("Loading texture from ");
     message.append(name);
-    this.glog.debug(message.toString());
+    {
+      final String s = message.toString();
+      assert s != null;
+      this.glog.debug(s);
+    }
 
     final String file = String.format("/com/io7m/r1/examples/%s", name);
     final InputStream stream =
@@ -132,7 +136,7 @@ public final class ETexture2DCache
       JCGLException
   {
     if (this.textures.containsKey(name)) {
-      return this.textures.get(name);
+      return NullCheck.notNull(this.textures.get(name));
     }
 
     final TextureWrapS wrap_s = TextureWrapS.TEXTURE_WRAP_REPEAT;
@@ -160,7 +164,7 @@ public final class ETexture2DCache
       JCGLException
   {
     if (this.textures.containsKey(name)) {
-      return this.textures.get(name);
+      return NullCheck.notNull(this.textures.get(name));
     }
 
     final TextureWrapS wrap_s = TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE;

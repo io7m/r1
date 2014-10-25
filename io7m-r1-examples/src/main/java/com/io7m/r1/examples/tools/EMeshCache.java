@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -106,19 +106,22 @@ public final class EMeshCache
     throws RException
   {
     if (this.meshes.containsKey(name)) {
-      return this.meshes.get(name);
+      return NullCheck.notNull(this.meshes.get(name));
     }
 
     final StringBuilder message = new StringBuilder();
     message.setLength(0);
     message.append("Loading mesh from ");
     message.append(name);
-    this.glog.debug(message.toString());
+    {
+      final String s = message.toString();
+      assert s != null;
+      this.glog.debug(s);
+    }
 
     final JCGLImplementationType g = this.gi;
     assert g != null;
     final JCGLInterfaceCommonType gl = g.getGLCommon();
-
     InputStream stream = null;
 
     try {
@@ -145,17 +148,29 @@ public final class EMeshCache
       message.setLength(0);
       message.append("Loaded mesh ");
       message.append(name);
-      this.glog.debug(message.toString());
+      {
+        final String s = message.toString();
+        assert s != null;
+        this.glog.debug(s);
+      }
 
       message.setLength(0);
       message.append("Mesh lower bound: ");
       message.append(km.meshGetBoundsLower());
-      this.glog.debug(message.toString());
+      {
+        final String s = message.toString();
+        assert s != null;
+        this.glog.debug(s);
+      }
 
       message.setLength(0);
       message.append("Mesh upper bound: ");
       message.append(km.meshGetBoundsUpper());
-      this.glog.debug(message.toString());
+      {
+        final String s = message.toString();
+        assert s != null;
+        this.glog.debug(s);
+      }
 
       return km;
     } catch (final JCGLException e) {
