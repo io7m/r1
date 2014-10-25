@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -38,8 +38,6 @@ import com.io7m.r1.rmb.RBImporter;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionIO;
 import com.io7m.r1.types.RExceptionJCGL;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RVectorI3F;
 import com.io7m.r1.xml.rmx.RXMLMeshDocument;
 import com.io7m.r1.xml.rmx.RXMLMeshParser;
 
@@ -140,32 +138,12 @@ public final class EMeshCache
 
       final ArrayBufferType array = events.getArray();
       final IndexBufferType index = events.getIndices();
-      final RVectorI3F<RSpaceObjectType> lower = events.getBoundsLower();
-      final RVectorI3F<RSpaceObjectType> upper = events.getBoundsUpper();
-      final KMesh km = KMesh.newMesh(array, index, lower, upper);
+      final KMesh km = KMesh.newMesh(array, index);
       this.meshes.put(name, km);
 
       message.setLength(0);
       message.append("Loaded mesh ");
       message.append(name);
-      {
-        final String s = message.toString();
-        assert s != null;
-        this.glog.debug(s);
-      }
-
-      message.setLength(0);
-      message.append("Mesh lower bound: ");
-      message.append(km.meshGetBoundsLower());
-      {
-        final String s = message.toString();
-        assert s != null;
-        this.glog.debug(s);
-      }
-
-      message.setLength(0);
-      message.append("Mesh upper bound: ");
-      message.append(km.meshGetBoundsUpper());
       {
         final String s = message.toString();
         assert s != null;

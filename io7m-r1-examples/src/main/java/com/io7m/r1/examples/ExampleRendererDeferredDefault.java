@@ -37,10 +37,6 @@ import com.io7m.r1.kernel.KFramebufferDepthVarianceCache;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCache;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCacheType;
-import com.io7m.r1.kernel.KMeshBoundsCache;
-import com.io7m.r1.kernel.KMeshBoundsCacheType;
-import com.io7m.r1.kernel.KMeshBoundsTrianglesCache;
-import com.io7m.r1.kernel.KMeshBoundsTrianglesCacheType;
 import com.io7m.r1.kernel.KPostprocessorBlurDepthVariance;
 import com.io7m.r1.kernel.KPostprocessorBlurDepthVarianceType;
 import com.io7m.r1.kernel.KRefractionRenderer;
@@ -77,7 +73,6 @@ import com.io7m.r1.kernel.types.KUnitSphereCacheType;
 import com.io7m.r1.kernel.types.KVisibleSet;
 import com.io7m.r1.rmb.RBUnitSphereResourceCache;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceObjectType;
 
 /**
  * An example renderer using the default deferred renderer.
@@ -227,24 +222,12 @@ public final class ExampleRendererDeferredDefault extends
         rgba_cache_config,
         log);
 
-    final LRUCacheConfig bounds_cache_config =
-      LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(1024));
-    final KMeshBoundsCacheType<RSpaceObjectType> bounds_cache =
-      KMeshBoundsCache.newCacheWithConfig(bounds_cache_config);
-
-    final LRUCacheConfig bounds_triangle_cache_config =
-      LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(1024));
-    final KMeshBoundsTrianglesCacheType<RSpaceObjectType> bounds_tri_cache =
-      KMeshBoundsTrianglesCache.newCache(bounds_triangle_cache_config);
-
     final KRefractionRendererType refraction_renderer =
       KRefractionRenderer.newRenderer(
         gi,
         copier,
         in_shader_translucent_unlit_cache,
-        rgba_cache,
-        bounds_cache,
-        bounds_tri_cache);
+        rgba_cache);
 
     final KFrustumMeshCacheType frustum_cache =
       KFrustumMeshCache.newCacheWithCapacity(

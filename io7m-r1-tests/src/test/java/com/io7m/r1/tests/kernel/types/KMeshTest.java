@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -36,8 +36,6 @@ import com.io7m.r1.types.RExceptionMeshMissingNormals;
 import com.io7m.r1.types.RExceptionMeshMissingPositions;
 import com.io7m.r1.types.RExceptionMeshMissingTangents;
 import com.io7m.r1.types.RExceptionMeshMissingUVs;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RVectorI3F;
 
 @SuppressWarnings("static-method") public final class KMeshTest
 {
@@ -63,14 +61,9 @@ import com.io7m.r1.types.RVectorI3F;
         1,
         UsageHint.USAGE_STATIC_DRAW);
 
-    final RVectorI3F<RSpaceObjectType> lower = RVectorI3F.zero();
-    final RVectorI3F<RSpaceObjectType> upper = RVectorI3F.zero();
-
-    final KMesh k = KMesh.newMesh(array, indices, lower, upper);
+    final KMesh k = KMesh.newMesh(array, indices);
     Assert.assertEquals(array, k.meshGetArrayBuffer());
     Assert.assertEquals(indices, k.meshGetIndexBuffer());
-    Assert.assertEquals(lower, k.meshGetBoundsLower());
-    Assert.assertEquals(upper, k.meshGetBoundsUpper());
     Assert.assertFalse(k.resourceIsDeleted());
 
     k.delete(gc);
@@ -101,10 +94,7 @@ import com.io7m.r1.types.RVectorI3F;
         1,
         UsageHint.USAGE_STATIC_DRAW);
 
-    final RVectorI3F<RSpaceObjectType> lower = RVectorI3F.zero();
-    final RVectorI3F<RSpaceObjectType> upper = RVectorI3F.zero();
-
-    KMesh.newMesh(array, indices, lower, upper);
+    KMesh.newMesh(array, indices);
   }
 
   @Test(expected = RExceptionMeshMissingPositions.class) public
@@ -130,10 +120,7 @@ import com.io7m.r1.types.RVectorI3F;
         1,
         UsageHint.USAGE_STATIC_DRAW);
 
-    final RVectorI3F<RSpaceObjectType> lower = RVectorI3F.zero();
-    final RVectorI3F<RSpaceObjectType> upper = RVectorI3F.zero();
-
-    KMesh.newMesh(array, indices, lower, upper);
+    KMesh.newMesh(array, indices);
   }
 
   @Test(expected = RExceptionMeshMissingTangents.class) public
@@ -159,10 +146,7 @@ import com.io7m.r1.types.RVectorI3F;
         1,
         UsageHint.USAGE_STATIC_DRAW);
 
-    final RVectorI3F<RSpaceObjectType> lower = RVectorI3F.zero();
-    final RVectorI3F<RSpaceObjectType> upper = RVectorI3F.zero();
-
-    KMesh.newMesh(array, indices, lower, upper);
+    KMesh.newMesh(array, indices);
   }
 
   @Test(expected = RExceptionMeshMissingUVs.class) public
@@ -188,9 +172,6 @@ import com.io7m.r1.types.RVectorI3F;
         1,
         UsageHint.USAGE_STATIC_DRAW);
 
-    final RVectorI3F<RSpaceObjectType> lower = RVectorI3F.zero();
-    final RVectorI3F<RSpaceObjectType> upper = RVectorI3F.zero();
-
-    KMesh.newMesh(array, indices, lower, upper);
+    KMesh.newMesh(array, indices);
   }
 }
