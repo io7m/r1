@@ -31,6 +31,14 @@ import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 import com.io7m.jcache.JCacheException;
+import com.io7m.jcamera.JCameraFPSStyle;
+import com.io7m.jcamera.JCameraFPSStyleIntegrator;
+import com.io7m.jcamera.JCameraFPSStyleIntegratorType;
+import com.io7m.jcamera.JCameraFPSStyleType;
+import com.io7m.jcamera.JCameraInput;
+import com.io7m.jcamera.JCameraMouseRegion;
+import com.io7m.jcamera.JCameraRotationCoefficients;
+import com.io7m.jcamera.JCameraScreenOrigin;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.FaceSelection;
@@ -55,6 +63,7 @@ import com.io7m.jlog.LogType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -83,6 +92,7 @@ import com.io7m.r1.kernel.KFramebufferRGBAUsableType;
 import com.io7m.r1.kernel.KProgramType;
 import com.io7m.r1.kernel.KShaderCachePostprocessingType;
 import com.io7m.r1.kernel.KShadingProgramCommon;
+import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KDepthPrecision;
 import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
 import com.io7m.r1.kernel.types.KFramebufferForwardDescription;
@@ -106,21 +116,187 @@ import com.io7m.r1.types.RExceptionBuilderInvalid;
 import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
 import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionLightGroupAlreadyAdded;
+import com.io7m.r1.types.RMatrixI4x4F;
+import com.io7m.r1.types.RTransformViewType;
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.KeyListener;
+import com.jogamp.newt.event.MouseAdapter;
+import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.FPSAnimator;
 
-final class ViewerSingleMainWindow implements Runnable
+@SuppressWarnings("synthetic-access") final class ViewerSingleMainWindow implements
+  Runnable
 {
-  static final int                  CLEAR_STENCIL;
-  static final VectorReadable4FType CLEAR_COLOR;
-  static final float                CLEAR_DEPTH;
+  protected static final int FRAMES_PER_SECOND = 60;
 
-  static {
-    CLEAR_STENCIL = 0;
-    CLEAR_COLOR = new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f);
-    CLEAR_DEPTH = 1.0f;
+  private final class ViewerSingleMainMouseListener extends MouseAdapter
+  {
+    public ViewerSingleMainMouseListener()
+    {
+      this.coefficients = new JCameraRotationCoefficients();
+    }
+
+    private final JCameraRotationCoefficients coefficients;
+
+    @Override public void mouseMoved(
+      final @Nullable MouseEvent e)
+    {
+      assert e != null;
+
+      final Runner r = ViewerSingleMainWindow.this.runner;
+      if (r == null) {
+        return;
+      }
+
+      if (r.mouseViewIsEnabled()) {
+        final JCameraMouseRegion mr =
+          ViewerSingleMainWindow.this.mouse_region;
+
+        final float x = e.getX();
+        final float y = e.getY();
+
+        mr.getCoefficients(x, y, this.coefficients);
+
+        final JCameraInput input = r.getFPSCameraInput();
+        input.addRotationAroundHorizontal(this.coefficients.getHorizontal());
+        input.addRotationAroundVertical(this.coefficients.getVertical());
+      }
+    }
+  }
+
+  private final class ViewerSingleMainKeyListener implements KeyListener
+  {
+    private final GLWindow window;
+
+    public ViewerSingleMainKeyListener(
+      final GLWindow in_window)
+    {
+      this.window = in_window;
+    }
+
+    @Override public void keyPressed(
+      final @Nullable KeyEvent e)
+    {
+      assert e != null;
+
+      final Runner r = ViewerSingleMainWindow.this.runner;
+      if (r == null) {
+        return;
+      }
+
+      final JCameraInput input = r.getFPSCameraInput();
+      final short code = e.getKeyCode();
+
+      switch (code) {
+        case KeyEvent.VK_A:
+        {
+          input.setMovingLeft(true);
+          break;
+        }
+        case KeyEvent.VK_D:
+        {
+          input.setMovingRight(true);
+          break;
+        }
+        case KeyEvent.VK_W:
+        {
+          input.setMovingForward(true);
+          break;
+        }
+        case KeyEvent.VK_S:
+        {
+          input.setMovingBackward(true);
+          break;
+        }
+        case KeyEvent.VK_F:
+        {
+          input.setMovingUp(true);
+          break;
+        }
+        case KeyEvent.VK_V:
+        {
+          input.setMovingDown(true);
+          break;
+        }
+      }
+    }
+
+    @Override public void keyReleased(
+      final @Nullable KeyEvent e)
+    {
+      assert e != null;
+
+      final Runner r = ViewerSingleMainWindow.this.runner;
+      if (r == null) {
+        return;
+      }
+
+      final JCameraInput input = r.getFPSCameraInput();
+      final short code = e.getKeyCode();
+      switch (code) {
+        case KeyEvent.VK_A:
+        {
+          input.setMovingLeft(false);
+          break;
+        }
+        case KeyEvent.VK_D:
+        {
+          input.setMovingRight(false);
+          break;
+        }
+        case KeyEvent.VK_W:
+        {
+          input.setMovingForward(false);
+          break;
+        }
+        case KeyEvent.VK_S:
+        {
+          input.setMovingBackward(false);
+          break;
+        }
+        case KeyEvent.VK_F:
+        {
+          input.setMovingUp(false);
+          break;
+        }
+        case KeyEvent.VK_V:
+        {
+          input.setMovingDown(false);
+          break;
+        }
+        case KeyEvent.VK_N:
+        {
+          r.nextViewIndex();
+          break;
+        }
+        case KeyEvent.VK_P:
+        {
+          r.previousViewIndex();
+          break;
+        }
+        case KeyEvent.VK_M:
+        {
+          if (r.mouseViewIsEnabled()) {
+            r.mouseViewDisable();
+            this.window.confinePointer(false);
+            this.window.setPointerVisible(true);
+          } else {
+            r.mouseViewEnable();
+            input.setRotationHorizontal(0.0f);
+            input.setRotationVertical(0.0f);
+            this.window.warpPointer(
+              this.window.getWidth() / 2,
+              this.window.getHeight() / 2);
+            this.window.confinePointer(true);
+            this.window.setPointerVisible(false);
+          }
+          break;
+        }
+      }
+    }
   }
 
   private static final class Runner
@@ -157,17 +333,24 @@ final class ViewerSingleMainWindow implements Runnable
       }
     }
 
-    private final ETexture2DCache          cache_2d;
-    private final ETextureCubeCache        cache_cube;
-    private final EMeshCache               cache_mesh;
-    private final ExampleSceneType         example;
-    private final KFramebufferDeferredType framebuffer;
-    private final JCGLImplementationType   gi;
-    private final TextureLoaderType        loader;
-    private final KUnitQuad                quad;
-    private final ExampleRendererType      renderer;
-    private int                            view_index;
-    private final VShaderCaches            shader_caches;
+    private final ETexture2DCache               cache_2d;
+    private final ETextureCubeCache             cache_cube;
+    private final EMeshCache                    cache_mesh;
+    private final ExampleSceneType              example;
+    private final JCameraFPSStyleType           fps_camera;
+    private final JCameraFPSStyleIntegratorType fps_camera_integrator;
+    private final KFramebufferDeferredType      framebuffer;
+    private final JCGLImplementationType        gi;
+    private final TextureLoaderType             loader;
+    private LogUsableType                       log;
+    private final MatrixM4x4F                   matrix_view_temporary;
+    private final MatrixM4x4F.Context           matrix_context;
+    private boolean                             mouse_view;
+    private final KUnitQuad                     quad;
+    private final ExampleRendererType           renderer;
+    private final VShaderCaches                 shader_caches;
+    private int                                 view_index;
+    private JCameraInput                        fps_camera_input;
 
     Runner(
       final GLAutoDrawable drawable,
@@ -189,6 +372,35 @@ final class ViewerSingleMainWindow implements Runnable
       this.cache_mesh = new EMeshCache(in_gi, in_log);
       this.quad = KUnitQuad.newQuad(in_gi.getGLCommon(), in_log);
       this.shader_caches = in_shader_caches;
+      this.mouse_view = false;
+      this.log = in_log;
+
+      this.matrix_view_temporary = new MatrixM4x4F();
+      this.matrix_context = new MatrixM4x4F.Context();
+
+      this.fps_camera = JCameraFPSStyle.newCamera();
+      this.fps_camera.cameraSetPosition3f(0.0f, 3.0f, 1.0f);
+
+      this.fps_camera_input = JCameraInput.newInput();
+
+      this.fps_camera_integrator =
+        JCameraFPSStyleIntegrator.newIntegrator(
+          this.fps_camera,
+          this.fps_camera_input);
+
+      this.fps_camera_integrator
+        .integratorAngularSetDragHorizontal(0.000000001f);
+      this.fps_camera_integrator
+        .integratorAngularSetDragVertical(0.000000001f);
+      this.fps_camera_integrator
+        .integratorAngularSetAccelerationHorizontal((float) ((Math.PI / 12) / (1.0 / 60.0)));
+      this.fps_camera_integrator
+        .integratorAngularSetAccelerationVertical((float) ((Math.PI / 12) / (1.0 / 60.0)));
+
+      this.fps_camera_integrator
+        .integratorLinearSetAcceleration((float) (3.0 / (1.0 / 60.0)));
+      this.fps_camera_integrator.integratorLinearSetMaximumSpeed(3.0f);
+      this.fps_camera_integrator.integratorLinearSetDrag(0.000000001f);
 
       final KUnitQuadCacheType quad_cache =
         KUnitQuadCache.newCache(in_gi.getGLCommon(), in_log);
@@ -247,11 +459,14 @@ final class ViewerSingleMainWindow implements Runnable
       this.framebuffer =
         this.renderer
           .rendererAccept(new ExampleRendererVisitorType<KFramebufferDeferredType>() {
-            @Override public KFramebufferDeferredType visitDeferred(
-              final ExampleRendererDeferredType r)
-              throws RException
+            private AreaInclusive makeArea()
             {
-              return this.makeDeferred();
+              final RangeInclusiveL range_x =
+                new RangeInclusiveL(0, drawable.getWidth() - 1);
+              final RangeInclusiveL range_y =
+                new RangeInclusiveL(0, drawable.getHeight() - 1);
+              final AreaInclusive area = new AreaInclusive(range_x, range_y);
+              return area;
             }
 
             private KFramebufferDeferredType makeDeferred()
@@ -280,23 +495,61 @@ final class ViewerSingleMainWindow implements Runnable
                   depth_description));
             }
 
-            private AreaInclusive makeArea()
-            {
-              final RangeInclusiveL range_x =
-                new RangeInclusiveL(0, drawable.getWidth() - 1);
-              final RangeInclusiveL range_y =
-                new RangeInclusiveL(0, drawable.getHeight() - 1);
-              final AreaInclusive area = new AreaInclusive(range_x, range_y);
-              return area;
-            }
-
             @Override public KFramebufferDeferredType visitDebug(
               final ExampleRendererDebugType r)
               throws RException
             {
               return this.makeDeferred();
             }
+
+            @Override public KFramebufferDeferredType visitDeferred(
+              final ExampleRendererDeferredType r)
+              throws RException
+            {
+              return this.makeDeferred();
+            }
           });
+    }
+
+    public JCameraInput getFPSCameraInput()
+    {
+      return this.fps_camera_integrator.integratorGetInput();
+    }
+
+    public void mouseViewDisable()
+    {
+      this.log.debug("mouse view disabled");
+      this.mouse_view = false;
+    }
+
+    public void mouseViewEnable()
+    {
+      this.log.debug("mouse view enabled");
+      this.mouse_view = true;
+    }
+
+    public boolean mouseViewIsEnabled()
+    {
+      return this.mouse_view;
+    }
+
+    public void nextViewIndex()
+    {
+      final List<ExampleViewType> views = this.example.exampleViewpoints();
+      this.view_index = (this.view_index + 1) % views.size();
+      this.log.debug("view index: " + this.view_index);
+    }
+
+    public void previousViewIndex()
+    {
+      final List<ExampleViewType> views = this.example.exampleViewpoints();
+
+      if (this.view_index == 0) {
+        this.view_index = views.size() - 1;
+      } else {
+        this.view_index = this.view_index - 1;
+      }
+      this.log.debug("view index: " + this.view_index);
     }
 
     private void renderSceneResults(
@@ -340,6 +593,7 @@ final class ViewerSingleMainWindow implements Runnable
           {
             final List<TextureUnitType> units = gc.textureGetUnits();
             final TextureUnitType unit = units.get(0);
+            assert unit != null;
 
             gc.texture2DStaticBind(unit, fb.rgbaGetTexture());
             p.programUniformPutTextureUnit("t_image", unit);
@@ -355,10 +609,27 @@ final class ViewerSingleMainWindow implements Runnable
     public void run()
       throws RException
     {
-      final ExampleViewType view =
-        this.example.exampleViewpoints().get(this.view_index);
-      final KVisibleSetBuilderWithCreateType scene_builder =
-        KVisibleSet.newBuilder(view.getCamera());
+      final List<ExampleViewType> viewpoints =
+        this.example.exampleViewpoints();
+      final ExampleViewType view = viewpoints.get(this.view_index);
+
+      final KCamera view_camera = view.getCamera();
+      final KVisibleSetBuilderWithCreateType scene_builder;
+      if (this.mouse_view) {
+        this.fps_camera_integrator
+          .integrate(1.0f / ViewerSingleMainWindow.FRAMES_PER_SECOND);
+        this.fps_camera.cameraMakeViewMatrix(
+          this.matrix_context,
+          this.matrix_view_temporary);
+
+        final RMatrixI4x4F<RTransformViewType> m =
+          RMatrixI4x4F.newFromReadable(this.matrix_view_temporary);
+
+        final KCamera kc = KCamera.newCamera(m, view_camera.getProjection());
+        scene_builder = KVisibleSet.newBuilder(kc);
+      } else {
+        scene_builder = KVisibleSet.newBuilder(view_camera);
+      }
 
       final ExampleSceneBuilderType b = new ExampleSceneBuilderType() {
         @Override public TextureCubeStaticUsableType cubeTextureClamped(
@@ -366,7 +637,26 @@ final class ViewerSingleMainWindow implements Runnable
           throws RException
         {
           try {
-            return Runner.this.cache_cube.loadCubeClamped(name);
+            final ETextureCubeCache cc = Runner.this.cache_cube;
+            assert cc != null;
+            return cc.loadCubeClamped(name);
+          } catch (final ValidityException e) {
+            throw new RuntimeException(e);
+          } catch (final IOException e) {
+            throw new RuntimeException(e);
+          } catch (final JCGLException e) {
+            throw new RuntimeException(e);
+          } catch (final ParsingException e) {
+            throw new RuntimeException(e);
+          }
+        }
+
+        @Override public TextureCubeStaticUsableType cubeTextureRepeated(
+          final String name)
+          throws RException
+        {
+          try {
+            return Runner.this.cache_cube.loadCubeRepeat(name);
           } catch (final ValidityException e) {
             throw new RuntimeException(e);
           } catch (final IOException e) {
@@ -407,23 +697,6 @@ final class ViewerSingleMainWindow implements Runnable
           } catch (final IOException e) {
             throw new RuntimeException(e);
           } catch (final JCGLException e) {
-            throw new RuntimeException(e);
-          }
-        }
-
-        @Override public TextureCubeStaticUsableType cubeTextureRepeated(
-          final String name)
-          throws RException
-        {
-          try {
-            return Runner.this.cache_cube.loadCubeRepeat(name);
-          } catch (final ValidityException e) {
-            throw new RuntimeException(e);
-          } catch (final IOException e) {
-            throw new RuntimeException(e);
-          } catch (final JCGLException e) {
-            throw new RuntimeException(e);
-          } catch (final ParsingException e) {
             throw new RuntimeException(e);
           }
         }
@@ -480,32 +753,6 @@ final class ViewerSingleMainWindow implements Runnable
       this.example.exampleScene(b);
 
       this.renderer.rendererAccept(new ExampleRendererVisitorType<Unit>() {
-        @Override public Unit visitDeferred(
-          final ExampleRendererDeferredType rd)
-          throws RException
-        {
-          try {
-            final KVisibleSet sc = scene_builder.visibleCreate();
-
-            final KFramebufferDeferredType fb = Runner.this.framebuffer;
-            assert fb != null;
-            fb.deferredFramebufferClear(
-              Runner.this.gi.getGLCommon(),
-              ViewerSingleMainWindow.CLEAR_COLOR,
-              ViewerSingleMainWindow.CLEAR_DEPTH,
-              ViewerSingleMainWindow.CLEAR_STENCIL);
-
-            rd.rendererDeferredEvaluateFull(fb, sc);
-            Runner.this.renderSceneResults(fb);
-
-            return Unit.unit();
-          } catch (final JCGLException e) {
-            throw RExceptionJCGL.fromJCGLException(e);
-          } catch (final JCacheException e) {
-            throw new UnreachableCodeException(e);
-          }
-        }
-
         @Override public Unit visitDebug(
           final ExampleRendererDebugType rd)
           throws RException
@@ -531,21 +778,52 @@ final class ViewerSingleMainWindow implements Runnable
             throw new UnreachableCodeException(e);
           }
         }
+
+        @Override public Unit visitDeferred(
+          final ExampleRendererDeferredType rd)
+          throws RException
+        {
+          try {
+            final KVisibleSet sc = scene_builder.visibleCreate();
+
+            final KFramebufferDeferredType fb = Runner.this.framebuffer;
+            assert fb != null;
+            fb.deferredFramebufferClear(
+              Runner.this.gi.getGLCommon(),
+              ViewerSingleMainWindow.CLEAR_COLOR,
+              ViewerSingleMainWindow.CLEAR_DEPTH,
+              ViewerSingleMainWindow.CLEAR_STENCIL);
+
+            rd.rendererDeferredEvaluateFull(fb, sc);
+            Runner.this.renderSceneResults(fb);
+
+            return Unit.unit();
+          } catch (final JCGLException e) {
+            throw RExceptionJCGL.fromJCGLException(e);
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
+          }
+        }
       });
     }
+  }
 
-    public void setViewIndex(
-      final int index)
-    {
-      final List<ExampleViewType> views = this.example.exampleViewpoints();
-      this.view_index = index % views.size();
-    }
+  static final VectorReadable4FType            CLEAR_COLOR;
+  static final float                           CLEAR_DEPTH;
+  static final int                             CLEAR_STENCIL;
+
+  static {
+    CLEAR_STENCIL = 0;
+    CLEAR_COLOR = new VectorI4F(0.0f, 0.0f, 0.0f, 0.0f);
+    CLEAR_DEPTH = 1.0f;
   }
 
   private final ViewerConfig                   config;
   private final ExampleSceneType               example;
   private final LogType                        log;
   private final ExampleRendererConstructorType renderer;
+  private @Nullable Runner                     runner;
+  private final JCameraMouseRegion             mouse_region;
 
   public ViewerSingleMainWindow(
     final ViewerConfig in_config,
@@ -560,6 +838,11 @@ final class ViewerSingleMainWindow implements Runnable
     this.log = in_log;
     this.renderer = ExampleRenderers.getRenderer(renderer_name);
     this.example = ExampleClasses.getScene(example_name);
+    this.mouse_region =
+      JCameraMouseRegion.newRegion(
+        JCameraScreenOrigin.SCREEN_ORIGIN_TOP_LEFT,
+        640.0f,
+        480.0f);
   }
 
   @Override public void run()
@@ -570,17 +853,22 @@ final class ViewerSingleMainWindow implements Runnable
 
     window.setSize(640, 480);
     window.addGLEventListener(new GLEventListener() {
-      private int              frames;
-      private @Nullable Runner runner;
-
       @Override public void display(
         @Nullable final GLAutoDrawable drawable)
       {
         try {
-          final Runner r = this.runner;
+          assert drawable != null;
+
+          final Runner r = ViewerSingleMainWindow.this.runner;
           assert r != null;
           r.run();
-          ++this.frames;
+
+          if (r.mouseViewIsEnabled()) {
+            final JCameraMouseRegion mr =
+              ViewerSingleMainWindow.this.mouse_region;
+            window.warpPointer((int) mr.getCenterX(), (int) mr.getCenterY());
+          }
+
         } catch (final Exception e) {
           throw new RuntimeException(e);
         }
@@ -597,6 +885,7 @@ final class ViewerSingleMainWindow implements Runnable
       {
         try {
           assert drawable != null;
+
           final GLContext ctx = drawable.getContext();
           assert ctx != null;
 
@@ -611,7 +900,7 @@ final class ViewerSingleMainWindow implements Runnable
               ViewerSingleMainWindow.this.config,
               ViewerSingleMainWindow.this.log);
 
-          this.runner =
+          ViewerSingleMainWindow.this.runner =
             new Runner(
               drawable,
               gi,
@@ -635,7 +924,10 @@ final class ViewerSingleMainWindow implements Runnable
         final int width,
         final int height)
       {
-
+        final JCameraMouseRegion mr =
+          ViewerSingleMainWindow.this.mouse_region;
+        mr.setHeight(height);
+        mr.setWidth(width);
       }
     });
 
@@ -648,12 +940,16 @@ final class ViewerSingleMainWindow implements Runnable
       }
     });
 
+    window.addMouseListener(new ViewerSingleMainMouseListener());
+    window.addKeyListener(new ViewerSingleMainKeyListener(window));
     window.setDefaultCloseOperation(WindowClosingMode.DISPOSE_ON_CLOSE);
     window.setVisible(true);
 
-    final int fps = 30;
-    final FPSAnimator anim = new FPSAnimator(fps);
-    anim.setUpdateFPSFrames(fps, System.err);
+    final FPSAnimator anim =
+      new FPSAnimator(ViewerSingleMainWindow.FRAMES_PER_SECOND);
+    anim.setUpdateFPSFrames(
+      ViewerSingleMainWindow.FRAMES_PER_SECOND,
+      System.err);
     anim.add(window);
     anim.start();
   }

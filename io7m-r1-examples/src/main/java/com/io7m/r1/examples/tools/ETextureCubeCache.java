@@ -19,11 +19,14 @@ package com.io7m.r1.examples.tools;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import nu.xom.Builder;
 import nu.xom.Document;
+import nu.xom.Element;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
@@ -55,35 +58,7 @@ import com.io7m.r1.xml.cubemap.CubeMap;
 
 public final class ETextureCubeCache
 {
-  private final Map<String, TextureCubeStaticUsableType> cube_textures;
-  private final JCGLImplementationType                   gi;
-  private final LogUsableType                            glog;
-  private final TextureLoaderType                        texture_loader;
-
-  /**
-   * Initialize the cache.
-   *
-   * @param in_gi
-   *          A GL interface.
-   * @param in_texture_loader
-   *          A texture loader.
-   * @param in_log
-   *          A log interface.
-   */
-
-  public ETextureCubeCache(
-    final JCGLImplementationType in_gi,
-    final TextureLoaderType in_texture_loader,
-    final LogUsableType in_log)
-  {
-    this.gi = NullCheck.notNull(in_gi, "GL");
-    this.glog = NullCheck.notNull(in_log, "Log").with("cube-cache");
-    this.texture_loader =
-      NullCheck.notNull(in_texture_loader, "Texture loader");
-    this.cube_textures = new HashMap<String, TextureCubeStaticUsableType>();
-  }
-
-  private TextureCubeStaticType loadCubeActual(
+  private static TextureCubeStaticType loadCubeActual(
     final String name,
     final TextureWrapR wrap_r,
     final TextureWrapS wrap_s,
@@ -113,6 +88,145 @@ public final class ETextureCubeCache
       positive_x,
       negative_x,
       name);
+  }
+
+  @SuppressWarnings("resource") private static
+    CubeMapFaceInputStream<CMFNegativeXKind>
+    openNegativeX(
+      final List<InputStream> streams,
+      final String name)
+      throws FileNotFoundException
+  {
+    final InputStream stream =
+      ETextureCubeCache.class.getResourceAsStream(name);
+    if (stream == null) {
+      throw new FileNotFoundException(name);
+    }
+    final CubeMapFaceInputStream<CMFNegativeXKind> r =
+      new CubeMapFaceInputStream<CMFNegativeXKind>(stream);
+    streams.add(r);
+    return r;
+  }
+
+  @SuppressWarnings("resource") private static
+    CubeMapFaceInputStream<CMFNegativeYKind>
+    openNegativeY(
+      final List<InputStream> streams,
+      final String name)
+      throws FileNotFoundException
+  {
+    final InputStream stream =
+      ETextureCubeCache.class.getResourceAsStream(name);
+    if (stream == null) {
+      throw new FileNotFoundException(name);
+    }
+    final CubeMapFaceInputStream<CMFNegativeYKind> r =
+      new CubeMapFaceInputStream<CMFNegativeYKind>(stream);
+    streams.add(r);
+    return r;
+  }
+
+  @SuppressWarnings("resource") private static
+    CubeMapFaceInputStream<CMFNegativeZKind>
+    openNegativeZ(
+      final List<InputStream> streams,
+      final String name)
+      throws FileNotFoundException
+  {
+    final InputStream stream =
+      ETextureCubeCache.class.getResourceAsStream(name);
+    if (stream == null) {
+      throw new FileNotFoundException(name);
+    }
+    final CubeMapFaceInputStream<CMFNegativeZKind> r =
+      new CubeMapFaceInputStream<CMFNegativeZKind>(stream);
+    streams.add(r);
+    return r;
+  }
+
+  @SuppressWarnings("resource") private static
+    CubeMapFaceInputStream<CMFPositiveXKind>
+    openPositiveX(
+      final List<InputStream> streams,
+      final String name)
+      throws FileNotFoundException
+  {
+    final InputStream stream =
+      ETextureCubeCache.class.getResourceAsStream(name);
+    if (stream == null) {
+      throw new FileNotFoundException(name);
+    }
+    final CubeMapFaceInputStream<CMFPositiveXKind> r =
+      new CubeMapFaceInputStream<CMFPositiveXKind>(stream);
+    streams.add(r);
+    return r;
+  }
+
+  @SuppressWarnings("resource") private static
+    CubeMapFaceInputStream<CMFPositiveYKind>
+    openPositiveY(
+      final List<InputStream> streams,
+      final String name)
+      throws FileNotFoundException
+  {
+    final InputStream stream =
+      ETextureCubeCache.class.getResourceAsStream(name);
+    if (stream == null) {
+      throw new FileNotFoundException(name);
+    }
+    final CubeMapFaceInputStream<CMFPositiveYKind> r =
+      new CubeMapFaceInputStream<CMFPositiveYKind>(stream);
+    streams.add(r);
+    return r;
+  }
+
+  @SuppressWarnings("resource") private static
+    CubeMapFaceInputStream<CMFPositiveZKind>
+    openPositiveZ(
+      final List<InputStream> streams,
+      final String name)
+      throws FileNotFoundException
+  {
+    final InputStream stream =
+      ETextureCubeCache.class.getResourceAsStream(name);
+    if (stream == null) {
+      throw new FileNotFoundException(name);
+    }
+    final CubeMapFaceInputStream<CMFPositiveZKind> r =
+      new CubeMapFaceInputStream<CMFPositiveZKind>(stream);
+    streams.add(r);
+    return r;
+  }
+
+  private final Map<String, TextureCubeStaticUsableType> cube_textures;
+
+  private final JCGLImplementationType                   gi;
+
+  private final LogUsableType                            glog;
+
+  private final TextureLoaderType                        texture_loader;
+
+  /**
+   * Initialize the cache.
+   *
+   * @param in_gi
+   *          A GL interface.
+   * @param in_texture_loader
+   *          A texture loader.
+   * @param in_log
+   *          A log interface.
+   */
+
+  public ETextureCubeCache(
+    final JCGLImplementationType in_gi,
+    final TextureLoaderType in_texture_loader,
+    final LogUsableType in_log)
+  {
+    this.gi = NullCheck.notNull(in_gi, "GL");
+    this.glog = NullCheck.notNull(in_log, "Log").with("cube-cache");
+    this.texture_loader =
+      NullCheck.notNull(in_texture_loader, "Texture loader");
+    this.cube_textures = new HashMap<String, TextureCubeStaticUsableType>();
   }
 
   /**
@@ -181,16 +295,18 @@ public final class ETextureCubeCache
       TextureWrapT.TEXTURE_WRAP_REPEAT);
   }
 
-  private TextureCubeStaticUsableType loadCubeWithWrap(
-    final String name,
-    final TextureWrapR wrap_r,
-    final TextureWrapS wrap_s,
-    final TextureWrapT wrap_t)
-    throws ParsingException,
-      ValidityException,
-      IOException,
-      RXMLException,
-      JCGLException
+  @SuppressWarnings("resource") private
+    TextureCubeStaticUsableType
+    loadCubeWithWrap(
+      final String name,
+      final TextureWrapR wrap_r,
+      final TextureWrapS wrap_s,
+      final TextureWrapT wrap_t)
+      throws ParsingException,
+        ValidityException,
+        IOException,
+        RXMLException,
+        JCGLException
   {
     /**
      * Store the name along with the wrapping modes in the cache, to allow for
@@ -209,69 +325,76 @@ public final class ETextureCubeCache
 
     final String name_with_wrap_actual = name_with_wrap.toString();
     if (this.cube_textures.containsKey(name_with_wrap_actual)) {
-      return this.cube_textures.get(name_with_wrap_actual);
+      final TextureCubeStaticUsableType r =
+        this.cube_textures.get(name_with_wrap_actual);
+      assert r != null;
+      return r;
     }
 
     final StringBuilder message = new StringBuilder();
     message.setLength(0);
     message.append("Loading texture from ");
     message.append(name);
-    this.glog.debug(message.toString());
+    {
+      final String s = message.toString();
+      assert s != null;
+      this.glog.debug(s);
+    }
 
     final String file = String.format("/com/io7m/r1/examples/%s", name);
     final int last_index = file.lastIndexOf('/');
     assert last_index != -1;
     final String directory = file.substring(0, last_index);
 
-    final InputStream stream =
-      ETextureCubeCache.class.getResourceAsStream(file.toString());
-
-    if (stream == null) {
-      throw new FileNotFoundException(String.format(
-        "Unable to open texture: %s",
-        file));
-    }
+    final List<InputStream> streams = new ArrayList<InputStream>();
 
     try {
+      final InputStream meta_stream =
+        ETextureCubeCache.class.getResourceAsStream(file.toString());
+      if (meta_stream == null) {
+        throw new FileNotFoundException(String.format(
+          "Unable to open texture: %s",
+          file));
+      }
+      streams.add(meta_stream);
+
       final Builder builder = new Builder();
-      final Document document = builder.build(stream);
-      final CubeMap cube = CubeMap.fromXML(document.getRootElement());
+      final Document document = builder.build(meta_stream);
+      final Element root = document.getRootElement();
+      final CubeMap cube = CubeMap.fromXML(NullCheck.notNull(root));
 
       final String positive_z_name =
         String.format("%s/%s", directory, cube.getPositiveZ());
-      final CubeMapFaceInputStream<CMFPositiveZKind> positive_z =
-        new CubeMapFaceInputStream<CMFPositiveZKind>(
-          ETextureCubeCache.class.getResourceAsStream(positive_z_name));
-
       final String positive_y_name =
         String.format("%s/%s", directory, cube.getPositiveY());
-      final CubeMapFaceInputStream<CMFPositiveYKind> positive_y =
-        new CubeMapFaceInputStream<CMFPositiveYKind>(
-          ETextureCubeCache.class.getResourceAsStream(positive_y_name));
-
       final String positive_x_name =
         String.format("%s/%s", directory, cube.getPositiveX());
-      final CubeMapFaceInputStream<CMFPositiveXKind> positive_x =
-        new CubeMapFaceInputStream<CMFPositiveXKind>(
-          ETextureCubeCache.class.getResourceAsStream(positive_x_name));
-
       final String negative_z_name =
         String.format("%s/%s", directory, cube.getNegativeZ());
-      final CubeMapFaceInputStream<CMFNegativeZKind> negative_z =
-        new CubeMapFaceInputStream<CMFNegativeZKind>(
-          ETextureCubeCache.class.getResourceAsStream(negative_z_name));
-
       final String negative_y_name =
         String.format("%s/%s", directory, cube.getNegativeY());
-      final CubeMapFaceInputStream<CMFNegativeYKind> negative_y =
-        new CubeMapFaceInputStream<CMFNegativeYKind>(
-          ETextureCubeCache.class.getResourceAsStream(negative_y_name));
-
       final String negative_x_name =
         String.format("%s/%s", directory, cube.getNegativeX());
+
+      assert positive_x_name != null;
+      assert positive_y_name != null;
+      assert positive_z_name != null;
+      assert negative_x_name != null;
+      assert negative_y_name != null;
+      assert negative_z_name != null;
+
+      final CubeMapFaceInputStream<CMFPositiveZKind> positive_z =
+        ETextureCubeCache.openPositiveZ(streams, positive_z_name);
+      final CubeMapFaceInputStream<CMFPositiveYKind> positive_y =
+        ETextureCubeCache.openPositiveY(streams, positive_y_name);
+      final CubeMapFaceInputStream<CMFPositiveXKind> positive_x =
+        ETextureCubeCache.openPositiveX(streams, positive_x_name);
+      final CubeMapFaceInputStream<CMFNegativeZKind> negative_z =
+        ETextureCubeCache.openNegativeZ(streams, negative_z_name);
+      final CubeMapFaceInputStream<CMFNegativeYKind> negative_y =
+        ETextureCubeCache.openNegativeY(streams, negative_y_name);
       final CubeMapFaceInputStream<CMFNegativeXKind> negative_x =
-        new CubeMapFaceInputStream<CMFNegativeXKind>(
-          ETextureCubeCache.class.getResourceAsStream(negative_x_name));
+        ETextureCubeCache.openNegativeX(streams, negative_x_name);
 
       final TextureLoaderType tl = this.texture_loader;
       assert tl != null;
@@ -279,7 +402,7 @@ public final class ETextureCubeCache
       assert g != null;
 
       final TextureCubeStaticType t =
-        this.loadCubeActual(
+        ETextureCubeCache.loadCubeActual(
           name,
           TextureWrapR.TEXTURE_WRAP_CLAMP_TO_EDGE,
           TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
@@ -293,9 +416,12 @@ public final class ETextureCubeCache
           tl,
           g);
       this.cube_textures.put(name_with_wrap_actual, t);
+
       return t;
     } finally {
-      stream.close();
+      for (final InputStream s : streams) {
+        s.close();
+      }
     }
   }
 }
