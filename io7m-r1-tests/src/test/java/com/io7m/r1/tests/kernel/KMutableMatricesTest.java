@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -91,7 +91,6 @@ import com.io7m.r1.types.RMatrixM3x3F;
 import com.io7m.r1.types.RMatrixM4x4F;
 import com.io7m.r1.types.RMatrixReadable3x3FType;
 import com.io7m.r1.types.RMatrixReadable4x4FType;
-import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
@@ -180,11 +179,7 @@ import com.io7m.r1.types.RVectorI4F;
           1,
           UsageHint.USAGE_STATIC_DRAW);
 
-      final KMesh mesh =
-        KMesh.newMesh(array, indices, new RVectorI3F<RSpaceObjectType>(
-          0.0f,
-          0.0f,
-          0.0f), new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f));
+      final KMesh mesh = KMesh.newMesh(array, indices);
 
       final RVectorI4F<RSpaceRGBAType> colour =
         new RVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.0f);

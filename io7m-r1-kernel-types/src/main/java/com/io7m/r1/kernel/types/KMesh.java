@@ -39,9 +39,6 @@ import com.io7m.r1.types.RExceptionMeshMissingNormals;
 import com.io7m.r1.types.RExceptionMeshMissingPositions;
 import com.io7m.r1.types.RExceptionMeshMissingTangents;
 import com.io7m.r1.types.RExceptionMeshMissingUVs;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorReadable3FType;
 
 /**
  * <p>
@@ -137,10 +134,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
    *          The array buffer of vertex data
    * @param in_indices
    *          The index buffer
-   * @param in_bounds_lower
-   *          The object-space lower bound
-   * @param in_bounds_upper
-   *          The object-space upper bound
+   * 
    * @return A new mesh
    * @throws RExceptionMeshMissingTangents
    *           If the array does not have tangent vectors.
@@ -154,28 +148,22 @@ import com.io7m.r1.types.RVectorReadable3FType;
 
   public static KMesh newMesh(
     final ArrayBufferType in_array,
-    final IndexBufferType in_indices,
-    final RVectorI3F<RSpaceObjectType> in_bounds_lower,
-    final RVectorI3F<RSpaceObjectType> in_bounds_upper)
+    final IndexBufferType in_indices)
     throws RExceptionMeshMissingUVs,
       RExceptionMeshMissingNormals,
       RExceptionMeshMissingTangents,
       RExceptionMeshMissingPositions
   {
-    return new KMesh(in_array, in_indices, in_bounds_lower, in_bounds_upper);
+    return new KMesh(in_array, in_indices);
   }
 
-  private final ArrayBufferType              array;
-  private final RVectorI3F<RSpaceObjectType> bounds_lower;
-  private final RVectorI3F<RSpaceObjectType> bounds_upper;
-  private boolean                            deleted;
-  private final IndexBufferType              indices;
+  private final ArrayBufferType array;
+  private boolean               deleted;
+  private final IndexBufferType indices;
 
   private KMesh(
     final ArrayBufferType in_array,
-    final IndexBufferType in_indices,
-    final RVectorI3F<RSpaceObjectType> in_bounds_lower,
-    final RVectorI3F<RSpaceObjectType> in_bounds_upper)
+    final IndexBufferType in_indices)
     throws RExceptionMeshMissingUVs,
       RExceptionMeshMissingNormals,
       RExceptionMeshMissingTangents,
@@ -183,8 +171,6 @@ import com.io7m.r1.types.RVectorReadable3FType;
   {
     this.array = NullCheck.notNull(in_array, "Array");
     this.indices = NullCheck.notNull(in_indices, "Indices");
-    this.bounds_lower = NullCheck.notNull(in_bounds_lower, "Lower bounds");
-    this.bounds_upper = NullCheck.notNull(in_bounds_upper, "Upper bounds");
 
     final ArrayDescriptor d = this.array.arrayGetDescriptor();
     final Map<String, ArrayAttributeDescriptor> as = d.getAttributes();
@@ -242,8 +228,6 @@ import com.io7m.r1.types.RVectorReadable3FType;
     }
     final KMesh other = (KMesh) obj;
     return this.array.equals(other.array)
-      && this.bounds_lower.equals(other.bounds_lower)
-      && this.bounds_upper.equals(other.bounds_upper)
       && (this.deleted == other.deleted)
       && this.indices.equals(other.indices);
   }
@@ -253,8 +237,6 @@ import com.io7m.r1.types.RVectorReadable3FType;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.array.hashCode();
-    result = (prime * result) + this.bounds_lower.hashCode();
-    result = (prime * result) + this.bounds_upper.hashCode();
     result = (prime * result) + (this.deleted ? 1231 : 1237);
     result = (prime * result) + this.indices.hashCode();
     return result;
@@ -263,20 +245,6 @@ import com.io7m.r1.types.RVectorReadable3FType;
   @Override public ArrayBufferUsableType meshGetArrayBuffer()
   {
     return this.array;
-  }
-
-  @Override public
-    RVectorReadable3FType<RSpaceObjectType>
-    meshGetBoundsLower()
-  {
-    return this.bounds_lower;
-  }
-
-  @Override public
-    RVectorReadable3FType<RSpaceObjectType>
-    meshGetBoundsUpper()
-  {
-    return this.bounds_upper;
   }
 
   @Override public IndexBufferUsableType meshGetIndexBuffer()

@@ -121,4 +121,35 @@ public interface KRegionCopierType
     final KFramebufferRGBAUsableType target,
     final AreaInclusive target_area)
     throws RException;
+
+  /**
+   * <p>
+   * Copy the given <code>source_area</code> from the depth buffer of
+   * <code>source</code> to the given <code>target_area</code> of the depth
+   * buffer of <code>target</code>.
+   * </p>
+   * <p>
+   * If the sizes of the two areas differ, the region will be scaled to the
+   * correct size.
+   * </p>
+   *
+   * @param source
+   *          The source framebuffer
+   * @param source_area
+   *          The source area
+   * @param target
+   *          The target framebuffer
+   * @param target_area
+   *          The target area
+   *
+   * @throws RException
+   *           If an error occurs
+   */
+
+  void copierCopyDepthOnly(
+    final KFramebufferRGBAUsableType source,
+    final AreaInclusive source_area,
+    final KFramebufferRGBAUsableType target,
+    final AreaInclusive target_area)
+    throws RException;
 }

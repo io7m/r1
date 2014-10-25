@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -55,10 +55,8 @@ import com.io7m.r1.types.RExceptionBuilderInvalid;
 import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
 import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RTransformModelType;
 import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RVectorI3F;
 
 @SuppressWarnings("static-method") public final class KVisibleSetLightGroupTest
 {
@@ -81,9 +79,7 @@ import com.io7m.r1.types.RVectorI3F;
         1,
         UsageHint.USAGE_STATIC_DRAW);
 
-    final RVectorI3F<RSpaceObjectType> lower = RVectorI3F.zero();
-    final RVectorI3F<RSpaceObjectType> upper = RVectorI3F.zero();
-    return KMesh.newMesh(array, indices, lower, upper);
+    return KMesh.newMesh(array, indices);
   }
 
   @Test public void testKVisibleSetLightGroup_0()
