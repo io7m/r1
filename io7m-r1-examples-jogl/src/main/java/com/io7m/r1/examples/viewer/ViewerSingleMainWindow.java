@@ -61,6 +61,7 @@ import com.io7m.jcanephora.texload.imageio.TextureLoaderImageIO;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogType;
 import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
@@ -101,7 +102,6 @@ import com.io7m.r1.kernel.types.KInstanceTranslucentUnlitType;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
-import com.io7m.r1.kernel.types.KNormalPrecision;
 import com.io7m.r1.kernel.types.KRGBAPrecision;
 import com.io7m.r1.kernel.types.KUnitQuad;
 import com.io7m.r1.kernel.types.KUnitQuadCache;
@@ -350,10 +350,12 @@ import com.jogamp.opengl.util.FPSAnimator;
     private final VShaderCaches                 shader_caches;
     private int                                 view_index;
     private JCameraInput                        fps_camera_input;
+    private ViewerConfig                        viewer_config;
 
     Runner(
       final GLAutoDrawable drawable,
       final JCGLImplementationType in_gi,
+      final ViewerConfig in_viewer_config,
       final ExampleSceneType in_example,
       final ExampleRendererConstructorType in_renderer_cons,
       final VShaderCaches in_shader_caches,
@@ -373,6 +375,8 @@ import com.jogamp.opengl.util.FPSAnimator;
       this.shader_caches = in_shader_caches;
       this.mouse_view = false;
       this.log = in_log;
+      this.viewer_config =
+        NullCheck.notNull(in_viewer_config, "Viewer config");
 
       this.matrix_view_temporary = new MatrixM4x4F();
       this.matrix_context = new MatrixM4x4F.Context();
@@ -480,8 +484,8 @@ import com.jogamp.opengl.util.FPSAnimator;
               ddb
                 .setRGBAMinificationFilter(TextureFilterMinification.TEXTURE_FILTER_LINEAR);
               ddb.setRGBAPrecision(KRGBAPrecision.RGBA_PRECISION_8);
-              ddb
-                .setGBufferNormalPrecision(KNormalPrecision.NORMAL_PRECISION_16F);
+              ddb.setGBufferNormalPrecision(Runner.this.viewer_config
+                .getNormalPrecision());
 
               final KFramebufferDeferredDescription d = ddb.build();
               return KFramebufferDeferred.newFramebuffer(in_gi, d);
@@ -896,6 +900,7 @@ import com.jogamp.opengl.util.FPSAnimator;
             new Runner(
               drawable,
               gi,
+              ViewerSingleMainWindow.this.config,
               ViewerSingleMainWindow.this.example,
               ViewerSingleMainWindow.this.renderer,
               caches,
