@@ -93,16 +93,15 @@ import com.io7m.r1.kernel.KProgramType;
 import com.io7m.r1.kernel.KShaderCachePostprocessingType;
 import com.io7m.r1.kernel.KShadingProgramCommon;
 import com.io7m.r1.kernel.types.KCamera;
-import com.io7m.r1.kernel.types.KDepthPrecision;
-import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
-import com.io7m.r1.kernel.types.KFramebufferForwardDescription;
-import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
+import com.io7m.r1.kernel.types.KFramebufferDeferredDescription;
+import com.io7m.r1.kernel.types.KFramebufferDeferredDescriptionBuilderType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.r1.kernel.types.KInstanceTranslucentUnlitType;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
+import com.io7m.r1.kernel.types.KNormalPrecision;
 import com.io7m.r1.kernel.types.KRGBAPrecision;
 import com.io7m.r1.kernel.types.KUnitQuad;
 import com.io7m.r1.kernel.types.KUnitQuadCache;
@@ -474,25 +473,18 @@ import com.jogamp.opengl.util.FPSAnimator;
             {
               final AreaInclusive area = this.makeArea();
 
-              final KFramebufferRGBADescription rgba_description =
-                KFramebufferRGBADescription.newDescription(
-                  area,
-                  TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-                  TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-                  KRGBAPrecision.RGBA_PRECISION_8);
+              final KFramebufferDeferredDescriptionBuilderType ddb =
+                KFramebufferDeferredDescription.newBuilder(area);
+              ddb
+                .setRGBAMagnificationFilter(TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+              ddb
+                .setRGBAMinificationFilter(TextureFilterMinification.TEXTURE_FILTER_LINEAR);
+              ddb.setRGBAPrecision(KRGBAPrecision.RGBA_PRECISION_8);
+              ddb
+                .setGBufferNormalPrecision(KNormalPrecision.NORMAL_PRECISION_16F);
 
-              final KFramebufferDepthDescription depth_description =
-                KFramebufferDepthDescription.newDescription(
-                  area,
-                  TextureFilterMagnification.TEXTURE_FILTER_NEAREST,
-                  TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-                  KDepthPrecision.DEPTH_PRECISION_24);
-
-              return KFramebufferDeferred.newFramebuffer(
-                Runner.this.gi,
-                KFramebufferForwardDescription.newDescription(
-                  rgba_description,
-                  depth_description));
+              final KFramebufferDeferredDescription d = ddb.build();
+              return KFramebufferDeferred.newFramebuffer(in_gi, d);
             }
 
             @Override public KFramebufferDeferredType visitDebug(
