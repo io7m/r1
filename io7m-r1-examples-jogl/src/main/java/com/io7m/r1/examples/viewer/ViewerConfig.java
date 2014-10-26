@@ -23,6 +23,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jproperties.JProperties;
 import com.io7m.jproperties.JPropertyException;
 import com.io7m.jproperties.JPropertyIncorrectType;
+import com.io7m.r1.kernel.types.KNormalPrecision;
 
 final class ViewerConfig
 {
@@ -33,10 +34,11 @@ final class ViewerConfig
     return new ViewerConfig(props);
   }
 
-  private final boolean    eclipse;
-  private String           program_version;
-  private final Properties props;
-  private final File       replacement_results_directory;
+  private final boolean          eclipse;
+  private String                 program_version;
+  private final Properties       props;
+  private final File             replacement_results_directory;
+  private final KNormalPrecision normal_precision;
 
   public ViewerConfig(
     final Properties in_props)
@@ -65,6 +67,11 @@ final class ViewerConfig
       new File(JProperties.getString(
         in_props,
         "com.io7m.r1.examples.viewer.replacement-results-directory"));
+    this.normal_precision =
+      KNormalPrecision.valueOf(JProperties.getStringOptional(
+        in_props,
+        "com.io7m.r1.examples.viewer.normal_precision",
+        KNormalPrecision.NORMAL_PRECISION_16F.toString()));
   }
 
   public String getProgramVersion()
@@ -80,5 +87,10 @@ final class ViewerConfig
   public boolean isEclipse()
   {
     return this.eclipse;
+  }
+
+  public KNormalPrecision getNormalPrecision()
+  {
+    return this.normal_precision;
   }
 }
