@@ -14,18 +14,39 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel;
+package com.io7m.r1.kernel.types;
 
-import com.io7m.jcache.BLUCacheType;
-import com.io7m.r1.kernel.types.KGeometryBufferDescription;
-import com.io7m.r1.types.RException;
+import com.io7m.jcanephora.AreaInclusive;
 
 /**
- * The type of geometry buffer caches.
+ * The type of mutable builders for {@link KGeometryBufferDescription}.
  */
 
-public interface KGeometryBufferCacheType extends
-  BLUCacheType<KGeometryBufferDescription, KGeometryBufferUsableType, KGeometryBufferType, RException>
+public interface KGeometryBufferDescriptionBuilderType
 {
-  // No extra functions
+  /**
+   * @return A description based on all of the parameters given so far
+   */
+
+  KGeometryBufferDescription build();
+
+  /**
+   * Set the inclusive area of the framebuffer.
+   *
+   * @param a
+   *          The area
+   */
+
+  void setArea(
+    AreaInclusive a);
+
+  /**
+   * Set the precision for the normal vectors.
+   *
+   * @param p
+   *          The precision
+   */
+
+  void setNormalPrecision(
+    KNormalPrecision p);
 }
