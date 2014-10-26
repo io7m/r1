@@ -49,8 +49,7 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
-import com.io7m.r1.kernel.types.KFramebufferForwardDescription;
+import com.io7m.r1.kernel.types.KFramebufferDeferredDescription;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
@@ -128,21 +127,21 @@ import com.io7m.r1.types.RExceptionNotSupported;
       KFramebufferDeferredType
       newFramebuffer(
         final G gl,
-        final KFramebufferForwardDescription description,
+        final KFramebufferDeferredDescription description,
         final KGeometryBufferType gbuffer)
         throws JCGLException
     {
-      final KFramebufferRGBADescription desc_rgba =
-        description.getRGBADescription();
-      final KFramebufferDepthDescription desc_depth =
-        description.getDepthDescription();
-      final AreaInclusive area = desc_rgba.getArea();
-      assert area.equals(desc_depth.getArea());
+      final AreaInclusive area = description.getArea();
       final int width = (int) area.getRangeX().getInterval();
       final int height = (int) area.getRangeY().getInterval();
 
       final Texture2DStaticType c =
-        KFramebufferDeferredGL3ES3.makeRGBA(desc_rgba, width, height, gl);
+        KFramebufferDeferredGL3ES3.makeRGBA(
+          description.getRGBADescription(),
+          width,
+          height,
+          gl);
+
       final Texture2DStaticType d =
         gl.texture2DStaticAllocateDepth24Stencil8(
           "render-d24s8",
@@ -162,17 +161,17 @@ import com.io7m.r1.types.RExceptionNotSupported;
       return new KFramebufferDeferredGL3ES3(c, d, fb, description, gbuffer);
     }
 
-    private final Texture2DStaticType            color;
-    private final Texture2DStaticType            depth;
-    private final KFramebufferForwardDescription description;
-    private final FramebufferType                framebuffer;
-    private final KGeometryBufferType            gbuffer;
+    private final Texture2DStaticType             color;
+    private final Texture2DStaticType             depth;
+    private final KFramebufferDeferredDescription description;
+    private final FramebufferType                 framebuffer;
+    private final KGeometryBufferType             gbuffer;
 
     public KFramebufferDeferredGL3ES3(
       final Texture2DStaticType c,
       final Texture2DStaticType d,
       final FramebufferType fb,
-      final KFramebufferForwardDescription in_description,
+      final KFramebufferDeferredDescription in_description,
       final KGeometryBufferType in_gbuffer)
     {
       super(c.textureGetArea(), c.resourceGetSizeBytes()
@@ -255,17 +254,17 @@ import com.io7m.r1.types.RExceptionNotSupported;
 
   static KFramebufferDeferredType newFramebuffer(
     final JCGLImplementationType gi,
-    final KFramebufferForwardDescription description)
+    final KFramebufferDeferredDescription description)
     throws JCGLException,
       RException
   {
     NullCheck.notNull(gi, "GL implementation");
     NullCheck.notNull(description, "Description");
 
-    final KFramebufferRGBADescription rgba_d =
-      description.getRGBADescription();
     final KGeometryBufferAbstract gbuffer =
-      KGeometryBufferAbstract.newRGBA(gi, rgba_d.getArea());
+      KGeometryBufferAbstract.newGBuffer(
+        gi,
+        description.getGeometryBufferDescription());
 
     return gi
       .implementationAccept(new JCGLImplementationVisitorType<KFramebufferDeferredType, RException>() {
