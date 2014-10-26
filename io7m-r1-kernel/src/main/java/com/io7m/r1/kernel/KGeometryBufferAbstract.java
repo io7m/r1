@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -52,6 +52,8 @@ import com.io7m.jcanephora.api.JCGLStencilBufferType;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.kernel.types.KGeometryBufferDescription;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionNotSupported;
@@ -59,28 +61,55 @@ import com.io7m.r1.types.RExceptionNotSupported;
 @EqualityReference abstract class KGeometryBufferAbstract implements
   KGeometryBufferType
 {
-  static final ClearSpecification CLEAR_SPEC;
-
-  static {
-    final ClearSpecificationBuilderType b = ClearSpecification.newBuilder();
-    b.enableColorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
-    b.enableDepthBufferClear(1.0f);
-    b.enableStencilBufferClear(0);
-    b.setStrictChecking(true);
-    CLEAR_SPEC = b.build();
-  }
-
   @EqualityReference private static final class KGeometryBuffer_GL3ES3 extends
     KGeometryBufferAbstract
   {
+    private static
+      <G extends JCGLTextures2DStaticGL3ES3Type & JCGLFramebuffersGL3Type>
+      Texture2DStaticType
+      makeNormal(
+        final G gl,
+        final KGeometryBufferDescription description,
+        final int width,
+        final int height)
+    {
+      switch (description.getPrecisionNormal()) {
+        case NORMAL_PRECISION_16F:
+        {
+          return gl.texture2DStaticAllocateRG16f(
+            "gbuffer-normal-16f",
+            width,
+            height,
+            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureFilterMinification.TEXTURE_FILTER_NEAREST,
+            TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+        }
+        case NORMAL_PRECISION_8:
+        {
+          return gl.texture2DStaticAllocateRG8(
+            "gbuffer-normal-8",
+            width,
+            height,
+            TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
+            TextureFilterMinification.TEXTURE_FILTER_NEAREST,
+            TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+        }
+      }
+
+      throw new UnreachableCodeException();
+    }
+
     public static
       <G extends JCGLTextures2DStaticGL3ES3Type & JCGLFramebuffersGL3Type>
       KGeometryBufferAbstract
-      newRGBA(
+      newGBuffer(
         final G gl,
-        final AreaInclusive area)
+        final KGeometryBufferDescription description)
         throws JCGLException
     {
+      final AreaInclusive area = description.getArea();
       final int width = (int) area.getRangeX().getInterval();
       final int height = (int) area.getRangeY().getInterval();
 
@@ -105,14 +134,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
           TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
 
       final Texture2DStaticType normal =
-        gl.texture2DStaticAllocateRG16f(
-          "gbuffer-normal",
-          width,
-          height,
-          TextureWrapS.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureWrapT.TEXTURE_WRAP_CLAMP_TO_EDGE,
-          TextureFilterMinification.TEXTURE_FILTER_NEAREST,
-          TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
+        KGeometryBuffer_GL3ES3.makeNormal(gl, description, width, height);
 
       final Texture2DStaticType specular =
         gl.texture2DStaticAllocateRGBA8(
@@ -174,6 +196,28 @@ import com.io7m.r1.types.RExceptionNotSupported;
       this.fb = NullCheck.notNull(in_fb, "Framebuffer");
     }
 
+    @Override public
+      <G extends JCGLColorBufferType & JCGLClearType & JCGLDepthBufferType & JCGLStencilBufferType & JCGLFramebuffersCommonType>
+      void
+      geomClear(
+        final G gc)
+        throws RException
+    {
+      try {
+        try {
+          gc.framebufferDrawBind(this.fb);
+          gc.colorBufferMask(true, true, true, true);
+          gc.depthBufferWriteEnable();
+          gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xffffffff);
+          gc.clear(KGeometryBufferAbstract.CLEAR_SPEC);
+        } finally {
+          gc.framebufferDrawUnbind();
+        }
+      } catch (final JCGLException e) {
+        throw RExceptionJCGL.fromJCGLException(e);
+      }
+    }
+
     @Override public void geomDelete(
       final JCGLImplementationType g)
       throws RException
@@ -216,33 +260,22 @@ import com.io7m.r1.types.RExceptionNotSupported;
     {
       return this.specular;
     }
-
-    @Override public
-      <G extends JCGLColorBufferType & JCGLClearType & JCGLDepthBufferType & JCGLStencilBufferType & JCGLFramebuffersCommonType>
-      void
-      geomClear(
-        final G gc)
-        throws RException
-    {
-      try {
-        try {
-          gc.framebufferDrawBind(this.fb);
-          gc.colorBufferMask(true, true, true, true);
-          gc.depthBufferWriteEnable();
-          gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xffffffff);
-          gc.clear(KGeometryBufferAbstract.CLEAR_SPEC);
-        } finally {
-          gc.framebufferDrawUnbind();
-        }
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
-      }
-    }
   }
 
-  static KGeometryBufferAbstract newRGBA(
+  static final ClearSpecification CLEAR_SPEC;
+
+  static {
+    final ClearSpecificationBuilderType b = ClearSpecification.newBuilder();
+    b.enableColorBufferClear4f(0.0f, 0.0f, 0.0f, 0.0f);
+    b.enableDepthBufferClear(1.0f);
+    b.enableStencilBufferClear(0);
+    b.setStrictChecking(true);
+    CLEAR_SPEC = b.build();
+  }
+
+  static KGeometryBufferAbstract newGBuffer(
     final JCGLImplementationType gi,
-    final AreaInclusive area)
+    final KGeometryBufferDescription description)
     throws JCGLException,
       RException
   {
@@ -260,7 +293,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
           final JCGLInterfaceGL3Type gl)
           throws JCGLException
         {
-          return KGeometryBuffer_GL3ES3.newRGBA(gl, area);
+          return KGeometryBuffer_GL3ES3.newGBuffer(gl, description);
         }
 
         @Override public KGeometryBufferAbstract implementationIsGLES2(
@@ -277,7 +310,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
             RExceptionNotSupported
         {
           if (gl.hasColorBufferFloat() || gl.hasColorBufferHalfFloat()) {
-            return KGeometryBuffer_GL3ES3.newRGBA(gl, area);
+            return KGeometryBuffer_GL3ES3.newGBuffer(gl, description);
           }
           throw RExceptionNotSupported.deferredRenderingNotSupported();
         }

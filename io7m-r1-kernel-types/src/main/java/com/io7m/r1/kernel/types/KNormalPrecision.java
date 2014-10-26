@@ -14,18 +14,24 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel;
-
-import com.io7m.jcache.BLUCacheType;
-import com.io7m.r1.kernel.types.KGeometryBufferDescription;
-import com.io7m.r1.types.RException;
+package com.io7m.r1.kernel.types;
 
 /**
- * The type of geometry buffer caches.
+ * A description of the precision of normal vector components in a
+ * framebuffer.
  */
 
-public interface KGeometryBufferCacheType extends
-  BLUCacheType<KGeometryBufferDescription, KGeometryBufferUsableType, KGeometryBufferType, RException>
+public enum KNormalPrecision
 {
-  // No extra functions
+  /**
+   * 8-bit components.
+   */
+
+  NORMAL_PRECISION_8,
+
+  /**
+   * 16-bit half-precision floating point components.
+   */
+
+  NORMAL_PRECISION_16F,
 }
