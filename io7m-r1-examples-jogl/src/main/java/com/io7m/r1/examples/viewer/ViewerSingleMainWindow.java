@@ -19,6 +19,7 @@ package com.io7m.r1.examples.viewer;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.opengl.GLAutoDrawable;
@@ -32,8 +33,10 @@ import nu.xom.ValidityException;
 
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcamera.JCameraFPSStyle;
+import com.io7m.jcamera.JCameraFPSStyle.Context;
 import com.io7m.jcamera.JCameraFPSStyleIntegrator;
 import com.io7m.jcamera.JCameraFPSStyleIntegratorType;
+import com.io7m.jcamera.JCameraFPSStyleSnapshot;
 import com.io7m.jcamera.JCameraFPSStyleType;
 import com.io7m.jcamera.JCameraInput;
 import com.io7m.jcamera.JCameraMouseRegion;
@@ -124,180 +127,11 @@ import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
-import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.Animator;
 
 @SuppressWarnings("synthetic-access") final class ViewerSingleMainWindow implements
   Runnable
 {
-  protected static final int FRAMES_PER_SECOND = 60;
-
-  private final class ViewerSingleMainMouseListener extends MouseAdapter
-  {
-    public ViewerSingleMainMouseListener()
-    {
-      this.coefficients = new JCameraRotationCoefficients();
-    }
-
-    private final JCameraRotationCoefficients coefficients;
-
-    @Override public void mouseMoved(
-      final @Nullable MouseEvent e)
-    {
-      assert e != null;
-
-      final Runner r = ViewerSingleMainWindow.this.runner;
-      if (r == null) {
-        return;
-      }
-
-      if (r.mouseViewIsEnabled()) {
-        final JCameraMouseRegion mr =
-          ViewerSingleMainWindow.this.mouse_region;
-
-        final float x = e.getX();
-        final float y = e.getY();
-
-        mr.getCoefficients(x, y, this.coefficients);
-
-        final JCameraInput input = r.getFPSCameraInput();
-        input.addRotationAroundHorizontal(this.coefficients.getHorizontal());
-        input.addRotationAroundVertical(this.coefficients.getVertical());
-      }
-    }
-  }
-
-  private final class ViewerSingleMainKeyListener implements KeyListener
-  {
-    private final GLWindow window;
-
-    public ViewerSingleMainKeyListener(
-      final GLWindow in_window)
-    {
-      this.window = in_window;
-    }
-
-    @Override public void keyPressed(
-      final @Nullable KeyEvent e)
-    {
-      assert e != null;
-
-      final Runner r = ViewerSingleMainWindow.this.runner;
-      if (r == null) {
-        return;
-      }
-
-      final JCameraInput input = r.getFPSCameraInput();
-      final short code = e.getKeyCode();
-
-      switch (code) {
-        case KeyEvent.VK_A:
-        {
-          input.setMovingLeft(true);
-          break;
-        }
-        case KeyEvent.VK_D:
-        {
-          input.setMovingRight(true);
-          break;
-        }
-        case KeyEvent.VK_W:
-        {
-          input.setMovingForward(true);
-          break;
-        }
-        case KeyEvent.VK_S:
-        {
-          input.setMovingBackward(true);
-          break;
-        }
-        case KeyEvent.VK_F:
-        {
-          input.setMovingUp(true);
-          break;
-        }
-        case KeyEvent.VK_V:
-        {
-          input.setMovingDown(true);
-          break;
-        }
-      }
-    }
-
-    @Override public void keyReleased(
-      final @Nullable KeyEvent e)
-    {
-      assert e != null;
-
-      final Runner r = ViewerSingleMainWindow.this.runner;
-      if (r == null) {
-        return;
-      }
-
-      final JCameraInput input = r.getFPSCameraInput();
-      final short code = e.getKeyCode();
-      switch (code) {
-        case KeyEvent.VK_A:
-        {
-          input.setMovingLeft(false);
-          break;
-        }
-        case KeyEvent.VK_D:
-        {
-          input.setMovingRight(false);
-          break;
-        }
-        case KeyEvent.VK_W:
-        {
-          input.setMovingForward(false);
-          break;
-        }
-        case KeyEvent.VK_S:
-        {
-          input.setMovingBackward(false);
-          break;
-        }
-        case KeyEvent.VK_F:
-        {
-          input.setMovingUp(false);
-          break;
-        }
-        case KeyEvent.VK_V:
-        {
-          input.setMovingDown(false);
-          break;
-        }
-        case KeyEvent.VK_N:
-        {
-          r.nextViewIndex();
-          break;
-        }
-        case KeyEvent.VK_P:
-        {
-          r.previousViewIndex();
-          break;
-        }
-        case KeyEvent.VK_M:
-        {
-          if (r.mouseViewIsEnabled()) {
-            r.mouseViewDisable();
-            this.window.confinePointer(false);
-            this.window.setPointerVisible(true);
-          } else {
-            r.mouseViewEnable();
-            input.setRotationHorizontal(0.0f);
-            input.setRotationVertical(0.0f);
-            this.window.warpPointer(
-              this.window.getWidth() / 2,
-              this.window.getHeight() / 2);
-            this.window.confinePointer(true);
-            this.window.setPointerVisible(false);
-          }
-          break;
-        }
-      }
-    }
-  }
-
   private static final class Runner
   {
     private static void drawQuad(
@@ -337,20 +171,22 @@ import com.jogamp.opengl.util.FPSAnimator;
     private final EMeshCache                    cache_mesh;
     private final ExampleSceneType              example;
     private final JCameraFPSStyleType           fps_camera;
+    private Context                             fps_camera_context;
+    private JCameraInput                        fps_camera_input;
     private final JCameraFPSStyleIntegratorType fps_camera_integrator;
     private final KFramebufferDeferredType      framebuffer;
     private final JCGLImplementationType        gi;
     private final TextureLoaderType             loader;
     private LogUsableType                       log;
     private final MatrixM4x4F                   matrix_view_temporary;
-    private final MatrixM4x4F.Context           matrix_context;
     private boolean                             mouse_view;
     private final KUnitQuad                     quad;
     private final ExampleRendererType           renderer;
     private final VShaderCaches                 shader_caches;
     private int                                 view_index;
-    private JCameraInput                        fps_camera_input;
     private ViewerConfig                        viewer_config;
+    private JCameraFPSStyleSnapshot             fps_camera_snap_prev;
+    private JCameraFPSStyleSnapshot             fps_camera_snap_curr;
 
     Runner(
       final GLAutoDrawable drawable,
@@ -379,12 +215,12 @@ import com.jogamp.opengl.util.FPSAnimator;
         NullCheck.notNull(in_viewer_config, "Viewer config");
 
       this.matrix_view_temporary = new MatrixM4x4F();
-      this.matrix_context = new MatrixM4x4F.Context();
+      this.time_then = System.nanoTime();
 
       this.fps_camera = JCameraFPSStyle.newCamera();
       this.fps_camera.cameraSetPosition3f(0.0f, 2.0f, 3.0f);
-
       this.fps_camera_input = JCameraInput.newInput();
+      this.fps_camera_context = new JCameraFPSStyle.Context();
 
       this.fps_camera_integrator =
         JCameraFPSStyleIntegrator.newIntegrator(
@@ -404,6 +240,9 @@ import com.jogamp.opengl.util.FPSAnimator;
         .integratorLinearSetAcceleration((float) (3.0 / (1.0 / 60.0)));
       this.fps_camera_integrator.integratorLinearSetMaximumSpeed(3.0f);
       this.fps_camera_integrator.integratorLinearSetDrag(0.000000001f);
+
+      this.fps_camera_snap_prev = this.fps_camera.cameraMakeSnapshot();
+      this.fps_camera_snap_curr = this.fps_camera_snap_prev;
 
       final KUnitQuadCacheType quad_cache =
         KUnitQuadCache.newCache(in_gi.getGLCommon(), in_log);
@@ -602,30 +441,20 @@ import com.jogamp.opengl.util.FPSAnimator;
       }
     }
 
+    private long   time_then;
+    private double time_accum;
+
     public void run()
       throws RException
     {
       final List<ExampleViewType> viewpoints =
         this.example.exampleViewpoints();
+
       final ExampleViewType view = viewpoints.get(this.view_index);
+      assert view != null;
 
-      final KCamera view_camera = view.getCamera();
-      final KVisibleSetBuilderWithCreateType scene_builder;
-      if (this.mouse_view) {
-        this.fps_camera_integrator
-          .integrate(1.0f / ViewerSingleMainWindow.FRAMES_PER_SECOND);
-        this.fps_camera.cameraMakeViewMatrix(
-          this.matrix_context,
-          this.matrix_view_temporary);
-
-        final RMatrixI4x4F<RTransformViewType> m =
-          RMatrixI4x4F.newFromReadable(this.matrix_view_temporary);
-
-        final KCamera kc = KCamera.newCamera(m, view_camera.getProjection());
-        scene_builder = KVisibleSet.newBuilder(kc);
-      } else {
-        scene_builder = KVisibleSet.newBuilder(view_camera);
-      }
+      final KVisibleSetBuilderWithCreateType scene_builder =
+        this.makeVisibleSet(view);
 
       final ExampleSceneBuilderType b = new ExampleSceneBuilderType() {
         @Override public TextureCubeStaticUsableType cubeTextureClamped(
@@ -802,11 +631,240 @@ import com.jogamp.opengl.util.FPSAnimator;
         }
       });
     }
+
+    private KVisibleSetBuilderWithCreateType makeVisibleSet(
+      final ExampleViewType view)
+    {
+      final KCamera view_camera = view.getCamera();
+      final KVisibleSetBuilderWithCreateType scene_builder;
+
+      if (this.mouse_view) {
+
+        /**
+         * Integrate the camera as many times as necessary for each rendering
+         * frame interval.
+         */
+
+        final long time_now = System.nanoTime();
+        final long time_diff = time_now - this.time_then;
+        final double time_diff_s = time_diff / 1000000000.0;
+        this.time_accum = this.time_accum + time_diff_s;
+        this.time_then = time_now;
+
+        final float delta = 1.0f / 60.0f;
+        while (this.time_accum >= delta) {
+          this.fps_camera_integrator.integrate(delta);
+          this.fps_camera_snap_prev = this.fps_camera_snap_curr;
+          this.fps_camera_snap_curr = this.fps_camera.cameraMakeSnapshot();
+          this.time_accum -= delta;
+        }
+
+        /**
+         * Determine how far the current time is between the current camera
+         * state and the next, and use that value to interpolate between the
+         * two saved states.
+         */
+
+        final float alpha = (float) (this.time_accum / delta);
+        final JCameraFPSStyleSnapshot snap_interpolated =
+          JCameraFPSStyleSnapshot.interpolate(
+            this.fps_camera_snap_prev,
+            this.fps_camera_snap_curr,
+            alpha);
+
+        /**
+         * Make a view matrix from the snapshot.
+         */
+
+        JCameraFPSStyle.cameraMakeViewMatrix(
+          this.fps_camera_context,
+          snap_interpolated,
+          this.matrix_view_temporary);
+
+        final RMatrixI4x4F<RTransformViewType> m =
+          RMatrixI4x4F.newFromReadable(this.matrix_view_temporary);
+
+        final KCamera kc = KCamera.newCamera(m, view_camera.getProjection());
+        scene_builder = KVisibleSet.newBuilder(kc);
+      } else {
+        scene_builder = KVisibleSet.newBuilder(view_camera);
+      }
+
+      return scene_builder;
+    }
   }
 
-  static final VectorReadable4FType            CLEAR_COLOR;
-  static final float                           CLEAR_DEPTH;
-  static final int                             CLEAR_STENCIL;
+  private final class ViewerSingleMainKeyListener implements KeyListener
+  {
+    private final GLWindow window;
+
+    public ViewerSingleMainKeyListener(
+      final GLWindow in_window)
+    {
+      this.window = in_window;
+    }
+
+    @Override public void keyPressed(
+      final @Nullable KeyEvent e)
+    {
+      assert e != null;
+
+      final Runner r = ViewerSingleMainWindow.this.runner;
+      if (r == null) {
+        return;
+      }
+
+      final JCameraInput input = r.getFPSCameraInput();
+      final short code = e.getKeyCode();
+
+      switch (code) {
+        case KeyEvent.VK_A:
+        {
+          input.setMovingLeft(true);
+          break;
+        }
+        case KeyEvent.VK_D:
+        {
+          input.setMovingRight(true);
+          break;
+        }
+        case KeyEvent.VK_W:
+        {
+          input.setMovingForward(true);
+          break;
+        }
+        case KeyEvent.VK_S:
+        {
+          input.setMovingBackward(true);
+          break;
+        }
+        case KeyEvent.VK_E:
+        {
+          input.setMovingUp(true);
+          break;
+        }
+        case KeyEvent.VK_Q:
+        {
+          input.setMovingDown(true);
+          break;
+        }
+      }
+    }
+
+    @Override public void keyReleased(
+      final @Nullable KeyEvent e)
+    {
+      assert e != null;
+
+      final Runner r = ViewerSingleMainWindow.this.runner;
+      if (r == null) {
+        return;
+      }
+
+      final JCameraInput input = r.getFPSCameraInput();
+      final short code = e.getKeyCode();
+      switch (code) {
+        case KeyEvent.VK_A:
+        {
+          input.setMovingLeft(false);
+          break;
+        }
+        case KeyEvent.VK_D:
+        {
+          input.setMovingRight(false);
+          break;
+        }
+        case KeyEvent.VK_W:
+        {
+          input.setMovingForward(false);
+          break;
+        }
+        case KeyEvent.VK_S:
+        {
+          input.setMovingBackward(false);
+          break;
+        }
+        case KeyEvent.VK_E:
+        {
+          input.setMovingUp(false);
+          break;
+        }
+        case KeyEvent.VK_Q:
+        {
+          input.setMovingDown(false);
+          break;
+        }
+        case KeyEvent.VK_N:
+        {
+          r.nextViewIndex();
+          break;
+        }
+        case KeyEvent.VK_P:
+        {
+          r.previousViewIndex();
+          break;
+        }
+        case KeyEvent.VK_M:
+        {
+          if (r.mouseViewIsEnabled()) {
+            r.mouseViewDisable();
+            this.window.confinePointer(false);
+            this.window.setPointerVisible(true);
+          } else {
+            r.mouseViewEnable();
+            input.setRotationHorizontal(0.0f);
+            input.setRotationVertical(0.0f);
+            this.window.warpPointer(
+              this.window.getWidth() / 2,
+              this.window.getHeight() / 2);
+            this.window.confinePointer(true);
+            this.window.setPointerVisible(false);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  private final class ViewerSingleMainMouseListener extends MouseAdapter
+  {
+    private final JCameraRotationCoefficients coefficients;
+
+    public ViewerSingleMainMouseListener()
+    {
+      this.coefficients = new JCameraRotationCoefficients();
+    }
+
+    @Override public void mouseMoved(
+      final @Nullable MouseEvent e)
+    {
+      assert e != null;
+
+      final Runner r = ViewerSingleMainWindow.this.runner;
+      if (r == null) {
+        return;
+      }
+
+      if (r.mouseViewIsEnabled()) {
+        final AtomicReference<JCameraMouseRegion> ref =
+          ViewerSingleMainWindow.this.mouse_region;
+        final JCameraMouseRegion mr = ref.get();
+
+        final float x = e.getX();
+        final float y = e.getY();
+
+        mr.getCoefficients(x, y, this.coefficients);
+
+        final JCameraInput input = r.getFPSCameraInput();
+        input.addRotationAroundHorizontal(this.coefficients.getHorizontal());
+        input.addRotationAroundVertical(this.coefficients.getVertical());
+      }
+    }
+  }
+
+  static final VectorReadable4FType                 CLEAR_COLOR;
+  static final float                                CLEAR_DEPTH;
+  static final int                                  CLEAR_STENCIL;
 
   static {
     CLEAR_STENCIL = 0;
@@ -814,12 +872,12 @@ import com.jogamp.opengl.util.FPSAnimator;
     CLEAR_DEPTH = 1.0f;
   }
 
-  private final ViewerConfig                   config;
-  private final ExampleSceneType               example;
-  private final LogType                        log;
-  private final ExampleRendererConstructorType renderer;
-  private @Nullable Runner                     runner;
-  private final JCameraMouseRegion             mouse_region;
+  private final ViewerConfig                        config;
+  private final ExampleSceneType                    example;
+  private final LogType                             log;
+  private final AtomicReference<JCameraMouseRegion> mouse_region;
+  private final ExampleRendererConstructorType      renderer;
+  private @Nullable Runner                          runner;
 
   public ViewerSingleMainWindow(
     final ViewerConfig in_config,
@@ -835,10 +893,10 @@ import com.jogamp.opengl.util.FPSAnimator;
     this.renderer = ExampleRenderers.getRenderer(renderer_name);
     this.example = ExampleClasses.getScene(example_name);
     this.mouse_region =
-      JCameraMouseRegion.newRegion(
+      new AtomicReference<JCameraMouseRegion>(JCameraMouseRegion.newRegion(
         JCameraScreenOrigin.SCREEN_ORIGIN_TOP_LEFT,
         640.0f,
-        480.0f);
+        480.0f));
   }
 
   @Override public void run()
@@ -847,6 +905,7 @@ import com.jogamp.opengl.util.FPSAnimator;
     final GLCapabilities caps = new GLCapabilities(pro);
     final GLWindow window = GLWindow.create(caps);
 
+    window.setTitle(ExampleSceneType.class.getCanonicalName());
     window.setSize(640, 480);
     window.addGLEventListener(new GLEventListener() {
       @Override public void display(
@@ -861,7 +920,7 @@ import com.jogamp.opengl.util.FPSAnimator;
 
           if (r.mouseViewIsEnabled()) {
             final JCameraMouseRegion mr =
-              ViewerSingleMainWindow.this.mouse_region;
+              ViewerSingleMainWindow.this.mouse_region.get();
             window.warpPointer((int) mr.getCenterX(), (int) mr.getCenterY());
           }
 
@@ -873,7 +932,7 @@ import com.jogamp.opengl.util.FPSAnimator;
       @Override public void dispose(
         @Nullable final GLAutoDrawable drawable)
       {
-
+        // Nothing
       }
 
       @Override public void init(
@@ -921,10 +980,12 @@ import com.jogamp.opengl.util.FPSAnimator;
         final int width,
         final int height)
       {
-        final JCameraMouseRegion mr =
+        final AtomicReference<JCameraMouseRegion> ref =
           ViewerSingleMainWindow.this.mouse_region;
-        mr.setHeight(height);
-        mr.setWidth(width);
+        ref.set(JCameraMouseRegion.newRegion(
+          JCameraScreenOrigin.SCREEN_ORIGIN_TOP_LEFT,
+          width,
+          height));
       }
     });
 
@@ -942,11 +1003,7 @@ import com.jogamp.opengl.util.FPSAnimator;
     window.setDefaultCloseOperation(WindowClosingMode.DISPOSE_ON_CLOSE);
     window.setVisible(true);
 
-    final FPSAnimator anim =
-      new FPSAnimator(ViewerSingleMainWindow.FRAMES_PER_SECOND);
-    anim.setUpdateFPSFrames(
-      ViewerSingleMainWindow.FRAMES_PER_SECOND,
-      System.err);
+    final Animator anim = new Animator();
     anim.add(window);
     anim.start();
   }
