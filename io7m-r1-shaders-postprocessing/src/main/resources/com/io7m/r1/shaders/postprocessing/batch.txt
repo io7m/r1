@@ -8,3 +8,5 @@ fog                         : com.io7m.r1.postprocessing.PostprocessingFog.fog
 copy_rgba                   : com.io7m.r1.core.Copy.copy_rgba
 copy_rgba_depth             : com.io7m.r1.core.Copy.copy_rgba_depth
 copy_depth_to_rgba          : com.io7m.r1.core.Copy.copy_depth_to_rgba
+fxaa_luminance              : com.io7m.r1.postprocessing.PostprocessingFXAA.luminance
+fxaa_antialias              : com.io7m.r1.postprocessing.PostprocessingFXAA.antialias
