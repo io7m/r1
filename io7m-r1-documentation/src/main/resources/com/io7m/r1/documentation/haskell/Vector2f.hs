@@ -15,6 +15,7 @@
 module Vector2f (
   T (V2), x, y,
   add2,
+  dot2,
   magnitude,
   magnitude_squared,
   mult2,
