@@ -301,6 +301,29 @@
           <s:term s:type="term">basic shadows</s:term>, but can be filtered
           by hardware, resulting in attractive soft shadows.
         </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithShadowBasic.html">KLightSpherePseudoWithShadowBasic</s:link-external>
+          - a <s:term s:type="term">pseudo-spherical</s:term> light. A 
+          pseudo-spherical light behaves like a 
+          <s:term s:type="term">spherical</s:term> light but is emulated via 
+          at most six <s:term s:type="term">projective</s:term> lights 
+          arranged such that each light provides a section of the sphere. 
+          Individual lights can be enabled and disabled, and the lights can 
+          project <s:term s:type="term">basic shadows</s:term>.
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithShadowVariance.html">KLightSpherePseudoWithShadowVariance</s:link-external>
+          - is to <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithShadowBasic.html">KLightSpherePseudoWithShadowBasic</s:link-external>
+          as
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowVariance.html">KLightProjectiveWithShadowVariance</s:link-external>
+          is to
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowBasic.html">KLightProjectiveWithShadowBasic</s:link-external>.
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSphereTexturedCubeWithoutShadow.html">KLightSphereTexturedCubeWithoutShadow</s:link-external>
+          - a <s:term s:type="term">spherical</s:term> light that projects
+          a <s:term s:type="term">cube map</s:term> in all directions.
+        </s:list-item>
       </s:list-unordered>
     </s:formal-item>
     <s:paragraph>
