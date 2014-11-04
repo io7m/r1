@@ -29,25 +29,20 @@
       A <s:term s:type="term">mesh</s:term> is a collection of vertices
       and triangles that define a polyhedral object, allocated on the
       GPU upon which the renderer is executing. In practical terms, a
-      mesh is a 3-tuple
-      <s:term s:type="expression">(a, i, b)</s:term>, where
+      mesh is a pair
+      <s:term s:type="expression">(a, i)</s:term>, where
       <s:term s:type="expression">a</s:term> is an OpenGL
       <s:term s:type="term">vertex buffer object</s:term> consisting
       of vertices of a
       <s:link s:target="r1.dai.meshes.attributes">standard type</s:link>,
       <s:term s:type="expression">i</s:term> is an OpenGL
       <s:term s:type="term">element buffer object</s:term> consisting
-      of indices that describe how to draw the mesh as a series of triangles,
-      and <s:term s:type="expression">b</s:term> is the
-      <s:link s:target="r1.dai.coords.object-space">object-space</s:link>
-      bounds of the mesh data.
+      of indices that describe how to draw the mesh as a series of triangles.
     </s:paragraph>
     <s:paragraph>
       The contents of <s:term s:type="expression">a</s:term> are mutable, but
       mesh references are considered to be immutable as with all other objects 
-      in the renderer. The programmer is responsible for keeping all vertices
-      inside <s:term s:type="expression">b</s:term> when making any modifications
-      to <s:term s:type="expression">a</s:term>.
+      in the renderer.
     </s:paragraph>
   </s:subsection>
 
@@ -118,24 +113,6 @@
       Meshes explicitly store per-vertex <s:term s:type="term">tangent</s:term>
       vectors. The purpose and format of these vectors is given in the section
       on <s:link s:target="r1.dai.normal-mapping.tangent-space">normal mapping</s:link>.
-    </s:paragraph>
-  </s:subsection>
-
-  <s:subsection xml:id="r1.dai.meshes.bounds">
-    <s:subsection-title>Bounds</s:subsection-title>
-    <s:paragraph>
-      Meshes also carry information regarding their 
-      <s:link s:target="r1.dai.coords.object-space">object-space</s:link>
-      <s:term s:type="term">bounds</s:term>. The bounds are effectively defined as
-      the smallest axis-aligned bounding box that could contain all of the vertices
-      in the mesh. Note that the bounds are immutable! If the mesh contents are
-      going to be regularly modified, then the modifications should respect the
-      bounds.
-    </s:paragraph>
-    <s:paragraph>
-      The <s:term s:type="package">${project.parent.name}</s:term> package currently
-      only uses the bounds information when rendering
-      <s:link s:target="r1.dai.generic-refraction">generic refraction</s:link>.
     </s:paragraph>
   </s:subsection>
 
