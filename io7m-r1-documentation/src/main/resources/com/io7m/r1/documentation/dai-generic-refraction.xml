@@ -26,7 +26,47 @@
   <s:subsection xml:id="r1.dai.generic-refraction.overview">
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
-      Overview.
+      The <s:term s:type="package">${project.parent.name}</s:term> package
+      implements the <s:term s:type="term">generic refraction</s:term> effect
+      described in <s:link-external s:target="http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter19.html">GPU Gems 2</s:link-external>.
     </s:paragraph>
   </s:subsection>
+
+  <s:subsection xml:id="r1.dai.generic-refraction.algorithm">
+    <s:subsection-title>Algorithm</s:subsection-title>
+    <s:paragraph>
+      For a given instance with a
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRefractive.html">refractive</s:link-external>
+      material applied, the process to render the instance is as follows:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Rendering process</s:formal-item-title>
+      <s:list-unordered>
+        <s:list-item>
+          Make a temporary copy <s:term s:type="variable">b</s:term> of the current scene's color buffer.
+        </s:list-item>
+        <s:list-item>
+          If <s:link s:target="r1.dai.generic-refraction.masking">masking</s:link> is
+          enabled for the material, render a mask for the instance into a temporary
+          mask image <s:term s:type="variable">m</s:term>.
+        </s:list-item>
+        <s:list-item>
+          Render the instance, using <s:term s:type="variable">b</s:term> as the
+          refraction source, the <s:term s:type="variable">x</s:term> and 
+          <s:term s:type="variable">y</s:term> components of the instance's
+          (possibly <s:link s:target="r1.dai.normal-mapping">mapped</s:link>)
+          normal vectors as the refraction vector, and optionally 
+          <s:term s:type="variable">m</s:term> for masking.
+        </s:list-item>
+      </s:list-unordered>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.generic-refraction.masking">
+    <s:subsection-title>Masking</s:subsection-title>
+    <s:paragraph>
+      Masking.
+    </s:paragraph>
+  </s:subsection>
+
 </s:section>

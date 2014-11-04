@@ -32,8 +32,10 @@
       to those buffers in
       <s:link s:target="r1.dai.coords.screen-space">screen-space</s:link>.
       This is in contrast to <s:term s:type="term">forward rendering</s:term>,
-      where all lighting is applied to objects as they are rendered. One major
-      advantage of deferred rendering is a massive reduction in the number of
+      where all lighting is applied to objects as they are rendered.
+    </s:paragraph>
+    <s:paragraph xml:id="r1.dai.deferred.overview.shaders">
+      One major advantage of deferred rendering is a massive reduction in the number of
       shaders required (traditional forward rendering requires <s:term s:type="expression">s * l</s:term>
       shaders, where <s:term s:type="expression">s</s:term> is the number of
       different object surface types in the scene, and 
