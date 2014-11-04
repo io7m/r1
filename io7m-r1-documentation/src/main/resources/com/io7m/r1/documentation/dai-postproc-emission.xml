@@ -26,7 +26,54 @@
   <s:subsection xml:id="r1.dai.postproc.emission.overview">
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
-      Overview.
+      An <s:term s:type="term">emissive</s:term> surface is a surface
+      that appears to emit light. The <s:term s:type="package">${project.parent.name}</s:term> 
+      package offers emission as a visual effect implemented as a post-process. An optional
+      <s:term s:type="term">glow</s:term> effect is provided to allow emissive
+      surfaces to appear to have a configurable 
+      <s:link-external s:target="http://en.wikipedia.org/wiki/Halo_%28optical_phenomenon%29">aura</s:link-external>.
+    </s:paragraph>
+    <s:paragraph>
+      The emission effect is obviously not physically accurate - surfaces do not
+      really emit light. The user is expected to make intelligent use of the
+      standard <s:term s:type="r1.dai.lighting">light types</s:term> to provide
+      lighting, and to use the emission effect to complement them.
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Emission</s:formal-item-title>
+      <s:image s:source="images/emission.png">Emission</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.postproc.emission.algorithm">
+    <s:subsection-title>Algorithm</s:subsection-title>
+    <s:paragraph>
+      The plain emission effect without <s:term s:type="term">glow</s:term> is 
+      implemented as trivially as possible by sampling the 
+      <s:link s:target="r1.dai.deferred.g-buffer">emission</s:link>
+      value from a rendered scene's <s:term s:type="term">g-buffer</s:term>,
+      multiplying it by the <s:term s:type="term">albedo</s:term> color and then
+      simply adding the result to the current pixel color.
+    </s:paragraph>
+    <s:paragraph>
+      The emission effect with <s:term s:type="term">glow</s:term> is implemented
+      similarly, except that the <s:term s:type="expression">albedo * emission</s:term>
+      term is stored in a separate image, and that image is blurred with a configurable
+      <s:term s:type="term">box blur</s:term> before being additively blended over the
+      original scene. Higher levels of blurring can give the impression of a dusty
+      atmosphere.
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Emission (Glow)</s:formal-item-title>
+      <s:image s:source="images/emission_glow.png">Emission (Glow)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The emission effect without glow is provided by the
+      <s:link-external s:target="apidocs/com/io7m/r1/meshes/KPostprocessorEmission.html">KPostprocessorEmission</s:link-external>
+      postprocessor. The emission effect with glow is provided by the
+      <s:link-external s:target="apidocs/com/io7m/r1/meshes/KPostprocessorEmissionGlow.html">KPostprocessorEmissionGlow</s:link-external>
+      postprocessor.
     </s:paragraph>
   </s:subsection>
+
 </s:section>
