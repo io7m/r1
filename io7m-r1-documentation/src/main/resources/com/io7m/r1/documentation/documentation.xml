@@ -327,6 +327,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.]]>
     <xi:include href="dai-shadow-mapping-variance.xml"/>
     <xi:include href="dai-generic-refraction.xml"/>
     <xi:include href="dai-postproc-emission.xml"/>
+    <xi:include href="dai-postproc-fxaa.xml"/>
   </s:part>
 
   <s:part>

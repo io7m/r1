@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.postproc.fxaa"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Postprocess: FXAA</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.postproc.fxaa.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Fast Approximate Anti-Aliasing</s:term> is a simple
+      algorithm that attempts to detect and smooth <s:term s:type="term">aliasing</s:term>
+      in a color image. The algorithm works with only the color components of the
+      image in question; no other per-pixel information or knowledge of the scene
+      is required.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Without FXAA</s:formal-item-title>
+      <s:image s:source="images/fxaa_without.png">Without FXAA</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>With FXAA</s:formal-item-title>
+      <s:image s:source="images/fxaa_with.png">With FXAA</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.postproc.fxaa.implementation">
+    <s:subsection-title>Implementation</s:subsection-title>
+    <s:paragraph>
+      Unfortunately, information on the FXAA algorithm is sparse, and much of it
+      has been lost to time. The original FXAA algorithm was published in a
+      whitepaper by NVIDIA
+      <s:footnote>
+        <s:link-external s:target="http://developer.download.nvidia.com/assets/gamedev/files/sdk/11/FXAA_WhitePaper.pdf">http://developer.download.nvidia.com/assets/gamedev/files/sdk/11/FXAA_WhitePaper.pdf</s:link-external>
+      </s:footnote> and was severely optimized by the author on the suggestions
+      of many mostly anonymous contributors. The latest published version of
+      the algorithm (version 3.11) bears little resemblance to the original
+      and no documentation exists on the changes. The 3.11 version of the
+      algorithm is constructed from a maze of C preprocessor macros, and
+      many different variations of the algorithm are possible based on how
+      the parameter macros are defined.
+    </s:paragraph>
+    <s:paragraph>
+      The implementation of FXAA in the <s:term s:type="package">${project.parent.name}</s:term>
+      package is a port to Parasol from the GLSL port produced as part of
+      the GLGE project
+      <s:footnote>
+        <s:link-external s:target="http://www.glge.org/demos/fxaa/">http://www.glge.org/demos/fxaa/</s:link-external>
+      </s:footnote>. The resulting algorithm appears to be a simplification
+      of one of the many possible macro expansions of the 3.11 version. The
+      algorithm is applied via the use of the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KPostprocessorFXAA.html">KPostprocessorFXAA</s:link-external>
+      postprocessor.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>
