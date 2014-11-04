@@ -26,7 +26,102 @@
   <s:subsection xml:id="r1.dai.forward-translucents.overview">
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
-      Overview.
+      Because the <s:link s:target="r1.dai.deferred">deferred renderer</s:link> in
+      the <s:term s:type="package">${project.parent.name}</s:term> package is incapable
+      of rendering <s:term s:type="term">translucent instances</s:term>, a separate
+      <s:term s:type="term">forward renderer</s:term> is provided. The
+      <s:term s:type="term">forward renderer</s:term> in the package can only work
+      with a subset of the available <s:link s:target="r1.dai.lighting">light types</s:link>,
+      in order to prevent the 
+      <s:link s:target="r1.dai.deferred.overview.shaders">combinatorial explosion</s:link>
+      of shaders required to support a large number of light and surface types.
+    </s:paragraph>
+    <s:paragraph>
+      Translucent instances are divided into 
+      <s:link s:target="r1.dai.forward-translucents.lit">lit</s:link>
+      and
+      <s:link s:target="r1.dai.forward-translucents.unlit">unlit</s:link> categories.
+      As stated previously, translucent instances are drawn in the order that they are
+      submitted to the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KVisibleSetTranslucentsBuilderType.html">visible set builder</s:link-external>.
+      A lit instance is submitted to the builder with the set of lights that affect it.
+      Only lights of type
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightTranslucentType.html">KLightTranslucentType</s:link-external>
+      can be applied to translucent instances. Rendering of translucent instances
+      typically occurs after the rendering of opaque instances and so rendering
+      works with a depth buffer that has already been populated. Depth testing is
+      enabled to ensure that instances overlap and are overlapped by existing opaque
+      instances, but translucent instances
+      do not have their depths written into the depth buffer, and so care should be
+      taken when rendering translucent instances that intersect with each other
+      <s:footnote>
+        It is fairly widely acknowledged that there is no completely satisfactory
+        solution to the problem of rendering intersecting translucent objects. The
+        <s:term s:type="package">${project.parent.name}</s:term> package makes no
+        attempt to solve the problem.
+      </s:footnote>.
     </s:paragraph>
   </s:subsection>
+
+  <s:subsection xml:id="r1.dai.forward-translucents.lit">
+    <s:subsection-title>Lit</s:subsection-title>
+    <s:paragraph>
+      Lit translucent instances can have
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRegular.html">regular</s:link-external>
+      and
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentSpecularOnly.html">specular-only</s:link-external>
+      materials. Specular-only materials result in only a specular term
+      being calculated for a given object, which is useful for implementing
+      glass-like objects:
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Specular Only</s:formal-item-title>
+      <s:image s:source="images/speconly.png">Specular Only</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Rendering of lit instances proceeds as follows:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Lit instance rendering</s:formal-item-title>
+      <s:list-ordered>
+        <s:list-item>
+          For each light <s:term s:type="variable">k</s:term> affecting the instance
+          <s:term s:type="variable">o</s:term>:
+          <s:list-ordered>
+            <s:list-item>
+              If <s:term s:type="variable">k</s:term> is the first light in the set,
+              set the blending functions to 
+              <s:term s:type="expression">(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA)</s:term>.
+              That is, the source color will be multiplied by <s:term s:type="expression">1</s:term>
+              and the destination color will be multiplied by
+              <s:term s:type="expression">1 - alpha</s:term>. This has the effect of
+              setting the overall "opacity" of the object for subsequent light contributions. 
+              If <s:term s:type="variable">k</s:term>
+              is not the first light in the set, set the blending functions to
+              <s:term s:type="expression">(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE)</s:term>.
+              This is the standard additive blending used to sum light contributions.
+            </s:list-item>
+            <s:list-item>
+              Render <s:term s:type="variable">o</s:term>, lit by
+              <s:term s:type="variable">k</s:term>.
+            </s:list-item>
+          </s:list-ordered>
+        </s:list-item>
+      </s:list-ordered>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.forward-translucents.unlit">
+    <s:subsection-title>Unlit</s:subsection-title>
+    <s:paragraph>
+      Unlit translucent instances can have
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRegular.html">regular</s:link-external>
+      and
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRefractive.html">refractive</s:link-external>
+      materials. Refractive materials are implemented using the
+      <s:link s:target="r1.dai.generic-refraction">generic refraction</s:link>
+      effect.
+    </s:paragraph>
+  </s:subsection>
+
 </s:section>
