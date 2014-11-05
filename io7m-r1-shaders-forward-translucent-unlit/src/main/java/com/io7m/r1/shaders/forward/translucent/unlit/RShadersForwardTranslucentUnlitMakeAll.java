@@ -34,6 +34,7 @@ import com.io7m.jlog.LogPolicyProperties;
 import com.io7m.jlog.LogPolicyType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.Nullable;
+import com.io7m.jparasol.CompilerError;
 import com.io7m.jparasol.UIError;
 import com.io7m.jparasol.core.GVersionES;
 import com.io7m.jparasol.core.GVersionFull;
@@ -105,16 +106,16 @@ import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
         code);
     }
 
-    batch.addShaderWithOutputName(TASTShaderNameFlat.parse(
-      "com.io7m.r1.core.Refraction.mask",
-      meta), "refraction_mask");
+    batch.addShaderWithOutputName(
+      TASTShaderNameFlat.parse("com.io7m.r1.core.Refraction.mask", meta),
+      "refraction_mask");
 
     return batch;
   }
 
   /**
    * Main program.
-   * 
+   *
    * @param args
    *          Command line arguments.
    * @throws Exception
@@ -155,52 +156,66 @@ import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
       }
     }
 
-    final List<KMaterialTranslucentRegular> translucent_regular =
-      new RKFUnlitTranslucentRegularCases().getCases();
-    final List<KMaterialTranslucentRefractive> translucent_refractive =
-      new RKFUnlitTranslucentRefractiveCases().getCases();
+    try {
+      final List<KMaterialTranslucentRegular> translucent_regular =
+        new RKFUnlitTranslucentRegularCases().getCases();
+      final List<KMaterialTranslucentRefractive> translucent_refractive =
+        new RKFUnlitTranslucentRefractiveCases().getCases();
 
-    RShadersForwardTranslucentUnlitMakeAll
-      .makeSourcesUnlitTranslucentRegular(
-        log,
-        translucent_regular,
-        out_parasol_dir);
+      RShadersForwardTranslucentUnlitMakeAll
+        .makeSourcesUnlitTranslucentRegular(
+          log,
+          translucent_regular,
+          out_parasol_dir);
 
-    RShadersForwardTranslucentUnlitMakeAll
-      .makeSourcesUnlitTranslucentRefractive(
-        log,
-        translucent_refractive,
-        out_parasol_dir);
+      RShadersForwardTranslucentUnlitMakeAll
+        .makeSourcesUnlitTranslucentRefractive(
+          log,
+          translucent_refractive,
+          out_parasol_dir);
 
-    final CompilerBatch batch =
-      RShadersForwardTranslucentUnlitMakeAll.generateBatches(
-        translucent_regular,
-        translucent_refractive);
+      final CompilerBatch batch =
+        RShadersForwardTranslucentUnlitMakeAll.generateBatches(
+          translucent_regular,
+          translucent_refractive);
 
-    final List<File> sources =
-      RShadersForwardTranslucentUnlitMakeAll.makeSourcesList(out_parasol_dir);
+      final List<File> sources =
+        RShadersForwardTranslucentUnlitMakeAll
+          .makeSourcesList(out_parasol_dir);
 
-    final ExecutorService e =
-      Executors
-        .newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
-    assert e != null;
+      final ExecutorService e =
+        Executors.newFixedThreadPool(Runtime
+          .getRuntime()
+          .availableProcessors() * 2);
+      assert e != null;
 
-    final ZipOutputStream archive_stream = CopyZip.copyZip(log, out_archive);
-    final GSerializerType serializer =
-      GSerializerZip.newSerializer(archive_stream, log);
+      final ZipOutputStream archive_stream =
+        CopyZip.copyZip(log, out_archive);
+      final GSerializerType serializer =
+        GSerializerZip.newSerializer(archive_stream, log);
 
-    final Compiler c = Compiler.newCompiler(log, e);
-    c.setCompacting(true);
-    c.setGeneratingCode(true);
-    c.setRequiredES(GVersionES.ALL);
-    c.setRequiredFull(GVersionFull.ALL);
-    c.setSerializer(serializer);
-    c.runForFiles(batch, sources);
+      final Compiler c = Compiler.newCompiler(log, e);
+      c.setCompacting(true);
+      c.setGeneratingCode(true);
+      c.setRequiredES(GVersionES.ALL);
+      c.setRequiredFull(GVersionFull.ALL);
+      c.setSerializer(serializer);
+      c.runForFiles(batch, sources);
 
-    serializer.close();
-    e.shutdown();
+      serializer.close();
+      e.shutdown();
 
-    log.debug("done");
+      log.debug("done");
+
+    } catch (final CompilerError e) {
+      System.err.printf(
+        "%s: %s:%s: %s\n",
+        e,
+        e.getFile(),
+        e.getPosition(),
+        e.getMessage());
+      throw e;
+    }
   }
 
   private static List<File> makeSourcesList(

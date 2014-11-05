@@ -166,9 +166,7 @@ import com.io7m.r1.types.RExceptionJCGL;
               }
             });
 
-          if (material.materialRequiresUVCoordinates()) {
-            KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
-          }
+          KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
 
           program
             .programExecute(new JCBProgramProcedureType<JCGLException>() {

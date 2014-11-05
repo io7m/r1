@@ -46,8 +46,10 @@ import com.io7m.r1.kernel.types.KMaterialEmissiveMapped;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflection;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflectionMapped;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
-import com.io7m.r1.kernel.types.KMaterialRefractiveMasked;
-import com.io7m.r1.kernel.types.KMaterialRefractiveUnmasked;
+import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedDeltaTextured;
+import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedNormals;
+import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedDeltaTextured;
+import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedNormals;
 import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KMeshAttributes;
@@ -139,6 +141,8 @@ import com.io7m.r1.types.RVectorReadable4FType;
                                                                    "t_projection";
   private static final String TEXTURE_NAME_REFRACTION_SCENE      =
                                                                    "t_refraction_scene";
+  private static final String TEXTURE_NAME_REFRACTION_DELTA      =
+                                                                   "t_refraction_delta";
   private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK =
                                                                    "t_refraction_scene_mask";
   private static final String TEXTURE_NAME_SHADOW_BASIC          =
@@ -1120,12 +1124,19 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putMaterialRefractiveMasked(
     final JCBProgramType program,
-    final KMaterialRefractiveMasked material)
+    final KMaterialRefractiveMaskedNormals material)
     throws JCGLException
   {
     KShadingProgramCommon.putMaterialRefractiveScale(
       program,
       material.getScale());
+  }
+
+  static void putMaterialRefractiveMaskedDeltaTextured(
+    final JCBProgramType program,
+    final KMaterialRefractiveMaskedDeltaTextured m)
+  {
+    KShadingProgramCommon.putMaterialRefractiveScale(program, m.getScale());
   }
 
   static void putMaterialRefractiveScale(
@@ -1138,12 +1149,19 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putMaterialRefractiveUnmasked(
     final JCBProgramType program,
-    final KMaterialRefractiveUnmasked material)
+    final KMaterialRefractiveUnmaskedNormals material)
     throws JCGLException
   {
     KShadingProgramCommon.putMaterialRefractiveScale(
       program,
       material.getScale());
+  }
+
+  static void putMaterialRefractiveUnmaskedDeltaTextured(
+    final JCBProgramType program,
+    final KMaterialRefractiveUnmaskedDeltaTextured m)
+  {
+    KShadingProgramCommon.putMaterialRefractiveScale(program, m.getScale());
   }
 
   static void putMaterialSpecularColor(
@@ -1683,11 +1701,6 @@ import com.io7m.r1.types.RVectorReadable4FType;
       unit);
   }
 
-  private KShadingProgramCommon()
-  {
-    throw new UnreachableCodeException();
-  }
-
   static void putViewport(
     final JCBProgramType program,
     final float inverse_width,
@@ -1725,5 +1738,19 @@ import com.io7m.r1.types.RVectorReadable4FType;
     program.programUniformPutVector3f(
       "view_rays.ray_x1y1",
       view_rays.getRayX1Y1());
+  }
+
+  private KShadingProgramCommon()
+  {
+    throw new UnreachableCodeException();
+  }
+
+  static void putRefractionTextureDelta(
+    final JCBProgramType program,
+    final TextureUnitType t)
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_REFRACTION_DELTA,
+      t);
   }
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,41 +16,50 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jnull.NullCheck;
 import com.io7m.r1.types.RException;
 
 /**
- * Properties for unmasked refraction.
+ * Properties for masked refraction.
  */
 
-@EqualityReference public final class KMaterialRefractiveUnmasked implements
+@EqualityReference public final class KMaterialRefractiveMaskedDeltaTextured implements
   KMaterialRefractiveType
 {
   /**
    * Construct new material properties.
-   * 
+   *
    * @param in_scale
    *          The scale of refraction.
+   * @param in_texture
+   *          The texture used to offset pixels for refraction.
+   *
    * @return Material properties.
    */
 
-  public static KMaterialRefractiveUnmasked unmasked(
-    final float in_scale)
+  public static KMaterialRefractiveMaskedDeltaTextured masked(
+    final float in_scale,
+    final Texture2DStaticUsableType in_texture)
   {
-    return new KMaterialRefractiveUnmasked(in_scale);
+    return new KMaterialRefractiveMaskedDeltaTextured(in_scale, in_texture);
   }
 
-  private final float scale;
+  private final float                     scale;
+  private final Texture2DStaticUsableType texture;
 
-  private KMaterialRefractiveUnmasked(
-    final float in_scale)
+  private KMaterialRefractiveMaskedDeltaTextured(
+    final float in_scale,
+    final Texture2DStaticUsableType in_texture)
   {
     this.scale = in_scale;
+    this.texture = NullCheck.notNull(in_texture, "Texture");
   }
 
   @Override public String codeGet()
   {
-    return "RefrU";
+    return "RefrMaskedRGTextured";
   }
 
   /**
@@ -62,9 +71,18 @@ import com.io7m.r1.types.RException;
     return this.scale;
   }
 
+  /**
+   * @return The texture containing x/y deltas.
+   */
+
+  public Texture2DStaticUsableType getTexture()
+  {
+    return this.texture;
+  }
+
   @Override public boolean materialRequiresUVCoordinates()
   {
-    return false;
+    return true;
   }
 
   @Override public
@@ -75,19 +93,21 @@ import com.io7m.r1.types.RException;
       throws E,
         RException
   {
-    return v.unmasked(this);
+    return v.maskedDeltaTextured(this);
   }
 
   @Override public int texturesGetRequired()
   {
-    return 0;
+    return 1;
   }
 
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[KMaterialRefractiveUnmasked scale=");
+    b.append("[KMaterialRefractiveMasked scale=");
     b.append(this.scale);
+    b.append(" ");
+    b.append(this.getTexture());
     b.append("]");
     final String r = b.toString();
     assert r != null;
