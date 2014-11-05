@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,6 +16,7 @@
 
 package com.io7m.r1.examples.scenes;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +27,7 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
+import com.io7m.r1.examples.ExampleViewLookAt;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
@@ -49,17 +51,16 @@ import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RVectorI3F;
 
 /**
- * A demonstration that (specular-only) translucency with multiple lights
- * looks correct.
+ * A demonstration that refraction works.
  */
 
-public final class STranslucentRefractive0 implements ExampleSceneType
+public final class STranslucentRefractive2 implements ExampleSceneType
 {
   /**
    * Construct the example.
    */
 
-  public STranslucentRefractive0()
+  public STranslucentRefractive2()
   {
 
   }
@@ -208,6 +209,12 @@ public final class STranslucentRefractive0 implements ExampleSceneType
 
   @Override public List<ExampleViewType> exampleViewpoints()
   {
-    return ExampleSceneUtilities.STANDARD_VIEWS_CLOSE_3;
+    final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
+    views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+      0.0f,
+      2.0f,
+      1.0f), ExampleSceneUtilities.CENTER));
+
+    return views;
   }
 }

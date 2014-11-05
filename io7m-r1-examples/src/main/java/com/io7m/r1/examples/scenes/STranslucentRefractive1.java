@@ -37,7 +37,7 @@ import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
-import com.io7m.r1.kernel.types.KMaterialRefractiveUnmasked;
+import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedNormals;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
@@ -121,7 +121,7 @@ public final class STranslucentRefractive1 implements ExampleSceneType
       KMaterialTranslucentRefractive.newMaterial(
         ExampleSceneUtilities.IDENTITY_UV,
         KMaterialNormalMapped.mapped(scene.texture("sea_tile_normal.png")),
-        KMaterialRefractiveUnmasked.unmasked(1.0f));
+        KMaterialRefractiveUnmaskedNormals.unmasked(1.0f));
 
     final KInstanceTranslucentRefractive glass_refr =
       KInstanceTranslucentRefractive.newInstance(

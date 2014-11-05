@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -23,26 +23,26 @@ import com.io7m.r1.types.RException;
  * Properties for masked refraction.
  */
 
-@EqualityReference public final class KMaterialRefractiveMasked implements
+@EqualityReference public final class KMaterialRefractiveMaskedNormals implements
   KMaterialRefractiveType
 {
   /**
    * Construct new material properties.
-   * 
+   *
    * @param in_scale
    *          The scale of refraction.
    * @return Material properties.
    */
 
-  public static KMaterialRefractiveMasked masked(
+  public static KMaterialRefractiveMaskedNormals masked(
     final float in_scale)
   {
-    return new KMaterialRefractiveMasked(in_scale);
+    return new KMaterialRefractiveMaskedNormals(in_scale);
   }
 
   private final float scale;
 
-  private KMaterialRefractiveMasked(
+  private KMaterialRefractiveMaskedNormals(
     final float in_scale)
   {
     this.scale = in_scale;
@@ -50,7 +50,7 @@ import com.io7m.r1.types.RException;
 
   @Override public String codeGet()
   {
-    return "RefrM";
+    return "RefrMaskedNormals";
   }
 
   /**
@@ -75,7 +75,7 @@ import com.io7m.r1.types.RException;
       throws E,
         RException
   {
-    return v.masked(this);
+    return v.maskedNormals(this);
   }
 
   @Override public int texturesGetRequired()
