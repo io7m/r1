@@ -290,6 +290,12 @@ public final class ExampleSceneUtilities
 
   public static final VectorReadable3FType                           Z_AXIS;
 
+  /**
+   * The standard range views for a "large room" example.
+   */
+
+  public static final List<ExampleViewType>                          LARGE_ROOM_VIEWS;
+
   // CHECKSTYLE:OFF
   static {
     // CHECKSTYLE:ON
@@ -480,6 +486,64 @@ public final class ExampleSceneUtilities
           4.0f,
           8.0f), ExampleSceneUtilities.CENTER));
         FAR_VIEWS_5 = Collections.unmodifiableList(views);
+      }
+
+      {
+        final List<ExampleViewType> v = new ArrayList<ExampleViewType>();
+        final RVectorI3F<RSpaceWorldType> center = RVectorI3F.zero();
+
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -6.0f,
+          3.0f,
+          6.0f), center));
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          0.0f,
+          3.0f,
+          6.0f), center));
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          6.0f,
+          3.0f,
+          6.0f), center));
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          6.0f,
+          3.0f,
+          0.0f), center));
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          6.0f,
+          3.0f,
+          -6.0f), center));
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          0.0f,
+          3.0f,
+          -6.0f), center));
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -6.0f,
+          3.0f,
+          -6.0f), center));
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -6.0f,
+          3.0f,
+          0.0f), center));
+
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -6.0f,
+          -6.0f,
+          6.0f), center));
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          6.0f,
+          -6.0f,
+          6.0f), center));
+
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          6.0f,
+          -6.0f,
+          -6.0f), center));
+        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+          -6.0f,
+          -6.0f,
+          -6.0f), center));
+
+        LARGE_ROOM_VIEWS = Collections.unmodifiableList(v);
       }
 
       {

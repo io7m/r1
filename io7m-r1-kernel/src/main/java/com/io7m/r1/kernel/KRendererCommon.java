@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -146,10 +146,7 @@ import com.io7m.r1.types.RException;
       program,
       mwi.getMatrixModelView());
     KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
-
-    if (material.materialRequiresUVCoordinates()) {
-      KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
-    }
+    KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
   }
 
   static void putInstanceTexturesRegular(
@@ -527,9 +524,7 @@ import com.io7m.r1.types.RException;
           KShadingProgramCommon.putShadowBasic(
             program,
             lp.lightGetShadowBasic());
-          KShadingProgramCommon.putTextureShadowMapBasic(
-            program,
-            unit);
+          KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
           return Unit.unit();
         }
 
@@ -548,9 +543,7 @@ import com.io7m.r1.types.RException;
           KShadingProgramCommon.putShadowVariance(
             program,
             lp.lightGetShadowVariance());
-          KShadingProgramCommon.putTextureShadowMapVariance(
-            program,
-            unit);
+          KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
           return Unit.unit();
         }
       });
@@ -570,8 +563,7 @@ import com.io7m.r1.types.RException;
             JCGLException
         {
           KShadingProgramCommon.putShadowBasicReuse(program);
-          KShadingProgramCommon
-            .putTextureShadowMapBasicReuse(program);
+          KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
           return Unit.unit();
         }
 
@@ -581,8 +573,7 @@ import com.io7m.r1.types.RException;
             JCGLException
         {
           KShadingProgramCommon.putShadowVarianceReuse(program);
-          KShadingProgramCommon
-            .putTextureShadowMapVarianceReuse(program);
+          KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
           return Unit.unit();
         }
       });

@@ -33,8 +33,28 @@ module Refraction is
   --
 
   type t is record
-    scale : float
+    scale : float,
+    color : vector_4f
   end;
+
+  --
+  -- Functions to unpack delta values from textures.
+  --
+
+  function delta_unpack (v : vector_4f) : vector_2f =
+    Vector2f.subtract_scalar (Vector2f.multiply_scalar (v [x y], 2.0), 1.0);
+    
+  function delta_get (
+    t : sampler_2d,
+    u : vector_2f,
+    s : float
+  ) : vector_2f =
+    Vector2f.multiply_scalar (delta_unpack (Sampler2D.texture (t, u)), s);
+
+  --
+  -- Refraction functions that sample from the scene based on an offset
+  -- that is calculated from the object's surface normal.
+  --
 
   function refraction_masked (
     refraction   : t,
@@ -67,7 +87,48 @@ module Refraction is
       value uv_there    = Transform.clip_to_texture (displaced) [x y];
       value scene_there = Sampler2D.texture (t_scene, uv_there);
     in
-      scene_there
+      Vector4f.multiply (scene_there, refraction.color)
+    end;
+
+  --
+  -- Refraction functions that sample from the scene based on an offset
+  -- that is read directly from a texture.
+  --
+
+  function refraction_masked_delta_textured (
+    refraction   : t,
+    t_scene      : sampler_2d,
+    t_scene_mask : sampler_2d,
+    t_delta      : sampler_2d,
+    uv           : vector_2f,
+    p            : vector_4f
+  ) : vector_4f =
+    let
+      value delta       = delta_get (t_delta, uv, refraction.scale);
+      value uv_here     = Transform.clip_to_texture (p) [x y];
+      value uv_there    = Vector2f.add (uv_here, delta);
+      value scene_here  = Sampler2D.texture (t_scene, uv_here);
+      value scene_there = Sampler2D.texture (t_scene, uv_there);
+      value mask_there  = Sampler2D.texture (t_scene_mask, uv_there) [x];
+      value mixed       = Vector4f.interpolate (scene_here, scene_there, mask_there);
+    in
+      Vector4f.multiply (mixed, refraction.color)
+    end;
+
+  function refraction_unmasked_delta_textured (
+    refraction  : t,
+    t_scene     : sampler_2d,
+    t_delta     : sampler_2d,
+    uv          : vector_2f,
+    p           : vector_4f
+  ) : vector_4f =
+    let
+      value delta       = delta_get (t_delta, uv, refraction.scale);
+      value uv_here     = Transform.clip_to_texture (p) [x y];
+      value uv_there    = Vector2f.add (uv_here, delta);
+      value scene_there = Sampler2D.texture (t_scene, uv_there);
+    in
+      Vector4f.multiply (scene_there, refraction.color)
     end;
 
   --
