@@ -19,6 +19,7 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.r1.types.RException;
 
 /**
@@ -35,31 +36,40 @@ import com.io7m.r1.types.RException;
    *          The scale of refraction.
    * @param in_texture
    *          The texture used to offset pixels for refraction.
+   * @param in_color
+   *          The color by which to multiply the refracted scene.
    *
    * @return Material properties.
    */
 
-  public static KMaterialRefractiveMaskedDeltaTextured masked(
+  public static KMaterialRefractiveMaskedDeltaTextured create(
     final float in_scale,
-    final Texture2DStaticUsableType in_texture)
+    final Texture2DStaticUsableType in_texture,
+    final VectorReadable4FType in_color)
   {
-    return new KMaterialRefractiveMaskedDeltaTextured(in_scale, in_texture);
+    return new KMaterialRefractiveMaskedDeltaTextured(
+      in_scale,
+      in_texture,
+      in_color);
   }
 
   private final float                     scale;
   private final Texture2DStaticUsableType texture;
+  private final VectorReadable4FType      color;
 
   private KMaterialRefractiveMaskedDeltaTextured(
     final float in_scale,
-    final Texture2DStaticUsableType in_texture)
+    final Texture2DStaticUsableType in_texture,
+    final VectorReadable4FType in_color)
   {
     this.scale = in_scale;
     this.texture = NullCheck.notNull(in_texture, "Texture");
+    this.color = NullCheck.notNull(in_color, "Color");
   }
 
   @Override public String codeGet()
   {
-    return "RefrMaskedRGTextured";
+    return "RefrMaskedDeltaTextured";
   }
 
   /**
@@ -78,6 +88,15 @@ import com.io7m.r1.types.RException;
   public Texture2DStaticUsableType getTexture()
   {
     return this.texture;
+  }
+
+  /**
+   * @return The multiplication color.
+   */
+
+  public VectorReadable4FType getColor()
+  {
+    return this.color;
   }
 
   @Override public boolean materialRequiresUVCoordinates()
@@ -108,6 +127,8 @@ import com.io7m.r1.types.RException;
     b.append(this.scale);
     b.append(" ");
     b.append(this.getTexture());
+    b.append(" ");
+    b.append(this.color);
     b.append("]");
     final String r = b.toString();
     assert r != null;

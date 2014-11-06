@@ -33,7 +33,8 @@ module Refraction is
   --
 
   type t is record
-    scale : float
+    scale : float,
+    color : vector_4f
   end;
 
   --
@@ -86,7 +87,7 @@ module Refraction is
       value uv_there    = Transform.clip_to_texture (displaced) [x y];
       value scene_there = Sampler2D.texture (t_scene, uv_there);
     in
-      scene_there
+      Vector4f.multiply (scene_there, refraction.color)
     end;
 
   --
@@ -109,8 +110,9 @@ module Refraction is
       value scene_here  = Sampler2D.texture (t_scene, uv_here);
       value scene_there = Sampler2D.texture (t_scene, uv_there);
       value mask_there  = Sampler2D.texture (t_scene_mask, uv_there) [x];
+      value mixed       = Vector4f.interpolate (scene_here, scene_there, mask_there);
     in
-      Vector4f.interpolate (scene_here, scene_there, mask_there)
+      Vector4f.multiply (mixed, refraction.color)
     end;
 
   function refraction_unmasked_delta_textured (
@@ -126,7 +128,7 @@ module Refraction is
       value uv_there    = Vector2f.add (uv_here, delta);
       value scene_there = Sampler2D.texture (t_scene, uv_there);
     in
-      scene_there
+      Vector4f.multiply (scene_there, refraction.color)
     end;
 
   --

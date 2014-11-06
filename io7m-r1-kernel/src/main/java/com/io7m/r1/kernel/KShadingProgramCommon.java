@@ -29,6 +29,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM4F;
+import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightDirectional;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
@@ -1122,7 +1123,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
     KShadingProgramCommon.putMaterialEnvironmentMix(program, envi.getMix());
   }
 
-  static void putMaterialRefractiveMasked(
+  static void putMaterialRefractiveMaskedNormals(
     final JCBProgramType program,
     final KMaterialRefractiveMaskedNormals material)
     throws JCGLException
@@ -1130,6 +1131,9 @@ import com.io7m.r1.types.RVectorReadable4FType;
     KShadingProgramCommon.putMaterialRefractiveScale(
       program,
       material.getScale());
+    KShadingProgramCommon.putMaterialRefractiveColor(
+      program,
+      material.getColor());
   }
 
   static void putMaterialRefractiveMaskedDeltaTextured(
@@ -1137,6 +1141,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
     final KMaterialRefractiveMaskedDeltaTextured m)
   {
     KShadingProgramCommon.putMaterialRefractiveScale(program, m.getScale());
+    KShadingProgramCommon.putMaterialRefractiveColor(program, m.getColor());
   }
 
   static void putMaterialRefractiveScale(
@@ -1147,7 +1152,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
     program.programUniformPutFloat("p_refraction.scale", scale);
   }
 
-  static void putMaterialRefractiveUnmasked(
+  static void putMaterialRefractiveUnmaskedNormals(
     final JCBProgramType program,
     final KMaterialRefractiveUnmaskedNormals material)
     throws JCGLException
@@ -1155,6 +1160,16 @@ import com.io7m.r1.types.RVectorReadable4FType;
     KShadingProgramCommon.putMaterialRefractiveScale(
       program,
       material.getScale());
+    KShadingProgramCommon.putMaterialRefractiveColor(
+      program,
+      material.getColor());
+  }
+
+  static void putMaterialRefractiveColor(
+    final JCBProgramType program,
+    final VectorReadable4FType color)
+  {
+    program.programUniformPutVector4f("p_refraction.color", color);
   }
 
   static void putMaterialRefractiveUnmaskedDeltaTextured(
@@ -1162,6 +1177,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
     final KMaterialRefractiveUnmaskedDeltaTextured m)
   {
     KShadingProgramCommon.putMaterialRefractiveScale(program, m.getScale());
+    KShadingProgramCommon.putMaterialRefractiveColor(program, m.getColor());
   }
 
   static void putMaterialSpecularColor(

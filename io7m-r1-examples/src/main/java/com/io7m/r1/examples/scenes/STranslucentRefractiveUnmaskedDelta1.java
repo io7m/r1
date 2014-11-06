@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -51,11 +51,9 @@ import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RMatrixM4x4F;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RTransformProjectionType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RVectorI3F;
 import com.io7m.r1.types.RVectorI4F;
@@ -70,17 +68,13 @@ import com.io7m.r1.types.RVectorI4F;
 public final class STranslucentRefractiveUnmaskedDelta1 implements
   ExampleSceneType
 {
-  private final RMatrixM4x4F<RTransformProjectionType> projection;
-  private int                                          frame;
-  private float                                        offset;
-
   /**
    * Construct the example.
    */
 
   public STranslucentRefractiveUnmaskedDelta1()
   {
-    this.projection = new RMatrixM4x4F<RTransformProjectionType>();
+
   }
 
   @Override public String exampleGetName()
@@ -118,9 +112,10 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
       KMaterialTranslucentRefractive.newMaterial(
         muv,
         KMaterialNormalVertex.vertex(),
-        KMaterialRefractiveUnmaskedDeltaTextured.unmasked(
+        KMaterialRefractiveUnmaskedDeltaTextured.create(
           0.05f,
-          scene.texture("dudv_clouds.png")));
+          scene.texture("dudv_clouds.png"),
+          ExampleSceneUtilities.RGBA_WHITE));
 
     final KInstanceTranslucentRefractive m_tr =
       KInstanceTranslucentRefractive.newInstance(
@@ -303,6 +298,6 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
 
   @Override public List<ExampleViewType> exampleViewpoints()
   {
-    return ExampleSceneUtilities.STANDARD_VIEWS_5;
+    return ExampleSceneUtilities.LARGE_ROOM_VIEWS;
   }
 }
