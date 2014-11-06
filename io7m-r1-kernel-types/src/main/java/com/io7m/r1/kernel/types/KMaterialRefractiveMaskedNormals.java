@@ -17,6 +17,8 @@
 package com.io7m.r1.kernel.types;
 
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.r1.types.RException;
 
 /**
@@ -31,21 +33,28 @@ import com.io7m.r1.types.RException;
    *
    * @param in_scale
    *          The scale of refraction.
+   * @param in_color
+   *          The color by which to multiply the refracted scene.
+   *
    * @return Material properties.
    */
 
-  public static KMaterialRefractiveMaskedNormals masked(
-    final float in_scale)
+  public static KMaterialRefractiveMaskedNormals create(
+    final float in_scale,
+    final VectorReadable4FType in_color)
   {
-    return new KMaterialRefractiveMaskedNormals(in_scale);
+    return new KMaterialRefractiveMaskedNormals(in_scale, in_color);
   }
 
-  private final float scale;
+  private final float                scale;
+  private final VectorReadable4FType color;
 
   private KMaterialRefractiveMaskedNormals(
-    final float in_scale)
+    final float in_scale,
+    final VectorReadable4FType in_color)
   {
     this.scale = in_scale;
+    this.color = NullCheck.notNull(in_color, "Color");
   }
 
   @Override public String codeGet()
@@ -60,6 +69,15 @@ import com.io7m.r1.types.RException;
   public float getScale()
   {
     return this.scale;
+  }
+
+  /**
+   * @return The multiplication color.
+   */
+
+  public VectorReadable4FType getColor()
+  {
+    return this.color;
   }
 
   @Override public boolean materialRequiresUVCoordinates()
@@ -86,8 +104,10 @@ import com.io7m.r1.types.RException;
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[KMaterialRefractiveMasked scale=");
+    b.append("[KMaterialRefractiveMaskedNormals scale=");
     b.append(this.scale);
+    b.append(" ");
+    b.append(this.color);
     b.append("]");
     final String r = b.toString();
     assert r != null;

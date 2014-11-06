@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -121,7 +121,9 @@ public final class STranslucentRefractive1 implements ExampleSceneType
       KMaterialTranslucentRefractive.newMaterial(
         ExampleSceneUtilities.IDENTITY_UV,
         KMaterialNormalMapped.mapped(scene.texture("sea_tile_normal.png")),
-        KMaterialRefractiveUnmaskedNormals.unmasked(1.0f));
+        KMaterialRefractiveUnmaskedNormals.create(
+          1.0f,
+          ExampleSceneUtilities.RGBA_WHITE));
 
     final KInstanceTranslucentRefractive glass_refr =
       KInstanceTranslucentRefractive.newInstance(

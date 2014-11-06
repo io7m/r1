@@ -41,9 +41,7 @@ import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RMatrixM4x4F;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RTransformProjectionType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RVectorI3F;
 
@@ -53,17 +51,13 @@ import com.io7m.r1.types.RVectorI3F;
 
 public final class STranslucentRefractive3 implements ExampleSceneType
 {
-  private final RMatrixM4x4F<RTransformProjectionType> projection;
-  private int                                          frame;
-  private float                                        offset;
-
   /**
    * Construct the example.
    */
 
   public STranslucentRefractive3()
   {
-    this.projection = new RMatrixM4x4F<RTransformProjectionType>();
+
   }
 
   @Override public String exampleGetName()
@@ -92,7 +86,9 @@ public final class STranslucentRefractive3 implements ExampleSceneType
       KMaterialTranslucentRefractive.newMaterial(
         muv,
         KMaterialNormalMapped.mapped(scene.texture("sea_tile_normal.png")),
-        KMaterialRefractiveMaskedNormals.masked(1.0f));
+        KMaterialRefractiveMaskedNormals.create(
+          1.0f,
+          ExampleSceneUtilities.RGBA_WHITE));
 
     final KInstanceTranslucentRefractive m =
       KInstanceTranslucentRefractive.newInstance(

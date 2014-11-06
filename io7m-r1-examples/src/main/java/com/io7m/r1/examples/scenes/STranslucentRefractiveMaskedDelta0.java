@@ -51,11 +51,9 @@ import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RMatrixM4x4F;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RTransformProjectionType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RVectorI3F;
 import com.io7m.r1.types.RVectorI4F;
@@ -70,17 +68,13 @@ import com.io7m.r1.types.RVectorI4F;
 public final class STranslucentRefractiveMaskedDelta0 implements
   ExampleSceneType
 {
-  private final RMatrixM4x4F<RTransformProjectionType> projection;
-  private int                                          frame;
-  private float                                        offset;
-
   /**
    * Construct the example.
    */
 
   public STranslucentRefractiveMaskedDelta0()
   {
-    this.projection = new RMatrixM4x4F<RTransformProjectionType>();
+
   }
 
   @Override public String exampleGetName()
@@ -118,9 +112,10 @@ public final class STranslucentRefractiveMaskedDelta0 implements
       KMaterialTranslucentRefractive.newMaterial(
         muv,
         KMaterialNormalVertex.vertex(),
-        KMaterialRefractiveMaskedDeltaTextured.masked(
+        KMaterialRefractiveMaskedDeltaTextured.create(
           0.05f,
-          scene.texture("dudv_clouds.png")));
+          scene.texture("dudv_clouds.png"),
+          ExampleSceneUtilities.RGBA_WHITE));
 
     final KInstanceTranslucentRefractive m_tr =
       KInstanceTranslucentRefractive.newInstance(
@@ -303,6 +298,6 @@ public final class STranslucentRefractiveMaskedDelta0 implements
 
   @Override public List<ExampleViewType> exampleViewpoints()
   {
-    return ExampleSceneUtilities.STANDARD_VIEWS_5;
+    return ExampleSceneUtilities.LARGE_ROOM_VIEWS;
   }
 }

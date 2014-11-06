@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -66,9 +66,11 @@ import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.r1.kernel.types.KMaterialVerification;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RMatrixI3x3F;
+import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RVectorI3F;
+import com.io7m.r1.types.RVectorI4F;
 
 @EqualityReference public final class RKFMaterialCases
 {
@@ -326,10 +328,14 @@ import com.io7m.r1.types.RVectorI3F;
   {
     final List<KMaterialRefractiveType> cases =
       new ArrayList<KMaterialRefractiveType>();
-    cases.add(KMaterialRefractiveMaskedNormals.masked(1.0f));
-    cases.add(KMaterialRefractiveMaskedDeltaTextured.masked(1.0f, t));
-    cases.add(KMaterialRefractiveUnmaskedNormals.unmasked(1.0f));
-    cases.add(KMaterialRefractiveUnmaskedDeltaTextured.unmasked(1.0f, t));
+    final RVectorI4F<RSpaceRGBAType> color =
+      new RVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f);
+
+    cases.add(KMaterialRefractiveMaskedNormals.create(1.0f, color));
+    cases.add(KMaterialRefractiveMaskedDeltaTextured.create(1.0f, t, color));
+    cases.add(KMaterialRefractiveUnmaskedNormals.create(1.0f, color));
+    cases
+      .add(KMaterialRefractiveUnmaskedDeltaTextured.create(1.0f, t, color));
     return cases;
   }
 
