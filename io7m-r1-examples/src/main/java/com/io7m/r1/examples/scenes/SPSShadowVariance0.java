@@ -16,7 +16,6 @@
 
 package com.io7m.r1.examples.scenes;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
@@ -30,7 +29,6 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
-import com.io7m.r1.examples.ExampleViewLookAt;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.kernel.types.KAxes;
 import com.io7m.r1.kernel.types.KBlurParameters;
@@ -418,60 +416,6 @@ public final class SPSShadowVariance0 implements ExampleSceneType
 
   @Override public List<ExampleViewType> exampleViewpoints()
   {
-    final List<ExampleViewType> v = new ArrayList<ExampleViewType>();
-    final RVectorI3F<RSpaceWorldType> center = RVectorI3F.zero();
-
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      -6.0f,
-      3.0f,
-      6.0f), center));
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      0.0f,
-      3.0f,
-      6.0f), center));
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      6.0f,
-      3.0f,
-      6.0f), center));
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      6.0f,
-      3.0f,
-      0.0f), center));
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      6.0f,
-      3.0f,
-      -6.0f), center));
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      0.0f,
-      3.0f,
-      -6.0f), center));
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      -6.0f,
-      3.0f,
-      -6.0f), center));
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      -6.0f,
-      3.0f,
-      0.0f), center));
-
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      -6.0f,
-      -6.0f,
-      6.0f), center));
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      6.0f,
-      -6.0f,
-      6.0f), center));
-
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      6.0f,
-      -6.0f,
-      -6.0f), center));
-    v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
-      -6.0f,
-      -6.0f,
-      -6.0f), center));
-
-    return v;
+    return ExampleSceneUtilities.LARGE_ROOM_VIEWS;
   }
 }

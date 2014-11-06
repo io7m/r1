@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,7 +21,7 @@ import com.io7m.r1.types.RException;
 /**
  * A generic normal visitor, returning values of type <code>A</code> and
  * raising exceptions of type <code>E</code>.
- * 
+ *
  * @param <A>
  *          The return value type of the implementing visitor
  * @param <E>
@@ -32,37 +32,73 @@ public interface KMaterialRefractiveVisitorType<A, E extends Throwable>
 {
   /**
    * Visit masked refractive properties.
-   * 
+   *
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * 
+   *
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  A masked(
-    final KMaterialRefractiveMasked m)
+  A maskedNormals(
+    final KMaterialRefractiveMaskedNormals m)
     throws RException,
       E;
 
   /**
    * Visit unmasked refractive properties.
-   * 
+   *
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * 
+   *
    * @throws RException
    *           If required
    * @throws E
    *           If required
    */
 
-  A unmasked(
-    final KMaterialRefractiveUnmasked m)
+  A unmaskedNormals(
+    final KMaterialRefractiveUnmaskedNormals m)
+    throws RException,
+      E;
+
+  /**
+   * Visit masked refractive properties.
+   *
+   * @param m
+   *          The material
+   * @return A value of type <code>A</code>
+   *
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  A maskedDeltaTextured(
+    final KMaterialRefractiveMaskedDeltaTextured m)
+    throws RException,
+      E;
+
+  /**
+   * Visit unmasked refractive properties.
+   *
+   * @param m
+   *          The material
+   * @return A value of type <code>A</code>
+   *
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  A unmaskedDeltaTextured(
+    final KMaterialRefractiveUnmaskedDeltaTextured m)
     throws RException,
       E;
 }

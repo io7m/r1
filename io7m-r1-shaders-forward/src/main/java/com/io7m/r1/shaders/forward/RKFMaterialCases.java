@@ -29,6 +29,7 @@ import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -48,9 +49,12 @@ import com.io7m.r1.kernel.types.KMaterialEnvironmentType;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialNormalType;
 import com.io7m.r1.kernel.types.KMaterialNormalVertex;
-import com.io7m.r1.kernel.types.KMaterialRefractiveMasked;
+import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedDeltaTextured;
+import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedNormals;
 import com.io7m.r1.kernel.types.KMaterialRefractiveType;
-import com.io7m.r1.kernel.types.KMaterialRefractiveUnmasked;
+import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedDeltaTextured;
+import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedNormals;
+import com.io7m.r1.kernel.types.KMaterialRefractiveVisitorType;
 import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KMaterialSpecularNone;
@@ -62,9 +66,11 @@ import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.r1.kernel.types.KMaterialVerification;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RMatrixI3x3F;
+import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RVectorI3F;
+import com.io7m.r1.types.RVectorI4F;
 
 @EqualityReference public final class RKFMaterialCases
 {
@@ -181,15 +187,57 @@ import com.io7m.r1.types.RVectorI3F;
       final List<KMaterialTranslucentRefractive> cases =
         new ArrayList<KMaterialTranslucentRefractive>();
 
-      for (final KMaterialNormalType n : cases_normal) {
-        assert n != null;
-        for (final KMaterialRefractiveType r : cases_refractive) {
-          assert r != null;
-          cases.add(KMaterialTranslucentRefractive.newMaterial(
-            uv_matrix,
-            n,
-            r));
-        }
+      for (final KMaterialRefractiveType r : cases_refractive) {
+        assert r != null;
+
+        r
+          .refractiveAccept(new KMaterialRefractiveVisitorType<Unit, UnreachableCodeException>() {
+            @Override public Unit maskedNormals(
+              final KMaterialRefractiveMaskedNormals m)
+            {
+              for (final KMaterialNormalType n : cases_normal) {
+                assert n != null;
+                cases.add(KMaterialTranslucentRefractive.newMaterial(
+                  uv_matrix,
+                  n,
+                  m));
+              }
+              return Unit.unit();
+            }
+
+            @Override public Unit unmaskedNormals(
+              final KMaterialRefractiveUnmaskedNormals m)
+            {
+              for (final KMaterialNormalType n : cases_normal) {
+                assert n != null;
+                cases.add(KMaterialTranslucentRefractive.newMaterial(
+                  uv_matrix,
+                  n,
+                  m));
+              }
+              return Unit.unit();
+            }
+
+            @Override public Unit maskedDeltaTextured(
+              final KMaterialRefractiveMaskedDeltaTextured m)
+            {
+              cases.add(KMaterialTranslucentRefractive.newMaterial(
+                uv_matrix,
+                KMaterialNormalVertex.vertex(),
+                m));
+              return Unit.unit();
+            }
+
+            @Override public Unit unmaskedDeltaTextured(
+              final KMaterialRefractiveUnmaskedDeltaTextured m)
+            {
+              cases.add(KMaterialTranslucentRefractive.newMaterial(
+                uv_matrix,
+                KMaterialNormalVertex.vertex(),
+                m));
+              return Unit.unit();
+            }
+          });
       }
 
       return cases;
@@ -275,12 +323,19 @@ import com.io7m.r1.types.RVectorI3F;
     return cases;
   }
 
-  private static List<KMaterialRefractiveType> makeRefractiveCases()
+  private static List<KMaterialRefractiveType> makeRefractiveCases(
+    final Texture2DStaticType t)
   {
     final List<KMaterialRefractiveType> cases =
       new ArrayList<KMaterialRefractiveType>();
-    cases.add(KMaterialRefractiveMasked.masked(1.0f));
-    cases.add(KMaterialRefractiveUnmasked.unmasked(1.0f));
+    final RVectorI4F<RSpaceRGBAType> color =
+      new RVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f);
+
+    cases.add(KMaterialRefractiveMaskedNormals.create(1.0f, color));
+    cases.add(KMaterialRefractiveMaskedDeltaTextured.create(1.0f, t, color));
+    cases.add(KMaterialRefractiveUnmaskedNormals.create(1.0f, color));
+    cases
+      .add(KMaterialRefractiveUnmaskedDeltaTextured.create(1.0f, t, color));
     return cases;
   }
 
@@ -529,7 +584,7 @@ import com.io7m.r1.types.RVectorI3F;
     this.cases_specular = RKFMaterialCases.makeSpecularCases(t);
     this.cases_specular_not_none =
       RKFMaterialCases.makeSpecularNotNoneCases(t);
-    this.cases_refractive = RKFMaterialCases.makeRefractiveCases();
+    this.cases_refractive = RKFMaterialCases.makeRefractiveCases(t);
 
     this.cases_lit_translucent_regular =
       RKFMaterialCases.makeCasesLitTranslucentRegular(

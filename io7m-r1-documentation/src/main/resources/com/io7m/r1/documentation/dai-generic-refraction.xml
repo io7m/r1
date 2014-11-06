@@ -29,6 +29,9 @@
       The <s:term s:type="package">${project.parent.name}</s:term> package
       implements the <s:term s:type="term">generic refraction</s:term> effect
       described in <s:link-external s:target="http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter19.html">GPU Gems 2</s:link-external>.
+      The technique lends itself to a huge range of effects such as lenses, glass,
+      heat haze, and water - simply by varying the meshes and textures used 
+      when performing refraction.
     </s:paragraph>
   </s:subsection>
 
@@ -52,21 +55,111 @@
         </s:list-item>
         <s:list-item>
           Render the instance, using <s:term s:type="variable">b</s:term> as the
-          refraction source, the <s:term s:type="variable">x</s:term> and 
-          <s:term s:type="variable">y</s:term> components of the instance's
-          (possibly <s:link s:target="r1.dai.normal-mapping">mapped</s:link>)
-          normal vectors as the refraction vector, and optionally 
-          <s:term s:type="variable">m</s:term> for masking.
+          refraction source, material-dependent 
+          <s:link s:target="r1.dai.generic-refraction.vectors">refraction vectors</s:link>,
+          a <s:link s:target="r1.dai.generic-refraction.color">refraction color</s:link>,
+          and optionally <s:term s:type="variable">m</s:term> for masking.
         </s:list-item>
       </s:list-unordered>
     </s:formal-item>
+    <s:paragraph>
+      The actual rendering technique is very simple: Given a screen-space position 
+      <s:term s:type="expression">(x, y)</s:term>, sample the color from a saved
+      image of the scene at <s:term s:type="expression">(x + s, y + t)</s:term>,
+      where <s:term s:type="expression">(s, t)</s:term> are signed per-pixel offset values -
+      the <s:link s:target="r1.dai.generic-refraction.vectors">refraction vectors</s:link> -
+      that are sampled from textures or derived from existing normal vectors.
+    </s:paragraph>
   </s:subsection>
 
   <s:subsection xml:id="r1.dai.generic-refraction.masking">
     <s:subsection-title>Masking</s:subsection-title>
     <s:paragraph>
-      Masking.
+      Because refractive instances are 
+      <s:link s:target="r1.dai.forward-translucents">translucent</s:link>, they
+      are normally rendered after having already rendered all of the opaque
+      objects in the scene. Because rendering of translucent instances occurs with
+      depth testing enabled, it is therefore possible for opaque instances to
+      occlude refractive instances. This poses a problem for the implementation
+      of refraction described above, because the pixels of an occluding object
+      may be sampled when performing the refraction, as shown in the following
+      image:
     </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Occluding pixel bleeding</s:formal-item-title>
+      <s:image s:source="images/refract_bleed.png">Occluding pixel bleeding</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Note how the pixels of the opaque instances are bleeding into the refracting
+      object, despite being conceptually "in front of" it. This is because the
+      refraction effect is implemented in screen space and is just sampling pixels
+      from the surrounding area to simulate the bending of light rays. Using
+      a <s:term s:type="term">mask</s:term> prevents this:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Occluding pixels masked</s:formal-item-title>
+      <s:image s:source="images/refract_nobleed.png">Occluding pixels masked</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      A mask is produced by rendering a black and white silhouette of the
+      refracting object, and then using the values of this mask to linearly
+      interpolate between the colors at
+      <s:term s:type="expression">(x, y)</s:term> and
+      <s:term s:type="expression">(x + s, y + t)</s:term>. This has the effect
+      of preventing the refraction simulation from using pixels that fall outside
+      of the mask area.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Mask</s:formal-item-title>
+      <s:image s:source="images/refract_mask.png">Mask</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.generic-refraction.vectors">
+    <s:subsection-title>Vectors</s:subsection-title>
+    <s:paragraph>
+      Refraction vectors may either be sampled from the current instance's
+      (possibly <s:link s:target="r1.dai.normal-mapping">mapped</s:link>)
+      normals, or from the red and green components of a 
+      <s:term s:type="term">delta texture</s:term>. The sampled values are
+      scaled by the material's <s:term s:type="term">scale</s:term> factor
+      and used directly to calculate 
+      <s:term s:type="expression">(x + s, y + t)</s:term>. For example,
+      a simple noisy red/green <s:term s:type="term">delta texture</s:term> 
+      applied to a quad results in the following effect:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Noise quad</s:formal-item-title>
+      <s:image s:source="images/refract_noise_quad.png">Noise quad</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Noise quad (texture)</s:formal-item-title>
+      <s:image s:source="images/refract_noise_quad_texture.png">Noise quad (texture)</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.generic-refraction.color">
+    <s:subsection-title>Color</s:subsection-title>
+    <s:paragraph>
+      The sample scene colors used to perform the refraction effect are
+      multiplied by a constant color, specified by each material. This
+      allows for simple colored glass effects (shown here with a
+      <s:link s:target="r1.dai.forward-translucents.lit">specular-only</s:link>
+      instance rendered over the top of the refractive instance to provide
+      specular highlights):
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Color 0</s:formal-item-title>
+      <s:image s:source="images/refract_color_0.png">Color 0</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Using pure RGBA white <s:term s:type="expression">(1.0, 1.0, 1.0, 1.0)</s:term>
+      results in a clear glass material:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Color 1</s:formal-item-title>
+      <s:image s:source="images/refract_color_1.png">Color 1</s:image>
+    </s:formal-item>
   </s:subsection>
 
 </s:section>

@@ -55,9 +55,11 @@ import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialNormalType;
 import com.io7m.r1.kernel.types.KMaterialNormalVertex;
 import com.io7m.r1.kernel.types.KMaterialNormalVisitorType;
-import com.io7m.r1.kernel.types.KMaterialRefractiveMasked;
+import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedDeltaTextured;
+import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedNormals;
 import com.io7m.r1.kernel.types.KMaterialRefractiveType;
-import com.io7m.r1.kernel.types.KMaterialRefractiveUnmasked;
+import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedDeltaTextured;
+import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedNormals;
 import com.io7m.r1.kernel.types.KMaterialRefractiveVisitorType;
 import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
@@ -364,17 +366,38 @@ import com.io7m.r1.types.RException;
 
       refractive
         .refractiveAccept(new KMaterialRefractiveVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit masked(
-            final KMaterialRefractiveMasked m)
+          @Override public Unit maskedNormals(
+            final KMaterialRefractiveMaskedNormals m)
           {
             b.append("  parameter t_refraction_scene_mask : sampler_2d;\n");
             b.append("\n");
             return Unit.unit();
           }
 
-          @Override public Unit unmasked(
-            final KMaterialRefractiveUnmasked m)
+          @Override public Unit unmaskedNormals(
+            final KMaterialRefractiveUnmaskedNormals m)
           {
+            b.append("\n");
+            return Unit.unit();
+          }
+
+          @Override public Unit maskedDeltaTextured(
+            final KMaterialRefractiveMaskedDeltaTextured m)
+            throws RException,
+              UnreachableCodeException
+          {
+            b.append("  parameter t_refraction_scene_mask : sampler_2d;\n");
+            b.append("  parameter t_refraction_delta      : sampler_2d;\n");
+            b.append("\n");
+            return Unit.unit();
+          }
+
+          @Override public Unit unmaskedDeltaTextured(
+            final KMaterialRefractiveUnmaskedDeltaTextured m)
+            throws RException,
+              UnreachableCodeException
+          {
+            b.append("  parameter t_refraction_delta      : sampler_2d;\n");
             b.append("\n");
             return Unit.unit();
           }
@@ -1379,8 +1402,8 @@ import com.io7m.r1.types.RException;
 
       refractive
         .refractiveAccept(new KMaterialRefractiveVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit masked(
-            final KMaterialRefractiveMasked m)
+          @Override public Unit maskedNormals(
+            final KMaterialRefractiveMaskedNormals m)
           {
             b.append("  value rgba =\n");
             b.append("    Refraction.refraction_masked (\n");
@@ -1394,14 +1417,45 @@ import com.io7m.r1.types.RException;
             return Unit.unit();
           }
 
-          @Override public Unit unmasked(
-            final KMaterialRefractiveUnmasked m)
+          @Override public Unit unmaskedNormals(
+            final KMaterialRefractiveUnmaskedNormals m)
           {
             b.append("  value rgba =\n");
             b.append("    Refraction.refraction_unmasked (\n");
             b.append("      p_refraction,\n");
             b.append("      t_refraction_scene,\n");
             b.append("      refract_n,\n");
+            b.append("      f_position_clip\n");
+            b.append("    );\n");
+            b.append("\n");
+            return Unit.unit();
+          }
+
+          @Override public Unit maskedDeltaTextured(
+            final KMaterialRefractiveMaskedDeltaTextured m)
+          {
+            b.append("  value rgba =\n");
+            b.append("    Refraction.refraction_masked_delta_textured (\n");
+            b.append("      p_refraction,\n");
+            b.append("      t_refraction_scene,\n");
+            b.append("      t_refraction_scene_mask,\n");
+            b.append("      t_refraction_delta,\n");
+            b.append("      f_uv,\n");
+            b.append("      f_position_clip\n");
+            b.append("    );\n");
+            b.append("\n");
+            return Unit.unit();
+          }
+
+          @Override public Unit unmaskedDeltaTextured(
+            final KMaterialRefractiveUnmaskedDeltaTextured m)
+          {
+            b.append("  value rgba =\n");
+            b.append("    Refraction.refraction_unmasked_delta_textured (\n");
+            b.append("      p_refraction,\n");
+            b.append("      t_refraction_scene,\n");
+            b.append("      t_refraction_delta,\n");
+            b.append("      f_uv,\n");
             b.append("      f_position_clip\n");
             b.append("    );\n");
             b.append("\n");
