@@ -36,8 +36,8 @@ import com.io7m.r1.types.RVectorI3F;
 public final class KLightGenerator implements Generator<KLightType>
 {
   private final KLightDirectionalGenerator         dir_gen;
-  private final KLightSphereWithoutShadowGenerator sph_gen;
   private final KLightProjectiveGenerator          pro_gen;
+  private final KLightSphereWithoutShadowGenerator sph_gen;
 
   public KLightGenerator(
     final JCGLImplementationType g)

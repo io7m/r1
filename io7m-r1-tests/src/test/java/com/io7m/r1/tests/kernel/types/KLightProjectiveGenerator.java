@@ -40,11 +40,11 @@ public final class KLightProjectiveGenerator implements
 {
   private final Generator<RVectorI3F<RSpaceRGBType>>   colour_gen;
   private final Generator<RVectorI3F<RSpaceWorldType>> position_gen;
-  private final Generator<QuaternionI4F>               quat_gen;
   private final Generator<KProjectionType>             proj_gen;
-  private final Generator<Texture2DStaticUsableType>   tex_gen;
+  private final Generator<QuaternionI4F>               quat_gen;
   private final Generator<KShadowMappedBasic>          shad_basic_gen;
   private final Generator<KShadowMappedVariance>       shad_variance_gen;
+  private final Generator<Texture2DStaticUsableType>   tex_gen;
 
   public KLightProjectiveGenerator(
     final Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,

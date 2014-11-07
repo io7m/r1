@@ -25,43 +25,6 @@ import com.io7m.r1.types.RTransformType;
 
 public class RMatrixI4x4FTest
 {
-  @SuppressWarnings("static-method") @Test public void testToString()
-  {
-    final MatrixM4x4F m0 = new MatrixM4x4F();
-    final MatrixM4x4F m1 = new MatrixM4x4F();
-
-    int index = 0;
-    for (int row = 0; row < 4; ++row) {
-      for (int col = 0; col < 4; ++col) {
-        m0.set(row, col, index);
-        ++index;
-      }
-    }
-
-    final RMatrixI4x4F<RTransformType> im = RMatrixI4x4F.newFromReadable(m0);
-    Assert.assertEquals(m0.toString(), im.toString());
-    im.makeMatrixM4x4F(m1);
-    Assert.assertEquals(m1.toString(), m0.toString());
-  }
-
-  @SuppressWarnings("static-method") @Test public void testMakeMatrix4x4F()
-  {
-    final MatrixM4x4F m0 = new MatrixM4x4F();
-    final MatrixM4x4F m1 = new MatrixM4x4F();
-
-    int index = 0;
-    for (int row = 0; row < 4; ++row) {
-      for (int col = 0; col < 4; ++col) {
-        m0.set(row, col, index);
-        ++index;
-      }
-    }
-
-    final RMatrixI4x4F<RTransformType> im = RMatrixI4x4F.newFromReadable(m0);
-    im.makeMatrixM4x4F(m1);
-    Assert.assertEquals(m0, m1);
-  }
-
   @SuppressWarnings("static-method") @Test public void testEquals()
   {
     final MatrixM4x4F m0 = new MatrixM4x4F();
@@ -102,5 +65,42 @@ public class RMatrixI4x4FTest
 
     final RMatrixI4x4F<RTransformType> im2 = RMatrixI4x4F.newFromReadable(m0);
     Assert.assertFalse(im0.equals(im2));
+  }
+
+  @SuppressWarnings("static-method") @Test public void testMakeMatrix4x4F()
+  {
+    final MatrixM4x4F m0 = new MatrixM4x4F();
+    final MatrixM4x4F m1 = new MatrixM4x4F();
+
+    int index = 0;
+    for (int row = 0; row < 4; ++row) {
+      for (int col = 0; col < 4; ++col) {
+        m0.set(row, col, index);
+        ++index;
+      }
+    }
+
+    final RMatrixI4x4F<RTransformType> im = RMatrixI4x4F.newFromReadable(m0);
+    im.makeMatrixM4x4F(m1);
+    Assert.assertEquals(m0, m1);
+  }
+
+  @SuppressWarnings("static-method") @Test public void testToString()
+  {
+    final MatrixM4x4F m0 = new MatrixM4x4F();
+    final MatrixM4x4F m1 = new MatrixM4x4F();
+
+    int index = 0;
+    for (int row = 0; row < 4; ++row) {
+      for (int col = 0; col < 4; ++col) {
+        m0.set(row, col, index);
+        ++index;
+      }
+    }
+
+    final RMatrixI4x4F<RTransformType> im = RMatrixI4x4F.newFromReadable(m0);
+    Assert.assertEquals(m0.toString(), im.toString());
+    im.makeMatrixM4x4F(m1);
+    Assert.assertEquals(m1.toString(), m0.toString());
   }
 }

@@ -47,6 +47,18 @@ import com.io7m.r1.xml.rmx.RXMLExporter;
 
 @SuppressWarnings({ "boxing", "static-method" }) public class MeshTangentsTest
 {
+  private static void dumpXML(
+    final Element x)
+    throws IOException
+  {
+    final Document doc = new Document(x);
+    final Serializer s = new Serializer(System.out);
+    s.setIndent(2);
+    s.setLineSeparator("\n");
+    s.setMaxLength(80);
+    s.write(doc);
+  }
+
   private static @NonNull String floatString(
     final float x)
   {
@@ -144,22 +156,6 @@ import com.io7m.r1.xml.rmx.RXMLExporter;
     return mt;
   }
 
-  @Test public void testMeshTriTextured()
-    throws RException,
-      IOException
-  {
-    final LogType log = ColladaDocumentTest.getLog();
-    final RXMLExporter exporter = new RXMLExporter(log);
-    final RMeshTangents mt =
-      MeshTangentsTest.makeAndCheckTangents(
-        log,
-        "tri.dae",
-        new RColladaGeometryID("tri_textured-mesh"));
-
-    final Element x = exporter.toXML(mt);
-    MeshTangentsTest.dumpXML(x);
-  }
-
   @Test public void testMeshCube()
     throws RException,
       IOException
@@ -240,18 +236,6 @@ import com.io7m.r1.xml.rmx.RXMLExporter;
     MeshTangentsTest.dumpXML(x);
   }
 
-  private static void dumpXML(
-    final Element x)
-    throws IOException
-  {
-    final Document doc = new Document(x);
-    final Serializer s = new Serializer(System.out);
-    s.setIndent(2);
-    s.setLineSeparator("\n");
-    s.setMaxLength(80);
-    s.write(doc);
-  }
-
   @Test public void testMeshTriLH()
     throws RException,
       IOException
@@ -279,6 +263,22 @@ import com.io7m.r1.xml.rmx.RXMLExporter;
         log,
         "tri_LHRH.dae",
         new RColladaGeometryID("tri_rh-mesh"));
+
+    final Element x = exporter.toXML(mt);
+    MeshTangentsTest.dumpXML(x);
+  }
+
+  @Test public void testMeshTriTextured()
+    throws RException,
+      IOException
+  {
+    final LogType log = ColladaDocumentTest.getLog();
+    final RXMLExporter exporter = new RXMLExporter(log);
+    final RMeshTangents mt =
+      MeshTangentsTest.makeAndCheckTangents(
+        log,
+        "tri.dae",
+        new RColladaGeometryID("tri_textured-mesh"));
 
     final Element x = exporter.toXML(mt);
     MeshTangentsTest.dumpXML(x);

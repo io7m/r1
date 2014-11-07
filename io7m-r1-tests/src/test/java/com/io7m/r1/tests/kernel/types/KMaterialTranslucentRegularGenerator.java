@@ -52,6 +52,22 @@ import com.io7m.r1.types.RVectorI3F;
   private final Generator<KMaterialSpecularType>               specular_gen;
 
   public KMaterialTranslucentRegularGenerator(
+    final Generator<RMatrixI3x3F<RTransformTextureType>> in_matrix_gen,
+    final Generator<KMaterialAlphaType> in_alpha_gen,
+    final Generator<KMaterialNormalType> in_normal_gen,
+    final Generator<KMaterialAlbedoType> in_albedo_gen,
+    final Generator<KMaterialEnvironmentType> in_environment_gen,
+    final Generator<KMaterialSpecularType> in_specular_gen)
+  {
+    this.alpha_gen = in_alpha_gen;
+    this.matrix_gen = in_matrix_gen;
+    this.normal_gen = in_normal_gen;
+    this.albedo_gen = in_albedo_gen;
+    this.environment_gen = in_environment_gen;
+    this.specular_gen = in_specular_gen;
+  }
+
+  public KMaterialTranslucentRegularGenerator(
     final JCGLImplementationType g)
   {
     this.alpha_gen = new KMaterialAlphaGenerator();
@@ -70,22 +86,6 @@ import com.io7m.r1.types.RVectorI3F;
     final Generator<RVectorI3F<RSpaceRGBType>> vg =
       new RVectorI3FGenerator<RSpaceRGBType>();
     this.specular_gen = new KMaterialSpecularGenerator(vg, th);
-  }
-
-  public KMaterialTranslucentRegularGenerator(
-    final Generator<RMatrixI3x3F<RTransformTextureType>> in_matrix_gen,
-    final Generator<KMaterialAlphaType> in_alpha_gen,
-    final Generator<KMaterialNormalType> in_normal_gen,
-    final Generator<KMaterialAlbedoType> in_albedo_gen,
-    final Generator<KMaterialEnvironmentType> in_environment_gen,
-    final Generator<KMaterialSpecularType> in_specular_gen)
-  {
-    this.alpha_gen = in_alpha_gen;
-    this.matrix_gen = in_matrix_gen;
-    this.normal_gen = in_normal_gen;
-    this.albedo_gen = in_albedo_gen;
-    this.environment_gen = in_environment_gen;
-    this.specular_gen = in_specular_gen;
   }
 
   @Override public KMaterialTranslucentRegular next()

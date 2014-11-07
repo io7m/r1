@@ -36,34 +36,6 @@ import com.io7m.r1.types.RVectorI3F;
 
 @SuppressWarnings("static-method") public final class KLightSphereTest
 {
-  @Test(expected = RangeCheckException.class) public void testZeroRange()
-  {
-    final KLightSphereWithoutShadowBuilderType b =
-      KLightSphereWithoutShadow.newBuilder();
-    b.setRadius(0.0f);
-    b.build();
-  }
-
-  @Test(expected = RangeCheckException.class) public void testZeroFalloff()
-  {
-    final KLightSphereWithoutShadowBuilderType b =
-      KLightSphereWithoutShadow.newBuilder();
-    b.setFalloff(0.0f);
-    b.build();
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_0()
-  {
-    final KLightSphereBuilderType b = KLightSphereWithoutShadow.newBuilder();
-    b.setColor((RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_1()
-  {
-    final KLightSphereBuilderType b = KLightSphereWithoutShadow.newBuilder();
-    b.setPosition((RVectorI3F<RSpaceWorldType>) TestUtilities.actuallyNull());
-  }
-
   @Test public void testAttributes()
   {
     final Generator<RVectorI3F<RSpaceRGBType>> colour_gen1 =
@@ -129,5 +101,33 @@ import com.io7m.r1.types.RVectorI3F;
           }
         }
       });
+  }
+
+  @Test(expected = NullCheckException.class) public void testNull_0()
+  {
+    final KLightSphereBuilderType b = KLightSphereWithoutShadow.newBuilder();
+    b.setColor((RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
+  }
+
+  @Test(expected = NullCheckException.class) public void testNull_1()
+  {
+    final KLightSphereBuilderType b = KLightSphereWithoutShadow.newBuilder();
+    b.setPosition((RVectorI3F<RSpaceWorldType>) TestUtilities.actuallyNull());
+  }
+
+  @Test(expected = RangeCheckException.class) public void testZeroFalloff()
+  {
+    final KLightSphereWithoutShadowBuilderType b =
+      KLightSphereWithoutShadow.newBuilder();
+    b.setFalloff(0.0f);
+    b.build();
+  }
+
+  @Test(expected = RangeCheckException.class) public void testZeroRange()
+  {
+    final KLightSphereWithoutShadowBuilderType b =
+      KLightSphereWithoutShadow.newBuilder();
+    b.setRadius(0.0f);
+    b.build();
   }
 }

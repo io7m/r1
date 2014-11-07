@@ -15,12 +15,12 @@ import com.io7m.jranges.RangeInclusiveL;
 public final class RFakeTextures2DStaticGenerator implements
   Generator<Texture2DStaticUsableType>
 {
-  private final Generator<TextureFormat>                  fmt_gen;
-  private final EnumGenerator<TextureWrapT>               wrap_t_gen;
-  private final EnumGenerator<TextureWrapS>               wrap_s_gen;
-  private final StringGenerator                           name_gen;
-  private final EnumGenerator<TextureFilterMinification>  filter_min_gen;
   private final EnumGenerator<TextureFilterMagnification> filter_mag_gen;
+  private final EnumGenerator<TextureFilterMinification>  filter_min_gen;
+  private final Generator<TextureFormat>                  fmt_gen;
+  private final StringGenerator                           name_gen;
+  private final EnumGenerator<TextureWrapS>               wrap_s_gen;
+  private final EnumGenerator<TextureWrapT>               wrap_t_gen;
 
   public RFakeTextures2DStaticGenerator()
   {
@@ -54,6 +54,11 @@ public final class RFakeTextures2DStaticGenerator implements
     final long size = width * format.getBytesPerPixel() * height;
 
     return new Texture2DStaticUsableType() {
+      @Override public int getGLName()
+      {
+        return id;
+      }
+
       @Override public long resourceGetSizeBytes()
       {
         return size;
@@ -64,46 +69,19 @@ public final class RFakeTextures2DStaticGenerator implements
         return false;
       }
 
-      @Override public int getGLName()
+      @Override public AreaInclusive textureGetArea()
       {
-        return id;
+        return area;
       }
 
-      @Override public TextureWrapT textureGetWrapT()
+      @Override public TextureFormat textureGetFormat()
       {
-        return wrap_t;
+        return format;
       }
 
-      @Override public TextureWrapS textureGetWrapS()
+      @Override public int textureGetHeight()
       {
-        return wrap_s;
-      }
-
-      @Override public int textureGetWidth()
-      {
-        return width;
-      }
-
-      @Override public RangeInclusiveL textureGetRangeY()
-      {
-        return range_y;
-      }
-
-      @Override public RangeInclusiveL textureGetRangeX()
-      {
-        return range_x;
-      }
-
-      @Override public String textureGetName()
-      {
-        return name;
-      }
-
-      @Override public
-        TextureFilterMinification
-        textureGetMinificationFilter()
-      {
-        return fmin;
+        return height;
       }
 
       @Override public
@@ -113,19 +91,41 @@ public final class RFakeTextures2DStaticGenerator implements
         return fmag;
       }
 
-      @Override public int textureGetHeight()
+      @Override public
+        TextureFilterMinification
+        textureGetMinificationFilter()
       {
-        return height;
+        return fmin;
       }
 
-      @Override public TextureFormat textureGetFormat()
+      @Override public String textureGetName()
       {
-        return format;
+        return name;
       }
 
-      @Override public AreaInclusive textureGetArea()
+      @Override public RangeInclusiveL textureGetRangeX()
       {
-        return area;
+        return range_x;
+      }
+
+      @Override public RangeInclusiveL textureGetRangeY()
+      {
+        return range_y;
+      }
+
+      @Override public int textureGetWidth()
+      {
+        return width;
+      }
+
+      @Override public TextureWrapS textureGetWrapS()
+      {
+        return wrap_s;
+      }
+
+      @Override public TextureWrapT textureGetWrapT()
+      {
+        return wrap_t;
       }
     };
   }

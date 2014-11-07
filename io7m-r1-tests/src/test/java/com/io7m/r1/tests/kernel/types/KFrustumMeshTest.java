@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -39,6 +39,9 @@ import com.io7m.jcanephora.JCGLExceptionAttributeMissing;
 import com.io7m.jcanephora.JCGLExceptionDeleted;
 import com.io7m.jcanephora.JCGLExceptionTypeError;
 import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jranges.RangeCheckException;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
@@ -50,13 +53,14 @@ import com.io7m.r1.kernel.types.KProjectionOrthographic;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
 
-@SuppressWarnings("static-method") public final class KFrustumMeshTest
+@SuppressWarnings({ "boxing", "static-method" }) public final class KFrustumMeshTest
 {
   @Test public void testDumpObj()
     throws Exception
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionFOV p =
@@ -69,24 +73,17 @@ import com.io7m.r1.tests.RFakeShaderControllers;
 
     final ArrayBufferUpdateUnmappedConstructorType au_cons =
       new ArrayBufferUpdateUnmappedConstructorType() {
-        @Override public
-          ArrayBufferUpdateUnmappedType
-          newUpdateReplacingRange(
-            final ArrayBufferType array,
-            final RangeInclusiveL range)
-            throws RangeCheckException,
-              JCGLExceptionDeleted
-        {
-          // TODO Auto-generated method stub
-          throw new UnimplementedCodeException();
-        }
-
         @Override public ArrayBufferUpdateUnmappedType newUpdateReplacingAll(
           final ArrayBufferType array)
           throws JCGLExceptionDeleted
         {
           return new ArrayBufferUpdateUnmappedType() {
-            @Override public CursorWritable4fType getCursor4f(
+            @Override public ArrayBufferUsableType getArrayBuffer()
+            {
+              return array;
+            }
+
+            @Override public CursorWritable2fType getCursor2f(
               final String attribute_name)
               throws JCGLExceptionAttributeMissing,
                 JCGLExceptionTypeError
@@ -102,18 +99,12 @@ import com.io7m.r1.tests.RFakeShaderControllers;
             {
               return new CursorWritable3fType() {
 
-                long max     = array.bufferGetRange().getUpper();
                 long current = 0;
+                long max     = array.bufferGetRange().getUpper();
 
-                @Override public void seekTo(
-                  final long index)
+                @Override public boolean hasNext()
                 {
-                  this.current = index;
-                }
-
-                @Override public void next()
-                {
-                  this.current = this.current + 1;
+                  return this.current < this.max;
                 }
 
                 @Override public boolean isValid()
@@ -121,9 +112,9 @@ import com.io7m.r1.tests.RFakeShaderControllers;
                   return this.current <= this.max;
                 }
 
-                @Override public boolean hasNext()
+                @Override public void next()
                 {
-                  return this.current < this.max;
+                  this.current = this.current + 1;
                 }
 
                 @Override public void put3f(
@@ -134,10 +125,16 @@ import com.io7m.r1.tests.RFakeShaderControllers;
                   System.out.printf("v %f %f %f\n", x, y, z);
                   this.next();
                 }
+
+                @Override public void seekTo(
+                  final long index)
+                {
+                  this.current = index;
+                }
               };
             }
 
-            @Override public CursorWritable2fType getCursor2f(
+            @Override public CursorWritable4fType getCursor4f(
               final String attribute_name)
               throws JCGLExceptionAttributeMissing,
                 JCGLExceptionTypeError
@@ -146,12 +143,7 @@ import com.io7m.r1.tests.RFakeShaderControllers;
               throw new UnimplementedCodeException();
             }
 
-            @Override public ArrayBufferUsableType getArrayBuffer()
-            {
-              return array;
-            }
-
-            @Override public long getTargetDataSize()
+            @Override public ByteBuffer getTargetData()
             {
               // TODO Auto-generated method stub
               throw new UnimplementedCodeException();
@@ -163,55 +155,47 @@ import com.io7m.r1.tests.RFakeShaderControllers;
               throw new UnimplementedCodeException();
             }
 
-            @Override public ByteBuffer getTargetData()
+            @Override public long getTargetDataSize()
             {
               // TODO Auto-generated method stub
               throw new UnimplementedCodeException();
             }
           };
         }
-      };
 
-    final IndexBufferUpdateUnmappedConstructorType iu_cons =
-      new IndexBufferUpdateUnmappedConstructorType() {
-        @Override public IndexBufferUpdateUnmappedType newUpdating(
-          final IndexBufferType b,
-          final RangeInclusiveL r)
-          throws RangeCheckException
+        @Override public
+          ArrayBufferUpdateUnmappedType
+          newUpdateReplacingRange(
+            final ArrayBufferType array,
+            final RangeInclusiveL range)
+            throws RangeCheckException,
+              JCGLExceptionDeleted
         {
           // TODO Auto-generated method stub
           throw new UnimplementedCodeException();
         }
+      };
 
+    final IndexBufferUpdateUnmappedConstructorType iu_cons =
+      new IndexBufferUpdateUnmappedConstructorType() {
         @Override public IndexBufferUpdateUnmappedType newReplacing(
           final IndexBufferType b)
         {
           return new IndexBufferUpdateUnmappedType() {
-            @Override public IndexBufferUsableType getIndexBuffer()
-            {
-              return b;
-            }
-
             @Override public CursorWritableIndexType getCursor()
             {
               return new CursorWritableIndexType() {
 
+                long current  = 0;
+                long max      = b.bufferGetRange().getUpper();
                 long v0       = -1;
                 long v1       = -1;
                 long v2       = -1;
                 int  vertices = 0;
-                long max      = b.bufferGetRange().getUpper();
-                long current  = 0;
 
-                @Override public void seekTo(
-                  final long index)
+                @Override public boolean hasNext()
                 {
-                  this.current = index;
-                }
-
-                @Override public void next()
-                {
-                  this.current = this.current + 1;
+                  return this.current < this.max;
                 }
 
                 @Override public boolean isValid()
@@ -219,9 +203,9 @@ import com.io7m.r1.tests.RFakeShaderControllers;
                   return this.current <= this.max;
                 }
 
-                @Override public boolean hasNext()
+                @Override public void next()
                 {
-                  return this.current < this.max;
+                  this.current = this.current + 1;
                 }
 
                 @Override public void putIndex(
@@ -262,10 +246,21 @@ import com.io7m.r1.tests.RFakeShaderControllers;
 
                   this.next();
                 }
+
+                @Override public void seekTo(
+                  final long index)
+                {
+                  this.current = index;
+                }
               };
             }
 
-            @Override public long getTargetDataSize()
+            @Override public IndexBufferUsableType getIndexBuffer()
+            {
+              return b;
+            }
+
+            @Override public ByteBuffer getTargetData()
             {
               // TODO Auto-generated method stub
               throw new UnimplementedCodeException();
@@ -277,12 +272,21 @@ import com.io7m.r1.tests.RFakeShaderControllers;
               throw new UnimplementedCodeException();
             }
 
-            @Override public ByteBuffer getTargetData()
+            @Override public long getTargetDataSize()
             {
               // TODO Auto-generated method stub
               throw new UnimplementedCodeException();
             }
           };
+        }
+
+        @Override public IndexBufferUpdateUnmappedType newUpdating(
+          final IndexBufferType b,
+          final RangeInclusiveL r)
+          throws RangeCheckException
+        {
+          // TODO Auto-generated method stub
+          throw new UnimplementedCodeException();
         }
       };
 
@@ -293,8 +297,9 @@ import com.io7m.r1.tests.RFakeShaderControllers;
   @Test public void testFOV()
     throws Exception
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionFOV p =
@@ -333,8 +338,9 @@ import com.io7m.r1.tests.RFakeShaderControllers;
   @Test public void testFrustum()
     throws Exception
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionFrustum p =
@@ -375,8 +381,9 @@ import com.io7m.r1.tests.RFakeShaderControllers;
   @Test public void testOrthographic()
     throws Exception
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionOrthographic p =

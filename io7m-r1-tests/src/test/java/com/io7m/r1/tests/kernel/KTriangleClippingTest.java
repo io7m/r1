@@ -197,6 +197,41 @@ import com.io7m.r1.types.RVectorI4F;
     Assert.assertEquals(t, rt);
   }
 
+  @Test public void testClippingPositiveX_P0Out()
+  {
+    final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
+
+    final RVectorI4F<RSpaceClipType> p0 =
+      new RVectorI4F<RSpaceClipType>(2.0f, 1.0f, 0.0f, 1.0f);
+    final RVectorI4F<RSpaceClipType> p1 =
+      new RVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
+    final RVectorI4F<RSpaceClipType> p2 =
+      new RVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
+
+    final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
+
+    final List<RTriangle4F<RSpaceClipType>> r =
+      KTriangleClipping.clipTrianglePlane(t, plane);
+
+    Assert.assertEquals(2, r.size());
+
+    {
+      final RTriangle4F<RSpaceClipType> rt = r.get(0);
+      System.out.println(rt);
+      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP0(), plane));
+      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
+      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
+    }
+
+    {
+      final RTriangle4F<RSpaceClipType> rt = r.get(1);
+      System.out.println(rt);
+      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP0(), plane));
+      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
+      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
+    }
+  }
+
   @Test public void testClippingPositiveX_P0P1Out()
   {
     final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
@@ -251,68 +286,6 @@ import com.io7m.r1.types.RVectorI4F;
     }
   }
 
-  @Test public void testClippingPositiveX_P1P2Out()
-  {
-    final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
-
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(2.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(2.0f, 0.0f, 0.0f, 1.0f);
-
-    final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
-
-    final List<RTriangle4F<RSpaceClipType>> r =
-      KTriangleClipping.clipTrianglePlane(t, plane);
-
-    Assert.assertEquals(1, r.size());
-
-    {
-      final RTriangle4F<RSpaceClipType> rt = r.get(0);
-      System.out.println(rt);
-      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP0(), plane));
-      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
-      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
-    }
-  }
-
-  @Test public void testClippingPositiveX_P0Out()
-  {
-    final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
-
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(2.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
-
-    final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
-
-    final List<RTriangle4F<RSpaceClipType>> r =
-      KTriangleClipping.clipTrianglePlane(t, plane);
-
-    Assert.assertEquals(2, r.size());
-
-    {
-      final RTriangle4F<RSpaceClipType> rt = r.get(0);
-      System.out.println(rt);
-      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP0(), plane));
-      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
-      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
-    }
-
-    {
-      final RTriangle4F<RSpaceClipType> rt = r.get(1);
-      System.out.println(rt);
-      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP0(), plane));
-      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
-      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
-    }
-  }
-
   @Test public void testClippingPositiveX_P1Out()
   {
     final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
@@ -341,6 +314,33 @@ import com.io7m.r1.types.RVectorI4F;
 
     {
       final RTriangle4F<RSpaceClipType> rt = r.get(1);
+      System.out.println(rt);
+      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP0(), plane));
+      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
+      Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));
+    }
+  }
+
+  @Test public void testClippingPositiveX_P1P2Out()
+  {
+    final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
+
+    final RVectorI4F<RSpaceClipType> p0 =
+      new RVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
+    final RVectorI4F<RSpaceClipType> p1 =
+      new RVectorI4F<RSpaceClipType>(2.0f, -1.0f, 0.0f, 1.0f);
+    final RVectorI4F<RSpaceClipType> p2 =
+      new RVectorI4F<RSpaceClipType>(2.0f, 0.0f, 0.0f, 1.0f);
+
+    final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
+
+    final List<RTriangle4F<RSpaceClipType>> r =
+      KTriangleClipping.clipTrianglePlane(t, plane);
+
+    Assert.assertEquals(1, r.size());
+
+    {
+      final RTriangle4F<RSpaceClipType> rt = r.get(0);
       System.out.println(rt);
       Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP0(), plane));
       Assert.assertTrue(KTriangleClipping.pointIsInside(rt.getP1(), plane));

@@ -17,21 +17,29 @@
 package com.io7m.r1.tests.kernel;
 
 import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.jcache.BLUCacheConfig;
-import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcanephora.ArrayBufferType;
 import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.ArrayDescriptorBuilderType;
 import com.io7m.jcanephora.IndexBufferType;
 import com.io7m.jcanephora.JCGLUnsignedType;
+import com.io7m.jcanephora.Texture2DStaticType;
+import com.io7m.jcanephora.TextureCubeStaticType;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
+import com.io7m.jcanephora.batchexec.JCGLExceptionExecution;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
@@ -56,10 +64,15 @@ import com.io7m.r1.kernel.KTranslucentRendererType;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
+import com.io7m.r1.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRegular;
+import com.io7m.r1.kernel.types.KInstanceTranslucentSpecularOnly;
+import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
+import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegularBuilderType;
+import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KMeshAttributes;
 import com.io7m.r1.kernel.types.KMeshReadableType;
@@ -70,10 +83,16 @@ import com.io7m.r1.kernel.types.KTransformMatrix4x4;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 import com.io7m.r1.kernel.types.KVisibleSetTranslucentsBuilderWithCreateType;
+import com.io7m.r1.shaders.forward.RKFLightCases;
+import com.io7m.r1.shaders.forward.RKFMaterialCases;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
+import com.io7m.r1.tests.RFakeTextures2DStatic;
+import com.io7m.r1.tests.RFakeTexturesCubeStatic;
 import com.io7m.r1.tests.TestShaderCaches;
 import com.io7m.r1.types.RException;
+import com.io7m.r1.types.RExceptionJCGL;
+import com.io7m.r1.types.RExceptionResource;
 import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RMatrixI4x4F;
 import com.io7m.r1.types.RSpaceRGBType;
@@ -82,7 +101,7 @@ import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RTransformViewType;
 import com.io7m.r1.types.RVectorI3F;
 
-@SuppressWarnings("static-method") public final class KTranslucentRendererTest
+@SuppressWarnings({ "null", "static-method" }) public final class KTranslucentRendererTest
 {
   static @NonNull KMesh makeMesh(
     final JCGLInterfaceCommonType gc)
@@ -114,9 +133,6 @@ import com.io7m.r1.types.RVectorI3F;
     try {
       final LogUsableType in_log =
         Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests");
-
-      final LRUCacheConfig cache_config =
-        LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(2048));
 
       final TestShaderCaches tc =
         TestShaderCaches.newCachesFromArchives(g, in_log);
@@ -151,11 +167,150 @@ import com.io7m.r1.types.RVectorI3F;
     }
   }
 
+  @Test public void testAllCases()
+    throws Exception
+  {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+    final KTranslucentRendererType r =
+      KTranslucentRendererTest.makeRenderer(g);
+
+    final KFramebufferRGBADescription rgba_desc =
+      KFramebufferRGBADescription.newDescription(
+        RFakeGL.SCREEN_AREA,
+        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+        KRGBAPrecision.RGBA_PRECISION_8);
+    final KFramebufferRGBAWithDepthUsableType framebuffer =
+      KFramebufferRGBAWithDepth.newFramebuffer(g, rgba_desc);
+
+    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
+    final KProjectionType projection =
+      KProjectionFOV.newProjection(
+        new MatrixM4x4F(),
+        (float) Math.toRadians(90.0f),
+        1.0f,
+        1.0f,
+        100.0f);
+
+    final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
+    final KTransformType transform = KTransformMatrix4x4.newTransform(model);
+    final KMeshReadableType mesh =
+      KTranslucentRendererTest.makeMesh(g.getGLCommon());
+    final RMatrixI3x3F<RTransformTextureType> m_uv = RMatrixI3x3F.identity();
+
+    final KCamera camera = KCamera.newCamera(view, projection);
+    final KVisibleSetTranslucentsBuilderWithCreateType tb =
+      KVisibleSetTranslucents.newBuilder(camera);
+
+    final Texture2DStaticType t = RFakeTextures2DStatic.newWithName(g, "t2d");
+    final TextureCubeStaticType tc = RFakeTexturesCubeStatic.newAnything(g);
+    final RKFMaterialCases material_cases = new RKFMaterialCases(t, tc);
+    final RKFLightCases light_cases = new RKFLightCases();
+
+    for (final KMaterialTranslucentRefractive c : material_cases
+      .getCasesUnlitTranslucentRefractive()) {
+      assert c != null;
+
+      final KInstanceTranslucentRefractive instance =
+        KInstanceTranslucentRefractive.newInstance(
+          mesh,
+          c,
+          transform,
+          m_uv,
+          KFaceSelection.FACE_RENDER_FRONT);
+      tb.visibleTranslucentsAddUnlit(instance);
+    }
+
+    for (final KMaterialTranslucentRegular c : material_cases
+      .getCasesUnlitTranslucentRegular()) {
+      assert c != null;
+
+      final KInstanceTranslucentRegular instance =
+        KInstanceTranslucentRegular.newInstance(
+          mesh,
+          c,
+          transform,
+          m_uv,
+          KFaceSelection.FACE_RENDER_FRONT);
+      tb.visibleTranslucentsAddUnlit(instance);
+    }
+
+    for (final KMaterialTranslucentRegular c : material_cases
+      .getCasesLitTranslucentRegular()) {
+      assert c != null;
+
+      final KInstanceTranslucentRegular instance =
+        KInstanceTranslucentRegular.newInstance(
+          mesh,
+          c,
+          transform,
+          m_uv,
+          KFaceSelection.FACE_RENDER_FRONT);
+      tb.visibleTranslucentsAddUnlit(instance);
+    }
+
+    for (final KMaterialTranslucentRegular c : material_cases
+      .getCasesLitTranslucentRegular()) {
+      assert c != null;
+
+      final KInstanceTranslucentRegular instance =
+        KInstanceTranslucentRegular.newInstance(
+          mesh,
+          c,
+          transform,
+          m_uv,
+          KFaceSelection.FACE_RENDER_FRONT);
+
+      final Set<KLightTranslucentType> ls =
+        new HashSet<KLightTranslucentType>(light_cases.getCases());
+
+      tb.visibleTranslucentsAddLit(instance, ls);
+    }
+
+    for (final KMaterialTranslucentSpecularOnly c : material_cases
+      .getCasesLitTranslucentSpecularOnly()) {
+      assert c != null;
+
+      final KInstanceTranslucentSpecularOnly instance =
+        KInstanceTranslucentSpecularOnly.newInstance(
+          mesh,
+          c,
+          transform,
+          m_uv,
+          KFaceSelection.FACE_RENDER_FRONT);
+
+      final Set<KLightTranslucentType> ls =
+        new HashSet<KLightTranslucentType>(light_cases.getCases());
+
+      tb.visibleTranslucentsAddLit(instance, ls);
+    }
+
+    final KVisibleSetTranslucents translucents =
+      tb.visibleTranslucentsCreate();
+
+    final KMutableMatrices m = KMutableMatrices.newMatrices();
+    m.withObserver(
+      view,
+      projection,
+      new KMatricesObserverFunctionType<Unit, UnreachableCodeException>() {
+        @Override public Unit run(
+          final KMatricesObserverType mwo)
+          throws RException
+        {
+          r.rendererEvaluateTranslucents(framebuffer, mwo, translucents);
+          return Unit.unit();
+        }
+      });
+  }
+
   @Test public void testBug_f1c93bc35b1()
     throws Exception
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final KTranslucentRendererType r =
       KTranslucentRendererTest.makeRenderer(g);
 
@@ -186,7 +341,6 @@ import com.io7m.r1.types.RVectorI3F;
 
     final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
     final KTransformType transform = KTransformMatrix4x4.newTransform(model);
-
     final KMeshReadableType mesh =
       KTranslucentRendererTest.makeMesh(g.getGLCommon());
 
@@ -220,5 +374,213 @@ import com.io7m.r1.types.RVectorI3F;
           return Unit.unit();
         }
       });
+  }
+
+  @Test(expected = RExceptionResource.class) public void testOutOfUnits_1()
+    throws Exception
+  {
+    try {
+      final JCGLSoftRestrictionsType restrictor =
+        new JCGLSoftRestrictionsType() {
+          @Override public int restrictTextureUnitCount(
+            final int count)
+          {
+            return 1;
+          }
+
+          @Override public boolean restrictExtensionVisibility(
+            final String name)
+          {
+            return true;
+          }
+        };
+      final OptionType<JCGLSoftRestrictionsType> restrict =
+        Option.some(restrictor);
+
+      final JCGLImplementationType g =
+        RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), restrict);
+      final KTranslucentRendererType r =
+        KTranslucentRendererTest.makeRenderer(g);
+
+      final KFramebufferRGBADescription rgba_desc =
+        KFramebufferRGBADescription.newDescription(
+          RFakeGL.SCREEN_AREA,
+          TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+          KRGBAPrecision.RGBA_PRECISION_8);
+      final KFramebufferRGBAWithDepthUsableType framebuffer =
+        KFramebufferRGBAWithDepth.newFramebuffer(g, rgba_desc);
+
+      final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
+      final KProjectionType projection =
+        KProjectionFOV.newProjection(
+          new MatrixM4x4F(),
+          (float) Math.toRadians(90.0f),
+          1.0f,
+          1.0f,
+          100.0f);
+
+      final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
+      final KTransformType transform =
+        KTransformMatrix4x4.newTransform(model);
+      final KMeshReadableType mesh =
+        KTranslucentRendererTest.makeMesh(g.getGLCommon());
+      final RMatrixI3x3F<RTransformTextureType> m_uv =
+        RMatrixI3x3F.identity();
+
+      final KCamera camera = KCamera.newCamera(view, projection);
+      final KVisibleSetTranslucentsBuilderWithCreateType tb =
+        KVisibleSetTranslucents.newBuilder(camera);
+
+      final Texture2DStaticType t =
+        RFakeTextures2DStatic.newWithName(g, "t2d");
+      final TextureCubeStaticType tc = RFakeTexturesCubeStatic.newAnything(g);
+      final RKFMaterialCases material_cases = new RKFMaterialCases(t, tc);
+      final RKFLightCases light_cases = new RKFLightCases();
+
+      for (final KMaterialTranslucentSpecularOnly c : material_cases
+        .getCasesLitTranslucentSpecularOnly()) {
+        assert c != null;
+
+        final KInstanceTranslucentSpecularOnly instance =
+          KInstanceTranslucentSpecularOnly.newInstance(
+            mesh,
+            c,
+            transform,
+            m_uv,
+            KFaceSelection.FACE_RENDER_FRONT);
+
+        final Set<KLightTranslucentType> ls =
+          new HashSet<KLightTranslucentType>(light_cases.getCases());
+
+        tb.visibleTranslucentsAddLit(instance, ls);
+      }
+
+      final KVisibleSetTranslucents translucents =
+        tb.visibleTranslucentsCreate();
+
+      final KMutableMatrices m = KMutableMatrices.newMatrices();
+      m.withObserver(
+        view,
+        projection,
+        new KMatricesObserverFunctionType<Unit, UnreachableCodeException>() {
+          @Override public Unit run(
+            final KMatricesObserverType mwo)
+            throws RException
+          {
+            r.rendererEvaluateTranslucents(framebuffer, mwo, translucents);
+            return Unit.unit();
+          }
+        });
+    } catch (final RExceptionJCGL e) {
+      Assert.assertTrue(e.getCause() instanceof JCGLExceptionExecution);
+      final JCGLExceptionExecution ee = (JCGLExceptionExecution) e.getCause();
+      Assert.assertTrue(ee.getCause() instanceof RExceptionResource);
+      throw (RExceptionResource) ee.getCause();
+    }
+  }
+
+  @Test(expected = RExceptionResource.class) public void testOutOfUnits_0()
+    throws Exception
+  {
+    try {
+      final JCGLSoftRestrictionsType restrictor =
+        new JCGLSoftRestrictionsType() {
+          @Override public int restrictTextureUnitCount(
+            final int count)
+          {
+            return 2;
+          }
+
+          @Override public boolean restrictExtensionVisibility(
+            final String name)
+          {
+            return true;
+          }
+        };
+      final OptionType<JCGLSoftRestrictionsType> restrict =
+        Option.some(restrictor);
+
+      final JCGLImplementationType g =
+        RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), restrict);
+      final KTranslucentRendererType r =
+        KTranslucentRendererTest.makeRenderer(g);
+
+      final KFramebufferRGBADescription rgba_desc =
+        KFramebufferRGBADescription.newDescription(
+          RFakeGL.SCREEN_AREA,
+          TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+          TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+          KRGBAPrecision.RGBA_PRECISION_8);
+      final KFramebufferRGBAWithDepthUsableType framebuffer =
+        KFramebufferRGBAWithDepth.newFramebuffer(g, rgba_desc);
+
+      final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
+      final KProjectionType projection =
+        KProjectionFOV.newProjection(
+          new MatrixM4x4F(),
+          (float) Math.toRadians(90.0f),
+          1.0f,
+          1.0f,
+          100.0f);
+
+      final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
+      final KTransformType transform =
+        KTransformMatrix4x4.newTransform(model);
+      final KMeshReadableType mesh =
+        KTranslucentRendererTest.makeMesh(g.getGLCommon());
+      final RMatrixI3x3F<RTransformTextureType> m_uv =
+        RMatrixI3x3F.identity();
+
+      final KCamera camera = KCamera.newCamera(view, projection);
+      final KVisibleSetTranslucentsBuilderWithCreateType tb =
+        KVisibleSetTranslucents.newBuilder(camera);
+
+      final Texture2DStaticType t =
+        RFakeTextures2DStatic.newWithName(g, "t2d");
+      final TextureCubeStaticType tc = RFakeTexturesCubeStatic.newAnything(g);
+      final RKFMaterialCases material_cases = new RKFMaterialCases(t, tc);
+      final RKFLightCases light_cases = new RKFLightCases();
+
+      for (final KMaterialTranslucentRegular c : material_cases
+        .getCasesLitTranslucentRegular()) {
+        assert c != null;
+
+        final KInstanceTranslucentRegular instance =
+          KInstanceTranslucentRegular.newInstance(
+            mesh,
+            c,
+            transform,
+            m_uv,
+            KFaceSelection.FACE_RENDER_FRONT);
+
+        final Set<KLightTranslucentType> ls =
+          new HashSet<KLightTranslucentType>(light_cases.getCases());
+
+        tb.visibleTranslucentsAddLit(instance, ls);
+      }
+
+      final KVisibleSetTranslucents translucents =
+        tb.visibleTranslucentsCreate();
+
+      final KMutableMatrices m = KMutableMatrices.newMatrices();
+      m.withObserver(
+        view,
+        projection,
+        new KMatricesObserverFunctionType<Unit, UnreachableCodeException>() {
+          @Override public Unit run(
+            final KMatricesObserverType mwo)
+            throws RException
+          {
+            r.rendererEvaluateTranslucents(framebuffer, mwo, translucents);
+            return Unit.unit();
+          }
+        });
+    } catch (final RExceptionJCGL e) {
+      Assert.assertTrue(e.getCause() instanceof JCGLExceptionExecution);
+      final JCGLExceptionExecution ee = (JCGLExceptionExecution) e.getCause();
+      Assert.assertTrue(ee.getCause() instanceof RExceptionResource);
+      throw (RExceptionResource) ee.getCause();
+    }
   }
 }

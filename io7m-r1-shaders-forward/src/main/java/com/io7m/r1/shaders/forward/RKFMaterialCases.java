@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -249,6 +249,7 @@ import com.io7m.r1.types.RVectorI4F;
   private static
     List<KMaterialTranslucentRegular>
     makeCasesUnlitTranslucentRegular(
+      final Texture2DStaticType t,
       final List<KMaterialAlbedoType> cases_albedo,
       final List<KMaterialAlphaType> cases_alpha,
       final List<KMaterialEnvironmentType> cases_env,
@@ -257,6 +258,8 @@ import com.io7m.r1.types.RVectorI4F;
     try {
       final RMatrixI3x3F<RTransformTextureType> uv_matrix =
         RMatrixI3x3F.identity();
+      final RVectorI3F<RSpaceRGBType> color = RVectorI3F.one();
+
       final List<KMaterialTranslucentRegular> cases =
         new ArrayList<KMaterialTranslucentRegular>();
 
@@ -266,22 +269,31 @@ import com.io7m.r1.types.RVectorI4F;
           assert al != null;
           for (final KMaterialEnvironmentType ev : cases_env) {
             assert ev != null;
+
+            final KMaterialSpecularType spec;
+            if (ev instanceof KMaterialEnvironmentReflectionMapped) {
+              spec = KMaterialSpecularMapped.mapped(color, 64.0f, t);
+            } else {
+              spec = KMaterialSpecularNone.none();
+            }
+
             for (final KMaterialNormalType n : cases_normal) {
               assert n != null;
 
-              if (RKFMaterialCases.validTranslucent(
-                ev,
-                KMaterialSpecularNone.none()) == false) {
+              if (RKFMaterialCases.validTranslucent(ev, spec) == false) {
                 continue;
               }
 
-              cases.add(KMaterialTranslucentRegular.newMaterial(
-                uv_matrix,
-                a,
-                al,
-                ev,
-                n,
-                KMaterialSpecularNone.none()));
+              final KMaterialTranslucentRegular m =
+                KMaterialTranslucentRegular.newMaterial(
+                  uv_matrix,
+                  a,
+                  al,
+                  ev,
+                  n,
+                  spec);
+
+              cases.add(m);
             }
           }
         }
@@ -388,9 +400,51 @@ import com.io7m.r1.types.RVectorI4F;
   private final List<KMaterialTranslucentRefractive>   cases_unlit_translucent_refractive;
   private final List<KMaterialTranslucentRegular>      cases_unlit_translucent_regular;
 
+  public RKFMaterialCases(
+    final Texture2DStaticType t,
+    final TextureCubeStaticType tc)
+  {
+    this.cases_albedo = RKFMaterialCases.makeAlbedoCases(t);
+    this.cases_alpha = RKFMaterialCases.makeAlphaCases();
+    this.cases_depth = RKFMaterialCases.makeDepthCases();
+    this.cases_env = RKFMaterialCases.makeEnvironmentCases(tc);
+    this.cases_normal = RKFMaterialCases.makeNormalCases(t);
+    this.cases_specular = RKFMaterialCases.makeSpecularCases(t);
+    this.cases_specular_not_none =
+      RKFMaterialCases.makeSpecularNotNoneCases(t);
+    this.cases_refractive = RKFMaterialCases.makeRefractiveCases(t);
+
+    this.cases_lit_translucent_regular =
+      RKFMaterialCases.makeCasesLitTranslucentRegular(
+        this.cases_albedo,
+        this.cases_alpha,
+        this.cases_env,
+        this.cases_normal,
+        this.cases_specular);
+
+    this.cases_unlit_translucent_regular =
+      RKFMaterialCases.makeCasesUnlitTranslucentRegular(
+        t,
+        this.cases_albedo,
+        this.cases_alpha,
+        this.cases_env,
+        this.cases_normal);
+
+    this.cases_unlit_translucent_refractive =
+      RKFMaterialCases.makeCasesUnlitTranslucentRefractive(
+        this.cases_normal,
+        this.cases_refractive);
+
+    this.cases_lit_translucent_specular_only =
+      RKFMaterialCases.makeCasesLitTranslucentSpecularOnly(
+        this.cases_alpha,
+        this.cases_normal,
+        this.cases_specular_not_none);
+  }
+
   public RKFMaterialCases()
   {
-    final Texture2DStaticType t = new Texture2DStaticType() {
+    this(new Texture2DStaticType() {
       @Override public long resourceGetSizeBytes()
       {
         // TODO Auto-generated method stub
@@ -478,9 +532,7 @@ import com.io7m.r1.types.RVectorI4F;
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
-    };
-
-    final TextureCubeStaticType tc = new TextureCubeStaticType() {
+    }, new TextureCubeStaticType() {
       @Override public boolean resourceIsDeleted()
       {
         // TODO Auto-generated method stub
@@ -574,43 +626,7 @@ import com.io7m.r1.types.RVectorI4F;
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
-    };
-
-    this.cases_albedo = RKFMaterialCases.makeAlbedoCases(t);
-    this.cases_alpha = RKFMaterialCases.makeAlphaCases();
-    this.cases_depth = RKFMaterialCases.makeDepthCases();
-    this.cases_env = RKFMaterialCases.makeEnvironmentCases(tc);
-    this.cases_normal = RKFMaterialCases.makeNormalCases(t);
-    this.cases_specular = RKFMaterialCases.makeSpecularCases(t);
-    this.cases_specular_not_none =
-      RKFMaterialCases.makeSpecularNotNoneCases(t);
-    this.cases_refractive = RKFMaterialCases.makeRefractiveCases(t);
-
-    this.cases_lit_translucent_regular =
-      RKFMaterialCases.makeCasesLitTranslucentRegular(
-        this.cases_albedo,
-        this.cases_alpha,
-        this.cases_env,
-        this.cases_normal,
-        this.cases_specular);
-
-    this.cases_unlit_translucent_regular =
-      RKFMaterialCases.makeCasesUnlitTranslucentRegular(
-        this.cases_albedo,
-        this.cases_alpha,
-        this.cases_env,
-        this.cases_normal);
-
-    this.cases_unlit_translucent_refractive =
-      RKFMaterialCases.makeCasesUnlitTranslucentRefractive(
-        this.cases_normal,
-        this.cases_refractive);
-
-    this.cases_lit_translucent_specular_only =
-      RKFMaterialCases.makeCasesLitTranslucentSpecularOnly(
-        this.cases_alpha,
-        this.cases_normal,
-        this.cases_specular_not_none);
+    });
   }
 
   public List<KMaterialAlbedoType> getCasesAlbedo()

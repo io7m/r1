@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -115,77 +115,63 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   private static void renderInstanceTranslucentRegular(
     final JCGLInterfaceCommonType gc,
-    final KTextureUnitContextType units,
     final KMatricesInstanceValuesType mwi,
     final JCBProgramType program,
     final KInstanceTranslucentRegular instance)
     throws JCGLException,
       RException
   {
-    units.withContext(new KTextureUnitWithType() {
-      @Override public void run(
-        final KTextureUnitContextType context)
-        throws JCGLException,
-          RException
-      {
-        final KMeshReadableType mesh = instance.instanceGetMesh();
-        final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
-        final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
-        final KMaterialTranslucentRegular material = instance.getMaterial();
+    final KMeshReadableType mesh = instance.instanceGetMesh();
+    final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
+    final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
+    final KMaterialTranslucentRegular material = instance.getMaterial();
 
-        KRendererCommon.putInstanceMatricesRegular(program, mwi, material);
-        KRendererCommon
-          .putInstanceTexturesRegular(context, program, material);
+    KRendererCommon.putInstanceMatricesRegular(program, mwi, material);
 
-        try {
-          gc.arrayBufferBind(array);
+    try {
+      gc.arrayBufferBind(array);
 
-          KShadingProgramCommon
-            .bindAttributePositionUnchecked(program, array);
+      KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
 
-          material.materialGetNormal().normalAccept(
-            new KMaterialNormalVisitorType<Unit, JCGLException>() {
-              @Override public Unit mapped(
-                final KMaterialNormalMapped m)
-                throws RException,
-                  JCGLException
-              {
-                KShadingProgramCommon.bindAttributeTangent4(program, array);
-                KShadingProgramCommon.bindAttributeNormal(program, array);
-                return Unit.unit();
-              }
+      material.materialGetNormal().normalAccept(
+        new KMaterialNormalVisitorType<Unit, JCGLException>() {
+          @Override public Unit mapped(
+            final KMaterialNormalMapped m)
+            throws RException,
+              JCGLException
+          {
+            KShadingProgramCommon.bindAttributeTangent4(program, array);
+            KShadingProgramCommon.bindAttributeNormal(program, array);
+            return Unit.unit();
+          }
 
-              @Override public Unit vertex(
-                final KMaterialNormalVertex m)
-                throws RException,
-                  JCGLException
-              {
-                KShadingProgramCommon.bindAttributeNormal(program, array);
-                return Unit.unit();
-              }
-            });
+          @Override public Unit vertex(
+            final KMaterialNormalVertex m)
+            throws RException,
+              JCGLException
+          {
+            KShadingProgramCommon.bindAttributeNormal(program, array);
+            return Unit.unit();
+          }
+        });
 
-          KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+      KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
 
-          program
-            .programExecute(new JCBProgramProcedureType<JCGLException>() {
-              @Override public void call()
-                throws JCGLException
-              {
-                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-              }
-            });
-
-        } finally {
-          gc.arrayBufferUnbind();
+      program.programExecute(new JCBProgramProcedureType<JCGLException>() {
+        @Override public void call()
+          throws JCGLException
+        {
+          gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
         }
-      }
-    });
+      });
+
+    } finally {
+      gc.arrayBufferUnbind();
+    }
   }
 
   private static void renderInstanceTranslucentRegularLit(
     final JCGLInterfaceCommonType gc,
-    final KTextureUnitContextType texture_unit_ctx,
     final KMatricesObserverType mwo,
     final KLightTranslucentType light,
     final JCBProgramType program,
@@ -210,7 +196,6 @@ import com.io7m.r1.types.RExceptionJCGL;
           KTranslucentRenderer
             .renderInstanceTranslucentRegularLitDirectional(
               gc,
-              texture_unit_ctx,
               mwo,
               l,
               program,
@@ -225,7 +210,6 @@ import com.io7m.r1.types.RExceptionJCGL;
         {
           KTranslucentRenderer.renderInstanceTranslucentRegularLitSpherical(
             gc,
-            texture_unit_ctx,
             mwo,
             l,
             program,
@@ -237,7 +221,6 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   private static void renderInstanceTranslucentRegularLitDirectional(
     final JCGLInterfaceCommonType gc,
-    final KTextureUnitContextType texture_unit_ctx,
     final KMatricesObserverType mwo,
     final KLightDirectional l,
     final JCBProgramType program,
@@ -261,7 +244,6 @@ import com.io7m.r1.types.RExceptionJCGL;
         {
           KTranslucentRenderer.renderInstanceTranslucentRegular(
             gc,
-            texture_unit_ctx,
             mwi,
             program,
             instance);
@@ -272,7 +254,6 @@ import com.io7m.r1.types.RExceptionJCGL;
 
   private static void renderInstanceTranslucentRegularLitSpherical(
     final JCGLInterfaceCommonType gc,
-    final KTextureUnitContextType texture_unit_ctx,
     final KMatricesObserverType mwo,
     final KLightSphereType l,
     final JCBProgramType program,
@@ -296,7 +277,6 @@ import com.io7m.r1.types.RExceptionJCGL;
         {
           KTranslucentRenderer.renderInstanceTranslucentRegular(
             gc,
-            texture_unit_ctx,
             mwi,
             program,
             instance);
@@ -539,9 +519,7 @@ import com.io7m.r1.types.RExceptionJCGL;
   private final LogUsableType                           log;
   private final KRefractionRendererType                 refraction_renderer;
   private final KShaderCacheForwardTranslucentLitType   shader_lit_cache;
-
   private final KShaderCacheForwardTranslucentUnlitType shader_unlit_cache;
-
   private final KTextureUnitAllocator                   texture_units;
 
   private KTranslucentRenderer(
@@ -758,9 +736,13 @@ import com.io7m.r1.types.RExceptionJCGL;
                 throws JCGLException,
                   RException
               {
+                KRendererCommon.putInstanceTexturesRegularLit(
+                  texture_unit_ctx,
+                  program,
+                  material);
+
                 KTranslucentRenderer.renderInstanceTranslucentRegularLit(
                   gc,
-                  texture_unit_ctx,
                   mwo,
                   light,
                   program,
@@ -822,9 +804,13 @@ import com.io7m.r1.types.RExceptionJCGL;
                       program,
                       mwi.getMatrixProjection());
 
+                    KRendererCommon.putInstanceTexturesRegularUnlit(
+                      texture_unit_ctx,
+                      program,
+                      material);
+
                     KTranslucentRenderer.renderInstanceTranslucentRegular(
                       gc,
-                      texture_unit_ctx,
                       mwi,
                       program,
                       t);

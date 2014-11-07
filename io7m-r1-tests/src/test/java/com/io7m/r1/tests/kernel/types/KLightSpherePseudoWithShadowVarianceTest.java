@@ -41,6 +41,51 @@ import com.io7m.r1.types.RVectorI3F;
 
 public final class KLightSpherePseudoWithShadowVarianceTest
 {
+  private static List<KLightProjectiveWithShadowVariance> collectLights(
+    final KLightSpherePseudoWithShadowVariance s)
+  {
+    final ArrayList<KLightProjectiveWithShadowVariance> actuals =
+      new ArrayList<KLightProjectiveWithShadowVariance>();
+
+    if (s.getNegativeX().isSome()) {
+      final Some<KLightProjectiveWithShadowVariance> some =
+        (Some<KLightProjectiveWithShadowVariance>) s.getNegativeX();
+      actuals.add(some.get());
+    }
+
+    if (s.getNegativeY().isSome()) {
+      final Some<KLightProjectiveWithShadowVariance> some =
+        (Some<KLightProjectiveWithShadowVariance>) s.getNegativeY();
+      actuals.add(some.get());
+    }
+
+    if (s.getNegativeZ().isSome()) {
+      final Some<KLightProjectiveWithShadowVariance> some =
+        (Some<KLightProjectiveWithShadowVariance>) s.getNegativeZ();
+      actuals.add(some.get());
+    }
+
+    if (s.getPositiveX().isSome()) {
+      final Some<KLightProjectiveWithShadowVariance> some =
+        (Some<KLightProjectiveWithShadowVariance>) s.getPositiveX();
+      actuals.add(some.get());
+    }
+
+    if (s.getPositiveY().isSome()) {
+      final Some<KLightProjectiveWithShadowVariance> some =
+        (Some<KLightProjectiveWithShadowVariance>) s.getPositiveY();
+      actuals.add(some.get());
+    }
+
+    if (s.getPositiveZ().isSome()) {
+      final Some<KLightProjectiveWithShadowVariance> some =
+        (Some<KLightProjectiveWithShadowVariance>) s.getPositiveZ();
+      actuals.add(some.get());
+    }
+
+    return actuals;
+  }
+
   @Test public void testAttributes()
   {
     final Generator<RVectorI3F<RSpaceRGBType>> colour_gen1 =
@@ -97,50 +142,5 @@ public final class KLightSpherePseudoWithShadowVarianceTest
           }
         }
       });
-  }
-
-  private static List<KLightProjectiveWithShadowVariance> collectLights(
-    final KLightSpherePseudoWithShadowVariance s)
-  {
-    final ArrayList<KLightProjectiveWithShadowVariance> actuals =
-      new ArrayList<KLightProjectiveWithShadowVariance>();
-
-    if (s.getNegativeX().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getNegativeX();
-      actuals.add(some.get());
-    }
-
-    if (s.getNegativeY().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getNegativeY();
-      actuals.add(some.get());
-    }
-
-    if (s.getNegativeZ().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getNegativeZ();
-      actuals.add(some.get());
-    }
-
-    if (s.getPositiveX().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getPositiveX();
-      actuals.add(some.get());
-    }
-
-    if (s.getPositiveY().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getPositiveY();
-      actuals.add(some.get());
-    }
-
-    if (s.getPositiveZ().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getPositiveZ();
-      actuals.add(some.get());
-    }
-
-    return actuals;
   }
 }

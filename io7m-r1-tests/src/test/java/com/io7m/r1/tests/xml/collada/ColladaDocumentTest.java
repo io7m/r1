@@ -83,6 +83,20 @@ import com.io7m.r1.xml.collada.RColladaGeometryID;
     }
   }
 
+  @Test public void testGetGeometry()
+    throws RXMLException
+  {
+    final Document d = ColladaDocumentTest.getDocument("monkeys.dae");
+    final RColladaDocument p =
+      RColladaDocument.newDocument(d, ColladaDocumentTest.getLog());
+
+    for (final RColladaGeometryID id : p.getGeometryIDs()) {
+      final RColladaGeometry m = p.getGeometry(id);
+      assert m != null;
+      Assert.assertEquals(id, m.getID());
+    }
+  }
+
   @Test public void testGetGeometryNamesEmpty()
     throws RXMLException
   {
@@ -105,19 +119,5 @@ import com.io7m.r1.xml.collada.RColladaGeometryID;
     names.add(new RColladaGeometryID("monkey_untextured_mesh-mesh"));
 
     Assert.assertEquals(names, p.getGeometryIDs());
-  }
-
-  @Test public void testGetGeometry()
-    throws RXMLException
-  {
-    final Document d = ColladaDocumentTest.getDocument("monkeys.dae");
-    final RColladaDocument p =
-      RColladaDocument.newDocument(d, ColladaDocumentTest.getLog());
-
-    for (final RColladaGeometryID id : p.getGeometryIDs()) {
-      final RColladaGeometry m = p.getGeometry(id);
-      assert m != null;
-      Assert.assertEquals(id, m.getID());
-    }
   }
 }
