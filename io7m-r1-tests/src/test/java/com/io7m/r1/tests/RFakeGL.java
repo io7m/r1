@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -35,6 +35,15 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
 public final class RFakeGL
 {
+  public static final AreaInclusive SCREEN_AREA;
+
+  static {
+    SCREEN_AREA =
+      new AreaInclusive(new RangeInclusiveL(0, 639), new RangeInclusiveL(
+        0,
+        479));
+  }
+
   private static JCGLImplementationType newFakeGL(
     final LogUsableType in_log,
     final JCGLVersionNumber number,
@@ -43,12 +52,14 @@ public final class RFakeGL
     final FakeShaderControlType shader_control)
   {
     try {
-      final AreaInclusive area =
-        new AreaInclusive(new RangeInclusiveL(0, 639), new RangeInclusiveL(
-          0,
-          479));
       final FakeDefaultFramebuffer fb =
-        FakeDefaultFramebuffer.newFramebuffer(area, 8, 8, 8, 24, 8);
+        FakeDefaultFramebuffer.newFramebuffer(
+          RFakeGL.SCREEN_AREA,
+          8,
+          8,
+          8,
+          24,
+          8);
       final FakeContext context =
         FakeContext.newContext(fb, number, api, glsl_version);
 

@@ -136,7 +136,6 @@ import com.io7m.r1.types.RExceptionJCGL;
         KRendererCommon.putInstanceMatricesRegular(program, mwi, material);
         KRendererCommon
           .putInstanceTexturesRegular(context, program, material);
-        KRendererCommon.putMaterialTranslucentRegular(program, material);
 
         try {
           gc.arrayBufferBind(array);
@@ -197,6 +196,9 @@ import com.io7m.r1.types.RExceptionJCGL;
     KShadingProgramCommon.putMatrixProjectionUnchecked(
       program,
       mwo.getMatrixProjection());
+    KRendererCommon.putMaterialTranslucentRegularLit(
+      program,
+      instance.getMaterial());
 
     light
       .lightTranslucentAccept(new KLightTranslucentVisitorType<Unit, JCGLException>() {
@@ -504,7 +506,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     final KMaterialTranslucentRegular material)
   {
     final String lcode = light.lightGetCode();
-    final String mcode = material.materialGetCode();
+    final String mcode = material.materialGetLitCode();
 
     final StringBuilder s = new StringBuilder();
     s.append(lcode);
@@ -521,7 +523,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     final KMaterialTranslucentSpecularOnly material)
   {
     final String lcode = light.lightGetCode();
-    final String mcode = material.materialGetCode();
+    final String mcode = material.materialGetLitCode();
 
     final StringBuilder s = new StringBuilder();
     s.append(lcode);
@@ -781,7 +783,8 @@ import com.io7m.r1.types.RExceptionJCGL;
       RException,
       JCacheException
   {
-    final String shader_code = t.getMaterial().materialGetCode();
+    final KMaterialTranslucentRegular material = t.getMaterial();
+    final String shader_code = material.materialGetUnlitCode();
 
     gc.blendingEnable(
       BlendFunction.BLEND_ONE,
@@ -797,6 +800,10 @@ import com.io7m.r1.types.RExceptionJCGL;
           throws JCGLException,
             RException
         {
+          KRendererCommon.putMaterialTranslucentRegularUnlit(
+            program,
+            material);
+
           unit_allocator.withContext(new KTextureUnitWithType() {
             @Override public void run(
               final KTextureUnitContextType texture_unit_ctx)

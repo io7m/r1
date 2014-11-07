@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -92,7 +92,6 @@ import com.io7m.junreachable.UnreachableCodeException;
   public static String makeCodeTranslucentRegularUnlit(
     final KMaterialAlbedoType in_albedo,
     final KMaterialAlphaType in_alpha,
-    final KMaterialEmissiveType in_emissive,
     final KMaterialEnvironmentType in_environment,
     final KMaterialNormalType in_normal)
   {
@@ -101,7 +100,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     b.append("_");
     KMaterialCodes.makeRegularUnlitCode(
       in_albedo,
-      in_emissive,
+      KMaterialEmissiveNone.none(),
       in_environment,
       in_normal,
       b);

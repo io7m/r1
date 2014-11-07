@@ -37,6 +37,7 @@ import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.r1.kernel.types.KMaterialAlbedoVisitorType;
 import com.io7m.r1.kernel.types.KMaterialAlphaConstant;
 import com.io7m.r1.kernel.types.KMaterialAlphaOneMinusDot;
+import com.io7m.r1.kernel.types.KMaterialAlphaType;
 import com.io7m.r1.kernel.types.KMaterialAlphaVisitorType;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentNone;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflection;
@@ -324,7 +325,7 @@ import com.io7m.r1.types.RException;
       });
   }
 
-  static void putMaterialRegular(
+  static void putMaterialRegularLit(
     final JCBProgramType program,
     final KMaterialRegularType material)
     throws JCGLException,
@@ -412,16 +413,85 @@ import com.io7m.r1.types.RException;
       });
   }
 
-  static void putMaterialTranslucentRegular(
+  static void putMaterialRegularUnlit(
+    final JCBProgramType program,
+    final KMaterialRegularType material)
+    throws JCGLException,
+      RException
+  {
+    material.materialRegularGetAlbedo().albedoAccept(
+      new KMaterialAlbedoVisitorType<Unit, JCGLException>() {
+        @Override public Unit textured(
+          final KMaterialAlbedoTextured m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putMaterialAlbedoTextured(program, m);
+          return Unit.unit();
+        }
+
+        @Override public Unit untextured(
+          final KMaterialAlbedoUntextured m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putMaterialAlbedoUntextured(program, m);
+          return Unit.unit();
+        }
+      });
+
+    material.materialRegularGetEnvironment().environmentAccept(
+      new KMaterialEnvironmentVisitorType<Unit, JCGLException>() {
+        @Override public Unit none(
+          final KMaterialEnvironmentNone m)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit reflection(
+          final KMaterialEnvironmentReflection m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putMaterialEnvironmentReflection(program, m);
+          return Unit.unit();
+        }
+
+        @Override public Unit reflectionMapped(
+          final KMaterialEnvironmentReflectionMapped m)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putMaterialEnvironmentReflectionMapped(
+            program,
+            m);
+          return Unit.unit();
+        }
+      });
+  }
+
+  static void putMaterialTranslucentRegularLit(
     final JCBProgramType program,
     final KMaterialTranslucentRegular material)
     throws JCGLException,
       RException
   {
-    KRendererCommon.putMaterialRegular(program, material);
+    KRendererCommon.putMaterialRegularLit(program, material);
+    KRendererCommon.putMaterialTranslucentAlpha(
+      program,
+      material.materialGetAlpha());
+  }
 
-    material.materialGetAlpha().alphaAccept(
-      new KMaterialAlphaVisitorType<Unit, JCGLException>() {
+  static void putMaterialTranslucentAlpha(
+    final JCBProgramType program,
+    final KMaterialAlphaType material)
+    throws JCGLException,
+      RException
+  {
+    material
+      .alphaAccept(new KMaterialAlphaVisitorType<Unit, JCGLException>() {
         @Override public Unit constant(
           final KMaterialAlphaConstant m)
           throws RException,
@@ -440,6 +510,18 @@ import com.io7m.r1.types.RException;
           return Unit.unit();
         }
       });
+  }
+
+  static void putMaterialTranslucentRegularUnlit(
+    final JCBProgramType program,
+    final KMaterialTranslucentRegular material)
+    throws JCGLException,
+      RException
+  {
+    KRendererCommon.putMaterialRegularUnlit(program, material);
+    KRendererCommon.putMaterialTranslucentAlpha(
+      program,
+      material.materialGetAlpha());
   }
 
   static void putMaterialTranslucentSpecularOnly(
@@ -477,26 +559,7 @@ import com.io7m.r1.types.RException;
         }
       });
 
-    material.getAlpha().alphaAccept(
-      new KMaterialAlphaVisitorType<Unit, JCGLException>() {
-        @Override public Unit constant(
-          final KMaterialAlphaConstant m)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putMaterialAlphaConstant(program, m);
-          return Unit.unit();
-        }
-
-        @Override public Unit oneMinusDot(
-          final KMaterialAlphaOneMinusDot m)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putMaterialAlphaOneMinusDot(program, m);
-          return Unit.unit();
-        }
-      });
+    KRendererCommon.putMaterialTranslucentAlpha(program, material.getAlpha());
   }
 
   static void putShadow(

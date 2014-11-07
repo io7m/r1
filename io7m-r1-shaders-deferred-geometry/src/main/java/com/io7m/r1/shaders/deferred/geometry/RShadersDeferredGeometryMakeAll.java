@@ -119,7 +119,7 @@ import com.io7m.r1.shaders.deferred.RKDeferredShader;
 
         for (final KMaterialOpaqueRegular c : cases_opaque) {
           assert c != null;
-          final String code = c.materialGetCode();
+          final String code = c.materialGetLitCode();
           final String name =
             String.format(
               "%s.%s.p",
@@ -213,7 +213,7 @@ import com.io7m.r1.shaders.deferred.RKDeferredShader;
     for (final KMaterialOpaqueRegular c : cases_opaque) {
       assert c != null;
 
-      final String code = c.materialGetCode();
+      final String code = c.materialGetLitCode();
       final File file = new File(dir, code + ".p");
       log.info("Generating " + file);
 

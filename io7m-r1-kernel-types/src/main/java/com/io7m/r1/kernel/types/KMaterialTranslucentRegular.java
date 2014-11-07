@@ -177,7 +177,7 @@ import com.io7m.r1.types.RTransformTextureType;
       in_normal,
       in_specular);
 
-    final String code =
+    final String code_lit =
       KMaterialCodes.makeCodeTranslucentRegularLit(
         in_albedo,
         in_alpha,
@@ -185,8 +185,16 @@ import com.io7m.r1.types.RTransformTextureType;
         in_normal,
         in_specular);
 
+    final String code_unlit =
+      KMaterialCodes.makeCodeTranslucentRegularUnlit(
+        in_albedo,
+        in_alpha,
+        in_environment,
+        in_normal);
+
     return new KMaterialTranslucentRegular(
-      code,
+      code_lit,
+      code_unlit,
       in_uv_matrix,
       in_albedo,
       in_alpha,
@@ -197,7 +205,8 @@ import com.io7m.r1.types.RTransformTextureType;
 
   private final KMaterialAlbedoType                 albedo;
   private final KMaterialAlphaType                  alpha;
-  private final String                              code;
+  private final String                              code_lit;
+  private final String                              code_unlit;
   private final KMaterialEnvironmentType            environment;
   private final KMaterialNormalType                 normal;
   private boolean                                   required_uv;
@@ -206,7 +215,8 @@ import com.io7m.r1.types.RTransformTextureType;
   private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
 
   private KMaterialTranslucentRegular(
-    final String in_code,
+    final String in_code_lit,
+    final String in_code_unlit,
     final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
     final KMaterialAlbedoType in_albedo,
     final KMaterialAlphaType in_alpha,
@@ -214,7 +224,8 @@ import com.io7m.r1.types.RTransformTextureType;
     final KMaterialNormalType in_normal,
     final KMaterialSpecularType in_specular)
   {
-    this.code = NullCheck.notNull(in_code, "Code");
+    this.code_lit = NullCheck.notNull(in_code_lit, "Code (lit)");
+    this.code_unlit = NullCheck.notNull(in_code_unlit, "Code (unlit)");
     this.normal = NullCheck.notNull(in_normal, "Normal");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     this.albedo = NullCheck.notNull(in_albedo, "Albedo");
@@ -262,14 +273,19 @@ import com.io7m.r1.types.RTransformTextureType;
     return this.alpha;
   }
 
-  @Override public String materialGetCode()
+  @Override public String materialGetLitCode()
   {
-    return this.code;
+    return this.code_lit;
   }
 
   @Override public KMaterialNormalType materialGetNormal()
   {
     return this.normal;
+  }
+
+  @Override public String materialGetUnlitCode()
+  {
+    return this.code_unlit;
   }
 
   @Override public RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix()
@@ -321,7 +337,7 @@ import com.io7m.r1.types.RTransformTextureType;
     b.append(" alpha=");
     b.append(this.alpha);
     b.append(" code=");
-    b.append(this.code);
+    b.append(this.code_lit);
     b.append(" environment=");
     b.append(this.environment);
     b.append(" normal=");
