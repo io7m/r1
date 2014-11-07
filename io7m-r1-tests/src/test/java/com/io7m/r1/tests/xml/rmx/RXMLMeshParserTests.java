@@ -41,253 +41,28 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
 
 @SuppressWarnings("synthetic-access") public final class RXMLMeshParserTests
 {
-  class Show implements RMeshParserEventsType<Throwable>
-  {
-    @Override public void eventError(
-      final Exception e)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshEnded()
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshName(
-      final String name)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshTriangle(
-      final long index,
-      final long v0,
-      final long v1,
-      final long v2)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshTrianglesEnded()
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshTrianglesStarted(
-      final long count)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshVertexEnded(
-      final long index)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshVertexNormal(
-      final long index,
-      final RVectorI3F<RSpaceObjectType> normal)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshVertexPosition(
-      final long index,
-      final RVectorI3F<RSpaceObjectType> position)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshVertexStarted(
-      final long index)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshVertexTangent4f(
-      final long index,
-      final RVectorI4F<RSpaceObjectType> tangent)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshVertexUV(
-      final long index,
-      final RVectorI2F<RSpaceTextureType> uv)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshVerticesEnded(
-      final RVectorI3F<RSpaceObjectType> lower,
-      final RVectorI3F<RSpaceObjectType> upper)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshVerticesStarted(
-      final long count)
-      throws Throwable
-    {
-      // Nothing
-    }
-
-    @Override public void eventMeshStarted()
-      throws Throwable
-    {
-      // Nothing
-    }
-  }
-
-  private @NonNull InputStream getFile(
-    final String name)
-  {
-    final InputStream s = this.getClass().getResourceAsStream(name);
-    if (s == null) {
-      throw new AssertionError("No such file!");
-    }
-    return s;
-  }
-
-  @Test(expected = RXMLException.RXMLParsingException.class) public
-    void
-    testXMLStreamMalformed()
-      throws IOException,
-        RXMLException
-  {
-    final InputStream s = this.getFile("malformed.rmx");
-    RXMLMeshDocument.parseFromStreamValidating(s);
-    s.close();
-  }
-
-  @Test(expected = RXMLException.RXMLSaxExceptions.class) public
-    void
-    testXMLStreamNotSchemaValid()
-      throws IOException,
-        RXMLException
-  {
-    final InputStream s = this.getFile("invalid.rmx");
-    RXMLMeshDocument.parseFromStreamValidating(s);
-    s.close();
-  }
-
-  @Test public void testXMLStreamValid()
-    throws IOException,
-      Throwable
-  {
-    final InputStream s = this.getFile("valid.rmx");
-    RXMLMeshDocument.parseFromStreamValidating(s);
-    s.close();
-  }
-
-  @Test public void testXMLBounds()
-    throws IOException,
-      Throwable
-  {
-    try {
-      final String expected_name = "some-mesh";
-      final int expected_triangles = 3;
-
-      final EnumSet<RXMLMeshAttribute> attribs =
-        EnumSet.noneOf(RXMLMeshAttribute.class);
-      attribs.add(RXMLMeshAttribute.NORMAL_3F);
-      attribs.add(RXMLMeshAttribute.TANGENT_4F);
-      attribs.add(RXMLMeshAttribute.UV_2F);
-
-      final int expected_vertices = 3;
-
-      final Checked c =
-        new Checked(
-          expected_name,
-          expected_triangles,
-          expected_vertices,
-          new RVectorI3F<RSpaceObjectType>(-23.0f, -34.0f, -11.0f),
-          new RVectorI3F<RSpaceObjectType>(56.0f, 72.0f, 4.0f));
-
-      final InputStream s = this.getFile("bounds.rmx");
-      final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
-      RXMLMeshParser.parseFromDocument(d, c);
-      s.close();
-
-      Assert.assertTrue(c.mesh_ended);
-      Assert.assertTrue(c.mesh_started);
-      Assert.assertTrue(c.mesh_vertex_ended);
-      Assert.assertTrue(c.triangle_called);
-      Assert.assertTrue(c.triangles_ended);
-      Assert.assertTrue(c.triangles_started);
-      Assert.assertTrue(c.vertex_normal_called);
-      Assert.assertTrue(c.vertex_position_called);
-      Assert.assertTrue(c.vertex_started_called);
-      Assert.assertTrue(c.vertex_tangent4f_called);
-      Assert.assertTrue(c.vertex_uv_called);
-      Assert.assertTrue(c.vertices_ended);
-      Assert.assertTrue(c.vertices_started);
-
-    } catch (final IOException e) {
-      throw new AssertionError(e);
-    }
-  }
-
-  @Test(expected = RXMLException.RXMLValidityException.class) public
-    void
-    testXMLStreamWrongTriangleCount()
-      throws Throwable
-  {
-    final InputStream s = this.getFile("wrongtrianglecount.rmx");
-    final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
-    RXMLMeshParser.parseFromDocument(d, new Show());
-    s.close();
-  }
-
-  @Test(expected = RXMLException.RXMLValidityException.class) public
-    void
-    testXMLStreamWrongVertexCount()
-      throws RXMLException,
-        Throwable
-  {
-    final InputStream s = this.getFile("wrongvertexcount.rmx");
-    final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
-    RXMLMeshParser.parseFromDocument(d, new Show());
-    s.close();
-  }
-
   static class Checked implements RMeshParserEventsType<Throwable>
   {
+    private final @NonNull RVectorI3F<RSpaceObjectType> expected_lower;
+    private final @NonNull String                       expected_name;
+    private final int                                   expected_triangles;
+    private final @NonNull RVectorI3F<RSpaceObjectType> expected_upper;
+    private final int                                   expected_vertices;
     private boolean                                     mesh_ended;
     private boolean                                     mesh_started;
-    private final @NonNull String                       expected_name;
+    private boolean                                     mesh_vertex_ended;
+    private int                                         triangle = 0;
     private boolean                                     triangle_called;
     private boolean                                     triangles_ended;
     private boolean                                     triangles_started;
-    private final int                                   expected_triangles;
-    private boolean                                     mesh_vertex_ended;
     private boolean                                     vertex_normal_called;
     private boolean                                     vertex_position_called;
     private boolean                                     vertex_started_called;
     private boolean                                     vertex_tangent4f_called;
     private boolean                                     vertex_uv_called;
+    private int                                         vertices = 0;
     private boolean                                     vertices_ended;
     private boolean                                     vertices_started;
-    private final int                                   expected_vertices;
-    private int                                         triangle = 0;
-    private int                                         vertices = 0;
-    private final @NonNull RVectorI3F<RSpaceObjectType> expected_lower;
-    private final @NonNull RVectorI3F<RSpaceObjectType> expected_upper;
 
     Checked(
       final @NonNull String in_expected_name,
@@ -321,6 +96,12 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
       throws Throwable
     {
       Assert.assertEquals(this.expected_name, name);
+    }
+
+    @Override public void eventMeshStarted()
+      throws Throwable
+    {
+      this.mesh_started = true;
     }
 
     @Override public void eventMeshTriangle(
@@ -429,11 +210,176 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
       this.vertices_started = true;
       Assert.assertEquals(this.expected_vertices, count);
     }
+  }
+
+  class Show implements RMeshParserEventsType<Throwable>
+  {
+    @Override public void eventError(
+      final Exception e)
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshEnded()
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshName(
+      final String name)
+      throws Throwable
+    {
+      // Nothing
+    }
 
     @Override public void eventMeshStarted()
       throws Throwable
     {
-      this.mesh_started = true;
+      // Nothing
+    }
+
+    @Override public void eventMeshTriangle(
+      final long index,
+      final long v0,
+      final long v1,
+      final long v2)
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshTrianglesEnded()
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshTrianglesStarted(
+      final long count)
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVertexEnded(
+      final long index)
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVertexNormal(
+      final long index,
+      final RVectorI3F<RSpaceObjectType> normal)
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVertexPosition(
+      final long index,
+      final RVectorI3F<RSpaceObjectType> position)
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVertexStarted(
+      final long index)
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVertexTangent4f(
+      final long index,
+      final RVectorI4F<RSpaceObjectType> tangent)
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVertexUV(
+      final long index,
+      final RVectorI2F<RSpaceTextureType> uv)
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVerticesEnded(
+      final RVectorI3F<RSpaceObjectType> lower,
+      final RVectorI3F<RSpaceObjectType> upper)
+      throws Throwable
+    {
+      // Nothing
+    }
+
+    @Override public void eventMeshVerticesStarted(
+      final long count)
+      throws Throwable
+    {
+      // Nothing
+    }
+  }
+
+  private @NonNull InputStream getFile(
+    final String name)
+  {
+    final InputStream s = this.getClass().getResourceAsStream(name);
+    if (s == null) {
+      throw new AssertionError("No such file!");
+    }
+    return s;
+  }
+
+  @Test public void testXMLBounds()
+    throws IOException,
+      Throwable
+  {
+    try {
+      final String expected_name = "some-mesh";
+      final int expected_triangles = 3;
+
+      final EnumSet<RXMLMeshAttribute> attribs =
+        EnumSet.noneOf(RXMLMeshAttribute.class);
+      attribs.add(RXMLMeshAttribute.NORMAL_3F);
+      attribs.add(RXMLMeshAttribute.TANGENT_4F);
+      attribs.add(RXMLMeshAttribute.UV_2F);
+
+      final int expected_vertices = 3;
+
+      final Checked c =
+        new Checked(
+          expected_name,
+          expected_triangles,
+          expected_vertices,
+          new RVectorI3F<RSpaceObjectType>(-23.0f, -34.0f, -11.0f),
+          new RVectorI3F<RSpaceObjectType>(56.0f, 72.0f, 4.0f));
+
+      final InputStream s = this.getFile("bounds.rmx");
+      final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
+      RXMLMeshParser.parseFromDocument(d, c);
+      s.close();
+
+      Assert.assertTrue(c.mesh_ended);
+      Assert.assertTrue(c.mesh_started);
+      Assert.assertTrue(c.mesh_vertex_ended);
+      Assert.assertTrue(c.triangle_called);
+      Assert.assertTrue(c.triangles_ended);
+      Assert.assertTrue(c.triangles_started);
+      Assert.assertTrue(c.vertex_normal_called);
+      Assert.assertTrue(c.vertex_position_called);
+      Assert.assertTrue(c.vertex_started_called);
+      Assert.assertTrue(c.vertex_tangent4f_called);
+      Assert.assertTrue(c.vertex_uv_called);
+      Assert.assertTrue(c.vertices_ended);
+      Assert.assertTrue(c.vertices_started);
+
+    } catch (final IOException e) {
+      throw new AssertionError(e);
     }
   }
 
@@ -482,5 +428,59 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
     } catch (final IOException e) {
       throw new AssertionError(e);
     }
+  }
+
+  @Test(expected = RXMLException.RXMLParsingException.class) public
+    void
+    testXMLStreamMalformed()
+      throws IOException,
+        RXMLException
+  {
+    final InputStream s = this.getFile("malformed.rmx");
+    RXMLMeshDocument.parseFromStreamValidating(s);
+    s.close();
+  }
+
+  @Test(expected = RXMLException.RXMLSaxExceptions.class) public
+    void
+    testXMLStreamNotSchemaValid()
+      throws IOException,
+        RXMLException
+  {
+    final InputStream s = this.getFile("invalid.rmx");
+    RXMLMeshDocument.parseFromStreamValidating(s);
+    s.close();
+  }
+
+  @Test public void testXMLStreamValid()
+    throws IOException,
+      Throwable
+  {
+    final InputStream s = this.getFile("valid.rmx");
+    RXMLMeshDocument.parseFromStreamValidating(s);
+    s.close();
+  }
+
+  @Test(expected = RXMLException.RXMLValidityException.class) public
+    void
+    testXMLStreamWrongTriangleCount()
+      throws Throwable
+  {
+    final InputStream s = this.getFile("wrongtrianglecount.rmx");
+    final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
+    RXMLMeshParser.parseFromDocument(d, new Show());
+    s.close();
+  }
+
+  @Test(expected = RXMLException.RXMLValidityException.class) public
+    void
+    testXMLStreamWrongVertexCount()
+      throws RXMLException,
+        Throwable
+  {
+    final InputStream s = this.getFile("wrongvertexcount.rmx");
+    final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
+    RXMLMeshParser.parseFromDocument(d, new Show());
+    s.close();
   }
 }

@@ -55,6 +55,24 @@ public final class KMaterialOpaqueRegularGenerator implements
   private final Generator<KMaterialSpecularType>               specular_gen;
 
   public KMaterialOpaqueRegularGenerator(
+    final Generator<RMatrixI3x3F<RTransformTextureType>> in_matrix_gen,
+    final Generator<KMaterialNormalType> in_normal_gen,
+    final Generator<KMaterialAlbedoType> in_albedo_gen,
+    final Generator<KMaterialDepthType> in_depth_gen,
+    final Generator<KMaterialEmissiveType> in_emissive_gen,
+    final Generator<KMaterialEnvironmentType> in_environment_gen,
+    final Generator<KMaterialSpecularType> in_specular_gen)
+  {
+    this.matrix_gen = in_matrix_gen;
+    this.depth_gen = in_depth_gen;
+    this.normal_gen = in_normal_gen;
+    this.albedo_gen = in_albedo_gen;
+    this.emissive_gen = in_emissive_gen;
+    this.environment_gen = in_environment_gen;
+    this.specular_gen = in_specular_gen;
+  }
+
+  public KMaterialOpaqueRegularGenerator(
     final JCGLImplementationType g)
   {
     final Generator<Texture2DStaticUsableType> in_tex_gen =
@@ -74,24 +92,6 @@ public final class KMaterialOpaqueRegularGenerator implements
     this.environment_gen = new KMaterialEnvironmentGenerator(in_tex_cube_gen);
     this.specular_gen =
       new KMaterialSpecularGenerator(in_vec3_gen, in_tex_gen);
-  }
-
-  public KMaterialOpaqueRegularGenerator(
-    final Generator<RMatrixI3x3F<RTransformTextureType>> in_matrix_gen,
-    final Generator<KMaterialNormalType> in_normal_gen,
-    final Generator<KMaterialAlbedoType> in_albedo_gen,
-    final Generator<KMaterialDepthType> in_depth_gen,
-    final Generator<KMaterialEmissiveType> in_emissive_gen,
-    final Generator<KMaterialEnvironmentType> in_environment_gen,
-    final Generator<KMaterialSpecularType> in_specular_gen)
-  {
-    this.matrix_gen = in_matrix_gen;
-    this.depth_gen = in_depth_gen;
-    this.normal_gen = in_normal_gen;
-    this.albedo_gen = in_albedo_gen;
-    this.emissive_gen = in_emissive_gen;
-    this.environment_gen = in_environment_gen;
-    this.specular_gen = in_specular_gen;
   }
 
   @SuppressWarnings("null") @Override public KMaterialOpaqueRegular next()

@@ -27,6 +27,9 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KMeshAttributes;
 import com.io7m.r1.tests.RFakeGL;
@@ -43,8 +46,11 @@ import com.io7m.r1.types.RExceptionMeshMissingUVs;
     throws JCGLException,
       RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLInterfaceCommonType gc =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+      RFakeGL
+        .newFakeGL30(RFakeShaderControllers.newNull(), none)
+        .getGLCommon();
 
     final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
     b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
@@ -77,8 +83,11 @@ import com.io7m.r1.types.RExceptionMeshMissingUVs;
       throws JCGLException,
         RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLInterfaceCommonType gc =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+      RFakeGL
+        .newFakeGL30(RFakeShaderControllers.newNull(), none)
+        .getGLCommon();
 
     final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
     b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
@@ -103,8 +112,11 @@ import com.io7m.r1.types.RExceptionMeshMissingUVs;
       throws JCGLException,
         RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLInterfaceCommonType gc =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+      RFakeGL
+        .newFakeGL30(RFakeShaderControllers.newNull(), none)
+        .getGLCommon();
 
     final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
     b.addAttribute(KMeshAttributes.ATTRIBUTE_TANGENT4);
@@ -129,8 +141,11 @@ import com.io7m.r1.types.RExceptionMeshMissingUVs;
       throws JCGLException,
         RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLInterfaceCommonType gc =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+      RFakeGL
+        .newFakeGL30(RFakeShaderControllers.newNull(), none)
+        .getGLCommon();
 
     final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
     b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
@@ -155,8 +170,11 @@ import com.io7m.r1.types.RExceptionMeshMissingUVs;
       throws JCGLException,
         RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLInterfaceCommonType gc =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+      RFakeGL
+        .newFakeGL30(RFakeShaderControllers.newNull(), none)
+        .getGLCommon();
 
     final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
     b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);

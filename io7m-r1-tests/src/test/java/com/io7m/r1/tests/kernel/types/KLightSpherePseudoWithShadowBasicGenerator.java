@@ -33,10 +33,10 @@ public final class KLightSpherePseudoWithShadowBasicGenerator implements
   Generator<KLightSpherePseudoWithShadowBasic>
 {
   private final @NonNull Generator<RVectorI3F<RSpaceRGBType>>   colour_gen;
-  private final @NonNull Generator<RVectorI3F<RSpaceWorldType>> position_gen;
-  private final @NonNull Generator<Texture2DStaticUsableType>   tex_gen;
-  private final @NonNull Generator<KShadowMappedBasic>          shad_basic_gen;
   private final @NonNull KTransformContext                      ctx;
+  private final @NonNull Generator<RVectorI3F<RSpaceWorldType>> position_gen;
+  private final @NonNull Generator<KShadowMappedBasic>          shad_basic_gen;
+  private final @NonNull Generator<Texture2DStaticUsableType>   tex_gen;
 
   public KLightSpherePseudoWithShadowBasicGenerator(
     final @NonNull Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,

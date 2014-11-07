@@ -34,8 +34,8 @@ public final class KLightProjectiveWithoutShadowGenerator implements
 {
   private final @NonNull Generator<RVectorI3F<RSpaceRGBType>>   colour_gen;
   private final @NonNull Generator<RVectorI3F<RSpaceWorldType>> position_gen;
-  private final @NonNull Generator<QuaternionI4F>               quat_gen;
   private final @NonNull Generator<KProjectionType>             proj_gen;
+  private final @NonNull Generator<QuaternionI4F>               quat_gen;
   private final @NonNull Generator<Texture2DStaticUsableType>   tex_gen;
 
   public KLightProjectiveWithoutShadowGenerator(

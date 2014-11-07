@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -34,6 +34,7 @@ import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
 import com.io7m.jequality.AlmostEqualFloat;
 import com.io7m.jequality.AlmostEqualFloat.ContextRelative;
 import com.io7m.jfunctional.Option;
@@ -70,7 +71,6 @@ import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KMeshAttributes;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.kernel.types.KShadowType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.tests.RFakeGL;
@@ -107,8 +107,20 @@ import com.io7m.r1.types.RTransformViewType;
 import com.io7m.r1.types.RVectorI3F;
 import com.io7m.r1.types.RVectorI4F;
 
-@SuppressWarnings({ "synthetic-access", "static-method" }) public final class KMutableMatricesTest
+@SuppressWarnings({ "null", "synthetic-access", "static-method" }) public final class KMutableMatricesTest
 {
+  private static @Nonnull KProjectionType arbitraryProjection()
+  {
+    return KProjectionFrustum.newProjection(
+      new MatrixM4x4F(),
+      -1.0f,
+      1.0f,
+      -1.0f,
+      1.0f,
+      1.0f,
+      100.0f);
+  }
+
   private static @NonNull KLightProjectiveWithoutShadow makeKProjective()
   {
     try {
@@ -130,10 +142,6 @@ import com.io7m.r1.types.RVectorI4F;
       m_projection.set(1, 1, 7.0f);
       m_projection.set(2, 2, 7.0f);
       m_projection.set(3, 3, 7.0f);
-      final RMatrixI4x4F<RTransformProjectionType> projection =
-        RMatrixI4x4F.newFromReadable(m_projection);
-
-      final OptionType<KShadowType> shadow = Option.none();
       final Integer v = Integer.valueOf(23);
       assert v != null;
 
@@ -157,8 +165,11 @@ import com.io7m.r1.types.RVectorI4F;
   private static @NonNull KInstanceType makeMeshInstance()
   {
     try {
+      final OptionType<JCGLSoftRestrictionsType> none = Option.none();
       final JCGLInterfaceCommonType gc =
-        RFakeGL.newFakeGL30(RFakeShaderControllers.newNull()).getGLCommon();
+        RFakeGL
+          .newFakeGL30(RFakeShaderControllers.newNull(), none)
+          .getGLCommon();
 
       final RMatrixI3x3F<RTransformTextureType> uv_matrix =
         RMatrixI3x3F.identity();
@@ -190,7 +201,6 @@ import com.io7m.r1.types.RVectorI4F;
         KMaterialEnvironmentNone.none();
       final KMaterialNormalVertex normal = KMaterialNormalVertex.vertex();
 
-      final RVectorI3F<RSpaceRGBType> rgb = RVectorI3F.zero();
       final KMaterialSpecularNone specular = KMaterialSpecularNone.none();
 
       final KMaterialOpaqueRegular material =
@@ -542,42 +552,6 @@ import com.io7m.r1.types.RVectorI4F;
       });
   }
 
-  @Test(expected = AssertionError.class) public void testWithObserverFault0()
-    throws Exception
-  {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<KMatricesObserverType> saved =
-      KMutableMatricesTest.saveObserverDangerously(mm);
-    saved.get().getMatrixContext();
-  }
-
-  @Test(expected = AssertionError.class) public void testWithObserverFault1()
-    throws Exception
-  {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<KMatricesObserverType> saved =
-      KMutableMatricesTest.saveObserverDangerously(mm);
-    saved.get().getMatrixProjection();
-  }
-
-  @Test(expected = AssertionError.class) public void testWithObserverFault2()
-    throws Exception
-  {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<KMatricesObserverType> saved =
-      KMutableMatricesTest.saveObserverDangerously(mm);
-    saved.get().getMatrixView();
-  }
-
-  @Test(expected = AssertionError.class) public void testWithObserverFault3()
-    throws Exception
-  {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<KMatricesObserverType> saved =
-      KMutableMatricesTest.saveObserverDangerously(mm);
-    saved.get().getMatrixViewInverse();
-  }
-
   @Test(expected = RExceptionMatricesObserverInactive.class) public
     void
     testWithInstanceWithProjectiveObserverInactive()
@@ -674,29 +648,40 @@ import com.io7m.r1.types.RVectorI4F;
     r.get().withInstance(i, f);
   }
 
-  @Test(expected = RExceptionMatricesObserverInactive.class) public
-    void
-    testWithProjectiveObserverInactive()
-      throws Exception
+  @Test(expected = AssertionError.class) public void testWithObserverFault0()
+    throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
-    final AtomicReference<KMatricesObserverType> r =
+    final AtomicReference<KMatricesObserverType> saved =
       KMutableMatricesTest.saveObserverDangerously(mm);
+    saved.get().getMatrixContext();
+  }
 
-    final KMatricesProjectiveLightFunctionType<Object, RException> f =
-      new KMatricesProjectiveLightFunctionType<Object, RException>() {
-        @Override public Object run(
-          final KMatricesProjectiveLightType p)
-          throws RException
-        {
-          return Unit.unit();
-        }
-      };
+  @Test(expected = AssertionError.class) public void testWithObserverFault1()
+    throws Exception
+  {
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final AtomicReference<KMatricesObserverType> saved =
+      KMutableMatricesTest.saveObserverDangerously(mm);
+    saved.get().getMatrixProjection();
+  }
 
-    final KLightProjectiveWithoutShadow p =
-      KMutableMatricesTest.makeKProjective();
+  @Test(expected = AssertionError.class) public void testWithObserverFault2()
+    throws Exception
+  {
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final AtomicReference<KMatricesObserverType> saved =
+      KMutableMatricesTest.saveObserverDangerously(mm);
+    saved.get().getMatrixView();
+  }
 
-    r.get().withProjectiveLight(p, f);
+  @Test(expected = AssertionError.class) public void testWithObserverFault3()
+    throws Exception
+  {
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final AtomicReference<KMatricesObserverType> saved =
+      KMutableMatricesTest.saveObserverDangerously(mm);
+    saved.get().getMatrixViewInverse();
   }
 
   @Test public void testWithObserverOnce()
@@ -871,18 +856,6 @@ import com.io7m.r1.types.RVectorI4F;
       });
   }
 
-  private static @Nonnull KProjectionType arbitraryProjection()
-  {
-    return KProjectionFrustum.newProjection(
-      new MatrixM4x4F(),
-      -1.0f,
-      1.0f,
-      -1.0f,
-      1.0f,
-      1.0f,
-      100.0f);
-  }
-
   @Test(expected = AssertionError.class) public
     void
     testWithProjectiveFault0()
@@ -923,55 +896,6 @@ import com.io7m.r1.types.RVectorI4F;
       KMutableMatricesTest.saveProjectiveDangerously(mm, projection, view);
 
     saved.get().getMatrixProjectiveView();
-  }
-
-  @Test(expected = RExceptionMatricesProjectiveActive.class) public
-    void
-    testWithProjectiveObserverTwice()
-      throws Exception
-  {
-    final KMutableMatrices mm = KMutableMatrices.newMatrices();
-
-    final KProjectionType projection =
-      KMutableMatricesTest.arbitraryProjection();
-
-    final RMatrixM4x4F<RTransformProjectionType> m_view =
-      new RMatrixM4x4F<RTransformProjectionType>();
-    final RMatrixI4x4F<RTransformViewType> view =
-      RMatrixI4x4F.newFromReadable(m_view);
-
-    final KInstanceType i = KMutableMatricesTest.makeMeshInstance();
-
-    mm.withObserver(
-      view,
-      projection,
-      new KMatricesObserverFunctionType<Unit, NullCheckException>() {
-        @Override public Unit run(
-          final KMatricesObserverType o)
-          throws RException
-        {
-          return o.withProjectiveLight(
-            KMutableMatricesTest.makeKProjective(),
-            new KMatricesProjectiveLightFunctionType<Unit, NullCheckException>() {
-              @Override public Unit run(
-                final KMatricesProjectiveLightType p)
-                throws RException
-              {
-                final KMatricesInstanceFunctionType<Unit, NullCheckException> f =
-                  new KMatricesInstanceFunctionType<Unit, NullCheckException>() {
-                    @Override public Unit run(
-                      final KMatricesInstanceType _)
-                      throws RException
-                    {
-                      return Unit.unit();
-                    }
-                  };
-                o.withInstance(i, f);
-                return Unit.unit();
-              }
-            });
-        }
-      });
   }
 
   @Test public void testWithProjectiveInstanceOnce()
@@ -1076,6 +1000,63 @@ import com.io7m.r1.types.RVectorI4F;
     Assert.assertTrue(instance_once.get());
   }
 
+  @Test public void testWithProjectiveInstanceSerialOK()
+    throws Exception
+  {
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+
+    final KProjectionType projection =
+      KMutableMatricesTest.arbitraryProjection();
+
+    final RMatrixM4x4F<RTransformProjectionType> m_view =
+      new RMatrixM4x4F<RTransformProjectionType>();
+    final RMatrixI4x4F<RTransformViewType> view =
+      RMatrixI4x4F.newFromReadable(m_view);
+
+    mm.withObserver(
+      view,
+      projection,
+      new KMatricesObserverFunctionType<Unit, NullCheckException>() {
+        @Override public Unit run(
+          final KMatricesObserverType o)
+          throws RException
+        {
+          return o.withProjectiveLight(
+            KMutableMatricesTest.makeKProjective(),
+            new KMatricesProjectiveLightFunctionType<Unit, NullCheckException>() {
+              @Override public Unit run(
+                final KMatricesProjectiveLightType p)
+                throws RException
+              {
+                p.withInstance(
+                  KMutableMatricesTest.makeMeshInstance(),
+                  new KMatricesInstanceWithProjectiveFunctionType<Unit, NullCheckException>() {
+                    @Override public Unit run(
+                      final KMatricesInstanceWithProjectiveType i)
+                      throws RException
+                    {
+                      return Unit.unit();
+                    }
+                  });
+
+                p.withInstance(
+                  KMutableMatricesTest.makeMeshInstance(),
+                  new KMatricesInstanceWithProjectiveFunctionType<Unit, NullCheckException>() {
+                    @Override public Unit run(
+                      final KMatricesInstanceWithProjectiveType i)
+                      throws RException
+                    {
+                      return Unit.unit();
+                    }
+                  });
+
+                return Unit.unit();
+              }
+            });
+        }
+      });
+  }
+
   @Test(expected = RExceptionMatricesInstanceActive.class) public
     void
     testWithProjectiveInstanceTwice()
@@ -1131,8 +1112,35 @@ import com.io7m.r1.types.RVectorI4F;
       });
   }
 
-  @Test public void testWithProjectiveInstanceSerialOK()
-    throws Exception
+  @Test(expected = RExceptionMatricesObserverInactive.class) public
+    void
+    testWithProjectiveObserverInactive()
+      throws Exception
+  {
+    final KMutableMatrices mm = KMutableMatrices.newMatrices();
+    final AtomicReference<KMatricesObserverType> r =
+      KMutableMatricesTest.saveObserverDangerously(mm);
+
+    final KMatricesProjectiveLightFunctionType<Object, RException> f =
+      new KMatricesProjectiveLightFunctionType<Object, RException>() {
+        @Override public Object run(
+          final KMatricesProjectiveLightType p)
+          throws RException
+        {
+          return Unit.unit();
+        }
+      };
+
+    final KLightProjectiveWithoutShadow p =
+      KMutableMatricesTest.makeKProjective();
+
+    r.get().withProjectiveLight(p, f);
+  }
+
+  @Test(expected = RExceptionMatricesProjectiveActive.class) public
+    void
+    testWithProjectiveObserverTwice()
+      throws Exception
   {
     final KMutableMatrices mm = KMutableMatrices.newMatrices();
 
@@ -1143,6 +1151,8 @@ import com.io7m.r1.types.RVectorI4F;
       new RMatrixM4x4F<RTransformProjectionType>();
     final RMatrixI4x4F<RTransformViewType> view =
       RMatrixI4x4F.newFromReadable(m_view);
+
+    final KInstanceType i = KMutableMatricesTest.makeMeshInstance();
 
     mm.withObserver(
       view,
@@ -1159,28 +1169,16 @@ import com.io7m.r1.types.RVectorI4F;
                 final KMatricesProjectiveLightType p)
                 throws RException
               {
-                p.withInstance(
-                  KMutableMatricesTest.makeMeshInstance(),
-                  new KMatricesInstanceWithProjectiveFunctionType<Unit, NullCheckException>() {
+                final KMatricesInstanceFunctionType<Unit, NullCheckException> f =
+                  new KMatricesInstanceFunctionType<Unit, NullCheckException>() {
                     @Override public Unit run(
-                      final KMatricesInstanceWithProjectiveType i)
+                      final KMatricesInstanceType _)
                       throws RException
                     {
                       return Unit.unit();
                     }
-                  });
-
-                p.withInstance(
-                  KMutableMatricesTest.makeMeshInstance(),
-                  new KMatricesInstanceWithProjectiveFunctionType<Unit, NullCheckException>() {
-                    @Override public Unit run(
-                      final KMatricesInstanceWithProjectiveType i)
-                      throws RException
-                    {
-                      return Unit.unit();
-                    }
-                  });
-
+                  };
+                o.withInstance(i, f);
                 return Unit.unit();
               }
             });

@@ -30,9 +30,9 @@ import com.io7m.r1.tests.EnumGenerator;
 public final class KShadowMappedBasicGenerator implements
   Generator<KShadowMappedBasic>
 {
+  private final EnumGenerator<KDepthPrecision>            depth_prec_gen;
   private final EnumGenerator<TextureFilterMagnification> filter_mag_gen;
   private final EnumGenerator<TextureFilterMinification>  filter_min_gen;
-  private final EnumGenerator<KDepthPrecision>            depth_prec_gen;
 
   public KShadowMappedBasicGenerator()
   {

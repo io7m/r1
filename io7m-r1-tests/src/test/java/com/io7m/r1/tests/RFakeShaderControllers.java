@@ -31,15 +31,15 @@ public final class RFakeShaderControllers
   public static FakeShaderControlType newNull()
   {
     return new FakeShaderControlType() {
-      @Override public void onVertexShaderCompile(
+      @Override public void onFragmentShaderCompile(
         final String name,
-        final VertexShaderType v)
+        final FragmentShaderType f)
         throws JCGLException
       {
-        System.err.println("shader-control: vertex shader compile: "
+        System.err.println("shader-control: fragment shader compile: "
           + name
           + " "
-          + v);
+          + f);
       }
 
       @Override public void onProgramCreate(
@@ -55,15 +55,15 @@ public final class RFakeShaderControllers
           + program);
       }
 
-      @Override public void onFragmentShaderCompile(
+      @Override public void onVertexShaderCompile(
         final String name,
-        final FragmentShaderType f)
+        final VertexShaderType v)
         throws JCGLException
       {
-        System.err.println("shader-control: fragment shader compile: "
+        System.err.println("shader-control: vertex shader compile: "
           + name
           + " "
-          + f);
+          + v);
       }
     };
   }

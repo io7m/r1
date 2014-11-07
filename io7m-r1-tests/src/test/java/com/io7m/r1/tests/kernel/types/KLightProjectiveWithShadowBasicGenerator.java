@@ -35,10 +35,10 @@ public final class KLightProjectiveWithShadowBasicGenerator implements
 {
   private final @NonNull Generator<RVectorI3F<RSpaceRGBType>>   colour_gen;
   private final @NonNull Generator<RVectorI3F<RSpaceWorldType>> position_gen;
-  private final @NonNull Generator<QuaternionI4F>               quat_gen;
   private final @NonNull Generator<KProjectionType>             proj_gen;
-  private final @NonNull Generator<Texture2DStaticUsableType>   tex_gen;
+  private final @NonNull Generator<QuaternionI4F>               quat_gen;
   private final @NonNull Generator<KShadowMappedBasic>          shad_basic_gen;
+  private final @NonNull Generator<Texture2DStaticUsableType>   tex_gen;
 
   public KLightProjectiveWithShadowBasicGenerator(
     final @NonNull Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,

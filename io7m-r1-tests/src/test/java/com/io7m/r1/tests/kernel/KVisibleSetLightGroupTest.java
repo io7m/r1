@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -31,6 +31,9 @@ import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
@@ -58,7 +61,7 @@ import com.io7m.r1.types.RMatrixI4x4F;
 import com.io7m.r1.types.RTransformModelType;
 import com.io7m.r1.types.RTransformTextureType;
 
-@SuppressWarnings("static-method") public final class KVisibleSetLightGroupTest
+@SuppressWarnings({ "null", "static-method" }) public final class KVisibleSetLightGroupTest
 {
   private static KMesh newMesh(
     final JCGLInterfaceCommonType gc)
@@ -85,8 +88,9 @@ import com.io7m.r1.types.RTransformTextureType;
   @Test public void testKVisibleSetLightGroup_0()
     throws RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
     final KTransformType t = KTransformMatrix4x4.newTransform(model);
@@ -137,8 +141,9 @@ import com.io7m.r1.types.RTransformTextureType;
   @Test public void testKVisibleSetLightGroup_1()
     throws RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
     final KTransformType t = KTransformMatrix4x4.newTransform(model);
@@ -194,8 +199,9 @@ import com.io7m.r1.types.RTransformTextureType;
     testKVisibleSetLightGroupAlreadyVisible_0()
       throws RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
     final KTransformType t = KTransformMatrix4x4.newTransform(model);
@@ -234,8 +240,9 @@ import com.io7m.r1.types.RTransformTextureType;
     testKVisibleSetLightGroupAlreadyVisible_1()
       throws RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
     final KTransformType t = KTransformMatrix4x4.newTransform(model);
@@ -281,7 +288,7 @@ import com.io7m.r1.types.RTransformTextureType;
       new HashSet<KInstanceOpaqueType>();
     final KVisibleSetLightGroupBuilderWithCreateType b =
       KVisibleSetLightGroup.newBuilder("g0", shadows, visible);
-    final KVisibleSetLightGroup v = b.groupCreate();
+    b.groupCreate();
     b.groupCreate();
   }
 

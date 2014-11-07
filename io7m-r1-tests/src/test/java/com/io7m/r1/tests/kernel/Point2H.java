@@ -24,18 +24,6 @@ class Point2H
   final float y;
   final float z;
 
-  public Point2H plus(
-    final Point2H p)
-  {
-    return new Point2H(p.x + this.x, p.y + this.y, 1.0f);
-  }
-
-  public Point2H scale(
-    final float s)
-  {
-    return new Point2H(this.x * s, this.y * s, 1.0f);
-  }
-
   public Point2H(
     final float ix,
     final float iy,
@@ -79,6 +67,18 @@ class Point2H
     result = (prime * result) + Float.floatToIntBits(this.y);
     result = (prime * result) + Float.floatToIntBits(this.z);
     return result;
+  }
+
+  public Point2H plus(
+    final Point2H p)
+  {
+    return new Point2H(p.x + this.x, p.y + this.y, 1.0f);
+  }
+
+  public Point2H scale(
+    final float s)
+  {
+    return new Point2H(this.x * s, this.y * s, 1.0f);
   }
 
   @Override public String toString()

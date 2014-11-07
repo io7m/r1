@@ -31,6 +31,9 @@ import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
@@ -55,7 +58,6 @@ import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.kernel.types.KLightGenerator;
 import com.io7m.r1.tests.kernel.types.KMaterialOpaqueRegularGenerator;
-import com.io7m.r1.tests.kernel.types.KMaterialTranslucentRegularGenerator;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RMatrixI4x4F;
@@ -63,7 +65,7 @@ import com.io7m.r1.types.RTransformModelType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RTransformViewType;
 
-@SuppressWarnings("static-method") public final class KVisibleSetTest
+@SuppressWarnings({ "null", "static-method" }) public final class KVisibleSetTest
 {
   private static KMesh newMesh(
     final JCGLInterfaceCommonType gc)
@@ -81,16 +83,31 @@ import com.io7m.r1.types.RTransformViewType;
     return KMesh.newMesh(array, indices);
   }
 
+  private KCamera makeCamera()
+  {
+    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
+    final MatrixM4x4F temp = new MatrixM4x4F();
+    final KProjectionType projection =
+      KProjectionFrustum.newProjection(
+        temp,
+        0.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        10.0f);
+    final KCamera camera = KCamera.newCamera(view, projection);
+    return camera;
+  }
+
   @Test public void testExhaustion()
     throws RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType gi =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final KMaterialOpaqueRegularGenerator mo_gen =
       new KMaterialOpaqueRegularGenerator(gi);
-    final KMaterialTranslucentRegularGenerator mt_gen =
-      new KMaterialTranslucentRegularGenerator(gi);
-
     final KLightGenerator li_gen = new KLightGenerator(gi);
     final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
     final KTransformType t = KTransformMatrix4x4.newTransform(model);
@@ -239,22 +256,5 @@ import com.io7m.r1.types.RTransformViewType;
 
       Assert.assertEquals(casters, found_casters);
     }
-  }
-
-  private KCamera makeCamera()
-  {
-    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
-    final MatrixM4x4F temp = new MatrixM4x4F();
-    final KProjectionType projection =
-      KProjectionFrustum.newProjection(
-        temp,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        10.0f);
-    final KCamera camera = KCamera.newCamera(view, projection);
-    return camera;
   }
 }

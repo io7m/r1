@@ -30,6 +30,9 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
@@ -61,7 +64,7 @@ import com.io7m.r1.types.RTransformModelType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RVectorI4F;
 
-@SuppressWarnings("static-method") public final class KVisibleSetShadowsTest
+@SuppressWarnings({ "null", "static-method" }) public final class KVisibleSetShadowsTest
 {
   private static KMesh newMesh(
     final JCGLInterfaceCommonType gc)
@@ -126,8 +129,9 @@ import com.io7m.r1.types.RVectorI4F;
   @Test public void testVisibleSetOpaque_0()
     throws RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
     final KTransformType t = KTransformMatrix4x4.newTransform(model);
@@ -190,8 +194,9 @@ import com.io7m.r1.types.RVectorI4F;
   @Test public void testVisibleSetOpaque_1()
     throws RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
     final KTransformType t = KTransformMatrix4x4.newTransform(model);

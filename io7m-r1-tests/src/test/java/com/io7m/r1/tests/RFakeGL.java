@@ -22,10 +22,13 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLSLVersionNumber;
 import com.io7m.jcanephora.JCGLVersionNumber;
 import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
 import com.io7m.jcanephora.fake.FakeContext;
 import com.io7m.jcanephora.fake.FakeDefaultFramebuffer;
 import com.io7m.jcanephora.fake.FakeShaderControlType;
 import com.io7m.jcanephora.fake.JCGLImplementationFake;
+import com.io7m.jcanephora.fake.JCGLImplementationFakeBuilderType;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
@@ -49,7 +52,8 @@ public final class RFakeGL
     final JCGLVersionNumber number,
     final JCGLApi api,
     final JCGLSLVersionNumber glsl_version,
-    final FakeShaderControlType shader_control)
+    final FakeShaderControlType shader_control,
+    final OptionType<JCGLSoftRestrictionsType> r)
   {
     try {
       final FakeDefaultFramebuffer fb =
@@ -63,10 +67,11 @@ public final class RFakeGL
       final FakeContext context =
         FakeContext.newContext(fb, number, api, glsl_version);
 
-      return JCGLImplementationFake.newBuilder().build(
-        context,
-        shader_control,
-        in_log);
+      final JCGLImplementationFakeBuilderType bb =
+        JCGLImplementationFake.newBuilder();
+      bb.setRestrictions(r);
+
+      return bb.build(context, shader_control, in_log);
     } catch (final JCGLException e) {
       throw new UnimplementedCodeException(e);
     }
@@ -74,7 +79,8 @@ public final class RFakeGL
 
   public static JCGLImplementationType newFakeGL21(
     final LogUsableType log,
-    final FakeShaderControlType shader_control)
+    final FakeShaderControlType shader_control,
+    final OptionType<JCGLSoftRestrictionsType> r)
   {
     final JCGLVersionNumber number = new JCGLVersionNumber(2, 1, 0);
     final JCGLSLVersionNumber glsl_version = new JCGLSLVersionNumber(1, 10);
@@ -83,11 +89,13 @@ public final class RFakeGL
       number,
       JCGLApi.JCGL_FULL,
       glsl_version,
-      shader_control);
+      shader_control,
+      r);
   }
 
   public static JCGLImplementationType newFakeGL30(
-    final FakeShaderControlType shader_control)
+    final FakeShaderControlType shader_control,
+    final OptionType<JCGLSoftRestrictionsType> r)
   {
     final LogUsableType log =
       Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests");
@@ -99,12 +107,14 @@ public final class RFakeGL
       number,
       JCGLApi.JCGL_FULL,
       glsl_version,
-      shader_control);
+      shader_control,
+      r);
   }
 
   public static JCGLImplementationType newFakeGL30WithLog(
     final LogUsableType log,
-    final FakeShaderControlType shader_control)
+    final FakeShaderControlType shader_control,
+    final OptionType<JCGLSoftRestrictionsType> r)
   {
     final JCGLVersionNumber number = new JCGLVersionNumber(3, 0, 0);
     final JCGLSLVersionNumber glsl_version = new JCGLSLVersionNumber(1, 50);
@@ -113,12 +123,14 @@ public final class RFakeGL
       number,
       JCGLApi.JCGL_FULL,
       glsl_version,
-      shader_control);
+      shader_control,
+      r);
   }
 
   public static JCGLImplementationType newFakeGLES2(
     final LogUsableType log,
-    final FakeShaderControlType shader_control)
+    final FakeShaderControlType shader_control,
+    final OptionType<JCGLSoftRestrictionsType> r)
   {
     final JCGLVersionNumber number = new JCGLVersionNumber(2, 0, 0);
     final JCGLSLVersionNumber glsl_version = new JCGLSLVersionNumber(1, 0);
@@ -127,12 +139,14 @@ public final class RFakeGL
       number,
       JCGLApi.JCGL_ES,
       glsl_version,
-      shader_control);
+      shader_control,
+      r);
   }
 
   public static JCGLImplementationType newFakeGLES3(
     final LogUsableType log,
-    final FakeShaderControlType shader_control)
+    final FakeShaderControlType shader_control,
+    final OptionType<JCGLSoftRestrictionsType> r)
   {
     final JCGLVersionNumber number = new JCGLVersionNumber(3, 0, 0);
     final JCGLSLVersionNumber glsl_version = new JCGLSLVersionNumber(3, 0);
@@ -141,6 +155,7 @@ public final class RFakeGL
       number,
       JCGLApi.JCGL_ES,
       glsl_version,
-      shader_control);
+      shader_control,
+      r);
   }
 }

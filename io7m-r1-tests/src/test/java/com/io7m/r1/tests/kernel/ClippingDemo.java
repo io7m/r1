@@ -51,10 +51,10 @@ import com.io7m.r1.types.RVectorI4F;
       return in_y;
     }
 
+    private int     point_current = 1;
     private Point2H tri_p0;
     private Point2H tri_p1;
     private Point2H tri_p2;
-    private int     point_current = 1;
 
     Panel()
     {
@@ -157,6 +157,39 @@ import com.io7m.r1.types.RVectorI4F;
       }
     }
 
+    private void drawClip(
+      final Graphics g)
+    {
+      final RVectorI4F<RSpaceClipType> p0 =
+        new RVectorI4F<RSpaceClipType>(
+          this.tri_p0.x,
+          this.tri_p0.y,
+          0.0f,
+          1.0f);
+      final RVectorI4F<RSpaceClipType> p1 =
+        new RVectorI4F<RSpaceClipType>(
+          this.tri_p1.x,
+          this.tri_p1.y,
+          0.0f,
+          1.0f);
+      final RVectorI4F<RSpaceClipType> p2 =
+        new RVectorI4F<RSpaceClipType>(
+          this.tri_p2.x,
+          this.tri_p2.y,
+          0.0f,
+          1.0f);
+
+      final RTriangle4F<RSpaceClipType> tri =
+        RTriangle4F.newTriangle(p0, p1, p2);
+
+      final List<RTriangle4F<RSpaceClipType>> results =
+        KTriangleClipping.clipTrianglePlanes(tri, KTriangleClipping.PLANES);
+
+      for (final RTriangle4F<RSpaceClipType> t : results) {
+        this.drawTriangle(g, Color.MAGENTA, t);
+      }
+    }
+
     private void drawLine(
       final Graphics g,
       final Color color,
@@ -211,6 +244,24 @@ import com.io7m.r1.types.RVectorI4F;
 
     }
 
+    private void drawTriangle(
+      final Graphics g,
+      final Color c,
+      final RTriangle4F<RSpaceClipType> t)
+    {
+      final VectorReadable4FType p0 = t.getP0();
+      final VectorReadable4FType p1 = t.getP1();
+      final VectorReadable4FType p2 = t.getP2();
+
+      final Point2H p0_h = new Point2H(p0.getXF(), p0.getYF(), p0.getWF());
+      final Point2H p1_h = new Point2H(p1.getXF(), p1.getYF(), p1.getWF());
+      final Point2H p2_h = new Point2H(p2.getXF(), p2.getYF(), p2.getWF());
+
+      this.drawLine(g, c, p0_h, p1_h);
+      this.drawLine(g, c, p1_h, p2_h);
+      this.drawLine(g, c, p2_h, p0_h);
+    }
+
     private int getBorderedHeight()
     {
       final int bm2 = Panel.BORDER * 2;
@@ -221,6 +272,32 @@ import com.io7m.r1.types.RVectorI4F;
     {
       final int bm2 = Panel.BORDER * 2;
       return this.getSize().width - bm2;
+    }
+
+    @Override public void keyPressed(
+      final KeyEvent e)
+    {
+      // Nothing
+    }
+
+    @Override public void keyReleased(
+      final KeyEvent e)
+    {
+      if (e.getKeyCode() == KeyEvent.VK_1) {
+        this.point_current = 1;
+      } else if (e.getKeyCode() == KeyEvent.VK_2) {
+        this.point_current = 2;
+      } else if (e.getKeyCode() == KeyEvent.VK_3) {
+        this.point_current = 3;
+      }
+
+      System.out.printf("Point current: %d\n", this.point_current);
+    }
+
+    @Override public void keyTyped(
+      final KeyEvent e)
+    {
+      // Nothing
     }
 
     @Override public void mouseClicked(
@@ -310,83 +387,6 @@ import com.io7m.r1.types.RVectorI4F;
       } catch (final Throwable x) {
         x.printStackTrace();
       }
-    }
-
-    private void drawClip(
-      final Graphics g)
-    {
-      final RVectorI4F<RSpaceClipType> p0 =
-        new RVectorI4F<RSpaceClipType>(
-          this.tri_p0.x,
-          this.tri_p0.y,
-          0.0f,
-          1.0f);
-      final RVectorI4F<RSpaceClipType> p1 =
-        new RVectorI4F<RSpaceClipType>(
-          this.tri_p1.x,
-          this.tri_p1.y,
-          0.0f,
-          1.0f);
-      final RVectorI4F<RSpaceClipType> p2 =
-        new RVectorI4F<RSpaceClipType>(
-          this.tri_p2.x,
-          this.tri_p2.y,
-          0.0f,
-          1.0f);
-
-      final RTriangle4F<RSpaceClipType> tri =
-        RTriangle4F.newTriangle(p0, p1, p2);
-
-      final List<RTriangle4F<RSpaceClipType>> results =
-        KTriangleClipping.clipTrianglePlanes(tri, KTriangleClipping.PLANES);
-
-      for (final RTriangle4F<RSpaceClipType> t : results) {
-        this.drawTriangle(g, Color.MAGENTA, t);
-      }
-    }
-
-    private void drawTriangle(
-      final Graphics g,
-      final Color c,
-      final RTriangle4F<RSpaceClipType> t)
-    {
-      final VectorReadable4FType p0 = t.getP0();
-      final VectorReadable4FType p1 = t.getP1();
-      final VectorReadable4FType p2 = t.getP2();
-
-      final Point2H p0_h = new Point2H(p0.getXF(), p0.getYF(), p0.getWF());
-      final Point2H p1_h = new Point2H(p1.getXF(), p1.getYF(), p1.getWF());
-      final Point2H p2_h = new Point2H(p2.getXF(), p2.getYF(), p2.getWF());
-
-      this.drawLine(g, c, p0_h, p1_h);
-      this.drawLine(g, c, p1_h, p2_h);
-      this.drawLine(g, c, p2_h, p0_h);
-    }
-
-    @Override public void keyTyped(
-      final KeyEvent e)
-    {
-      // Nothing
-    }
-
-    @Override public void keyPressed(
-      final KeyEvent e)
-    {
-      // Nothing
-    }
-
-    @Override public void keyReleased(
-      final KeyEvent e)
-    {
-      if (e.getKeyCode() == KeyEvent.VK_1) {
-        this.point_current = 1;
-      } else if (e.getKeyCode() == KeyEvent.VK_2) {
-        this.point_current = 2;
-      } else if (e.getKeyCode() == KeyEvent.VK_3) {
-        this.point_current = 3;
-      }
-
-      System.out.printf("Point current: %d\n", this.point_current);
     }
   }
 

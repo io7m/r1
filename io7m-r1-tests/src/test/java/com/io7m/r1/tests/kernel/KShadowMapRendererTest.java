@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -47,12 +47,15 @@ import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.VertexShaderType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
 import com.io7m.jcanephora.batchexec.JCBExecutor;
 import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.fake.FakeProgram;
 import com.io7m.jcanephora.fake.FakeProgramAttribute;
 import com.io7m.jcanephora.fake.FakeProgramUniform;
 import com.io7m.jcanephora.fake.FakeShaderControlType;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
@@ -119,7 +122,7 @@ import com.io7m.r1.types.RTransformModelType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RTransformViewType;
 
-@SuppressWarnings("static-method") public class KShadowMapRendererTest
+@SuppressWarnings({ "null", "static-method", "synthetic-access" }) public class KShadowMapRendererTest
 {
   private static final class TestRenderer
   {
@@ -143,7 +146,7 @@ import com.io7m.r1.types.RTransformViewType;
               final KProgramType v)
               throws RException
             {
-
+              // Nothing
             }
 
             @Override public KProgramType cacheValueLoad(
@@ -219,7 +222,7 @@ import com.io7m.r1.types.RTransformViewType;
               final KProgramType v)
               throws RException
             {
-
+              // Nothing
             }
 
             @Override public KProgramType cacheValueLoad(
@@ -326,7 +329,7 @@ import com.io7m.r1.types.RTransformViewType;
             final BigInteger size,
             final Throwable x)
           {
-
+            // Nothing
           }
 
           @Override public void cacheEventValueEvicted(
@@ -433,7 +436,7 @@ import com.io7m.r1.types.RTransformViewType;
         final FragmentShaderType v)
         throws JCGLException
       {
-
+        // Nothing
       }
 
       @Override public void onProgramCreate(
@@ -475,14 +478,15 @@ import com.io7m.r1.types.RTransformViewType;
         final VertexShaderType v)
         throws JCGLException
       {
-
+        // Nothing
       }
     };
 
     final LogUsableType log =
       Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests");
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30WithLog(log, shader_control);
+      RFakeGL.newFakeGL30WithLog(log, shader_control, none);
 
     final TestRenderer r = new TestRenderer(g, log);
 
@@ -578,7 +582,7 @@ import com.io7m.r1.types.RTransformViewType;
         final FragmentShaderType v)
         throws JCGLException
       {
-
+        // Nothing
       }
 
       @Override public void onProgramCreate(
@@ -620,14 +624,15 @@ import com.io7m.r1.types.RTransformViewType;
         final VertexShaderType v)
         throws JCGLException
       {
-
+        // Nothing
       }
     };
 
     final LogUsableType log =
       Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests");
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30WithLog(log, shader_control);
+      RFakeGL.newFakeGL30WithLog(log, shader_control, none);
 
     final TestRenderer r = new TestRenderer(g, log);
 

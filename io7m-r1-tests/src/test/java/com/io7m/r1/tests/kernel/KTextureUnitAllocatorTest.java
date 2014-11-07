@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -38,6 +38,9 @@ import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -54,25 +57,14 @@ import com.io7m.r1.types.RExceptionResource;
 import com.io7m.r1.types.RExceptionUnitAllocatorActive;
 import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
 
-@SuppressWarnings("static-method") public final class KTextureUnitAllocatorTest
+@SuppressWarnings({ "null", "static-method" }) public final class KTextureUnitAllocatorTest
 {
-  @Test public void testInit()
-    throws JCGLException
-  {
-    final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
-    final JCGLInterfaceCommonType gc = g.getGLCommon();
-    final List<TextureUnitType> units = gc.textureGetUnits();
-
-    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
-    Assert.assertTrue(a.hasEnoughUnits(units.size() - 1));
-  }
-
   @Test public void testBindings_0()
     throws Exception
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
@@ -126,8 +118,9 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
   @Test public void testBindings_1()
     throws Exception
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
@@ -212,8 +205,9 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
   @Test public void testBindings_2()
     throws Exception
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
@@ -321,14 +315,27 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
     Assert.assertFalse(gc.textureUnitIsBound(units.get(7)));
   }
 
+  @Test public void testInit()
+    throws JCGLException
+  {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
+    final JCGLImplementationType g =
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+    final JCGLInterfaceCommonType gc = g.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+
+    final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
+    Assert.assertTrue(a.hasEnoughUnits(units.size() - 1));
+  }
+
   @Test public void testNoUseCount()
     throws JCGLException,
       RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
-    final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
     final AtomicInteger called = new AtomicInteger(0);
@@ -388,8 +395,9 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
     throws JCGLException,
       RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
@@ -424,8 +432,9 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
     throws JCGLException,
       RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
@@ -455,8 +464,9 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
     throws JCGLException,
       RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
@@ -464,6 +474,12 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
     Assume.assumeTrue("8 texture units are available", units.size() == 8);
 
     final Texture2DStaticType t = new Texture2DStaticType() {
+      @Override public int getGLName()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
       @Override public long resourceGetSizeBytes()
       {
         // TODO Auto-generated method stub
@@ -476,51 +492,19 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
         throw new UnimplementedCodeException();
       }
 
-      @Override public int getGLName()
+      @Override public AreaInclusive textureGetArea()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
 
-      @Override public TextureWrapT textureGetWrapT()
+      @Override public TextureFormat textureGetFormat()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
 
-      @Override public TextureWrapS textureGetWrapS()
-      {
-        // TODO Auto-generated method stub
-        throw new UnimplementedCodeException();
-      }
-
-      @Override public int textureGetWidth()
-      {
-        // TODO Auto-generated method stub
-        throw new UnimplementedCodeException();
-      }
-
-      @Override public RangeInclusiveL textureGetRangeY()
-      {
-        // TODO Auto-generated method stub
-        throw new UnimplementedCodeException();
-      }
-
-      @Override public RangeInclusiveL textureGetRangeX()
-      {
-        // TODO Auto-generated method stub
-        throw new UnimplementedCodeException();
-      }
-
-      @Override public String textureGetName()
-      {
-        // TODO Auto-generated method stub
-        throw new UnimplementedCodeException();
-      }
-
-      @Override public
-        TextureFilterMinification
-        textureGetMinificationFilter()
+      @Override public int textureGetHeight()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
@@ -534,19 +518,45 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
         throw new UnimplementedCodeException();
       }
 
-      @Override public int textureGetHeight()
+      @Override public
+        TextureFilterMinification
+        textureGetMinificationFilter()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
 
-      @Override public TextureFormat textureGetFormat()
+      @Override public String textureGetName()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
 
-      @Override public AreaInclusive textureGetArea()
+      @Override public RangeInclusiveL textureGetRangeX()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeY()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetWidth()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapS textureGetWrapS()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapT textureGetWrapT()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
@@ -683,8 +693,9 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
     throws JCGLException,
       RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
@@ -719,8 +730,9 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
     throws JCGLException,
       RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
@@ -750,8 +762,9 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
     throws JCGLException,
       RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
@@ -759,7 +772,7 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
     Assume.assumeTrue("8 texture units are available", units.size() == 8);
 
     final TextureCubeStaticType t = new TextureCubeStaticType() {
-      @Override public boolean resourceIsDeleted()
+      @Override public int getGLName()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
@@ -771,57 +784,25 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
         throw new UnimplementedCodeException();
       }
 
-      @Override public int getGLName()
+      @Override public boolean resourceIsDeleted()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
 
-      @Override public TextureWrapT textureGetWrapT()
+      @Override public AreaInclusive textureGetArea()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
 
-      @Override public TextureWrapS textureGetWrapS()
+      @Override public TextureFormat textureGetFormat()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
 
-      @Override public TextureWrapR textureGetWrapR()
-      {
-        // TODO Auto-generated method stub
-        throw new UnimplementedCodeException();
-      }
-
-      @Override public int textureGetWidth()
-      {
-        // TODO Auto-generated method stub
-        throw new UnimplementedCodeException();
-      }
-
-      @Override public RangeInclusiveL textureGetRangeY()
-      {
-        // TODO Auto-generated method stub
-        throw new UnimplementedCodeException();
-      }
-
-      @Override public RangeInclusiveL textureGetRangeX()
-      {
-        // TODO Auto-generated method stub
-        throw new UnimplementedCodeException();
-      }
-
-      @Override public String textureGetName()
-      {
-        // TODO Auto-generated method stub
-        throw new UnimplementedCodeException();
-      }
-
-      @Override public
-        TextureFilterMinification
-        textureGetMinificationFilter()
+      @Override public int textureGetHeight()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
@@ -835,19 +816,51 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
         throw new UnimplementedCodeException();
       }
 
-      @Override public int textureGetHeight()
+      @Override public
+        TextureFilterMinification
+        textureGetMinificationFilter()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
 
-      @Override public TextureFormat textureGetFormat()
+      @Override public String textureGetName()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
 
-      @Override public AreaInclusive textureGetArea()
+      @Override public RangeInclusiveL textureGetRangeX()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeY()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetWidth()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapR textureGetWrapR()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapS textureGetWrapS()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapT textureGetWrapT()
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
@@ -986,10 +999,10 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
       throws JCGLException,
         RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
-    final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
     a.withContext(new KTextureUnitWithType() {
@@ -1017,10 +1030,10 @@ import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
       throws JCGLException,
         RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final JCGLInterfaceCommonType gc = g.getGLCommon();
-    final List<TextureUnitType> units = gc.textureGetUnits();
     final KTextureUnitAllocator a = KTextureUnitAllocator.newAllocator(gc);
 
     a.withContext(new KTextureUnitWithType() {

@@ -173,6 +173,17 @@ import com.io7m.r1.types.RVectorI4F;
 
   @Test(expected = RBExceptionInvalidMagicNumber.class) public
     void
+    testBadMagic_1()
+      throws Exception
+  {
+    RBImporter.parseFromStream(
+      RBImporterTest.get("bad-magic-1.rmb"),
+      new Show(),
+      Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"));
+  }
+
+  @Test(expected = RBExceptionInvalidMagicNumber.class) public
+    void
     testBadMagic_2()
       throws Exception
   {
@@ -204,17 +215,6 @@ import com.io7m.r1.types.RVectorI4F;
       Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"));
   }
 
-  @Test(expected = RBExceptionInvalidMagicNumber.class) public
-    void
-    testBadMagic_1()
-      throws Exception
-  {
-    RBImporter.parseFromStream(
-      RBImporterTest.get("bad-magic-1.rmb"),
-      new Show(),
-      Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"));
-  }
-
   @Test(expected = RBExceptionUnsupportedVersion.class) public
     void
     testBadVersion_0()
@@ -224,22 +224,6 @@ import com.io7m.r1.types.RVectorI4F;
       RBImporterTest.get("bad-version-0.rmb"),
       new Show(),
       Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"));
-  }
-
-  @Test public void testMinimalEquals_0()
-    throws Exception
-  {
-    final RBInfo rb0 =
-      RBInfo.parseFromStream(
-        Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"),
-        RBImporterTest.get("minimal-0.rmb"));
-    final RBInfo rb1 =
-      RBInfo.parseFromStream(
-        Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"),
-        RBImporterTest.get("minimal-0.rmb"));
-
-    Assert.assertEquals(rb0, rb1);
-    Assert.assertEquals(1, rb0.getVersion());
   }
 
   @Test public void testMinimal_0()
@@ -403,6 +387,22 @@ import com.io7m.r1.types.RVectorI4F;
       RBImporterTest.get("minimal-0.rmb"),
       events,
       Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"));
+  }
+
+  @Test public void testMinimalEquals_0()
+    throws Exception
+  {
+    final RBInfo rb0 =
+      RBInfo.parseFromStream(
+        Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"),
+        RBImporterTest.get("minimal-0.rmb"));
+    final RBInfo rb1 =
+      RBInfo.parseFromStream(
+        Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests"),
+        RBImporterTest.get("minimal-0.rmb"));
+
+    Assert.assertEquals(rb0, rb1);
+    Assert.assertEquals(1, rb0.getVersion());
   }
 
   @Test public void testSphere16()

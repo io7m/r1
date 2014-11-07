@@ -100,7 +100,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     b.append("_");
     KMaterialCodes.makeRegularUnlitCode(
       in_albedo,
-      KMaterialEmissiveNone.none(),
       in_environment,
       in_normal,
       b);
@@ -219,20 +218,11 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private static void makeRegularUnlitCode(
     final KMaterialAlbedoType in_albedo,
-    final KMaterialEmissiveType in_emissive,
     final KMaterialEnvironmentType in_environment,
     final KMaterialNormalType in_normal,
     final StringBuilder b)
   {
     b.append(in_albedo.codeGet());
-
-    {
-      final String c = in_emissive.codeGet();
-      if (c.isEmpty() == false) {
-        b.append("_");
-        b.append(c);
-      }
-    }
 
     {
       final String c = in_environment.codeGet();

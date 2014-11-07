@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,6 +25,9 @@ import org.junit.Test;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
@@ -34,8 +37,9 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
 {
   @Test public void testMapped()
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     QuickCheck.forAllVerbose(
       RFakeTextures2DStatic.generator(g, new StringGenerator()),

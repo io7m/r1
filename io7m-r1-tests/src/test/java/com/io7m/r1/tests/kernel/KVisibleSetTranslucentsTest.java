@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -31,6 +31,9 @@ import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
@@ -59,25 +62,8 @@ import com.io7m.r1.types.RTransformModelType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RTransformViewType;
 
-@SuppressWarnings("static-method") public final class KVisibleSetTranslucentsTest
+@SuppressWarnings({ "null", "static-method" }) public final class KVisibleSetTranslucentsTest
 {
-  private KCamera makeCamera()
-  {
-    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
-    final MatrixM4x4F temp = new MatrixM4x4F();
-    final KProjectionType projection =
-      KProjectionFrustum.newProjection(
-        temp,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        10.0f);
-    final KCamera camera = KCamera.newCamera(view, projection);
-    return camera;
-  }
-
   private static KMesh newMesh(
     final JCGLInterfaceCommonType gc)
     throws RException
@@ -100,33 +86,29 @@ import com.io7m.r1.types.RTransformViewType;
     return KMesh.newMesh(array, indices);
   }
 
-  @Test(expected = RExceptionBuilderInvalid.class) public
-    void
-    testVisibleBuilderInvalid_0()
-      throws RException
+  private KCamera makeCamera()
   {
-    final KVisibleSetTranslucentsBuilderWithCreateType b =
-      KVisibleSetTranslucents.newBuilder(this.makeCamera());
-
-    b.visibleTranslucentsCreate();
-    b.visibleTranslucentsCreate();
-  }
-
-  @Test public void testVisibleNoInstances_0()
-    throws RException
-  {
-    final KVisibleSetTranslucentsBuilderWithCreateType b =
-      KVisibleSetTranslucents.newBuilder(this.makeCamera());
-
-    final KVisibleSetTranslucents v = b.visibleTranslucentsCreate();
-    Assert.assertEquals(0, v.getInstances().size());
+    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
+    final MatrixM4x4F temp = new MatrixM4x4F();
+    final KProjectionType projection =
+      KProjectionFrustum.newProjection(
+        temp,
+        0.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        10.0f);
+    final KCamera camera = KCamera.newCamera(view, projection);
+    return camera;
   }
 
   @Test public void testInstances_0()
     throws RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
     final KTransformType t = KTransformMatrix4x4.newTransform(model);
@@ -159,8 +141,9 @@ import com.io7m.r1.types.RTransformViewType;
   @Test public void testInstances_1()
     throws RException
   {
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
-      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull());
+      RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
     final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
     final KTransformType t = KTransformMatrix4x4.newTransform(model);
@@ -199,5 +182,38 @@ import com.io7m.r1.types.RTransformViewType;
     final List<KTranslucentType> is = v.getInstances();
     Assert.assertEquals(2, is.size());
     Assert.assertTrue(is.contains(i0));
+  }
+
+  @Test(expected = RExceptionBuilderInvalid.class) public
+    void
+    testVisibleBuilderInvalid_0()
+      throws RException
+  {
+    final KVisibleSetTranslucentsBuilderWithCreateType b =
+      KVisibleSetTranslucents.newBuilder(this.makeCamera());
+
+    b.visibleTranslucentsCreate();
+    b.visibleTranslucentsCreate();
+  }
+
+  @Test public void testVisibleCamera_0()
+    throws RException
+  {
+    final KCamera c = this.makeCamera();
+    final KVisibleSetTranslucentsBuilderWithCreateType b =
+      KVisibleSetTranslucents.newBuilder(c);
+
+    final KVisibleSetTranslucents v = b.visibleTranslucentsCreate();
+    Assert.assertEquals(c, v.getCamera());
+  }
+
+  @Test public void testVisibleNoInstances_0()
+    throws RException
+  {
+    final KVisibleSetTranslucentsBuilderWithCreateType b =
+      KVisibleSetTranslucents.newBuilder(this.makeCamera());
+
+    final KVisibleSetTranslucents v = b.visibleTranslucentsCreate();
+    Assert.assertEquals(0, v.getInstances().size());
   }
 }

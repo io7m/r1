@@ -45,74 +45,6 @@ import com.io7m.r1.types.RVectorI3F;
 
 @SuppressWarnings("static-method") public final class KLightProjectiveWithShadowVarianceTest
 {
-  @Test(expected = RangeCheckException.class) public void testZeroRange()
-    throws Exception
-  {
-    final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
-    final KProjectionFOV p =
-      KProjectionFOV.newProjection(
-        new MatrixM4x4F(),
-        1.0f,
-        1.0f,
-        1.0f,
-        100.0f);
-
-    final KLightProjectiveWithShadowVarianceBuilderType b =
-      KLightProjectiveWithShadowVariance.newBuilder(t, p);
-    b.setRange(0.0f);
-    b.build();
-  }
-
-  @Test(expected = RangeCheckException.class) public void testZeroFalloff()
-    throws Exception
-  {
-    final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
-    final KProjectionFOV p =
-      KProjectionFOV.newProjection(
-        new MatrixM4x4F(),
-        1.0f,
-        1.0f,
-        1.0f,
-        100.0f);
-
-    final KLightProjectiveWithShadowVarianceBuilderType b =
-      KLightProjectiveWithShadowVariance.newBuilder(t, p);
-    b.setFalloff(0.0f);
-    b.build();
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_0()
-  {
-    final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
-    final KProjectionFOV p =
-      KProjectionFOV.newProjection(
-        new MatrixM4x4F(),
-        1.0f,
-        1.0f,
-        1.0f,
-        100.0f);
-
-    final KLightProjectiveBuilderType b =
-      KLightProjectiveWithShadowVariance.newBuilder(t, p);
-    b.setColor((RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_1()
-  {
-    final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
-    final KProjectionFOV p =
-      KProjectionFOV.newProjection(
-        new MatrixM4x4F(),
-        1.0f,
-        1.0f,
-        1.0f,
-        100.0f);
-
-    final KLightProjectiveBuilderType b =
-      KLightProjectiveWithShadowVariance.newBuilder(t, p);
-    b.setPosition((RVectorI3F<RSpaceWorldType>) TestUtilities.actuallyNull());
-  }
-
   @Test public void testAttributes()
   {
     final Generator<RVectorI3F<RSpaceRGBType>> colour_gen1 =
@@ -198,5 +130,73 @@ import com.io7m.r1.types.RVectorI3F;
           }
         }
       });
+  }
+
+  @Test(expected = NullCheckException.class) public void testNull_0()
+  {
+    final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
+    final KProjectionFOV p =
+      KProjectionFOV.newProjection(
+        new MatrixM4x4F(),
+        1.0f,
+        1.0f,
+        1.0f,
+        100.0f);
+
+    final KLightProjectiveBuilderType b =
+      KLightProjectiveWithShadowVariance.newBuilder(t, p);
+    b.setColor((RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
+  }
+
+  @Test(expected = NullCheckException.class) public void testNull_1()
+  {
+    final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
+    final KProjectionFOV p =
+      KProjectionFOV.newProjection(
+        new MatrixM4x4F(),
+        1.0f,
+        1.0f,
+        1.0f,
+        100.0f);
+
+    final KLightProjectiveBuilderType b =
+      KLightProjectiveWithShadowVariance.newBuilder(t, p);
+    b.setPosition((RVectorI3F<RSpaceWorldType>) TestUtilities.actuallyNull());
+  }
+
+  @Test(expected = RangeCheckException.class) public void testZeroFalloff()
+    throws Exception
+  {
+    final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
+    final KProjectionFOV p =
+      KProjectionFOV.newProjection(
+        new MatrixM4x4F(),
+        1.0f,
+        1.0f,
+        1.0f,
+        100.0f);
+
+    final KLightProjectiveWithShadowVarianceBuilderType b =
+      KLightProjectiveWithShadowVariance.newBuilder(t, p);
+    b.setFalloff(0.0f);
+    b.build();
+  }
+
+  @Test(expected = RangeCheckException.class) public void testZeroRange()
+    throws Exception
+  {
+    final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
+    final KProjectionFOV p =
+      KProjectionFOV.newProjection(
+        new MatrixM4x4F(),
+        1.0f,
+        1.0f,
+        1.0f,
+        100.0f);
+
+    final KLightProjectiveWithShadowVarianceBuilderType b =
+      KLightProjectiveWithShadowVariance.newBuilder(t, p);
+    b.setRange(0.0f);
+    b.build();
   }
 }

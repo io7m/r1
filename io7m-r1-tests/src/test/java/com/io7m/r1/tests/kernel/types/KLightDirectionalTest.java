@@ -34,26 +34,6 @@ import com.io7m.r1.types.RVectorI3F;
 
 @SuppressWarnings("static-method") public final class KLightDirectionalTest
 {
-  @Test(expected = NullCheckException.class) public void testNull_0()
-  {
-    final RVectorI3F<RSpaceRGBType> colour =
-      new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
-
-    final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
-    b.setColor((RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
-  }
-
-  @Test(expected = NullCheckException.class) public void testNull_1()
-  {
-    final RVectorI3F<RSpaceWorldType> direction =
-      new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f);
-
-    final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
-    b
-      .setDirection((RVectorI3F<RSpaceWorldType>) TestUtilities
-        .actuallyNull());
-  }
-
   @Test public void testAttributes()
   {
     final Generator<RVectorI3F<RSpaceRGBType>> colour_gen1 =
@@ -93,5 +73,25 @@ import com.io7m.r1.types.RVectorI3F;
           }
         }
       });
+  }
+
+  @Test(expected = NullCheckException.class) public void testNull_0()
+  {
+    final RVectorI3F<RSpaceRGBType> colour =
+      new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
+
+    final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
+    b.setColor((RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
+  }
+
+  @Test(expected = NullCheckException.class) public void testNull_1()
+  {
+    final RVectorI3F<RSpaceWorldType> direction =
+      new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f);
+
+    final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
+    b
+      .setDirection((RVectorI3F<RSpaceWorldType>) TestUtilities
+        .actuallyNull());
   }
 }
