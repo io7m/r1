@@ -29,7 +29,7 @@ import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
     final KMaterialTranslucentRegular m)
   {
     final String lcode = l.lightGetCode();
-    final String mcode = m.materialGetCode();
+    final String mcode = m.materialGetLitCode();
     final String scode = String.format("%s_%s", lcode, mcode);
     assert scode != null;
     return scode;
@@ -48,7 +48,7 @@ import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
     final KMaterialTranslucentSpecularOnly m)
   {
     final String lcode = l.lightGetCode();
-    final String mcode = m.materialGetCode();
+    final String mcode = m.materialGetLitCode();
     final String scode = String.format("%s_%s", lcode, mcode);
     assert scode != null;
     return scode;
@@ -65,12 +65,12 @@ import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
   public static String fromUnlitTranslucentRefractive(
     final KMaterialTranslucentRefractive m)
   {
-    return m.materialGetCode();
+    return m.materialGetUnlitCode();
   }
 
   public static String fromUnlitTranslucentRegular(
     final KMaterialTranslucentRegular m)
   {
-    return m.materialGetCode();
+    return m.materialGetUnlitCode();
   }
 }

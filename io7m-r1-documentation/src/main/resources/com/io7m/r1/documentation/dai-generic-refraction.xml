@@ -141,7 +141,7 @@
   <s:subsection xml:id="r1.dai.generic-refraction.color">
     <s:subsection-title>Color</s:subsection-title>
     <s:paragraph>
-      The sample scene colors used to perform the refraction effect are
+      The sampled scene colors used to perform the refraction effect are
       multiplied by a constant color, specified by each material. This
       allows for simple colored glass effects (shown here with a
       <s:link s:target="r1.dai.forward-translucents.lit">specular-only</s:link>

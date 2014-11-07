@@ -36,7 +36,10 @@ public final class RFakeShaderControllers
         final VertexShaderType v)
         throws JCGLException
       {
-        // Nothing.
+        System.err.println("shader-control: vertex shader compile: "
+          + name
+          + " "
+          + v);
       }
 
       @Override public void onProgramCreate(
@@ -46,15 +49,21 @@ public final class RFakeShaderControllers
         final Map<String, ProgramAttributeType> attributes)
         throws JCGLException
       {
-        // Nothing.
+        System.err.println("shader-control: program create: "
+          + name
+          + " "
+          + program);
       }
 
       @Override public void onFragmentShaderCompile(
         final String name,
-        final FragmentShaderType v)
+        final FragmentShaderType f)
         throws JCGLException
       {
-        // Nothing.
+        System.err.println("shader-control: fragment shader compile: "
+          + name
+          + " "
+          + f);
       }
     };
   }

@@ -278,11 +278,6 @@ import com.io7m.r1.types.RTransformTextureType;
     return v.materialOpaque(this);
   }
 
-  @Override public String materialGetCode()
-  {
-    return this.code;
-  }
-
   /**
    * @return The emission properties for the surface.
    */
@@ -292,9 +287,19 @@ import com.io7m.r1.types.RTransformTextureType;
     return this.emissive;
   }
 
+  @Override public String materialGetLitCode()
+  {
+    return this.code;
+  }
+
   @Override public KMaterialNormalType materialGetNormal()
   {
     return this.normal;
+  }
+
+  @Override public String materialGetUnlitCode()
+  {
+    return this.code;
   }
 
   @Override public RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix()

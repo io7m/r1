@@ -1,20 +1,4 @@
-/*
- * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
- * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
- * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
-package com.io7m.r1.examples.viewer;
+package com.io7m.r1.tests;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -24,6 +8,7 @@ import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jlog.LogUsableType;
+import com.io7m.jnull.NullCheck;
 import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.FilesystemType;
@@ -49,34 +34,14 @@ import com.io7m.r1.shaders.forward.translucent.unlit.RShadersForwardTranslucentU
 import com.io7m.r1.shaders.postprocessing.RShadersPostprocessing;
 import com.io7m.r1.types.RException;
 
-/**
- * A set of shader caches.
- */
-
-public final class VShaderCaches
+public final class TestShaderCaches
 {
-  private static File makeShaderArchiveNameAssembled(
-    final ViewerConfig config,
-    final String name)
-  {
-    final StringBuilder s = new StringBuilder();
-    s.append("lib/io7m-r1-shaders-");
-    s.append(name);
-    s.append("-");
-    s.append(config.getProgramVersion());
-    s.append(".jar");
-    return new File(s.toString());
-  }
-
   private static File makeShaderArchiveNameEclipse(
-    final ViewerConfig config,
-    final String name)
+    final String base,
+    final String name,
+    final String version)
   {
     final StringBuilder s = new StringBuilder();
-    final String base = System.getenv("ECLIPSE_EXEC_DIR");
-    if (base == null) {
-      throw new IllegalStateException("ECLIPSE_EXEC_DIR is unset");
-    }
 
     s.append(base);
     s.append("/io7m-r1-shaders-");
@@ -84,7 +49,7 @@ public final class VShaderCaches
     s.append("/target/io7m-r1-shaders-");
     s.append(name);
     s.append("-");
-    s.append(config.getProgramVersion());
+    s.append(version);
     s.append(".jar");
     return new File(s.toString());
   }
@@ -103,12 +68,22 @@ public final class VShaderCaches
    *           On filesystem i/o errors.
    */
 
-  public static VShaderCaches newCachesFromArchives(
+  public static TestShaderCaches newCachesFromArchives(
     final JCGLImplementationType gi,
-    final ViewerConfig config,
     final LogUsableType log)
     throws FilesystemError
   {
+    final LRUCacheConfig cache_config =
+      LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(2048));
+
+    final String environment =
+      System.getProperty("com.io7m.r1.test_environment");
+    if (environment != null) {
+      if ("eclipse".equals(environment)) {
+        return TestShaderCaches.setupForEclipse(gi, log, cache_config);
+      }
+    }
+
     final KShaderCacheDebugType in_shader_debug_cache;
     final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache;
     final KShaderCacheDeferredLightType in_shader_deferred_light_cache;
@@ -118,161 +93,225 @@ public final class VShaderCaches
     final KShaderCacheForwardTranslucentUnlitType in_shader_forward_translucent_unlit_cache;
     final KShaderCachePostprocessingType in_shader_postprocessing_cache;
 
-    final LRUCacheConfig cache_config =
-      LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(2048));
+    log.info("tests: Loading shaders from classpath archives");
 
-    /**
-     * If running from eclipse, alternate measures have to be taken to set up
-     * the shader filesystem caches, because the program's not running from a
-     * neatly arranged assembly directory, and the shader archives aren't on
-     * the classpath.
-     */
-
-    if (config.isEclipse()) {
-      log
-        .info("Running under eclipse - loading shaders from target directories");
-
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountArchiveFromAnywhere(
-          VShaderCaches.makeShaderArchiveNameEclipse(config, "debug"),
-          PathVirtual.ROOT);
-        in_shader_debug_cache =
-          VShaderCaches.wrapDebug(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountArchiveFromAnywhere(
-          VShaderCaches.makeShaderArchiveNameEclipse(config, "depth"),
-          PathVirtual.ROOT);
-        in_shader_depth_cache =
-          VShaderCaches.wrapDepth(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountArchiveFromAnywhere(
-          VShaderCaches
-            .makeShaderArchiveNameEclipse(config, "depth_variance"),
-          PathVirtual.ROOT);
-        in_shader_depth_variance_cache =
-          VShaderCaches.wrapDepthVariance(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountArchiveFromAnywhere(
-          VShaderCaches.makeShaderArchiveNameEclipse(
-            config,
-            "deferred-geometry"),
-          PathVirtual.ROOT);
-        in_shader_deferred_geo_cache =
-          VShaderCaches.wrapDeferredGeometry(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountArchiveFromAnywhere(
-          VShaderCaches
-            .makeShaderArchiveNameEclipse(config, "deferred-light"),
-          PathVirtual.ROOT);
-        in_shader_deferred_light_cache =
-          VShaderCaches.wrapDeferredLight(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountArchiveFromAnywhere(
-          VShaderCaches
-            .makeShaderArchiveNameEclipse(config, "postprocessing"),
-          PathVirtual.ROOT);
-        in_shader_postprocessing_cache =
-          VShaderCaches.wrapPostprocessing(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountArchiveFromAnywhere(
-          VShaderCaches.makeShaderArchiveNameEclipse(
-            config,
-            "forward-translucent-lit"),
-          PathVirtual.ROOT);
-        in_shader_forward_translucent_lit_cache =
-          VShaderCaches.wrapForwardTranslucentLit(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountArchiveFromAnywhere(
-          VShaderCaches.makeShaderArchiveNameEclipse(
-            config,
-            "forward-translucent-unlit"),
-          PathVirtual.ROOT);
-        in_shader_forward_translucent_unlit_cache =
-          VShaderCaches
-            .wrapForwardTranslucentUnlit(gi, log, cache_config, fs);
-      }
-    } else {
-      log.info("Loading shaders from classpath archives");
-
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountClasspathArchive(RShadersDebug.class, PathVirtual.ROOT);
-        in_shader_debug_cache =
-          VShaderCaches.wrapDebug(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountClasspathArchive(RShadersDepth.class, PathVirtual.ROOT);
-        in_shader_depth_cache =
-          VShaderCaches.wrapDepth(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountClasspathArchive(
-          RShadersDepthVariance.class,
-          PathVirtual.ROOT);
-        in_shader_depth_variance_cache =
-          VShaderCaches.wrapDepthVariance(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountClasspathArchive(
-          RShadersDeferredGeometry.class,
-          PathVirtual.ROOT);
-        in_shader_deferred_geo_cache =
-          VShaderCaches.wrapDeferredGeometry(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountClasspathArchive(
-          RShadersPostprocessing.class,
-          PathVirtual.ROOT);
-        in_shader_postprocessing_cache =
-          VShaderCaches.wrapPostprocessing(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountClasspathArchive(
-          RShadersForwardTranslucentLit.class,
-          PathVirtual.ROOT);
-        in_shader_forward_translucent_lit_cache =
-          VShaderCaches.wrapForwardTranslucentLit(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountClasspathArchive(
-          RShadersForwardTranslucentUnlit.class,
-          PathVirtual.ROOT);
-        in_shader_forward_translucent_unlit_cache =
-          VShaderCaches
-            .wrapForwardTranslucentUnlit(gi, log, cache_config, fs);
-      }
-      {
-        final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-        fs.mountClasspathArchive(
-          RShadersDeferredLight.class,
-          PathVirtual.ROOT);
-        in_shader_deferred_light_cache =
-          VShaderCaches.wrapDeferredLight(gi, log, cache_config, fs);
-      }
+    {
+      final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
+      fs.mountClasspathArchive(RShadersDebug.class, PathVirtual.ROOT);
+      in_shader_debug_cache =
+        TestShaderCaches.wrapDebug(gi, log, cache_config, fs);
+    }
+    {
+      final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
+      fs.mountClasspathArchive(RShadersDepth.class, PathVirtual.ROOT);
+      in_shader_depth_cache =
+        TestShaderCaches.wrapDepth(gi, log, cache_config, fs);
+    }
+    {
+      final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
+      fs.mountClasspathArchive(RShadersDepthVariance.class, PathVirtual.ROOT);
+      in_shader_depth_variance_cache =
+        TestShaderCaches.wrapDepthVariance(gi, log, cache_config, fs);
+    }
+    {
+      final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
+      fs.mountClasspathArchive(
+        RShadersDeferredGeometry.class,
+        PathVirtual.ROOT);
+      in_shader_deferred_geo_cache =
+        TestShaderCaches.wrapDeferredGeometry(gi, log, cache_config, fs);
+    }
+    {
+      final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
+      fs
+        .mountClasspathArchive(RShadersPostprocessing.class, PathVirtual.ROOT);
+      in_shader_postprocessing_cache =
+        TestShaderCaches.wrapPostprocessing(gi, log, cache_config, fs);
+    }
+    {
+      final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
+      fs.mountClasspathArchive(
+        RShadersForwardTranslucentLit.class,
+        PathVirtual.ROOT);
+      in_shader_forward_translucent_lit_cache =
+        TestShaderCaches.wrapForwardTranslucentLit(gi, log, cache_config, fs);
+    }
+    {
+      final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
+      fs.mountClasspathArchive(
+        RShadersForwardTranslucentUnlit.class,
+        PathVirtual.ROOT);
+      in_shader_forward_translucent_unlit_cache =
+        TestShaderCaches.wrapForwardTranslucentUnlit(
+          gi,
+          log,
+          cache_config,
+          fs);
+    }
+    {
+      final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
+      fs.mountClasspathArchive(RShadersDeferredLight.class, PathVirtual.ROOT);
+      in_shader_deferred_light_cache =
+        TestShaderCaches.wrapDeferredLight(gi, log, cache_config, fs);
     }
 
-    return new VShaderCaches(
+    return new TestShaderCaches(
+      in_shader_debug_cache,
+      in_shader_deferred_geo_cache,
+      in_shader_deferred_light_cache,
+      in_shader_depth_cache,
+      in_shader_depth_variance_cache,
+      in_shader_forward_translucent_lit_cache,
+      in_shader_forward_translucent_unlit_cache,
+      in_shader_postprocessing_cache);
+  }
+
+  /**
+   * If running from eclipse, alternate measures have to be taken to set up
+   * the shader filesystem caches, because the program's not running from a
+   * neatly arranged assembly directory, and the shader archives aren't on the
+   * classpath.
+   */
+
+  private static TestShaderCaches setupForEclipse(
+    final JCGLImplementationType in_gi,
+    final LogUsableType in_log,
+    final LRUCacheConfig cache_config)
+    throws FilesystemError
+  {
+    in_log.info("tests: Testing environment is Eclipse");
+    final String base =
+      NullCheck.notNull(
+        System.getProperty("com.io7m.r1.test_eclipse_base"),
+        "Base");
+    in_log.info("tests: Eclipse test base: " + base);
+    final String version =
+      NullCheck.notNull(System.getProperty("com.io7m.r1.version"), "Version");
+    in_log.info("tests: Version: " + version);
+
+    final KShaderCacheDebugType in_shader_debug_cache;
+    final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache;
+    final KShaderCacheDeferredLightType in_shader_deferred_light_cache;
+    final KShaderCacheDepthType in_shader_depth_cache;
+    final KShaderCacheDepthVarianceType in_shader_depth_variance_cache;
+    final KShaderCacheForwardTranslucentLitType in_shader_forward_translucent_lit_cache;
+    final KShaderCacheForwardTranslucentUnlitType in_shader_forward_translucent_unlit_cache;
+    final KShaderCachePostprocessingType in_shader_postprocessing_cache;
+
+    {
+      final FilesystemType fs =
+        Filesystem.makeWithoutArchiveDirectory(in_log);
+      fs
+        .mountArchiveFromAnywhere(
+          TestShaderCaches.makeShaderArchiveNameEclipse(
+            base,
+            "debug",
+            version),
+          PathVirtual.ROOT);
+      in_shader_debug_cache =
+        TestShaderCaches.wrapDebug(in_gi, in_log, cache_config, fs);
+    }
+
+    {
+      final FilesystemType fs =
+        Filesystem.makeWithoutArchiveDirectory(in_log);
+      fs
+        .mountArchiveFromAnywhere(
+          TestShaderCaches.makeShaderArchiveNameEclipse(
+            base,
+            "depth",
+            version),
+          PathVirtual.ROOT);
+      in_shader_depth_cache =
+        TestShaderCaches.wrapDepth(in_gi, in_log, cache_config, fs);
+    }
+
+    {
+      final FilesystemType fs =
+        Filesystem.makeWithoutArchiveDirectory(in_log);
+      fs.mountArchiveFromAnywhere(
+        TestShaderCaches.makeShaderArchiveNameEclipse(
+          base,
+          "depth_variance",
+          version),
+        PathVirtual.ROOT);
+      in_shader_depth_variance_cache =
+        TestShaderCaches.wrapDepthVariance(in_gi, in_log, cache_config, fs);
+    }
+
+    {
+      final FilesystemType fs =
+        Filesystem.makeWithoutArchiveDirectory(in_log);
+      fs.mountArchiveFromAnywhere(
+        TestShaderCaches.makeShaderArchiveNameEclipse(
+          base,
+          "deferred-geometry",
+          version),
+        PathVirtual.ROOT);
+      in_shader_deferred_geo_cache =
+        TestShaderCaches
+          .wrapDeferredGeometry(in_gi, in_log, cache_config, fs);
+    }
+
+    {
+      final FilesystemType fs =
+        Filesystem.makeWithoutArchiveDirectory(in_log);
+      fs.mountArchiveFromAnywhere(
+        TestShaderCaches.makeShaderArchiveNameEclipse(
+          base,
+          "deferred-light",
+          version),
+        PathVirtual.ROOT);
+      in_shader_deferred_light_cache =
+        TestShaderCaches.wrapDeferredLight(in_gi, in_log, cache_config, fs);
+    }
+
+    {
+      final FilesystemType fs =
+        Filesystem.makeWithoutArchiveDirectory(in_log);
+      fs.mountArchiveFromAnywhere(
+        TestShaderCaches.makeShaderArchiveNameEclipse(
+          base,
+          "postprocessing",
+          version),
+        PathVirtual.ROOT);
+      in_shader_postprocessing_cache =
+        TestShaderCaches.wrapPostprocessing(in_gi, in_log, cache_config, fs);
+    }
+
+    {
+      final FilesystemType fs =
+        Filesystem.makeWithoutArchiveDirectory(in_log);
+      fs.mountArchiveFromAnywhere(TestShaderCaches
+        .makeShaderArchiveNameEclipse(
+          base,
+          "forward-translucent-lit",
+          version), PathVirtual.ROOT);
+      in_shader_forward_translucent_lit_cache =
+        TestShaderCaches.wrapForwardTranslucentLit(
+          in_gi,
+          in_log,
+          cache_config,
+          fs);
+    }
+
+    {
+      final FilesystemType fs =
+        Filesystem.makeWithoutArchiveDirectory(in_log);
+      fs.mountArchiveFromAnywhere(TestShaderCaches
+        .makeShaderArchiveNameEclipse(
+          base,
+          "forward-translucent-unlit",
+          version), PathVirtual.ROOT);
+      in_shader_forward_translucent_unlit_cache =
+        TestShaderCaches.wrapForwardTranslucentUnlit(
+          in_gi,
+          in_log,
+          cache_config,
+          fs);
+    }
+
+    return new TestShaderCaches(
       in_shader_debug_cache,
       in_shader_deferred_geo_cache,
       in_shader_deferred_light_cache,
@@ -419,7 +458,7 @@ public final class VShaderCaches
    *          A shader cache
    */
 
-  private VShaderCaches(
+  private TestShaderCaches(
     final KShaderCacheDebugType in_shader_debug_cache,
     final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache,
     final KShaderCacheDeferredLightType in_shader_deferred_light_cache,
