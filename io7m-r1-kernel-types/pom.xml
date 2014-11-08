@@ -92,12 +92,6 @@
       <artifactId>io7m-junreachable-core</artifactId>
       <version>${com.io7m.junreachable.versionRange}</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.pcollections</groupId>
-      <artifactId>pcollections</artifactId>
-      <version>2.1.2</version>
-    </dependency>
   </dependencies>
 
   <reporting>
