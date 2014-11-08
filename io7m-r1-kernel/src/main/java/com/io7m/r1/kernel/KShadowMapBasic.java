@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -49,7 +49,7 @@ import com.io7m.r1.types.RException;
     NullCheck.notNull(g, "OpenGL implementation");
     NullCheck.notNull(description, "Description");
 
-    final KFramebufferDepth f =
+    final KFramebufferDepthType f =
       KFramebufferDepth.newDepthFramebuffer(
         g,
         description.getFramebufferDescription());
@@ -57,11 +57,11 @@ import com.io7m.r1.types.RException;
   }
 
   private final KShadowMapDescriptionBasic description;
-  private final KFramebufferDepth          framebuffer;
+  private final KFramebufferDepthType      framebuffer;
 
   private KShadowMapBasic(
     final KShadowMapDescriptionBasic in_description,
-    final KFramebufferDepth in_framebuffer)
+    final KFramebufferDepthType in_framebuffer)
   {
     this.description = NullCheck.notNull(in_description, "Description");
     this.framebuffer = NullCheck.notNull(in_framebuffer, "Framebuffer");
@@ -80,7 +80,7 @@ import com.io7m.r1.types.RException;
    * @return The framebuffer
    */
 
-  public KFramebufferDepth getFramebuffer()
+  public KFramebufferDepthType getFramebuffer()
   {
     return this.framebuffer;
   }

@@ -223,4 +223,29 @@ import com.io7m.r1.types.RTransformProjectionType;
   {
     return this.z_near;
   }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[KProjectionFOV aspect_ratio=");
+    b.append(this.aspect_ratio);
+    b.append(", horizontal_fov=");
+    b.append(this.horizontal_fov);
+    b.append(", x_max=");
+    b.append(this.x_max);
+    b.append(", x_min=");
+    b.append(this.x_min);
+    b.append(", y_max=");
+    b.append(this.y_max);
+    b.append(", y_min=");
+    b.append(this.y_min);
+    b.append(", z_far=");
+    b.append(this.z_far);
+    b.append(", z_near=");
+    b.append(this.z_near);
+    b.append("]");
+    final String r = b.toString();
+    assert r != null;
+    return r;
+  }
 }

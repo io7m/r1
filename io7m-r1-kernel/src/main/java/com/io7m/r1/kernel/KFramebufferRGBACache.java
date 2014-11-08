@@ -16,6 +16,8 @@
 
 package com.io7m.r1.kernel;
 
+import java.math.BigInteger;
+
 import com.io7m.jcache.BLUCacheAbstract;
 import com.io7m.jcache.BLUCacheConfig;
 import com.io7m.jcache.BLUCacheTrivial;
@@ -63,6 +65,47 @@ import com.io7m.r1.types.RException;
       BLUCacheTrivial.newCache(loader, config);
 
     return new KFramebufferRGBACache(c);
+  }
+
+  /**
+   * <p>
+   * Construct a cache configuration that will result in a cache that caches
+   * at most <code>count</code> framebuffers of width <code>width</code> and
+   * height <code>height</code>. The width and height parameters are used to
+   * calculate a cache size in bytes, and should therefore be considered more
+   * as suggestions.
+   * </p>
+   *
+   * @param count
+   *          The number of framebuffers
+   * @param width
+   *          The assumed framebuffer widths
+   * @param height
+   *          The assumed framebuffer heights
+   * @return A cache configuration
+   */
+
+  public static BLUCacheConfig getCacheConfigFor(
+    final long count,
+    final long width,
+    final long height)
+  {
+    final BigInteger borrows = BigInteger.valueOf(8);
+    assert borrows != null;
+    final BigInteger big_map_count = BigInteger.valueOf(count);
+    final BigInteger big_map_width = BigInteger.valueOf(width);
+    final BigInteger big_map_height = BigInteger.valueOf(height);
+    final BigInteger big_bpp = BigInteger.valueOf(4);
+
+    final BigInteger capacity =
+      big_map_count.multiply(big_map_width.multiply(big_map_height
+        .multiply(big_bpp)));
+    assert capacity != null;
+
+    return BLUCacheConfig
+      .empty()
+      .withMaximumBorrowsPerKey(borrows)
+      .withMaximumCapacity(capacity);
   }
 
   /**

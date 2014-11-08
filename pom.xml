@@ -21,6 +21,7 @@
     <module>io7m-r1-examples</module>
     <module>io7m-r1-kernel-types</module>
     <module>io7m-r1-kernel</module>
+    <module>io7m-r1-main</module>
     <module>io7m-r1-meshes-binary</module>
     <module>io7m-r1-meshes-tools</module>
     <module>io7m-r1-meshes-xml</module>
@@ -37,6 +38,7 @@
     <module>io7m-r1-shaders-forward</module>
     <module>io7m-r1-shaders-postprocessing</module>
     <module>io7m-r1-tests</module>
+    <module>io7m-r1-tests-jogl</module>
     <module>io7m-r1-types</module>
     <module>io7m-r1-xml</module>
   </modules>
@@ -48,9 +50,9 @@
     <siteDocumentationDirectory>/com/io7m/r1/io7m-r1-documentation</siteDocumentationDirectory>
 
     <com.io7m.ieee754b16.versionRange>[1.0.0, 2.0.0)</com.io7m.ieee754b16.versionRange>
-    <com.io7m.jcache.versionRange>[0.6.0, 0.7.0)</com.io7m.jcache.versionRange>
+    <com.io7m.jcache.versionRange>[0.7.0, 0.8.0)</com.io7m.jcache.versionRange>
     <com.io7m.jcamera.versionRange>[0.2.0, 0.3.0)</com.io7m.jcamera.versionRange>
-    <com.io7m.jcanephora.versionRange>0.34.3</com.io7m.jcanephora.versionRange>
+    <com.io7m.jcanephora.versionRange>0.34.4</com.io7m.jcanephora.versionRange>
     <com.io7m.jequality.versionRange>[1.0.1, 2.0.0)</com.io7m.jequality.versionRange>
     <com.io7m.jfunctional.versionRange>[1.0.0, 2.0.0)</com.io7m.jfunctional.versionRange>
     <com.io7m.jintegers.versionRange>[1.0.0, 2.0.0)</com.io7m.jintegers.versionRange>

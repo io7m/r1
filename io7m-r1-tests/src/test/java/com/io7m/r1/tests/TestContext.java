@@ -17,19 +17,19 @@
 package com.io7m.r1.tests;
 
 import com.io7m.jcanephora.api.JCGLImplementationType;
-import com.io7m.jlog.Log;
+import com.io7m.jlog.LogUsableType;
 import com.io7m.jvvfs.FilesystemType;
 
 public final class TestContext
 {
   private final FilesystemType         fs;
   private final JCGLImplementationType gi;
-  private final Log                    log;
+  private final LogUsableType          log;
 
   public TestContext(
     final FilesystemType in_fs,
     final JCGLImplementationType in_gi,
-    final Log in_log)
+    final LogUsableType in_log)
   {
     this.fs = in_fs;
     this.gi = in_gi;
@@ -46,7 +46,7 @@ public final class TestContext
     return this.gi;
   }
 
-  public Log getLog()
+  public LogUsableType getLog()
   {
     return this.log;
   }

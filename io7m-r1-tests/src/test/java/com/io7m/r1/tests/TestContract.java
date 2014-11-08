@@ -16,11 +16,25 @@
 
 package com.io7m.r1.tests;
 
-import com.io7m.jcanephora.JCGLException;
+import org.junit.Before;
 
 public abstract class TestContract
 {
-  public abstract TestContext newTestContext(
-    final int units)
-    throws JCGLException;
+  /**
+   * @return <code>true</code> if the current OpenGL profile is supported.
+   */
+
+  public abstract boolean isGLSupported();
+
+  /**
+   * Check that the current OpenGL profile is supported.
+   */
+
+  @Before public abstract void checkSupport();
+
+  /**
+   * @return A new test context.
+   */
+
+  public abstract TestContext newTestContext();
 }
