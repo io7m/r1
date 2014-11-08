@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -60,6 +60,7 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
+import com.io7m.r1.types.RExceptionResource;
 
 /**
  * The default implementation of the {@link KTranslucentRendererType}.
@@ -700,7 +701,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       final int required =
         light.texturesGetRequired() + material.texturesGetRequired();
       if (unit_allocator.hasEnoughUnits(required) == false) {
-        throw RException.notEnoughTextureUnitsForShader(
+        throw RExceptionResource.notEnoughTextureUnitsForShader(
           shader_code,
           required,
           unit_allocator.getUnitCount());
@@ -856,7 +857,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
       final int required = material.texturesGetRequired();
       if (unit_allocator.hasEnoughUnits(required) == false) {
-        throw RException.notEnoughTextureUnitsForShader(
+        throw RExceptionResource.notEnoughTextureUnitsForShader(
           shader_code,
           required,
           unit_allocator.getUnitCount());
