@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -15,6 +15,8 @@
  */
 
 package com.io7m.r1.kernel;
+
+import java.math.BigInteger;
 
 import com.io7m.jcache.BLUCacheAbstract;
 import com.io7m.jcache.BLUCacheConfig;
@@ -38,8 +40,7 @@ import com.io7m.r1.types.RException;
 {
 
   /**
-   * Wrap the given cache and expose a {@link KShadowMapCacheType}
-   * interface.
+   * Wrap the given cache and expose a {@link KShadowMapCacheType} interface.
    *
    * @param c
    *          The cache
@@ -58,6 +59,47 @@ import com.io7m.r1.types.RException;
     final BLUCacheType<KShadowMapDescriptionType, KShadowMapUsableType, KShadowMapType, RException> in_cache)
   {
     super(in_cache);
+  }
+
+  /**
+   * <p>
+   * Construct a cache configuration that will result in a cache that allows
+   * up to <code>shadow_map_cache_count</code> shadow maps of width and height
+   * <code>shadow_map_cache_size</code>.
+   * </p>
+   * <p>
+   * The number of shadow maps specified is essentially the upper limit of the
+   * number of shadow casting lights that can appear in a
+   * {@link com.io7m.r1.kernel.types.KVisibleSet}.
+   * </p>
+   *
+   * @param shadow_map_cache_count
+   *          The number of maps
+   * @param shadow_map_cache_size
+   *          The length of the map sides
+   * @return A cache configuration
+   */
+
+  public static BLUCacheConfig getCacheConfigFor(
+    final long shadow_map_cache_count,
+    final long shadow_map_cache_size)
+  {
+    final BigInteger borrows = BigInteger.valueOf(1);
+    assert borrows != null;
+    final BigInteger big_map_count =
+      BigInteger.valueOf(shadow_map_cache_count);
+    final BigInteger big_map_size = BigInteger.valueOf(shadow_map_cache_size);
+    final BigInteger big_bpp = BigInteger.valueOf(8);
+
+    final BigInteger capacity =
+      big_map_count.multiply(big_map_size.multiply(big_map_size
+        .multiply(big_bpp)));
+    assert capacity != null;
+
+    return BLUCacheConfig
+      .empty()
+      .withMaximumBorrowsPerKey(borrows)
+      .withMaximumCapacity(capacity);
   }
 
   /**

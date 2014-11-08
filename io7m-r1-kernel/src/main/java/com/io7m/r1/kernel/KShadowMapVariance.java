@@ -30,11 +30,11 @@ import com.io7m.r1.types.RException;
   KShadowMapType
 {
   private final KShadowMapDescriptionVariance description;
-  private final KFramebufferDepthVariance     framebuffer;
+  private final KFramebufferDepthVarianceAbstract     framebuffer;
 
   private KShadowMapVariance(
     final KShadowMapDescriptionVariance in_description,
-    final KFramebufferDepthVariance in_framebuffer)
+    final KFramebufferDepthVarianceAbstract in_framebuffer)
   {
     this.description = NullCheck.notNull(in_description, "Description");
     this.framebuffer = NullCheck.notNull(in_framebuffer, "Framebuffer");
@@ -53,7 +53,7 @@ import com.io7m.r1.types.RException;
    * @return The framebuffer
    */
 
-  public KFramebufferDepthVariance getFramebuffer()
+  public KFramebufferDepthVarianceAbstract getFramebuffer()
   {
     return this.framebuffer;
   }
@@ -103,7 +103,7 @@ import com.io7m.r1.types.RException;
     NullCheck.notNull(g, "OpenGL implementation");
     NullCheck.notNull(description, "Description");
 
-    final KFramebufferDepthVariance f =
+    final KFramebufferDepthVarianceAbstract f =
       KFramebufferDepthVariance.newDepthVarianceFramebuffer(
         g,
         description.getFramebufferDescription());

@@ -66,6 +66,7 @@ import com.io7m.r1.kernel.KRegionCopier;
 import com.io7m.r1.kernel.KRegionCopierType;
 import com.io7m.r1.kernel.KRendererDeferredOpaque;
 import com.io7m.r1.kernel.KRendererDeferredOpaqueType;
+import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.kernel.KShadowMapCache;
 import com.io7m.r1.kernel.KShadowMapCacheType;
 import com.io7m.r1.kernel.KShadowMapContextType;
@@ -139,7 +140,7 @@ import com.io7m.r1.types.RTransformViewType;
 
   private static KRendererDeferredOpaqueType makeRenderer(
     final JCGLImplementationType g,
-    final TestShaderCaches tc,
+    final KShaderCacheSetType tc,
     final LogUsableType in_log,
     final KUnitQuadCacheType qc)
     throws Exception
@@ -194,7 +195,7 @@ import com.io7m.r1.types.RTransformViewType;
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
     final KUnitQuadCacheType qc =
       KUnitQuadCache.newCache(g.getGLCommon(), in_log);
-    final TestShaderCaches tc =
+    final KShaderCacheSetType tc =
       TestShaderCaches.newCachesFromArchives(g, in_log);
 
     final KFramebufferDeferredDescriptionBuilderType framebuffer_db =
