@@ -84,6 +84,30 @@ import com.io7m.r1.types.RException;
   }
 
   /**
+   * <p>
+   * Construct a cache config that will cache at most <code>count</code>
+   * frustum meshes. The maximum size of the cache will be
+   * <code>count * {@link KFrustumMesh#getFrustumMeshSizeBytes()}</code>
+   * bytes.
+   * </p>
+   *
+   * @param count
+   *          The number of meshes.
+   * @return A cache config
+   */
+
+  public static LRUCacheConfig getCacheConfigFor(
+    final long count)
+  {
+    final BigInteger big_count = BigInteger.valueOf(count);
+    final BigInteger size =
+      BigInteger.valueOf(KFrustumMesh.getFrustumMeshSizeBytes());
+    final BigInteger capacity = big_count.multiply(size);
+    assert capacity != null;
+    return LRUCacheConfig.empty().withMaximumCapacity(capacity);
+  }
+
+  /**
    * Construct a cache of frustum meshes that will permit at most
    * <code>count</code> meshes to remain allocated.
    *
@@ -117,13 +141,8 @@ import com.io7m.r1.types.RException;
     NullCheck.notNull(count, "Count");
     NullCheck.notNull(log, "Log");
 
-    final BigInteger size =
-      BigInteger.valueOf(KFrustumMesh.getFrustumMeshSizeBytes());
-    final BigInteger capacity = count.multiply(size);
-    assert capacity != null;
-
     final LRUCacheConfig config =
-      LRUCacheConfig.empty().withMaximumCapacity(capacity);
+      KFrustumMeshCache.getCacheConfigFor(count.longValue());
 
     return KFrustumMeshCache.newCache(g, au_cons, iu_cons, config, log);
   }

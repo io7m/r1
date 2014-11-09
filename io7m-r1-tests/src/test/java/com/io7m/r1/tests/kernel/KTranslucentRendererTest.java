@@ -59,6 +59,7 @@ import com.io7m.r1.kernel.KRefractionRenderer;
 import com.io7m.r1.kernel.KRefractionRendererType;
 import com.io7m.r1.kernel.KRegionCopier;
 import com.io7m.r1.kernel.KRegionCopierType;
+import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.kernel.KTranslucentRenderer;
 import com.io7m.r1.kernel.KTranslucentRendererType;
 import com.io7m.r1.kernel.types.KCamera;
@@ -134,7 +135,7 @@ import com.io7m.r1.types.RVectorI3F;
       final LogUsableType in_log =
         Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests");
 
-      final TestShaderCaches tc =
+      final KShaderCacheSetType tc =
         TestShaderCaches.newCachesFromArchives(g, in_log);
 
       final KRegionCopierType copier = KRegionCopier.newCopier(g, in_log);
