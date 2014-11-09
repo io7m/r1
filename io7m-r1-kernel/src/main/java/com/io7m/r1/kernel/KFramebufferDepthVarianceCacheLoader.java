@@ -76,7 +76,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     v.kFramebufferDelete(this.gi);
   }
 
-  @Override public KFramebufferDepthVariance cacheValueLoad(
+  @Override public KFramebufferDepthVarianceAbstract cacheValueLoad(
     final KFramebufferDepthVarianceDescription key)
     throws RException
   {

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -26,6 +26,7 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.r1.kernel.KFramebufferDeferredUsableType;
 import com.io7m.r1.kernel.KFramebufferRGBACache;
 import com.io7m.r1.kernel.KFramebufferRGBACacheType;
+import com.io7m.r1.kernel.KPostprocessorDeferredType;
 import com.io7m.r1.kernel.KPostprocessorEmissionGlow;
 import com.io7m.r1.kernel.KRegionCopier;
 import com.io7m.r1.kernel.KRegionCopierType;
@@ -155,7 +156,7 @@ public final class ExampleRendererDeferredWithEmissionGlow extends
     final KFramebufferRGBACacheType rgba_cache =
       KFramebufferRGBACache.newCacheWithConfig(gi, rgba_cache_config, log);
 
-    final KPostprocessorEmissionGlow p =
+    final KPostprocessorDeferredType<KGlowParameters> p =
       KPostprocessorEmissionGlow.postprocessorNew(
         gi,
         copier,

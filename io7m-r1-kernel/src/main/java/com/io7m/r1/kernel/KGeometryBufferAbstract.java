@@ -42,12 +42,7 @@ import com.io7m.jcanephora.api.JCGLFramebufferBuilderGL3ES3Type;
 import com.io7m.jcanephora.api.JCGLFramebuffersCommonType;
 import com.io7m.jcanephora.api.JCGLFramebuffersGL3Type;
 import com.io7m.jcanephora.api.JCGLImplementationType;
-import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
-import com.io7m.jcanephora.api.JCGLInterfaceGL2Type;
-import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
-import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
-import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
 import com.io7m.jcanephora.api.JCGLStencilBufferType;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
 import com.io7m.jequality.annotations.EqualityReference;
@@ -56,12 +51,11 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KGeometryBufferDescription;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
-import com.io7m.r1.types.RExceptionNotSupported;
 
 @EqualityReference abstract class KGeometryBufferAbstract implements
   KGeometryBufferType
 {
-  @EqualityReference private static final class KGeometryBuffer_GL3ES3 extends
+  @EqualityReference static final class KGeometryBuffer_GL3ES3 extends
     KGeometryBufferAbstract
   {
     private static
@@ -271,50 +265,6 @@ import com.io7m.r1.types.RExceptionNotSupported;
     b.enableStencilBufferClear(0);
     b.setStrictChecking(true);
     CLEAR_SPEC = b.build();
-  }
-
-  static KGeometryBufferAbstract newGBuffer(
-    final JCGLImplementationType gi,
-    final KGeometryBufferDescription description)
-    throws JCGLException,
-      RException
-  {
-    return gi
-      .implementationAccept(new JCGLImplementationVisitorType<KGeometryBufferAbstract, RException>() {
-        @Override public KGeometryBufferAbstract implementationIsGL2(
-          final JCGLInterfaceGL2Type gl)
-          throws JCGLException,
-            RExceptionNotSupported
-        {
-          throw RExceptionNotSupported.deferredRenderingNotSupported();
-        }
-
-        @Override public KGeometryBufferAbstract implementationIsGL3(
-          final JCGLInterfaceGL3Type gl)
-          throws JCGLException
-        {
-          return KGeometryBuffer_GL3ES3.newGBuffer(gl, description);
-        }
-
-        @Override public KGeometryBufferAbstract implementationIsGLES2(
-          final JCGLInterfaceGLES2Type gl)
-          throws JCGLException,
-            RExceptionNotSupported
-        {
-          throw RExceptionNotSupported.deferredRenderingNotSupported();
-        }
-
-        @Override public KGeometryBufferAbstract implementationIsGLES3(
-          final JCGLInterfaceGLES3Type gl)
-          throws JCGLException,
-            RExceptionNotSupported
-        {
-          if (gl.hasColorBufferFloat() || gl.hasColorBufferHalfFloat()) {
-            return KGeometryBuffer_GL3ES3.newGBuffer(gl, description);
-          }
-          throw RExceptionNotSupported.deferredRenderingNotSupported();
-        }
-      });
   }
 
   private boolean deleted;
