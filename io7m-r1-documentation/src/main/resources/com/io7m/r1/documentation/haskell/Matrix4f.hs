@@ -15,6 +15,8 @@
 
 module Matrix4f (
   T (..),
+  inverse,
+  mult,
   mult_v,
   row,
   row_column

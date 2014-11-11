@@ -1,4 +1,4 @@
-module LightSpherical where
+module LightProjective where
 
 import qualified Color3
 import qualified Position3
