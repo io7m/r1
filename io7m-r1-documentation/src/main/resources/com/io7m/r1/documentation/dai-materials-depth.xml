@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.materials-depth"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Depth Materials</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.materials-depth.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="term">depth properties</s:term> of opaque 
+      materials indicate how surfaces with those materials will affect
+      the current <s:term s:type="term">depth buffer</s:term>. Essentially,
+      parts of a surface can elect to effectively be discarded by not
+      being written to the depth buffer, allowing parts of otherwise
+      opaque instances to appear fully transparent (without requiring the
+      overhead of using fully <s:link s:target="r1.dai.forward-translucents">translucent</s:link>
+      instances).
+    </s:paragraph>
+    <s:paragraph>
+      Depth properties are described by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialDepthType.html">KMaterialDepthType</s:link-external>,
+      with
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialDepthConstant.html">KMaterialDepthConstant</s:link-external>
+      indicating that an object is fully opaque, and
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMaterialDepthAlpha.html">KMaterialDepthAlpha</s:link-external>
+      indicating that parts of the object with an
+      <s:link s:target="r1.dai.materials-regular.albedo-properties">albedo</s:link>
+      that has an opacity of less than a given threshold
+      will appear to be completely translucent.
+    </s:paragraph>
+    <s:paragraph>
+      Depth information is also taken into account during
+      the application of
+      <s:link s:target="r1.dai.shadow-mapping-basic">shadow mapping</s:link>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Depth alpha</s:formal-item-title>
+      <s:image s:source="images/depth_alpha.png">Depth alpha</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+</s:section>

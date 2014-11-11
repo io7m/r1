@@ -103,4 +103,16 @@
     </s:formal-item>
   </s:subsection>
 
+  <s:subsection xml:id="r1.dai.lighting-spherical.shadows">
+    <s:subsection-title>Shadows</s:subsection-title>
+    <s:paragraph>
+      Spherical lights cannot project shadows. However, the
+      <s:term s:type="package">${project.parent.name}</s:term> provides
+      a so-called <s:link s:target="r1.dai.lighting-projective.pseudo-spherical">pseudo-spherical</s:link>
+      lights implemented with six
+      <s:link s:target="r1.dai.lighting-projective">projective</s:link> lights,
+      each of which can project shadows.
+    </s:paragraph>
+  </s:subsection>
+
 </s:section>

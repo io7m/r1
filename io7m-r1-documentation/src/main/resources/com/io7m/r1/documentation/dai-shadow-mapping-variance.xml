@@ -26,7 +26,60 @@
   <s:subsection xml:id="r1.dai.shadow-mapping-variance.overview">
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
-      Overview.
+      <s:term s:type="term">Variance shadow mapping</s:term> is a technique
+      that can give attractive soft-edged shadows. Using the same
+      view and projection matrices used to apply
+      <s:link s:target="r1.dai.lighting-projective">projective lights</s:link>,
+      a <s:term s:type="term">depth-variance</s:term> image of the current
+      scene is rendered, and those stored depth distribution values
+      are used to determine the probability that a given
+      point in the scene is in shadow with respect to the current light.
+    </s:paragraph>
+    <s:paragraph>
+      The algorithm implemented in the <s:term s:type="package">${project.parent.name}</s:term> 
+      package is described in
+      <s:link-external s:target="http://http.developer.nvidia.com/GPUGems3/gpugems3_ch08.html">GPU Gems 3</s:link-external>,
+      which is a set of improvements to the original variance shadow mapping
+      algorithm by William Donnelly and Andrew Lauritzen. The
+      <s:term s:type="package">${project.parent.name}</s:term> package implements
+      all of the improvements to the algorithm except
+      <s:term s:type="term">summed area tables</s:term>. The package also provides
+      optional box blurring of shadows as described in the chapter.
     </s:paragraph>
   </s:subsection>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-variance.algorithm">
+    <s:subsection-title>Algorithm</s:subsection-title>
+    <s:paragraph>
+      Prior to actually <s:link s:target="r1.dai.deferred">rendering</s:link> 
+      a visible set, <s:term s:type="term">shadow maps</s:term> are generated
+      for all <s:term s:type="term">shadow-projecting</s:term> lights in
+      the set. A <s:term s:type="term">shadow map</s:term>, for variance shadow
+      mapping, is a two-component red/green image of the visible set rendered 
+      from the point of view of the shadow-projecting light, with the red
+      channel of each pixel in the image representing the 
+      <s:link s:target="r1.dai.coords.screen-space">screen-space depth</s:link>
+      and of the closest surface at that pixel, and the green channel representing
+      the depth squared (literally <s:term s:type="expression">depth * depth</s:term>). 
+      For example:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Depth-variance image</s:formal-item-title>
+      <s:image s:source="images/d_depth.png">Depth-variance image</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Then, when actually applying lighting during rendering of the
+      scene, a given <s:link s:target="r1.dai.coords.eye-space">eye space</s:link>
+      position <s:term s:type="expression">p</s:term> is transformed to
+      <s:link s:target="r1.dai.lighting-projective.algorithm">light-clip space</s:link>
+      and then mapped to the range
+      <s:term s:type="expression">[(0, 0, 0), (1, 1, 1)]</s:term> in order
+      to sample the <s:term s:type="term">depth</s:term> and
+      <s:term s:type="term">depth squared</s:term> values
+      <s:term s:type="expression">(d, ds)</s:term>
+      from the shadow map (as with sampling from a projected texture
+      with projective lighting).
+    </s:paragraph>
+  </s:subsection>
+
 </s:section>

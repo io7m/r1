@@ -61,3 +61,10 @@ mult_v m v =
     (V4.dot4 (row m 2) v)
     (V4.dot4 (row m 3) v)
 
+-- XXX: Omitted
+mult :: T -> T -> T
+mult _ _ = undefined
+
+-- XXX: Omitted
+inverse :: T -> Maybe T
+inverse _ = undefined

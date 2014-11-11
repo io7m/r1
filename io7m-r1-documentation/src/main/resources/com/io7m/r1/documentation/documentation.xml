@@ -310,6 +310,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.]]>
     <xi:include href="dai-process.xml"/>
     <xi:include href="dai-materials.xml"/>
     <xi:include href="dai-materials-regular.xml"/>
+    <xi:include href="dai-materials-depth.xml"/>
     <xi:include href="dai-meshes.xml"/>
     <xi:include href="dai-transforms.xml"/>
     <xi:include href="dai-instances.xml"/>
@@ -323,6 +324,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.]]>
     <xi:include href="dai-lighting-directional.xml"/>
     <xi:include href="dai-lighting-spherical.xml"/>
     <xi:include href="dai-lighting-projective.xml"/>
+    <xi:include href="dai-shadows.xml"/>
     <xi:include href="dai-shadow-mapping-basic.xml"/>
     <xi:include href="dai-shadow-mapping-variance.xml"/>
     <xi:include href="dai-generic-refraction.xml"/>
