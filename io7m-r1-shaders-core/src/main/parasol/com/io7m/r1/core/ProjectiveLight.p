@@ -38,20 +38,14 @@ module ProjectiveLight is
 
   --
   -- Sample a texel from the given texture [t], given clip-space 
-  -- coordinates [u]. If [u [w]] is not greater than 0.0, then
-  -- the coordinate is behind the viewer (the light) and so no lighting
-  -- should be applied.
+  -- coordinates [u].
   --
 
   function light_texel (
     t : sampler_2d,
     u : vector_4f
   ) : vector_4f =
-    if F.lesser (u [w], 0.0) then
-      new vector_4f (0.0, 0.0, 0.0, 1.0)
-    else
-      S2.texture (t, Transform.clip_to_texture (u) [x y])
-    end;
+    S2.texture (t, Transform.clip_to_texture (u) [x y]);
 
   --
   -- Given a projective light [light], calculate the diffuse
