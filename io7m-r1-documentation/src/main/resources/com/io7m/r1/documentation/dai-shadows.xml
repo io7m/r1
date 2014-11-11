@@ -26,14 +26,17 @@
   <s:subsection xml:id="r1.dai.shadows.overview">
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
-      Overview.
-    </s:paragraph>
-  </s:subsection>
-
-  <s:subsection xml:id="r1.dai.shadows.casters">
-    <s:subsection-title>Casters</s:subsection-title>
-    <s:paragraph>
-      Casters.
+      Because the <s:term s:type="package">${project.parent.name}</s:term> package
+      implements <s:term s:type="term">local illumination</s:term>, it is necessary
+      to associate <s:term s:type="term">shadows</s:term> with those light sources
+      capable of projecting them (currently only 
+      <s:link s:target="r1.dai.lighting-projective">projective</s:link> lights).
+      The <s:term s:type="package">${project.parent.name}</s:term> package currently
+      supports <s:link s:target="r1.dai.shadow-mapping-basic">basic</s:link> and
+      <s:link s:target="r1.dai.shadow-mapping-variance">variance</s:link> 
+      <s:term s:type="term">shadow mapping</s:term>. So-called
+      <s:term s:type="term">mapped</s:term> shadows allow efficient per-pixel
+      shadows to be calculated with varying degrees of visual quality.
     </s:paragraph>
   </s:subsection>
 
@@ -67,6 +70,11 @@
       <s:link-external s:target="apidocs/com/io7m/r1/kernel/KShadowMapCacheLoader.html">KShadowMapCacheLoader</s:link-external>,
       with the actual map implementation for basic shadow mapping given in
       <s:link-external s:target="apidocs/com/io7m/r1/kernel/KShadowMapBasic.html">KShadowMapBasic</s:link-external>.
+    </s:paragraph>
+    <s:paragraph>
+      The actual production of all shadow maps is managed by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KShadowMapRenderer.html">KShadowMapRenderer</s:link-external>
+      type.
     </s:paragraph>
   </s:subsection>
 

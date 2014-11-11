@@ -261,7 +261,7 @@
       <s:term s:type="term">sub-lights</s:term>,
       each of which are oriented along the major axis directions with projections that
       have a <s:term s:type="expression">90°</s:term> field of view.
-      <s:link s:target="r1.dai.shadows.casters">Shadow casters</s:link> are assigned
+      <s:link s:target="r1.dai.visible-sets.shadow-geometry">Shadow casters</s:link> are assigned
       to each sub-light as with any ordinary projective light.
     </s:paragraph>
     <s:formal-item s:kind="diagram">
