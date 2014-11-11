@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -296,21 +296,8 @@ public final class SPSShadowVariance0 implements ExampleSceneType
     final Texture2DStaticUsableType tex =
       scene.textureClamped("projective.png");
     final KShadowMappedVariance ks = SPSShadowVariance0.makeShadow();
-
-    final KLightSpherePseudoWithShadowVarianceBuilderType kspb =
-      KLightSpherePseudoWithShadowVariance.newBuilder();
-    kspb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
-    kspb.setRadius(16.0f);
-    kspb.setShadow(ks);
-    kspb.setEnabledNegativeX(true);
-    kspb.setEnabledNegativeY(true);
-    kspb.setEnabledNegativeZ(true);
-    kspb.setEnabledPositiveX(true);
-    kspb.setEnabledPositiveY(true);
-    kspb.setEnabledPositiveZ(true);
-
     final KLightSpherePseudoWithShadowVariance ksp =
-      kspb.build(this.ctx, tex);
+      this.makeShadowLight(tex, ks);
 
     final KVisibleSetLightGroupBuilderType gb =
       scene.visibleOpaqueNewLightGroup("g");
@@ -418,6 +405,28 @@ public final class SPSShadowVariance0 implements ExampleSceneType
     gb.groupAddInstance(monkey_pos_x);
     gb.groupAddInstance(monkey_pos_y);
     gb.groupAddInstance(monkey_pos_z);
+  }
+
+  private KLightSpherePseudoWithShadowVariance makeShadowLight(
+    final Texture2DStaticUsableType tex,
+    final KShadowMappedVariance ks)
+    throws RException
+  {
+    final KLightSpherePseudoWithShadowVarianceBuilderType kspb =
+      KLightSpherePseudoWithShadowVariance.newBuilder();
+    kspb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
+    kspb.setRadius(16.0f);
+    kspb.setShadow(ks);
+    kspb.setEnabledNegativeX(true);
+    kspb.setEnabledNegativeY(true);
+    kspb.setEnabledNegativeZ(true);
+    kspb.setEnabledPositiveX(true);
+    kspb.setEnabledPositiveY(true);
+    kspb.setEnabledPositiveZ(true);
+
+    final KLightSpherePseudoWithShadowVariance ksp =
+      kspb.build(this.ctx, tex);
+    return ksp;
   }
 
   @Override public List<ExampleViewType> exampleViewpoints()
