@@ -45,7 +45,7 @@ import com.io7m.r1.types.RVectorI3F;
      * The default distance to the near clipping plane.
      */
 
-    public static final float           DEFAULT_NEAR_CLIP = 0.0001f;
+    public static final float           DEFAULT_NEAR_CLIP = 0.5f;
 
     private static final float          FOV_BASE;
     private static final QuaternionI4F  NEGATIVE_X_ORIENTATION;

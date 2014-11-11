@@ -326,6 +326,7 @@ public final class SPSShadowVariance0 implements ExampleSceneType
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_neg_x);
+            scene.visibleShadowsAddCaster(kpwsv, plane_neg_x);
             return Unit.unit();
           }
         });
@@ -340,6 +341,7 @@ public final class SPSShadowVariance0 implements ExampleSceneType
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_neg_y);
+            scene.visibleShadowsAddCaster(kpwsv, plane_neg_y);
             return Unit.unit();
           }
         });
@@ -354,6 +356,7 @@ public final class SPSShadowVariance0 implements ExampleSceneType
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_neg_z);
+            scene.visibleShadowsAddCaster(kpwsv, plane_neg_z);
             return Unit.unit();
           }
         });
@@ -368,6 +371,7 @@ public final class SPSShadowVariance0 implements ExampleSceneType
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_pos_x);
+            scene.visibleShadowsAddCaster(kpwsv, plane_pos_x);
             return Unit.unit();
           }
         });
@@ -382,6 +386,7 @@ public final class SPSShadowVariance0 implements ExampleSceneType
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_pos_y);
+            scene.visibleShadowsAddCaster(kpwsv, plane_pos_y);
             return Unit.unit();
           }
         });
@@ -396,6 +401,7 @@ public final class SPSShadowVariance0 implements ExampleSceneType
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_pos_z);
+            scene.visibleShadowsAddCaster(kpwsv, plane_pos_z);
             return Unit.unit();
           }
         });
