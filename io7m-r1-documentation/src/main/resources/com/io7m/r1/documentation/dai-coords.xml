@@ -22,6 +22,7 @@
   xmlns:xi="http://www.w3.org/2001/XInclude">
   <s:section-title>Coordinate systems</s:section-title>
   <s:section-contents/>
+
   <s:subsection xml:id="r1.dai.coords.conventions">
     <s:subsection-title>Conventions</s:subsection-title>
     <s:paragraph>
@@ -110,6 +111,85 @@
       <s:image s:source="images/rot_matrix.png">Rotation of r radians around an arbitrary axis</s:image>
     </s:formal-item>
   </s:subsection>
+
+  <s:subsection xml:id="r1.dai.coords.types">
+    <s:subsection-title>Types</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">${project.parent.name}</s:term> package
+      uses so-called <s:term s:type="term">phantom type parameters</s:term>
+      to statically indicate the coordinate systems of vectors, and the
+      types of transformations that matrices represent. For example, a
+      value of type <s:term s:type="expression">RVectorI3F&lt;RSpaceObjectType></s:term>
+      represents an immutable three-dimension vectors with coordinate 
+      specified in <s:link s:target="r1.dai.coords.object-space">object space</s:link>.
+      A value of type <s:term s:type="expression">RMatrixI4x4F&lt;RSpaceTransformViewType></s:term>
+      represents an immutable 4x4 matrix that contains a transformation from
+      <s:link s:target="r1.dai.coords.world-space">world space</s:link> to
+      <s:link s:target="r1.dai.coords.eye-space">eye space</s:link>.
+    </s:paragraph>
+    <s:paragraph>
+      Due to the limited nature of Java's type system, it is obviously
+      possible for the programmer to deliberately construct vectors and
+      matrices that do not represent valid coordinates or transforms in
+      any coordinate space. However, mistakes involving the mixing up
+      of coordinate systems are rampant in graphics programming, and
+      in practice, the system as implemented catches many of the mistakes
+      at compile time.
+    </s:paragraph>
+    <s:paragraph>
+      The package contains the following coordinate system and transform
+      indexed types:
+    </s:paragraph>
+    <s:formal-item s:kind="listing">
+      <s:formal-item-title>Vector and matrix types</s:formal-item-title>
+      <s:table>
+        <s:table-summary>Vector and matrix types</s:table-summary>
+        <s:table-head>
+          <s:table-column-name>Type</s:table-column-name>
+          <s:table-column-name>Description</s:table-column-name>
+        </s:table-head>
+        <s:table-body>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RMatrixI3x3F.html">RMatrixI3x3F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Immutable 3x3 matrix type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RMatrixI4x4F.html">RMatrixI4x4F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Immutable 4x4 matrix type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RMatrixM4x4F.html">RMatrixM4x4F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Mutable 4x4 matrix type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RMatrixM3x3F.html">RMatrixM3x3F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Mutable 3x3 matrix type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RVectorI2F.html">RVectorI2F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Immutable 2D vector type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RVectorI3F.html">RVectorI3F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Immutable 3D vector type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RVectorI4F.html">RVectorI4F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Immutable 4D vector type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RVectorM3F.html">RVectorM3F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Mutable 3D vector type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RVectorM4F.html">RVectorM4F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Mutable 4D vector type</s:table-cell>
+          </s:table-row>
+        </s:table-body>
+      </s:table>
+    </s:formal-item>
+  </s:subsection>
+
   <s:subsection xml:id="r1.dai.coords.object-space">
     <s:subsection-title>Object space</s:subsection-title>
     <s:paragraph>
@@ -139,7 +219,13 @@
       is sometimes referred to as <s:term s:type="term">local space</s:term>,
       or <s:term s:type="term">model space</s:term>.
     </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">${project.parent.name}</s:term> package, 
+      <s:term s:type="term">object space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceObjectType.html">RSpaceObjectType</s:link-external>.
+    </s:paragraph>
   </s:subsection>
+
   <s:subsection xml:id="r1.dai.coords.world-space">
     <s:subsection-title>World space</s:subsection-title>
     <s:paragraph>
@@ -167,7 +253,13 @@
       with the positions of the object space vertices yields vertices in
       world space.
     </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">${project.parent.name}</s:term> package, 
+      <s:term s:type="term">world space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceWorldType.html">RSpaceWorldType</s:link-external>.
+    </s:paragraph>
   </s:subsection>
+
   <s:subsection xml:id="r1.dai.coords.eye-space">
     <s:subsection-title>Eye space</s:subsection-title>
     <s:paragraph>
@@ -262,7 +354,13 @@
       is sometimes referred to as <s:term s:type="term">camera space</s:term>,
       or <s:term s:type="term">view space</s:term>.
     </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">${project.parent.name}</s:term> package, 
+      <s:term s:type="term">eye space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceEyeType.html">RSpaceEyeType</s:link-external>.
+    </s:paragraph>
   </s:subsection>
+
   <s:subsection xml:id="r1.dai.coords.clip-space">
     <s:subsection-title>Clip space</s:subsection-title>
     <s:paragraph>
@@ -334,7 +432,13 @@
       <s:term s:type="term">clip space</s:term> coordinates which are then
       used by the hardware rasterizer to produce color fragments onscreen.
     </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">${project.parent.name}</s:term> package, 
+      <s:term s:type="term">clip space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceClipType.html">RSpaceClipType</s:link-external>.
+    </s:paragraph>
   </s:subsection>
+
   <s:subsection xml:id="r1.dai.coords.normalized-device-space">
     <s:subsection-title>Normalized-device space</s:subsection-title>
     <s:paragraph>
@@ -367,7 +471,13 @@
       <s:term s:type="term">normalized-device space</s:term>; it is mentioned
       here for completeness.
     </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">${project.parent.name}</s:term> package, 
+      <s:term s:type="term">normalized-device space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceNDCType.html">RSpaceNDCType</s:link-external>.
+    </s:paragraph>
   </s:subsection>
+
   <s:subsection xml:id="r1.dai.coords.screen-space">
     <s:subsection-title>Screen space</s:subsection-title>
     <s:paragraph>
@@ -404,5 +514,11 @@ With this mapping, the depth buffer range is fully utilized.</s:verbatim>
       <s:term s:type="expression">[0, 1]</s:term>, the positive Z axis
       points away from the observer, making the coordinate system left handed.
     </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">${project.parent.name}</s:term> package, 
+      <s:term s:type="term">screen space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceWindowType.html">RSpaceWindowType</s:link-external>.
+    </s:paragraph>
   </s:subsection>
+
 </s:section>
