@@ -59,13 +59,13 @@
       from the point of view of the shadow-projecting light, with the red
       channel of each pixel in the image representing the 
       <s:link s:target="r1.dai.coords.screen-space">screen-space depth</s:link>
-      and of the closest surface at that pixel, and the green channel representing
+      of the closest surface at that pixel, and the green channel representing
       the depth squared (literally <s:term s:type="expression">depth * depth</s:term>). 
       For example:
     </s:paragraph>
     <s:formal-item s:kind="diagram">
       <s:formal-item-title>Depth-variance image</s:formal-item-title>
-      <s:image s:source="images/d_depth.png">Depth-variance image</s:image>
+      <s:image s:source="images/depth_variance.png">Depth-variance image</s:image>
     </s:formal-item>
     <s:paragraph>
       Then, when actually applying lighting during rendering of the
@@ -78,7 +78,95 @@
       <s:term s:type="term">depth squared</s:term> values
       <s:term s:type="expression">(d, ds)</s:term>
       from the shadow map (as with sampling from a projected texture
-      with projective lighting).
+      with projective lighting). 
+    </s:paragraph>
+    <s:paragraph>
+      As stated previously, the intent of variance
+      shadow mapping is to essentially calculate the 
+      <s:term s:type="term">probability</s:term> that a given point is in shadow,
+      rather than the binary <s:term s:type="term">is/is not</s:term> of
+      <s:link s:target="r1.dai.shadow-mapping-basic">basic shadow mapping</s:link>.
+      A <s:term s:type="term">one-tailed</s:term> variant of
+      <s:link-external s:target="https://en.wikipedia.org/wiki/Chebyshev%27s_inequality">Chebyshev's inequality</s:link-external>
+      is used to calculate the upper bound <s:term s:type="expression">u</s:term>
+      on the probability that, given
+      <s:term s:type="expression">(d, ds)</s:term>, a given point with depth
+      <s:term s:type="expression">t</s:term> is in shadow:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Chebyshev 0</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/ShadowVarianceChebyshev0.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      One of the improvements suggested to the original variance shadow
+      algorithm is to clamp the minimum variance to some small value
+      (the <s:term s:type="package">${project.parent.name}</s:term> package uses <s:term s:type="constant">0.00002</s:term>
+      by default, but this is configurable on a per-shadow basis). The
+      equation above becomes:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Chebyshev 1</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/ShadowVarianceChebyshev1.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      The above is sufficient to give shadows that are roughly equivalent
+      in visual quality to <s:link s:target="r1.dai.shadow-mapping-basic">basic shadow mapping</s:link>
+      with the added benefit of being generally better behaved and with
+      far fewer artifacts. However, the algorithm can suffer from
+      <s:term s:type="term">light bleeding</s:term>, where the penumbrae
+      of overlapping shadows can be unexpectedly bright despite the fact
+      that the entire area should be in shadow. One of the suggested
+      improvements to reduce light bleeding is to modify the upper bound
+      <s:term s:type="expression">u</s:term> such that all values below
+      a configurable threshold are mapped to zero, and values above the
+      threshold are rescaled to map them to the range
+      <s:term s:type="expression">[0, 1]</s:term>. The original article
+      suggests a linear step function applied to 
+      <s:term s:type="expression">u</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Chebyshev 2</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/ShadowVarianceChebyshev2.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      The amount of light bleed reduction is adjustable on a per-shadow
+      basis.
+    </s:paragraph>
+    <s:paragraph>
+      To reduce problems involving numeric inaccuracy, the
+      original article suggests the use of 32-bit floating point textures
+      in depth variance maps. The <s:term s:type="package">${project.parent.name}</s:term>
+      allows 16-bit or 32-bit textures, configurable on a per-shadow basis.
+    </s:paragraph>
+    <s:paragraph>
+      Finally, as mentioned previously, the <s:term s:type="package">${project.parent.name}</s:term>
+      allows both optional box blurring and mipmap generation for shadow
+      maps. Both blurring and mipmapping can reduce aliasing artifacts,
+      with the former also allowing the edges of shadows to be significantly
+      softened as a visual effect:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Depth-variance shadows (Minimal blur)</s:formal-item-title>
+      <s:image s:source="images/variance_0.png">Depth-variance shadows (Minimal blur)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Depth-variance shadows (High blur)</s:formal-item-title>
+      <s:image s:source="images/variance_1.png">Depth-variance shadows (High blur)</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-variance.types">
+    <s:subsection-title>Types</s:subsection-title>
+    <s:paragraph>
+      Variance mapped shadows are represented by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KShadowMappedVariance.html">KShadowMappedVariance</s:link-external>
+      type, and can be associated with
+      <s:link s:target="r1.dai.lighting-projective">projective lights</s:link>.
+    </s:paragraph>
+    <s:paragraph>
+      Rendering of depth-variance images is handled by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KDepthVarianceRendererType.html">KDepthVarianceRendererType</s:link-external>
+      type.
     </s:paragraph>
   </s:subsection>
 
