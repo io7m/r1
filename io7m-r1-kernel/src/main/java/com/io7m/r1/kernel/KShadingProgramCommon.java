@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -58,7 +58,6 @@ import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RMatrixM4x4F;
 import com.io7m.r1.types.RMatrixReadable3x3FType;
 import com.io7m.r1.types.RMatrixReadable4x4FType;
 import com.io7m.r1.types.RSpaceObjectType;
@@ -74,7 +73,6 @@ import com.io7m.r1.types.RTransformProjectionInverseType;
 import com.io7m.r1.types.RTransformProjectionType;
 import com.io7m.r1.types.RTransformProjectiveModelViewType;
 import com.io7m.r1.types.RTransformProjectiveProjectionType;
-import com.io7m.r1.types.RTransformSphericalViewInverseViewType;
 import com.io7m.r1.types.RTransformTextureType;
 import com.io7m.r1.types.RTransformViewInverseType;
 import com.io7m.r1.types.RTransformViewType;
@@ -1256,13 +1254,6 @@ import com.io7m.r1.types.RVectorReadable4FType;
     program.programUniformPutMatrix3x3f(
       KShadingProgramCommon.MATRIX_NAME_LIGHT_SPHERICAL,
       m);
-  }
-
-  static void putMatrixLightSphericalViewInverseView(
-    final JCBProgramType program,
-    final RMatrixM4x4F<RTransformSphericalViewInverseViewType> m)
-  {
-    program.programUniformPutMatrix4x4f("m_spherical_view", m);
   }
 
   static void putMatrixModel(
