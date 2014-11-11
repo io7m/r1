@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -32,6 +32,7 @@ import com.io7m.jlog.LogPolicyProperties;
 import com.io7m.jlog.LogPolicyType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.Nullable;
+import com.io7m.jparasol.CompilerError;
 import com.io7m.jparasol.core.GVersionES;
 import com.io7m.jparasol.core.GVersionFull;
 import com.io7m.jparasol.frontend.Compiler;
@@ -79,31 +80,43 @@ import com.io7m.jparasol.glsl.serialization.GSerializerZip;
       }
     }
 
-    final List<File> sources =
-      RShadersDepthVarianceMakeAll.makeSourcesList(out_parasol_dir);
-    final CompilerBatch batch = CompilerBatch.newBatchFromFile(out_batch);
+    try {
+      final List<File> sources =
+        RShadersDepthVarianceMakeAll.makeSourcesList(out_parasol_dir);
+      final CompilerBatch batch = CompilerBatch.newBatchFromFile(out_batch);
 
-    final ExecutorService e =
-      Executors
-        .newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
-    assert e != null;
+      final ExecutorService e =
+        Executors.newFixedThreadPool(Runtime
+          .getRuntime()
+          .availableProcessors() * 2);
+      assert e != null;
 
-    final ZipOutputStream archive_stream = CopyZip.copyZip(log, out_archive);
-    final GSerializerType serializer =
-      GSerializerZip.newSerializer(archive_stream, log);
+      final ZipOutputStream archive_stream =
+        CopyZip.copyZip(log, out_archive);
+      final GSerializerType serializer =
+        GSerializerZip.newSerializer(archive_stream, log);
 
-    final Compiler c = Compiler.newCompiler(log, e);
-    c.setCompacting(true);
-    c.setGeneratingCode(true);
-    c.setRequiredES(GVersionES.ALL);
-    c.setRequiredFull(GVersionFull.ALL);
-    c.setSerializer(serializer);
-    c.runForFiles(batch, sources);
+      final Compiler c = Compiler.newCompiler(log, e);
+      c.setCompacting(true);
+      c.setGeneratingCode(true);
+      c.setRequiredES(GVersionES.ALL);
+      c.setRequiredFull(GVersionFull.ALL);
+      c.setSerializer(serializer);
+      c.runForFiles(batch, sources);
 
-    serializer.close();
-    e.shutdown();
+      serializer.close();
+      e.shutdown();
 
-    log.debug("done");
+      log.debug("done");
+    } catch (final CompilerError e) {
+      System.err.printf(
+        "%s: %s:%s: %s\n",
+        e,
+        e.getFile(),
+        e.getPosition(),
+        e.getMessage());
+      throw e;
+    }
   }
 
   private static List<File> makeSourcesList(

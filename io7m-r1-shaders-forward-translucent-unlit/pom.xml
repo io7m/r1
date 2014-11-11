@@ -165,6 +165,7 @@
               <includeArtifactIds>io7m-r1-shaders-core</includeArtifactIds>
               <includeClassifiers>shader-sources</includeClassifiers>
               <includeTypes>zip</includeTypes>
+              <includes>**\/*.p</includes>
               <outputDirectory>${project.build.directory}/parasol</outputDirectory>
             </configuration>
           </execution>
@@ -260,9 +261,9 @@
         </executions>
       </plugin>
 
-      <!-- 
+      <!--
         Compile Parasol shader sources.
-        
+
         Note that this is dependent on the project jar having been produced.
         This introduces an unfortunate dependency on the fact that two plugins
         in the same phase will be executed in the order that they are declared
