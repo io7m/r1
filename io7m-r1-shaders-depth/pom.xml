@@ -164,6 +164,7 @@
               <includeArtifactIds>io7m-r1-shaders-core</includeArtifactIds>
               <includeClassifiers>shader-sources</includeClassifiers>
               <includeTypes>zip</includeTypes>
+              <includes>**\/*.p</includes>
               <outputDirectory>${project.build.directory}/parasol</outputDirectory>
             </configuration>
           </execution>
