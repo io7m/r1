@@ -54,12 +54,16 @@
       Prior to actually <s:link s:target="r1.dai.deferred">rendering</s:link> 
       a visible set, <s:term s:type="term">shadow maps</s:term> are generated
       for all <s:term s:type="term">shadow-projecting</s:term> lights in
-      the set. A <s:term s:type="term">shadow map</s:term>, for variance shadow
-      mapping, is a two-component red/green image of the visible set rendered 
-      from the point of view of the shadow-projecting light, with the red
-      channel of each pixel in the image representing the 
+      the set. A <s:term s:type="term">shadow map</s:term> for variance shadow
+      mapping, for a light <s:term s:type="expression">k</s:term>, is a two-component 
+      red/green image of all of the 
+      <s:link s:target="r1.dai.visible-sets.shadow-geometry">shadow casters</s:link>
+      associated with <s:term s:type="expression">k</s:term> in the visible set.
+      The image is produced by rendering the instances from the point of view of
+      <s:term s:type="expression">k</s:term>. The red
+      channel of each pixel in the image represents the 
       <s:link s:target="r1.dai.coords.screen-space">screen-space depth</s:link>
-      of the closest surface at that pixel, and the green channel representing
+      of the closest surface at that pixel, and the green channel represents
       the depth squared (literally <s:term s:type="expression">depth * depth</s:term>). 
       For example:
     </s:paragraph>

@@ -43,10 +43,13 @@
       Prior to actually <s:link s:target="r1.dai.deferred">rendering</s:link> 
       a visible set, <s:term s:type="term">shadow maps</s:term> are generated
       for all <s:term s:type="term">shadow-projecting</s:term> lights in
-      the set. A <s:term s:type="term">shadow map</s:term>, for basic shadow
-      mapping, is an image of the visible set rendered from the point of
-      view of the shadow-projecting light, with each pixel in the image
-      representing the <s:link s:target="r1.dai.coords.screen-space">screen-space depth</s:link>
+      the set. A <s:term s:type="term">shadow map</s:term> for basic shadow
+      mapping for a light <s:term s:type="expression">k</s:term> is an image of all of the 
+      <s:link s:target="r1.dai.visible-sets.shadow-geometry">shadow casters</s:link>
+      associated with <s:term s:type="expression">k</s:term>
+      in the visible set, rendered from the point of
+      view of <s:term s:type="expression">k</s:term>. Each pixel in the image
+      represents the <s:link s:target="r1.dai.coords.screen-space">screen-space depth</s:link>
       of the closest surface at that pixel. For example:
     </s:paragraph>
     <s:formal-item s:kind="diagram">
