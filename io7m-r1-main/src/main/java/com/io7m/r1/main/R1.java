@@ -35,6 +35,7 @@ import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
 import com.io7m.r1.kernel.KDepthVarianceRendererType;
+import com.io7m.r1.kernel.KFXAAParameters;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCache;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
 import com.io7m.r1.kernel.KFramebufferRGBACache;
@@ -99,7 +100,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
     private final LogUsableType                                   log;
     private @Nullable KPostprocessorDeferredType<Unit>            post_emission;
     private @Nullable KPostprocessorDeferredType<KGlowParameters> post_emission_glow;
-    private @Nullable KPostprocessorRGBAType<Unit>                post_fxaa;
+    private @Nullable KPostprocessorRGBAType<KFXAAParameters>     post_fxaa;
     private @Nullable KUnitQuadCacheType                          quad_cache;
     private @Nullable KRendererDeferredType                       renderer_deferred;
     private @Nullable KRendererDeferredOpaqueType                 renderer_deferred_opaque;
@@ -214,7 +215,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
             in_copier,
             in_quad_cache,
             in_rgba_cache);
-        final KPostprocessorRGBAType<Unit> in_post_fxaa =
+        final KPostprocessorRGBAType<KFXAAParameters> in_post_fxaa =
           this.makePostFXAA(
             in_shader_caches,
             in_copier,
@@ -410,13 +411,13 @@ import com.io7m.r1.types.RExceptionFilesystem;
       return in_post_emission_glow;
     }
 
-    private KPostprocessorRGBAType<Unit> makePostFXAA(
+    private KPostprocessorRGBAType<KFXAAParameters> makePostFXAA(
       final KShaderCacheSetType in_shader_caches,
       final KRegionCopierType in_copier,
       final KUnitQuadCacheType in_quad_cache,
       final KFramebufferRGBACacheType in_rgba_cache)
     {
-      final KPostprocessorRGBAType<Unit> in_post_fxaa;
+      final KPostprocessorRGBAType<KFXAAParameters> in_post_fxaa;
       if (this.post_fxaa != null) {
         in_post_fxaa = this.post_fxaa;
       } else {
@@ -723,7 +724,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
     }
 
     @Override public void setPostprocessorFXAA(
-      final KPostprocessorRGBAType<Unit> p)
+      final KPostprocessorRGBAType<KFXAAParameters> p)
     {
       this.post_fxaa = p;
     }
@@ -964,7 +965,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
   private final KFrustumMeshCacheType                       frustum_cache;
   private final KPostprocessorDeferredType<Unit>            post_emission;
   private final KPostprocessorDeferredType<KGlowParameters> post_emission_glow;
-  private final KPostprocessorRGBAType<Unit>                post_fxaa;
+  private final KPostprocessorRGBAType<KFXAAParameters>     post_fxaa;
   private final KUnitQuadCacheType                          quad_cache;
   private final KRefractionRendererType                     refraction_renderer;
   private final KRendererDeferredType                       renderer;
@@ -987,7 +988,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
     final KFrustumMeshCacheType in_frustum_cache,
     final KPostprocessorDeferredType<Unit> in_post_emission,
     final KPostprocessorDeferredType<KGlowParameters> in_post_emission_glow,
-    final KPostprocessorRGBAType<Unit> in_post_fxaa,
+    final KPostprocessorRGBAType<KFXAAParameters> in_post_fxaa,
     final KUnitQuadCacheType in_quad_cache,
     final KRefractionRendererType in_refraction_renderer,
     final KRendererDeferredType in_renderer,
@@ -1040,7 +1041,9 @@ import com.io7m.r1.types.RExceptionFilesystem;
     return this.post_emission_glow;
   }
 
-  @Override public KPostprocessorRGBAType<Unit> getPostprocessorFXAA()
+  @Override public
+    KPostprocessorRGBAType<KFXAAParameters>
+    getPostprocessorFXAA()
   {
     return this.post_fxaa;
   }
