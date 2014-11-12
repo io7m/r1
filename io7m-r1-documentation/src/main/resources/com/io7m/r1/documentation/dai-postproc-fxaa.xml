@@ -60,13 +60,18 @@
     </s:paragraph>
     <s:paragraph>
       The implementation of FXAA in the <s:term s:type="package">${project.parent.name}</s:term>
-      package is a port to Parasol from the GLSL port produced as part of
-      the GLGE project
+      package is a set of GLSL expansions of the public domain
       <s:footnote>
-        <s:link-external s:target="http://www.glge.org/demos/fxaa/">http://www.glge.org/demos/fxaa/</s:link-external>
-      </s:footnote>. The resulting algorithm appears to be a simplification
-      of one of the many possible macro expansions of the 3.11 version. The
-      algorithm is applied via the use of the
+        The included <s:term s:type="file">Fxaa3_11.h</s:term> file bears an NVIDIA
+        copyright, but was placed into the public domain by the original author.
+      </s:footnote>
+      <s:term s:type="file">Fxaa3_11.h</s:term> header with a few minor modifications
+      (unused parameter removals). Specifically, the 
+      <s:term s:type="term">PC</s:term> algorithm is used, with quality presets
+      <s:term s:type="expression">(10, 15, 20, 25, 29, 39)</s:term>.
+    </s:paragraph>
+    <s:paragraph>
+      The algorithm is applied via the use of the
       <s:link-external s:target="apidocs/com/io7m/r1/kernel/KPostprocessorFXAA.html">KPostprocessorFXAA</s:link-external>
       postprocessor.
     </s:paragraph>

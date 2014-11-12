@@ -27,12 +27,12 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.r1.kernel.KFXAAParameters;
 import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KPostprocessorDeferredType;
@@ -263,7 +263,8 @@ import com.io7m.r1.types.RTransformViewType;
 
     final KPostprocessorDeferredType<KGlowParameters> glow =
       r1.getPostprocessorEmissionGlow();
-    final KPostprocessorRGBAType<Unit> fxaa = r1.getPostprocessorFXAA();
+    final KPostprocessorRGBAType<KFXAAParameters> fxaa =
+      r1.getPostprocessorFXAA();
 
     final KVisibleSet visible = tb.visibleCreate();
     rd.rendererDeferredEvaluateFull(fb, visible);
@@ -271,7 +272,8 @@ import com.io7m.r1.types.RTransformViewType;
       final KGlowParameters glow_config = KGlowParameters.getDefault();
       glow.postprocessorEvaluateDeferred(glow_config, fb, fb);
     }
-    fxaa.postprocessorEvaluateRGBA(Unit.unit(), fb, fb);
+    final KFXAAParameters fxaa_config = KFXAAParameters.getDefault();
+    fxaa.postprocessorEvaluateRGBA(fxaa_config, fb, fb);
 
     rd.rendererDeferredEvaluateFull(fb, visible);
     {
@@ -281,6 +283,6 @@ import com.io7m.r1.types.RTransformViewType;
       gbb.setFactor(2.0f);
       glow.postprocessorEvaluateDeferred(gbb.build(), fb, fb);
     }
-    fxaa.postprocessorEvaluateRGBA(Unit.unit(), fb, fb);
+    fxaa.postprocessorEvaluateRGBA(fxaa_config, fb, fb);
   }
 }
