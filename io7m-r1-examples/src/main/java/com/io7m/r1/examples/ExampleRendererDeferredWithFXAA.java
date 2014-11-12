@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,9 +22,11 @@ import com.io7m.jcache.BLUCacheConfig;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jfunctional.PartialProcedureType;
-import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.r1.kernel.KFXAAParameters;
+import com.io7m.r1.kernel.KFXAAParameters.Quality;
+import com.io7m.r1.kernel.KFXAAParametersBuilderType;
 import com.io7m.r1.kernel.KFramebufferDeferredUsableType;
 import com.io7m.r1.kernel.KFramebufferRGBACache;
 import com.io7m.r1.kernel.KFramebufferRGBACacheType;
@@ -159,13 +161,17 @@ public final class ExampleRendererDeferredWithFXAA extends
     final KFramebufferRGBACacheType rgba_cache =
       KFramebufferRGBACache.newCacheWithConfig(gi, rgba_cache_config, log);
 
-    final KPostprocessorRGBAType<Unit> p =
+    final KPostprocessorRGBAType<KFXAAParameters> p =
       KPostprocessorFXAA.postprocessorNew(
         gi,
         copier,
         quad_cache,
         rgba_cache,
         in_shader_postprocessing_cache);
+
+    final KFXAAParametersBuilderType fxb = KFXAAParameters.newBuilder();
+    fxb.setQuality(Quality.QUALITY_39);
+    final KFXAAParameters fx = fxb.build();
 
     final KRendererDeferredType r_with_e = new KRendererDeferredType() {
       @Override public
@@ -177,7 +183,7 @@ public final class ExampleRendererDeferredWithFXAA extends
           throws RException
       {
         r.rendererDeferredEvaluate(framebuffer, scene, procedure);
-        p.postprocessorEvaluateRGBA(Unit.unit(), framebuffer, framebuffer);
+        p.postprocessorEvaluateRGBA(fx, framebuffer, framebuffer);
       }
 
       @Override public void rendererDeferredEvaluateFull(
@@ -186,7 +192,7 @@ public final class ExampleRendererDeferredWithFXAA extends
         throws RException
       {
         r.rendererDeferredEvaluateFull(framebuffer, scene);
-        p.postprocessorEvaluateRGBA(Unit.unit(), framebuffer, framebuffer);
+        p.postprocessorEvaluateRGBA(fx, framebuffer, framebuffer);
       }
 
       @Override public String rendererGetName()
