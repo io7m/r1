@@ -35,6 +35,7 @@ import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.VectorM2F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
@@ -48,7 +49,7 @@ import com.io7m.r1.types.RExceptionJCGL;
  */
 
 @EqualityReference public final class KPostprocessorFXAA implements
-  KPostprocessorRGBAType<Unit>
+  KPostprocessorRGBAType<KFXAAParameters>
 {
   private static final String NAME;
 
@@ -72,7 +73,7 @@ import com.io7m.r1.types.RExceptionJCGL;
    * @return A new postprocessor
    */
 
-  public static KPostprocessorRGBAType<Unit> postprocessorNew(
+  public static KPostprocessorRGBAType<KFXAAParameters> postprocessorNew(
     final JCGLImplementationType gi,
     final KRegionCopierType copier,
     final KUnitQuadCacheType quad_cache,
@@ -91,6 +92,7 @@ import com.io7m.r1.types.RExceptionJCGL;
   private final JCGLImplementationType         gi;
   private final KUnitQuadCacheType             quad_cache;
   private final KFramebufferRGBACacheType      rgba_cache;
+  private final VectorM2F                      screen;
   private final KShaderCachePostprocessingType shader_cache;
 
   private KPostprocessorFXAA(
@@ -106,10 +108,12 @@ import com.io7m.r1.types.RExceptionJCGL;
       NullCheck.notNull(in_rgba_cache, "RGBA framebuffer cache");
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
     this.quad_cache = NullCheck.notNull(in_quad_cache, "Quad cache");
+    this.screen = new VectorM2F();
   }
 
   private <F extends KFramebufferRGBAUsableType> void evaluateFXAA(
     final F input,
+    final KFXAAParameters config,
     final KFramebufferRGBAUsableType output)
     throws JCGLException,
       RException,
@@ -118,9 +122,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
 
-    final KProgramType program =
-      this.shader_cache.cacheGetLU("fxaa_antialias");
-    assert program != null;
+    final KProgramType program = this.getProgram(config);
 
     try {
       gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
@@ -152,25 +154,29 @@ import com.io7m.r1.types.RExceptionJCGL;
 
             gc.arrayBufferBind(array);
             KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
-            KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
 
             final TextureUnitType image_unit = units.get(0);
             assert image_unit != null;
 
             gc.texture2DStaticBind(image_unit, input.rgbaGetTexture());
 
-            KShadingProgramCommon.putMatrixUVUnchecked(
-              p,
-              KMatrices.IDENTITY_UV);
-
-            p.programUniformPutFloat("fxaa.reduce_factor", 1.0f / 8.0f);
-            p.programUniformPutFloat("fxaa.reduce_minimum", 1.0f / 128.0f);
-            p.programUniformPutFloat("fxaa.span_maximum", 8.0f);
-
             final AreaInclusive area = output.kFramebufferGetArea();
             final long width = area.getRangeX().getInterval();
             final long height = area.getRangeY().getInterval();
-            KShadingProgramCommon.putViewport(p, 1.0f / width, 1.0f / height);
+            KPostprocessorFXAA.this.screen.set2F(1.0f / width, 1.0f / height);
+
+            p.programUniformPutVector2f(
+              "fxaa_screen_inverse",
+              KPostprocessorFXAA.this.screen);
+            p.programUniformPutFloat(
+              "fxaa_subpixel",
+              config.getSubpixelAliasingRemoval());
+            p.programUniformPutFloat(
+              "fxaa_edge_threshold",
+              config.getEdgeThreshold());
+            p.programUniformPutFloat(
+              "fxaa_edge_threshold_min",
+              config.getEdgeThresholdMinimum());
 
             p.programUniformPutTextureUnit("t_image", image_unit);
             p.programExecute(new JCBProgramProcedureType<JCGLException>() {
@@ -193,8 +199,42 @@ import com.io7m.r1.types.RExceptionJCGL;
     }
   }
 
+  private KProgramType getProgram(
+    final KFXAAParameters config)
+    throws RException
+  {
+    switch (config.getQuality()) {
+      case QUALITY_10:
+      {
+        return this.shader_cache.cacheGetLU("fxaa_10");
+      }
+      case QUALITY_15:
+      {
+        return this.shader_cache.cacheGetLU("fxaa_15");
+      }
+      case QUALITY_20:
+      {
+        return this.shader_cache.cacheGetLU("fxaa_20");
+      }
+      case QUALITY_25:
+      {
+        return this.shader_cache.cacheGetLU("fxaa_25");
+      }
+      case QUALITY_29:
+      {
+        return this.shader_cache.cacheGetLU("fxaa_29");
+      }
+      case QUALITY_39:
+      {
+        return this.shader_cache.cacheGetLU("fxaa_39");
+      }
+    }
+
+    throw new UnreachableCodeException();
+  }
+
   @Override public void postprocessorEvaluateRGBA(
-    final Unit config,
+    final KFXAAParameters config,
     final KFramebufferRGBAUsableType input,
     final KFramebufferRGBAUsableType output)
     throws RException
@@ -209,7 +249,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
       try {
         final KFramebufferRGBAUsableType temp = receipt.getValue();
-        this.evaluateFXAA(input, temp);
+        this.evaluateFXAA(input, config, temp);
         this.copier.copierCopyRGBAOnly(
           temp,
           temp.kFramebufferGetArea(),
