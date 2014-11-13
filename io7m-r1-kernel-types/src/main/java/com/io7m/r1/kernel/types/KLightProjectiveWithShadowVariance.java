@@ -39,8 +39,7 @@ import com.io7m.r1.types.RVectorI3F;
  */
 
 @EqualityReference public final class KLightProjectiveWithShadowVariance implements
-  KLightProjectiveType,
-  KLightWithShadowType
+  KLightProjectiveWithShadowVarianceType
 {
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightProjectiveWithShadowVarianceBuilderType
@@ -79,8 +78,24 @@ import com.io7m.r1.types.RVectorI3F;
 
               @Override public
                 KShadowMappedVariance
+                projectiveWithoutShadowDiffuseOnly(
+                  final KLightProjectiveWithoutShadowDiffuseOnly _)
+              {
+                return KShadowMappedVariance.getDefault();
+              }
+
+              @Override public
+                KShadowMappedVariance
                 projectiveWithShadowBasic(
                   final KLightProjectiveWithShadowBasic _)
+              {
+                return KShadowMappedVariance.getDefault();
+              }
+
+              @Override public
+                KShadowMappedVariance
+                projectiveWithShadowBasicDiffuseOnly(
+                  final KLightProjectiveWithShadowBasicDiffuseOnly _)
               {
                 return KShadowMappedVariance.getDefault();
               }
@@ -95,18 +110,10 @@ import com.io7m.r1.types.RVectorI3F;
 
               @Override public
                 KShadowMappedVariance
-                projectiveWithoutShadowDiffuseOnly(
-                  final KLightProjectiveWithoutShadowDiffuseOnly _)
+                projectiveWithShadowVarianceDiffuseOnly(
+                  final KLightProjectiveWithShadowVarianceDiffuseOnly lp)
               {
-                return KShadowMappedVariance.getDefault();
-              }
-
-              @Override public
-                KShadowMappedVariance
-                projectiveWithShadowBasicDiffuseOnly(
-                  final KLightProjectiveWithShadowBasicDiffuseOnly _)
-              {
-                return KShadowMappedVariance.getDefault();
+                return lp.lightGetShadowVariance();
               }
             });
       } catch (final RException e) {
@@ -331,11 +338,7 @@ import com.io7m.r1.types.RVectorI3F;
     return this.shadow;
   }
 
-  /**
-   * @return The shadow.
-   */
-
-  public KShadowMappedVariance lightGetShadowVariance()
+  @Override public KShadowMappedVariance lightGetShadowVariance()
   {
     return this.shadow;
   }
@@ -389,6 +392,17 @@ import com.io7m.r1.types.RVectorI3F;
     <A, E extends Throwable, V extends KLightProjectiveVisitorType<A, E>>
     A
     projectiveAccept(
+      final V v)
+      throws RException,
+        E
+  {
+    return v.projectiveWithShadowVariance(this);
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KLightProjectiveWithShadowVarianceVisitorType<A, E>>
+    A
+    projectiveWithShadowVarianceAccept(
       final V v)
       throws RException,
         E

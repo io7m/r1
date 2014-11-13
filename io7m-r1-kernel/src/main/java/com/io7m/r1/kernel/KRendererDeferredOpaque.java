@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -66,12 +66,6 @@ import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueVisitorType;
 import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
-import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
-import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
-import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightSphereVisitorType;
@@ -79,6 +73,7 @@ import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightVisitorType;
+import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
 import com.io7m.r1.kernel.types.KMaterialDepthConstant;
 import com.io7m.r1.kernel.types.KMaterialDepthVisitorType;
@@ -1291,63 +1286,13 @@ import com.io7m.r1.types.RVectorI4F;
 
               KShadingProgramCommon.putViewRays(program, view_rays);
 
-              lp
-                .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
-                  @Override public Unit projectiveWithoutShadow(
-                    final KLightProjectiveWithoutShadow _)
-                    throws RException,
-                      JCGLException
-                  {
-                    return Unit.unit();
-                  }
-
-                  @Override public Unit projectiveWithShadowBasic(
-                    final KLightProjectiveWithShadowBasic lpwsb)
-                    throws RException,
-                      JCGLException
-                  {
-                    KRendererCommon.putShadow(
-                      shadow_map_context,
-                      texture_unit_context,
-                      program,
-                      lpwsb);
-                    return Unit.unit();
-                  }
-
-                  @Override public Unit projectiveWithShadowVariance(
-                    final KLightProjectiveWithShadowVariance lpwsv)
-                    throws RException,
-                      JCGLException
-                  {
-                    KRendererCommon.putShadow(
-                      shadow_map_context,
-                      texture_unit_context,
-                      program,
-                      lpwsv);
-                    return Unit.unit();
-                  }
-
-                  @Override public Unit projectiveWithoutShadowDiffuseOnly(
-                    final KLightProjectiveWithoutShadowDiffuseOnly _)
-                    throws RException,
-                      JCGLException
-                  {
-                    return Unit.unit();
-                  }
-
-                  @Override public Unit projectiveWithShadowBasicDiffuseOnly(
-                    final KLightProjectiveWithShadowBasicDiffuseOnly lpwsb)
-                    throws RException,
-                      JCGLException
-                  {
-                    KRendererCommon.putShadow(
-                      shadow_map_context,
-                      texture_unit_context,
-                      program,
-                      lpwsb);
-                    return Unit.unit();
-                  }
-                });
+              if (lp instanceof KLightWithShadowType) {
+                KRendererCommon.putShadow(
+                  shadow_map_context,
+                  texture_unit_context,
+                  program,
+                  (KLightWithShadowType) lp);
+              }
 
               KShadingProgramCommon.putTextureProjection(
                 program,

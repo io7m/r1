@@ -200,6 +200,10 @@
           <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowVariance.html">KLightProjectiveWithShadowVariance</s:link-external> -
           a projective light that projects <s:link s:target="r1.dai.shadow-mapping-variance">variance shadows</s:link>.
         </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowVarianceDiffuseOnly.html">KLightProjectiveWithShadowVarianceDiffuseOnly</s:link-external> -
+          a projective light that projects <s:link s:target="r1.dai.shadow-mapping-variance">variance shadows</s:link>, and does not cause specular highlights.
+        </s:list-item>
       </s:list-unordered>
     </s:formal-item>
   </s:subsection>

@@ -83,4 +83,22 @@ public interface KLightWithShadowVisitorType<A, E extends Throwable>
     final KLightProjectiveWithShadowVariance lp)
     throws RException,
       E;
+
+  /**
+   * Visit a projective diffuse-only light with a variance shadow.
+   *
+   * @param lp
+   *          The projective light
+   * @return A value of type <code>A</code>
+   *
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  A projectiveWithShadowVarianceDiffuseOnly(
+    final KLightProjectiveWithShadowVarianceDiffuseOnly lp)
+    throws RException,
+      E;
 }
