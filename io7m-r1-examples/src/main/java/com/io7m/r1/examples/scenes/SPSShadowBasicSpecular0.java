@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -42,6 +42,7 @@ import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
+import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionBasicBuilderType;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
@@ -59,7 +60,7 @@ import com.io7m.r1.types.RVectorI3F;
  * An example with pseudo-spherical shadow-projecting lights.
  */
 
-public final class SPSShadowBasic0 implements ExampleSceneType
+public final class SPSShadowBasicSpecular0 implements ExampleSceneType
 {
   private static KShadowMappedBasic makeShadow()
   {
@@ -85,7 +86,7 @@ public final class SPSShadowBasic0 implements ExampleSceneType
    * Construct the example.
    */
 
-  public SPSShadowBasic0()
+  public SPSShadowBasicSpecular0()
   {
     this.ctx = KTransformContext.newContext();
   }
@@ -145,21 +146,21 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     final KInstanceOpaqueRegular plane_pos_x =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_pos_x,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_pos_y =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_pos_y,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_pos_z =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_pos_z,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -167,21 +168,21 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     final KInstanceOpaqueRegular plane_neg_x =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_neg_x,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_neg_y =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_neg_y,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_neg_z =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_neg_z,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -229,6 +230,9 @@ public final class SPSShadowBasic0 implements ExampleSceneType
       ExampleSceneUtilities.RGBA_WHITE,
       1.0f,
       t));
+    mmb.setSpecular(KMaterialSpecularConstant.constant(
+      ExampleSceneUtilities.RGB_WHITE,
+      8.0f));
     final KMaterialOpaqueRegular monkey_mat = mmb.build();
 
     final KInstanceOpaqueRegular monkey_neg_x =
@@ -284,7 +288,7 @@ public final class SPSShadowBasic0 implements ExampleSceneType
 
     final Texture2DStaticUsableType tex =
       scene.textureClamped("projective.png");
-    final KShadowMappedBasic ks = SPSShadowBasic0.makeShadow();
+    final KShadowMappedBasic ks = SPSShadowBasicSpecular0.makeShadow();
 
     final KLightSpherePseudoWithShadowBasicBuilderType kspb =
       KLightSpherePseudoWithShadowBasic.newBuilder();

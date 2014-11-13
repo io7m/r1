@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -31,21 +31,25 @@ import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.kernel.types.KAxes;
+import com.io7m.r1.kernel.types.KBlurParameters;
+import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
 import com.io7m.r1.kernel.types.KDepthPrecision;
+import com.io7m.r1.kernel.types.KDepthVariancePrecision;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicType;
-import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowBasic;
-import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowBasicBuilderType;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceType;
+import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowVariance;
+import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowVarianceBuilderType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
-import com.io7m.r1.kernel.types.KShadowMapDescriptionBasicBuilderType;
-import com.io7m.r1.kernel.types.KShadowMappedBasic;
-import com.io7m.r1.kernel.types.KShadowMappedBasicBuilderType;
+import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionVarianceBuilderType;
+import com.io7m.r1.kernel.types.KShadowMappedVariance;
+import com.io7m.r1.kernel.types.KShadowMappedVarianceBuilderType;
 import com.io7m.r1.kernel.types.KTransformContext;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
@@ -59,33 +63,15 @@ import com.io7m.r1.types.RVectorI3F;
  * An example with pseudo-spherical shadow-projecting lights.
  */
 
-public final class SPSShadowBasic0 implements ExampleSceneType
+public final class SPSShadowVarianceSpecular0 implements ExampleSceneType
 {
-  private static KShadowMappedBasic makeShadow()
-  {
-    final KShadowMapDescriptionBasicBuilderType ksmdb =
-      KShadowMapDescriptionBasic.newBuilder();
-    ksmdb
-      .setMagnificationFilter(TextureFilterMagnification.TEXTURE_FILTER_NEAREST);
-    ksmdb
-      .setMinificationFilter(TextureFilterMinification.TEXTURE_FILTER_NEAREST);
-    ksmdb.setSizeExponent(9);
-    ksmdb.setDepthPrecision(KDepthPrecision.DEPTH_PRECISION_16);
-    final KShadowMapDescriptionBasic ksmd = ksmdb.build();
-
-    final KShadowMappedBasicBuilderType ksb = KShadowMappedBasic.newBuilder();
-    ksb.setMapDescription(ksmd);
-    final KShadowMappedBasic ks = ksb.build();
-    return ks;
-  }
-
   private final KTransformContext ctx;
 
   /**
    * Construct the example.
    */
 
-  public SPSShadowBasic0()
+  public SPSShadowVarianceSpecular0()
   {
     this.ctx = KTransformContext.newContext();
   }
@@ -93,6 +79,32 @@ public final class SPSShadowBasic0 implements ExampleSceneType
   @Override public String exampleGetName()
   {
     return NullCheck.notNull(this.getClass().getCanonicalName());
+  }
+
+  private static KShadowMappedVariance makeShadow()
+  {
+    final KBlurParametersBuilderType bb = KBlurParameters.newBuilder();
+    bb.setPasses(1);
+    final KBlurParameters bp = bb.build();
+
+    final KShadowMapDescriptionVarianceBuilderType ksmdb =
+      KShadowMapDescriptionVariance.newBuilder();
+    ksmdb
+      .setMagnificationFilter(TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
+    ksmdb
+      .setMinificationFilter(TextureFilterMinification.TEXTURE_FILTER_LINEAR);
+    ksmdb.setSizeExponent(9);
+    ksmdb.setDepthPrecision(KDepthPrecision.DEPTH_PRECISION_16);
+    ksmdb
+      .setDepthVariancePrecision(KDepthVariancePrecision.DEPTH_VARIANCE_PRECISION_16F);
+    final KShadowMapDescriptionVariance ksmd = ksmdb.build();
+
+    final KShadowMappedVarianceBuilderType ksb =
+      KShadowMappedVariance.newBuilder();
+    ksb.setBlurParameters(bp);
+    ksb.setMapDescription(ksmd);
+    final KShadowMappedVariance ks = ksb.build();
+    return ks;
   }
 
   @Override public void exampleScene(
@@ -145,21 +157,21 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     final KInstanceOpaqueRegular plane_pos_x =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_pos_x,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_pos_y =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_pos_y,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_pos_z =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_pos_z,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -167,21 +179,21 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     final KInstanceOpaqueRegular plane_neg_x =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_neg_x,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_neg_y =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_neg_y,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_neg_z =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        ExampleSceneUtilities.OPAQUE_GLOSS_PLASTIC_WHITE,
         plane_trans_neg_z,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -229,6 +241,9 @@ public final class SPSShadowBasic0 implements ExampleSceneType
       ExampleSceneUtilities.RGBA_WHITE,
       1.0f,
       t));
+    mmb.setSpecular(KMaterialSpecularConstant.constant(
+      ExampleSceneUtilities.RGB_WHITE,
+      8.0f));
     final KMaterialOpaqueRegular monkey_mat = mmb.build();
 
     final KInstanceOpaqueRegular monkey_neg_x =
@@ -284,21 +299,9 @@ public final class SPSShadowBasic0 implements ExampleSceneType
 
     final Texture2DStaticUsableType tex =
       scene.textureClamped("projective.png");
-    final KShadowMappedBasic ks = SPSShadowBasic0.makeShadow();
-
-    final KLightSpherePseudoWithShadowBasicBuilderType kspb =
-      KLightSpherePseudoWithShadowBasic.newBuilder();
-    kspb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
-    kspb.setRadius(16.0f);
-    kspb.setShadow(ks);
-    kspb.setEnabledNegativeX(true);
-    kspb.setEnabledNegativeY(true);
-    kspb.setEnabledNegativeZ(true);
-    kspb.setEnabledPositiveX(true);
-    kspb.setEnabledPositiveY(true);
-    kspb.setEnabledPositiveZ(true);
-
-    final KLightSpherePseudoWithShadowBasic ksp = kspb.build(this.ctx, tex);
+    final KShadowMappedVariance ks = SPSShadowVarianceSpecular0.makeShadow();
+    final KLightSpherePseudoWithShadowVariance ksp =
+      this.makeShadowLight(tex, ks);
 
     final KVisibleSetLightGroupBuilderType gb =
       scene.visibleOpaqueNewLightGroup("g");
@@ -307,13 +310,14 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getNegativeX()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowVarianceType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasicType kpwsv)
+            final KLightProjectiveWithShadowVarianceType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_neg_x);
+            scene.visibleShadowsAddCaster(kpwsv, plane_neg_x);
             return Unit.unit();
           }
         });
@@ -321,13 +325,14 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getNegativeY()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowVarianceType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasicType kpwsv)
+            final KLightProjectiveWithShadowVarianceType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_neg_y);
+            scene.visibleShadowsAddCaster(kpwsv, plane_neg_y);
             return Unit.unit();
           }
         });
@@ -335,13 +340,14 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getNegativeZ()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowVarianceType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasicType kpwsv)
+            final KLightProjectiveWithShadowVarianceType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_neg_z);
+            scene.visibleShadowsAddCaster(kpwsv, plane_neg_z);
             return Unit.unit();
           }
         });
@@ -349,13 +355,14 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getPositiveX()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowVarianceType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasicType kpwsv)
+            final KLightProjectiveWithShadowVarianceType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_pos_x);
+            scene.visibleShadowsAddCaster(kpwsv, plane_pos_x);
             return Unit.unit();
           }
         });
@@ -363,13 +370,14 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getPositiveY()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowVarianceType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasicType kpwsv)
+            final KLightProjectiveWithShadowVarianceType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_pos_y);
+            scene.visibleShadowsAddCaster(kpwsv, plane_pos_y);
             return Unit.unit();
           }
         });
@@ -377,13 +385,14 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getPositiveZ()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowVarianceType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasicType kpwsv)
+            final KLightProjectiveWithShadowVarianceType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);
             scene.visibleShadowsAddCaster(kpwsv, monkey_pos_z);
+            scene.visibleShadowsAddCaster(kpwsv, plane_pos_z);
             return Unit.unit();
           }
         });
@@ -400,6 +409,28 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     gb.groupAddInstance(monkey_pos_x);
     gb.groupAddInstance(monkey_pos_y);
     gb.groupAddInstance(monkey_pos_z);
+  }
+
+  private KLightSpherePseudoWithShadowVariance makeShadowLight(
+    final Texture2DStaticUsableType tex,
+    final KShadowMappedVariance ks)
+    throws RException
+  {
+    final KLightSpherePseudoWithShadowVarianceBuilderType kspb =
+      KLightSpherePseudoWithShadowVariance.newBuilder();
+    kspb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
+    kspb.setRadius(16.0f);
+    kspb.setShadow(ks);
+    kspb.setEnabledNegativeX(true);
+    kspb.setEnabledNegativeY(true);
+    kspb.setEnabledNegativeZ(true);
+    kspb.setEnabledPositiveX(true);
+    kspb.setEnabledPositiveY(true);
+    kspb.setEnabledPositiveZ(true);
+
+    final KLightSpherePseudoWithShadowVariance ksp =
+      kspb.build(this.ctx, tex);
+    return ksp;
   }
 
   @Override public List<ExampleViewType> exampleViewpoints()
