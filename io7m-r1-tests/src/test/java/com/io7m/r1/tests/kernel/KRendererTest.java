@@ -48,6 +48,7 @@ import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.r1.kernel.types.KInstanceTranslucentSpecularOnly;
+import com.io7m.r1.kernel.types.KLightPropertiesType;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
@@ -155,7 +156,7 @@ import com.io7m.r1.types.RTransformViewType;
 
         lg.groupAddInstance(o);
 
-        for (final KLightType l : light_cases.getCases()) {
+        for (final KLightPropertiesType l : light_cases.getCases()) {
           if (l instanceof KLightWithShadowType) {
             tb.visibleShadowsAddCaster((KLightWithShadowType) l, o);
           }

@@ -17,8 +17,6 @@
 package com.io7m.r1.kernel.types;
 
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * <p>
@@ -31,40 +29,8 @@ import com.io7m.r1.types.RVectorI3F;
  * </p>
  */
 
-public interface KLightSphereType extends KLightWithTransformType
+public interface KLightSphereType extends KLightWithTransformType, KLightSpherePropertiesType
 {
-  /**
-   * @return The falloff exponent for the light
-   */
-
-  float lightGetFalloff();
-
-  /**
-   * @return The inverse falloff exponent for the light (1.0 /
-   *         {@link #lightGetFalloff()}).
-   */
-
-  float lightGetFalloffInverse();
-
-  /**
-   * @return The world position of the light
-   */
-
-  RVectorI3F<RSpaceWorldType> lightGetPosition();
-
-  /**
-   * @return The radius of the light
-   */
-
-  float lightGetRadius();
-
-  /**
-   * @return The inverse radius of the light (1.0 / {@link #lightGetRadius()}
-   *         ).
-   */
-
-  float lightGetRadiusInverse();
-
   /**
    * Be visited by the given generic visitor.
    *
