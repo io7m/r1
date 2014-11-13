@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,13 +28,25 @@ public interface KLightDirectionalBuilderType
 {
   /**
    * <p>
+   * Set all values in the builder to those in the given existing light.
+   * </p>
+   *
+   * @param d
+   *          The light
+   */
+
+  void copyFromDirectional(
+    final KLightDirectionalType d);
+
+  /**
+   * <p>
    * Construct a light.
    * </p>
    * <p>
    * This function can be called as many times as required, yielding new
    * lights each time it is called.
    * </p>
-   * 
+   *
    * @return A new light based on all of the parameters given so far.
    */
 
@@ -47,7 +59,7 @@ public interface KLightDirectionalBuilderType
    * <p>
    * The default color is full-intensity white.
    * </p>
-   * 
+   *
    * @param color
    *          The color.
    */
@@ -62,7 +74,7 @@ public interface KLightDirectionalBuilderType
    * <p>
    * The default direction is unspecified.
    * </p>
-   * 
+   *
    * @param direction
    *          The direction in world-space.
    */
@@ -77,7 +89,7 @@ public interface KLightDirectionalBuilderType
    * <p>
    * The default intensity is <code>1.0</code>.
    * </p>
-   * 
+   *
    * @param intensity
    *          The intensity.
    */

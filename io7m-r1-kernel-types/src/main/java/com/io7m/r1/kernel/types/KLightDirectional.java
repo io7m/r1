@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,7 +19,6 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
@@ -42,23 +41,25 @@ import com.io7m.r1.types.RVectorI3F;
     private RVectorI3F<RSpaceWorldType>                         direction;
     private @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
 
-    Builder(
-      final @Nullable KLightDirectionalType in_original)
+    Builder()
     {
-      if (in_original != null) {
-        this.color = in_original.lightGetColor();
-        this.direction = in_original.lightGetDirection();
-        this.intensity = in_original.lightGetIntensity();
-      } else {
-        this.color = RVectorI3F.one();
-        this.direction = new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, -1.0f);
-        this.intensity = 1.0f;
-      }
+      this.color = RVectorI3F.one();
+      this.direction = new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, -1.0f);
+      this.intensity = 1.0f;
     }
 
     @Override public KLightDirectional build()
     {
       return new KLightDirectional(this.direction, this.color, this.intensity);
+    }
+
+    @Override public void copyFromDirectional(
+      final KLightDirectionalType d)
+    {
+      NullCheck.notNull(d, "Directional light");
+      this.color = d.lightGetColor();
+      this.direction = d.lightGetDirection();
+      this.intensity = d.lightGetIntensity();
     }
 
     @Override public void setColor(
@@ -90,24 +91,7 @@ import com.io7m.r1.types.RVectorI3F;
 
   public static KLightDirectionalBuilderType newBuilder()
   {
-    return new Builder(null);
-  }
-
-  /**
-   * <p>
-   * Create a builder for creating new directional lights. The builder will be
-   * initialized to values based on the given light.
-   * </p>
-   *
-   * @param d
-   *          The initial light.
-   * @return A new light builder.
-   */
-
-  public static KLightDirectionalBuilderType newBuilderFrom(
-    final KLightDirectionalType d)
-  {
-    return new Builder(NullCheck.notNull(d, "Light"));
+    return new Builder();
   }
 
   /**
