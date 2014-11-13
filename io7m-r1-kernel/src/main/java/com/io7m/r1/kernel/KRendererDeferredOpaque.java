@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -68,6 +68,7 @@ import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowDiffuseOnly;
@@ -1331,6 +1332,19 @@ import com.io7m.r1.types.RVectorI4F;
                     throws RException,
                       JCGLException
                   {
+                    return Unit.unit();
+                  }
+
+                  @Override public Unit projectiveWithShadowBasicDiffuseOnly(
+                    final KLightProjectiveWithShadowBasicDiffuseOnly lpwsb)
+                    throws RException,
+                      JCGLException
+                  {
+                    KRendererCommon.putShadow(
+                      shadow_map_context,
+                      texture_unit_context,
+                      program,
+                      lpwsb);
                     return Unit.unit();
                   }
                 });

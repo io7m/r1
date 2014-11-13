@@ -285,4 +285,76 @@ import com.io7m.r1.types.RTransformViewType;
     }
     fxaa.postprocessorEvaluateRGBA(fxaa_config, fb, fb);
   }
+
+  @Test public void testShadowMapBorrows()
+    throws Exception
+  {
+    final LogUsableType log =
+      Log.newLog(LogPolicyAllOn.newPolicy(LogLevel.LOG_DEBUG), "tests");
+    final OptionType<JCGLSoftRestrictionsType> none = Option.none();
+    final JCGLImplementationType gi =
+      RFakeGL.newFakeGL30WithLog(log, RFakeShaderControllers.newNull(), none);
+
+    final R1BuilderType r1b = R1.newBuilder(gi, log);
+    r1b.setShaderCacheSet(TestShaderCaches.newCachesFromArchives(gi, log));
+    final R1Type r1 = r1b.build();
+    final KRendererDeferredType rd = r1.getRendererDeferred();
+
+    final KFramebufferDeferredDescriptionBuilderType fbb =
+      KFramebufferDeferredDescription.newBuilder(RFakeGL.SCREEN_AREA);
+    final KFramebufferDeferredDescription fb_desc = fbb.build();
+    final KFramebufferDeferredType fb =
+      KFramebufferDeferred.newFramebuffer(gi, fb_desc);
+
+    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
+    final MatrixM4x4F temporary = new MatrixM4x4F();
+    final KProjectionType projection =
+      KProjectionFOV.newProjection(
+        temporary,
+        (float) Math.toRadians(90.0f),
+        1.0f,
+        1.0f,
+        100.0f);
+
+    final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
+    final KTransformType transform = KTransformMatrix4x4.newTransform(model);
+    final KMeshReadableType mesh =
+      KRendererDeferredOpaqueTest.makeMesh(gi.getGLCommon());
+    final RMatrixI3x3F<RTransformTextureType> m_uv = RMatrixI3x3F.identity();
+
+    final KCamera camera = KCamera.newCamera(view, projection);
+    final KVisibleSetBuilderWithCreateType tb =
+      KVisibleSet.newBuilder(camera);
+
+    final Texture2DStaticType t2d =
+      RFakeTextures2DStatic.newWithName(gi, "t2d");
+    final TextureCubeStaticType tcube =
+      RFakeTexturesCubeStatic.newAnything(gi);
+
+    {
+      final RKDLightCases light_cases = new RKDLightCases(t2d, tcube);
+
+      final KVisibleSetLightGroupBuilderType lg =
+        tb.visibleOpaqueNewLightGroup("g0");
+
+      for (final KLightType l : light_cases.getCases()) {
+        assert l != null;
+        lg.groupAddLight(l);
+      }
+
+      final KMaterialOpaqueRegular mat =
+        KMaterialOpaqueRegular.newBuilder().build();
+      final KInstanceOpaqueRegular o =
+        KInstanceOpaqueRegular.newInstance(
+          mesh,
+          mat,
+          transform,
+          m_uv,
+          KFaceSelection.FACE_RENDER_FRONT);
+
+      lg.groupAddInstance(o);
+    }
+
+    rd.rendererDeferredEvaluateFull(fb, tb.visibleCreate());
+  }
 }

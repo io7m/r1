@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,6 +28,7 @@ import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowDiffuseOnly;
@@ -304,6 +305,21 @@ import com.io7m.r1.types.RException;
                 @Override public Unit projectiveWithoutShadowDiffuseOnly(
                   final KLightProjectiveWithoutShadowDiffuseOnly _)
                   throws RException
+                {
+                  b.append("  -- Projective light inputs\n");
+                  b.append("  in f_position_light_clip : vector_4f;\n");
+                  b.append("\n");
+                  b.append("  -- Projective light parameters\n");
+                  b.append("  parameter light_projective : Light.t;\n");
+                  b.append("  parameter t_projection     : sampler_2d;\n");
+                  b.append("\n");
+                  return Unit.unit();
+                }
+
+                @Override public Unit projectiveWithShadowBasicDiffuseOnly(
+                  final KLightProjectiveWithShadowBasicDiffuseOnly _)
+                  throws RException,
+                    UnreachableCodeException
                 {
                   b.append("  -- Projective light inputs\n");
                   b.append("  in f_position_light_clip : vector_4f;\n");
@@ -961,6 +977,17 @@ import com.io7m.r1.types.RException;
             b.append("\n");
             return Unit.unit();
           }
+
+          @Override public Unit projectiveWithShadowBasicDiffuseOnly(
+            final KLightProjectiveWithShadowBasicDiffuseOnly _)
+            throws RException,
+              UnreachableCodeException
+          {
+            b
+              .append("  value light_attenuation = light_vectors.attenuation;\n");
+            b.append("\n");
+            return Unit.unit();
+          }
         });
 
       b.append("  -- Projective diffuse light term\n");
@@ -1115,6 +1142,17 @@ import com.io7m.r1.types.RException;
           @Override public Unit projectiveWithoutShadowDiffuseOnly(
             final KLightProjectiveWithoutShadowDiffuseOnly _)
             throws RException
+          {
+            b
+              .append("  value light_attenuation = light_vectors.attenuation;\n");
+            b.append("\n");
+            return Unit.unit();
+          }
+
+          @Override public Unit projectiveWithShadowBasicDiffuseOnly(
+            final KLightProjectiveWithShadowBasicDiffuseOnly _)
+            throws RException,
+              UnreachableCodeException
           {
             b
               .append("  value light_attenuation = light_vectors.attenuation;\n");
