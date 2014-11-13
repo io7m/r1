@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -72,7 +72,7 @@ import com.io7m.r1.types.RVectorI3F;
           in_original
             .projectiveAccept(new KLightProjectiveVisitorType<KShadowMappedVariance, UnreachableCodeException>() {
               @Override public KShadowMappedVariance projectiveWithoutShadow(
-                final KLightProjectiveWithoutShadow lp)
+                final KLightProjectiveWithoutShadow _)
               {
                 return KShadowMappedVariance.getDefault();
               }
@@ -80,7 +80,7 @@ import com.io7m.r1.types.RVectorI3F;
               @Override public
                 KShadowMappedVariance
                 projectiveWithShadowBasic(
-                  final KLightProjectiveWithShadowBasic lp)
+                  final KLightProjectiveWithShadowBasic _)
               {
                 return KShadowMappedVariance.getDefault();
               }
@@ -96,7 +96,15 @@ import com.io7m.r1.types.RVectorI3F;
               @Override public
                 KShadowMappedVariance
                 projectiveWithoutShadowDiffuseOnly(
-                  final KLightProjectiveWithoutShadowDiffuseOnly lp)
+                  final KLightProjectiveWithoutShadowDiffuseOnly _)
+              {
+                return KShadowMappedVariance.getDefault();
+              }
+
+              @Override public
+                KShadowMappedVariance
+                projectiveWithShadowBasicDiffuseOnly(
+                  final KLightProjectiveWithShadowBasicDiffuseOnly _)
               {
                 return KShadowMappedVariance.getDefault();
               }

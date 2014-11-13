@@ -19,8 +19,8 @@ package com.io7m.r1.kernel.types;
 import com.io7m.r1.types.RException;
 
 /**
- * A generic light-with-shadow visitor, returning values of type
- * <code>A</code> and raising exceptions of type <code>E</code>.
+ * A generic projective light visitor, returning values of type <code>A</code>
+ * and raising exceptions of type <code>E</code>.
  *
  * @param <A>
  *          The return value type of the implementing visitor
@@ -28,7 +28,7 @@ import com.io7m.r1.types.RException;
  *          The type of exceptions raised by the implementing visitor
  */
 
-public interface KLightWithShadowVisitorType<A, E extends Throwable>
+public interface KLightProjectiveWithShadowBasicVisitorType<A, E extends Throwable>
 {
   /**
    * Visit a projective light with a basic shadow.
@@ -63,24 +63,6 @@ public interface KLightWithShadowVisitorType<A, E extends Throwable>
 
   A projectiveWithShadowBasicDiffuseOnly(
     final KLightProjectiveWithShadowBasicDiffuseOnly lp)
-    throws RException,
-      E;
-
-  /**
-   * Visit a projective light with a variance shadow.
-   *
-   * @param lp
-   *          The projective light
-   * @return A value of type <code>A</code>
-   *
-   * @throws RException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A projectiveWithShadowVariance(
-    final KLightProjectiveWithShadowVariance lp)
     throws RException,
       E;
 }
