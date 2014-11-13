@@ -185,6 +185,10 @@
           a projective light that does not project shadows.
         </s:list-item>
         <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithoutShadowDiffuseOnly.html">KLightProjectiveWithoutShadowDiffuseOnly</s:link-external> -
+          a projective light that does not project shadows, and does not cause specular highlights.
+        </s:list-item>
+        <s:list-item>
           <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowBasic.html">KLightProjectiveWithShadowBasic</s:link-external> -
           a projective light that projects <s:link s:target="r1.dai.shadow-mapping-basic">basic shadows</s:link>.
         </s:list-item>
