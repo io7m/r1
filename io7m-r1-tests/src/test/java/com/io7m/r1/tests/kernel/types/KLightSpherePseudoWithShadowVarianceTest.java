@@ -30,6 +30,7 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceType;
 import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowVariance;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
@@ -48,39 +49,39 @@ public final class KLightSpherePseudoWithShadowVarianceTest
       new ArrayList<KLightProjectiveWithShadowVariance>();
 
     if (s.getNegativeX().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getNegativeX();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowVarianceType> some =
+        (Some<KLightProjectiveWithShadowVarianceType>) s.getNegativeX();
+      actuals.add((KLightProjectiveWithShadowVariance) some.get());
     }
 
     if (s.getNegativeY().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getNegativeY();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowVarianceType> some =
+        (Some<KLightProjectiveWithShadowVarianceType>) s.getNegativeY();
+      actuals.add((KLightProjectiveWithShadowVariance) some.get());
     }
 
     if (s.getNegativeZ().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getNegativeZ();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowVarianceType> some =
+        (Some<KLightProjectiveWithShadowVarianceType>) s.getNegativeZ();
+      actuals.add((KLightProjectiveWithShadowVariance) some.get());
     }
 
     if (s.getPositiveX().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getPositiveX();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowVarianceType> some =
+        (Some<KLightProjectiveWithShadowVarianceType>) s.getPositiveX();
+      actuals.add((KLightProjectiveWithShadowVariance) some.get());
     }
 
     if (s.getPositiveY().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getPositiveY();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowVarianceType> some =
+        (Some<KLightProjectiveWithShadowVarianceType>) s.getPositiveY();
+      actuals.add((KLightProjectiveWithShadowVariance) some.get());
     }
 
     if (s.getPositiveZ().isSome()) {
-      final Some<KLightProjectiveWithShadowVariance> some =
-        (Some<KLightProjectiveWithShadowVariance>) s.getPositiveZ();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowVarianceType> some =
+        (Some<KLightProjectiveWithShadowVarianceType>) s.getPositiveZ();
+      actuals.add((KLightProjectiveWithShadowVariance) some.get());
     }
 
     return actuals;
