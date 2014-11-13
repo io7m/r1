@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,12 +20,11 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionLightMissingTexture;
 import com.io7m.r1.types.RExceptionUserError;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
@@ -46,29 +45,55 @@ import com.io7m.r1.types.RVectorI3F;
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightProjectiveWithShadowBasicBuilderType
   {
-    private RVectorI3F<RSpaceRGBType>           color;
-    private float                               falloff;
-    private float                               intensity;
-    private QuaternionI4F                       orientation;
-    private RVectorI3F<RSpaceWorldType>         position;
-    private KProjectionType                     projection;
-    private float                               range;
-    private KShadowMappedBasic                  shadow;
-    private @Nullable Texture2DStaticUsableType texture;
+    private RVectorI3F<RSpaceRGBType>   color;
+    private float                       falloff;
+    private float                       intensity;
+    private QuaternionI4F               orientation;
+    private RVectorI3F<RSpaceWorldType> position;
+    private KProjectionType             projection;
+    private float                       range;
+    private KShadowMappedBasic          shadow;
+    private Texture2DStaticUsableType   texture;
 
     Builder(
-      final KLightProjectiveWithShadowBasic in_original)
+      final KLightProjectiveType in_original)
     {
       NullCheck.notNull(in_original, "Light");
-      this.color = in_original.color;
-      this.intensity = in_original.intensity;
-      this.falloff = in_original.falloff;
-      this.position = in_original.position;
-      this.orientation = in_original.orientation;
-      this.projection = in_original.projection;
-      this.range = in_original.range;
-      this.texture = in_original.texture;
-      this.shadow = in_original.shadow;
+      try {
+        this.color = in_original.lightGetColor();
+        this.intensity = in_original.lightGetIntensity();
+        this.falloff = in_original.lightProjectiveGetFalloff();
+        this.position = in_original.lightProjectiveGetPosition();
+        this.orientation = in_original.lightProjectiveGetOrientation();
+        this.projection = in_original.lightProjectiveGetProjection();
+        this.range = in_original.lightProjectiveGetRange();
+        this.texture = in_original.lightProjectiveGetTexture();
+        this.shadow =
+          in_original
+            .projectiveAccept(new KLightProjectiveVisitorType<KShadowMappedBasic, UnreachableCodeException>() {
+              @Override public KShadowMappedBasic projectiveWithoutShadow(
+                final KLightProjectiveWithoutShadow lp)
+              {
+                return KShadowMappedBasic.getDefault();
+              }
+
+              @Override public KShadowMappedBasic projectiveWithShadowBasic(
+                final KLightProjectiveWithShadowBasic lp)
+              {
+                return lp.shadow;
+              }
+
+              @Override public
+                KShadowMappedBasic
+                projectiveWithShadowVariance(
+                  final KLightProjectiveWithShadowVariance lp)
+              {
+                return KShadowMappedBasic.getDefault();
+              }
+            });
+      } catch (final RException e) {
+        throw new UnreachableCodeException(e);
+      }
     }
 
     Builder(
@@ -90,14 +115,8 @@ import com.io7m.r1.types.RVectorI3F;
       throws RException,
         RExceptionUserError
     {
-      final Texture2DStaticUsableType t = this.texture;
-      if (t == null) {
-        throw new RExceptionLightMissingTexture(
-          "No texture specified for projective light");
-      }
-
       return new KLightProjectiveWithShadowBasic(
-        t,
+        this.texture,
         this.position,
         this.orientation,
         this.color,
@@ -202,7 +221,6 @@ import com.io7m.r1.types.RVectorI3F;
   }
 
   private final RVectorI3F<RSpaceRGBType>   color;
-
   private final float                       falloff;
   private final float                       falloff_inverse;
   private final float                       intensity;

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,6 +24,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionLightMissingTexture;
 import com.io7m.r1.types.RExceptionUserError;
@@ -57,18 +58,46 @@ import com.io7m.r1.types.RVectorI3F;
     private @Nullable Texture2DStaticUsableType texture;
 
     Builder(
-      final KLightProjectiveWithShadowVariance in_original)
+      final KLightProjectiveType in_original)
     {
       NullCheck.notNull(in_original, "Light");
-      this.color = in_original.color;
-      this.intensity = in_original.intensity;
-      this.falloff = in_original.falloff;
-      this.position = in_original.position;
-      this.orientation = in_original.orientation;
-      this.projection = in_original.projection;
-      this.range = in_original.range;
-      this.texture = in_original.texture;
-      this.shadow = in_original.shadow;
+      try {
+        this.color = in_original.lightGetColor();
+        this.intensity = in_original.lightGetIntensity();
+        this.falloff = in_original.lightProjectiveGetFalloff();
+        this.position = in_original.lightProjectiveGetPosition();
+        this.orientation = in_original.lightProjectiveGetOrientation();
+        this.projection = in_original.lightProjectiveGetProjection();
+        this.range = in_original.lightProjectiveGetRange();
+        this.texture = in_original.lightProjectiveGetTexture();
+        this.shadow =
+          in_original
+            .projectiveAccept(new KLightProjectiveVisitorType<KShadowMappedVariance, UnreachableCodeException>() {
+              @Override public KShadowMappedVariance projectiveWithoutShadow(
+                final KLightProjectiveWithoutShadow lp)
+              {
+                return KShadowMappedVariance.getDefault();
+              }
+
+              @Override public
+                KShadowMappedVariance
+                projectiveWithShadowBasic(
+                  final KLightProjectiveWithShadowBasic lp)
+              {
+                return KShadowMappedVariance.getDefault();
+              }
+
+              @Override public
+                KShadowMappedVariance
+                projectiveWithShadowVariance(
+                  final KLightProjectiveWithShadowVariance lp)
+              {
+                return lp.shadow;
+              }
+            });
+      } catch (final RException e) {
+        throw new UnreachableCodeException(e);
+      }
     }
 
     Builder(
@@ -196,13 +225,12 @@ import com.io7m.r1.types.RVectorI3F;
    */
 
   public static KLightProjectiveWithShadowVarianceBuilderType newBuilderFrom(
-    final KLightProjectiveWithShadowVariance p)
+    final KLightProjectiveType p)
   {
     return new Builder(p);
   }
 
   private final RVectorI3F<RSpaceRGBType>   color;
-
   private final float                       falloff;
   private final float                       falloff_inverse;
   private final float                       intensity;
