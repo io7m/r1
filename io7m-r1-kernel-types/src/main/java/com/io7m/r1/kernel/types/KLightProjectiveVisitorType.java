@@ -49,6 +49,24 @@ public interface KLightProjectiveVisitorType<A, E extends Throwable>
       E;
 
   /**
+   * Visit a projective diffuse-only light without a shadow.
+   *
+   * @param lp
+   *          The projective light
+   * @return A value of type <code>A</code>
+   *
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  A projectiveWithoutShadowDiffuseOnly(
+    final KLightProjectiveWithoutShadowDiffuseOnly lp)
+    throws RException,
+      E;
+
+  /**
    * Visit a projective light with a basic shadow.
    *
    * @param lp
@@ -67,6 +85,24 @@ public interface KLightProjectiveVisitorType<A, E extends Throwable>
       E;
 
   /**
+   * Visit a projective diffuse-only light with a basic shadow.
+   *
+   * @param lp
+   *          The projective light
+   * @return A value of type <code>A</code>
+   *
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  A projectiveWithShadowBasicDiffuseOnly(
+    final KLightProjectiveWithShadowBasicDiffuseOnly lp)
+    throws RException,
+      E;
+
+  /**
    * Visit a projective light with a variance shadow.
    *
    * @param lp
@@ -81,6 +117,24 @@ public interface KLightProjectiveVisitorType<A, E extends Throwable>
 
   A projectiveWithShadowVariance(
     final KLightProjectiveWithShadowVariance lp)
+    throws RException,
+      E;
+
+  /**
+   * Visit a projective light with a variance shadow.
+   *
+   * @param lp
+   *          The projective light
+   * @return A value of type <code>A</code>
+   *
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  A projectiveWithShadowVarianceDiffuseOnly(
+    final KLightProjectiveWithShadowVarianceDiffuseOnly lp)
     throws RException,
       E;
 }

@@ -282,30 +282,22 @@ public interface R1BuilderType
    * the given parameters.
    * </p>
    * <p>
-   * The cache will raise an exception when the capacity is exceeded - The
-   * number of shadow maps specified is essentially the upper limit of the
-   * number of shadow casting lights that can appear in a
-   * {@link com.io7m.r1.kernel.types.KVisibleSet}.
+   * The cache is allowed to exceed this limit to accomodate scenes that use
+   * more shadow maps than the limit allows, but will be reduced to the
+   * maximum size by deallocating returned maps at the earliest opportunity.
    * </p>
    * <p>
-   * The default limit on the number of cached shadow maps is
-   * {@link R1#DEFAULT_SHADOW_MAP_CACHE_MAP_COUNT}.
-   * </p>
-   * <p>
-   * The default assumed size of shadow maps is
-   * {@link R1#DEFAULT_SHADOW_MAP_CACHE_MAP_SIZE}.
+   * The default assumed size of shadow map caches is
+   * {@link R1#DEFAULT_SHADOW_MAP_CACHE_SIZE}.
    * </p>
    *
-   * @see com.io7m.r1.kernel.KShadowMapCache#getCacheConfigFor(long, long)
-   * @param map_count
-   *          The number of maps
-   * @param map_size
-   *          The size of the map
+   * @see com.io7m.r1.kernel.KShadowMapCache#getCacheConfigFor(long)
+   * @param bytes
+   *          The size in bytes
    */
 
   void setShadowMapCacheSize(
-    final int map_count,
-    final int map_size);
+    final long bytes);
 
   /**
    * Set the shadow map renderer that will be used for all renderers.

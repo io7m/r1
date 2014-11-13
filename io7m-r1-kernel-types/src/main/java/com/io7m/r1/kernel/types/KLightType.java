@@ -18,14 +18,12 @@ package com.io7m.r1.kernel.types;
 
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * The type of lights.
  */
 
-public interface KLightType extends KTexturesRequiredType
+public interface KLightType extends KTexturesRequiredType, KLightPropertiesType
 {
   /**
    * Be visited by the given generic visitor.
@@ -60,16 +58,4 @@ public interface KLightType extends KTexturesRequiredType
    */
 
   String lightGetCode();
-
-  /**
-   * @return The color of the light
-   */
-
-  RVectorI3F<RSpaceRGBType> lightGetColor();
-
-  /**
-   * @return The intensity of the light
-   */
-
-  float lightGetIntensity();
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,12 +20,10 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionLightMissingTexture;
 import com.io7m.r1.types.RExceptionUserError;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
@@ -43,28 +41,14 @@ import com.io7m.r1.types.RVectorI3F;
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightProjectiveWithoutShadowBuilderType
   {
-    private RVectorI3F<RSpaceRGBType>           color;
-    private float                               falloff;
-    private float                               intensity;
-    private QuaternionI4F                       orientation;
-    private RVectorI3F<RSpaceWorldType>         position;
-    private KProjectionType                     projection;
-    private float                               range;
-    private @Nullable Texture2DStaticUsableType texture;
-
-    Builder(
-      final KLightProjectiveWithoutShadow in_original)
-    {
-      NullCheck.notNull(in_original, "Light");
-      this.color = in_original.color;
-      this.intensity = in_original.intensity;
-      this.falloff = in_original.falloff;
-      this.position = in_original.position;
-      this.orientation = in_original.orientation;
-      this.projection = in_original.projection;
-      this.range = in_original.range;
-      this.texture = in_original.texture;
-    }
+    private RVectorI3F<RSpaceRGBType>   color;
+    private float                       falloff;
+    private float                       intensity;
+    private QuaternionI4F               orientation;
+    private RVectorI3F<RSpaceWorldType> position;
+    private KProjectionType             projection;
+    private float                       range;
+    private Texture2DStaticUsableType   texture;
 
     Builder(
       final Texture2DStaticUsableType in_texture,
@@ -84,14 +68,8 @@ import com.io7m.r1.types.RVectorI3F;
       throws RException,
         RExceptionUserError
     {
-      final Texture2DStaticUsableType t = this.texture;
-      if (t == null) {
-        throw new RExceptionLightMissingTexture(
-          "No texture specified for projective light");
-      }
-
       return new KLightProjectiveWithoutShadow(
-        t,
+        this.texture,
         this.position,
         this.orientation,
         this.color,
@@ -148,6 +126,20 @@ import com.io7m.r1.types.RVectorI3F;
     {
       this.texture = NullCheck.notNull(in_texture, "Texture");
     }
+
+    @Override public void copyFromProjective(
+      final KLightProjectiveType in_original)
+    {
+      NullCheck.notNull(in_original, "Light");
+      this.color = in_original.lightGetColor();
+      this.intensity = in_original.lightGetIntensity();
+      this.falloff = in_original.lightProjectiveGetFalloff();
+      this.position = in_original.lightProjectiveGetPosition();
+      this.orientation = in_original.lightProjectiveGetOrientation();
+      this.projection = in_original.lightProjectiveGetProjection();
+      this.range = in_original.lightProjectiveGetRange();
+      this.texture = in_original.lightProjectiveGetTexture();
+    }
   }
 
   private static final VectorI3F ONE = new VectorI3F(1.0f, 1.0f, 1.0f);
@@ -169,23 +161,6 @@ import com.io7m.r1.types.RVectorI3F;
     final KProjectionType in_projection)
   {
     return new Builder(in_texture, in_projection);
-  }
-
-  /**
-   * <p>
-   * Create a builder for creating new spherical lights. The builder will be
-   * initialized to values based on the given light.
-   * </p>
-   *
-   * @param p
-   *          The initial light.
-   * @return A new light builder.
-   */
-
-  public static KLightProjectiveWithoutShadowBuilderType newBuilderFrom(
-    final KLightProjectiveWithoutShadow p)
-  {
-    return new Builder(p);
   }
 
   private final RVectorI3F<RSpaceRGBType>   color;

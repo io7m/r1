@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -34,7 +34,7 @@ import com.io7m.r1.kernel.types.KAxes;
 import com.io7m.r1.kernel.types.KDepthPrecision;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicType;
 import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowBasicBuilderType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
@@ -307,9 +307,9 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getNegativeX()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasic, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasic kpwsv)
+            final KLightProjectiveWithShadowBasicType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);
@@ -321,9 +321,9 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getNegativeY()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasic, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasic kpwsv)
+            final KLightProjectiveWithShadowBasicType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);
@@ -335,9 +335,9 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getNegativeZ()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasic, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasic kpwsv)
+            final KLightProjectiveWithShadowBasicType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);
@@ -349,9 +349,9 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getPositiveX()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasic, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasic kpwsv)
+            final KLightProjectiveWithShadowBasicType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);
@@ -363,9 +363,9 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getPositiveY()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasic, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasic kpwsv)
+            final KLightProjectiveWithShadowBasicType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);
@@ -377,9 +377,9 @@ public final class SPSShadowBasic0 implements ExampleSceneType
     ksp
       .getPositiveZ()
       .mapPartial(
-        new PartialFunctionType<KLightProjectiveWithShadowBasic, Unit, RException>() {
+        new PartialFunctionType<KLightProjectiveWithShadowBasicType, Unit, RException>() {
           @Override public Unit call(
-            final KLightProjectiveWithShadowBasic kpwsv)
+            final KLightProjectiveWithShadowBasicType kpwsv)
             throws RException
           {
             gb.groupAddLight(kpwsv);

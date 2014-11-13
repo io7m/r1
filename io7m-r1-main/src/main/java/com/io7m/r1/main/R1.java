@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -116,7 +116,6 @@ import com.io7m.r1.types.RExceptionFilesystem;
     private long                                                  rgba_with_depth_framebuffer_width;
     private @Nullable KShaderCacheSetType                         shader_caches;
     private @Nullable KShadowMapCacheType                         shadow_cache;
-    private long                                                  shadow_map_cache_count;
     private long                                                  shadow_map_cache_size;
     private @Nullable KShadowMapRendererType                      shadow_renderer;
     private @Nullable KUnitSphereCacheType                        sphere_cache;
@@ -130,8 +129,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
       this.gl = NullCheck.notNull(in_gl, "OpenGL");
       this.log = NullCheck.notNull(in_log, "Log");
       this.view_ray_cache_count = R1.DEFAULT_VIEW_RAY_CACHE_SIZE;
-      this.shadow_map_cache_count = R1.DEFAULT_SHADOW_MAP_CACHE_MAP_COUNT;
-      this.shadow_map_cache_size = R1.DEFAULT_SHADOW_MAP_CACHE_MAP_SIZE;
+      this.shadow_map_cache_size = R1.DEFAULT_SHADOW_MAP_CACHE_SIZE;
       this.depth_variance_framebuffer_count =
         R1.DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_COUNT;
       this.depth_variance_framebuffer_width =
@@ -553,9 +551,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
         in_shadow_cache = this.shadow_cache;
       } else {
         final BLUCacheConfig shadow_map_cache_config =
-          KShadowMapCache.getCacheConfigFor(
-            this.shadow_map_cache_count,
-            this.shadow_map_cache_size);
+          KShadowMapCache.getCacheConfigFor(this.shadow_map_cache_size);
         in_shadow_cache =
           KShadowMapCache.newCacheWithConfig(
             this.gl,
@@ -798,21 +794,10 @@ import com.io7m.r1.types.RExceptionFilesystem;
     }
 
     @Override public void setShadowMapCacheSize(
-      final int map_count,
-      final int map_size)
+      final long bytes)
     {
-      this.shadow_map_cache_count =
-        RangeCheck.checkGreater(
-          map_count,
-          "Shadow map count",
-          0,
-          "Shadow map minimum count");
       this.shadow_map_cache_size =
-        RangeCheck.checkGreater(
-          map_count,
-          "Shadow map size",
-          0,
-          "Shadow map minimum size");
+        RangeCheck.checkGreater(bytes, "Bytes", 0, "Minimum size");
     }
 
     @Override public void setShadowMapRenderer(
@@ -906,16 +891,10 @@ import com.io7m.r1.types.RExceptionFilesystem;
   public static final long DEFAULT_FRUSTUM_CACHE_COUNT;
 
   /**
-   * The default limit on cached shadow maps.
+   * The default size of shadow maps caches.
    */
 
-  public static final int  DEFAULT_SHADOW_MAP_CACHE_MAP_COUNT;
-
-  /**
-   * The assumed size of shadow maps used in cache size calculations.
-   */
-
-  public static final int  DEFAULT_SHADOW_MAP_CACHE_MAP_SIZE;
+  public static final long DEFAULT_SHADOW_MAP_CACHE_SIZE;
 
   /**
    * The default number of cached view rays.
@@ -925,8 +904,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
 
   static {
     DEFAULT_VIEW_RAY_CACHE_SIZE = 8;
-    DEFAULT_SHADOW_MAP_CACHE_MAP_COUNT = 128;
-    DEFAULT_SHADOW_MAP_CACHE_MAP_SIZE = 1024;
+    DEFAULT_SHADOW_MAP_CACHE_SIZE = 32L * (512L * 512L * 8L);
     DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_COUNT = 2;
     DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_HEIGHT = 1024;
     DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_WIDTH = 1024;

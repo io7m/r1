@@ -31,12 +31,15 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.kernel.types.KLightDirectional;
+import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
+import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
@@ -626,7 +629,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
     final JCBProgramType e,
     final MatrixM4x4F.Context context,
     final RMatrixReadable4x4FType<RTransformViewType> view,
-    final KLightDirectional light)
+    final KLightDirectionalType light)
     throws JCGLException
   {
     KShadingProgramCommon.putLightDirectionalDirection(
@@ -836,7 +839,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
     light
       .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
         @Override public Unit projectiveWithoutShadow(
-          final KLightProjectiveWithoutShadow lp)
+          final KLightProjectiveWithoutShadow _)
           throws RException,
             JCGLException
         {
@@ -844,7 +847,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
         }
 
         @Override public Unit projectiveWithShadowBasic(
-          final KLightProjectiveWithShadowBasic lp)
+          final KLightProjectiveWithShadowBasic _)
           throws RException,
             JCGLException
         {
@@ -853,7 +856,33 @@ import com.io7m.r1.types.RVectorReadable4FType;
         }
 
         @Override public Unit projectiveWithShadowVariance(
-          final KLightProjectiveWithShadowVariance lp)
+          final KLightProjectiveWithShadowVariance _)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putShadowVarianceReuse(program);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithoutShadowDiffuseOnly(
+          final KLightProjectiveWithoutShadowDiffuseOnly _)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasicDiffuseOnly(
+          final KLightProjectiveWithShadowBasicDiffuseOnly _)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putShadowBasicReuse(program);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowVarianceDiffuseOnly(
+          final KLightProjectiveWithShadowVarianceDiffuseOnly _)
           throws RException,
             JCGLException
         {
