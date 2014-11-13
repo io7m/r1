@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -76,7 +76,11 @@ import com.io7m.r1.types.RVectorI3F;
           {
             {
               final KLightProjectiveWithShadowBasicDiffuseOnlyBuilderType b =
-                KLightProjectiveWithShadowBasicDiffuseOnly.newBuilderFrom(s);
+                KLightProjectiveWithShadowBasicDiffuseOnly.newBuilder(
+                  s.lightProjectiveGetTexture(),
+                  s.lightProjectiveGetProjection());
+              b.copyFromProjective(s);
+
               final float f = s.lightProjectiveGetFalloff() + 1.0f;
               b.setFalloff(f);
               final KLightProjectiveWithShadowBasicDiffuseOnly r = b.build();
@@ -89,7 +93,11 @@ import com.io7m.r1.types.RVectorI3F;
 
             {
               final KLightProjectiveWithShadowBasicDiffuseOnlyBuilderType b =
-                KLightProjectiveWithShadowBasicDiffuseOnly.newBuilderFrom(s);
+                KLightProjectiveWithShadowBasicDiffuseOnly.newBuilder(
+                  s.lightProjectiveGetTexture(),
+                  s.lightProjectiveGetProjection());
+              b.copyFromProjective(s);
+
               final float i = s.lightGetIntensity() + 1.0f;
               b.setIntensity(i);
               final KLightProjectiveWithShadowBasicDiffuseOnly r = b.build();
@@ -98,7 +106,11 @@ import com.io7m.r1.types.RVectorI3F;
 
             {
               final KLightProjectiveWithShadowBasicDiffuseOnlyBuilderType b =
-                KLightProjectiveWithShadowBasicDiffuseOnly.newBuilderFrom(s);
+                KLightProjectiveWithShadowBasicDiffuseOnly.newBuilder(
+                  s.lightProjectiveGetTexture(),
+                  s.lightProjectiveGetProjection());
+              b.copyFromProjective(s);
+
               final float r = s.lightProjectiveGetRange() + 1.0f;
               b.setRange(r);
               final KLightProjectiveWithShadowBasicDiffuseOnly ss = b.build();
@@ -111,7 +123,11 @@ import com.io7m.r1.types.RVectorI3F;
 
             {
               final KLightProjectiveWithShadowBasicDiffuseOnlyBuilderType b =
-                KLightProjectiveWithShadowBasicDiffuseOnly.newBuilderFrom(s);
+                KLightProjectiveWithShadowBasicDiffuseOnly.newBuilder(
+                  s.lightProjectiveGetTexture(),
+                  s.lightProjectiveGetProjection());
+              b.copyFromProjective(s);
+
               final RVectorI3F<RSpaceRGBType> c =
                 new RVectorI3F<RSpaceRGBType>(0.0f, 0.5f, 1.0f);
 
@@ -122,7 +138,11 @@ import com.io7m.r1.types.RVectorI3F;
 
             {
               final KLightProjectiveWithShadowBasicDiffuseOnlyBuilderType b =
-                KLightProjectiveWithShadowBasicDiffuseOnly.newBuilderFrom(s);
+                KLightProjectiveWithShadowBasicDiffuseOnly.newBuilder(
+                  s.lightProjectiveGetTexture(),
+                  s.lightProjectiveGetProjection());
+              b.copyFromProjective(s);
+
               final RVectorI3F<RSpaceWorldType> p =
                 new RVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 1.0f);
               b.setPosition(p);

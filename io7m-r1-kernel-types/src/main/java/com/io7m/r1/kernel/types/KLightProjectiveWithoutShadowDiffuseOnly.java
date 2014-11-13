@@ -55,20 +55,6 @@ import com.io7m.r1.types.RVectorI3F;
     private Texture2DStaticUsableType   texture;
 
     Builder(
-      final KLightProjectiveType in_original)
-    {
-      NullCheck.notNull(in_original, "Light");
-      this.color = in_original.lightGetColor();
-      this.intensity = in_original.lightGetIntensity();
-      this.falloff = in_original.lightProjectiveGetFalloff();
-      this.position = in_original.lightProjectiveGetPosition();
-      this.orientation = in_original.lightProjectiveGetOrientation();
-      this.projection = in_original.lightProjectiveGetProjection();
-      this.range = in_original.lightProjectiveGetRange();
-      this.texture = in_original.lightProjectiveGetTexture();
-    }
-
-    Builder(
       final Texture2DStaticUsableType in_texture,
       final KProjectionType in_projection)
     {
@@ -144,6 +130,20 @@ import com.io7m.r1.types.RVectorI3F;
     {
       this.texture = NullCheck.notNull(in_texture, "Texture");
     }
+
+    @Override public void copyFromProjective(
+      final KLightProjectiveType in_original)
+    {
+      NullCheck.notNull(in_original, "Light");
+      this.color = in_original.lightGetColor();
+      this.intensity = in_original.lightGetIntensity();
+      this.falloff = in_original.lightProjectiveGetFalloff();
+      this.position = in_original.lightProjectiveGetPosition();
+      this.orientation = in_original.lightProjectiveGetOrientation();
+      this.projection = in_original.lightProjectiveGetProjection();
+      this.range = in_original.lightProjectiveGetRange();
+      this.texture = in_original.lightProjectiveGetTexture();
+    }
   }
 
   private static final VectorI3F ONE = new VectorI3F(1.0f, 1.0f, 1.0f);
@@ -167,25 +167,6 @@ import com.io7m.r1.types.RVectorI3F;
       final KProjectionType in_projection)
   {
     return new Builder(in_texture, in_projection);
-  }
-
-  /**
-   * <p>
-   * Create a builder for creating new spherical lights. The builder will be
-   * initialized to values based on the given light.
-   * </p>
-   *
-   * @param p
-   *          The initial light.
-   * @return A new light builder.
-   */
-
-  public static
-    KLightProjectiveWithoutShadowDiffuseOnlyBuilderType
-    newBuilderFrom(
-      final KLightProjectiveType p)
-  {
-    return new Builder(p);
   }
 
   private final RVectorI3F<RSpaceRGBType>   color;
