@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -152,25 +152,6 @@ import com.io7m.r1.types.RVectorI3F;
       } catch (final RException e) {
         throw new UnreachableCodeException(e);
       }
-    }
-
-    Builder(
-      final KLightSphereType s)
-    {
-      this.compensation_bias = (float) Math.toRadians(3.7f);
-      this.near_clip = Builder.DEFAULT_NEAR_CLIP;
-      this.color = s.lightGetColor();
-      this.intensity = s.lightGetIntensity();
-      this.exponent = s.lightGetFalloff();
-      this.radius = s.lightGetRadius();
-      this.position = s.lightGetPosition();
-      this.shadow = KShadowMappedVariance.getDefault();
-      this.negative_x = true;
-      this.negative_y = true;
-      this.negative_z = true;
-      this.positive_x = true;
-      this.positive_y = true;
-      this.positive_z = true;
     }
 
     @Override public KLightSpherePseudoWithShadowVariance build(
@@ -386,6 +367,17 @@ import com.io7m.r1.types.RVectorI3F;
     {
       this.shadow = NullCheck.notNull(s, "Shadow");
     }
+
+    @Override public void copyFromSphere(
+      final KLightSphereType s)
+    {
+      NullCheck.notNull(s, "Sphere");
+      this.color = s.lightGetColor();
+      this.intensity = s.lightGetIntensity();
+      this.exponent = s.lightGetFalloff();
+      this.radius = s.lightGetRadius();
+      this.position = s.lightGetPosition();
+    }
   }
 
   /**
@@ -415,24 +407,6 @@ import com.io7m.r1.types.RVectorI3F;
     KLightSpherePseudoWithShadowVarianceBuilderType
     newBuilderFromPseudo(
       final KLightSpherePseudoType s)
-  {
-    return new Builder(s);
-  }
-
-  /**
-   * <p>
-   * Create a builder for creating new pseudo-spherical lights.
-   * </p>
-   *
-   * @param s
-   *          The light upon which this light will be based.
-   * @return A new light builder.
-   */
-
-  public static
-    KLightSpherePseudoWithShadowVarianceBuilderType
-    newBuilderFromSpherical(
-      final KLightSphereType s)
   {
     return new Builder(s);
   }

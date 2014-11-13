@@ -19,11 +19,13 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
@@ -54,34 +56,6 @@ import com.io7m.r1.types.RVectorI3F;
     private RVectorI3F<RSpaceWorldType>           position;
     private float                                 radius;
     private @Nullable TextureCubeStaticUsableType texture;
-
-    Builder(
-      final KLightSphereTexturedCubeWithoutShadow in_original)
-    {
-      NullCheck.notNull(in_original, "Light");
-
-      this.color = in_original.color;
-      this.intensity = in_original.intensity;
-      this.exponent = in_original.falloff;
-      this.radius = in_original.radius;
-      this.position = in_original.position;
-      this.texture = in_original.texture;
-      this.orientation = in_original.orientation;
-    }
-
-    Builder(
-      final KLightSphereWithoutShadow in_original,
-      final TextureCubeStaticUsableType in_texture)
-    {
-      NullCheck.notNull(in_original, "Light");
-      this.color = in_original.lightGetColor();
-      this.intensity = in_original.lightGetIntensity();
-      this.exponent = in_original.lightGetFalloff();
-      this.radius = in_original.lightGetRadius();
-      this.position = in_original.lightGetPosition();
-      this.texture = NullCheck.notNull(in_texture, "Texture");
-      this.orientation = QuaternionI4F.IDENTITY;
-    }
 
     Builder(
       final TextureCubeStaticUsableType in_texture)
@@ -152,6 +126,46 @@ import com.io7m.r1.types.RVectorI3F;
       this.orientation =
         NullCheck.notNull(in_orientation, "Texture orientation");
     }
+
+    @Override public void copyFromSphere(
+      final KLightSphereType s)
+    {
+      try {
+        NullCheck.notNull(s, "Sphere");
+
+        this.color = s.lightGetColor();
+        this.intensity = s.lightGetIntensity();
+        this.exponent = s.lightGetFalloff();
+        this.radius = s.lightGetRadius();
+        this.position = s.lightGetPosition();
+
+        s
+          .sphereAccept(new KLightSphereVisitorType<Unit, UnreachableCodeException>() {
+            @Override public Unit sphereTexturedCubeWithoutShadow(
+              final KLightSphereTexturedCubeWithoutShadow ls)
+            {
+              Builder.this.position = ls.position;
+              Builder.this.texture = ls.texture;
+              Builder.this.orientation = ls.orientation;
+              return Unit.unit();
+            }
+
+            @Override public Unit sphereWithoutShadow(
+              final KLightSphereWithoutShadow ls)
+            {
+              return Unit.unit();
+            }
+
+            @Override public Unit sphereWithoutShadowDiffuseOnly(
+              final KLightSphereWithoutShadowDiffuseOnly ls)
+            {
+              return Unit.unit();
+            }
+          });
+      } catch (final RException e) {
+        throw new UnreachableCodeException(e);
+      }
+    }
   }
 
   /**
@@ -169,48 +183,6 @@ import com.io7m.r1.types.RVectorI3F;
     final TextureCubeStaticUsableType in_texture)
   {
     return new Builder(in_texture);
-  }
-
-  /**
-   * <p>
-   * Create a builder for creating new spherical lights. The builder will be
-   * initialized to values based on the given light.
-   * </p>
-   *
-   * @param s
-   *          The initial light.
-   * @return A new light builder.
-   */
-
-  public static
-    KLightSphereTexturedCubeWithoutShadowBuilderType
-    newBuilderFrom(
-      final KLightSphereTexturedCubeWithoutShadow s)
-  {
-    return new Builder(s);
-  }
-
-  /**
-   * <p>
-   * Create a builder for creating new spherical lights. The builder will be
-   * initialized to values based on the given light.
-   * </p>
-   *
-   * @param s
-   *          The initial light.
-   * @param in_texture
-   *          The texture for the light.
-   *
-   * @return A new light builder.
-   */
-
-  public static
-    KLightSphereTexturedCubeWithoutShadowBuilderType
-    newBuilderFromWithoutShadow(
-      final KLightSphereWithoutShadow s,
-      final TextureCubeStaticUsableType in_texture)
-  {
-    return new Builder(s, in_texture);
   }
 
   /**

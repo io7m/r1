@@ -64,8 +64,8 @@ public final class SLSpecularDiffuseOnly0 implements ExampleSceneType
 
     {
       final KLightSphereWithoutShadowDiffuseOnlyBuilderType b =
-        KLightSphereWithoutShadowDiffuseOnly
-          .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
+        KLightSphereWithoutShadowDiffuseOnly.newBuilder();
+      b.copyFromSphere(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setPosition(ExampleSceneUtilities.CENTER);
 
       final KVisibleSetLightGroupBuilderType g =
