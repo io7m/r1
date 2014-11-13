@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,6 +30,7 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicType;
 import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowBasic;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
@@ -48,39 +49,39 @@ public final class KLightSpherePseudoWithShadowBasicTest
       new ArrayList<KLightProjectiveWithShadowBasic>();
 
     if (s.getNegativeX().isSome()) {
-      final Some<KLightProjectiveWithShadowBasic> some =
-        (Some<KLightProjectiveWithShadowBasic>) s.getNegativeX();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowBasicType> some =
+        (Some<KLightProjectiveWithShadowBasicType>) s.getNegativeX();
+      actuals.add((KLightProjectiveWithShadowBasic) some.get());
     }
 
     if (s.getNegativeY().isSome()) {
-      final Some<KLightProjectiveWithShadowBasic> some =
-        (Some<KLightProjectiveWithShadowBasic>) s.getNegativeY();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowBasicType> some =
+        (Some<KLightProjectiveWithShadowBasicType>) s.getNegativeY();
+      actuals.add((KLightProjectiveWithShadowBasic) some.get());
     }
 
     if (s.getNegativeZ().isSome()) {
-      final Some<KLightProjectiveWithShadowBasic> some =
-        (Some<KLightProjectiveWithShadowBasic>) s.getNegativeZ();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowBasicType> some =
+        (Some<KLightProjectiveWithShadowBasicType>) s.getNegativeZ();
+      actuals.add((KLightProjectiveWithShadowBasic) some.get());
     }
 
     if (s.getPositiveX().isSome()) {
-      final Some<KLightProjectiveWithShadowBasic> some =
-        (Some<KLightProjectiveWithShadowBasic>) s.getPositiveX();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowBasicType> some =
+        (Some<KLightProjectiveWithShadowBasicType>) s.getPositiveX();
+      actuals.add((KLightProjectiveWithShadowBasic) some.get());
     }
 
     if (s.getPositiveY().isSome()) {
-      final Some<KLightProjectiveWithShadowBasic> some =
-        (Some<KLightProjectiveWithShadowBasic>) s.getPositiveY();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowBasicType> some =
+        (Some<KLightProjectiveWithShadowBasicType>) s.getPositiveY();
+      actuals.add((KLightProjectiveWithShadowBasic) some.get());
     }
 
     if (s.getPositiveZ().isSome()) {
-      final Some<KLightProjectiveWithShadowBasic> some =
-        (Some<KLightProjectiveWithShadowBasic>) s.getPositiveZ();
-      actuals.add(some.get());
+      final Some<KLightProjectiveWithShadowBasicType> some =
+        (Some<KLightProjectiveWithShadowBasicType>) s.getPositiveZ();
+      actuals.add((KLightProjectiveWithShadowBasic) some.get());
     }
 
     return actuals;

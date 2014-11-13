@@ -55,6 +55,11 @@
           <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightDirectional.html">KLightDirectional</s:link-external> -
           a directional light.
         </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightDirectionalDiffuseOnly.html">KLightDirectionalDiffuseOnly</s:link-external> -
+          a <s:link s:target="r1.dai.lighting.diffuse-only">diffuse-only</s:link>
+          variant of the standard directional light.
+        </s:list-item>
       </s:list-unordered>
     </s:formal-item>
   </s:subsection>

@@ -19,7 +19,6 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
@@ -32,7 +31,8 @@ import com.io7m.r1.types.RVectorI3F;
  */
 
 @EqualityReference public final class KLightDirectional implements
-  KLightTranslucentType
+  KLightTranslucentType,
+  KLightDirectionalType
 {
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightDirectionalBuilderType
@@ -40,36 +40,26 @@ import com.io7m.r1.types.RVectorI3F;
     private RVectorI3F<RSpaceRGBType>                           color;
     private RVectorI3F<RSpaceWorldType>                         direction;
     private @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
-    private final @Nullable KLightDirectional                   original;
 
     Builder()
     {
-      this.original = null;
       this.color = RVectorI3F.one();
-      this.direction = RVectorI3F.zero();
+      this.direction = new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, -1.0f);
       this.intensity = 1.0f;
-    }
-
-    Builder(
-      final KLightDirectional in_original)
-    {
-      this.original = NullCheck.notNull(in_original, "Light");
-      this.color = in_original.color;
-      this.direction = in_original.direction;
-      this.intensity = in_original.intensity;
     }
 
     @Override public KLightDirectional build()
     {
-      final KLightDirectional o = this.original;
-
-      if (o != null) {
-        final KLightDirectional k =
-          new KLightDirectional(this.direction, this.color, this.intensity);
-        return k;
-      }
-
       return new KLightDirectional(this.direction, this.color, this.intensity);
+    }
+
+    @Override public void copyFromDirectional(
+      final KLightDirectionalType d)
+    {
+      NullCheck.notNull(d, "Directional light");
+      this.color = d.lightGetColor();
+      this.direction = d.lightGetDirection();
+      this.intensity = d.lightGetIntensity();
     }
 
     @Override public void setColor(
@@ -102,23 +92,6 @@ import com.io7m.r1.types.RVectorI3F;
   public static KLightDirectionalBuilderType newBuilder()
   {
     return new Builder();
-  }
-
-  /**
-   * <p>
-   * Create a builder for creating new directional lights. The builder will be
-   * initialized to values based on the given light.
-   * </p>
-   *
-   * @param d
-   *          The initial light.
-   * @return A new light builder.
-   */
-
-  public static KLightDirectionalBuilderType newBuilderFrom(
-    final KLightDirectional d)
-  {
-    return new Builder(d);
   }
 
   /**
@@ -155,6 +128,14 @@ import com.io7m.r1.types.RVectorI3F;
     this.direction = NullCheck.notNull(in_direction, "Direction");
   }
 
+  @Override public <A, E extends Throwable> A directionalAccept(
+    final KLightDirectionalVisitorType<A, E> v)
+    throws RException,
+      E
+  {
+    return v.directional(this);
+  }
+
   @Override public
     <A, E extends Throwable, V extends KLightVisitorType<A, E>>
     A
@@ -177,11 +158,7 @@ import com.io7m.r1.types.RVectorI3F;
     return this.color;
   }
 
-  /**
-   * @return The direction in world space that the emitted light is traveling.
-   */
-
-  public RVectorI3F<RSpaceWorldType> lightGetDirection()
+  @Override public RVectorI3F<RSpaceWorldType> lightGetDirection()
   {
     return this.direction;
   }

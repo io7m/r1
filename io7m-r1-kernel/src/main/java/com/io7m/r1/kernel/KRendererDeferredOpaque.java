@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -64,18 +64,16 @@ import com.io7m.r1.kernel.types.KFrustumMeshUsableType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueVisitorType;
-import com.io7m.r1.kernel.types.KLightDirectional;
+import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
-import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
-import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightSphereVisitorType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
+import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightVisitorType;
+import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
 import com.io7m.r1.kernel.types.KMaterialDepthConstant;
 import com.io7m.r1.kernel.types.KMaterialDepthVisitorType;
@@ -609,7 +607,7 @@ import com.io7m.r1.types.RVectorI4F;
     final KViewRays view_rays,
     final JCGLInterfaceCommonType gc,
     final KMatricesInstanceValuesType mwi,
-    final KLightSphereWithoutShadow ls,
+    final KLightSphereType ls,
     final KUnitSphereUsableType s,
     final KProgramType kp)
   {
@@ -997,7 +995,7 @@ import com.io7m.r1.types.RVectorI4F;
 
     light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
       @Override public Unit lightDirectional(
-        final KLightDirectional ld)
+        final KLightDirectionalType ld)
         throws RException
       {
         try {
@@ -1106,7 +1104,7 @@ import com.io7m.r1.types.RVectorI4F;
     final KViewRays view_rays,
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
-    final KLightDirectional ld)
+    final KLightDirectionalType ld)
     throws RException,
       JCacheException
   {
@@ -1288,42 +1286,13 @@ import com.io7m.r1.types.RVectorI4F;
 
               KShadingProgramCommon.putViewRays(program, view_rays);
 
-              lp
-                .projectiveAccept(new KLightProjectiveVisitorType<Unit, JCGLException>() {
-                  @Override public Unit projectiveWithoutShadow(
-                    final KLightProjectiveWithoutShadow lpws)
-                    throws RException,
-                      JCGLException
-                  {
-                    return Unit.unit();
-                  }
-
-                  @Override public Unit projectiveWithShadowBasic(
-                    final KLightProjectiveWithShadowBasic lpwsb)
-                    throws RException,
-                      JCGLException
-                  {
-                    KRendererCommon.putShadow(
-                      shadow_map_context,
-                      texture_unit_context,
-                      program,
-                      lpwsb);
-                    return Unit.unit();
-                  }
-
-                  @Override public Unit projectiveWithShadowVariance(
-                    final KLightProjectiveWithShadowVariance lpwsv)
-                    throws RException,
-                      JCGLException
-                  {
-                    KRendererCommon.putShadow(
-                      shadow_map_context,
-                      texture_unit_context,
-                      program,
-                      lpwsv);
-                    return Unit.unit();
-                  }
-                });
+              if (lp instanceof KLightWithShadowType) {
+                KRendererCommon.putShadow(
+                  shadow_map_context,
+                  texture_unit_context,
+                  program,
+                  (KLightWithShadowType) lp);
+              }
 
               KShadingProgramCommon.putTextureProjection(
                 program,
@@ -1495,6 +1464,36 @@ import com.io7m.r1.types.RVectorI4F;
       @Override public Unit sphereWithoutShadow(
         final KLightSphereWithoutShadow lsws)
         throws RException
+      {
+        return mwo.withGenericTransform(
+          t,
+          uv,
+          new KMatricesInstanceFunctionType<Unit, RException>() {
+            @Override public Unit run(
+              final KMatricesInstanceType mwi)
+              throws RException
+            {
+              KRendererDeferredOpaque.renderGroupLightSphericalWithoutShadow(
+                framebuffer,
+                t_map_albedo,
+                t_map_depth_stencil,
+                t_map_normal,
+                t_map_specular,
+                view_rays,
+                gc,
+                mwi,
+                lsws,
+                s,
+                kp);
+              return Unit.unit();
+            }
+          });
+      }
+
+      @Override public Unit sphereWithoutShadowDiffuseOnly(
+        final KLightSphereWithoutShadowDiffuseOnly lsws)
+        throws RException,
+          JCGLException
       {
         return mwo.withGenericTransform(
           t,

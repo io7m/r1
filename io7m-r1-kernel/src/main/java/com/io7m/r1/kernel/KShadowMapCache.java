@@ -63,37 +63,25 @@ import com.io7m.r1.types.RException;
 
   /**
    * <p>
-   * Construct a cache configuration that will result in a cache that allows
-   * up to <code>shadow_map_cache_count</code> shadow maps of width and height
-   * <code>shadow_map_cache_size</code>.
-   * </p>
-   * <p>
-   * The number of shadow maps specified is essentially the upper limit of the
-   * number of shadow casting lights that can appear in a
-   * {@link com.io7m.r1.kernel.types.KVisibleSet}.
+   * Construct a cache configuration that will result in a cache that will
+   * store <tt>bytes</tt> bytes of shadow maps. The cache is allowed to
+   * temporarily exceed this limit if more maps are requested than can be
+   * stored in <tt>bytes</tt>, but will then deallocate maps to reduce the
+   * size to at most <tt>bytes</tt> when enough of the maps have been returned
+   * to allow it.
    * </p>
    *
-   * @param shadow_map_cache_count
-   *          The number of maps
-   * @param shadow_map_cache_size
-   *          The length of the map sides
+   * @param bytes
+   *          The maximum size of the cache
    * @return A cache configuration
    */
 
   public static BLUCacheConfig getCacheConfigFor(
-    final long shadow_map_cache_count,
-    final long shadow_map_cache_size)
+    final long bytes)
   {
-    final BigInteger borrows = BigInteger.valueOf(1);
+    final BigInteger borrows = BigInteger.valueOf(0);
     assert borrows != null;
-    final BigInteger big_map_count =
-      BigInteger.valueOf(shadow_map_cache_count);
-    final BigInteger big_map_size = BigInteger.valueOf(shadow_map_cache_size);
-    final BigInteger big_bpp = BigInteger.valueOf(8);
-
-    final BigInteger capacity =
-      big_map_count.multiply(big_map_size.multiply(big_map_size
-        .multiply(big_bpp)));
+    final BigInteger capacity = BigInteger.valueOf(bytes);
     assert capacity != null;
 
     return BLUCacheConfig

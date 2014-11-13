@@ -107,9 +107,9 @@ public final class SLMEmpty0 implements ExampleSceneType
 
     {
       final KLightSphereTexturedCubeWithoutShadowBuilderType b =
-        KLightSphereTexturedCubeWithoutShadow.newBuilderFromWithoutShadow(
-          ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE,
-          scene.cubeTextureClamped("toronto/cube.rxc"));
+        KLightSphereTexturedCubeWithoutShadow.newBuilder(scene
+          .cubeTextureClamped("toronto/cube.rxc"));
+      b.copyFromSphere(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setPosition(ExampleSceneUtilities.CENTER);
 
       {

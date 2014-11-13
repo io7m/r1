@@ -72,7 +72,11 @@ import com.io7m.r1.types.RVectorI3F;
         {
           {
             final KLightProjectiveWithoutShadowBuilderType b =
-              KLightProjectiveWithoutShadow.newBuilderFrom(s);
+              KLightProjectiveWithoutShadow.newBuilder(
+                s.lightProjectiveGetTexture(),
+                s.lightProjectiveGetProjection());
+            b.copyFromProjective(s);
+
             final float f = s.lightProjectiveGetFalloff() + 1.0f;
             b.setFalloff(f);
             final KLightProjectiveWithoutShadow r = b.build();
@@ -85,7 +89,11 @@ import com.io7m.r1.types.RVectorI3F;
 
           {
             final KLightProjectiveWithoutShadowBuilderType b =
-              KLightProjectiveWithoutShadow.newBuilderFrom(s);
+              KLightProjectiveWithoutShadow.newBuilder(
+                s.lightProjectiveGetTexture(),
+                s.lightProjectiveGetProjection());
+            b.copyFromProjective(s);
+
             final float i = s.lightGetIntensity() + 1.0f;
             b.setIntensity(i);
             final KLightProjectiveWithoutShadow r = b.build();
@@ -94,7 +102,11 @@ import com.io7m.r1.types.RVectorI3F;
 
           {
             final KLightProjectiveWithoutShadowBuilderType b =
-              KLightProjectiveWithoutShadow.newBuilderFrom(s);
+              KLightProjectiveWithoutShadow.newBuilder(
+                s.lightProjectiveGetTexture(),
+                s.lightProjectiveGetProjection());
+            b.copyFromProjective(s);
+
             final float r = s.lightProjectiveGetRange() + 1.0f;
             b.setRange(r);
             final KLightProjectiveWithoutShadow ss = b.build();
@@ -107,7 +119,11 @@ import com.io7m.r1.types.RVectorI3F;
 
           {
             final KLightProjectiveWithoutShadowBuilderType b =
-              KLightProjectiveWithoutShadow.newBuilderFrom(s);
+              KLightProjectiveWithoutShadow.newBuilder(
+                s.lightProjectiveGetTexture(),
+                s.lightProjectiveGetProjection());
+            b.copyFromProjective(s);
+
             final RVectorI3F<RSpaceRGBType> c =
               new RVectorI3F<RSpaceRGBType>(0.0f, 0.5f, 1.0f);
 
@@ -118,7 +134,11 @@ import com.io7m.r1.types.RVectorI3F;
 
           {
             final KLightProjectiveWithoutShadowBuilderType b =
-              KLightProjectiveWithoutShadow.newBuilderFrom(s);
+              KLightProjectiveWithoutShadow.newBuilder(
+                s.lightProjectiveGetTexture(),
+                s.lightProjectiveGetProjection());
+            b.copyFromProjective(s);
+
             final RVectorI3F<RSpaceWorldType> p =
               new RVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 1.0f);
             b.setPosition(p);

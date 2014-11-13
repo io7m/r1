@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -29,7 +29,9 @@ import com.io7m.jtensors.MatrixReadable4x4FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KLightWithShadowVisitorType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
@@ -612,6 +614,45 @@ import com.io7m.r1.types.RException;
           KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
           return Unit.unit();
         }
+
+        @Override public Unit projectiveWithShadowBasicDiffuseOnly(
+          final KLightProjectiveWithShadowBasicDiffuseOnly lp)
+          throws RException,
+            JCGLException
+        {
+          final KShadowMapBasic map =
+            (KShadowMapBasic) shadow_context.getShadowMap(lp);
+          final KFramebufferDepthType framebuffer = map.getFramebuffer();
+          final TextureUnitType unit =
+            unit_context.withTexture2D(framebuffer
+              .kFramebufferGetDepthTexture());
+
+          KShadingProgramCommon.putShadowBasic(
+            program,
+            lp.lightGetShadowBasic());
+          KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowVarianceDiffuseOnly(
+          final KLightProjectiveWithShadowVarianceDiffuseOnly lp)
+          throws RException,
+            JCGLException
+        {
+          final KShadowMapVariance map =
+            (KShadowMapVariance) shadow_context.getShadowMap(lp);
+          final KFramebufferDepthVarianceAbstract framebuffer =
+            map.getFramebuffer();
+          final TextureUnitType unit =
+            unit_context.withTexture2D(framebuffer
+              .kFramebufferGetDepthVarianceTexture());
+
+          KShadingProgramCommon.putShadowVariance(
+            program,
+            lp.lightGetShadowVariance());
+          KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
+          return Unit.unit();
+        }
       });
   }
 
@@ -624,7 +665,7 @@ import com.io7m.r1.types.RException;
     light
       .withShadowAccept(new KLightWithShadowVisitorType<Unit, JCGLException>() {
         @Override public Unit projectiveWithShadowBasic(
-          final KLightProjectiveWithShadowBasic lp)
+          final KLightProjectiveWithShadowBasic _)
           throws RException,
             JCGLException
         {
@@ -634,7 +675,27 @@ import com.io7m.r1.types.RException;
         }
 
         @Override public Unit projectiveWithShadowVariance(
-          final KLightProjectiveWithShadowVariance lp)
+          final KLightProjectiveWithShadowVariance _)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putShadowVarianceReuse(program);
+          KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasicDiffuseOnly(
+          final KLightProjectiveWithShadowBasicDiffuseOnly _)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putShadowBasicReuse(program);
+          KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowVarianceDiffuseOnly(
+          final KLightProjectiveWithShadowVarianceDiffuseOnly _)
           throws RException,
             JCGLException
         {
