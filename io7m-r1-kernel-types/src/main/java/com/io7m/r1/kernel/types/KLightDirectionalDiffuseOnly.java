@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,16 +27,17 @@ import com.io7m.r1.types.RVectorI3F;
 
 /**
  * <p>
- * A directional light, from a conceptually infinite distance away.
+ * A directional light, from a conceptually infinite distance away. The light
+ * does not cause specular highlights on objects.
  * </p>
  */
 
-@EqualityReference public final class KLightDirectional implements
-  KLightTranslucentType,
-  KLightDirectionalType
+@EqualityReference public final class KLightDirectionalDiffuseOnly implements
+  KLightDirectionalType,
+  KLightDiffuseOnlyType
 {
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
-    KLightDirectionalBuilderType
+    KLightDirectionalDiffuseOnlyBuilderType
   {
     private RVectorI3F<RSpaceRGBType>                           color;
     private RVectorI3F<RSpaceWorldType>                         direction;
@@ -56,9 +57,12 @@ import com.io7m.r1.types.RVectorI3F;
       }
     }
 
-    @Override public KLightDirectional build()
+    @Override public KLightDirectionalDiffuseOnly build()
     {
-      return new KLightDirectional(this.direction, this.color, this.intensity);
+      return new KLightDirectionalDiffuseOnly(
+        this.direction,
+        this.color,
+        this.intensity);
     }
 
     @Override public void setColor(
@@ -88,7 +92,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A new light builder.
    */
 
-  public static KLightDirectionalBuilderType newBuilder()
+  public static KLightDirectionalDiffuseOnlyBuilderType newBuilder()
   {
     return new Builder(null);
   }
@@ -104,7 +108,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A new light builder.
    */
 
-  public static KLightDirectionalBuilderType newBuilderFrom(
+  public static KLightDirectionalDiffuseOnlyBuilderType newBuilderFrom(
     final KLightDirectionalType d)
   {
     return new Builder(d);
@@ -122,19 +126,22 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A new directional light.
    */
 
-  public static KLightDirectional newLight(
+  public static KLightDirectionalDiffuseOnly newLight(
     final RVectorI3F<RSpaceWorldType> in_direction,
     final RVectorI3F<RSpaceRGBType> in_color,
     final float in_intensity)
   {
-    return new KLightDirectional(in_direction, in_color, in_intensity);
+    return new KLightDirectionalDiffuseOnly(
+      in_direction,
+      in_color,
+      in_intensity);
   }
 
   private final RVectorI3F<RSpaceRGBType>                           color;
   private final RVectorI3F<RSpaceWorldType>                         direction;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
 
-  private KLightDirectional(
+  private KLightDirectionalDiffuseOnly(
     final RVectorI3F<RSpaceWorldType> in_direction,
     final RVectorI3F<RSpaceRGBType> in_color,
     final float in_intensity)
@@ -149,7 +156,7 @@ import com.io7m.r1.types.RVectorI3F;
     throws RException,
       E
   {
-    return v.directional(this);
+    return v.directionalDiffuseOnly(this);
   }
 
   @Override public
@@ -166,7 +173,7 @@ import com.io7m.r1.types.RVectorI3F;
 
   @Override public String lightGetCode()
   {
-    return "LDir";
+    return "LDirDiffuseOnly";
   }
 
   @Override public RVectorI3F<RSpaceRGBType> lightGetColor()
@@ -184,14 +191,6 @@ import com.io7m.r1.types.RVectorI3F;
     return this.intensity;
   }
 
-  @Override public <A, E extends Throwable> A lightTranslucentAccept(
-    final KLightTranslucentVisitorType<A, E> v)
-    throws RException,
-      E
-  {
-    return v.lightTranslucentDirectional(this);
-  }
-
   @Override public int texturesGetRequired()
   {
     return 0;
@@ -200,7 +199,7 @@ import com.io7m.r1.types.RVectorI3F;
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[KLightDirectional color=");
+    b.append("[KLightDirectionalDiffuseOnly color=");
     b.append(this.color);
     b.append(" direction=");
     b.append(this.direction);

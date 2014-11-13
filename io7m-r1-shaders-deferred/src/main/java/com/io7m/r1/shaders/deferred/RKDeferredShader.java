@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,10 +18,13 @@ package com.io7m.r1.shaders.deferred;
 
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
-import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.kernel.types.KLightDiffuseOnlyType;
 import com.io7m.r1.kernel.types.KLightDirectional;
+import com.io7m.r1.kernel.types.KLightDirectionalDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightDirectionalType;
+import com.io7m.r1.kernel.types.KLightDirectionalVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
@@ -185,8 +188,7 @@ import com.io7m.r1.types.RException;
 
   private static void fragmentShaderLight(
     final StringBuilder b,
-    final KLightType l,
-    final FunctionType<StringBuilder, Unit> rgba)
+    final KLightType l)
     throws JCGLException
   {
     try {
@@ -215,7 +217,7 @@ import com.io7m.r1.types.RException;
 
       l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
         @Override public Unit lightDirectional(
-          final KLightDirectional ld)
+          final KLightDirectionalType ld)
           throws RException
         {
           b.append("  -- Directional light parameters\n");
@@ -345,7 +347,7 @@ import com.io7m.r1.types.RException;
 
       l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
         @Override public Unit lightDirectional(
-          final KLightDirectional ld)
+          final KLightDirectionalType ld)
           throws RException
         {
           b.append("  -- Directional light vectors\n");
@@ -356,21 +358,38 @@ import com.io7m.r1.types.RException;
           b.append("      normal\n");
           b.append("    );\n");
           b.append("\n");
-          b.append("  -- Directional emissive diffuse light term\n");
+
+          b.append("  -- Directional diffuse light term\n");
           b.append("  value light_diffuse : vector_3f =\n");
           b.append("    DirectionalLight.diffuse_color (\n");
           b.append("      light_directional,\n");
           b.append("      light_vectors\n");
           b.append("     );\n");
           b.append("\n");
-          b.append("  -- Directional specular light term\n");
-          b.append("  value light_specular : vector_3f =\n");
-          b.append("    DirectionalLight.specular_color (\n");
-          b.append("      light_directional,\n");
-          b.append("      light_vectors,\n");
-          b.append("      specular\n");
-          b.append("    );\n");
-          return Unit.unit();
+
+          return ld
+            .directionalAccept(new KLightDirectionalVisitorType<Unit, RException>() {
+              @Override public Unit directional(
+                final KLightDirectional ldd)
+                throws RException
+              {
+                b.append("  -- Directional specular light term\n");
+                b.append("  value light_specular : vector_3f =\n");
+                b.append("    DirectionalLight.specular_color (\n");
+                b.append("      light_directional,\n");
+                b.append("      light_vectors,\n");
+                b.append("      specular\n");
+                b.append("    );\n");
+                return Unit.unit();
+              }
+
+              @Override public Unit directionalDiffuseOnly(
+                final KLightDirectionalDiffuseOnly lddo)
+                throws RException
+              {
+                return Unit.unit();
+              }
+            });
         }
 
         @Override public Unit lightProjective(
@@ -593,10 +612,16 @@ import com.io7m.r1.types.RException;
 
       b.append("  value lit_d =\n");
       b.append("    V3.multiply (albedo [x y z], light_diffuse);\n");
-      b.append("  value lit_s =\n");
-      b.append("    V3.add (lit_d, light_specular);\n");
 
-      rgba.call(b);
+      if (l instanceof KLightDiffuseOnlyType) {
+        b.append("  value rgba =\n");
+        b.append("    new vector_4f (lit_d [x y z], 1.0);\n");
+      } else {
+        b.append("  value lit_s =\n");
+        b.append("    V3.add (lit_d, light_specular);\n");
+        b.append("  value rgba =\n");
+        b.append("    new vector_4f (lit_s [x y z], 1.0);\n");
+      }
 
       b.append("as\n");
       b.append("  out out_0 = rgba;\n");
@@ -612,18 +637,7 @@ import com.io7m.r1.types.RException;
     final StringBuilder b,
     final KLightType l)
   {
-    RKDeferredShader.fragmentShaderLight(
-      b,
-      l,
-      new FunctionType<StringBuilder, Unit>() {
-        @Override public Unit call(
-          final StringBuilder sb)
-        {
-          sb.append("  value rgba =\n");
-          sb.append("    new vector_4f (lit_s [x y z], 1.0);\n");
-          return Unit.unit();
-        }
-      });
+    RKDeferredShader.fragmentShaderLight(b, l);
   }
 
   public static void fragmentShaderValuesEmission(
@@ -869,7 +883,7 @@ import com.io7m.r1.types.RException;
     try {
       l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
         @Override public Unit lightDirectional(
-          final KLightDirectional ld)
+          final KLightDirectionalType ld)
           throws RException
         {
           b.append("shader program p is\n");
