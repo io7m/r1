@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -38,6 +38,8 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KLightWithShadowVisitorType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
@@ -100,6 +102,94 @@ import com.io7m.r1.types.RTransformViewType;
       in_log);
   }
 
+  private static
+    Unit
+    projectiveWithShadowBasic(
+      final KVisibleSetShadows shadows,
+      final Map<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts,
+      final KMatricesObserverType observer,
+      final KShadowMapCacheType sc,
+      final JCGLInterfaceCommonType gc,
+      final KDepthRendererType dr,
+      final KLightWithShadowType light,
+      final KLightProjectiveWithShadowBasicType lp)
+      throws RException
+  {
+    final KShadowMappedBasic shadow = lp.lightGetShadowBasic();
+    final KShadowMapDescriptionBasic desc = shadow.getMapDescription();
+    final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
+      sc.bluCacheGet(desc);
+
+    assert receipts.containsKey(light) == false;
+    receipts.put(light, r);
+
+    final KShadowMapBasic sm = (KShadowMapBasic) r.getValue();
+
+    return observer.withProjectiveLight(
+      lp,
+      new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final KMatricesProjectiveLightType mwp)
+          throws JCGLException,
+            RException
+        {
+          KShadowMapRenderer.renderProjectiveBasic(
+            gc,
+            mwp,
+            shadows,
+            dr,
+            lp,
+            sm);
+          return Unit.unit();
+        }
+      });
+  }
+
+  private static
+    Unit
+    projectiveWithShadowVariance(
+      final KVisibleSetShadows shadows,
+      final Map<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts,
+      final KMatricesObserverType observer,
+      final KShadowMapCacheType sc,
+      final JCGLInterfaceCommonType gc,
+      final KDepthVarianceRendererType dvr,
+      final KPostprocessorBlurDepthVarianceType pb,
+      final KLightWithShadowType light,
+      final KLightProjectiveWithShadowVarianceType lp)
+      throws RException
+  {
+    final KShadowMappedVariance shadow = lp.lightGetShadowVariance();
+    final KShadowMapDescriptionVariance desc = shadow.getMapDescription();
+    final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
+      sc.bluCacheGet(desc);
+
+    assert receipts.containsKey(light) == false;
+    receipts.put(light, r);
+
+    final KShadowMapVariance sm = (KShadowMapVariance) r.getValue();
+
+    return observer.withProjectiveLight(
+      lp,
+      new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final KMatricesProjectiveLightType mwp)
+          throws JCGLException,
+            RException
+        {
+          KShadowMapRenderer.renderProjectiveVariance(
+            gc,
+            mwp,
+            shadows,
+            dvr,
+            pb,
+            lp,
+            sm);
+          return Unit.unit();
+        }
+      });
+  }
+
   private static void renderProjectiveBasic(
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mwp,
@@ -145,7 +235,7 @@ import com.io7m.r1.types.RTransformViewType;
     final KVisibleSetShadows shadows,
     final KDepthVarianceRendererType dvr,
     final KPostprocessorBlurDepthVarianceType blur,
-    final KLightProjectiveWithShadowVariance lp,
+    final KLightProjectiveWithShadowVarianceType lp,
     final KShadowMapVariance sm)
     throws JCGLException,
       RException
@@ -186,7 +276,6 @@ import com.io7m.r1.types.RTransformViewType;
       gc.framebufferDrawUnbind();
     }
   }
-
   private static
     void
     returnReceipts(
@@ -200,13 +289,14 @@ import com.io7m.r1.types.RTransformViewType;
       r.returnToCache();
     }
   }
-
   private final KPostprocessorBlurDepthVarianceType blur;
   private final KDepthRendererType                  depth_renderer;
   private final KDepthVarianceRendererType          depth_variance_renderer;
   private final JCGLImplementationType              g;
   private final LogUsableType                       log;
+
   private final KMutableMatrices                    matrices;
+
   private final KShadowMapCacheType                 shadow_cache;
 
   private KShadowMapRenderer(
@@ -327,36 +417,31 @@ import com.io7m.r1.types.RTransformViewType;
               JCacheException,
               JCGLException
           {
-            final KShadowMappedBasic shadow = lp.lightGetShadowBasic();
-            final KShadowMapDescriptionBasic desc =
-              shadow.getMapDescription();
-            final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
-              sc.bluCacheGet(desc);
+            return KShadowMapRenderer.projectiveWithShadowBasic(
+              shadows,
+              receipts,
+              observer,
+              sc,
+              gc,
+              dr,
+              light,
+              lp);
+          }
 
-            assert receipts.containsKey(light) == false;
-            receipts.put(light, r);
-
-            final KShadowMapBasic sm = (KShadowMapBasic) r.getValue();
-
-            return observer
-              .withProjectiveLight(
-                lp,
-                new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
-                  @Override public Unit run(
-                    final KMatricesProjectiveLightType mwp)
-                    throws JCGLException,
-                      RException
-                  {
-                    KShadowMapRenderer.renderProjectiveBasic(
-                      gc,
-                      mwp,
-                      shadows,
-                      dr,
-                      lp,
-                      sm);
-                    return Unit.unit();
-                  }
-                });
+          @Override public Unit projectiveWithShadowBasicDiffuseOnly(
+            final KLightProjectiveWithShadowBasicDiffuseOnly lp)
+            throws RException,
+              JCacheException
+          {
+            return KShadowMapRenderer.projectiveWithShadowBasic(
+              shadows,
+              receipts,
+              observer,
+              sc,
+              gc,
+              dr,
+              light,
+              lp);
           }
 
           @Override public Unit projectiveWithShadowVariance(
@@ -365,74 +450,33 @@ import com.io7m.r1.types.RTransformViewType;
               JCacheException,
               JCGLException
           {
-            final KShadowMappedVariance shadow = lp.lightGetShadowVariance();
-            final KShadowMapDescriptionVariance desc =
-              shadow.getMapDescription();
-            final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
-              sc.bluCacheGet(desc);
-
-            assert receipts.containsKey(light) == false;
-            receipts.put(light, r);
-
-            final KShadowMapVariance sm = (KShadowMapVariance) r.getValue();
-
-            return observer
-              .withProjectiveLight(
-                lp,
-                new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
-                  @Override public Unit run(
-                    final KMatricesProjectiveLightType mwp)
-                    throws JCGLException,
-                      RException
-                  {
-                    KShadowMapRenderer.renderProjectiveVariance(
-                      gc,
-                      mwp,
-                      shadows,
-                      dvr,
-                      pb,
-                      lp,
-                      sm);
-                    return Unit.unit();
-                  }
-                });
+            return KShadowMapRenderer.projectiveWithShadowVariance(
+              shadows,
+              receipts,
+              observer,
+              sc,
+              gc,
+              dvr,
+              pb,
+              light,
+              lp);
           }
 
-          @Override public Unit projectiveWithShadowBasicDiffuseOnly(
-            final KLightProjectiveWithShadowBasicDiffuseOnly lp)
+          @Override public Unit projectiveWithShadowVarianceDiffuseOnly(
+            final KLightProjectiveWithShadowVarianceDiffuseOnly lp)
             throws RException,
               JCacheException
           {
-            final KShadowMappedBasic shadow = lp.lightGetShadowBasic();
-            final KShadowMapDescriptionBasic desc =
-              shadow.getMapDescription();
-            final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
-              sc.bluCacheGet(desc);
-
-            assert receipts.containsKey(light) == false;
-            receipts.put(light, r);
-
-            final KShadowMapBasic sm = (KShadowMapBasic) r.getValue();
-
-            return observer
-              .withProjectiveLight(
-                lp,
-                new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
-                  @Override public Unit run(
-                    final KMatricesProjectiveLightType mwp)
-                    throws JCGLException,
-                      RException
-                  {
-                    KShadowMapRenderer.renderProjectiveBasic(
-                      gc,
-                      mwp,
-                      shadows,
-                      dr,
-                      lp,
-                      sm);
-                    return Unit.unit();
-                  }
-                });
+            return KShadowMapRenderer.projectiveWithShadowVariance(
+              shadows,
+              receipts,
+              observer,
+              sc,
+              gc,
+              dvr,
+              pb,
+              light,
+              lp);
           }
         });
     }

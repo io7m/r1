@@ -17,45 +17,39 @@
 package com.io7m.r1.kernel.types;
 
 import com.io7m.r1.types.RException;
+import com.io7m.r1.types.RExceptionUserError;
 
 /**
- * The type of projective lights that have basic shadows.
+ * The type of mutable builders for projective lights that have mapped
+ * variance shadows.
  */
 
-public interface KLightProjectiveWithShadowBasicType extends
-  KLightProjectiveType,
-  KLightWithShadowType
+public interface KLightProjectiveWithShadowVarianceDiffuseOnlyBuilderType extends
+  KLightProjectiveBuilderType
 {
   /**
-   * Be visited by the given generic visitor.
+   * <p>
+   * Construct a light.
+   * </p>
    *
-   * @param v
-   *          The visitor
-   * @return The value returned by the visitor
-   *
+   * @return A new light based on all of the parameters given so far.
+   * @throws RExceptionUserError
+   *           If no texture was specified.
    * @throws RException
-   *           Iff the visitor raises {@link RException}
-   * @throws E
-   *           Iff the visitor raises <code>E</code
-   *
-   * @param <A>
-   *          The return type of the visitor
-   * @param <E>
-   *          The type of exceptions raised by the visitor
-   * @param <V>
-   *          A specific visitor subtype
+   *           If any other error occurs.
    */
 
-    <A, E extends Throwable, V extends KLightProjectiveWithShadowBasicVisitorType<A, E>>
-    A
-    projectiveWithShadowBasicAccept(
-      final V v)
-      throws RException,
-        E;
+  KLightProjectiveWithShadowVarianceDiffuseOnly build()
+    throws RExceptionUserError,
+      RException;
 
   /**
-   * @return The basic shadow associated with the light.
+   * Set the shadow.
+   *
+   * @param s
+   *          The shadow.
    */
 
-  KShadowMappedBasic lightGetShadowBasic();
+  void setShadow(
+    KShadowMappedVariance s);
 }

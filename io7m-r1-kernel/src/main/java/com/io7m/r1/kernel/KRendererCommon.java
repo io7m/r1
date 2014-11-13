@@ -31,6 +31,7 @@ import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KLightWithShadowVisitorType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
@@ -632,6 +633,26 @@ import com.io7m.r1.types.RException;
           KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
           return Unit.unit();
         }
+
+        @Override public Unit projectiveWithShadowVarianceDiffuseOnly(
+          final KLightProjectiveWithShadowVarianceDiffuseOnly lp)
+          throws RException,
+            JCGLException
+        {
+          final KShadowMapVariance map =
+            (KShadowMapVariance) shadow_context.getShadowMap(lp);
+          final KFramebufferDepthVarianceAbstract framebuffer =
+            map.getFramebuffer();
+          final TextureUnitType unit =
+            unit_context.withTexture2D(framebuffer
+              .kFramebufferGetDepthVarianceTexture());
+
+          KShadingProgramCommon.putShadowVariance(
+            program,
+            lp.lightGetShadowVariance());
+          KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
+          return Unit.unit();
+        }
       });
   }
 
@@ -670,6 +691,16 @@ import com.io7m.r1.types.RException;
         {
           KShadingProgramCommon.putShadowBasicReuse(program);
           KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowVarianceDiffuseOnly(
+          final KLightProjectiveWithShadowVarianceDiffuseOnly _)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putShadowVarianceReuse(program);
+          KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
           return Unit.unit();
         }
       });

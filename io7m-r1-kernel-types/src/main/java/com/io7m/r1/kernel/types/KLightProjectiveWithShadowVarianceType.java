@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,10 +19,10 @@ package com.io7m.r1.kernel.types;
 import com.io7m.r1.types.RException;
 
 /**
- * The type of projective lights that have basic shadows.
+ * The type of projective lights that have variance shadows.
  */
 
-public interface KLightProjectiveWithShadowBasicType extends
+public interface KLightProjectiveWithShadowVarianceType extends
   KLightProjectiveType,
   KLightWithShadowType
 {
@@ -46,16 +46,16 @@ public interface KLightProjectiveWithShadowBasicType extends
    *          A specific visitor subtype
    */
 
-    <A, E extends Throwable, V extends KLightProjectiveWithShadowBasicVisitorType<A, E>>
+    <A, E extends Throwable, V extends KLightProjectiveWithShadowVarianceVisitorType<A, E>>
     A
-    projectiveWithShadowBasicAccept(
+    projectiveWithShadowVarianceAccept(
       final V v)
       throws RException,
         E;
 
   /**
-   * @return The basic shadow associated with the light.
+   * @return The variance shadow associated with the light.
    */
 
-  KShadowMappedBasic lightGetShadowBasic();
+  KShadowMappedVariance lightGetShadowVariance();
 }
