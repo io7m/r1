@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -23,7 +23,6 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
-import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionUserError;
 import com.io7m.r1.types.RSpaceRGBType;
@@ -32,18 +31,16 @@ import com.io7m.r1.types.RVectorI3F;
 
 /**
  * <p>
- * A projective light with a mapped basic shadow.
+ * A projective light without a shadow.
  * </p>
- *
- * @see KShadowMappedBasic
  */
 
-@EqualityReference public final class KLightProjectiveWithShadowBasic implements
+@EqualityReference public final class KLightProjectiveWithoutShadowDiffuseOnly implements
   KLightProjectiveType,
-  KLightWithShadowType
+  KLightDiffuseOnlyType
 {
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
-    KLightProjectiveWithShadowBasicBuilderType
+    KLightProjectiveWithoutShadowDiffuseOnlyBuilderType
   {
     private RVectorI3F<RSpaceRGBType>   color;
     private float                       falloff;
@@ -52,56 +49,20 @@ import com.io7m.r1.types.RVectorI3F;
     private RVectorI3F<RSpaceWorldType> position;
     private KProjectionType             projection;
     private float                       range;
-    private KShadowMappedBasic          shadow;
     private Texture2DStaticUsableType   texture;
 
     Builder(
       final KLightProjectiveType in_original)
     {
       NullCheck.notNull(in_original, "Light");
-      try {
-        this.color = in_original.lightGetColor();
-        this.intensity = in_original.lightGetIntensity();
-        this.falloff = in_original.lightProjectiveGetFalloff();
-        this.position = in_original.lightProjectiveGetPosition();
-        this.orientation = in_original.lightProjectiveGetOrientation();
-        this.projection = in_original.lightProjectiveGetProjection();
-        this.range = in_original.lightProjectiveGetRange();
-        this.texture = in_original.lightProjectiveGetTexture();
-        this.shadow =
-          in_original
-            .projectiveAccept(new KLightProjectiveVisitorType<KShadowMappedBasic, UnreachableCodeException>() {
-              @Override public KShadowMappedBasic projectiveWithoutShadow(
-                final KLightProjectiveWithoutShadow lp)
-              {
-                return KShadowMappedBasic.getDefault();
-              }
-
-              @Override public KShadowMappedBasic projectiveWithShadowBasic(
-                final KLightProjectiveWithShadowBasic lp)
-              {
-                return lp.shadow;
-              }
-
-              @Override public
-                KShadowMappedBasic
-                projectiveWithShadowVariance(
-                  final KLightProjectiveWithShadowVariance lp)
-              {
-                return KShadowMappedBasic.getDefault();
-              }
-
-              @Override public
-                KShadowMappedBasic
-                projectiveWithoutShadowDiffuseOnly(
-                  final KLightProjectiveWithoutShadowDiffuseOnly lp)
-              {
-                return KShadowMappedBasic.getDefault();
-              }
-            });
-      } catch (final RException e) {
-        throw new UnreachableCodeException(e);
-      }
+      this.color = in_original.lightGetColor();
+      this.intensity = in_original.lightGetIntensity();
+      this.falloff = in_original.lightProjectiveGetFalloff();
+      this.position = in_original.lightProjectiveGetPosition();
+      this.orientation = in_original.lightProjectiveGetOrientation();
+      this.projection = in_original.lightProjectiveGetProjection();
+      this.range = in_original.lightProjectiveGetRange();
+      this.texture = in_original.lightProjectiveGetTexture();
     }
 
     Builder(
@@ -116,14 +77,13 @@ import com.io7m.r1.types.RVectorI3F;
       this.projection = NullCheck.notNull(in_projection, "Projection");
       this.range = 8.0f;
       this.texture = NullCheck.notNull(in_texture, "Texture");
-      this.shadow = KShadowMappedBasic.getDefault();
     }
 
-    @Override public KLightProjectiveWithShadowBasic build()
+    @Override public KLightProjectiveWithoutShadowDiffuseOnly build()
       throws RException,
         RExceptionUserError
     {
-      return new KLightProjectiveWithShadowBasic(
+      return new KLightProjectiveWithoutShadowDiffuseOnly(
         this.texture,
         this.position,
         this.orientation,
@@ -131,8 +91,7 @@ import com.io7m.r1.types.RVectorI3F;
         this.intensity,
         this.range,
         this.falloff,
-        this.projection,
-        this.shadow);
+        this.projection);
     }
 
     @Override public void setColor(
@@ -177,12 +136,6 @@ import com.io7m.r1.types.RVectorI3F;
       this.range = in_range;
     }
 
-    @Override public void setShadow(
-      final KShadowMappedBasic s)
-    {
-      this.shadow = NullCheck.notNull(s, "Shadow");
-    }
-
     @Override public void setTexture(
       final Texture2DStaticUsableType in_texture)
     {
@@ -204,9 +157,11 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A new light builder.
    */
 
-  public static KLightProjectiveWithShadowBasicBuilderType newBuilder(
-    final Texture2DStaticUsableType in_texture,
-    final KProjectionType in_projection)
+  public static
+    KLightProjectiveWithoutShadowDiffuseOnlyBuilderType
+    newBuilder(
+      final Texture2DStaticUsableType in_texture,
+      final KProjectionType in_projection)
   {
     return new Builder(in_texture, in_projection);
   }
@@ -222,8 +177,10 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A new light builder.
    */
 
-  public static KLightProjectiveWithShadowBasicBuilderType newBuilderFrom(
-    final KLightProjectiveWithShadowBasic p)
+  public static
+    KLightProjectiveWithoutShadowDiffuseOnlyBuilderType
+    newBuilderFrom(
+      final KLightProjectiveType p)
   {
     return new Builder(p);
   }
@@ -237,12 +194,11 @@ import com.io7m.r1.types.RVectorI3F;
   private final KProjectionType             projection;
   private final float                       range;
   private final float                       range_inverse;
-  private final KShadowMappedBasic          shadow;
   private final Texture2DStaticUsableType   texture;
   private final int                         textures;
   private final KTransformType              transform;
 
-  private KLightProjectiveWithShadowBasic(
+  private KLightProjectiveWithoutShadowDiffuseOnly(
     final Texture2DStaticUsableType in_texture,
     final RVectorI3F<RSpaceWorldType> in_position,
     final QuaternionI4F in_orientation,
@@ -250,8 +206,7 @@ import com.io7m.r1.types.RVectorI3F;
     final float in_intensity,
     final float in_range,
     final float in_falloff,
-    final KProjectionType in_projection,
-    final KShadowMappedBasic in_shadow)
+    final KProjectionType in_projection)
   {
     this.intensity = in_intensity;
     this.color = NullCheck.notNull(in_color, "Color");
@@ -259,7 +214,6 @@ import com.io7m.r1.types.RVectorI3F;
     this.orientation = NullCheck.notNull(in_orientation, "Orientation");
     this.projection = NullCheck.notNull(in_projection, "Projection");
     this.texture = NullCheck.notNull(in_texture, "Texture");
-    this.shadow = NullCheck.notNull(in_shadow, "Shadow");
 
     this.range =
       (float) RangeCheck.checkGreaterDouble(
@@ -279,14 +233,14 @@ import com.io7m.r1.types.RVectorI3F;
     this.transform =
       KTransformOST.newTransform(
         this.orientation,
-        KLightProjectiveWithShadowBasic.ONE,
+        KLightProjectiveWithoutShadowDiffuseOnly.ONE,
         this.position);
 
     /**
-     * One texture for the light, and at most one for the shadow.
+     * One texture for the light.
      */
 
-    this.textures = 2;
+    this.textures = 1;
   }
 
   @Override public
@@ -303,7 +257,7 @@ import com.io7m.r1.types.RVectorI3F;
 
   @Override public String lightGetCode()
   {
-    return "LProjSMBasic";
+    return "LProjDiffuseOnly";
   }
 
   @Override public RVectorI3F<RSpaceRGBType> lightGetColor()
@@ -314,20 +268,6 @@ import com.io7m.r1.types.RVectorI3F;
   @Override public float lightGetIntensity()
   {
     return this.intensity;
-  }
-
-  @Override public KShadowType lightGetShadow()
-  {
-    return this.shadow;
-  }
-
-  /**
-   * @return The shadow.
-   */
-
-  public KShadowMappedBasic lightGetShadowBasic()
-  {
-    return this.shadow;
   }
 
   @Override public KTransformType lightGetTransform()
@@ -383,20 +323,11 @@ import com.io7m.r1.types.RVectorI3F;
       throws RException,
         E
   {
-    return v.projectiveWithShadowBasic(this);
+    return v.projectiveWithoutShadowDiffuseOnly(this);
   }
 
   @Override public int texturesGetRequired()
   {
     return this.textures;
-  }
-
-  @Override public <A, E extends Throwable> A withShadowAccept(
-    final KLightWithShadowVisitorType<A, E> v)
-    throws RException,
-      E,
-      JCGLException
-  {
-    return v.projectiveWithShadowBasic(this);
   }
 }

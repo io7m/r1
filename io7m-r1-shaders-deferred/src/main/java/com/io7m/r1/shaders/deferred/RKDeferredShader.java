@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,6 +30,7 @@ import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
+import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightSphereVisitorType;
@@ -270,6 +271,13 @@ import com.io7m.r1.types.RException;
                 b.append("\n");
                 return Unit.unit();
               }
+
+              @Override public Unit projectiveWithoutShadowDiffuseOnly(
+                final KLightProjectiveWithoutShadowDiffuseOnly _)
+                throws RException
+              {
+                return Unit.unit();
+              }
             });
         }
 
@@ -439,7 +447,7 @@ import com.io7m.r1.types.RException;
           lp
             .projectiveAccept(new KLightProjectiveVisitorType<Unit, UnreachableCodeException>() {
               @Override public Unit projectiveWithoutShadow(
-                final KLightProjectiveWithoutShadow lpws)
+                final KLightProjectiveWithoutShadow _)
                 throws RException
               {
                 b
@@ -489,6 +497,16 @@ import com.io7m.r1.types.RException;
                 b.append("\n");
                 return Unit.unit();
               }
+
+              @Override public Unit projectiveWithoutShadowDiffuseOnly(
+                final KLightProjectiveWithoutShadowDiffuseOnly _)
+                throws RException
+              {
+                b
+                  .append("  value light_attenuation = light_vectors.attenuation;\n");
+                b.append("\n");
+                return Unit.unit();
+              }
             });
 
           b.append("  -- Projective diffuse light term\n");
@@ -505,21 +523,25 @@ import com.io7m.r1.types.RException;
           b.append("      light_attenuation\n");
           b.append("    );\n");
           b.append("\n");
-          b.append("  -- Projective specular light term\n");
-          b.append("  value light_specular_unattenuated : vector_3f =\n");
-          b.append("    ProjectiveLight.specular_color (\n");
-          b.append("      light_projective,\n");
-          b.append("      light_vectors.vectors,\n");
-          b.append("      light_color,\n");
-          b.append("      specular\n");
-          b.append("    );\n");
-          b.append("\n");
-          b.append("  value light_specular : vector_3f =\n");
-          b.append("    V3.multiply_scalar (\n");
-          b.append("      light_specular_unattenuated,\n");
-          b.append("      light_attenuation\n");
-          b.append("    );\n");
-          b.append("\n");
+
+          if ((lp instanceof KLightDiffuseOnlyType) == false) {
+            b.append("  -- Projective specular light term\n");
+            b.append("  value light_specular_unattenuated : vector_3f =\n");
+            b.append("    ProjectiveLight.specular_color (\n");
+            b.append("      light_projective,\n");
+            b.append("      light_vectors.vectors,\n");
+            b.append("      light_color,\n");
+            b.append("      specular\n");
+            b.append("    );\n");
+            b.append("\n");
+            b.append("  value light_specular : vector_3f =\n");
+            b.append("    V3.multiply_scalar (\n");
+            b.append("      light_specular_unattenuated,\n");
+            b.append("      light_attenuation\n");
+            b.append("    );\n");
+            b.append("\n");
+          }
+
           return Unit.unit();
         }
 

@@ -20,13 +20,11 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionLightMissingTexture;
 import com.io7m.r1.types.RExceptionUserError;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
@@ -47,15 +45,15 @@ import com.io7m.r1.types.RVectorI3F;
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightProjectiveWithShadowVarianceBuilderType
   {
-    private RVectorI3F<RSpaceRGBType>           color;
-    private float                               falloff;
-    private float                               intensity;
-    private QuaternionI4F                       orientation;
-    private RVectorI3F<RSpaceWorldType>         position;
-    private KProjectionType                     projection;
-    private float                               range;
-    private KShadowMappedVariance               shadow;
-    private @Nullable Texture2DStaticUsableType texture;
+    private RVectorI3F<RSpaceRGBType>   color;
+    private float                       falloff;
+    private float                       intensity;
+    private QuaternionI4F               orientation;
+    private RVectorI3F<RSpaceWorldType> position;
+    private KProjectionType             projection;
+    private float                       range;
+    private KShadowMappedVariance       shadow;
+    private Texture2DStaticUsableType   texture;
 
     Builder(
       final KLightProjectiveType in_original)
@@ -94,6 +92,14 @@ import com.io7m.r1.types.RVectorI3F;
               {
                 return lp.shadow;
               }
+
+              @Override public
+                KShadowMappedVariance
+                projectiveWithoutShadowDiffuseOnly(
+                  final KLightProjectiveWithoutShadowDiffuseOnly lp)
+              {
+                return KShadowMappedVariance.getDefault();
+              }
             });
       } catch (final RException e) {
         throw new UnreachableCodeException(e);
@@ -119,14 +125,8 @@ import com.io7m.r1.types.RVectorI3F;
       throws RException,
         RExceptionUserError
     {
-      final Texture2DStaticUsableType t = this.texture;
-      if (t == null) {
-        throw new RExceptionLightMissingTexture(
-          "No texture specified for projective light");
-      }
-
       return new KLightProjectiveWithShadowVariance(
-        t,
+        this.texture,
         this.position,
         this.orientation,
         this.color,
