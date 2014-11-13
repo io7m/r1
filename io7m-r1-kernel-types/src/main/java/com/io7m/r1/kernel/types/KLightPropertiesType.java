@@ -14,33 +14,27 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.shaders.forward;
+package com.io7m.r1.kernel.types;
 
-import com.io7m.jequality.annotations.EqualityReference;
-import com.io7m.r1.kernel.types.KLightTranslucentType;
-import com.io7m.r1.kernel.types.KLightType;
-import com.io7m.r1.kernel.types.KMaterialType;
+import com.io7m.r1.types.RSpaceRGBType;
+import com.io7m.r1.types.RVectorI3F;
 
-@EqualityReference public final class RKFLitCase<M extends KMaterialType>
+/**
+ * Readable properties of lights.
+ */
+
+public interface KLightPropertiesType
 {
-  private final KLightTranslucentType light;
-  private final M                     material;
+  /**
+   * @return The color of the light
+   */
 
-  public RKFLitCase(
-    final KLightTranslucentType in_light,
-    final M in_material)
-  {
-    this.light = in_light;
-    this.material = in_material;
-  }
+  RVectorI3F<RSpaceRGBType> lightGetColor();
 
-  public KLightType getLight()
-  {
-    return this.light;
-  }
+  /**
+   * @return The intensity of the light
+   */
 
-  public M getMaterial()
-  {
-    return this.material;
-  }
+  float lightGetIntensity();
+
 }
