@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -88,6 +88,8 @@ import com.io7m.r1.types.RVectorI3F;
 
     private float                       near_clip;
 
+    private boolean                     diffuse_only;
+
     @Override public void setNearClip(
       final float d)
     {
@@ -128,54 +130,54 @@ import com.io7m.r1.types.RVectorI3F;
           this.near_clip,
           this.radius);
 
-      final OptionType<KLightProjectiveWithShadowBasic> light_negative_x;
+      final OptionType<KLightProjectiveWithShadowBasicType> light_negative_x;
       if (this.negative_x) {
-        final KLightProjectiveWithShadowBasic k =
+        final KLightProjectiveWithShadowBasicType k =
           this.makeProjective(texture, p, Builder.NEGATIVE_X_ORIENTATION);
         light_negative_x = Option.some(k);
       } else {
         light_negative_x = Option.none();
       }
 
-      final OptionType<KLightProjectiveWithShadowBasic> light_negative_y;
+      final OptionType<KLightProjectiveWithShadowBasicType> light_negative_y;
       if (this.negative_y) {
-        final KLightProjectiveWithShadowBasic k =
+        final KLightProjectiveWithShadowBasicType k =
           this.makeProjective(texture, p, Builder.NEGATIVE_Y_ORIENTATION);
         light_negative_y = Option.some(k);
       } else {
         light_negative_y = Option.none();
       }
 
-      final OptionType<KLightProjectiveWithShadowBasic> light_negative_z;
+      final OptionType<KLightProjectiveWithShadowBasicType> light_negative_z;
       if (this.negative_z) {
-        final KLightProjectiveWithShadowBasic k =
+        final KLightProjectiveWithShadowBasicType k =
           this.makeProjective(texture, p, Builder.NEGATIVE_Z_ORIENTATION);
         light_negative_z = Option.some(k);
       } else {
         light_negative_z = Option.none();
       }
 
-      final OptionType<KLightProjectiveWithShadowBasic> light_positive_x;
+      final OptionType<KLightProjectiveWithShadowBasicType> light_positive_x;
       if (this.positive_x) {
-        final KLightProjectiveWithShadowBasic k =
+        final KLightProjectiveWithShadowBasicType k =
           this.makeProjective(texture, p, Builder.POSITIVE_X_ORIENTATION);
         light_positive_x = Option.some(k);
       } else {
         light_positive_x = Option.none();
       }
 
-      final OptionType<KLightProjectiveWithShadowBasic> light_positive_y;
+      final OptionType<KLightProjectiveWithShadowBasicType> light_positive_y;
       if (this.positive_y) {
-        final KLightProjectiveWithShadowBasic k =
+        final KLightProjectiveWithShadowBasicType k =
           this.makeProjective(texture, p, Builder.POSITIVE_Y_ORIENTATION);
         light_positive_y = Option.some(k);
       } else {
         light_positive_y = Option.none();
       }
 
-      final OptionType<KLightProjectiveWithShadowBasic> light_positive_z;
+      final OptionType<KLightProjectiveWithShadowBasicType> light_positive_z;
       if (this.positive_z) {
-        final KLightProjectiveWithShadowBasic k =
+        final KLightProjectiveWithShadowBasicType k =
           this.makeProjective(texture, p, Builder.POSITIVE_Z_ORIENTATION);
         light_positive_z = Option.some(k);
       } else {
@@ -191,13 +193,27 @@ import com.io7m.r1.types.RVectorI3F;
         light_positive_z);
     }
 
-    private KLightProjectiveWithShadowBasic makeProjective(
+    private KLightProjectiveWithShadowBasicType makeProjective(
       final Texture2DStaticUsableType texture,
       final KProjectionFOV p,
       final QuaternionI4F orientation)
       throws RExceptionUserError,
         RException
     {
+      if (this.diffuse_only) {
+        final KLightProjectiveWithShadowBasicDiffuseOnlyBuilderType b =
+          KLightProjectiveWithShadowBasicDiffuseOnly.newBuilder(texture, p);
+        b.setColor(this.color);
+        b.setIntensity(this.intensity);
+        b.setRange(this.radius);
+        b.setFalloff(this.exponent);
+        b.setShadow(this.shadow);
+        b.setPosition(this.position);
+        b.setOrientation(orientation);
+        final KLightProjectiveWithShadowBasicDiffuseOnly k = b.build();
+        return k;
+      }
+
       final KLightProjectiveWithShadowBasicBuilderType b =
         KLightProjectiveWithShadowBasic.newBuilder(texture, p);
       b.setColor(this.color);
@@ -288,6 +304,12 @@ import com.io7m.r1.types.RVectorI3F;
     {
       this.shadow = NullCheck.notNull(s, "Shadow");
     }
+
+    @Override public void setDiffuseOnly(
+      final boolean d)
+    {
+      this.diffuse_only = d;
+    }
   }
 
   /**
@@ -303,20 +325,20 @@ import com.io7m.r1.types.RVectorI3F;
     return new Builder();
   }
 
-  private final OptionType<KLightProjectiveWithShadowBasic> negative_x;
-  private final OptionType<KLightProjectiveWithShadowBasic> negative_y;
-  private final OptionType<KLightProjectiveWithShadowBasic> negative_z;
-  private final OptionType<KLightProjectiveWithShadowBasic> positive_x;
-  private final OptionType<KLightProjectiveWithShadowBasic> positive_y;
-  private final OptionType<KLightProjectiveWithShadowBasic> positive_z;
+  private final OptionType<KLightProjectiveWithShadowBasicType> negative_x;
+  private final OptionType<KLightProjectiveWithShadowBasicType> negative_y;
+  private final OptionType<KLightProjectiveWithShadowBasicType> negative_z;
+  private final OptionType<KLightProjectiveWithShadowBasicType> positive_x;
+  private final OptionType<KLightProjectiveWithShadowBasicType> positive_y;
+  private final OptionType<KLightProjectiveWithShadowBasicType> positive_z;
 
   private KLightSpherePseudoWithShadowBasic(
-    final OptionType<KLightProjectiveWithShadowBasic> in_negative_x,
-    final OptionType<KLightProjectiveWithShadowBasic> in_negative_y,
-    final OptionType<KLightProjectiveWithShadowBasic> in_negative_z,
-    final OptionType<KLightProjectiveWithShadowBasic> in_positive_x,
-    final OptionType<KLightProjectiveWithShadowBasic> in_positive_y,
-    final OptionType<KLightProjectiveWithShadowBasic> in_positive_z)
+    final OptionType<KLightProjectiveWithShadowBasicType> in_negative_x,
+    final OptionType<KLightProjectiveWithShadowBasicType> in_negative_y,
+    final OptionType<KLightProjectiveWithShadowBasicType> in_negative_z,
+    final OptionType<KLightProjectiveWithShadowBasicType> in_positive_x,
+    final OptionType<KLightProjectiveWithShadowBasicType> in_positive_y,
+    final OptionType<KLightProjectiveWithShadowBasicType> in_positive_z)
   {
     this.negative_x = NullCheck.notNull(in_negative_x, "Negative X");
     this.negative_y = NullCheck.notNull(in_negative_y, "Negative Y");
@@ -330,7 +352,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The negative X facing sub-light, if any.
    */
 
-  public OptionType<KLightProjectiveWithShadowBasic> getNegativeX()
+  public OptionType<KLightProjectiveWithShadowBasicType> getNegativeX()
   {
     return this.negative_x;
   }
@@ -339,7 +361,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The negative Y facing sub-light, if any.
    */
 
-  public OptionType<KLightProjectiveWithShadowBasic> getNegativeY()
+  public OptionType<KLightProjectiveWithShadowBasicType> getNegativeY()
   {
     return this.negative_y;
   }
@@ -348,7 +370,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The negative Z facing sub-light, if any.
    */
 
-  public OptionType<KLightProjectiveWithShadowBasic> getNegativeZ()
+  public OptionType<KLightProjectiveWithShadowBasicType> getNegativeZ()
   {
     return this.negative_z;
   }
@@ -357,7 +379,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The positive X facing sub-light, if any.
    */
 
-  public OptionType<KLightProjectiveWithShadowBasic> getPositiveX()
+  public OptionType<KLightProjectiveWithShadowBasicType> getPositiveX()
   {
     return this.positive_x;
   }
@@ -366,7 +388,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The positive Y facing sub-light, if any.
    */
 
-  public OptionType<KLightProjectiveWithShadowBasic> getPositiveY()
+  public OptionType<KLightProjectiveWithShadowBasicType> getPositiveY()
   {
     return this.positive_y;
   }
@@ -375,7 +397,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The positive Z facing sub-light, if any.
    */
 
-  public OptionType<KLightProjectiveWithShadowBasic> getPositiveZ()
+  public OptionType<KLightProjectiveWithShadowBasicType> getPositiveZ()
   {
     return this.positive_z;
   }
