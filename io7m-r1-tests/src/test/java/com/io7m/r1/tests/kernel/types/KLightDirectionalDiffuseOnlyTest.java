@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,8 +24,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.jnull.NullCheckException;
-import com.io7m.r1.kernel.types.KLightDirectional;
-import com.io7m.r1.kernel.types.KLightDirectionalBuilderType;
+import com.io7m.r1.kernel.types.KLightDirectionalDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightDirectionalDiffuseOnlyBuilderType;
 import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.tests.types.RVectorI3FGenerator;
 import com.io7m.r1.tests.utilities.TestUtilities;
@@ -33,7 +33,7 @@ import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
 import com.io7m.r1.types.RVectorI3F;
 
-@SuppressWarnings("static-method") public final class KLightDirectionalTest
+@SuppressWarnings("static-method") public final class KLightDirectionalDiffuseOnlyTest
 {
   @Test public void testAttributes()
   {
@@ -41,24 +41,24 @@ import com.io7m.r1.types.RVectorI3F;
       new RVectorI3FGenerator<RSpaceRGBType>();
     final Generator<RVectorI3F<RSpaceWorldType>> position_gen1 =
       new RVectorI3FGenerator<RSpaceWorldType>();
-    final Generator<KLightDirectional> gen =
-      new KLightDirectionalGenerator(colour_gen1, position_gen1);
+    final Generator<KLightDirectionalDiffuseOnly> gen =
+      new KLightDirectionalDiffuseOnlyGenerator(colour_gen1, position_gen1);
 
     QuickCheck.forAllVerbose(
       gen,
-      new AbstractCharacteristic<KLightDirectional>() {
+      new AbstractCharacteristic<KLightDirectionalDiffuseOnly>() {
         @Override protected void doSpecify(
-          final KLightDirectional s)
+          final KLightDirectionalDiffuseOnly s)
           throws Throwable
         {
           {
             final RVectorI3F<RSpaceRGBType> c =
               new RVectorI3F<RSpaceRGBType>(0.2f, 0.5f, 1.0f);
 
-            final KLightDirectionalBuilderType b =
-              KLightDirectional.newBuilderFrom(s);
+            final KLightDirectionalDiffuseOnlyBuilderType b =
+              KLightDirectionalDiffuseOnly.newBuilderFrom(s);
             b.setColor(c);
-            final KLightDirectional r = b.build();
+            final KLightDirectionalDiffuseOnly r = b.build();
             Assert.assertEquals(c, r.lightGetColor());
           }
 
@@ -66,8 +66,8 @@ import com.io7m.r1.types.RVectorI3F;
             final RVectorI3F<RSpaceWorldType> p =
               new RVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 1.0f);
 
-            final KLightDirectionalBuilderType b =
-              KLightDirectional.newBuilderFrom(s);
+            final KLightDirectionalDiffuseOnlyBuilderType b =
+              KLightDirectionalDiffuseOnly.newBuilderFrom(s);
             b.setDirection(p);
             final KLightDirectionalType r = b.build();
             Assert.assertEquals(p, r.lightGetDirection());
@@ -81,7 +81,8 @@ import com.io7m.r1.types.RVectorI3F;
     final RVectorI3F<RSpaceRGBType> colour =
       new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
 
-    final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
+    final KLightDirectionalDiffuseOnlyBuilderType b =
+      KLightDirectionalDiffuseOnly.newBuilder();
     b.setColor((RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
   }
 
@@ -90,7 +91,8 @@ import com.io7m.r1.types.RVectorI3F;
     final RVectorI3F<RSpaceWorldType> direction =
       new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f);
 
-    final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
+    final KLightDirectionalDiffuseOnlyBuilderType b =
+      KLightDirectionalDiffuseOnly.newBuilder();
     b
       .setDirection((RVectorI3F<RSpaceWorldType>) TestUtilities
         .actuallyNull());

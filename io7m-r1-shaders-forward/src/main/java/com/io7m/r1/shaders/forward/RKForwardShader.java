@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,7 +24,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.kernel.types.KLightDirectional;
+import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
@@ -238,7 +238,7 @@ import com.io7m.r1.types.RException;
     try {
       l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
         @Override public Unit lightDirectional(
-          final KLightDirectional ld)
+          final KLightDirectionalType ld)
         {
           b.append("  -- Directional light parameters\n");
           b.append("  parameter light_directional : DirectionalLight.t;\n");
@@ -713,7 +713,7 @@ import com.io7m.r1.types.RException;
     try {
       l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
         @Override public Unit lightDirectional(
-          final KLightDirectional ld)
+          final KLightDirectionalType ld)
         {
           RKForwardShader.fragmentShaderValuesLightDirectional(b, specular);
           return Unit.unit();
@@ -1152,7 +1152,7 @@ import com.io7m.r1.types.RException;
     try {
       l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
         @Override public Unit lightDirectional(
-          final KLightDirectional ld)
+          final KLightDirectionalType ld)
         {
           RKForwardShader.fragmentShaderValuesLightDirectionalSpecularOnly(
             b,
@@ -1899,7 +1899,7 @@ import com.io7m.r1.types.RException;
               return s.get().lightAccept(
                 new KLightVisitorType<String, UnreachableCodeException>() {
                   @Override public String lightDirectional(
-                    final KLightDirectional _)
+                    final KLightDirectionalType _)
                     throws RException
                   {
                     return m

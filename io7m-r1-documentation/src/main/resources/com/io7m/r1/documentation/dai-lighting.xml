@@ -139,6 +139,17 @@
     </s:formal-item>
   </s:subsection>
 
+  <s:subsection xml:id="r1.dai.lighting.diffuse-only">
+    <s:subsection-title>Diffuse-Only Lights</s:subsection-title>
+    <s:paragraph>
+      Some lights have <s:term s:type="term">diffuse-only</s:term> variants.
+      Little explanation is required: The 
+      <s:link s:target="r1.dai.lighting.diffuse-specular.specular">specular</s:link>
+      term is simply not calculated and only the <s:term s:type="term">diffuse</s:term>
+      term is used.
+    </s:paragraph>
+  </s:subsection>
+
   <s:subsection xml:id="r1.dai.lighting.attenuation">
     <s:subsection-title>Attenuation</s:subsection-title>
     <s:paragraph>

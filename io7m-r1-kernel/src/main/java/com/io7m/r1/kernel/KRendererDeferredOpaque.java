@@ -64,7 +64,7 @@ import com.io7m.r1.kernel.types.KFrustumMeshUsableType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueVisitorType;
-import com.io7m.r1.kernel.types.KLightDirectional;
+import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
@@ -997,7 +997,7 @@ import com.io7m.r1.types.RVectorI4F;
 
     light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
       @Override public Unit lightDirectional(
-        final KLightDirectional ld)
+        final KLightDirectionalType ld)
         throws RException
       {
         try {
@@ -1106,7 +1106,7 @@ import com.io7m.r1.types.RVectorI4F;
     final KViewRays view_rays,
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
-    final KLightDirectional ld)
+    final KLightDirectionalType ld)
     throws RException,
       JCacheException
   {

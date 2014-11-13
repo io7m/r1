@@ -19,8 +19,8 @@ package com.io7m.r1.kernel.types;
 import com.io7m.r1.types.RException;
 
 /**
- * A generic light visitor, returning values of type <code>A</code> and
- * raising exceptions of type <code>E</code>.
+ * A generic spherical light visitor, returning values of type <code>A</code>
+ * and raising exceptions of type <code>E</code>.
  *
  * @param <A>
  *          The return value type of the implementing visitor
@@ -28,12 +28,12 @@ import com.io7m.r1.types.RException;
  *          The type of exceptions raised by the implementing visitor
  */
 
-public interface KLightVisitorType<A, E extends Throwable>
+public interface KLightDirectionalVisitorType<A, E extends Throwable>
 {
   /**
    * Visit a directional light.
    *
-   * @param l
+   * @param ld
    *          The directional light
    * @return A value of type <code>A</code>
    *
@@ -43,16 +43,16 @@ public interface KLightVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A lightDirectional(
-    final KLightDirectionalType l)
+  A directional(
+    final KLightDirectional ld)
     throws RException,
       E;
 
   /**
-   * Visit a projective light.
+   * Visit a (diffuse only) directional light.
    *
-   * @param l
-   *          The projective light
+   * @param ld
+   *          The directional light
    * @return A value of type <code>A</code>
    *
    * @throws RException
@@ -61,26 +61,8 @@ public interface KLightVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A lightProjective(
-    final KLightProjectiveType l)
-    throws RException,
-      E;
-
-  /**
-   * Visit a spherical light.
-   *
-   * @param l
-   *          The spherical light
-   * @return A value of type <code>A</code>
-   *
-   * @throws RException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A lightSpherical(
-    final KLightSphereType l)
+  A directionalDiffuseOnly(
+    final KLightDirectionalDiffuseOnly ld)
     throws RException,
       E;
 }
