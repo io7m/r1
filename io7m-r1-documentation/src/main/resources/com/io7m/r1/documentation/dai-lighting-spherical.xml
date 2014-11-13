@@ -72,6 +72,10 @@
           <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSphereWithoutShadow.html">KLightSphereWithoutShadow</s:link-external> -
           a spherical light that does not cast shadows.
         </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSphereWithoutShadowDiffuseOnly.html">KLightSphereWithoutShadowDiffuseOnly</s:link-external> -
+          a spherical light that does not cast shadows and does not cause specular highlights.
+        </s:list-item>
       </s:list-unordered>
     </s:formal-item>
   </s:subsection>

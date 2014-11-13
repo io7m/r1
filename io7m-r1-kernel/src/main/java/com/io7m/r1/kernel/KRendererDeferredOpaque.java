@@ -74,6 +74,7 @@ import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightSphereVisitorType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
+import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightVisitorType;
 import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
@@ -609,7 +610,7 @@ import com.io7m.r1.types.RVectorI4F;
     final KViewRays view_rays,
     final JCGLInterfaceCommonType gc,
     final KMatricesInstanceValuesType mwi,
-    final KLightSphereWithoutShadow ls,
+    final KLightSphereType ls,
     final KUnitSphereUsableType s,
     final KProgramType kp)
   {
@@ -1495,6 +1496,36 @@ import com.io7m.r1.types.RVectorI4F;
       @Override public Unit sphereWithoutShadow(
         final KLightSphereWithoutShadow lsws)
         throws RException
+      {
+        return mwo.withGenericTransform(
+          t,
+          uv,
+          new KMatricesInstanceFunctionType<Unit, RException>() {
+            @Override public Unit run(
+              final KMatricesInstanceType mwi)
+              throws RException
+            {
+              KRendererDeferredOpaque.renderGroupLightSphericalWithoutShadow(
+                framebuffer,
+                t_map_albedo,
+                t_map_depth_stencil,
+                t_map_normal,
+                t_map_specular,
+                view_rays,
+                gc,
+                mwi,
+                lsws,
+                s,
+                kp);
+              return Unit.unit();
+            }
+          });
+      }
+
+      @Override public Unit sphereWithoutShadowDiffuseOnly(
+        final KLightSphereWithoutShadowDiffuseOnly lsws)
+        throws RException,
+          JCGLException
       {
         return mwo.withGenericTransform(
           t,

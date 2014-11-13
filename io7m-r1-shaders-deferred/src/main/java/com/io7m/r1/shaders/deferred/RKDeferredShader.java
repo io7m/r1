@@ -34,6 +34,7 @@ import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightSphereVisitorType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
+import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightVisitorType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoType;
@@ -280,7 +281,7 @@ import com.io7m.r1.types.RException;
           return ls
             .sphereAccept(new KLightSphereVisitorType<Unit, RException>() {
               @Override public Unit sphereWithoutShadow(
-                final KLightSphereWithoutShadow lsws)
+                final KLightSphereWithoutShadow _)
                 throws RException
               {
                 b
@@ -291,7 +292,7 @@ import com.io7m.r1.types.RException;
               }
 
               @Override public Unit sphereTexturedCubeWithoutShadow(
-                final KLightSphereTexturedCubeWithoutShadow lstcws)
+                final KLightSphereTexturedCubeWithoutShadow _)
                 throws RException
               {
                 b
@@ -301,6 +302,17 @@ import com.io7m.r1.types.RException;
                   .append("  parameter t_light_spherical_cube : sampler_cube;\n");
                 b
                   .append("  parameter m_light_spherical      : matrix_3x3f;\n");
+                b.append("\n");
+                return Unit.unit();
+              }
+
+              @Override public Unit sphereWithoutShadowDiffuseOnly(
+                final KLightSphereWithoutShadowDiffuseOnly _)
+                throws RException
+              {
+                b
+                  .append("  -- Spherical light parameters (without shadow)\n");
+                b.append("  parameter light_spherical : Light.t;\n");
                 b.append("\n");
                 return Unit.unit();
               }
@@ -527,7 +539,7 @@ import com.io7m.r1.types.RException;
           ls
             .sphereAccept(new KLightSphereVisitorType<Unit, UnreachableCodeException>() {
               @Override public Unit sphereWithoutShadow(
-                final KLightSphereWithoutShadow lsws)
+                final KLightSphereWithoutShadow _)
                 throws RException
               {
                 b
@@ -579,6 +591,16 @@ import com.io7m.r1.types.RException;
                 b.append("\n");
                 return Unit.unit();
               }
+
+              @Override public Unit sphereWithoutShadowDiffuseOnly(
+                final KLightSphereWithoutShadowDiffuseOnly _)
+                throws RException
+              {
+                b
+                  .append("  value light_attenuation = light_vectors.attenuation;\n");
+                b.append("\n");
+                return Unit.unit();
+              }
             });
 
           b.append("  -- Spherical diffuse light term\n");
@@ -593,19 +615,22 @@ import com.io7m.r1.types.RException;
           b.append("      light_attenuation\n");
           b.append("    );\n");
           b.append("\n");
-          b.append("  -- Spherical specular light term\n");
-          b.append("  value light_specular_unattenuated : vector_3f =\n");
-          b.append("    SphericalLight.specular_color (\n");
-          b.append("      light_spherical,\n");
-          b.append("      light_vectors.vectors,\n");
-          b.append("      specular\n");
-          b.append("    );\n");
-          b.append("  value light_specular : vector_3f =\n");
-          b.append("    V3.multiply_scalar (\n");
-          b.append("      light_specular_unattenuated,\n");
-          b.append("      light_attenuation\n");
-          b.append("    );\n");
-          b.append("\n");
+
+          if ((ls instanceof KLightDiffuseOnlyType) == false) {
+            b.append("  -- Spherical specular light term\n");
+            b.append("  value light_specular_unattenuated : vector_3f =\n");
+            b.append("    SphericalLight.specular_color (\n");
+            b.append("      light_spherical,\n");
+            b.append("      light_vectors.vectors,\n");
+            b.append("      specular\n");
+            b.append("    );\n");
+            b.append("  value light_specular : vector_3f =\n");
+            b.append("    V3.multiply_scalar (\n");
+            b.append("      light_specular_unattenuated,\n");
+            b.append("      light_attenuation\n");
+            b.append("    );\n");
+            b.append("\n");
+          }
           return Unit.unit();
         }
       });

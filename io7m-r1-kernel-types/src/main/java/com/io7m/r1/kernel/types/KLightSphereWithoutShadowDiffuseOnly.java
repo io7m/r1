@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -32,16 +32,17 @@ import com.io7m.r1.types.RVectorI3F;
  * <p>
  * A spherical light emits light from the given location in all directions,
  * with the intensity of the attenuated over distance according to the given
- * falloff value, and is maximally attenuated at the given radius value.
+ * falloff value, and is maximally attenuated at the given radius value. The
+ * light will not cause specular highlights.
  * </p>
  */
 
-@EqualityReference public final class KLightSphereWithoutShadow implements
+@EqualityReference public final class KLightSphereWithoutShadowDiffuseOnly implements
   KLightSphereType,
-  KLightTranslucentType
+  KLightDiffuseOnlyType
 {
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
-    KLightSphereWithoutShadowBuilderType
+    KLightSphereWithoutShadowDiffuseOnlyBuilderType
   {
     private RVectorI3F<RSpaceRGBType>   color;
     private float                       exponent;
@@ -67,9 +68,9 @@ import com.io7m.r1.types.RVectorI3F;
       }
     }
 
-    @Override public KLightSphereWithoutShadow build()
+    @Override public KLightSphereWithoutShadowDiffuseOnly build()
     {
-      return new KLightSphereWithoutShadow(
+      return new KLightSphereWithoutShadowDiffuseOnly(
         this.color,
         this.intensity,
         this.position,
@@ -116,7 +117,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A new light builder.
    */
 
-  public static KLightSphereWithoutShadowBuilderType newBuilder()
+  public static KLightSphereWithoutShadowDiffuseOnlyBuilderType newBuilder()
   {
     return new Builder(null);
   }
@@ -132,8 +133,10 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A new light builder.
    */
 
-  public static KLightSphereWithoutShadowBuilderType newBuilderFrom(
-    final KLightSphereType s)
+  public static
+    KLightSphereWithoutShadowDiffuseOnlyBuilderType
+    newBuilderFrom(
+      final KLightSphereType s)
   {
     return new Builder(NullCheck.notNull(s, "Light"));
   }
@@ -154,14 +157,14 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A new spherical light.
    */
 
-  public static KLightSphereWithoutShadow newLight(
+  public static KLightSphereWithoutShadowDiffuseOnly newLight(
     final RVectorI3F<RSpaceRGBType> in_color,
     final float in_intensity,
     final RVectorI3F<RSpaceWorldType> in_position,
     final float in_radius,
     final float in_falloff)
   {
-    return new KLightSphereWithoutShadow(
+    return new KLightSphereWithoutShadowDiffuseOnly(
       in_color,
       in_intensity,
       in_position,
@@ -178,7 +181,7 @@ import com.io7m.r1.types.RVectorI3F;
   private final float                                                             radius_inverse;
   private final KTransformType                                                    transform;
 
-  private KLightSphereWithoutShadow(
+  private KLightSphereWithoutShadowDiffuseOnly(
     final RVectorI3F<RSpaceRGBType> in_color,
     final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float in_intensity,
     final RVectorI3F<RSpaceWorldType> in_position,
@@ -225,7 +228,7 @@ import com.io7m.r1.types.RVectorI3F;
 
   @Override public String lightGetCode()
   {
-    return "LSph";
+    return "LSphDiffuseOnly";
   }
 
   @Override public RVectorI3F<RSpaceRGBType> lightGetColor()
@@ -280,20 +283,12 @@ import com.io7m.r1.types.RVectorI3F;
     return this.transform;
   }
 
-  @Override public <A, E extends Throwable> A lightTranslucentAccept(
-    final KLightTranslucentVisitorType<A, E> v)
-    throws RException,
-      E
-  {
-    return v.lightTranslucentSphericalWithoutShadow(this);
-  }
-
   @Override public <A, E extends Throwable> A sphereAccept(
     final KLightSphereVisitorType<A, E> v)
     throws RException,
       E
   {
-    return v.sphereWithoutShadow(this);
+    return v.sphereWithoutShadowDiffuseOnly(this);
   }
 
   @Override public int texturesGetRequired()
@@ -304,7 +299,7 @@ import com.io7m.r1.types.RVectorI3F;
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[KLightSphereWithoutShadow color=");
+    b.append("[KLightSphereWithoutShadowDiffuseOnly color=");
     b.append(this.color);
     b.append(", falloff=");
     b.append(this.falloff);
