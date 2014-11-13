@@ -28,6 +28,18 @@ public interface KLightSpherePseudoWithShadowBasicBuilderType extends
   KLightSpherePseudoWithShadowBuilderType
 {
   /**
+   * <p>
+   * Set all values in the builder to those in the given existing light.
+   * </p>
+   *
+   * @param s
+   *          The light
+   */
+
+  void copyFromPseudo(
+    final KLightSpherePseudoType s);
+
+  /**
    * Construct a light.
    *
    * @param context

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,7 +21,6 @@ import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
@@ -49,13 +48,13 @@ import com.io7m.r1.types.RVectorI3F;
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightSphereTexturedCubeWithoutShadowBuilderType
   {
-    private RVectorI3F<RSpaceRGBType>             color;
-    private float                                 exponent;
-    private float                                 intensity;
-    private QuaternionI4F                         orientation;
-    private RVectorI3F<RSpaceWorldType>           position;
-    private float                                 radius;
-    private @Nullable TextureCubeStaticUsableType texture;
+    private RVectorI3F<RSpaceRGBType>   color;
+    private float                       exponent;
+    private float                       intensity;
+    private QuaternionI4F               orientation;
+    private RVectorI3F<RSpaceWorldType> position;
+    private float                       radius;
+    private TextureCubeStaticUsableType texture;
 
     Builder(
       final TextureCubeStaticUsableType in_texture)
@@ -71,16 +70,13 @@ import com.io7m.r1.types.RVectorI3F;
 
     @Override public KLightSphereTexturedCubeWithoutShadow build()
     {
-      final TextureCubeStaticUsableType t = this.texture;
-      assert t != null;
-
       return new KLightSphereTexturedCubeWithoutShadow(
         this.color,
         this.intensity,
         this.position,
         this.radius,
         this.exponent,
-        t,
+        this.texture,
         this.orientation);
     }
 

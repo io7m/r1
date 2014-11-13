@@ -21,7 +21,6 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -91,67 +90,22 @@ import com.io7m.r1.types.RVectorI3F;
     private float                       radius;
     private KShadowMappedBasic          shadow;
 
-    Builder(
-      final @Nullable KLightSpherePseudoType s)
+    Builder()
     {
-      try {
-        this.compensation_bias = (float) Math.toRadians(3.7f);
-        this.near_clip = Builder.DEFAULT_NEAR_CLIP;
-
-        if (s != null) {
-          this.color = s.lightGetColor();
-          this.intensity = s.lightGetIntensity();
-          this.exponent = s.lightGetFalloff();
-          this.radius = s.lightGetRadius();
-          this.position = s.lightGetPosition();
-          this.shadow =
-            s
-              .spherePseudoAccept(new KLightSpherePseudoVisitorType<KShadowMappedBasic, UnreachableCodeException>() {
-                @Override public
-                  KShadowMappedBasic
-                  spherePseudoWithShadowBasic(
-                    final KLightSpherePseudoWithShadowBasic sb)
-                {
-                  Builder.this.negative_x = sb.getNegativeX().isSome();
-                  Builder.this.negative_y = sb.getNegativeY().isSome();
-                  Builder.this.negative_z = sb.getNegativeZ().isSome();
-                  Builder.this.positive_x = sb.getPositiveX().isSome();
-                  Builder.this.positive_y = sb.getPositiveY().isSome();
-                  Builder.this.positive_z = sb.getPositiveZ().isSome();
-                  return sb.shadow;
-                }
-
-                @Override public
-                  KShadowMappedBasic
-                  spherePseudoWithShadowVariance(
-                    final KLightSpherePseudoWithShadowVariance sv)
-                {
-                  Builder.this.negative_x = sv.getNegativeX().isSome();
-                  Builder.this.negative_y = sv.getNegativeY().isSome();
-                  Builder.this.negative_z = sv.getNegativeZ().isSome();
-                  Builder.this.positive_x = sv.getPositiveX().isSome();
-                  Builder.this.positive_y = sv.getPositiveY().isSome();
-                  Builder.this.positive_z = sv.getPositiveZ().isSome();
-                  return KShadowMappedBasic.getDefault();
-                }
-              });
-        } else {
-          this.color = RVectorI3F.one();
-          this.intensity = 1.0f;
-          this.exponent = 1.0f;
-          this.radius = 8.0f;
-          this.position = RVectorI3F.zero();
-          this.shadow = KShadowMappedBasic.getDefault();
-          this.negative_x = true;
-          this.negative_y = true;
-          this.negative_z = true;
-          this.positive_x = true;
-          this.positive_y = true;
-          this.positive_z = true;
-        }
-      } catch (final RException e) {
-        throw new UnreachableCodeException(e);
-      }
+      this.compensation_bias = (float) Math.toRadians(3.7f);
+      this.near_clip = Builder.DEFAULT_NEAR_CLIP;
+      this.color = RVectorI3F.one();
+      this.intensity = 1.0f;
+      this.exponent = 1.0f;
+      this.radius = 8.0f;
+      this.position = RVectorI3F.zero();
+      this.shadow = KShadowMappedBasic.getDefault();
+      this.negative_x = true;
+      this.negative_y = true;
+      this.negative_z = true;
+      this.positive_x = true;
+      this.positive_y = true;
+      this.positive_z = true;
     }
 
     @Override public KLightSpherePseudoWithShadowBasic build(
@@ -377,6 +331,52 @@ import com.io7m.r1.types.RVectorI3F;
       this.radius = s.lightGetRadius();
       this.position = s.lightGetPosition();
     }
+
+    @Override public void copyFromPseudo(
+      final KLightSpherePseudoType s)
+    {
+      NullCheck.notNull(s, "Light");
+      try {
+        this.color = s.lightGetColor();
+        this.intensity = s.lightGetIntensity();
+        this.exponent = s.lightGetFalloff();
+        this.radius = s.lightGetRadius();
+        this.position = s.lightGetPosition();
+        this.shadow =
+          s
+            .spherePseudoAccept(new KLightSpherePseudoVisitorType<KShadowMappedBasic, UnreachableCodeException>() {
+              @Override public
+                KShadowMappedBasic
+                spherePseudoWithShadowBasic(
+                  final KLightSpherePseudoWithShadowBasic sb)
+              {
+                Builder.this.negative_x = sb.getNegativeX().isSome();
+                Builder.this.negative_y = sb.getNegativeY().isSome();
+                Builder.this.negative_z = sb.getNegativeZ().isSome();
+                Builder.this.positive_x = sb.getPositiveX().isSome();
+                Builder.this.positive_y = sb.getPositiveY().isSome();
+                Builder.this.positive_z = sb.getPositiveZ().isSome();
+                return sb.shadow;
+              }
+
+              @Override public
+                KShadowMappedBasic
+                spherePseudoWithShadowVariance(
+                  final KLightSpherePseudoWithShadowVariance sv)
+              {
+                Builder.this.negative_x = sv.getNegativeX().isSome();
+                Builder.this.negative_y = sv.getNegativeY().isSome();
+                Builder.this.negative_z = sv.getNegativeZ().isSome();
+                Builder.this.positive_x = sv.getPositiveX().isSome();
+                Builder.this.positive_y = sv.getPositiveY().isSome();
+                Builder.this.positive_z = sv.getPositiveZ().isSome();
+                return KShadowMappedBasic.getDefault();
+              }
+            });
+      } catch (final RException e) {
+        throw new UnreachableCodeException(e);
+      }
+    }
   }
 
   /**
@@ -389,25 +389,7 @@ import com.io7m.r1.types.RVectorI3F;
 
   public static KLightSpherePseudoWithShadowBasicBuilderType newBuilder()
   {
-    return new Builder((KLightSpherePseudoType) null);
-  }
-
-  /**
-   * <p>
-   * Create a builder for creating new pseudo-spherical lights.
-   * </p>
-   *
-   * @param s
-   *          The light upon which this light will be based.
-   * @return A new light builder.
-   */
-
-  public static
-    KLightSpherePseudoWithShadowBasicBuilderType
-    newBuilderFromPseudo(
-      final KLightSpherePseudoType s)
-  {
-    return new Builder(s);
+    return new Builder();
   }
 
   private final OptionType<KLightProjectiveWithShadowBasicType> negative_x;
