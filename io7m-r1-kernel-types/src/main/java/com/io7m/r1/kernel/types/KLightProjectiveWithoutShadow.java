@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -53,17 +53,17 @@ import com.io7m.r1.types.RVectorI3F;
     private @Nullable Texture2DStaticUsableType texture;
 
     Builder(
-      final KLightProjectiveWithoutShadow in_original)
+      final KLightProjectiveType in_original)
     {
       NullCheck.notNull(in_original, "Light");
-      this.color = in_original.color;
-      this.intensity = in_original.intensity;
-      this.falloff = in_original.falloff;
-      this.position = in_original.position;
-      this.orientation = in_original.orientation;
-      this.projection = in_original.projection;
-      this.range = in_original.range;
-      this.texture = in_original.texture;
+      this.color = in_original.lightGetColor();
+      this.intensity = in_original.lightGetIntensity();
+      this.falloff = in_original.lightProjectiveGetFalloff();
+      this.position = in_original.lightProjectiveGetPosition();
+      this.orientation = in_original.lightProjectiveGetOrientation();
+      this.projection = in_original.lightProjectiveGetProjection();
+      this.range = in_original.lightProjectiveGetRange();
+      this.texture = in_original.lightProjectiveGetTexture();
     }
 
     Builder(
@@ -183,7 +183,7 @@ import com.io7m.r1.types.RVectorI3F;
    */
 
   public static KLightProjectiveWithoutShadowBuilderType newBuilderFrom(
-    final KLightProjectiveWithoutShadow p)
+    final KLightProjectiveType p)
   {
     return new Builder(p);
   }
