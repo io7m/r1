@@ -19,7 +19,6 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
@@ -50,22 +49,13 @@ import com.io7m.r1.types.RVectorI3F;
     private RVectorI3F<RSpaceWorldType> position;
     private float                       radius;
 
-    Builder(
-      final @Nullable KLightSphereType s)
+    Builder()
     {
-      if (s != null) {
-        this.color = s.lightGetColor();
-        this.intensity = s.lightGetIntensity();
-        this.exponent = s.lightGetFalloff();
-        this.radius = s.lightGetRadius();
-        this.position = s.lightGetPosition();
-      } else {
-        this.color = RVectorI3F.one();
-        this.intensity = 1.0f;
-        this.exponent = 1.0f;
-        this.radius = 8.0f;
-        this.position = RVectorI3F.zero();
-      }
+      this.color = RVectorI3F.one();
+      this.intensity = 1.0f;
+      this.exponent = 1.0f;
+      this.radius = 8.0f;
+      this.position = RVectorI3F.zero();
     }
 
     @Override public KLightSphereWithoutShadowDiffuseOnly build()
@@ -107,6 +97,17 @@ import com.io7m.r1.types.RVectorI3F;
     {
       this.radius = in_radius;
     }
+
+    @Override public void copyFromSphere(
+      final KLightSphereType s)
+    {
+      NullCheck.notNull(s, "Sphere");
+      this.color = s.lightGetColor();
+      this.intensity = s.lightGetIntensity();
+      this.exponent = s.lightGetFalloff();
+      this.radius = s.lightGetRadius();
+      this.position = s.lightGetPosition();
+    }
   }
 
   /**
@@ -119,26 +120,7 @@ import com.io7m.r1.types.RVectorI3F;
 
   public static KLightSphereWithoutShadowDiffuseOnlyBuilderType newBuilder()
   {
-    return new Builder(null);
-  }
-
-  /**
-   * <p>
-   * Create a builder for creating new spherical lights. The builder will be
-   * initialized to values based on the given light.
-   * </p>
-   *
-   * @param s
-   *          The initial light.
-   * @return A new light builder.
-   */
-
-  public static
-    KLightSphereWithoutShadowDiffuseOnlyBuilderType
-    newBuilderFrom(
-      final KLightSphereType s)
-  {
-    return new Builder(NullCheck.notNull(s, "Light"));
+    return new Builder();
   }
 
   /**
