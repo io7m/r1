@@ -42,7 +42,6 @@ import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
-import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionVarianceBuilderType;
@@ -58,11 +57,12 @@ import com.io7m.r1.types.RTransformProjectionType;
 import com.io7m.r1.types.RVectorI3F;
 
 /**
- * An example with projective lighting and variance shadow mapping, where only
- * one light actually has shadow casters assigned.
+ * An example with projective lighting and variance shadow mapping, where all
+ * lights have shadow casters assigned.
  */
 
-public final class SPShadowVarianceSpecular0 implements ExampleSceneType
+public final class SPShadowVarianceSpecularMipmap1 implements
+  ExampleSceneType
 {
   private final RMatrixM4x4F<RTransformProjectionType> projection;
 
@@ -70,7 +70,7 @@ public final class SPShadowVarianceSpecular0 implements ExampleSceneType
    * Construct the example.
    */
 
-  public SPShadowVarianceSpecular0()
+  public SPShadowVarianceSpecularMipmap1()
   {
     this.projection = new RMatrixM4x4F<RTransformProjectionType>();
   }
@@ -114,9 +114,6 @@ public final class SPShadowVarianceSpecular0 implements ExampleSceneType
       ExampleSceneUtilities.RGBA_WHITE,
       1.0f,
       t));
-    mmb.setSpecular(KMaterialSpecularConstant.constant(
-      ExampleSceneUtilities.RGB_WHITE,
-      8.0f));
 
     final KInstanceOpaqueRegular m =
       KInstanceOpaqueRegular.newInstance(
@@ -163,7 +160,7 @@ public final class SPShadowVarianceSpecular0 implements ExampleSceneType
       smv_map_b
         .setMagnificationFilter(TextureFilterMagnification.TEXTURE_FILTER_LINEAR);
       smv_map_b
-        .setMinificationFilter(TextureFilterMinification.TEXTURE_FILTER_LINEAR);
+        .setMinificationFilter(TextureFilterMinification.TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR);
       smv_map_b.setSizeExponent(8);
       final KShadowMapDescriptionVariance smv_map = smv_map_b.build();
 
@@ -234,6 +231,8 @@ public final class SPShadowVarianceSpecular0 implements ExampleSceneType
     }
 
     scene.visibleShadowsAddCaster(kp0, m);
+    scene.visibleShadowsAddCaster(kp1, m);
+    scene.visibleShadowsAddCaster(kp2, m);
 
     final KVisibleSetLightGroupBuilderType gb =
       scene.visibleOpaqueNewLightGroup("g");
