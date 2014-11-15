@@ -37,8 +37,6 @@ import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
-import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
-import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
@@ -58,11 +56,10 @@ import com.io7m.r1.types.RTransformProjectionType;
 import com.io7m.r1.types.RVectorI3F;
 
 /**
- * An example with projective lighting and variance shadow mapping, where only
- * one light actually has shadow casters assigned.
+ * An example with projective lighting and variance shadow mapping.
  */
 
-public final class SPShadowVarianceSpecular0 implements ExampleSceneType
+public final class SPShadowVarianceSpecular3 implements ExampleSceneType
 {
   private final RMatrixM4x4F<RTransformProjectionType> projection;
 
@@ -70,7 +67,7 @@ public final class SPShadowVarianceSpecular0 implements ExampleSceneType
    * Construct the example.
    */
 
-  public SPShadowVarianceSpecular0()
+  public SPShadowVarianceSpecular3()
   {
     this.projection = new RMatrixM4x4F<RTransformProjectionType>();
   }
@@ -126,20 +123,7 @@ public final class SPShadowVarianceSpecular0 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    KLightSphereWithoutShadow ks;
-    {
-      final KLightSphereWithoutShadowBuilderType b =
-        KLightSphereWithoutShadow
-          .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
-      b.setRadius(30.0f);
-      b.setIntensity(0.5f);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 3.0f, 2.0f));
-      ks = b.build();
-    }
-
     final KLightProjectiveWithShadowVariance kp0;
-    final KLightProjectiveWithShadowVariance kp1;
-    final KLightProjectiveWithShadowVariance kp2;
 
     {
       final Texture2DStaticUsableType tp =
@@ -210,8 +194,6 @@ public final class SPShadowVarianceSpecular0 implements ExampleSceneType
         b.setOrientation(o);
       }
 
-      kp1 = b.build();
-
       b.setColor(ExampleSceneUtilities.RGB_BLUE);
       b.setPosition(new RVectorI3F<RSpaceWorldType>(3.0f, 3.0f, 0.0f));
 
@@ -229,18 +211,13 @@ public final class SPShadowVarianceSpecular0 implements ExampleSceneType
 
         b.setOrientation(o);
       }
-
-      kp2 = b.build();
     }
 
     scene.visibleShadowsAddCaster(kp0, m);
 
     final KVisibleSetLightGroupBuilderType gb =
       scene.visibleOpaqueNewLightGroup("g");
-    gb.groupAddLight(ks);
     gb.groupAddLight(kp0);
-    gb.groupAddLight(kp1);
-    gb.groupAddLight(kp2);
     gb.groupAddInstance(floor);
     gb.groupAddInstance(m);
   }

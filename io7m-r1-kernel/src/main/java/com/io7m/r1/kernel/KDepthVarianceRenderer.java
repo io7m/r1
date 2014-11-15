@@ -21,6 +21,8 @@ import java.util.List;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.ClearSpecification;
+import com.io7m.jcanephora.ClearSpecificationBuilderType;
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.IndexBufferUsableType;
@@ -68,10 +70,18 @@ import com.io7m.r1.types.RTransformViewType;
 @SuppressWarnings("synthetic-access") @EqualityReference public final class KDepthVarianceRenderer implements
   KDepthVarianceRendererType
 {
-  private static final String NAME;
+  private static final String             NAME;
+  private static final ClearSpecification CLEAR_SPECIFICATION;
 
   static {
     NAME = "depth-variance";
+
+    final ClearSpecificationBuilderType cbd = ClearSpecification.newBuilder();
+    cbd.enableColorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
+    cbd.enableDepthBufferClear(1.0f);
+    cbd.enableStencilBufferClear(1);
+    cbd.setStrictChecking(false);
+    CLEAR_SPECIFICATION = cbd.build();
   }
 
   /**
@@ -294,13 +304,6 @@ import com.io7m.r1.types.RTransformViewType;
       RException,
       JCacheException
   {
-    gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
-    gc.depthBufferWriteEnable();
-    gc.depthBufferClear(1.0f);
-    gc.colorBufferMask(true, true, true, true);
-    gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
-    gc.blendingDisable();
-
     for (final String depth_code : instances.getMaterialCodes()) {
       assert depth_code != null;
 
@@ -427,13 +430,12 @@ import com.io7m.r1.types.RTransformViewType;
 
     gc.blendingDisable();
     gc.colorBufferMask(true, true, true, true);
-    gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
     gc.cullingDisable();
     gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN);
     gc.depthBufferWriteEnable();
-    gc.depthBufferClear(1.0f);
     gc.scissorDisable();
     gc.viewportSet(framebuffer_area);
+    gc.clear(KDepthVarianceRenderer.CLEAR_SPECIFICATION);
 
     this.renderDepthPassBatches(instances, gc, mwo, faces);
   }

@@ -602,7 +602,7 @@ import com.io7m.r1.types.RException;
         {
           final KShadowMapVariance map =
             (KShadowMapVariance) shadow_context.getShadowMap(lp);
-          final KFramebufferDepthVarianceAbstract framebuffer =
+          final KFramebufferDepthVarianceType framebuffer =
             map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
@@ -641,7 +641,7 @@ import com.io7m.r1.types.RException;
         {
           final KShadowMapVariance map =
             (KShadowMapVariance) shadow_context.getShadowMap(lp);
-          final KFramebufferDepthVarianceAbstract framebuffer =
+          final KFramebufferDepthVarianceType framebuffer =
             map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
