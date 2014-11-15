@@ -30,11 +30,11 @@ import com.io7m.r1.types.RException;
   KShadowMapType
 {
   private final KShadowMapDescriptionVariance description;
-  private final KFramebufferDepthVarianceAbstract     framebuffer;
+  private final KFramebufferDepthVarianceType framebuffer;
 
   private KShadowMapVariance(
     final KShadowMapDescriptionVariance in_description,
-    final KFramebufferDepthVarianceAbstract in_framebuffer)
+    final KFramebufferDepthVarianceType in_framebuffer)
   {
     this.description = NullCheck.notNull(in_description, "Description");
     this.framebuffer = NullCheck.notNull(in_framebuffer, "Framebuffer");
@@ -53,7 +53,7 @@ import com.io7m.r1.types.RException;
    * @return The framebuffer
    */
 
-  public KFramebufferDepthVarianceAbstract getFramebuffer()
+  public KFramebufferDepthVarianceType getFramebuffer()
   {
     return this.framebuffer;
   }

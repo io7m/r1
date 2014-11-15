@@ -97,14 +97,19 @@ import com.io7m.r1.types.RException;
             final TextureUnitType unit = units.get(0);
             assert unit != null;
             gc.texture2DStaticBind(unit, input_texture);
-            p.programUniformPutTextureUnit("t_image", unit);
-            p.programExecute(new JCBProgramProcedureType<JCGLException>() {
-              @Override public void call()
-                throws JCGLException
-              {
-                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-              }
-            });
+
+            try {
+              p.programUniformPutTextureUnit("t_image", unit);
+              p.programExecute(new JCBProgramProcedureType<JCGLException>() {
+                @Override public void call()
+                  throws JCGLException
+                {
+                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+                }
+              });
+            } finally {
+              gc.texture2DStaticUnbind(unit);
+            }
 
           } catch (final JCacheException x) {
             throw new UnreachableCodeException(x);
@@ -173,14 +178,19 @@ import com.io7m.r1.types.RException;
             final TextureUnitType unit = units.get(0);
             assert unit != null;
             gc.texture2DStaticBind(unit, input_texture);
-            p.programUniformPutTextureUnit("t_image", unit);
-            p.programExecute(new JCBProgramProcedureType<JCGLException>() {
-              @Override public void call()
-                throws JCGLException
-              {
-                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-              }
-            });
+
+            try {
+              p.programUniformPutTextureUnit("t_image", unit);
+              p.programExecute(new JCBProgramProcedureType<JCGLException>() {
+                @Override public void call()
+                  throws JCGLException
+                {
+                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+                }
+              });
+            } finally {
+              gc.texture2DStaticUnbind(unit);
+            }
 
           } catch (final JCacheException x) {
             throw new UnreachableCodeException(x);
