@@ -52,13 +52,13 @@
     <com.io7m.ieee754b16.versionRange>[1.0.0, 2.0.0)</com.io7m.ieee754b16.versionRange>
     <com.io7m.jcache.versionRange>[0.7.1, 0.8.0)</com.io7m.jcache.versionRange>
     <com.io7m.jcamera.versionRange>[0.2.0, 0.3.0)</com.io7m.jcamera.versionRange>
-    <com.io7m.jcanephora.versionRange>0.34.4</com.io7m.jcanephora.versionRange>
+    <com.io7m.jcanephora.versionRange>0.34.5</com.io7m.jcanephora.versionRange>
     <com.io7m.jequality.versionRange>[1.0.1, 2.0.0)</com.io7m.jequality.versionRange>
     <com.io7m.jfunctional.versionRange>[1.0.0, 2.0.0)</com.io7m.jfunctional.versionRange>
     <com.io7m.jintegers.versionRange>[1.0.0, 2.0.0)</com.io7m.jintegers.versionRange>
     <com.io7m.jlog.versionRange>[3.1.0, 4.0.0)</com.io7m.jlog.versionRange>
     <com.io7m.jnull.versionRange>[1.0.0, 2.0.0)</com.io7m.jnull.versionRange>
-    <com.io7m.jparasol.versionRange>[0.10.5, 0.11.0)</com.io7m.jparasol.versionRange>
+    <com.io7m.jparasol.versionRange>[0.10.6, 0.11.0)</com.io7m.jparasol.versionRange>
     <com.io7m.jproperties.versionRange>[1.0.0, 2.0.0)</com.io7m.jproperties.versionRange>
     <com.io7m.jranges.versionRange>[1.0.0, 2.0.0)</com.io7m.jranges.versionRange>
     <com.io7m.jtensors.versionRange>[6.0.0, 7.0.0)</com.io7m.jtensors.versionRange>

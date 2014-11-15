@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -34,6 +34,7 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
+import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicType;
@@ -241,16 +242,13 @@ import com.io7m.r1.types.RTransformViewType;
       RException
   {
     final KShadowMappedVariance shadow = lp.lightGetShadowVariance();
-    final KFramebufferDepthVarianceAbstract fb = sm.getFramebuffer();
+    final KFramebufferDepthVarianceType fb = sm.getFramebuffer();
+    final KFramebufferDepthVarianceDescription description =
+      sm.getDescription().getFramebufferDescription();
 
     gc.framebufferDrawBind(fb.kFramebufferGetDepthVariancePassFramebuffer());
 
     try {
-      gc.colorBufferMask(true, true, true, true);
-      gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
-      gc.depthBufferWriteEnable();
-      gc.depthBufferClear(1.0f);
-
       final RMatrixI4x4F<RTransformViewType> view =
         RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveView());
 
@@ -260,22 +258,44 @@ import com.io7m.r1.types.RTransformViewType;
        */
 
       final OptionType<KFaceSelection> none = Option.none();
-      dvr.rendererEvaluateDepthVariance(
+      dvr.rendererEvaluateDepthVarianceWithBoundFramebuffer(
         view,
         mwp.getProjectiveProjection(),
         shadows.getInstancesForLight(lp),
-        fb,
+        fb.kFramebufferGetArea(),
         none);
-
-      blur.postprocessorEvaluateDepthVariance(
-        shadow.getBlurParameters(),
-        fb,
-        fb);
 
     } finally {
       gc.framebufferDrawUnbind();
     }
+
+    blur.postprocessorEvaluateDepthVariance(
+      shadow.getBlurParameters(),
+      fb,
+      fb);
+
+    /**
+     * Regenerate mipmaps if the shadow map uses them.
+     */
+
+    switch (description.getFilterMinification()) {
+      case TEXTURE_FILTER_LINEAR:
+      case TEXTURE_FILTER_NEAREST:
+      {
+        break;
+      }
+      case TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR:
+      case TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST:
+      case TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR:
+      case TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST:
+      {
+        gc.texture2DStaticRegenerateMipmaps(fb
+          .kFramebufferGetDepthVarianceTexture());
+        break;
+      }
+    }
   }
+
   private static
     void
     returnReceipts(
@@ -289,6 +309,7 @@ import com.io7m.r1.types.RTransformViewType;
       r.returnToCache();
     }
   }
+
   private final KPostprocessorBlurDepthVarianceType blur;
   private final KDepthRendererType                  depth_renderer;
   private final KDepthVarianceRendererType          depth_variance_renderer;
