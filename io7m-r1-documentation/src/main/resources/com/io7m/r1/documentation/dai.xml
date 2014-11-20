@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:part 
+  xml:id="r1.dai"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <s:part-title>Design and Implementation</s:part-title>
+  <s:part-contents/>
+
+  <xi:include href="dai-conventions.xml"/>
+  <xi:include href="dai-concepts.xml"/>
+  <xi:include href="dai-coords.xml"/>
+  <xi:include href="dai-process.xml"/>
+  <xi:include href="dai-materials.xml"/>
+  <xi:include href="dai-materials-regular.xml"/>
+  <xi:include href="dai-materials-depth.xml"/>
+  <xi:include href="dai-meshes.xml"/>
+  <xi:include href="dai-transforms.xml"/>
+  <xi:include href="dai-instances.xml"/>
+  <xi:include href="dai-visible-sets.xml"/>
+  <xi:include href="dai-deferred.xml"/>
+  <xi:include href="dai-deferred-position-recon.xml"/>
+  <xi:include href="dai-forward-translucents.xml"/>
+  <xi:include href="dai-normal-mapping.xml"/>
+  <xi:include href="dai-environment-mapping.xml"/>
+  <xi:include href="dai-lighting.xml"/>
+  <xi:include href="dai-lighting-directional.xml"/>
+  <xi:include href="dai-lighting-spherical.xml"/>
+  <xi:include href="dai-lighting-projective.xml"/>
+  <xi:include href="dai-shadows.xml"/>
+  <xi:include href="dai-shadow-mapping-basic.xml"/>
+  <xi:include href="dai-shadow-mapping-variance.xml"/>
+  <xi:include href="dai-generic-refraction.xml"/>
+  <xi:include href="dai-filter-blur.xml"/>
+  <xi:include href="dai-filter-emission.xml"/>
+  <xi:include href="dai-filter-fxaa.xml"/>
+</s:part>

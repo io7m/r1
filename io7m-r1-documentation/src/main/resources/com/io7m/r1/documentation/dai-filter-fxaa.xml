@@ -17,13 +17,13 @@
   -->
 
 <s:section 
-  xml:id="r1.dai.postproc.fxaa"
+  xml:id="r1.dai.filter.fxaa"
   xmlns:s="http://schemas.io7m.com/structural/2.1.0"
   xmlns:xi="http://www.w3.org/2001/XInclude">
-  <s:section-title>Postprocess: FXAA</s:section-title>
+  <s:section-title>Filter: FXAA</s:section-title>
   <s:section-contents/>
 
-  <s:subsection xml:id="r1.dai.postproc.fxaa.overview">
+  <s:subsection xml:id="r1.dai.filter.fxaa.overview">
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
       <s:term s:type="term">Fast Approximate Anti-Aliasing</s:term> is a simple
@@ -42,7 +42,7 @@
     </s:formal-item>
   </s:subsection>
 
-  <s:subsection xml:id="r1.dai.postproc.fxaa.implementation">
+  <s:subsection xml:id="r1.dai.filter.fxaa.implementation">
     <s:subsection-title>Implementation</s:subsection-title>
     <s:paragraph>
       Unfortunately, information on the FXAA algorithm is sparse, and much of it
@@ -72,8 +72,8 @@
     </s:paragraph>
     <s:paragraph>
       The algorithm is applied via the use of the
-      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KPostprocessorFXAA.html">KPostprocessorFXAA</s:link-external>
-      postprocessor.
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KImageFilterFXAA.html">KImageFilterFXAA</s:link-external>
+      filter.
     </s:paragraph>
   </s:subsection>
 

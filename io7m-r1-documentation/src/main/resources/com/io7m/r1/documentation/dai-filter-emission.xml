@@ -17,18 +17,18 @@
   -->
 
 <s:section 
-  xml:id="r1.dai.postproc.emission"
+  xml:id="r1.dai.filter.emission"
   xmlns:s="http://schemas.io7m.com/structural/2.1.0"
   xmlns:xi="http://www.w3.org/2001/XInclude">
-  <s:section-title>Postprocess: Emission</s:section-title>
+  <s:section-title>Filter: Emission</s:section-title>
   <s:section-contents/>
 
-  <s:subsection xml:id="r1.dai.postproc.emission.overview">
+  <s:subsection xml:id="r1.dai.filter.emission.overview">
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
       An <s:term s:type="term">emissive</s:term> surface is a surface
       that appears to emit light. The <s:term s:type="package">${project.parent.name}</s:term> 
-      package offers emission as a visual effect implemented as a post-process. An optional
+      package offers emission as a visual effect implemented as a filter. An optional
       <s:term s:type="term">glow</s:term> effect is provided to allow emissive
       surfaces to appear to have a configurable 
       <s:link-external s:target="http://en.wikipedia.org/wiki/Halo_%28optical_phenomenon%29">aura</s:link-external>.
@@ -45,7 +45,7 @@
     </s:formal-item>
   </s:subsection>
 
-  <s:subsection xml:id="r1.dai.postproc.emission.algorithm">
+  <s:subsection xml:id="r1.dai.filter.emission.algorithm">
     <s:subsection-title>Algorithm</s:subsection-title>
     <s:paragraph>
       The plain emission effect without <s:term s:type="term">glow</s:term> is 
@@ -69,10 +69,10 @@
     </s:formal-item>
     <s:paragraph>
       The emission effect without glow is provided by the
-      <s:link-external s:target="apidocs/com/io7m/r1/meshes/KPostprocessorEmission.html">KPostprocessorEmission</s:link-external>
-      postprocessor. The emission effect with glow is provided by the
-      <s:link-external s:target="apidocs/com/io7m/r1/meshes/KPostprocessorEmissionGlow.html">KPostprocessorEmissionGlow</s:link-external>
-      postprocessor.
+      <s:link-external s:target="apidocs/com/io7m/r1/meshes/KImageFilterEmission.html">KImageFilterEmission</s:link-external>
+      filter. The emission effect with glow is provided by the
+      <s:link-external s:target="apidocs/com/io7m/r1/meshes/KImageFilterEmissionGlow.html">KImageFilterEmissionGlow</s:link-external>
+      filter.
     </s:paragraph>
   </s:subsection>
 

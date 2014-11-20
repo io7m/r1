@@ -226,7 +226,7 @@
       and <s:term s:type="variable">albedo_b</s:term> components correspond to the
       red, green, and blue components of the surface, respectively. The
       <s:term s:type="variable">emission</s:term> component refers to the surface
-      <s:link s:target="r1.dai.postproc.emission">emission</s:link> level. The
+      <s:link s:target="r1.dai.filter.emission">emission</s:link> level. The
       <s:term s:type="variable">normal_x</s:term> and
       <s:term s:type="variable">normal_y</s:term> components correspond to the
       two components of the <s:link s:target="r1.dai.deferred.normal-compression">compressed surface normal</s:link>
