@@ -54,18 +54,16 @@ import com.io7m.r1.examples.scenes.DLSimple0;
         }
       }, log);
 
+    final DLSimple0 ex = new DLSimple0();
+
     final OptionType<String> opt =
-      e
-        .getImage(
-          ExampleRendererDeferredDefault.getName(),
-          DLSimple0.class,
-          0);
+      e.getImage(ExampleRendererDeferredDefault.getName(), ex, 0);
     final Some<String> r = (Some<String>) opt;
     final String expected =
       String.format(
         "/%s/%s/%s/0.png",
-        "com/io7m/r1/examples/results",
-        DLSimple0.class.getCanonicalName(),
+        "com/io7m/r1/examples/results/scenes",
+        ex.exampleGetName(),
         ExampleRendererDeferredDefault.getName());
     Assert.assertEquals(expected, r.get());
   }

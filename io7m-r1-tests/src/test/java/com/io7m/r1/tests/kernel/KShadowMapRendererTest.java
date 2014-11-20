@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -72,7 +72,8 @@ import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
 import com.io7m.r1.kernel.KDepthVarianceRendererType;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceUsableType;
-import com.io7m.r1.kernel.KPostprocessorBlurDepthVarianceType;
+import com.io7m.r1.kernel.KImageFilterDepthVarianceType;
+import com.io7m.r1.kernel.KImageFilterVisitorType;
 import com.io7m.r1.kernel.KProgramType;
 import com.io7m.r1.kernel.KShaderCache;
 import com.io7m.r1.kernel.KShaderCacheDepthType;
@@ -294,9 +295,9 @@ import com.io7m.r1.types.RTransformViewType;
       final KDepthVarianceRendererType depth_variance_renderer =
         KDepthVarianceRenderer.newRenderer(g, depth_variance_shader_cache);
 
-      final KPostprocessorBlurDepthVarianceType blur =
-        new KPostprocessorBlurDepthVarianceType() {
-          @Override public void postprocessorEvaluateDepthVariance(
+      final KImageFilterDepthVarianceType<KBlurParameters> blur =
+        new KImageFilterDepthVarianceType<KBlurParameters>() {
+          @Override public void filterEvaluateDepthVariance(
             final KBlurParameters blur_config,
             final KFramebufferDepthVarianceUsableType input,
             final KFramebufferDepthVarianceUsableType output)
@@ -305,9 +306,17 @@ import com.io7m.r1.types.RTransformViewType;
             // Nothing
           }
 
-          @Override public String postprocessorGetName()
+          @Override public String filterGetName()
           {
             return "pseudo-blur";
+          }
+
+          @Override public <A, E extends Throwable> A filterAccept(
+            final KImageFilterVisitorType<A, E> v)
+            throws RException,
+              E
+          {
+            return v.depthVariance(this);
           }
         };
 

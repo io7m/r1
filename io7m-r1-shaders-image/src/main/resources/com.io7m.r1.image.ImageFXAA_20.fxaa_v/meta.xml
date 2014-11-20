@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<g:meta-vertex g:version="5" xmlns:g="http://schemas.io7m.com/parasol/glsl-meta">
+  <g:program-name>com.io7m.r1.image.ImageFXAA_20.fxaa_v</g:program-name>
+
+  <g:supports>
+    <g:version g:number="130" g:api="glsl"/>
+    <g:version g:number="100" g:api="glsl-es"/>
+    <g:version g:number="400" g:api="glsl"/>
+    <g:version g:number="140" g:api="glsl"/>
+    <g:version g:number="110" g:api="glsl"/>
+    <g:version g:number="410" g:api="glsl"/>
+    <g:version g:number="430" g:api="glsl"/>
+    <g:version g:number="440" g:api="glsl"/>
+    <g:version g:number="420" g:api="glsl"/>
+    <g:version g:number="330" g:api="glsl"/>
+    <g:version g:number="150" g:api="glsl"/>
+    <g:version g:number="120" g:api="glsl"/>
+    <g:version g:number="300" g:api="glsl-es"/>
+  </g:supports>
+
+  <g:parameters-vertex>
+    <g:declared-vertex-parameters>
+    </g:declared-vertex-parameters>
+    <g:declared-vertex-inputs>
+      <g:input g:name="v_position" g:type="vec3"/>
+    </g:declared-vertex-inputs>
+    <g:declared-vertex-outputs>
+      <g:output g:name="f_position_uv" g:type="vec2"/>
+    </g:declared-vertex-outputs>
+  </g:parameters-vertex>
+
+</g:meta-vertex>

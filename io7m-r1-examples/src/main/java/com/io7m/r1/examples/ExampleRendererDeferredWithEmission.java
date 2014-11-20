@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -23,29 +23,22 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.r1.kernel.KFramebufferDeferredUsableType;
-import com.io7m.r1.kernel.KPostprocessorDeferredType;
-import com.io7m.r1.kernel.KPostprocessorEmission;
+import com.io7m.r1.kernel.KImageFilterDeferredType;
 import com.io7m.r1.kernel.KRendererDeferredControlType;
 import com.io7m.r1.kernel.KRendererDeferredType;
-import com.io7m.r1.kernel.KShaderCacheDebugType;
-import com.io7m.r1.kernel.KShaderCacheDeferredGeometryType;
-import com.io7m.r1.kernel.KShaderCacheDeferredLightType;
-import com.io7m.r1.kernel.KShaderCacheDepthType;
-import com.io7m.r1.kernel.KShaderCacheDepthVarianceType;
-import com.io7m.r1.kernel.KShaderCacheForwardTranslucentLitType;
-import com.io7m.r1.kernel.KShaderCacheForwardTranslucentUnlitType;
-import com.io7m.r1.kernel.KShaderCachePostprocessingType;
-import com.io7m.r1.kernel.types.KUnitQuadCache;
-import com.io7m.r1.kernel.types.KUnitQuadCacheType;
+import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.kernel.types.KVisibleSet;
+import com.io7m.r1.main.R1;
+import com.io7m.r1.main.R1BuilderType;
+import com.io7m.r1.main.R1Type;
 import com.io7m.r1.types.RException;
 
 /**
  * An example renderer using the default deferred renderer.
  */
 
-public final class ExampleRendererDeferredWithEmission extends
-  AbstractExampleDeferredRenderer
+public final class ExampleRendererDeferredWithEmission implements
+  ExampleRendererDeferredType
 {
   /**
    * @return A renderer constructor.
@@ -53,43 +46,17 @@ public final class ExampleRendererDeferredWithEmission extends
 
   public static ExampleRendererConstructorType get()
   {
-    return new ExampleRendererConstructorDeferredType() {
-      @Override public <A, E extends Exception> A matchConstructor(
-        final ExampleRendererConstructorVisitorType<A, E> v)
-        throws E,
-          RException,
-          JCGLException
-      {
-        return v.deferred(this);
-      }
-
-      @Override public
-        ExampleRendererDeferredType
+    return new ExampleRendererConstructorType() {
+      @SuppressWarnings("synthetic-access") @Override public
+        ExampleRendererType
         newRenderer(
           final LogUsableType log,
-          final KShaderCacheDebugType in_shader_debug_cache,
-          final KShaderCacheForwardTranslucentLitType in_shader_translucent_lit_cache,
-          final KShaderCacheForwardTranslucentUnlitType in_shader_translucent_unlit_cache,
-          final KShaderCacheDepthType in_shader_depth_cache,
-          final KShaderCacheDepthVarianceType in_shader_depth_variance_cache,
-          final KShaderCachePostprocessingType in_shader_postprocessing_cache,
-          final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache,
-          final KShaderCacheDeferredLightType in_shader_deferred_light_cache,
+          final KShaderCacheSetType caches,
           final JCGLImplementationType gi)
           throws JCGLException,
             RException
       {
-        return ExampleRendererDeferredWithEmission.make(
-          log,
-          in_shader_debug_cache,
-          in_shader_translucent_lit_cache,
-          in_shader_translucent_unlit_cache,
-          in_shader_depth_cache,
-          in_shader_depth_variance_cache,
-          in_shader_postprocessing_cache,
-          in_shader_deferred_geo_cache,
-          in_shader_deferred_light_cache,
-          gi);
+        return ExampleRendererDeferredWithEmission.make(log, caches, gi);
       }
     };
   }
@@ -101,50 +68,22 @@ public final class ExampleRendererDeferredWithEmission extends
   public static ExampleRendererName getName()
   {
     final String name =
-      ExampleRendererDeferredWithEmission.class.getCanonicalName();
+      ExampleRendererDeferredWithEmission.class.getSimpleName();
     return new ExampleRendererName(NullCheck.notNull(name));
   }
 
-  protected static
-    ExampleRendererDeferredType
-    make(
-      final LogUsableType log,
-      final KShaderCacheDebugType in_shader_debug_cache,
-      final KShaderCacheForwardTranslucentLitType in_shader_translucent_lit_cache,
-      final KShaderCacheForwardTranslucentUnlitType in_shader_translucent_unlit_cache,
-      final KShaderCacheDepthType in_shader_depth_cache,
-      final KShaderCacheDepthVarianceType in_shader_depth_variance_cache,
-      final KShaderCachePostprocessingType in_shader_postprocessing_cache,
-      final KShaderCacheDeferredGeometryType in_shader_deferred_geo_cache,
-      final KShaderCacheDeferredLightType in_shader_deferred_light_cache,
-      final JCGLImplementationType gi)
-      throws JCGLException,
-        RException
+  private static ExampleRendererDeferredType make(
+    final LogUsableType log,
+    final KShaderCacheSetType in_cache,
+    final JCGLImplementationType gi)
+    throws JCGLException,
+      RException
   {
-    final ExampleRendererConstructorType rc =
-      ExampleRendererDeferredDefault.get();
-    final ExampleRendererConstructorDeferredType rdc =
-      (ExampleRendererConstructorDeferredType) rc;
-    final ExampleRendererDeferredType r =
-      rdc.newRenderer(
-        log,
-        in_shader_debug_cache,
-        in_shader_translucent_lit_cache,
-        in_shader_translucent_unlit_cache,
-        in_shader_depth_cache,
-        in_shader_depth_variance_cache,
-        in_shader_postprocessing_cache,
-        in_shader_deferred_geo_cache,
-        in_shader_deferred_light_cache,
-        gi);
-
-    final KUnitQuadCacheType quad_cache =
-      KUnitQuadCache.newCache(gi.getGLCommon(), log);
-    final KPostprocessorDeferredType<Unit> p =
-      KPostprocessorEmission.postprocessorNew(
-        gi,
-        quad_cache,
-        in_shader_postprocessing_cache);
+    final R1BuilderType b = R1.newBuilder(gi, log);
+    b.setShaderCacheSet(in_cache);
+    final R1Type r = b.build();
+    final KRendererDeferredType dr = r.getRendererDeferred();
+    final KImageFilterDeferredType<Unit> p = r.getFilterEmission();
 
     final KRendererDeferredType r_with_e = new KRendererDeferredType() {
       @Override public
@@ -155,12 +94,8 @@ public final class ExampleRendererDeferredWithEmission extends
           final PartialProcedureType<KRendererDeferredControlType, RException> procedure)
           throws RException
       {
-        r.rendererDeferredEvaluate(framebuffer, scene, procedure);
-        p
-          .postprocessorEvaluateDeferred(
-            Unit.unit(),
-            framebuffer,
-            framebuffer);
+        dr.rendererDeferredEvaluate(framebuffer, scene, procedure);
+        p.filterEvaluateDeferred(Unit.unit(), framebuffer, framebuffer);
       }
 
       @Override public void rendererDeferredEvaluateFull(
@@ -168,12 +103,8 @@ public final class ExampleRendererDeferredWithEmission extends
         final KVisibleSet scene)
         throws RException
       {
-        r.rendererDeferredEvaluateFull(framebuffer, scene);
-        p
-          .postprocessorEvaluateDeferred(
-            Unit.unit(),
-            framebuffer,
-            framebuffer);
+        dr.rendererDeferredEvaluateFull(framebuffer, scene);
+        p.filterEvaluateDeferred(Unit.unit(), framebuffer, framebuffer);
       }
 
       @Override public String rendererGetName()
@@ -184,16 +115,31 @@ public final class ExampleRendererDeferredWithEmission extends
       }
     };
 
-    return new ExampleRendererDeferredWithEmission(r_with_e);
+    return new ExampleRendererDeferredWithEmission(r, r_with_e);
   }
 
   private final KRendererDeferredType actual;
+  private final R1Type                r1;
 
   private ExampleRendererDeferredWithEmission(
-    final KRendererDeferredType r)
+    final R1Type in_r1,
+    final KRendererDeferredType rd)
   {
-    super(r);
-    this.actual = r;
+    this.r1 = in_r1;
+    this.actual = rd;
+  }
+
+  @Override public ExampleRendererName exampleRendererGetName()
+  {
+    final String name =
+      ExampleRendererDeferredWithEmission.class.getSimpleName();
+    assert name != null;
+    return new ExampleRendererName(name);
+  }
+
+  @Override public R1Type getR1()
+  {
+    return this.r1;
   }
 
   @Override public <T> T rendererAccept(
@@ -220,12 +166,6 @@ public final class ExampleRendererDeferredWithEmission extends
     throws RException
   {
     this.actual.rendererDeferredEvaluateFull(framebuffer, scene);
-  }
-
-  @Override public ExampleRendererName exampleRendererGetName()
-  {
-    return new ExampleRendererName(
-      ExampleRendererDeferredWithEmission.class.getCanonicalName());
   }
 
   @Override public String rendererGetName()

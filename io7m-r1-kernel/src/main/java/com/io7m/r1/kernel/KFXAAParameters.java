@@ -23,7 +23,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.r1.kernel.types.KSuggestedRangeF;
 
 /**
- * Parameters to the {@link KPostprocessorFXAA} postprocessor.
+ * Parameters to the {@link KImageFilterFXAA} postprocessor.
  */
 
 @EqualityStructural public final class KFXAAParameters

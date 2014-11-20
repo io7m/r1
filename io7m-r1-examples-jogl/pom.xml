@@ -82,6 +82,11 @@
       <artifactId>io7m-r1-examples</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>io7m-r1-main</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.jogamp.gluegen</groupId>

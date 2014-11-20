@@ -115,7 +115,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-r1-shaders-postprocessing</artifactId>
+      <artifactId>io7m-r1-shaders-image</artifactId>
       <version>${project.version}</version>
     </dependency>
 
