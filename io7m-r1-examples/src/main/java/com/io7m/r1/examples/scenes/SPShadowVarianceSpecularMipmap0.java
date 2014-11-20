@@ -29,6 +29,7 @@ import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleViewType;
+import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
 import com.io7m.r1.kernel.types.KDepthPrecision;
@@ -62,7 +63,8 @@ import com.io7m.r1.types.RVectorI3F;
  * one light actually has shadow casters assigned.
  */
 
-public final class SPShadowVarianceSpecularMipmap0 implements ExampleSceneType
+public final class SPShadowVarianceSpecularMipmap0 implements
+  ExampleSceneType
 {
   private final RMatrixM4x4F<RTransformProjectionType> projection;
 
@@ -75,9 +77,15 @@ public final class SPShadowVarianceSpecularMipmap0 implements ExampleSceneType
     this.projection = new RMatrixM4x4F<RTransformProjectionType>();
   }
 
+  @Override public <A> A exampleAccept(
+    final ExampleVisitorType<A> v)
+  {
+    return v.scene(this);
+  }
+
   @Override public String exampleGetName()
   {
-    return NullCheck.notNull(this.getClass().getCanonicalName());
+    return NullCheck.notNull(this.getClass().getSimpleName());
   }
 
   @Override public void exampleScene(

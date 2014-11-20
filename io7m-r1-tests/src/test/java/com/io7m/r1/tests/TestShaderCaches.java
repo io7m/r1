@@ -23,7 +23,7 @@ import com.io7m.r1.kernel.KShaderCacheDepthVarianceType;
 import com.io7m.r1.kernel.KShaderCacheFilesystemLoader;
 import com.io7m.r1.kernel.KShaderCacheForwardTranslucentLitType;
 import com.io7m.r1.kernel.KShaderCacheForwardTranslucentUnlitType;
-import com.io7m.r1.kernel.KShaderCachePostprocessingType;
+import com.io7m.r1.kernel.KShaderCacheImageType;
 import com.io7m.r1.kernel.KShaderCacheSetClasspath;
 import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.types.RException;
@@ -112,7 +112,7 @@ public final class TestShaderCaches implements KShaderCacheSetType
     final KShaderCacheDepthVarianceType in_shader_depth_variance_cache;
     final KShaderCacheForwardTranslucentLitType in_shader_forward_translucent_lit_cache;
     final KShaderCacheForwardTranslucentUnlitType in_shader_forward_translucent_unlit_cache;
-    final KShaderCachePostprocessingType in_shader_postprocessing_cache;
+    final KShaderCacheImageType in_shader_image_cache;
 
     {
       final FilesystemType fs =
@@ -185,14 +185,15 @@ public final class TestShaderCaches implements KShaderCacheSetType
     {
       final FilesystemType fs =
         Filesystem.makeWithoutArchiveDirectory(in_log);
-      fs.mountArchiveFromAnywhere(
-        TestShaderCaches.makeShaderArchiveNameEclipse(
-          base,
-          "postprocessing",
-          version),
-        PathVirtual.ROOT);
-      in_shader_postprocessing_cache =
-        TestShaderCaches.wrapPostprocessing(in_gi, in_log, cache_config, fs);
+      fs
+        .mountArchiveFromAnywhere(
+          TestShaderCaches.makeShaderArchiveNameEclipse(
+            base,
+            "image",
+            version),
+          PathVirtual.ROOT);
+      in_shader_image_cache =
+        TestShaderCaches.wrapImage(in_gi, in_log, cache_config, fs);
     }
 
     {
@@ -235,7 +236,7 @@ public final class TestShaderCaches implements KShaderCacheSetType
       in_shader_depth_variance_cache,
       in_shader_forward_translucent_lit_cache,
       in_shader_forward_translucent_unlit_cache,
-      in_shader_postprocessing_cache);
+      in_shader_image_cache);
   }
 
   private static KShaderCacheDebugType wrapDebug(
@@ -333,7 +334,7 @@ public final class TestShaderCaches implements KShaderCacheSetType
     return KShaderCache.wrapForwardTranslucentUnlit(c);
   }
 
-  private static KShaderCachePostprocessingType wrapPostprocessing(
+  private static KShaderCacheImageType wrapImage(
     final JCGLImplementationType gi,
     final LogUsableType log,
     final LRUCacheConfig cache_config,
@@ -343,7 +344,7 @@ public final class TestShaderCaches implements KShaderCacheSetType
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
     final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
-    return KShaderCache.wrapPostprocessing(c);
+    return KShaderCache.wrapImage(c);
   }
 
   private final KShaderCacheDebugType                   shader_debug_cache;
@@ -353,7 +354,7 @@ public final class TestShaderCaches implements KShaderCacheSetType
   private final KShaderCacheDepthVarianceType           shader_depth_variance_cache;
   private final KShaderCacheForwardTranslucentLitType   shader_forward_translucent_lit_cache;
   private final KShaderCacheForwardTranslucentUnlitType shader_forward_translucent_unlit_cache;
-  private final KShaderCachePostprocessingType          shader_postprocessing_cache;
+  private final KShaderCacheImageType                   shader_image_cache;
 
   /**
    * Construct shader caches.
@@ -370,7 +371,7 @@ public final class TestShaderCaches implements KShaderCacheSetType
    *          A shader cache
    * @param in_shader_forward_translucent_lit_cache
    *          A shader cache
-   * @param in_shader_postprocessing_cache
+   * @param in_shader_image_cache
    *          A shader cache
    */
 
@@ -382,7 +383,7 @@ public final class TestShaderCaches implements KShaderCacheSetType
     final KShaderCacheDepthVarianceType in_shader_depth_variance_cache,
     final KShaderCacheForwardTranslucentLitType in_shader_forward_translucent_lit_cache,
     final KShaderCacheForwardTranslucentUnlitType in_shader_forward_translucent_unlit_cache,
-    final KShaderCachePostprocessingType in_shader_postprocessing_cache)
+    final KShaderCacheImageType in_shader_image_cache)
   {
     this.shader_debug_cache = in_shader_debug_cache;
     this.shader_deferred_geo_cache = in_shader_deferred_geo_cache;
@@ -393,7 +394,7 @@ public final class TestShaderCaches implements KShaderCacheSetType
       in_shader_forward_translucent_lit_cache;
     this.shader_forward_translucent_unlit_cache =
       in_shader_forward_translucent_unlit_cache;
-    this.shader_postprocessing_cache = in_shader_postprocessing_cache;
+    this.shader_image_cache = in_shader_image_cache;
   }
 
   @Override public KShaderCacheDebugType getShaderDebugCache()
@@ -441,10 +442,8 @@ public final class TestShaderCaches implements KShaderCacheSetType
     return this.shader_forward_translucent_unlit_cache;
   }
 
-  @Override public
-    KShaderCachePostprocessingType
-    getShaderPostprocessingCache()
+  @Override public KShaderCacheImageType getShaderImageCache()
   {
-    return this.shader_postprocessing_cache;
+    return this.shader_image_cache;
   }
 }

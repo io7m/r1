@@ -31,6 +31,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.r1.kernel.KCopyParameters;
 import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
@@ -42,13 +43,19 @@ import com.io7m.r1.kernel.KFramebufferRGBACache;
 import com.io7m.r1.kernel.KFramebufferRGBACacheType;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCache;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCacheType;
-import com.io7m.r1.kernel.KPostprocessorBlurDepthVariance;
-import com.io7m.r1.kernel.KPostprocessorBlurDepthVarianceType;
-import com.io7m.r1.kernel.KPostprocessorDeferredType;
-import com.io7m.r1.kernel.KPostprocessorEmission;
-import com.io7m.r1.kernel.KPostprocessorEmissionGlow;
-import com.io7m.r1.kernel.KPostprocessorFXAA;
-import com.io7m.r1.kernel.KPostprocessorRGBAType;
+import com.io7m.r1.kernel.KImageFilterBlurDepthVariance;
+import com.io7m.r1.kernel.KImageFilterBlurRGBA;
+import com.io7m.r1.kernel.KImageFilterCopyRGBA;
+import com.io7m.r1.kernel.KImageFilterDeferredType;
+import com.io7m.r1.kernel.KImageFilterDepthVarianceType;
+import com.io7m.r1.kernel.KImageFilterEmission;
+import com.io7m.r1.kernel.KImageFilterEmissionGlow;
+import com.io7m.r1.kernel.KImageFilterFXAA;
+import com.io7m.r1.kernel.KImageFilterRGBAType;
+import com.io7m.r1.kernel.KImageSourceDepthVarianceMix;
+import com.io7m.r1.kernel.KImageSourceDepthVarianceType;
+import com.io7m.r1.kernel.KImageSourceRGBAMix;
+import com.io7m.r1.kernel.KImageSourceRGBAType;
 import com.io7m.r1.kernel.KRefractionRenderer;
 import com.io7m.r1.kernel.KRefractionRendererType;
 import com.io7m.r1.kernel.KRegionCopier;
@@ -63,10 +70,12 @@ import com.io7m.r1.kernel.KShadowMapCache;
 import com.io7m.r1.kernel.KShadowMapCacheType;
 import com.io7m.r1.kernel.KShadowMapRenderer;
 import com.io7m.r1.kernel.KShadowMapRendererType;
+import com.io7m.r1.kernel.KTextureMixParameters;
 import com.io7m.r1.kernel.KTranslucentRenderer;
 import com.io7m.r1.kernel.KTranslucentRendererType;
 import com.io7m.r1.kernel.KViewRaysCache;
 import com.io7m.r1.kernel.KViewRaysCacheType;
+import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KFrustumMeshCache;
 import com.io7m.r1.kernel.types.KFrustumMeshCacheType;
 import com.io7m.r1.kernel.types.KGlowParameters;
@@ -86,41 +95,45 @@ import com.io7m.r1.types.RExceptionFilesystem;
   @EqualityReference private static final class Builder implements
     R1BuilderType
   {
-    private @Nullable KRegionCopierType                           copier;
-    private @Nullable KDepthRendererType                          depth_renderer;
-    private @Nullable KPostprocessorBlurDepthVarianceType         depth_variance_blur;
-    private @Nullable KFramebufferDepthVarianceCacheType          depth_variance_cache;
-    private long                                                  depth_variance_framebuffer_count;
-    private long                                                  depth_variance_framebuffer_height;
-    private long                                                  depth_variance_framebuffer_width;
-    private @Nullable KDepthVarianceRendererType                  depth_variance_renderer;
-    private @Nullable KFrustumMeshCacheType                       frustum_cache;
-    private long                                                  frustum_cache_count;
-    private final JCGLImplementationType                          gl;
-    private final LogUsableType                                   log;
-    private @Nullable KPostprocessorDeferredType<Unit>            post_emission;
-    private @Nullable KPostprocessorDeferredType<KGlowParameters> post_emission_glow;
-    private @Nullable KPostprocessorRGBAType<KFXAAParameters>     post_fxaa;
-    private @Nullable KUnitQuadCacheType                          quad_cache;
-    private @Nullable KRendererDeferredType                       renderer_deferred;
-    private @Nullable KRendererDeferredOpaqueType                 renderer_deferred_opaque;
-    private @Nullable KRefractionRendererType                     renderer_refraction;
-    private @Nullable KTranslucentRendererType                    renderer_translucent;
-    private @Nullable KFramebufferRGBACacheType                   rgba_cache;
-    private long                                                  rgba_framebuffer_count;
-    private long                                                  rgba_framebuffer_height;
-    private long                                                  rgba_framebuffer_width;
-    private @Nullable KFramebufferRGBAWithDepthCacheType          rgba_with_depth_cache;
-    private long                                                  rgba_with_depth_framebuffer_count;
-    private long                                                  rgba_with_depth_framebuffer_height;
-    private long                                                  rgba_with_depth_framebuffer_width;
-    private @Nullable KShaderCacheSetType                         shader_caches;
-    private @Nullable KShadowMapCacheType                         shadow_cache;
-    private long                                                  shadow_map_cache_size;
-    private @Nullable KShadowMapRendererType                      shadow_renderer;
-    private @Nullable KUnitSphereCacheType                        sphere_cache;
-    private long                                                  view_ray_cache_count;
-    private @Nullable KViewRaysCacheType                          view_rays_cache;
+    private @Nullable KRegionCopierType                                    copier;
+    private @Nullable KDepthRendererType                                   depth_renderer;
+    private @Nullable KImageFilterDepthVarianceType<KBlurParameters>       depth_variance_blur;
+    private @Nullable KFramebufferDepthVarianceCacheType                   depth_variance_cache;
+    private long                                                           depth_variance_framebuffer_count;
+    private long                                                           depth_variance_framebuffer_height;
+    private long                                                           depth_variance_framebuffer_width;
+    private @Nullable KDepthVarianceRendererType                           depth_variance_renderer;
+    private @Nullable KImageFilterCopyRGBA                                 filter_rgba_copy;
+    private @Nullable KFrustumMeshCacheType                                frustum_cache;
+    private long                                                           frustum_cache_count;
+    private final JCGLImplementationType                                   gl;
+    private final LogUsableType                                            log;
+    private @Nullable KImageFilterDeferredType<Unit>                       post_emission;
+    private @Nullable KImageFilterDeferredType<KGlowParameters>            post_emission_glow;
+    private @Nullable KImageFilterRGBAType<KFXAAParameters>                post_fxaa;
+    private @Nullable KUnitQuadCacheType                                   quad_cache;
+    private @Nullable KRendererDeferredType                                renderer_deferred;
+    private @Nullable KRendererDeferredOpaqueType                          renderer_deferred_opaque;
+    private @Nullable KRefractionRendererType                              renderer_refraction;
+    private @Nullable KTranslucentRendererType                             renderer_translucent;
+    private @Nullable KImageFilterRGBAType<KBlurParameters>                rgba_blur;
+    private @Nullable KFramebufferRGBACacheType                            rgba_cache;
+    private long                                                           rgba_framebuffer_count;
+    private long                                                           rgba_framebuffer_height;
+    private long                                                           rgba_framebuffer_width;
+    private @Nullable KFramebufferRGBAWithDepthCacheType                   rgba_with_depth_cache;
+    private long                                                           rgba_with_depth_framebuffer_count;
+    private long                                                           rgba_with_depth_framebuffer_height;
+    private long                                                           rgba_with_depth_framebuffer_width;
+    private @Nullable KShaderCacheSetType                                  shader_caches;
+    private @Nullable KShadowMapCacheType                                  shadow_cache;
+    private long                                                           shadow_map_cache_size;
+    private @Nullable KShadowMapRendererType                               shadow_renderer;
+    private @Nullable KImageSourceDepthVarianceType<KTextureMixParameters> source_depth_variance_mix;
+    private @Nullable KImageSourceRGBAType<KTextureMixParameters>          source_rgba_mix;
+    private @Nullable KUnitSphereCacheType                                 sphere_cache;
+    private long                                                           view_ray_cache_count;
+    private @Nullable KViewRaysCacheType                                   view_rays_cache;
 
     Builder(
       final JCGLImplementationType in_gl,
@@ -155,32 +168,44 @@ import com.io7m.r1.types.RExceptionFilesystem;
     {
       try {
         final KShaderCacheSetType in_shader_caches = this.makeShaderCaches();
+
         final KDepthVarianceRendererType in_depth_variance_renderer =
           this.makeDepthVarianceRenderer(in_shader_caches);
+
         final KDepthRendererType in_depth_renderer =
           this.makeDepthRenderer(in_shader_caches);
+
         final KRegionCopierType in_copier = this.makeRegionCopier();
+
         final KUnitQuadCacheType in_quad_cache = this.makeQuadCache();
+
         final KFramebufferDepthVarianceCacheType in_depth_variance_cache =
           this.makeDepthVarianceCache();
-        final KPostprocessorBlurDepthVarianceType in_depth_variance_blur =
+
+        final KImageFilterDepthVarianceType<KBlurParameters> in_depth_variance_blur =
           this.makeDepthVarianceBlur(
             in_shader_caches,
             in_copier,
             in_quad_cache,
             in_depth_variance_cache);
+
         final KShadowMapCacheType in_shadow_cache = this.makeShadowMapCache();
+
         final KShadowMapRendererType in_shadow_renderer =
           this.makeShadowRenderer(
             in_depth_variance_renderer,
             in_depth_renderer,
             in_depth_variance_blur,
             in_shadow_cache);
+
         final KUnitSphereCacheType in_sphere_cache = this.makeSphereCache();
+
         final KFrustumMeshCacheType in_frustum_cache =
           this.makeFrustumCache();
+
         final KViewRaysCacheType in_view_rays_cache =
           this.makeViewRaysCache();
+
         final KRendererDeferredOpaqueType in_renderer_deferred_opaque =
           this.makeDeferredOpaque(
             in_shader_caches,
@@ -188,37 +213,64 @@ import com.io7m.r1.types.RExceptionFilesystem;
             in_sphere_cache,
             in_frustum_cache,
             in_view_rays_cache);
+
         final KFramebufferRGBAWithDepthCacheType in_rgba_with_depth_cache =
           this.makeRGBAWithDepthCache();
+
+        final KFramebufferRGBACacheType in_rgba_cache = this.makeRGBACache();
+
         final KRefractionRendererType in_refraction_renderer =
           this.makeRefractionRenderer(
             in_shader_caches,
             in_copier,
             in_rgba_with_depth_cache);
+
         final KTranslucentRendererType in_renderer_translucent =
           this.makeTranslucentRenderer(
             in_shader_caches,
             in_refraction_renderer);
+
         final KRendererDeferredType in_renderer =
           this.makeRenderer(
             in_shadow_renderer,
             in_renderer_deferred_opaque,
             in_renderer_translucent);
-        final KPostprocessorDeferredType<Unit> in_post_emission =
-          this.makePostEmission(in_shader_caches, in_quad_cache);
-        final KFramebufferRGBACacheType in_rgba_cache = this.makeRGBACache();
-        final KPostprocessorDeferredType<KGlowParameters> in_post_emission_glow =
-          this.makePostEmissionGlow(
+
+        final KImageFilterRGBAType<KBlurParameters> in_blur_rgba =
+          this.makeRGBABlur(
             in_shader_caches,
             in_copier,
             in_quad_cache,
             in_rgba_cache);
-        final KPostprocessorRGBAType<KFXAAParameters> in_post_fxaa =
+
+        final KImageFilterDeferredType<Unit> in_post_emission =
+          this.makePostEmission(in_shader_caches, in_quad_cache);
+
+        final KImageFilterDeferredType<KGlowParameters> in_post_emission_glow =
+          this.makePostEmissionGlow(
+            in_shader_caches,
+            in_blur_rgba,
+            in_quad_cache,
+            in_rgba_cache);
+
+        final KImageFilterRGBAType<KFXAAParameters> in_post_fxaa =
           this.makePostFXAA(
             in_shader_caches,
             in_copier,
             in_quad_cache,
             in_rgba_cache);
+
+        final KImageSourceRGBAType<KTextureMixParameters> in_source_rgba_mix =
+          this.makeSourceRGBAMix(this.gl, in_quad_cache, in_shader_caches);
+
+        final KImageSourceDepthVarianceType<KTextureMixParameters> in_source_depth_variance_mix =
+          this.makeSourceDepthVarianceMix(
+            this.gl,
+            in_quad_cache,
+            in_shader_caches);
+
+        final KImageFilterRGBAType<KCopyParameters> in_filter_rgba_copy =
+          this.makeRGBACopy(in_copier, in_rgba_cache);
 
         return new R1(
           in_copier,
@@ -241,7 +293,12 @@ import com.io7m.r1.types.RExceptionFilesystem;
           in_shadow_cache,
           in_shadow_renderer,
           in_sphere_cache,
-          in_view_rays_cache);
+          in_view_rays_cache,
+          in_source_rgba_mix,
+          in_blur_rgba,
+          in_source_depth_variance_mix,
+          this.gl,
+          in_filter_rgba_copy);
 
       } catch (final FilesystemError e) {
         throw RExceptionFilesystem.fromFilesystemException(e);
@@ -291,22 +348,24 @@ import com.io7m.r1.types.RExceptionFilesystem;
       return in_depth_renderer;
     }
 
-    private KPostprocessorBlurDepthVarianceType makeDepthVarianceBlur(
-      final KShaderCacheSetType in_shader_caches,
-      final KRegionCopierType in_copier,
-      final KUnitQuadCacheType in_quad_cache,
-      final KFramebufferDepthVarianceCacheType in_depth_variance_cache)
+    private
+      KImageFilterDepthVarianceType<KBlurParameters>
+      makeDepthVarianceBlur(
+        final KShaderCacheSetType in_shader_caches,
+        final KRegionCopierType in_copier,
+        final KUnitQuadCacheType in_quad_cache,
+        final KFramebufferDepthVarianceCacheType in_depth_variance_cache)
     {
-      final KPostprocessorBlurDepthVarianceType in_depth_variance_blur;
+      final KImageFilterDepthVarianceType<KBlurParameters> in_depth_variance_blur;
       if (this.depth_variance_blur != null) {
         in_depth_variance_blur = this.depth_variance_blur;
       } else {
         in_depth_variance_blur =
-          KPostprocessorBlurDepthVariance.postprocessorNew(
+          KImageFilterBlurDepthVariance.filterNew(
             this.gl,
             in_copier,
             in_depth_variance_cache,
-            in_shader_caches.getShaderPostprocessingCache(),
+            in_shader_caches.getShaderImageCache(),
             in_quad_cache,
             this.log);
       }
@@ -370,62 +429,62 @@ import com.io7m.r1.types.RExceptionFilesystem;
       return in_frustum_cache;
     }
 
-    private KPostprocessorDeferredType<Unit> makePostEmission(
+    private KImageFilterDeferredType<Unit> makePostEmission(
       final KShaderCacheSetType in_shader_caches,
       final KUnitQuadCacheType in_quad_cache)
     {
-      KPostprocessorDeferredType<Unit> in_post_emission;
+      KImageFilterDeferredType<Unit> in_post_emission;
       if (this.post_emission != null) {
         in_post_emission = this.post_emission;
       } else {
         in_post_emission =
-          KPostprocessorEmission.postprocessorNew(
+          KImageFilterEmission.filterNew(
             this.gl,
             in_quad_cache,
-            in_shader_caches.getShaderPostprocessingCache());
+            in_shader_caches.getShaderImageCache());
       }
       return in_post_emission;
     }
 
-    private KPostprocessorDeferredType<KGlowParameters> makePostEmissionGlow(
+    private KImageFilterDeferredType<KGlowParameters> makePostEmissionGlow(
       final KShaderCacheSetType in_shader_caches,
-      final KRegionCopierType in_copier,
+      final KImageFilterRGBAType<KBlurParameters> in_blur_rgba,
       final KUnitQuadCacheType in_quad_cache,
       final KFramebufferRGBACacheType in_rgba_cache)
     {
-      KPostprocessorDeferredType<KGlowParameters> in_post_emission_glow;
+      KImageFilterDeferredType<KGlowParameters> in_post_emission_glow;
       if (this.post_emission_glow != null) {
         in_post_emission_glow = this.post_emission_glow;
       } else {
         in_post_emission_glow =
-          KPostprocessorEmissionGlow.postprocessorNew(
+          KImageFilterEmissionGlow.filterNew(
             this.gl,
-            in_copier,
             in_quad_cache,
             in_rgba_cache,
-            in_shader_caches.getShaderPostprocessingCache(),
+            in_shader_caches.getShaderImageCache(),
+            in_blur_rgba,
             this.log);
       }
       return in_post_emission_glow;
     }
 
-    private KPostprocessorRGBAType<KFXAAParameters> makePostFXAA(
+    private KImageFilterRGBAType<KFXAAParameters> makePostFXAA(
       final KShaderCacheSetType in_shader_caches,
       final KRegionCopierType in_copier,
       final KUnitQuadCacheType in_quad_cache,
       final KFramebufferRGBACacheType in_rgba_cache)
     {
-      final KPostprocessorRGBAType<KFXAAParameters> in_post_fxaa;
+      final KImageFilterRGBAType<KFXAAParameters> in_post_fxaa;
       if (this.post_fxaa != null) {
         in_post_fxaa = this.post_fxaa;
       } else {
         in_post_fxaa =
-          KPostprocessorFXAA.postprocessorNew(
+          KImageFilterFXAA.filterNew(
             this.gl,
             in_copier,
             in_quad_cache,
             in_rgba_cache,
-            in_shader_caches.getShaderPostprocessingCache());
+            in_shader_caches.getShaderImageCache());
       }
       return in_post_fxaa;
     }
@@ -494,6 +553,28 @@ import com.io7m.r1.types.RExceptionFilesystem;
       return in_renderer;
     }
 
+    private KImageFilterRGBAType<KBlurParameters> makeRGBABlur(
+      final KShaderCacheSetType in_shader_caches,
+      final KRegionCopierType in_copier,
+      final KUnitQuadCacheType in_quad_cache,
+      final KFramebufferRGBACacheType in_rgba_cache)
+    {
+      final KImageFilterRGBAType<KBlurParameters> in_rgba_blur;
+      if (this.rgba_blur != null) {
+        in_rgba_blur = this.rgba_blur;
+      } else {
+        in_rgba_blur =
+          KImageFilterBlurRGBA.filterNew(
+            this.gl,
+            in_copier,
+            in_rgba_cache,
+            in_shader_caches.getShaderImageCache(),
+            in_quad_cache,
+            this.log);
+      }
+      return in_rgba_blur;
+    }
+
     private KFramebufferRGBACacheType makeRGBACache()
     {
       KFramebufferRGBACacheType in_rgba_cache;
@@ -509,6 +590,17 @@ import com.io7m.r1.types.RExceptionFilesystem;
           KFramebufferRGBACache.newCacheWithConfig(this.gl, config, this.log);
       }
       return in_rgba_cache;
+    }
+
+    private KImageFilterRGBAType<KCopyParameters> makeRGBACopy(
+      final KRegionCopierType in_copier,
+      final KFramebufferRGBACacheType in_rgba_cache)
+    {
+      if (this.filter_rgba_copy != null) {
+        return this.filter_rgba_copy;
+      }
+
+      return KImageFilterCopyRGBA.filterNew(in_copier, in_rgba_cache);
     }
 
     private KFramebufferRGBAWithDepthCacheType makeRGBAWithDepthCache()
@@ -561,11 +653,13 @@ import com.io7m.r1.types.RExceptionFilesystem;
       return in_shadow_cache;
     }
 
-    private KShadowMapRendererType makeShadowRenderer(
-      final KDepthVarianceRendererType in_depth_variance_renderer,
-      final KDepthRendererType in_depth_renderer,
-      final KPostprocessorBlurDepthVarianceType in_depth_variance_blur,
-      final KShadowMapCacheType in_shadow_cache)
+    private
+      KShadowMapRendererType
+      makeShadowRenderer(
+        final KDepthVarianceRendererType in_depth_variance_renderer,
+        final KDepthRendererType in_depth_renderer,
+        final KImageFilterDepthVarianceType<KBlurParameters> in_depth_variance_blur,
+        final KShadowMapCacheType in_shadow_cache)
     {
       final KShadowMapRendererType in_shadow_renderer;
       if (this.shadow_renderer != null) {
@@ -581,6 +675,38 @@ import com.io7m.r1.types.RExceptionFilesystem;
             this.log);
       }
       return in_shadow_renderer;
+    }
+
+    private
+      KImageSourceDepthVarianceType<KTextureMixParameters>
+      makeSourceDepthVarianceMix(
+        final JCGLImplementationType in_gi,
+        final KUnitQuadCacheType in_quad_cache,
+        final KShaderCacheSetType in_shader_cache)
+    {
+      if (this.source_depth_variance_mix != null) {
+        return this.source_depth_variance_mix;
+      }
+
+      return KImageSourceDepthVarianceMix.sourceNew(
+        in_gi,
+        in_quad_cache,
+        in_shader_cache.getShaderImageCache());
+    }
+
+    private KImageSourceRGBAType<KTextureMixParameters> makeSourceRGBAMix(
+      final JCGLImplementationType in_gi,
+      final KUnitQuadCacheType in_quad_cache,
+      final KShaderCacheSetType in_shader_cache)
+    {
+      if (this.source_rgba_mix != null) {
+        return this.source_rgba_mix;
+      }
+
+      return KImageSourceRGBAMix.sourceNew(
+        in_gi,
+        in_quad_cache,
+        in_shader_cache.getShaderImageCache());
     }
 
     private KUnitSphereCacheType makeSphereCache()
@@ -683,6 +809,37 @@ import com.io7m.r1.types.RExceptionFilesystem;
         NullCheck.notNull(r, "Depth variance renderer");
     }
 
+    @Override public void setFilterBlurDepthVariance(
+      final KImageFilterDepthVarianceType<KBlurParameters> r)
+    {
+      this.depth_variance_blur =
+        NullCheck.notNull(r, "Depth variance blur filter");
+    }
+
+    @Override public void setFilterBlurRGBA(
+      final KImageFilterRGBAType<KBlurParameters> r)
+    {
+      this.rgba_blur = NullCheck.notNull(r, "RGBA blur filter");
+    }
+
+    @Override public void setFilterEmission(
+      final KImageFilterDeferredType<Unit> p)
+    {
+      this.post_emission = p;
+    }
+
+    @Override public void setFilterEmissionGlow(
+      final KImageFilterDeferredType<KGlowParameters> p)
+    {
+      this.post_emission_glow = p;
+    }
+
+    @Override public void setFilterFXAA(
+      final KImageFilterRGBAType<KFXAAParameters> p)
+    {
+      this.post_fxaa = p;
+    }
+
     @Override public void setFrustumCache(
       final KFrustumMeshCacheType r)
     {
@@ -698,31 +855,6 @@ import com.io7m.r1.types.RExceptionFilesystem;
           "Frustum count",
           0,
           "Frustum minimum count");
-    }
-
-    @Override public void setPostprocessorBlurDepthVariance(
-      final KPostprocessorBlurDepthVarianceType r)
-    {
-      this.depth_variance_blur =
-        NullCheck.notNull(r, "Depth variance blur postprocessor");
-    }
-
-    @Override public void setPostprocessorEmission(
-      final KPostprocessorDeferredType<Unit> p)
-    {
-      this.post_emission = p;
-    }
-
-    @Override public void setPostprocessorEmissionGlow(
-      final KPostprocessorDeferredType<KGlowParameters> p)
-    {
-      this.post_emission_glow = p;
-    }
-
-    @Override public void setPostprocessorFXAA(
-      final KPostprocessorRGBAType<KFXAAParameters> p)
-    {
-      this.post_fxaa = p;
     }
 
     @Override public void setRegionCopier(
@@ -831,6 +963,30 @@ import com.io7m.r1.types.RExceptionFilesystem;
   }
 
   /**
+   * The default number of temporary depth variance framebuffers.
+   */
+
+  public static final long DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_COUNT;
+
+  /**
+   * The assumed height of temporary depth variance framebuffers.
+   */
+
+  public static final long DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_HEIGHT;
+
+  /**
+   * The assumed width of temporary depth variance framebuffers.
+   */
+
+  public static final long DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_WIDTH;
+
+  /**
+   * The default number of frustum meshes to be cached.
+   */
+
+  public static final long DEFAULT_FRUSTUM_CACHE_COUNT;
+
+  /**
    * The default number of temporary RGBA framebuffers.
    */
 
@@ -865,30 +1021,6 @@ import com.io7m.r1.types.RExceptionFilesystem;
    */
 
   public static final long DEFAULT_RGBA_WITH_DEPTH_FRAMEBUFFER_WIDTH;
-
-  /**
-   * The default number of temporary depth variance framebuffers.
-   */
-
-  public static final long DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_COUNT;
-
-  /**
-   * The assumed height of temporary depth variance framebuffers.
-   */
-
-  public static final long DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_HEIGHT;
-
-  /**
-   * The assumed width of temporary depth variance framebuffers.
-   */
-
-  public static final long DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_WIDTH;
-
-  /**
-   * The default number of frustum meshes to be cached.
-   */
-
-  public static final long DEFAULT_FRUSTUM_CACHE_COUNT;
 
   /**
    * The default size of shadow maps caches.
@@ -935,38 +1067,43 @@ import com.io7m.r1.types.RExceptionFilesystem;
     return new Builder(in_gl, in_log);
   }
 
-  private final KRegionCopierType                           copier;
-  private final KDepthRendererType                          depth_renderer;
-  private final KPostprocessorBlurDepthVarianceType         depth_variance_blur;
-  private final KFramebufferDepthVarianceCacheType          depth_variance_cache;
-  private final KDepthVarianceRendererType                  depth_variance_renderer;
-  private final KFrustumMeshCacheType                       frustum_cache;
-  private final KPostprocessorDeferredType<Unit>            post_emission;
-  private final KPostprocessorDeferredType<KGlowParameters> post_emission_glow;
-  private final KPostprocessorRGBAType<KFXAAParameters>     post_fxaa;
-  private final KUnitQuadCacheType                          quad_cache;
-  private final KRefractionRendererType                     refraction_renderer;
-  private final KRendererDeferredType                       renderer;
-  private final KRendererDeferredOpaqueType                 renderer_deferred_opaque;
-  private final KTranslucentRendererType                    renderer_translucent;
-  private final KFramebufferRGBACacheType                   rgba_cache;
-  private final KFramebufferRGBAWithDepthCacheType          rgba_with_depth_cache;
-  private final KShaderCacheSetType                         shader_caches;
-  private final KShadowMapCacheType                         shadow_cache;
-  private final KShadowMapRendererType                      shadow_renderer;
-  private final KUnitSphereCacheType                        sphere_cache;
-  private final KViewRaysCacheType                          view_rays_cache;
+  private final KRegionCopierType                                    copier;
+  private final KDepthRendererType                                   depth_renderer;
+  private final KImageFilterDepthVarianceType<KBlurParameters>       depth_variance_blur;
+  private final KFramebufferDepthVarianceCacheType                   depth_variance_cache;
+  private final KDepthVarianceRendererType                           depth_variance_renderer;
+  private final KImageFilterRGBAType<KBlurParameters>                filter_blur_rgba;
+  private final KImageFilterDeferredType<Unit>                       filter_emission;
+  private final KImageFilterDeferredType<KGlowParameters>            filter_emission_glow;
+  private final KImageFilterRGBAType<KFXAAParameters>                filter_fxaa;
+  private final KImageFilterRGBAType<KCopyParameters>                filter_rgba_copy;
+  private final KFrustumMeshCacheType                                frustum_cache;
+  private final JCGLImplementationType                               gl;
+  private final KUnitQuadCacheType                                   quad_cache;
+  private final KRefractionRendererType                              refraction_renderer;
+  private final KRendererDeferredType                                renderer;
+  private final KRendererDeferredOpaqueType                          renderer_deferred_opaque;
+  private final KTranslucentRendererType                             renderer_translucent;
+  private final KFramebufferRGBACacheType                            rgba_cache;
+  private final KFramebufferRGBAWithDepthCacheType                   rgba_with_depth_cache;
+  private final KShaderCacheSetType                                  shader_caches;
+  private final KShadowMapCacheType                                  shadow_cache;
+  private final KShadowMapRendererType                               shadow_renderer;
+  private final KImageSourceDepthVarianceType<KTextureMixParameters> source_depth_variance_mix;
+  private final KImageSourceRGBAType<KTextureMixParameters>          source_rgba_mix;
+  private final KUnitSphereCacheType                                 sphere_cache;
+  private final KViewRaysCacheType                                   view_rays_cache;
 
   private R1(
     final KRegionCopierType in_copier,
     final KDepthRendererType in_depth_renderer,
-    final KPostprocessorBlurDepthVarianceType in_depth_variance_blur,
+    final KImageFilterDepthVarianceType<KBlurParameters> in_depth_variance_blur,
     final KFramebufferDepthVarianceCacheType in_depth_variance_cache,
     final KDepthVarianceRendererType in_depth_variance_renderer,
     final KFrustumMeshCacheType in_frustum_cache,
-    final KPostprocessorDeferredType<Unit> in_post_emission,
-    final KPostprocessorDeferredType<KGlowParameters> in_post_emission_glow,
-    final KPostprocessorRGBAType<KFXAAParameters> in_post_fxaa,
+    final KImageFilterDeferredType<Unit> in_post_emission,
+    final KImageFilterDeferredType<KGlowParameters> in_post_emission_glow,
+    final KImageFilterRGBAType<KFXAAParameters> in_post_fxaa,
     final KUnitQuadCacheType in_quad_cache,
     final KRefractionRendererType in_refraction_renderer,
     final KRendererDeferredType in_renderer,
@@ -978,7 +1115,12 @@ import com.io7m.r1.types.RExceptionFilesystem;
     final KShadowMapCacheType in_shadow_cache,
     final KShadowMapRendererType in_shadow_renderer,
     final KUnitSphereCacheType in_sphere_cache,
-    final KViewRaysCacheType in_view_rays_cache)
+    final KViewRaysCacheType in_view_rays_cache,
+    final KImageSourceRGBAType<KTextureMixParameters> in_source_mix,
+    final KImageFilterRGBAType<KBlurParameters> in_filter_blur_rgba,
+    final KImageSourceDepthVarianceType<KTextureMixParameters> in_source_depth_variance_mix,
+    final JCGLImplementationType in_gl,
+    final KImageFilterRGBAType<KCopyParameters> in_filter_rgba_copy)
   {
     this.copier = NullCheck.notNull(in_copier);
     this.depth_renderer = NullCheck.notNull(in_depth_renderer);
@@ -987,9 +1129,10 @@ import com.io7m.r1.types.RExceptionFilesystem;
     this.depth_variance_renderer =
       NullCheck.notNull(in_depth_variance_renderer);
     this.frustum_cache = NullCheck.notNull(in_frustum_cache);
-    this.post_emission = NullCheck.notNull(in_post_emission);
-    this.post_emission_glow = NullCheck.notNull(in_post_emission_glow);
-    this.post_fxaa = NullCheck.notNull(in_post_fxaa);
+    this.filter_emission = NullCheck.notNull(in_post_emission);
+    this.filter_emission_glow = NullCheck.notNull(in_post_emission_glow);
+    this.filter_fxaa = NullCheck.notNull(in_post_fxaa);
+    this.filter_blur_rgba = NullCheck.notNull(in_filter_blur_rgba);
     this.quad_cache = NullCheck.notNull(in_quad_cache);
     this.refraction_renderer = NullCheck.notNull(in_refraction_renderer);
     this.renderer = NullCheck.notNull(in_renderer);
@@ -998,36 +1141,78 @@ import com.io7m.r1.types.RExceptionFilesystem;
     this.renderer_translucent = NullCheck.notNull(in_renderer_translucent);
     this.rgba_cache = NullCheck.notNull(in_rgba_cache);
     this.rgba_with_depth_cache = NullCheck.notNull(in_rgba_with_depth_cache);
+    this.source_rgba_mix = NullCheck.notNull(in_source_mix);
     this.shader_caches = NullCheck.notNull(in_shader_caches);
     this.shadow_cache = NullCheck.notNull(in_shadow_cache);
     this.shadow_renderer = NullCheck.notNull(in_shadow_renderer);
     this.sphere_cache = NullCheck.notNull(in_sphere_cache);
     this.view_rays_cache = NullCheck.notNull(in_view_rays_cache);
+    this.source_depth_variance_mix =
+      NullCheck.notNull(in_source_depth_variance_mix);
+    this.gl = NullCheck.notNull(in_gl);
+    this.filter_rgba_copy = NullCheck.notNull(in_filter_rgba_copy);
+  }
+
+  @Override public KFramebufferDepthVarianceCacheType getDepthVarianceCache()
+  {
+    return this.depth_variance_cache;
   }
 
   @Override public
-    KPostprocessorDeferredType<Unit>
-    getPostprocessorEmission()
+    KImageFilterDepthVarianceType<KBlurParameters>
+    getFilterBlurDepthVariance()
   {
-    return this.post_emission;
+    return this.depth_variance_blur;
+  }
+
+  @Override public KImageFilterRGBAType<KBlurParameters> getFilterBlurRGBA()
+  {
+    return this.filter_blur_rgba;
+  }
+
+  @Override public KImageFilterRGBAType<KCopyParameters> getFilterCopyRGBA()
+  {
+    return this.filter_rgba_copy;
+  }
+
+  @Override public KImageFilterDeferredType<Unit> getFilterEmission()
+  {
+    return this.filter_emission;
   }
 
   @Override public
-    KPostprocessorDeferredType<KGlowParameters>
-    getPostprocessorEmissionGlow()
+    KImageFilterDeferredType<KGlowParameters>
+    getFilterEmissionGlow()
   {
-    return this.post_emission_glow;
+    return this.filter_emission_glow;
   }
 
-  @Override public
-    KPostprocessorRGBAType<KFXAAParameters>
-    getPostprocessorFXAA()
+  @Override public KImageFilterRGBAType<KFXAAParameters> getFilterFXAA()
   {
-    return this.post_fxaa;
+    return this.filter_fxaa;
+  }
+
+  @Override public JCGLImplementationType getJCGLImplementation()
+  {
+    return this.gl;
   }
 
   @Override public KRendererDeferredType getRendererDeferred()
   {
     return this.renderer;
+  }
+
+  @Override public
+    KImageSourceDepthVarianceType<KTextureMixParameters>
+    getSourceDepthVarianceTextureMix()
+  {
+    return this.source_depth_variance_mix;
+  }
+
+  @Override public
+    KImageSourceRGBAType<KTextureMixParameters>
+    getSourceRGBATextureMix()
+  {
+    return this.source_rgba_mix;
   }
 }

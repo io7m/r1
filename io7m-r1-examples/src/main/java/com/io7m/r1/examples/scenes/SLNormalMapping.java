@@ -23,6 +23,7 @@ import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleViewType;
+import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
@@ -46,9 +47,15 @@ public final class SLNormalMapping implements ExampleSceneType
 
   }
 
+  @Override public <A> A exampleAccept(
+    final ExampleVisitorType<A> v)
+  {
+    return v.scene(this);
+  }
+
   @Override public String exampleGetName()
   {
-    return NullCheck.notNull(this.getClass().getCanonicalName());
+    return NullCheck.notNull(this.getClass().getSimpleName());
   }
 
   @Override public void exampleScene(

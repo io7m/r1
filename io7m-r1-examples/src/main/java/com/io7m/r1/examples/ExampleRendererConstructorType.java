@@ -17,6 +17,9 @@
 package com.io7m.r1.examples;
 
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jlog.LogUsableType;
+import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.types.RException;
 
 /**
@@ -26,27 +29,26 @@ import com.io7m.r1.types.RException;
 public interface ExampleRendererConstructorType
 {
   /**
-   * Accept a visitor.
-   * 
-   * @param v
-   *          The visitor.
-   * @param <A>
-   *          The type of values.
-   * @param <E>
-   *          The type of raised exceptions.
-   * 
-   * @return The value returned by the visitor.
-   * @throws E
-   *           If the visitor throws <code>E</code>.
+   * Construct a new renderer.
+   *
+   * @param log
+   *          A log handle
+   * @param caches
+   *          A shader cache set
+   * @param gi
+   *          A GL implementation
+   * @return A new renderer
+   *
    * @throws JCGLException
-   *           If the visitor raises this type of exception.
+   *           If an OpenGL error occurs
    * @throws RException
-   *           If the visitor raises this type of exception.
+   *           If any other error occurs
    */
 
-  <A, E extends Exception> A matchConstructor(
-    final ExampleRendererConstructorVisitorType<A, E> v)
-    throws E,
-      RException,
-      JCGLException;
+  ExampleRendererType newRenderer(
+    final LogUsableType log,
+    final KShaderCacheSetType caches,
+    final JCGLImplementationType gi)
+    throws JCGLException,
+      RException;
 }

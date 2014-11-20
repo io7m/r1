@@ -69,5 +69,5 @@ public interface KShaderCacheSetType
    * @return A shader cache.
    */
 
-  KShaderCachePostprocessingType getShaderPostprocessingCache();
+  KShaderCacheImageType getShaderImageCache();
 }

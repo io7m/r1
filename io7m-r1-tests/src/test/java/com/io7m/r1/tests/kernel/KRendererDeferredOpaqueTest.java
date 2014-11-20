@@ -56,11 +56,11 @@ import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredUsableType;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCache;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
+import com.io7m.r1.kernel.KImageFilterBlurDepthVariance;
+import com.io7m.r1.kernel.KImageFilterDepthVarianceType;
 import com.io7m.r1.kernel.KMatricesObserverFunctionType;
 import com.io7m.r1.kernel.KMatricesObserverType;
 import com.io7m.r1.kernel.KMutableMatrices;
-import com.io7m.r1.kernel.KPostprocessorBlurDepthVariance;
-import com.io7m.r1.kernel.KPostprocessorBlurDepthVarianceType;
 import com.io7m.r1.kernel.KRefractionRendererType;
 import com.io7m.r1.kernel.KRegionCopier;
 import com.io7m.r1.kernel.KRegionCopierType;
@@ -75,6 +75,7 @@ import com.io7m.r1.kernel.KShadowMapRendererType;
 import com.io7m.r1.kernel.KShadowMapWithType;
 import com.io7m.r1.kernel.KViewRaysCache;
 import com.io7m.r1.kernel.KViewRaysCacheType;
+import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KFramebufferDeferredDescription;
@@ -225,12 +226,12 @@ import com.io7m.r1.types.RTransformViewType;
       KDepthRenderer.newRenderer(g, tc.getShaderDepthCache(), in_log);
     final KDepthVarianceRendererType dvr =
       KDepthVarianceRenderer.newRenderer(g, tc.getShaderDepthVarianceCache());
-    final KPostprocessorBlurDepthVarianceType pbdv =
-      KPostprocessorBlurDepthVariance.postprocessorNew(
+    final KImageFilterDepthVarianceType<KBlurParameters> pbdv =
+      KImageFilterBlurDepthVariance.filterNew(
         g,
         copier,
         depth_variance_cache,
-        tc.getShaderPostprocessingCache(),
+        tc.getShaderImageCache(),
         qc,
         in_log);
 

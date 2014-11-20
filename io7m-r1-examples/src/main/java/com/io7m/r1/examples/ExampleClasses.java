@@ -17,7 +17,8 @@
 package com.io7m.r1.examples;
 
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.examples.scenes.SLEmpty0;
+import com.io7m.r1.examples.images.Images;
+import com.io7m.r1.examples.scenes.Scenes;
 
 /**
  * Functions for retrieving example classes.
@@ -26,34 +27,50 @@ import com.io7m.r1.examples.scenes.SLEmpty0;
 public final class ExampleClasses
 {
   /**
-   * Attempt to retrieve the scene with the given unqualified name.
-   * 
+   * Attempt to retrieve the example with the given unqualified name.
+   *
+   * @param type
+   *          The type of example.
    * @param name
-   *          The name of the scene.
-   * @return The scene class.
+   *          The name of the example.
+   * @return The example class.
    * @throws ClassNotFoundException
-   *           If the scene does not exist.
+   *           If the example does not exist.
    * @throws IllegalAccessException
-   *           If the scene is not accessible.
+   *           If the example is not accessible.
    * @throws InstantiationException
-   *           If the scene cannot be instantiated.
+   *           If the example cannot be instantiated.
    */
 
-  public static ExampleSceneType getScene(
+  public static ExampleType getExample(
+    final ExampleTypeEnum type,
     final String name)
     throws ClassNotFoundException,
       InstantiationException,
       IllegalAccessException
   {
     final StringBuilder b = new StringBuilder();
-    b.append(SLEmpty0.class.getPackage().getName());
+
+    switch (type) {
+      case EXAMPLE_IMAGE:
+      {
+        b.append(Images.class.getPackage().getName());
+        break;
+      }
+      case EXAMPLE_SCENE:
+      {
+        b.append(Scenes.class.getPackage().getName());
+        break;
+      }
+    }
+
     b.append(".");
     b.append(name);
     final String c_name = b.toString();
     assert c_name != null;
 
-    final Class<? extends ExampleSceneType> c =
-      (Class<? extends ExampleSceneType>) Class.forName(c_name);
+    final Class<? extends ExampleType> c =
+      (Class<? extends ExampleType>) Class.forName(c_name);
     return c.newInstance();
   }
 
