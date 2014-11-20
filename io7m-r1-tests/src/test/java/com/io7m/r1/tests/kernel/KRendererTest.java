@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -35,8 +35,8 @@ import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.r1.kernel.KFXAAParameters;
 import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
-import com.io7m.r1.kernel.KPostprocessorDeferredType;
-import com.io7m.r1.kernel.KPostprocessorRGBAType;
+import com.io7m.r1.kernel.KImageFilterDeferredType;
+import com.io7m.r1.kernel.KImageFilterRGBAType;
 import com.io7m.r1.kernel.KRendererDeferredType;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
@@ -262,19 +262,18 @@ import com.io7m.r1.types.RTransformViewType;
       }
     }
 
-    final KPostprocessorDeferredType<KGlowParameters> glow =
-      r1.getPostprocessorEmissionGlow();
-    final KPostprocessorRGBAType<KFXAAParameters> fxaa =
-      r1.getPostprocessorFXAA();
+    final KImageFilterDeferredType<KGlowParameters> glow =
+      r1.getFilterEmissionGlow();
+    final KImageFilterRGBAType<KFXAAParameters> fxaa = r1.getFilterFXAA();
 
     final KVisibleSet visible = tb.visibleCreate();
     rd.rendererDeferredEvaluateFull(fb, visible);
     {
       final KGlowParameters glow_config = KGlowParameters.getDefault();
-      glow.postprocessorEvaluateDeferred(glow_config, fb, fb);
+      glow.filterEvaluateDeferred(glow_config, fb, fb);
     }
     final KFXAAParameters fxaa_config = KFXAAParameters.getDefault();
-    fxaa.postprocessorEvaluateRGBA(fxaa_config, fb, fb);
+    fxaa.filterEvaluateRGBA(fxaa_config, fb, fb);
 
     rd.rendererDeferredEvaluateFull(fb, visible);
     {
@@ -282,9 +281,9 @@ import com.io7m.r1.types.RTransformViewType;
       gbb.setScale(0.5f);
       gbb.setPasses(3);
       gbb.setFactor(2.0f);
-      glow.postprocessorEvaluateDeferred(gbb.build(), fb, fb);
+      glow.filterEvaluateDeferred(gbb.build(), fb, fb);
     }
-    fxaa.postprocessorEvaluateRGBA(fxaa_config, fb, fb);
+    fxaa.filterEvaluateRGBA(fxaa_config, fb, fb);
   }
 
   @Test public void testShadowMapBorrows()

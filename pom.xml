@@ -36,9 +36,9 @@
     <module>io7m-r1-shaders-forward-translucent-lit</module>
     <module>io7m-r1-shaders-forward-translucent-unlit</module>
     <module>io7m-r1-shaders-forward</module>
-    <module>io7m-r1-shaders-postprocessing</module>
-    <module>io7m-r1-tests</module>
+    <module>io7m-r1-shaders-image</module>
     <module>io7m-r1-tests-jogl</module>
+    <module>io7m-r1-tests</module>
     <module>io7m-r1-types</module>
     <module>io7m-r1-xml</module>
   </modules>

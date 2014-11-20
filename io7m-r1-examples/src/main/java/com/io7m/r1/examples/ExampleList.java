@@ -31,28 +31,102 @@ import org.reflections.Reflections;
 
 public final class ExampleList
 {
-  private static final SortedMap<String, Class<? extends ExampleSceneType>> EXAMPLES;
+  private static final SortedMap<String, Class<? extends ExampleImageType>> EXAMPLE_IMAGES;
+  private static final SortedMap<String, Class<? extends ExampleSceneType>> EXAMPLE_SCENES;
+  private static final SortedMap<String, Class<? extends ExampleType>>      EXAMPLES;
 
   static {
     EXAMPLES = ExampleList.makeExamples();
+    EXAMPLE_SCENES = ExampleList.makeExampleScenes();
+    EXAMPLE_IMAGES = ExampleList.makeExampleImages();
   }
 
   /**
    * @return A list of all of the available examples.
    */
 
-  public static
-    SortedMap<String, Class<? extends ExampleSceneType>>
-    getExamples()
+  public static SortedMap<String, Class<? extends ExampleType>> getExamples()
   {
     return ExampleList.EXAMPLES;
   }
 
-  private static
+  /**
+   * @return A list of all of the available image examples.
+   */
+
+  public static
+    SortedMap<String, Class<? extends ExampleImageType>>
+    getExamplesImages()
+  {
+    return ExampleList.EXAMPLE_IMAGES;
+  }
+
+  /**
+   * @return A list of all of the available scene examples.
+   */
+
+  public static
     SortedMap<String, Class<? extends ExampleSceneType>>
+    getExamplesScenes()
+  {
+    return ExampleList.EXAMPLE_SCENES;
+  }
+
+  private static
+    SortedMap<String, Class<? extends ExampleImageType>>
+    makeExampleImages()
+  {
+    final Reflections ref = new Reflections("com.io7m.r1.examples.images");
+    final Set<Class<? extends ExampleImageType>> s =
+      ref.getSubTypesOf(ExampleImageType.class);
+
+    final SortedMap<String, Class<? extends ExampleImageType>> examples =
+      new TreeMap<String, Class<? extends ExampleImageType>>();
+
+    final Iterator<Class<? extends ExampleImageType>> i = s.iterator();
+    while (i.hasNext()) {
+      final Class<? extends ExampleImageType> c = i.next();
+
+      boolean ok = true;
+      ok &= c.isInterface() == false;
+      ok &= Modifier.isAbstract(c.getModifiers()) == false;
+      ok &= Modifier.isPublic(c.getModifiers());
+
+      if (ok == false) {
+        i.remove();
+      }
+
+      final String name = c.getCanonicalName();
+      assert examples.containsKey(name) == false;
+      examples.put(c.getCanonicalName(), c);
+    }
+
+    final SortedMap<String, Class<? extends ExampleImageType>> r =
+      Collections.unmodifiableSortedMap(examples);
+    assert r != null;
+    return r;
+  }
+
+  private static
+    SortedMap<String, Class<? extends ExampleType>>
     makeExamples()
   {
-    final Reflections ref = new Reflections("com.io7m.r1.examples");
+    final SortedMap<String, Class<? extends ExampleSceneType>> ms =
+      ExampleList.makeExampleScenes();
+    final SortedMap<String, Class<? extends ExampleImageType>> mi =
+      ExampleList.makeExampleImages();
+    final SortedMap<String, Class<? extends ExampleType>> m =
+      new TreeMap<String, Class<? extends ExampleType>>();
+    m.putAll(ms);
+    m.putAll(mi);
+    return m;
+  }
+
+  private static
+    SortedMap<String, Class<? extends ExampleSceneType>>
+    makeExampleScenes()
+  {
+    final Reflections ref = new Reflections("com.io7m.r1.examples.scenes");
     final Set<Class<? extends ExampleSceneType>> s =
       ref.getSubTypesOf(ExampleSceneType.class);
 
@@ -62,10 +136,11 @@ public final class ExampleList
     final Iterator<Class<? extends ExampleSceneType>> i = s.iterator();
     while (i.hasNext()) {
       final Class<? extends ExampleSceneType> c = i.next();
-      final boolean ok =
-        (c.isInterface() == false)
-          && (Modifier.isAbstract(c.getModifiers()) == false)
-          && Modifier.isPublic(c.getModifiers());
+
+      boolean ok = true;
+      ok &= c.isInterface() == false;
+      ok &= Modifier.isAbstract(c.getModifiers()) == false;
+      ok &= Modifier.isPublic(c.getModifiers());
 
       if (ok == false) {
         i.remove();

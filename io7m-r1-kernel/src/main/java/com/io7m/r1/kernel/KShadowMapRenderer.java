@@ -32,6 +32,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
@@ -90,7 +91,7 @@ import com.io7m.r1.types.RTransformViewType;
     final JCGLImplementationType gl,
     final KDepthRendererType in_depth_renderer,
     final KDepthVarianceRendererType in_depth_variance_renderer,
-    final KPostprocessorBlurDepthVarianceType in_blur,
+    final KImageFilterDepthVarianceType<KBlurParameters> in_blur,
     final KShadowMapCacheType in_shadow_cache,
     final LogUsableType in_log)
   {
@@ -155,7 +156,7 @@ import com.io7m.r1.types.RTransformViewType;
       final KShadowMapCacheType sc,
       final JCGLInterfaceCommonType gc,
       final KDepthVarianceRendererType dvr,
-      final KPostprocessorBlurDepthVarianceType pb,
+      final KImageFilterDepthVarianceType<KBlurParameters> pb,
       final KLightWithShadowType light,
       final KLightProjectiveWithShadowVarianceType lp)
       throws RException
@@ -235,7 +236,7 @@ import com.io7m.r1.types.RTransformViewType;
     final KMatricesProjectiveLightType mwp,
     final KVisibleSetShadows shadows,
     final KDepthVarianceRendererType dvr,
-    final KPostprocessorBlurDepthVarianceType blur,
+    final KImageFilterDepthVarianceType<KBlurParameters> blur,
     final KLightProjectiveWithShadowVarianceType lp,
     final KShadowMapVariance sm)
     throws JCGLException,
@@ -269,10 +270,7 @@ import com.io7m.r1.types.RTransformViewType;
       gc.framebufferDrawUnbind();
     }
 
-    blur.postprocessorEvaluateDepthVariance(
-      shadow.getBlurParameters(),
-      fb,
-      fb);
+    blur.filterEvaluateDepthVariance(shadow.getBlurParameters(), fb, fb);
 
     /**
      * Regenerate mipmaps if the shadow map uses them.
@@ -310,21 +308,19 @@ import com.io7m.r1.types.RTransformViewType;
     }
   }
 
-  private final KPostprocessorBlurDepthVarianceType blur;
-  private final KDepthRendererType                  depth_renderer;
-  private final KDepthVarianceRendererType          depth_variance_renderer;
-  private final JCGLImplementationType              g;
-  private final LogUsableType                       log;
-
-  private final KMutableMatrices                    matrices;
-
-  private final KShadowMapCacheType                 shadow_cache;
+  private final KImageFilterDepthVarianceType<KBlurParameters> blur;
+  private final KDepthRendererType                             depth_renderer;
+  private final KDepthVarianceRendererType                     depth_variance_renderer;
+  private final JCGLImplementationType                         g;
+  private final LogUsableType                                  log;
+  private final KMutableMatrices                               matrices;
+  private final KShadowMapCacheType                            shadow_cache;
 
   private KShadowMapRenderer(
     final JCGLImplementationType gl,
     final KDepthRendererType in_depth_renderer,
     final KDepthVarianceRendererType in_depth_variance_renderer,
-    final KPostprocessorBlurDepthVarianceType in_blur,
+    final KImageFilterDepthVarianceType<KBlurParameters> in_blur,
     final KShadowMapCacheType in_shadow_cache,
     final LogUsableType in_log)
   {
@@ -424,7 +420,7 @@ import com.io7m.r1.types.RTransformViewType;
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
     final KDepthRendererType dr = this.depth_renderer;
     final KDepthVarianceRendererType dvr = this.depth_variance_renderer;
-    final KPostprocessorBlurDepthVarianceType pb = this.blur;
+    final KImageFilterDepthVarianceType<KBlurParameters> pb = this.blur;
 
     final Set<KLightWithShadowType> lights = shadows.getLights();
     for (final KLightWithShadowType light : lights) {

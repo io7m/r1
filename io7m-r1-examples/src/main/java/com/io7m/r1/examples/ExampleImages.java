@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -44,10 +44,31 @@ public final class ExampleImages<T>
   private static final PathVirtual        SCENES_BASE;
   private static final String             SCENES_BASE_TEXT;
 
+  /**
+   * The width of result images.
+   */
+
+  public static final int                 EXAMPLE_RESULT_IMAGE_WIDTH;
+
+  /**
+   * The height of result images.
+   */
+
+  public static final int                 EXAMPLE_RESULT_IMAGE_HEIGHT;
+
+  private static final String             IMAGES_BASE_TEXT;
+  private static final PathVirtual        IMAGES_BASE;
+
   static {
+    EXAMPLE_RESULT_IMAGE_WIDTH = 640;
+    EXAMPLE_RESULT_IMAGE_HEIGHT = 480;
+
     try {
-      SCENES_BASE_TEXT = "/com/io7m/r1/examples/results/";
+      SCENES_BASE_TEXT = "/com/io7m/r1/examples/results/scenes";
       SCENES_BASE = PathVirtual.ofString(ExampleImages.SCENES_BASE_TEXT);
+
+      IMAGES_BASE_TEXT = "/com/io7m/r1/examples/results/images";
+      IMAGES_BASE = PathVirtual.ofString(ExampleImages.IMAGES_BASE_TEXT);
     } catch (final FilesystemError e) {
       throw new UnreachableCodeException(e);
     }
@@ -85,7 +106,7 @@ public final class ExampleImages<T>
    *
    * @param renderer
    *          The renderer.
-   * @param scene
+   * @param example
    *          The scene.
    * @param view
    *          The view.
@@ -96,14 +117,14 @@ public final class ExampleImages<T>
 
   public synchronized OptionType<T> getImage(
     final ExampleRendererName renderer,
-    final Class<? extends ExampleSceneType> scene,
+    final ExampleType example,
     final int view)
     throws Exception
   {
-    final PathVirtual path_scene =
-      ExampleImages.SCENES_BASE.appendName(scene.getCanonicalName());
+    final PathVirtual path_base = ExampleImages.getPathBase(example);
+
     final PathVirtual path_renderer =
-      path_scene.appendName(renderer.toString());
+      path_base.appendName(renderer.toString());
     final PathVirtual path_view =
       path_renderer.appendName(String.format("%d.png", view));
 
@@ -124,6 +145,34 @@ public final class ExampleImages<T>
     return Option.none();
   }
 
+  private static PathVirtual getPathBase(
+    final ExampleType example)
+  {
+    return example.exampleAccept(new ExampleVisitorType<PathVirtual>() {
+      @Override public PathVirtual scene(
+        final ExampleSceneType s)
+      {
+        try {
+          return ExampleImages.SCENES_BASE.appendName(example
+            .exampleGetName());
+        } catch (final FilesystemError e) {
+          throw new UnreachableCodeException(e);
+        }
+      }
+
+      @Override public PathVirtual image(
+        final ExampleImageType i)
+      {
+        try {
+          return ExampleImages.IMAGES_BASE.appendName(example
+            .exampleGetName());
+        } catch (final FilesystemError e) {
+          throw new UnreachableCodeException(e);
+        }
+      }
+    });
+  }
+
   /**
    * Retrieve the list of renderers for which results exist for the given
    * scene.
@@ -141,7 +190,7 @@ public final class ExampleImages<T>
   {
     try {
       final PathVirtual path_scene =
-        ExampleImages.SCENES_BASE.appendName(scene.getCanonicalName());
+        ExampleImages.SCENES_BASE.appendName(scene.getSimpleName());
       final SortedSet<String> renderers =
         this.filesystem.listDirectory(path_scene);
 
