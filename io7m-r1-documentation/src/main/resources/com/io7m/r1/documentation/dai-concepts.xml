@@ -23,6 +23,7 @@
 
   <s:section-title>Concepts</s:section-title>
   <s:section-contents/>
+
   <s:subsection xml:id="r1.dai.concepts.overview">
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
@@ -32,6 +33,7 @@
       is given in later sections that focus on each concept in detail.
     </s:paragraph>
   </s:subsection>
+
   <s:subsection xml:id="r1.dai.concepts.renderers">
     <s:subsection-title>Renderers</s:subsection-title>
     <s:paragraph>
@@ -63,6 +65,7 @@
       result in the same image each time.
     </s:paragraph>
   </s:subsection>
+
   <s:subsection xml:id="r1.dai.concepts.visible-sets">
     <s:subsection-title>Visible Sets</s:subsection-title>
     <s:paragraph>
@@ -86,6 +89,7 @@
       intelligently decide what should and should not be drawn.
     </s:paragraph>
   </s:subsection>
+
   <s:subsection xml:id="r1.dai.concepts.framebuffers">
     <s:subsection-title>Framebuffers</s:subsection-title>
     <s:paragraph>
@@ -98,11 +102,12 @@
       and the renderer populates the given framebuffer with an image
       of the rendered visible set. The programmer can then copy the contents of
       this framebuffer to the screen for viewing, pass it on to a separate
-      <s:link s:target="r1.dai.concepts.postprocessors">postprocessor</s:link>
+      <s:link s:target="r1.dai.concepts.image-filters">filter</s:link>
       for extra visual effects, use it as a texture to be applied to objects
       in further rendered visible sets, etc.
     </s:paragraph>
   </s:subsection>
+
   <s:subsection xml:id="r1.dai.concepts.meshes">
     <s:subsection-title>Meshes</s:subsection-title>
     <s:paragraph>
@@ -339,6 +344,7 @@
       <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSphereWithoutShadowBuilderType.html">KLightSphereWithoutShadowBuilderType</s:link-external>.
     </s:paragraph>
   </s:subsection>
+
   <s:subsection xml:id="r1.dai.concepts.light_groups">
     <s:subsection-title>Light groups</s:subsection-title>
     <s:paragraph>
@@ -435,10 +441,11 @@
       implementing specific visual effects.
     </s:paragraph>
   </s:subsection>
-  <s:subsection xml:id="r1.dai.concepts.postprocessors">
-    <s:subsection-title>Postprocessors</s:subsection-title>
+
+  <s:subsection xml:id="r1.dai.concepts.image-filters">
+    <s:subsection-title>Image Filters</s:subsection-title>
     <s:paragraph>
-      A <s:term s:type="term">postprocessor</s:term> is similar to a
+      An <s:term s:type="term">image filter</s:term> is similar to a
       <s:link s:target="r1.dai.concepts.renderers">renderer</s:link>
       except that it accepts
       a <s:link s:target="r1.dai.concepts.framebuffers">framebuffer</s:link>
@@ -449,11 +456,11 @@
       as the input framebuffer). It is used to provide visual effects such
       as full-screen <s:term s:type="term">blurring</s:term>,
       <s:term s:type="term">color-correction</s:term>, 
-      <s:term s:type="term">screen-space ambient occlusion</s:term>, and
+      <s:term s:type="term">emission</s:term>, and
       others.
     </s:paragraph>
     <s:paragraph>
-      Typically, a <s:term s:type="term">postprocessor</s:term> accepts
+      Typically, an <s:term s:type="term">image filter</s:term> accepts
       a framebuffer that was populated by a 
       <s:term s:type="term">deferred renderer</s:term>, and therefore has
       access to much more per-pixel data than a typical image processor. For
@@ -461,7 +468,7 @@
       renderer will contain at least the linear
        <s:term s:type="term">depth</s:term>
       value of that pixel, and the <s:term s:type="term">normal vector</s:term>
-      of the surface at that pixel. If the postprocessor also has access to the
+      of the surface at that pixel. If the filter also has access to the
       <s:term s:type="term">viewing projection</s:term> that was used to produce
       the image, then it can actually efficiently 
       <s:link s:target="r1.dai.deferred-position-recon">reconstruct</s:link>
@@ -470,7 +477,20 @@
       such as <s:term s:type="term">fog</s:term> and
       <s:term s:type="term">depth-of-field</s:term> simulation, that rely on
       knowing the original positions of objects within the visible set - information
-      that would not usually be available to a simple image-based postprocessor.
+      that would not usually be available to a simple image-based filter.
     </s:paragraph>
   </s:subsection>
+
+  <s:subsection xml:id="r1.dai.concepts.image-sources">
+    <s:subsection-title>Image Sources</s:subsection-title>
+    <s:paragraph>
+      An <s:term s:type="term">image source</s:term> is analogous
+      to an <s:link s:target="r1.dai.concepts.image-filters">image filter</s:link>
+      that does not take a
+      <s:link s:target="r1.dai.concepts.framebuffers">framebuffer</s:link> as
+      input. They are usually provided as a convenience (such as conveniently
+      populating a framebuffer with a fixed image prior to rendering).
+    </s:paragraph>
+  </s:subsection>
+
 </s:section>

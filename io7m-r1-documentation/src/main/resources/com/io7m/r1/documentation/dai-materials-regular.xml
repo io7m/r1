@@ -133,7 +133,7 @@
       The <s:term s:type="term">emission</s:term> properties of a surface
       specify to what degree the surface appears to emit light. The color
       of the light is equal to the final surface color. Emission is implemented as a 
-      <s:link s:target="r1.dai.postproc.emission">postprocess</s:link> and
+      <s:link s:target="r1.dai.filter.emission">filter</s:link> and
       therefore emissive surfaces do not represent true
       <s:link s:target="r1.dai.lighting">light sources</s:link>. Additionally,
       emission is not supported for translucent objects.

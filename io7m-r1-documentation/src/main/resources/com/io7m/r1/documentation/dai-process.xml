@@ -51,7 +51,7 @@
       is just included for the purposes of the process description.
     </s:footnote>. Then, the programmer creates instances of any
     <s:term s:type="term">renderers</s:term> and/or 
-    <s:term s:type="term">postprocessors</s:term> that will be used during
+    <s:term s:type="term">filters</s:term> that will be used during
     rendering.
   </s:paragraph>
   
@@ -114,12 +114,10 @@
     this batched visible set to whichever renderer is currently being used. The renderer
     generates any shadow maps required for the lights in the visible set and then renders
     all of the opaque instances to the given framebuffer. The programmer can then
-    optionally pass this framebuffer to a postprocessor if desired (to allow for
-    the application of effects such as 
-    <s:term s:type="term">screen space ambient occlusion</s:term>). Then, the
+    optionally pass this framebuffer to a filter if desired. Then, the
     programmer submits the same visible set to the renderer in order to allow
     it to render the remaining translucent instances. Again, the programmer can
-    optionally pass the framebuffer to another postprocessor, or the contents of
+    optionally pass the framebuffer to another filter, or the contents of
     the framebuffer can simply be copied to the screen for display.
   </s:paragraph>
 

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.filter.blur"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Filter: Blur</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.filter.blur.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">${project.parent.name}</s:term> offers
+      a set of simple box blurs for use on both color and
+      <s:link s:target="r1.dai.shadow-mapping-variance.algorithm">depth-variance</s:link>
+      data, with the effect being used on the latter to soften
+      the edges of shadows.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.filter.blur.algorithm">
+    <s:subsection-title>Algorithm</s:subsection-title>
+    <s:paragraph>
+      The implemented algorithm is a simple box blur separated into
+      horizontal and vertical passes. The package also allows for
+      scaling of the image prior to blurring, in order to use bilinear
+      filtering during scaling to accentuate the blur effect. The following
+      image shows a blur of size <s:term s:type="expression">1.0</s:term>
+      but with the image scaled to <s:term s:type="expression">0.5</s:term>
+      times its original size, the blur applied, and then the
+      image scaled back up to the original size again with bilinear
+      filtering: 
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Blur</s:formal-item-title>
+      <s:image s:source="images/blur.png">Blur</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The blur effect for RGBA data is provided by the
+      <s:link-external s:target="apidocs/com/io7m/r1/meshes/KImageFilterBlurRGBA.html">KImageFilterBlurRGBA</s:link-external>
+      filter. The blur effect for depth-variance data is provided by the
+      <s:link-external s:target="apidocs/com/io7m/r1/meshes/KImageFilterBlurDepthVariance.html">KImageFilterBlurDepthVariance</s:link-external>
+      filter.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>
