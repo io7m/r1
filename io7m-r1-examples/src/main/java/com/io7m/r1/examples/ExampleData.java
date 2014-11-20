@@ -39,7 +39,7 @@ public final class ExampleData
 
   public static String getDataPath(
     final ExampleRendererType renderer,
-    final ExampleSceneType scene)
+    final ExampleType scene)
   {
     final StringBuilder name = new StringBuilder();
     final String scene_name = scene.exampleGetName();
@@ -69,7 +69,7 @@ public final class ExampleData
 
   @SuppressWarnings("boxing") public static String getResultFile(
     final ExampleRendererType renderer,
-    final ExampleSceneType scene,
+    final ExampleType scene,
     final int view)
   {
     final String r =
@@ -96,7 +96,7 @@ public final class ExampleData
 
   public static @Nullable InputStream getResultImageStream(
     final ExampleRendererType renderer,
-    final ExampleSceneType scene,
+    final ExampleType scene,
     final int view)
   {
     return ExampleData.class.getResourceAsStream(ExampleData.getResultFile(

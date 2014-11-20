@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -35,7 +35,7 @@ import com.io7m.r1.shaders.depth_only.RShadersDepth;
 import com.io7m.r1.shaders.depth_variance.RShadersDepthVariance;
 import com.io7m.r1.shaders.forward.translucent.lit.RShadersForwardTranslucentLit;
 import com.io7m.r1.shaders.forward.translucent.unlit.RShadersForwardTranslucentUnlit;
-import com.io7m.r1.shaders.postprocessing.RShadersPostprocessing;
+import com.io7m.r1.shaders.image.RShadersImage;
 import com.io7m.r1.types.RException;
 
 /**
@@ -75,7 +75,7 @@ import com.io7m.r1.types.RException;
     final KShaderCacheDepthVarianceType in_shader_depth_variance_cache;
     final KShaderCacheForwardTranslucentLitType in_shader_forward_translucent_lit_cache;
     final KShaderCacheForwardTranslucentUnlitType in_shader_forward_translucent_unlit_cache;
-    final KShaderCachePostprocessingType in_shader_postprocessing_cache;
+    final KShaderCacheImageType in_shader_image_cache;
 
     {
       final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
@@ -109,11 +109,9 @@ import com.io7m.r1.types.RException;
     }
     {
       final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
-      fs
-        .mountClasspathArchive(RShadersPostprocessing.class, PathVirtual.ROOT);
-      in_shader_postprocessing_cache =
-        KShaderCacheSetClasspath
-          .wrapPostprocessing(gi, log, cache_config, fs);
+      fs.mountClasspathArchive(RShadersImage.class, PathVirtual.ROOT);
+      in_shader_image_cache =
+        KShaderCacheSetClasspath.wrapImage(gi, log, cache_config, fs);
     }
     {
       final FilesystemType fs = Filesystem.makeWithoutArchiveDirectory(log);
@@ -154,7 +152,7 @@ import com.io7m.r1.types.RException;
       in_shader_depth_variance_cache,
       in_shader_forward_translucent_lit_cache,
       in_shader_forward_translucent_unlit_cache,
-      in_shader_postprocessing_cache);
+      in_shader_image_cache);
   }
 
   private static KShaderCacheDebugType wrapDebug(
@@ -252,7 +250,7 @@ import com.io7m.r1.types.RException;
     return KShaderCache.wrapForwardTranslucentUnlit(c);
   }
 
-  private static KShaderCachePostprocessingType wrapPostprocessing(
+  private static KShaderCacheImageType wrapImage(
     final JCGLImplementationType gi,
     final LogUsableType log,
     final LRUCacheConfig cache_config,
@@ -262,7 +260,7 @@ import com.io7m.r1.types.RException;
       KShaderCacheFilesystemLoader.newLoader(gi, fs, log);
     final LRUCacheTrivial<String, KProgramType, KProgramType, RException> c =
       LRUCacheTrivial.newCache(loader, cache_config);
-    return KShaderCache.wrapPostprocessing(c);
+    return KShaderCache.wrapImage(c);
   }
 
   private final KShaderCacheDebugType                   shader_debug_cache;
@@ -272,7 +270,7 @@ import com.io7m.r1.types.RException;
   private final KShaderCacheDepthVarianceType           shader_depth_variance_cache;
   private final KShaderCacheForwardTranslucentLitType   shader_forward_translucent_lit_cache;
   private final KShaderCacheForwardTranslucentUnlitType shader_forward_translucent_unlit_cache;
-  private final KShaderCachePostprocessingType          shader_postprocessing_cache;
+  private final KShaderCacheImageType                   shader_image_cache;
 
   /**
    * Construct shader caches.
@@ -289,7 +287,7 @@ import com.io7m.r1.types.RException;
    *          A shader cache
    * @param in_shader_forward_translucent_lit_cache
    *          A shader cache
-   * @param in_shader_postprocessing_cache
+   * @param in_shader_image_cache
    *          A shader cache
    */
 
@@ -301,7 +299,7 @@ import com.io7m.r1.types.RException;
     final KShaderCacheDepthVarianceType in_shader_depth_variance_cache,
     final KShaderCacheForwardTranslucentLitType in_shader_forward_translucent_lit_cache,
     final KShaderCacheForwardTranslucentUnlitType in_shader_forward_translucent_unlit_cache,
-    final KShaderCachePostprocessingType in_shader_postprocessing_cache)
+    final KShaderCacheImageType in_shader_image_cache)
   {
     this.shader_debug_cache = in_shader_debug_cache;
     this.shader_deferred_geo_cache = in_shader_deferred_geo_cache;
@@ -312,7 +310,7 @@ import com.io7m.r1.types.RException;
       in_shader_forward_translucent_lit_cache;
     this.shader_forward_translucent_unlit_cache =
       in_shader_forward_translucent_unlit_cache;
-    this.shader_postprocessing_cache = in_shader_postprocessing_cache;
+    this.shader_image_cache = in_shader_image_cache;
   }
 
   @Override public KShaderCacheDebugType getShaderDebugCache()
@@ -360,10 +358,8 @@ import com.io7m.r1.types.RException;
     return this.shader_forward_translucent_unlit_cache;
   }
 
-  @Override public
-    KShaderCachePostprocessingType
-    getShaderPostprocessingCache()
+  @Override public KShaderCacheImageType getShaderImageCache()
   {
-    return this.shader_postprocessing_cache;
+    return this.shader_image_cache;
   }
 }

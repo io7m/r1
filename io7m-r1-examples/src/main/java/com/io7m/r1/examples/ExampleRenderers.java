@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,6 +19,8 @@ package com.io7m.r1.examples;
 import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import com.io7m.jnull.NullCheck;
 
 /**
  * The available example renderers.
@@ -46,17 +48,14 @@ public final class ExampleRenderers
       InstantiationException,
       IllegalAccessException
   {
-    final StringBuilder b = new StringBuilder();
-    b.append(ExampleRendererConstructorType.class.getPackage().getName());
-    b.append(".");
-    b.append(name);
-    final ExampleRendererName c_name = new ExampleRendererName(b.toString());
+    final ExampleRendererName c_name = new ExampleRendererName(name);
     assert c_name != null;
 
     final SortedMap<ExampleRendererName, ExampleRendererConstructorType> rc =
       ExampleRenderers.getRenderers();
     if (rc.containsKey(c_name)) {
-      return rc.get(c_name);
+      assert c_name != null;
+      return NullCheck.notNull(rc.get(c_name));
     }
 
     throw new ClassNotFoundException(c_name.toString());

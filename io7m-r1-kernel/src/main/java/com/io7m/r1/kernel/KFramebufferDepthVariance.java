@@ -52,52 +52,42 @@ import com.io7m.r1.types.RExceptionNotSupported;
    *           On errors
    */
 
-  public static
-    KFramebufferDepthVarianceAbstract
-    newDepthVarianceFramebuffer(
-      final JCGLImplementationType gi,
-      final KFramebufferDepthVarianceDescription description)
-      throws RException
+  public static KFramebufferDepthVarianceType newDepthVarianceFramebuffer(
+    final JCGLImplementationType gi,
+    final KFramebufferDepthVarianceDescription description)
+    throws RException
   {
     return gi
-      .implementationAccept(new JCGLImplementationVisitorType<KFramebufferDepthVarianceAbstract, RException>() {
-        @Override public
-          KFramebufferDepthVarianceAbstract
-          implementationIsGL2(
-            final JCGLInterfaceGL2Type gl)
-            throws JCGLException,
-              RException
+      .implementationAccept(new JCGLImplementationVisitorType<KFramebufferDepthVarianceType, RException>() {
+        @Override public KFramebufferDepthVarianceType implementationIsGL2(
+          final JCGLInterfaceGL2Type gl)
+          throws JCGLException,
+            RException
         {
           throw RExceptionNotSupported.varianceShadowMapsNotSupported();
         }
 
-        @Override public
-          KFramebufferDepthVarianceAbstract
-          implementationIsGL3(
-            final JCGLInterfaceGL3Type gl)
-            throws JCGLException,
-              RException
+        @Override public KFramebufferDepthVarianceType implementationIsGL3(
+          final JCGLInterfaceGL3Type gl)
+          throws JCGLException,
+            RException
         {
           return KFramebufferDepthVarianceAbstract.KFramebufferDepthVarianceGL3ES3
             .newDepthVarianceFramebuffer(gl, description, true, true);
         }
 
-        @Override public
-          KFramebufferDepthVarianceAbstract
-          implementationIsGLES2(
-            final JCGLInterfaceGLES2Type gl)
-            throws JCGLException,
-              RException
+        @Override public KFramebufferDepthVarianceType implementationIsGLES2(
+          final JCGLInterfaceGLES2Type gl)
+          throws JCGLException,
+            RException
         {
           throw RExceptionNotSupported.varianceShadowMapsNotSupported();
         }
 
-        @Override public
-          KFramebufferDepthVarianceAbstract
-          implementationIsGLES3(
-            final JCGLInterfaceGLES3Type gl)
-            throws JCGLException,
-              RException
+        @Override public KFramebufferDepthVarianceType implementationIsGLES3(
+          final JCGLInterfaceGLES3Type gl)
+          throws JCGLException,
+            RException
         {
           if (gl.hasColorBufferFloat() || gl.hasColorBufferHalfFloat()) {
             return KFramebufferDepthVarianceAbstract.KFramebufferDepthVarianceGL3ES3

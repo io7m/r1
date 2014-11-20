@@ -21,13 +21,14 @@ import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRendererType;
 import com.io7m.r1.kernel.KFXAAParameters;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
-import com.io7m.r1.kernel.KPostprocessorBlurDepthVarianceType;
-import com.io7m.r1.kernel.KPostprocessorDeferredType;
-import com.io7m.r1.kernel.KPostprocessorRGBAType;
+import com.io7m.r1.kernel.KImageFilterDeferredType;
+import com.io7m.r1.kernel.KImageFilterDepthVarianceType;
+import com.io7m.r1.kernel.KImageFilterRGBAType;
 import com.io7m.r1.kernel.KRegionCopierType;
 import com.io7m.r1.kernel.KRendererDeferredOpaqueType;
 import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.kernel.KShadowMapRendererType;
+import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KFrustumMeshCacheType;
 import com.io7m.r1.kernel.types.KGlowParameters;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
@@ -62,7 +63,7 @@ public interface R1BuilderType
 
   /**
    * Set the depth variance framebuffer cache that will be used for all
-   * renderers and postprocessors.
+   * renderers and filters.
    *
    * @see com.io7m.r1.kernel.KFramebufferDepthVarianceCache
    * @see com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription
@@ -111,8 +112,66 @@ public interface R1BuilderType
     final KDepthVarianceRendererType r);
 
   /**
-   * Set the frustum cache that will be used for all renderers and
-   * postprocessors.
+   * Set the filter that will be used to blur depth variance data (such as
+   * variance shadow maps).
+   *
+   * @see com.io7m.r1.kernel.types.KShadowMappedVariance
+   * @see com.io7m.r1.kernel.KShadowMapVariance
+   * @see com.io7m.r1.kernel.KImageFilterBlurDepthVariance
+   * @param p
+   *          The filter.
+   */
+
+  void setFilterBlurDepthVariance(
+    final KImageFilterDepthVarianceType<KBlurParameters> p);
+
+  /**
+   * Set the filter that will be used to blur RGBA data (such as the emission
+   * contribution of framebuffers).
+   *
+   * @see com.io7m.r1.kernel.KImageFilterBlurRGBA
+   * @param p
+   *          The filter.
+   */
+
+  void setFilterBlurRGBA(
+    KImageFilterRGBAType<KBlurParameters> p);
+
+  /**
+   * Set the emission filter.
+   *
+   * @see com.io7m.r1.kernel.KImageFilterEmission
+   * @param p
+   *          The filter.
+   */
+
+  void setFilterEmission(
+    final KImageFilterDeferredType<Unit> p);
+
+  /**
+   * Set the emission and glow filter.
+   *
+   * @see com.io7m.r1.kernel.KImageFilterEmissionGlow
+   * @param p
+   *          The filter.
+   */
+
+  void setFilterEmissionGlow(
+    final KImageFilterDeferredType<KGlowParameters> p);
+
+  /**
+   * Set the FXAA filter.
+   *
+   * @see com.io7m.r1.kernel.KImageFilterFXAA
+   * @param p
+   *          The filter.
+   */
+
+  void setFilterFXAA(
+    final KImageFilterRGBAType<KFXAAParameters> p);
+
+  /**
+   * Set the frustum cache that will be used for all renderers and filters.
    *
    * @see com.io7m.r1.kernel.types.KFrustumMesh
    * @see com.io7m.r1.kernel.types.KFrustumMeshCache
@@ -144,53 +203,6 @@ public interface R1BuilderType
 
   void setFrustumCacheCount(
     int count);
-
-  /**
-   * Set the postprocessor that will be used to blur depth variance data (such
-   * as variance shadow maps).
-   *
-   * @see com.io7m.r1.kernel.types.KShadowMappedVariance
-   * @see com.io7m.r1.kernel.KShadowMapVariance
-   * @see com.io7m.r1.kernel.KPostprocessorBlurDepthVariance
-   * @param p
-   *          The postprocessor.
-   */
-
-  void setPostprocessorBlurDepthVariance(
-    final KPostprocessorBlurDepthVarianceType p);
-
-  /**
-   * Set the emission postprocessor.
-   *
-   * @see com.io7m.r1.kernel.KPostprocessorEmission
-   * @param p
-   *          The postprocessor.
-   */
-
-  void setPostprocessorEmission(
-    final KPostprocessorDeferredType<Unit> p);
-
-  /**
-   * Set the emission and glow postprocessor.
-   *
-   * @see com.io7m.r1.kernel.KPostprocessorEmissionGlow
-   * @param p
-   *          The postprocessor.
-   */
-
-  void setPostprocessorEmissionGlow(
-    final KPostprocessorDeferredType<KGlowParameters> p);
-
-  /**
-   * Set the FXAA postprocessor.
-   *
-   * @see com.io7m.r1.kernel.KPostprocessorFXAA
-   * @param p
-   *          The postprocessor.
-   */
-
-  void setPostprocessorFXAA(
-    final KPostprocessorRGBAType<KFXAAParameters> p);
 
   /**
    * Set the region copier.
@@ -266,7 +278,7 @@ public interface R1BuilderType
 
   /**
    * Set the set of shader caches that will be used for all renderers and
-   * postprocessors.
+   * filters.
    *
    * @see com.io7m.r1.kernel.KShaderCacheSetClasspath
    * @param caches
@@ -310,8 +322,7 @@ public interface R1BuilderType
     final KShadowMapRendererType r);
 
   /**
-   * Set the unit quad cache that will be used for all renderers and
-   * postprocessors.
+   * Set the unit quad cache that will be used for all renderers and filters.
    *
    * @see com.io7m.r1.kernel.types.KUnitQuadCache
    * @see com.io7m.r1.kernel.types.KUnitQuad
@@ -324,7 +335,7 @@ public interface R1BuilderType
 
   /**
    * Set the unit sphere cache that will be used for all renderers and
-   * postprocessors.
+   * filters.
    *
    * @see com.io7m.r1.kernel.types.KUnitSphere
    * @see com.io7m.r1.rmb.RBUnitSphereResourceCache

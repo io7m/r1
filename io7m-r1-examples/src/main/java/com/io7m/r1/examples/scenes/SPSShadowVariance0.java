@@ -30,6 +30,7 @@ import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleViewType;
+import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.kernel.types.KAxes;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
@@ -64,22 +65,6 @@ import com.io7m.r1.types.RVectorI3F;
 
 public final class SPSShadowVariance0 implements ExampleSceneType
 {
-  private final KTransformContext ctx;
-
-  /**
-   * Construct the example.
-   */
-
-  public SPSShadowVariance0()
-  {
-    this.ctx = KTransformContext.newContext();
-  }
-
-  @Override public String exampleGetName()
-  {
-    return NullCheck.notNull(this.getClass().getCanonicalName());
-  }
-
   private static KShadowMappedVariance makeShadow()
   {
     final KBlurParametersBuilderType bb = KBlurParameters.newBuilder();
@@ -104,6 +89,28 @@ public final class SPSShadowVariance0 implements ExampleSceneType
     ksb.setMapDescription(ksmd);
     final KShadowMappedVariance ks = ksb.build();
     return ks;
+  }
+
+  private final KTransformContext ctx;
+
+  /**
+   * Construct the example.
+   */
+
+  public SPSShadowVariance0()
+  {
+    this.ctx = KTransformContext.newContext();
+  }
+
+  @Override public <A> A exampleAccept(
+    final ExampleVisitorType<A> v)
+  {
+    return v.scene(this);
+  }
+
+  @Override public String exampleGetName()
+  {
+    return NullCheck.notNull(this.getClass().getSimpleName());
   }
 
   @Override public void exampleScene(
@@ -407,6 +414,11 @@ public final class SPSShadowVariance0 implements ExampleSceneType
     gb.groupAddInstance(monkey_pos_z);
   }
 
+  @Override public List<ExampleViewType> exampleViewpoints()
+  {
+    return ExampleSceneUtilities.LARGE_ROOM_VIEWS;
+  }
+
   private KLightSpherePseudoWithShadowVariance makeShadowLight(
     final Texture2DStaticUsableType tex,
     final KShadowMappedVariance ks)
@@ -427,10 +439,5 @@ public final class SPSShadowVariance0 implements ExampleSceneType
     final KLightSpherePseudoWithShadowVariance ksp =
       kspb.build(this.ctx, tex);
     return ksp;
-  }
-
-  @Override public List<ExampleViewType> exampleViewpoints()
-  {
-    return ExampleSceneUtilities.LARGE_ROOM_VIEWS;
   }
 }
