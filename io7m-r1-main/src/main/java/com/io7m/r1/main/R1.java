@@ -37,6 +37,8 @@ import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
 import com.io7m.r1.kernel.KDepthVarianceRendererType;
 import com.io7m.r1.kernel.KFXAAParameters;
+import com.io7m.r1.kernel.KFogYParameters;
+import com.io7m.r1.kernel.KFogZParameters;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCache;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
 import com.io7m.r1.kernel.KFramebufferRGBACache;
@@ -51,6 +53,8 @@ import com.io7m.r1.kernel.KImageFilterDepthVarianceType;
 import com.io7m.r1.kernel.KImageFilterEmission;
 import com.io7m.r1.kernel.KImageFilterEmissionGlow;
 import com.io7m.r1.kernel.KImageFilterFXAA;
+import com.io7m.r1.kernel.KImageFilterFogY;
+import com.io7m.r1.kernel.KImageFilterFogZ;
 import com.io7m.r1.kernel.KImageFilterRGBAType;
 import com.io7m.r1.kernel.KImageSourceDepthVarianceMix;
 import com.io7m.r1.kernel.KImageSourceDepthVarianceType;
@@ -64,6 +68,7 @@ import com.io7m.r1.kernel.KRendererDeferred;
 import com.io7m.r1.kernel.KRendererDeferredOpaque;
 import com.io7m.r1.kernel.KRendererDeferredOpaqueType;
 import com.io7m.r1.kernel.KRendererDeferredType;
+import com.io7m.r1.kernel.KShaderCacheImageType;
 import com.io7m.r1.kernel.KShaderCacheSetClasspath;
 import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.kernel.KShadowMapCache;
@@ -103,6 +108,8 @@ import com.io7m.r1.types.RExceptionFilesystem;
     private long                                                           depth_variance_framebuffer_height;
     private long                                                           depth_variance_framebuffer_width;
     private @Nullable KDepthVarianceRendererType                           depth_variance_renderer;
+    private @Nullable KImageFilterDeferredType<KFogYParameters>            filter_fog_y;
+    private @Nullable KImageFilterDeferredType<KFogZParameters>            filter_fog_z;
     private @Nullable KImageFilterCopyRGBA                                 filter_rgba_copy;
     private @Nullable KFrustumMeshCacheType                                frustum_cache;
     private long                                                           frustum_cache_count;
@@ -272,6 +279,21 @@ import com.io7m.r1.types.RExceptionFilesystem;
         final KImageFilterRGBAType<KCopyParameters> in_filter_rgba_copy =
           this.makeRGBACopy(in_copier, in_rgba_cache);
 
+        final KImageFilterDeferredType<KFogZParameters> in_filter_fog_z =
+          this.makeFilterFogZ(
+            in_copier,
+            in_quad_cache,
+            in_rgba_cache,
+            in_shader_caches.getShaderImageCache());
+
+        final KImageFilterDeferredType<KFogYParameters> in_filter_fog_y =
+          this.makeFilterFogY(
+            in_copier,
+            in_quad_cache,
+            in_rgba_cache,
+            in_shader_caches.getShaderImageCache(),
+            in_view_rays_cache);
+
         return new R1(
           in_copier,
           in_depth_renderer,
@@ -298,7 +320,9 @@ import com.io7m.r1.types.RExceptionFilesystem;
           in_blur_rgba,
           in_source_depth_variance_mix,
           this.gl,
-          in_filter_rgba_copy);
+          in_filter_rgba_copy,
+          in_filter_fog_z,
+          in_filter_fog_y);
 
       } catch (final FilesystemError e) {
         throw RExceptionFilesystem.fromFilesystemException(e);
@@ -407,6 +431,44 @@ import com.io7m.r1.types.RExceptionFilesystem;
             in_shader_caches.getShaderDepthVarianceCache());
       }
       return in_depth_variance_renderer;
+    }
+
+    private KImageFilterDeferredType<KFogYParameters> makeFilterFogY(
+      final KRegionCopierType in_copier,
+      final KUnitQuadCacheType in_quad_cache,
+      final KFramebufferRGBACacheType in_rgba_cache,
+      final KShaderCacheImageType in_shader_cache,
+      final KViewRaysCacheType in_view_rays_cache)
+    {
+      if (this.filter_fog_y != null) {
+        return this.filter_fog_y;
+      }
+
+      return KImageFilterFogY.filterNew(
+        this.gl,
+        in_copier,
+        in_quad_cache,
+        in_rgba_cache,
+        in_view_rays_cache,
+        in_shader_cache);
+    }
+
+    private KImageFilterDeferredType<KFogZParameters> makeFilterFogZ(
+      final KRegionCopierType in_copier,
+      final KUnitQuadCacheType in_quad_cache,
+      final KFramebufferRGBACacheType in_rgba_cache,
+      final KShaderCacheImageType in_shader_cache)
+    {
+      if (this.filter_fog_z != null) {
+        return this.filter_fog_z;
+      }
+
+      return KImageFilterFogZ.filterNew(
+        this.gl,
+        in_copier,
+        in_quad_cache,
+        in_rgba_cache,
+        in_shader_cache);
     }
 
     private KFrustumMeshCacheType makeFrustumCache()
@@ -1075,6 +1137,8 @@ import com.io7m.r1.types.RExceptionFilesystem;
   private final KImageFilterRGBAType<KBlurParameters>                filter_blur_rgba;
   private final KImageFilterDeferredType<Unit>                       filter_emission;
   private final KImageFilterDeferredType<KGlowParameters>            filter_emission_glow;
+  private final KImageFilterDeferredType<KFogYParameters>            filter_fog_y;
+  private final KImageFilterDeferredType<KFogZParameters>            filter_fog_z;
   private final KImageFilterRGBAType<KFXAAParameters>                filter_fxaa;
   private final KImageFilterRGBAType<KCopyParameters>                filter_rgba_copy;
   private final KFrustumMeshCacheType                                frustum_cache;
@@ -1120,7 +1184,9 @@ import com.io7m.r1.types.RExceptionFilesystem;
     final KImageFilterRGBAType<KBlurParameters> in_filter_blur_rgba,
     final KImageSourceDepthVarianceType<KTextureMixParameters> in_source_depth_variance_mix,
     final JCGLImplementationType in_gl,
-    final KImageFilterRGBAType<KCopyParameters> in_filter_rgba_copy)
+    final KImageFilterRGBAType<KCopyParameters> in_filter_rgba_copy,
+    final KImageFilterDeferredType<KFogZParameters> in_filter_fog_z,
+    final KImageFilterDeferredType<KFogYParameters> in_filter_fog_y)
   {
     this.copier = NullCheck.notNull(in_copier);
     this.depth_renderer = NullCheck.notNull(in_depth_renderer);
@@ -1151,6 +1217,8 @@ import com.io7m.r1.types.RExceptionFilesystem;
       NullCheck.notNull(in_source_depth_variance_mix);
     this.gl = NullCheck.notNull(in_gl);
     this.filter_rgba_copy = NullCheck.notNull(in_filter_rgba_copy);
+    this.filter_fog_z = NullCheck.notNull(in_filter_fog_z);
+    this.filter_fog_y = NullCheck.notNull(in_filter_fog_y);
   }
 
   @Override public KFramebufferDepthVarianceCacheType getDepthVarianceCache()
@@ -1185,6 +1253,16 @@ import com.io7m.r1.types.RExceptionFilesystem;
     getFilterEmissionGlow()
   {
     return this.filter_emission_glow;
+  }
+
+  @Override public KImageFilterDeferredType<KFogYParameters> getFilterFogY()
+  {
+    return this.filter_fog_y;
+  }
+
+  @Override public KImageFilterDeferredType<KFogZParameters> getFilterFogZ()
+  {
+    return this.filter_fog_z;
   }
 
   @Override public KImageFilterRGBAType<KFXAAParameters> getFilterFXAA()
