@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,29 +16,27 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.jequality.annotations.EqualityStructural;
-import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
-
 /**
- * Fog parameters.
+ * Different types of fog progression.
  */
 
-@EqualityStructural public final class KFogParameters
+public enum KFogProgression
 {
-  private KFogParameters()
-  {
-    throw new UnimplementedCodeException();
-  }
+  /**
+   * Fog increases linearly over distance.
+   */
 
-  @Override public boolean equals(
-    final @Nullable Object other)
-  {
-    throw new UnimplementedCodeException();
-  }
+  FOG_LINEAR,
 
-  @Override public int hashCode()
-  {
-    throw new UnimplementedCodeException();
-  }
+  /**
+   * Fog increases with an exponential progression over distance.
+   */
+
+  FOG_EXPONENTIAL,
+
+  /**
+   * Fog increases with a logarithmic progression over distance.
+   */
+
+  FOG_LOGARITHMIC
 }
