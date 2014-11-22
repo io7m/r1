@@ -51,4 +51,7 @@
   <xi:include href="dai-filter-blur.xml"/>
   <xi:include href="dai-filter-emission.xml"/>
   <xi:include href="dai-filter-fxaa.xml"/>
+  <xi:include href="dai-filter-fog-z.xml"/>
+  <xi:include href="dai-filter-fog-y.xml"/>
+
 </s:part>

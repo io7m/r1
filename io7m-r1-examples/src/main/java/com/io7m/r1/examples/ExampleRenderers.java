@@ -84,6 +84,12 @@ public final class ExampleRenderers
     r.put(
       ExampleRendererDeferredWithFXAA.getName(),
       ExampleRendererDeferredWithFXAA.get());
+    r.put(
+      ExampleRendererDeferredWithFogZ.getName(),
+      ExampleRendererDeferredWithFogZ.get());
+    r.put(
+      ExampleRendererDeferredWithFogY.getName(),
+      ExampleRendererDeferredWithFogY.get());
 
     final SortedMap<ExampleRendererName, ExampleRendererConstructorType> ur =
       Collections.unmodifiableSortedMap(r);
