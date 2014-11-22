@@ -140,11 +140,11 @@
       To reduce problems involving numeric inaccuracy, the
       original article suggests the use of 32-bit floating point textures
       in depth variance maps. The <s:term s:type="package">${project.parent.name}</s:term>
-      allows 16-bit or 32-bit textures, configurable on a per-shadow basis.
+      package allows 16-bit or 32-bit textures, configurable on a per-shadow basis.
     </s:paragraph>
     <s:paragraph>
       Finally, as mentioned previously, the <s:term s:type="package">${project.parent.name}</s:term>
-      allows both optional box blurring and mipmap generation for shadow
+      package allows both optional box blurring and mipmap generation for shadow
       maps. Both blurring and mipmapping can reduce aliasing artifacts,
       with the former also allowing the edges of shadows to be significantly
       softened as a visual effect:

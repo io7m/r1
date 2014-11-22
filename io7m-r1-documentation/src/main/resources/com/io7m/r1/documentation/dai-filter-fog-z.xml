@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.filter.fog-z"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Filter: Z Fog</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.filter.fog-z.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">${project.parent.name}</s:term> offers
+      a filter that provides simple <s:term s:type="term">distance fog</s:term>
+      effects for roughly simulating the scattering of light due to atmosphere.
+      It can also be used for special effects such as smoke and dust.
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Fog</s:formal-item-title>
+      <s:image s:source="images/fog_z.png">Fog</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The fog filter applies a configurable fog color to all pixels in the
+      scene, based on given near and far planes for the fog. The fog is
+      applied based on the current view direction (the local negative Z axis).
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.filter.fog-z.algorithm">
+    <s:subsection-title>Algorithm</s:subsection-title>
+    <s:paragraph>
+      The implemented algorithm takes a color <s:term s:type="expression">c</s:term>,
+      an eye-space near fog distance <s:term s:type="expression">near</s:term>, and an
+      eye-space far fog distance <s:term s:type="expression">far</s:term>. It samples
+      the depth of each pixel in the current scene, and
+      <s:link s:target="r1.dai.deferred-position-recon.eye-space-z">reconstructs</s:link>
+      the eye-space Z component of the surface that produced the pixel in question
+      and takes the absolute value of that component to yield a positive distance
+      <s:term s:type="expression">z</s:term> from the observer.
+      Then, a <s:term s:type="term">fog factor</s:term> <s:term s:type="expression">r</s:term>
+      is calculated by <s:term s:type="expression">fog_factor</s:term>
+      [<s:link-external s:target="haskell/FogFactorZ.hs">FogFactorZ.hs</s:link-external>]:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Fog factor</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/FogFactorZ.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      The value of <s:term s:type="expression">r</s:term> is then used to interpolate
+      between the original color of the pixel and <s:term s:type="expression">c</s:term>.
+      Surfaces with <s:term s:type="expression">z</s:term> less than <s:term s:type="expression">near</s:term>
+      are unaffected by fog. Surfaces with <s:term s:type="expression">z</s:term> greater than or equal to
+      <s:term s:type="expression">far</s:term> are maximally affected by fog and will actually
+      have their color values completely replaced by <s:term s:type="expression">c</s:term>.
+      Surfaces with <s:term s:type="expression">z</s:term> values that fall between 
+      <s:term s:type="expression">near</s:term>
+      and <s:term s:type="expression">far</s:term> will have differing amounts of fog applied
+      based on the type of <s:term s:type="term">fog progression</s:term> selected.
+      The filter offers <s:term s:type="term">linear</s:term>,
+      <s:term s:type="term">exponential</s:term>, and <s:term s:type="term">logarithmic</s:term>
+      fog progressions. With <s:term s:type="term">linear</s:term> fog, the
+      <s:term s:type="expression">r</s:term> value linearly interpolates between the
+      original surface color and <s:term s:type="expression">c</s:term>. With
+      <s:term s:type="term">exponential</s:term> fog, the value of 
+      <s:term s:type="expression">r * r</s:term> is used to linearly interpolate
+      between the original surface color and <s:term s:type="expression">c</s:term>.
+      Finally, with <s:term s:type="term">logarithmic</s:term> fog, the value of
+      <s:term s:type="expression">sqrt(r)</s:term> is used to linearly interpolate
+      between the original surface color and <s:term s:type="expression">c</s:term>.
+    </s:paragraph>
+    <s:paragraph>
+      The fog effect is provided by the
+      <s:link-external s:target="apidocs/com/io7m/r1/meshes/KImageFilterFogZ.html">KImageFilterFogZ</s:link-external>
+      filter.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>

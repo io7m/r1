@@ -20,6 +20,8 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.r1.kernel.KCopyParameters;
 import com.io7m.r1.kernel.KFXAAParameters;
+import com.io7m.r1.kernel.KFogYParameters;
+import com.io7m.r1.kernel.KFogZParameters;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
 import com.io7m.r1.kernel.KImageFilterDeferredType;
 import com.io7m.r1.kernel.KImageFilterDepthVarianceType;
@@ -78,6 +80,20 @@ public interface R1Type
    */
 
   KImageFilterDeferredType<KGlowParameters> getFilterEmissionGlow();
+
+  /**
+   * @see com.io7m.r1.kernel.KImageFilterFogY
+   * @return The Y fog filter.
+   */
+
+  KImageFilterDeferredType<KFogYParameters> getFilterFogY();
+
+  /**
+   * @see com.io7m.r1.kernel.KImageFilterFogZ
+   * @return The Z fog filter.
+   */
+
+  KImageFilterDeferredType<KFogZParameters> getFilterFogZ();
 
   /**
    * @see com.io7m.r1.kernel.KImageFilterFXAA
