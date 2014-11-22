@@ -51,7 +51,8 @@
       <s:link s:target="r1.dai.deferred-position-recon">reconstructs</s:link>
       the full eye-space position of the surface that produced the pixel in question. It
       then transforms this position back to world-space using the scene's inverse
-      view matrix. Then, a <s:term s:type="term">fog factor</s:term> <s:term s:type="expression">r</s:term>
+      view matrix, yielding a Y component <s:term s:type="expression">y</s:term>. 
+      Then, a <s:term s:type="term">fog factor</s:term> <s:term s:type="expression">r</s:term>
       is calculated by <s:term s:type="expression">fog_factor</s:term>
       [<s:link-external s:target="haskell/FogFactorY.hs">FogFactorY.hs</s:link-external>]:
     </s:paragraph>
@@ -62,12 +63,13 @@
     <s:paragraph>
       The value of <s:term s:type="expression">r</s:term> is then used to interpolate
       between the original color of the pixel and <s:term s:type="expression">c</s:term>.
-      Surfaces with a world-space Y component less than <s:term s:type="expression">n</s:term>
-      are unaffected by fog. Surfaces with a world-space Y component greater than or equal to
-      <s:term s:type="expression">f</s:term> are maximally affected by fog and will actually
+      Surfaces with <s:term s:type="expression">y</s:term> less than <s:term s:type="expression">lower_y</s:term>
+      are unaffected by fog. Surfaces with <s:term s:type="expression">y</s:term> greater than or equal to
+      <s:term s:type="expression">upper_y</s:term> are maximally affected by fog and will actually
       have their color values completely replaced by <s:term s:type="expression">c</s:term>.
-      Surfaces with a world-space Y component that falls between <s:term s:type="expression">n</s:term>
-      and <s:term s:type="expression">f</s:term> will have differing amounts of fog applied
+      Surfaces with <s:term s:type="expression">y</s:term> values that fall between 
+      <s:term s:type="expression">lower_y</s:term>
+      and <s:term s:type="expression">upper_y</s:term> will have differing amounts of fog applied
       based on the type of <s:term s:type="term">fog progression</s:term> selected.
       The filter offers <s:term s:type="term">linear</s:term>,
       <s:term s:type="term">exponential</s:term>, and <s:term s:type="term">logarithmic</s:term>
