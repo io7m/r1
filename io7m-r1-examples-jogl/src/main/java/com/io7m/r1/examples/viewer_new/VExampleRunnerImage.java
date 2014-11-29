@@ -31,6 +31,7 @@ import com.io7m.jcanephora.texload.imageio.TextureLoaderImageIO;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.r1.examples.ExampleImageBuilderType;
 import com.io7m.r1.examples.ExampleImageType;
@@ -40,6 +41,8 @@ import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleTypeEnum;
 import com.io7m.r1.examples.tools.ETexture2DCache;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
+import com.io7m.r1.kernel.KImageSinkBlitRGBA;
+import com.io7m.r1.kernel.KImageSinkRGBAType;
 import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.kernel.types.KUnitQuadCache;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
@@ -54,20 +57,22 @@ import com.jogamp.newt.opengl.GLWindow;
 
 public final class VExampleRunnerImage implements VExampleRunnerImageType
 {
-  private @Nullable ETexture2DCache            cache_2d;
-  private @Nullable KUnitQuadCacheType         cache_quad;
-  private final VExampleConfig                 config;
-  private final ExampleImageType               example;
-  private @Nullable KFramebufferDeferredType   framebuffer;
-  private @Nullable JCGLImplementationType     gi;
-  private @Nullable GL                         gl;
-  private @Nullable TextureLoaderType          loader;
-  private final LogUsableType                  log;
-  private @Nullable ExampleRendererType        renderer;
-  private final ExampleRendererConstructorType renderer_cons;
-  private @Nullable KShaderCacheSetType        shader_cache;
-  private final AtomicBoolean                  want_save;
-  private final @Nullable GLWindow             window;
+  private @Nullable ETexture2DCache                   cache_2d;
+  private @Nullable KUnitQuadCacheType                cache_quad;
+  private final VExampleConfig                        config;
+  private final ExampleImageType                      example;
+  private @Nullable KFramebufferDeferredType          framebuffer;
+  private @Nullable JCGLImplementationType            gi;
+  private @Nullable GL                                gl;
+  private @Nullable TextureLoaderType                 loader;
+  private final LogUsableType                         log;
+  private @Nullable ExampleRendererType               renderer;
+  private final ExampleRendererConstructorType        renderer_cons;
+  private @Nullable AreaInclusive                     screen_area;
+  private @Nullable KShaderCacheSetType               shader_cache;
+  private @Nullable KImageSinkRGBAType<AreaInclusive> sink;
+  private final AtomicBoolean                         want_save;
+  private final @Nullable GLWindow                    window;
 
   /**
    * Construct an example runner.
@@ -126,6 +131,11 @@ public final class VExampleRunnerImage implements VExampleRunnerImageType
         0);
 
       final ExampleImageBuilderType builder = new ExampleImageBuilderType() {
+        @Override public R1Type getR1()
+        {
+          return r.getR1();
+        }
+
         @Override public Texture2DStaticUsableType texture(
           final String name)
           throws RException
@@ -136,16 +146,13 @@ public final class VExampleRunnerImage implements VExampleRunnerImageType
             throw RExceptionIO.fromIOException(e);
           }
         }
-
-        @Override public R1Type getR1()
-        {
-          return r.getR1();
-        }
       };
 
       this.example.exampleImage(builder, fb);
 
-      VShowResults.renderSceneResults(g, fb, sc, qc);
+      assert this.sink != null;
+      assert this.screen_area != null;
+      this.sink.sinkEvaluateRGBA(this.screen_area, fb);
     } catch (final RException e) {
       throw new RuntimeException(e);
     }
@@ -220,11 +227,23 @@ public final class VExampleRunnerImage implements VExampleRunnerImageType
         TextureLoaderImageIO
           .newTextureLoaderWithAlphaPremultiplication(this.log);
       this.cache_2d = new ETexture2DCache(g, this.loader, this.log);
-      this.cache_quad = KUnitQuadCache.newCache(g.getGLCommon(), this.log);
-      this.shader_cache = VShaderCaches.newCachesFromArchives(g, this.log);
+
+      final KUnitQuadCacheType cq =
+        KUnitQuadCache.newCache(g.getGLCommon(), this.log);
+      this.cache_quad = cq;
+      final KShaderCacheSetType sc =
+        VShaderCaches.newCachesFromArchives(g, this.log);
+      this.shader_cache = sc;
 
       this.renderer =
         this.renderer_cons.newRenderer(this.log, this.shader_cache, g);
+
+      this.sink = KImageSinkBlitRGBA.newSink(g, sc.getShaderImageCache(), cq);
+      this.screen_area =
+        new AreaInclusive(
+          new RangeInclusiveL(0, drawable.getWidth() - 1),
+          new RangeInclusiveL(0, drawable.getHeight() - 1));
+
     } catch (final RException e) {
       throw new RuntimeException(e);
     } catch (final FilesystemError e) {
@@ -258,6 +277,11 @@ public final class VExampleRunnerImage implements VExampleRunnerImageType
           old_fb.kFramebufferDelete(g);
         }
       }
+
+      this.screen_area =
+        new AreaInclusive(
+          new RangeInclusiveL(0, width - 1),
+          new RangeInclusiveL(0, height - 1));
 
     } catch (final RException e) {
       throw new RuntimeException(e);

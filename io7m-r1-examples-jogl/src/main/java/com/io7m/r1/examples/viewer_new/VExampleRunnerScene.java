@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -49,6 +49,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.r1.examples.ExampleRendererConstructorType;
@@ -65,6 +66,8 @@ import com.io7m.r1.examples.tools.EMeshCache;
 import com.io7m.r1.examples.tools.ETexture2DCache;
 import com.io7m.r1.examples.tools.ETextureCubeCache;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
+import com.io7m.r1.kernel.KImageSinkBlitRGBA;
+import com.io7m.r1.kernel.KImageSinkRGBAType;
 import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
@@ -92,34 +95,36 @@ import com.jogamp.newt.opengl.GLWindow;
 
 public final class VExampleRunnerScene implements VExampleRunnerSceneType
 {
-  private @Nullable ETexture2DCache                 cache_2d;
-  private @Nullable ETextureCubeCache               cache_cube;
-  private @Nullable EMeshCache                      cache_mesh;
-  private @Nullable KUnitQuadCacheType              cache_quad;
-  private final JCameraFPSStyleType                 camera;
-  private final Context                             camera_context;
-  private final JCameraInput                        camera_input;
-  private final JCameraFPSStyleIntegratorType       camera_integrator;
-  private JCameraFPSStyleSnapshot                   camera_snap_curr;
-  private JCameraFPSStyleSnapshot                   camera_snap_prev;
-  private final VExampleConfig                      config;
-  private final ExampleSceneType                    example;
-  private @Nullable KFramebufferDeferredType        framebuffer;
-  private @Nullable JCGLImplementationType          gi;
-  private @Nullable GL                              gl;
-  private @Nullable TextureLoaderType               loader;
-  private final LogUsableType                       log;
-  private final MatrixM4x4F                         matrix_view_temporary;
-  private final AtomicReference<JCameraMouseRegion> mouse_region;
-  private final AtomicBoolean                       mouse_view;
-  private @Nullable ExampleRendererType             renderer;
-  private final ExampleRendererConstructorType      renderer_cons;
-  private @Nullable KShaderCacheSetType             shader_cache;
-  private double                                    time_accum;
-  private long                                      time_then;
-  private final AtomicInteger                       view_index;
-  private final @Nullable GLWindow                  window;
-  private final AtomicBoolean                       want_save;
+  private @Nullable ETexture2DCache                   cache_2d;
+  private @Nullable ETextureCubeCache                 cache_cube;
+  private @Nullable EMeshCache                        cache_mesh;
+  private @Nullable KUnitQuadCacheType                cache_quad;
+  private final JCameraFPSStyleType                   camera;
+  private final Context                               camera_context;
+  private final JCameraInput                          camera_input;
+  private final JCameraFPSStyleIntegratorType         camera_integrator;
+  private JCameraFPSStyleSnapshot                     camera_snap_curr;
+  private JCameraFPSStyleSnapshot                     camera_snap_prev;
+  private final VExampleConfig                        config;
+  private final ExampleSceneType                      example;
+  private @Nullable KFramebufferDeferredType          framebuffer;
+  private @Nullable JCGLImplementationType            gi;
+  private @Nullable GL                                gl;
+  private @Nullable TextureLoaderType                 loader;
+  private final LogUsableType                         log;
+  private final MatrixM4x4F                           matrix_view_temporary;
+  private final AtomicReference<JCameraMouseRegion>   mouse_region;
+  private final AtomicBoolean                         mouse_view;
+  private @Nullable ExampleRendererType               renderer;
+  private final ExampleRendererConstructorType        renderer_cons;
+  private @Nullable AreaInclusive                     screen_area;
+  private @Nullable KShaderCacheSetType               shader_cache;
+  private @Nullable KImageSinkRGBAType<AreaInclusive> sink;
+  private double                                      time_accum;
+  private long                                        time_then;
+  private final AtomicInteger                         view_index;
+  private final AtomicBoolean                         want_save;
+  private final @Nullable GLWindow                    window;
 
   /**
    * Construct an example runner.
@@ -350,7 +355,9 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
         }
       });
 
-      VShowResults.renderSceneResults(g, fb, sc, qc);
+      assert this.sink != null;
+      assert this.screen_area != null;
+      this.sink.sinkEvaluateRGBA(this.screen_area, fb);
     } catch (final RException e) {
       throw new RuntimeException(e);
     }
@@ -392,6 +399,32 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
       }
     } catch (final RException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  private void doSaveImage()
+  {
+    final KFramebufferDeferredType fb = this.framebuffer;
+    if (fb != null) {
+      final AreaInclusive area = fb.kFramebufferGetArea();
+      final int width = (int) area.getRangeX().getInterval();
+      final int height = (int) area.getRangeY().getInterval();
+
+      final GL g = this.gl;
+      assert g != null;
+      final ExampleRendererType r = this.renderer;
+      assert r != null;
+
+      VSaveFramebuffer.saveSceneImage(
+        this.config,
+        g,
+        width,
+        height,
+        ExampleTypeEnum.EXAMPLE_SCENE,
+        this.example.exampleGetName(),
+        r.exampleRendererGetName(),
+        this.view_index.get(),
+        this.log);
     }
   }
 
@@ -470,16 +503,32 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
       this.cache_2d = new ETexture2DCache(g, this.loader, this.log);
       this.cache_cube = new ETextureCubeCache(g, this.loader, this.log);
       this.cache_mesh = new EMeshCache(g, this.log);
-      this.cache_quad = KUnitQuadCache.newCache(g.getGLCommon(), this.log);
-      this.shader_cache = VShaderCaches.newCachesFromArchives(g, this.log);
+
+      final KUnitQuadCacheType cq =
+        KUnitQuadCache.newCache(g.getGLCommon(), this.log);
+      this.cache_quad = cq;
+      final KShaderCacheSetType sc =
+        VShaderCaches.newCachesFromArchives(g, this.log);
+      this.shader_cache = sc;
 
       this.renderer =
         this.renderer_cons.newRenderer(this.log, this.shader_cache, g);
+      this.sink = KImageSinkBlitRGBA.newSink(g, sc.getShaderImageCache(), cq);
+      this.screen_area =
+        new AreaInclusive(
+          new RangeInclusiveL(0, drawable.getWidth() - 1),
+          new RangeInclusiveL(0, drawable.getHeight() - 1));
+
     } catch (final RException e) {
       throw new RuntimeException(e);
     } catch (final FilesystemError e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override public void requestImageSave()
+  {
+    this.want_save.set(true);
   }
 
   @Override public void reshape(
@@ -511,39 +560,13 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
           height);
       this.mouse_region.set(region);
 
+      this.screen_area =
+        new AreaInclusive(
+          new RangeInclusiveL(0, width - 1),
+          new RangeInclusiveL(0, height - 1));
+
     } catch (final RException e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  @Override public void requestImageSave()
-  {
-    this.want_save.set(true);
-  }
-
-  private void doSaveImage()
-  {
-    final KFramebufferDeferredType fb = this.framebuffer;
-    if (fb != null) {
-      final AreaInclusive area = fb.kFramebufferGetArea();
-      final int width = (int) area.getRangeX().getInterval();
-      final int height = (int) area.getRangeY().getInterval();
-
-      final GL g = this.gl;
-      assert g != null;
-      final ExampleRendererType r = this.renderer;
-      assert r != null;
-
-      VSaveFramebuffer.saveSceneImage(
-        this.config,
-        g,
-        width,
-        height,
-        ExampleTypeEnum.EXAMPLE_SCENE,
-        this.example.exampleGetName(),
-        r.exampleRendererGetName(),
-        this.view_index.get(),
-        this.log);
     }
   }
 

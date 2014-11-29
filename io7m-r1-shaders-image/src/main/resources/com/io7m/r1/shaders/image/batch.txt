@@ -1,4 +1,5 @@
 copy_depth_to_rgba          : com.io7m.r1.core.Copy.copy_depth_to_rgba
+copy_depth_variance_to_rgba : com.io7m.r1.core.Copy.copy_depth_variance_to_rgba
 copy_rgba                   : com.io7m.r1.core.Copy.copy_rgba
 copy_rgba_depth             : com.io7m.r1.core.Copy.copy_rgba_depth
 emission                    : com.io7m.r1.image.ImageFilterEmission.emission

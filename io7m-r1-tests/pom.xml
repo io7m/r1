@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.io7m.r1</groupId>
     <artifactId>io7m-r1</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
   </parent>
   <artifactId>io7m-r1-tests</artifactId>
 
@@ -286,6 +286,7 @@
             <phase>package</phase>
             <goals>
               <goal>jar</goal>
+              <goal>test-jar</goal>
             </goals>
             <configuration>
               <archive>

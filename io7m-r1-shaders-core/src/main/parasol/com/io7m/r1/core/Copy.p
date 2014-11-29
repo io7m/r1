@@ -84,4 +84,24 @@ module Copy is
     out out_0 = rgba;
   end;
 
+  --
+  -- Copy the RG components of a depth-variance image to the output.
+  --
+
+  shader program copy_depth_variance_to_rgba is
+    vertex   VertexShaders.standard_clip;
+    fragment copy_depth_variance_to_rgba_f;
+  end;
+
+  shader fragment copy_depth_variance_to_rgba_f is
+    parameter t_image : sampler_2d;
+    in        f_uv    : vector_2f;
+    out       out_0   : vector_4f as 0;
+  with
+    value rgba =
+      new vector_4f (Sampler2D.texture (t_image, f_uv) [x y], 0.0, 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
 end;
