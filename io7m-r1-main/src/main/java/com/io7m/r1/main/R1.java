@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,6 +20,7 @@ import java.math.BigInteger;
 
 import com.io7m.jcache.BLUCacheConfig;
 import com.io7m.jcache.LRUCacheConfig;
+import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUpdateUnmapped;
 import com.io7m.jcanephora.IndexBufferUpdateUnmapped;
 import com.io7m.jcanephora.api.JCGLImplementationType;
@@ -56,6 +57,8 @@ import com.io7m.r1.kernel.KImageFilterFXAA;
 import com.io7m.r1.kernel.KImageFilterFogY;
 import com.io7m.r1.kernel.KImageFilterFogZ;
 import com.io7m.r1.kernel.KImageFilterRGBAType;
+import com.io7m.r1.kernel.KImageSinkBlitRGBA;
+import com.io7m.r1.kernel.KImageSinkRGBAType;
 import com.io7m.r1.kernel.KImageSourceDepthVarianceMix;
 import com.io7m.r1.kernel.KImageSourceDepthVarianceType;
 import com.io7m.r1.kernel.KImageSourceRGBAMix;
@@ -136,6 +139,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
     private @Nullable KShadowMapCacheType                                  shadow_cache;
     private long                                                           shadow_map_cache_size;
     private @Nullable KShadowMapRendererType                               shadow_renderer;
+    private @Nullable KImageSinkRGBAType<AreaInclusive>                    sink_rgba;
     private @Nullable KImageSourceDepthVarianceType<KTextureMixParameters> source_depth_variance_mix;
     private @Nullable KImageSourceRGBAType<KTextureMixParameters>          source_rgba_mix;
     private @Nullable KUnitSphereCacheType                                 sphere_cache;
@@ -294,6 +298,11 @@ import com.io7m.r1.types.RExceptionFilesystem;
             in_shader_caches.getShaderImageCache(),
             in_view_rays_cache);
 
+        final KImageSinkRGBAType<AreaInclusive> in_sink_rgba =
+          this.makeSinkRGBA(
+            in_quad_cache,
+            in_shader_caches.getShaderImageCache());
+
         return new R1(
           in_copier,
           in_depth_renderer,
@@ -322,7 +331,8 @@ import com.io7m.r1.types.RExceptionFilesystem;
           this.gl,
           in_filter_rgba_copy,
           in_filter_fog_z,
-          in_filter_fog_y);
+          in_filter_fog_y,
+          in_sink_rgba);
 
       } catch (final FilesystemError e) {
         throw RExceptionFilesystem.fromFilesystemException(e);
@@ -739,6 +749,20 @@ import com.io7m.r1.types.RExceptionFilesystem;
       return in_shadow_renderer;
     }
 
+    private KImageSinkRGBAType<AreaInclusive> makeSinkRGBA(
+      final KUnitQuadCacheType in_quad_cache,
+      final KShaderCacheImageType in_shader_cache_image)
+    {
+      if (this.sink_rgba != null) {
+        return this.sink_rgba;
+      }
+
+      return KImageSinkBlitRGBA.newSink(
+        this.gl,
+        in_shader_cache_image,
+        in_quad_cache);
+    }
+
     private
       KImageSourceDepthVarianceType<KTextureMixParameters>
       makeSourceDepthVarianceMix(
@@ -1153,6 +1177,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
   private final KShaderCacheSetType                                  shader_caches;
   private final KShadowMapCacheType                                  shadow_cache;
   private final KShadowMapRendererType                               shadow_renderer;
+  private final KImageSinkRGBAType<AreaInclusive>                    sink_rgba;
   private final KImageSourceDepthVarianceType<KTextureMixParameters> source_depth_variance_mix;
   private final KImageSourceRGBAType<KTextureMixParameters>          source_rgba_mix;
   private final KUnitSphereCacheType                                 sphere_cache;
@@ -1186,7 +1211,8 @@ import com.io7m.r1.types.RExceptionFilesystem;
     final JCGLImplementationType in_gl,
     final KImageFilterRGBAType<KCopyParameters> in_filter_rgba_copy,
     final KImageFilterDeferredType<KFogZParameters> in_filter_fog_z,
-    final KImageFilterDeferredType<KFogYParameters> in_filter_fog_y)
+    final KImageFilterDeferredType<KFogYParameters> in_filter_fog_y,
+    final KImageSinkRGBAType<AreaInclusive> in_sink_rgba)
   {
     this.copier = NullCheck.notNull(in_copier);
     this.depth_renderer = NullCheck.notNull(in_depth_renderer);
@@ -1219,6 +1245,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
     this.filter_rgba_copy = NullCheck.notNull(in_filter_rgba_copy);
     this.filter_fog_z = NullCheck.notNull(in_filter_fog_z);
     this.filter_fog_y = NullCheck.notNull(in_filter_fog_y);
+    this.sink_rgba = NullCheck.notNull(in_sink_rgba);
   }
 
   @Override public KFramebufferDepthVarianceCacheType getDepthVarianceCache()
@@ -1278,6 +1305,11 @@ import com.io7m.r1.types.RExceptionFilesystem;
   @Override public KRendererDeferredType getRendererDeferred()
   {
     return this.renderer;
+  }
+
+  @Override public KImageSinkRGBAType<AreaInclusive> getSinkBlitRGBA()
+  {
+    return this.sink_rgba;
   }
 
   @Override public

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,6 +16,7 @@
 
 package com.io7m.r1.main;
 
+import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.r1.kernel.KCopyParameters;
@@ -26,6 +27,7 @@ import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
 import com.io7m.r1.kernel.KImageFilterDeferredType;
 import com.io7m.r1.kernel.KImageFilterDepthVarianceType;
 import com.io7m.r1.kernel.KImageFilterRGBAType;
+import com.io7m.r1.kernel.KImageSinkRGBAType;
 import com.io7m.r1.kernel.KImageSourceDepthVarianceType;
 import com.io7m.r1.kernel.KImageSourceRGBAType;
 import com.io7m.r1.kernel.KRendererDeferredType;
@@ -113,6 +115,13 @@ public interface R1Type
    */
 
   KRendererDeferredType getRendererDeferred();
+
+  /**
+   * @see com.io7m.r1.kernel.KImageSinkBlitRGBA
+   * @return The RGBA sink
+   */
+
+  KImageSinkRGBAType<AreaInclusive> getSinkBlitRGBA();
 
   /**
    * @see com.io7m.r1.kernel.KImageSourceDepthVarianceMix
