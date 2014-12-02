@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,9 +19,9 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * A mesh with a specular-only material ( {@link KMesh}), with a specific
@@ -33,7 +33,7 @@ import com.io7m.r1.types.RTransformTextureType;
 {
   /**
    * Construct a new translucent regular instance.
-   * 
+   *
    * @param in_mesh
    *          The mesh
    * @param in_material
@@ -51,7 +51,7 @@ import com.io7m.r1.types.RTransformTextureType;
     final KMeshReadableType in_mesh,
     final KMaterialTranslucentSpecularOnly in_material,
     final KTransformType in_transform,
-    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
     final KFaceSelection in_faces)
   {
     return new KInstanceTranslucentSpecularOnly(
@@ -62,18 +62,18 @@ import com.io7m.r1.types.RTransformTextureType;
       in_faces);
   }
 
-  private final KFaceSelection                      faces;
+  private final KFaceSelection                                     faces;
 
-  private final KMaterialTranslucentSpecularOnly    material;
-  private final KMeshReadableType                   mesh;
-  private final KTransformType                      transform;
-  private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
+  private final KMaterialTranslucentSpecularOnly                   material;
+  private final KMeshReadableType                                  mesh;
+  private final KTransformType                                     transform;
+  private final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix;
 
   private KInstanceTranslucentSpecularOnly(
     final KMeshReadableType in_mesh,
     final KMaterialTranslucentSpecularOnly in_material,
     final KTransformType in_transform,
-    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
     final KFaceSelection in_faces)
   {
     this.transform = NullCheck.notNull(in_transform, "Transform");
@@ -119,7 +119,9 @@ import com.io7m.r1.types.RTransformTextureType;
     return this.transform;
   }
 
-  @Override public RMatrixI3x3F<RTransformTextureType> instanceGetUVMatrix()
+  @Override public
+    PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>
+    instanceGetUVMatrix()
   {
     return this.uv_matrix;
   }

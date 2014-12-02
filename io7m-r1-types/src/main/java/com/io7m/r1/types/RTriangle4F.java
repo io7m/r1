@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,11 +21,12 @@ import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.NullCheckException;
 import com.io7m.jnull.Nullable;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 
 /**
  * An immutable triangle with four-dimensional (likely homogeneous) points
  * <code>(p0, p1, p2)</code>.
- * 
+ *
  * @param <S>
  *          The coordinate space in which the points exist
  */
@@ -34,7 +35,7 @@ import com.io7m.jnull.Nullable;
 {
   /**
    * Construct a new triangle with the given points.
-   * 
+   *
    * @param in_p0
    *          Point 0
    * @param in_p1
@@ -47,21 +48,21 @@ import com.io7m.jnull.Nullable;
    */
 
   public static <S extends RSpaceType> RTriangle4F<S> newTriangle(
-    final RVectorI4F<S> in_p0,
-    final RVectorI4F<S> in_p1,
-    final RVectorI4F<S> in_p2)
+    final PVectorI4F<S> in_p0,
+    final PVectorI4F<S> in_p1,
+    final PVectorI4F<S> in_p2)
   {
     return new RTriangle4F<S>(in_p0, in_p1, in_p2);
   }
 
-  private final RVectorI4F<S> p0;
-  private final RVectorI4F<S> p1;
-  private final RVectorI4F<S> p2;
+  private final PVectorI4F<S> p0;
+  private final PVectorI4F<S> p1;
+  private final PVectorI4F<S> p2;
 
   private RTriangle4F(
-    final RVectorI4F<S> in_p0,
-    final RVectorI4F<S> in_p1,
-    final RVectorI4F<S> in_p2)
+    final PVectorI4F<S> in_p0,
+    final PVectorI4F<S> in_p1,
+    final PVectorI4F<S> in_p2)
   {
     this.p0 = NullCheck.notNull(in_p0, "Point 0");
     this.p1 = NullCheck.notNull(in_p1, "Point 1");
@@ -90,7 +91,7 @@ import com.io7m.jnull.Nullable;
    * @return Point 0 of the triangle
    */
 
-  public RVectorI4F<S> getP0()
+  public PVectorI4F<S> getP0()
   {
     return this.p0;
   }
@@ -99,7 +100,7 @@ import com.io7m.jnull.Nullable;
    * @return Point 1 of the triangle
    */
 
-  public RVectorI4F<S> getP1()
+  public PVectorI4F<S> getP1()
   {
     return this.p1;
   }
@@ -108,7 +109,7 @@ import com.io7m.jnull.Nullable;
    * @return Point 2 of the triangle
    */
 
-  public RVectorI4F<S> getP2()
+  public PVectorI4F<S> getP2()
   {
     return this.p2;
   }
@@ -141,7 +142,7 @@ import com.io7m.jnull.Nullable;
   /**
    * Transform a triangle in space <code>S</code> to one in space
    * <code>T</code> using the given transform function.
-   * 
+   *
    * @param <T>
    *          The target coordinate space
    * @param transform
@@ -153,7 +154,7 @@ import com.io7m.jnull.Nullable;
     <T extends RSpaceType>
     RTriangle4F<T>
     transform(
-      final PartialFunctionType<RVectorI4F<S>, RVectorI4F<T>, NullCheckException> transform)
+      final PartialFunctionType<PVectorI4F<S>, PVectorI4F<T>, NullCheckException> transform)
   {
     NullCheck.notNull(transform, "Transform");
     return new RTriangle4F<T>(

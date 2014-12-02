@@ -21,6 +21,8 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.KFogProgression;
 import com.io7m.r1.kernel.KFogZParameters;
 import com.io7m.r1.kernel.KFogZParametersBuilderType;
@@ -35,10 +37,9 @@ import com.io7m.r1.main.R1;
 import com.io7m.r1.main.R1BuilderType;
 import com.io7m.r1.main.R1Type;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI4x4F;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RTransformProjectionType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * An example renderer using the default deferred renderer.
@@ -91,10 +92,10 @@ public final class ExampleRendererDeferredWithFogZ implements
     final KRendererDeferredType dr = r.getRendererDeferred();
     final KImageFilterDeferredType<KFogZParameters> p = r.getFilterFogZ();
 
-    final RMatrixI4x4F<RTransformProjectionType> in_projection =
-      RMatrixI4x4F.identity();
-    final RVectorI3F<RSpaceRGBType> grey =
-      new RVectorI3F<RSpaceRGBType>(0.2f, 0.2f, 0.2f);
+    final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> in_projection =
+      PMatrixI4x4F.identity();
+    final PVectorI3F<RSpaceRGBType> grey =
+      new PVectorI3F<RSpaceRGBType>(0.2f, 0.2f, 0.2f);
     final KFogZParametersBuilderType fog_b =
       KFogZParameters.newBuilder(in_projection);
 

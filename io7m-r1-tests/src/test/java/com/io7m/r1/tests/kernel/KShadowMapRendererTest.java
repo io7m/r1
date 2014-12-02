@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -64,7 +64,9 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jparasol.core.JPFragmentShaderMetaType;
 import com.io7m.jparasol.core.JPUncompactedProgramShaderMeta;
 import com.io7m.jparasol.core.JPVertexShaderMetaType;
-import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.KDepthRenderer;
@@ -117,11 +119,11 @@ import com.io7m.r1.types.RExceptionMeshMissingNormals;
 import com.io7m.r1.types.RExceptionMeshMissingPositions;
 import com.io7m.r1.types.RExceptionMeshMissingTangents;
 import com.io7m.r1.types.RExceptionMeshMissingUVs;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RTransformModelType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RTransformViewType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceObjectType;
+import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings({ "null", "static-method", "synthetic-access" }) public class KShadowMapRendererTest
 {
@@ -397,8 +399,10 @@ import com.io7m.r1.types.RTransformViewType;
     try {
       final JCGLInterfaceCommonType gc = g.getGLCommon();
 
-      final RMatrixI3x3F<RTransformTextureType> uv = RMatrixI3x3F.identity();
-      final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv =
+        PMatrixI3x3F.identity();
+      final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
+        PMatrixI4x4F.identity();
       final KTransformType trans = KTransformMatrix4x4.newTransform(model);
       final KMaterialOpaqueRegular in_material =
         KMaterialOpaqueRegular.newBuilder().build();
@@ -499,10 +503,15 @@ import com.io7m.r1.types.RTransformViewType;
 
     final TestRenderer r = new TestRenderer(g, log);
 
-    final MatrixM4x4F temp = new MatrixM4x4F();
-    final RMatrixI4x4F<RTransformViewType> id = RMatrixI4x4F.identity();
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> id =
+      PMatrixI4x4F.identity();
     final KProjectionFOV proj =
-      KProjectionFOV.newProjection(temp, 90.0f, 1.0f, 1.0f, 100.0f);
+      KProjectionFOV.newProjection(
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
+        90.0f,
+        1.0f,
+        1.0f,
+        100.0f);
     final KCamera camera = KCamera.newCamera(id, proj);
 
     final KVisibleSetBuilderWithCreateType sb =
@@ -645,10 +654,15 @@ import com.io7m.r1.types.RTransformViewType;
 
     final TestRenderer r = new TestRenderer(g, log);
 
-    final MatrixM4x4F temp = new MatrixM4x4F();
-    final RMatrixI4x4F<RTransformViewType> id = RMatrixI4x4F.identity();
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> id =
+      PMatrixI4x4F.identity();
     final KProjectionFOV proj =
-      KProjectionFOV.newProjection(temp, 90.0f, 1.0f, 1.0f, 100.0f);
+      KProjectionFOV.newProjection(
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
+        90.0f,
+        1.0f,
+        1.0f,
+        100.0f);
     final KCamera camera = KCamera.newCamera(id, proj);
 
     final KVisibleSetBuilderWithCreateType sb =

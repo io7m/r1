@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -35,9 +35,8 @@ import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.MatrixM4x4F.Context;
-import com.io7m.jtensors.VectorM4F;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.kernel.types.KProjectionType;
@@ -46,11 +45,10 @@ import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
-import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RMatrixM4x4F;
-import com.io7m.r1.types.RTransformProjectionType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RTransformViewInverseType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 /**
  * A fog filter based on the global Y axis.
@@ -100,17 +98,16 @@ import com.io7m.r1.types.RTransformViewInverseType;
       shader_cache);
   }
 
-  private final KRegionCopierType                       copier;
-  private final JCGLImplementationType                  gi;
-  private final RMatrixM3x3F<RTransformTextureType>     matrix_uv;
-  private final RMatrixM4x4F<RTransformProjectionType>  projection;
-  private final KUnitQuadCacheType                      quad_cache;
-  private final KFramebufferRGBACacheType               rgba_cache;
-  private final KShaderCacheImageType                   shader_cache;
-  private final RMatrixM4x4F<RTransformViewInverseType> view_inverse;
-  private final Context                                 matrix_context;
-  private final VectorM4F                               position;
-  private final KViewRaysCacheType                      ray_cache;
+  private final KRegionCopierType                                  copier;
+  private final JCGLImplementationType                             gi;
+  private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> matrix_uv;
+  private final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>        projection;
+  private final KUnitQuadCacheType                                 quad_cache;
+  private final KFramebufferRGBACacheType                          rgba_cache;
+  private final KShaderCacheImageType                              shader_cache;
+  private final PMatrixM4x4F<RSpaceEyeType, RSpaceWorldType>       view_inverse;
+  private final KViewRaysCacheType                                 ray_cache;
+  private final PMatrixM4x4F.Context                               context;
 
   private KImageFilterFogY(
     final JCGLImplementationType in_gi,
@@ -126,12 +123,11 @@ import com.io7m.r1.types.RTransformViewInverseType;
       NullCheck.notNull(in_rgba_cache, "RGBA framebuffer cache");
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
     this.quad_cache = NullCheck.notNull(in_quad_cache, "Quad cache");
-    this.matrix_uv = new RMatrixM3x3F<RTransformTextureType>();
-    this.projection = new RMatrixM4x4F<RTransformProjectionType>();
-    this.view_inverse = new RMatrixM4x4F<RTransformViewInverseType>();
+    this.matrix_uv = new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
+    this.projection = new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>();
+    this.view_inverse = new PMatrixM4x4F<RSpaceEyeType, RSpaceWorldType>();
     this.ray_cache = NullCheck.notNull(in_ray_cache, "Ray cache");
-    this.matrix_context = new MatrixM4x4F.Context();
-    this.position = new VectorM4F();
+    this.context = new PMatrixM4x4F.Context();
   }
 
   private void evaluateFog(
@@ -143,8 +139,11 @@ import com.io7m.r1.types.RTransformViewInverseType;
       RException,
       JCacheException
   {
-    config.getView().makeMatrixM4x4F(this.view_inverse);
-    MatrixM4x4F.invertInPlace(this.view_inverse);
+    @SuppressWarnings("unchecked") final PMatrixM4x4F<RSpaceWorldType, RSpaceEyeType> vi_temp =
+      (PMatrixM4x4F<RSpaceWorldType, RSpaceEyeType>) (PMatrixM4x4F<?, ?>) this.view_inverse;
+
+    config.getView().makeMatrixM4x4F(vi_temp);
+    PMatrixM4x4F.invertWithContext(this.context, vi_temp, this.view_inverse);
 
     final KProjectionType c_proj = config.getProjection();
     final KViewRays vr = this.ray_cache.cacheGetLU(c_proj);
@@ -242,20 +241,6 @@ import com.io7m.r1.types.RTransformViewInverseType;
     } finally {
       gc.framebufferDrawUnbind();
     }
-  }
-
-  private float calculateY(
-    final float y)
-  {
-    this.position.set4F(0.0f, y, 0.0f, 1.0f);
-
-    MatrixM4x4F.multiplyVector4FWithContext(
-      this.matrix_context,
-      this.view_inverse,
-      this.position,
-      this.position);
-
-    return this.position.getYF();
   }
 
   @Override public <A, E extends Throwable> A filterAccept(

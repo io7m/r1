@@ -27,8 +27,9 @@ import com.io7m.jcanephora.Texture2DStaticType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NullCheckException;
 import com.io7m.jranges.RangeCheckException;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.types.KLightProjectiveBuilderType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
@@ -37,20 +38,21 @@ import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.RFakeTextures2DStaticGenerator;
-import com.io7m.r1.tests.types.RVectorI3FGenerator;
+import com.io7m.r1.tests.types.PVectorI3FGenerator;
 import com.io7m.r1.tests.utilities.TestUtilities;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 @SuppressWarnings("static-method") public final class KLightProjectiveWithShadowBasicTest
 {
   @Test public void testAttributes()
   {
-    final Generator<RVectorI3F<RSpaceRGBType>> colour_gen1 =
-      new RVectorI3FGenerator<RSpaceRGBType>();
-    final Generator<RVectorI3F<RSpaceWorldType>> position_gen1 =
-      new RVectorI3FGenerator<RSpaceWorldType>();
+    final Generator<PVectorI3F<RSpaceRGBType>> colour_gen1 =
+      new PVectorI3FGenerator<RSpaceRGBType>();
+    final Generator<PVectorI3F<RSpaceWorldType>> position_gen1 =
+      new PVectorI3FGenerator<RSpaceWorldType>();
     final Generator<QuaternionI4F> qg = new QuaternionI4FGenerator();
     final Generator<KProjectionType> pg = new KProjectionGenerator();
     final Generator<Texture2DStaticUsableType> tg =
@@ -127,8 +129,8 @@ import com.io7m.r1.types.RVectorI3F;
                 s.lightProjectiveGetProjection());
             b.copyFromProjective(s);
 
-            final RVectorI3F<RSpaceRGBType> c =
-              new RVectorI3F<RSpaceRGBType>(0.0f, 0.5f, 1.0f);
+            final PVectorI3F<RSpaceRGBType> c =
+              new PVectorI3F<RSpaceRGBType>(0.0f, 0.5f, 1.0f);
 
             b.setColor(c);
             final KLightProjectiveWithShadowBasic r = b.build();
@@ -142,8 +144,8 @@ import com.io7m.r1.types.RVectorI3F;
                 s.lightProjectiveGetProjection());
             b.copyFromProjective(s);
 
-            final RVectorI3F<RSpaceWorldType> p =
-              new RVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 1.0f);
+            final PVectorI3F<RSpaceWorldType> p =
+              new PVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 1.0f);
             b.setPosition(p);
             final KLightProjectiveWithShadowBasic r = b.build();
             Assert.assertEquals(r.lightProjectiveGetPosition(), p);
@@ -157,7 +159,7 @@ import com.io7m.r1.types.RVectorI3F;
     final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
     final KProjectionFOV p =
       KProjectionFOV.newProjection(
-        new MatrixM4x4F(),
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         1.0f,
         1.0f,
         1.0f,
@@ -165,7 +167,7 @@ import com.io7m.r1.types.RVectorI3F;
 
     final KLightProjectiveBuilderType b =
       KLightProjectiveWithShadowBasic.newBuilder(t, p);
-    b.setColor((RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
+    b.setColor((PVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
   }
 
   @Test(expected = NullCheckException.class) public void testNull_1()
@@ -173,7 +175,7 @@ import com.io7m.r1.types.RVectorI3F;
     final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
     final KProjectionFOV p =
       KProjectionFOV.newProjection(
-        new MatrixM4x4F(),
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         1.0f,
         1.0f,
         1.0f,
@@ -181,7 +183,7 @@ import com.io7m.r1.types.RVectorI3F;
 
     final KLightProjectiveBuilderType b =
       KLightProjectiveWithShadowBasic.newBuilder(t, p);
-    b.setPosition((RVectorI3F<RSpaceWorldType>) TestUtilities.actuallyNull());
+    b.setPosition((PVectorI3F<RSpaceWorldType>) TestUtilities.actuallyNull());
   }
 
   @Test(expected = RangeCheckException.class) public void testZeroFalloff()
@@ -190,7 +192,7 @@ import com.io7m.r1.types.RVectorI3F;
     final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
     final KProjectionFOV p =
       KProjectionFOV.newProjection(
-        new MatrixM4x4F(),
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         1.0f,
         1.0f,
         1.0f,
@@ -208,7 +210,7 @@ import com.io7m.r1.types.RVectorI3F;
     final Texture2DStaticType t = RFakeTextures2DStatic.newAnything();
     final KProjectionFOV p =
       KProjectionFOV.newProjection(
-        new MatrixM4x4F(),
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         1.0f,
         1.0f,
         1.0f,

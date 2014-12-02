@@ -26,6 +26,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -58,7 +59,6 @@ import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * An example with pseudo-spherical shadow-projecting lights.
@@ -127,23 +127,23 @@ public final class SPSShadowVarianceSpecular0 implements ExampleSceneType
             KAxes.AXIS_Z,
             Math.toRadians(-90.0f)),
           floor_scale,
-          new RVectorI3F<RSpaceWorldType>(-8.0f, 0.0f, 0.0f));
+          new PVectorI3F<RSpaceWorldType>(-8.0f, 0.0f, 0.0f));
     final KTransformType plane_trans_neg_y =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         floor_scale,
-        new RVectorI3F<RSpaceWorldType>(0.0f, -8.0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(0.0f, -8.0f, 0.0f));
     final KTransformType plane_trans_neg_z =
       KTransformOST.newTransform(
         QuaternionI4F.makeFromAxisAngle(KAxes.AXIS_X, Math.toRadians(90.0f)),
         floor_scale,
-        new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, -8.0f));
+        new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, -8.0f));
 
     final KTransformType plane_trans_pos_x =
       KTransformOST.newTransform(
         QuaternionI4F.makeFromAxisAngle(KAxes.AXIS_Z, Math.toRadians(90.0f)),
         floor_scale,
-        new RVectorI3F<RSpaceWorldType>(8.0f, 0.0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(8.0f, 0.0f, 0.0f));
     final KTransformType plane_trans_pos_y =
       KTransformOST
         .newTransform(
@@ -151,7 +151,7 @@ public final class SPSShadowVarianceSpecular0 implements ExampleSceneType
             KAxes.AXIS_Z,
             Math.toRadians(180.0f)),
           floor_scale,
-          new RVectorI3F<RSpaceWorldType>(0.0f, 8.0f, 0.0f));
+          new PVectorI3F<RSpaceWorldType>(0.0f, 8.0f, 0.0f));
     final KTransformType plane_trans_pos_z =
       KTransformOST
         .newTransform(
@@ -159,7 +159,7 @@ public final class SPSShadowVarianceSpecular0 implements ExampleSceneType
             KAxes.AXIS_X,
             Math.toRadians(-90.0f)),
           floor_scale,
-          new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 8.0f));
+          new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 8.0f));
 
     final KInstanceOpaqueRegular plane_pos_x =
       KInstanceOpaqueRegular.newInstance(
@@ -211,33 +211,33 @@ public final class SPSShadowVarianceSpecular0 implements ExampleSceneType
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         monkey_scale,
-        new RVectorI3F<RSpaceWorldType>(-4.0f, 0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(-4.0f, 0f, 0.0f));
     final KTransformType monkey_t_neg_y =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         monkey_scale,
-        new RVectorI3F<RSpaceWorldType>(0.0f, -4.0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(0.0f, -4.0f, 0.0f));
     final KTransformType monkey_t_neg_z =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         monkey_scale,
-        new RVectorI3F<RSpaceWorldType>(0.0f, 0f, -4.0f));
+        new PVectorI3F<RSpaceWorldType>(0.0f, 0f, -4.0f));
 
     final KTransformType monkey_t_pos_x =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         monkey_scale,
-        new RVectorI3F<RSpaceWorldType>(4.0f, 0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(4.0f, 0f, 0.0f));
     final KTransformType monkey_t_pos_y =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         monkey_scale,
-        new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f));
     final KTransformType monkey_t_pos_z =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         monkey_scale,
-        new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 4.0f));
+        new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 4.0f));
 
     final Texture2DStaticUsableType t = scene.texture("monkey_albedo.png");
 
@@ -299,8 +299,8 @@ public final class SPSShadowVarianceSpecular0 implements ExampleSceneType
 
     final KLightSphereWithoutShadowBuilderType sb =
       KLightSphereWithoutShadow.newBuilder();
-    sb.setColor(new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f));
-    sb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
+    sb.setColor(new PVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f));
+    sb.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
     sb.setRadius(32.0f);
     final KLightSphereWithoutShadow s = sb.build();
 
@@ -430,7 +430,7 @@ public final class SPSShadowVarianceSpecular0 implements ExampleSceneType
   {
     final KLightSpherePseudoWithShadowVarianceBuilderType kspb =
       KLightSpherePseudoWithShadowVariance.newBuilder();
-    kspb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
+    kspb.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
     kspb.setRadius(16.0f);
     kspb.setShadow(ks);
     kspb.setEnabledNegativeX(true);

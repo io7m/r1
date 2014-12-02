@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,11 +25,11 @@ import java.util.Map;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeCheck;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.types.RExceptionMeshNameInvalid;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * <p>
@@ -62,10 +62,10 @@ import com.io7m.r1.types.RVectorI3F;
   }
 
   private final String                              name;
-  private final List<RVectorI3F<RSpaceObjectType>>  normals;
-  private final List<RVectorI3F<RSpaceObjectType>>  positions;
+  private final List<PVectorI3F<RSpaceObjectType>>  normals;
+  private final List<PVectorI3F<RSpaceObjectType>>  positions;
   private final List<RMeshTriangle>                 triangles;
-  private final List<RVectorI2F<RSpaceTextureType>> uvs;
+  private final List<PVectorI2F<RSpaceTextureType>> uvs;
   private final Map<RMeshBasicVertex, Integer>      vertex_map;
   private final List<RMeshBasicVertex>              vertices;
 
@@ -74,9 +74,9 @@ import com.io7m.r1.types.RVectorI3F;
     throws RExceptionMeshNameInvalid
   {
     this.name = RMeshNames.checkMeshName(in_name);
-    this.normals = new ArrayList<RVectorI3F<RSpaceObjectType>>();
-    this.positions = new ArrayList<RVectorI3F<RSpaceObjectType>>();
-    this.uvs = new ArrayList<RVectorI2F<RSpaceTextureType>>();
+    this.normals = new ArrayList<PVectorI3F<RSpaceObjectType>>();
+    this.positions = new ArrayList<PVectorI3F<RSpaceObjectType>>();
+    this.uvs = new ArrayList<PVectorI2F<RSpaceTextureType>>();
     this.vertices = new ArrayList<RMeshBasicVertex>();
     this.vertex_map = new HashMap<RMeshBasicVertex, Integer>();
     this.triangles = new ArrayList<RMeshTriangle>();
@@ -121,7 +121,7 @@ import com.io7m.r1.types.RVectorI3F;
    */
 
   public int normalAdd(
-    final RVectorI3F<RSpaceObjectType> normal)
+    final PVectorI3F<RSpaceObjectType> normal)
   {
     this.normals.add(NullCheck.notNull(normal, "KMaterialNormalLabel"));
     return this.normals.size() - 1;
@@ -131,9 +131,9 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A read-only view of the current list of normal vectors.
    */
 
-  public List<RVectorI3F<RSpaceObjectType>> normalsGet()
+  public List<PVectorI3F<RSpaceObjectType>> normalsGet()
   {
-    final List<RVectorI3F<RSpaceObjectType>> r =
+    final List<PVectorI3F<RSpaceObjectType>> r =
       Collections.unmodifiableList(this.normals);
     assert r != null;
     return r;
@@ -148,7 +148,7 @@ import com.io7m.r1.types.RVectorI3F;
    */
 
   public int positionAdd(
-    final RVectorI3F<RSpaceObjectType> position)
+    final PVectorI3F<RSpaceObjectType> position)
   {
     this.positions.add(NullCheck.notNull(position, "Position"));
     return this.positions.size() - 1;
@@ -158,9 +158,9 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A read-only view of the current list of positions.
    */
 
-  public List<RVectorI3F<RSpaceObjectType>> positionsGet()
+  public List<PVectorI3F<RSpaceObjectType>> positionsGet()
   {
-    final List<RVectorI3F<RSpaceObjectType>> r =
+    final List<PVectorI3F<RSpaceObjectType>> r =
       Collections.unmodifiableList(this.positions);
     assert r != null;
     return r;
@@ -224,7 +224,7 @@ import com.io7m.r1.types.RVectorI3F;
    */
 
   public int uvAdd(
-    final RVectorI2F<RSpaceTextureType> uv)
+    final PVectorI2F<RSpaceTextureType> uv)
   {
     this.uvs.add(NullCheck.notNull(uv, "UV"));
     return this.uvs.size() - 1;
@@ -234,9 +234,9 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A read-only view of the current list of UV coordinates.
    */
 
-  public List<RVectorI2F<RSpaceTextureType>> uvsGet()
+  public List<PVectorI2F<RSpaceTextureType>> uvsGet()
   {
-    final List<RVectorI2F<RSpaceTextureType>> r =
+    final List<PVectorI2F<RSpaceTextureType>> r =
       Collections.unmodifiableList(this.uvs);
     assert r != null;
     return r;

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -32,13 +32,13 @@ import com.io7m.jlog.LogType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NonNull;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshBasic;
 import com.io7m.r1.meshes.RMeshTangents;
 import com.io7m.r1.tests.xml.collada.ColladaDocumentTest;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 import com.io7m.r1.xml.collada.RColladaDocument;
 import com.io7m.r1.xml.collada.RColladaGeometry;
 import com.io7m.r1.xml.collada.RColladaGeometryID;
@@ -78,22 +78,21 @@ import com.io7m.r1.xml.rmx.RXMLExporter;
     final RColladaGeometry geom = cd.getGeometry(geo);
     assert geom != null;
 
-    final RColladaToMeshBasic importer =
-      new RColladaToMeshBasic(log);
+    final RColladaToMeshBasic importer = new RColladaToMeshBasic(log);
     final RMeshBasic m = importer.newMeshFromColladaGeometry(cd, geom);
     final RMeshTangents mt = RMeshTangents.makeWithTangents(m);
 
-    final List<RVectorI3F<RSpaceObjectType>> normals = mt.normalsGet();
-    final List<RVectorI4F<RSpaceObjectType>> tangents = mt.tangentsGet();
-    final List<RVectorI3F<RSpaceObjectType>> bitangents = mt.bitangentsGet();
+    final List<PVectorI3F<RSpaceObjectType>> normals = mt.normalsGet();
+    final List<PVectorI4F<RSpaceObjectType>> tangents = mt.tangentsGet();
+    final List<PVectorI3F<RSpaceObjectType>> bitangents = mt.bitangentsGet();
 
     final ContextRelative context = new ContextRelative();
     context.setMaxAbsoluteDifference(0.0009f);
 
     for (int index = 0; index < normals.size(); ++index) {
-      final RVectorI3F<RSpaceObjectType> n = normals.get(index);
-      final RVectorI4F<RSpaceObjectType> t = tangents.get(index);
-      final RVectorI3F<RSpaceObjectType> b = bitangents.get(index);
+      final PVectorI3F<RSpaceObjectType> n = normals.get(index);
+      final PVectorI4F<RSpaceObjectType> t = tangents.get(index);
+      final PVectorI3F<RSpaceObjectType> b = bitangents.get(index);
       assert n != null;
       assert t != null;
       assert b != null;

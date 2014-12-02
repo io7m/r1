@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,21 +18,21 @@ package com.io7m.r1.tests.kernel.types;
 
 import net.java.quickcheck.Generator;
 
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.kernel.types.KMaterialNormalType;
 import com.io7m.r1.kernel.types.KMaterialRefractiveType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 public final class KMaterialTranslucentRefractiveGenerator implements
   Generator<KMaterialTranslucentRefractive>
 {
-  private final Generator<RMatrixI3x3F<RTransformTextureType>> matrix_gen;
-  private final Generator<KMaterialNormalType>                 normal_gen;
-  private final Generator<KMaterialRefractiveType>             refr_gen;
+  private final Generator<PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>> matrix_gen;
+  private final Generator<KMaterialNormalType>                                normal_gen;
+  private final Generator<KMaterialRefractiveType>                            refr_gen;
 
   public KMaterialTranslucentRefractiveGenerator(
-    final Generator<RMatrixI3x3F<RTransformTextureType>> in_matrix_gen,
+    final Generator<PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>> in_matrix_gen,
     final Generator<KMaterialNormalType> in_normal_gen,
     final Generator<KMaterialRefractiveType> in_refr_gen)
   {

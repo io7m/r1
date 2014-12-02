@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,16 +22,16 @@ import net.java.quickcheck.generator.support.StringGenerator;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
-import com.io7m.r1.tests.types.RVectorI3FGenerator;
+import com.io7m.r1.tests.types.PVectorI3FGenerator;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 public final class KLightGenerator implements Generator<KLightType>
 {
@@ -42,12 +42,12 @@ public final class KLightGenerator implements Generator<KLightType>
   public KLightGenerator(
     final JCGLImplementationType g)
   {
-    final Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen =
-      new RVectorI3FGenerator<RSpaceRGBType>();
-    final Generator<RVectorI3F<RSpaceWorldType>> in_direction_gen =
-      new RVectorI3FGenerator<RSpaceWorldType>();
-    final Generator<RVectorI3F<RSpaceWorldType>> in_position_gen =
-      new RVectorI3FGenerator<RSpaceWorldType>();
+    final Generator<PVectorI3F<RSpaceRGBType>> in_colour_gen =
+      new PVectorI3FGenerator<RSpaceRGBType>();
+    final Generator<PVectorI3F<RSpaceWorldType>> in_direction_gen =
+      new PVectorI3FGenerator<RSpaceWorldType>();
+    final Generator<PVectorI3F<RSpaceWorldType>> in_position_gen =
+      new PVectorI3FGenerator<RSpaceWorldType>();
     final Generator<QuaternionI4F> in_quat_gen = new QuaternionI4FGenerator();
     final Generator<KProjectionType> in_proj_gen = new KProjectionGenerator();
     final Generator<String> name_gen = new StringGenerator();

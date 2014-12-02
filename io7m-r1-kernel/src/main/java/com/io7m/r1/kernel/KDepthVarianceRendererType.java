@@ -18,12 +18,13 @@ package com.io7m.r1.kernel;
 
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.r1.kernel.types.KDepthInstancesType;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RTransformViewType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 /**
  * The type of depth-variance renderers.
@@ -33,7 +34,7 @@ public interface KDepthVarianceRendererType extends KRendererType
 {
   /**
    * Bind the given framebuffer and then call
-   * {@link #rendererEvaluateDepthVarianceWithBoundFramebuffer(RMatrixI4x4F, KProjectionType, KDepthInstancesType, AreaInclusive, OptionType)}
+   * {@link #rendererEvaluateDepthVarianceWithBoundFramebuffer(PMatrixI4x4F, KProjectionType, KDepthInstancesType, AreaInclusive, OptionType)}
    * unbinding the framebuffer after use.
    *
    * @param view
@@ -53,7 +54,7 @@ public interface KDepthVarianceRendererType extends KRendererType
    */
 
   void rendererEvaluateDepthVariance(
-    final RMatrixI4x4F<RTransformViewType> view,
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view,
     final KProjectionType projection,
     final KDepthInstancesType instances,
     final KFramebufferDepthVarianceUsableType framebuffer,
@@ -85,7 +86,7 @@ public interface KDepthVarianceRendererType extends KRendererType
    */
 
   void rendererEvaluateDepthVarianceWithBoundFramebuffer(
-    final RMatrixI4x4F<RTransformViewType> view,
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view,
     final KProjectionType projection,
     final KDepthInstancesType instances,
     final AreaInclusive framebuffer_area,

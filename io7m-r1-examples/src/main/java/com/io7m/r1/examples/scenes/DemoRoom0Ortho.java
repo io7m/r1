@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,9 +21,10 @@ import java.util.List;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -45,8 +46,9 @@ import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * A demo room.
@@ -109,12 +111,12 @@ public final class DemoRoom0Ortho implements ExampleSceneType
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         one,
-        new RVectorI3F<RSpaceWorldType>(-8.0f, 0.0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(-8.0f, 0.0f, 0.0f));
     final KTransformType room_trans_right =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         one,
-        new RVectorI3F<RSpaceWorldType>(8.0f, 0.0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(8.0f, 0.0f, 0.0f));
 
     final KInstanceOpaqueRegular room_center =
       KInstanceOpaqueRegular.newInstance(
@@ -158,7 +160,7 @@ public final class DemoRoom0Ortho implements ExampleSceneType
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         one,
-        new RVectorI3F<RSpaceWorldType>(0.0f, 0.1f, -1.0f));
+        new PVectorI3F<RSpaceWorldType>(0.0f, 0.1f, -1.0f));
 
     final KInstanceOpaqueRegular sofa =
       KInstanceOpaqueRegular.newInstance(
@@ -172,11 +174,11 @@ public final class DemoRoom0Ortho implements ExampleSceneType
       final KLightSphereWithoutShadowBuilderType door_sb =
         KLightSphereWithoutShadow.newBuilder();
       door_sb.setRadius(3.0f);
-      door_sb.setPosition(new RVectorI3F<RSpaceWorldType>(-4.0f, 1.0f, 1.0f));
+      door_sb.setPosition(new PVectorI3F<RSpaceWorldType>(-4.0f, 1.0f, 1.0f));
       door_sb.setColor(ExampleSceneUtilities.RGB_RED);
       final KLightSphereWithoutShadow door_s_red = door_sb.build();
 
-      door_sb.setPosition(new RVectorI3F<RSpaceWorldType>(4.0f, 1.0f, 1.0f));
+      door_sb.setPosition(new PVectorI3F<RSpaceWorldType>(4.0f, 1.0f, 1.0f));
       door_sb.setColor(ExampleSceneUtilities.RGB_BLUE);
       final KLightSphereWithoutShadow door_s_blue = door_sb.build();
 
@@ -186,7 +188,7 @@ public final class DemoRoom0Ortho implements ExampleSceneType
         final KLightSphereWithoutShadowBuilderType sb =
           KLightSphereWithoutShadow.newBuilder();
         sb.setRadius(32.0f);
-        sb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 2.0f, 0.0f));
+        sb.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 2.0f, 0.0f));
 
         gb.groupAddLight(sb.build());
         gb.groupAddLight(door_s_red);
@@ -202,7 +204,7 @@ public final class DemoRoom0Ortho implements ExampleSceneType
           KLightSphereWithoutShadow.newBuilder();
         sb.setRadius(32.0f);
         sb.setColor(ExampleSceneUtilities.RGB_RED);
-        sb.setPosition(new RVectorI3F<RSpaceWorldType>(-6.0f, 2.0f, 0.0f));
+        sb.setPosition(new PVectorI3F<RSpaceWorldType>(-6.0f, 2.0f, 0.0f));
 
         gb.groupAddLight(sb.build());
         gb.groupAddLight(door_s_red);
@@ -216,7 +218,7 @@ public final class DemoRoom0Ortho implements ExampleSceneType
           KLightSphereWithoutShadow.newBuilder();
         sb.setRadius(32.0f);
         sb.setColor(ExampleSceneUtilities.RGB_BLUE);
-        sb.setPosition(new RVectorI3F<RSpaceWorldType>(6.0f, 2.0f, 0.0f));
+        sb.setPosition(new PVectorI3F<RSpaceWorldType>(6.0f, 2.0f, 0.0f));
 
         gb.groupAddLight(sb.build());
         gb.groupAddLight(door_s_blue);
@@ -231,14 +233,12 @@ public final class DemoRoom0Ortho implements ExampleSceneType
     v0.addAll(ExampleSceneUtilities.FAR_VIEWS_5);
     v0.addAll(ExampleSceneUtilities.STANDARD_VIEWS_CLOSE_3);
 
-    final MatrixM4x4F t = new MatrixM4x4F();
-
     final List<ExampleViewType> v1 = new ArrayList<ExampleViewType>();
     for (final ExampleViewType v : v0) {
       final KCamera vc = v.getCamera();
       final KProjectionOrthographic p =
         KProjectionOrthographic.newProjection(
-          t,
+          new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
           -10.0f,
           10.0f,
           -5.0f,

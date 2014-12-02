@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,9 +19,9 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * The type of mapped specular properties.
@@ -32,7 +32,7 @@ import com.io7m.r1.types.RVectorI3F;
 {
   /**
    * Construct new specular properties.
-   * 
+   *
    * @param in_color
    *          The global surface specular color.
    * @param in_exponent
@@ -43,19 +43,19 @@ import com.io7m.r1.types.RVectorI3F;
    */
 
   public static KMaterialSpecularMapped mapped(
-    final RVectorI3F<RSpaceRGBType> in_color,
+    final PVectorI3F<RSpaceRGBType> in_color,
     final float in_exponent,
     final Texture2DStaticUsableType in_texture)
   {
     return new KMaterialSpecularMapped(in_color, in_exponent, in_texture);
   }
 
-  private final RVectorI3F<RSpaceRGBType> color;
+  private final PVectorI3F<RSpaceRGBType> color;
   private final float                     exponent;
   private final Texture2DStaticUsableType texture;
 
   private KMaterialSpecularMapped(
-    final RVectorI3F<RSpaceRGBType> in_color,
+    final PVectorI3F<RSpaceRGBType> in_color,
     final float in_exponent,
     final Texture2DStaticUsableType in_texture)
   {
@@ -73,7 +73,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The specular color.
    */
 
-  public RVectorI3F<RSpaceRGBType> getColor()
+  public PVectorI3F<RSpaceRGBType> getColor()
   {
     return this.color;
   }

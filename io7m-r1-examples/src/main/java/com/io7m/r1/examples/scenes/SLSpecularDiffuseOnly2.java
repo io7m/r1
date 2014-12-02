@@ -19,6 +19,7 @@ package com.io7m.r1.examples.scenes;
 import java.util.List;
 
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -32,7 +33,6 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * The {@link SLSpecular2} example with a diffuse-only light.
@@ -87,11 +87,11 @@ public final class SLSpecularDiffuseOnly2 implements ExampleSceneType
       b.setIntensity(1.0f);
 
       b.setColor(ExampleSceneUtilities.RGB_RED);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(-0.5f, 1.0f, 1.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(-0.5f, 1.0f, 1.0f));
       g.groupAddLight(b.build());
 
       b.setColor(ExampleSceneUtilities.RGB_BLUE);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.5f, 1.0f, -1.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(0.5f, 1.0f, -1.0f));
       g.groupAddLight(b.build());
     }
 

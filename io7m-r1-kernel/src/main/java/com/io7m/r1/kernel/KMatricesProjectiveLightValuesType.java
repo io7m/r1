@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,12 +16,12 @@
 
 package com.io7m.r1.kernel;
 
+import com.io7m.jtensors.parameterized.PMatrixDirectReadable4x4FType;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RMatrixM4x4F;
-import com.io7m.r1.types.RMatrixReadable4x4FType;
-import com.io7m.r1.types.RTransformDeferredProjectionType;
-import com.io7m.r1.types.RTransformProjectiveProjectionType;
-import com.io7m.r1.types.RTransformProjectiveViewType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceLightClipType;
+import com.io7m.r1.types.RSpaceLightEyeType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 /**
  * Matrices available within the context of a projective light.
@@ -34,21 +34,22 @@ public interface KMatricesProjectiveLightValuesType extends
    * @return The current deferred projection matrix
    */
 
-    RMatrixReadable4x4FType<RTransformDeferredProjectionType>
+    PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightClipType>
     getMatrixDeferredProjection();
 
   /**
    * @return The current projection matrix for the projective light
    */
 
-    RMatrixM4x4F<RTransformProjectiveProjectionType>
+    PMatrixDirectReadable4x4FType<RSpaceLightEyeType, RSpaceLightClipType>
     getMatrixProjectiveProjection();
 
   /**
    * @return The current view matrix for the projective light
    */
 
-  RMatrixM4x4F<RTransformProjectiveViewType> getMatrixProjectiveView();
+    PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceLightEyeType>
+    getMatrixProjectiveView();
 
   /**
    * @return The projection for the current projective light.

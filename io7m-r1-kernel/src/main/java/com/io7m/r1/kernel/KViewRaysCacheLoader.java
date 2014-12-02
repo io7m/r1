@@ -21,12 +21,11 @@ import java.math.BigInteger;
 import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.MatrixM4x4F.Context;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixM4x4F;
-import com.io7m.r1.types.RTransformProjectionInverseType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 
 /**
  * A cache loader that constructs and caches view rays for projections.
@@ -40,26 +39,26 @@ import com.io7m.r1.types.RTransformProjectionInverseType;
    *
    * @param context
    *          Preallocated temporary matrix storage
-   * 
+   *
    * @return A new cache loader
    */
 
   public static
     JCacheLoaderType<KProjectionType, KViewRays, RException>
     newLoader(
-      final Context context)
+      final PMatrixM4x4F.Context context)
   {
     return new KViewRaysCacheLoader(context);
   }
 
-  private final Context                                       context;
-  private final RMatrixM4x4F<RTransformProjectionInverseType> matrix;
+  private final PMatrixM4x4F.Context                        context;
+  private final PMatrixM4x4F<RSpaceClipType, RSpaceEyeType> matrix;
 
   private KViewRaysCacheLoader(
-    final Context in_context)
+    final PMatrixM4x4F.Context in_context)
   {
     this.context = NullCheck.notNull(in_context, "Context");
-    this.matrix = new RMatrixM4x4F<RTransformProjectionInverseType>();
+    this.matrix = new PMatrixM4x4F<RSpaceClipType, RSpaceEyeType>();
   }
 
   @Override public void cacheValueClose(
@@ -73,8 +72,10 @@ import com.io7m.r1.types.RTransformProjectionInverseType;
     final KProjectionType p)
     throws RException
   {
-    p.projectionGetMatrix().makeMatrixM4x4F(this.matrix);
-    MatrixM4x4F.invertInPlace(this.matrix);
+    @SuppressWarnings("unchecked") final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType> vi_temp =
+      (PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>) (PMatrixM4x4F<?, ?>) this.matrix;
+    p.projectionGetMatrix().makeMatrixM4x4F(vi_temp);
+    PMatrixM4x4F.invertInPlaceWithContext(this.context, this.matrix);
     return KViewRays.newRays(this.context, this.matrix);
   }
 

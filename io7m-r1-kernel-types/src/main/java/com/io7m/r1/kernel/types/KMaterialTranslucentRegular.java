@@ -18,11 +18,11 @@ package com.io7m.r1.kernel.types;
 
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionMaterialMissingAlbedoTexture;
 import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * The type of translucent materials.
@@ -35,16 +35,16 @@ import com.io7m.r1.types.RTransformTextureType;
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KMaterialTranslucentRegularBuilderType
   {
-    private KMaterialAlbedoType                 albedo;
-    private KMaterialAlphaType                  alpha;
-    private KMaterialEnvironmentType            environment;
-    private KMaterialNormalType                 normal;
-    private KMaterialSpecularType               specular;
-    private RMatrixI3x3F<RTransformTextureType> uv_matrix;
+    private KMaterialAlbedoType                                albedo;
+    private KMaterialAlphaType                                 alpha;
+    private KMaterialEnvironmentType                           environment;
+    private KMaterialNormalType                                normal;
+    private KMaterialSpecularType                              specular;
+    private PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix;
 
     public Builder()
     {
-      this.uv_matrix = RMatrixI3x3F.identity();
+      this.uv_matrix = PMatrixI3x3F.identity();
       this.albedo = KMaterialAlbedoUntextured.white();
       this.alpha = KMaterialAlphaConstant.constant(1.0f);
       this.environment = KMaterialEnvironmentNone.none();
@@ -109,7 +109,7 @@ import com.io7m.r1.types.RTransformTextureType;
     }
 
     @Override public void setUVMatrix(
-      final RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix)
     {
       this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     }
@@ -161,7 +161,7 @@ import com.io7m.r1.types.RTransformTextureType;
    */
 
   public static KMaterialTranslucentRegular newMaterial(
-    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
     final KMaterialAlbedoType in_albedo,
     final KMaterialAlphaType in_alpha,
     final KMaterialEnvironmentType in_environment,
@@ -203,21 +203,21 @@ import com.io7m.r1.types.RTransformTextureType;
       in_specular);
   }
 
-  private final KMaterialAlbedoType                 albedo;
-  private final KMaterialAlphaType                  alpha;
-  private final String                              code_lit;
-  private final String                              code_unlit;
-  private final KMaterialEnvironmentType            environment;
-  private final KMaterialNormalType                 normal;
-  private boolean                                   required_uv;
-  private final KMaterialSpecularType               specular;
-  private final int                                 textures_required;
-  private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
+  private final KMaterialAlbedoType                                albedo;
+  private final KMaterialAlphaType                                 alpha;
+  private final String                                             code_lit;
+  private final String                                             code_unlit;
+  private final KMaterialEnvironmentType                           environment;
+  private final KMaterialNormalType                                normal;
+  private boolean                                                  required_uv;
+  private final KMaterialSpecularType                              specular;
+  private final int                                                textures_required;
+  private final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix;
 
   private KMaterialTranslucentRegular(
     final String in_code_lit,
     final String in_code_unlit,
-    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
     final KMaterialAlbedoType in_albedo,
     final KMaterialAlphaType in_alpha,
     final KMaterialEnvironmentType in_environment,
@@ -288,7 +288,9 @@ import com.io7m.r1.types.RTransformTextureType;
     return this.code_unlit;
   }
 
-  @Override public RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix()
+  @Override public
+    PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>
+    materialGetUVMatrix()
   {
     return this.uv_matrix;
   }

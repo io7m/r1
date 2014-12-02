@@ -30,6 +30,8 @@ import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
@@ -56,10 +58,8 @@ import com.io7m.r1.kernel.types.KMaterialSpecularNone;
 import com.io7m.r1.kernel.types.KMaterialSpecularType;
 import com.io7m.r1.kernel.types.KMaterialVerification;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RVectorI3F;
+import com.io7m.r1.types.RSpaceTextureType;
 
 @EqualityReference public final class RKDMaterialCases
 {
@@ -85,8 +85,8 @@ import com.io7m.r1.types.RVectorI3F;
     try {
       final List<KMaterialOpaqueRegular> cases =
         new ArrayList<KMaterialOpaqueRegular>();
-      final RMatrixI3x3F<RTransformTextureType> uv_matrix =
-        RMatrixI3x3F.identity();
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix =
+        PMatrixI3x3F.identity();
 
       for (final KMaterialDepthType d : cases_depth) {
         assert d != null;
@@ -172,8 +172,8 @@ import com.io7m.r1.types.RVectorI3F;
   {
     final List<KMaterialSpecularType> cases =
       new ArrayList<KMaterialSpecularType>();
-    final RVectorI3F<RSpaceRGBType> color =
-      new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
+    final PVectorI3F<RSpaceRGBType> color =
+      new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
     cases.add(KMaterialSpecularNone.none());
     cases.add(KMaterialSpecularConstant.constant(color, 1.0f));
     cases.add(KMaterialSpecularMapped.mapped(color, 1.0f, t));

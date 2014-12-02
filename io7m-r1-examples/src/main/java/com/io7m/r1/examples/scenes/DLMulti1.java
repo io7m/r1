@@ -21,6 +21,7 @@ import java.util.List;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -38,7 +39,6 @@ import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * Multiple sphere meshes and multiple light groups.
@@ -86,7 +86,7 @@ public final class DLMulti1 implements ExampleSceneType
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         1.0f,
         1.0f,
-        1.0f), new RVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f));
+        1.0f), new PVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f));
 
     final KInstanceOpaqueRegular m0 =
       KInstanceOpaqueRegular.newInstance(
@@ -100,7 +100,7 @@ public final class DLMulti1 implements ExampleSceneType
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         1.0f,
         1.0f,
-        1.0f), new RVectorI3F<RSpaceWorldType>(-2.0f, 1.0f, 0.0f));
+        1.0f), new PVectorI3F<RSpaceWorldType>(-2.0f, 1.0f, 0.0f));
 
     final KInstanceOpaqueRegular m1 =
       KInstanceOpaqueRegular.newInstance(
@@ -114,7 +114,7 @@ public final class DLMulti1 implements ExampleSceneType
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         1.0f,
         1.0f,
-        1.0f), new RVectorI3F<RSpaceWorldType>(2.0f, 1.0f, 0.0f));
+        1.0f), new PVectorI3F<RSpaceWorldType>(2.0f, 1.0f, 0.0f));
 
     final KInstanceOpaqueRegular m2 =
       KInstanceOpaqueRegular.newInstance(
@@ -132,12 +132,12 @@ public final class DLMulti1 implements ExampleSceneType
       final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
       final VectorI3F d_raw =
         VectorI3F.normalize(new VectorI3F(0.0f, -1.0f, 0.0f));
-      final RVectorI3F<RSpaceWorldType> dir =
-        new RVectorI3F<RSpaceWorldType>(
+      final PVectorI3F<RSpaceWorldType> dir =
+        new PVectorI3F<RSpaceWorldType>(
           d_raw.getXF(),
           d_raw.getYF(),
           d_raw.getZF());
-      b.setColor(new RVectorI3F<RSpaceRGBType>(0.0f, 1.0f, 0.0f));
+      b.setColor(new PVectorI3F<RSpaceRGBType>(0.0f, 1.0f, 0.0f));
       b.setDirection(dir);
       l0 = b.build();
     }
@@ -146,12 +146,12 @@ public final class DLMulti1 implements ExampleSceneType
       final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
       final VectorI3F d_raw =
         VectorI3F.normalize(new VectorI3F(1.0f, 0.0f, 0.0f));
-      final RVectorI3F<RSpaceWorldType> dir =
-        new RVectorI3F<RSpaceWorldType>(
+      final PVectorI3F<RSpaceWorldType> dir =
+        new PVectorI3F<RSpaceWorldType>(
           d_raw.getXF(),
           d_raw.getYF(),
           d_raw.getZF());
-      b.setColor(new RVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f));
+      b.setColor(new PVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f));
       b.setDirection(dir);
       l1 = b.build();
     }
@@ -160,12 +160,12 @@ public final class DLMulti1 implements ExampleSceneType
       final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
       final VectorI3F d_raw =
         VectorI3F.normalize(new VectorI3F(-1.0f, 0.0f, 0.0f));
-      final RVectorI3F<RSpaceWorldType> dir =
-        new RVectorI3F<RSpaceWorldType>(
+      final PVectorI3F<RSpaceWorldType> dir =
+        new PVectorI3F<RSpaceWorldType>(
           d_raw.getXF(),
           d_raw.getYF(),
           d_raw.getZF());
-      b.setColor(new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f));
+      b.setColor(new PVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f));
       b.setDirection(dir);
       l2 = b.build();
     }

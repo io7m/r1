@@ -22,6 +22,7 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -40,7 +41,6 @@ import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * A demonstration that specular lighting with multiple lights looks correct.
@@ -72,7 +72,7 @@ public final class SLSpecular3 implements ExampleSceneType
     final ExampleSceneBuilderType scene)
     throws RException
   {
-    final RVectorI3F<RSpaceWorldType> z = RVectorI3F.zero();
+    final PVectorI3F<RSpaceWorldType> z = PVectorI3F.zero();
     final KTransformType floor_t =
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         4.0f,
@@ -91,7 +91,7 @@ public final class SLSpecular3 implements ExampleSceneType
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         1.0f,
         1.0f,
-        1.0f), new RVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 1.0f));
+        1.0f), new PVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 1.0f));
 
     final Texture2DStaticUsableType t = scene.texture("monkey_albedo.png");
 
@@ -121,7 +121,7 @@ public final class SLSpecular3 implements ExampleSceneType
       final KLightSphereWithoutShadowBuilderType b =
         KLightSphereWithoutShadow
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 1.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 1.0f));
       gb.groupAddLight(b.build());
     }
 
@@ -130,7 +130,7 @@ public final class SLSpecular3 implements ExampleSceneType
         KLightSphereWithoutShadow
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setColor(ExampleSceneUtilities.RGB_RED);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(1.0f, 2.0f, 2.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(1.0f, 2.0f, 2.0f));
       gb.groupAddLight(b.build());
     }
 
@@ -139,7 +139,7 @@ public final class SLSpecular3 implements ExampleSceneType
         KLightSphereWithoutShadow
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setColor(ExampleSceneUtilities.RGB_BLUE);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(-1.0f, 2.0f, 2.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(-1.0f, 2.0f, 2.0f));
       gb.groupAddLight(b.build());
     }
 
@@ -148,7 +148,7 @@ public final class SLSpecular3 implements ExampleSceneType
         KLightSphereWithoutShadow
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setColor(ExampleSceneUtilities.RGB_GREEN);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 3.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 3.0f));
       gb.groupAddLight(b.build());
     }
 

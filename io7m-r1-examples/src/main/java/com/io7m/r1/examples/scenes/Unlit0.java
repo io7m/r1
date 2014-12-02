@@ -21,6 +21,7 @@ import java.util.List;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -36,7 +37,6 @@ import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * A simple example with unlit spheres.
@@ -91,7 +91,7 @@ public final class Unlit0 implements ExampleSceneType
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         1.0f,
         1.0f,
-        1.0f), new RVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f));
+        1.0f), new PVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f));
 
     final KInstanceOpaqueRegular m =
       KInstanceOpaqueRegular.newInstance(

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -32,6 +32,7 @@ import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogUsableType;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KImageSourceRGBAType;
@@ -46,9 +47,8 @@ import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.RFakeTextures2DStaticGenerator;
 import com.io7m.r1.tests.TestShaderCaches;
-import com.io7m.r1.tests.types.RMatrixI3x3FGenerator;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.tests.types.PMatrixI3x3FGenerator;
+import com.io7m.r1.types.RSpaceTextureType;
 
 @SuppressWarnings("static-method") public final class KImageSourceRGBAMixTest
 {
@@ -77,8 +77,10 @@ import com.io7m.r1.types.RTransformTextureType;
       RFakeTextures2DStatic.newAnything(gi);
     final Texture2DStaticUsableType t1 =
       RFakeTextures2DStatic.newAnything(gi);
-    final RMatrixI3x3F<RTransformTextureType> m0 = RMatrixI3x3F.identity();
-    final RMatrixI3x3F<RTransformTextureType> m1 = RMatrixI3x3F.identity();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m0 =
+      PMatrixI3x3F.identity();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m1 =
+      PMatrixI3x3F.identity();
     final KTextureMixParameters config =
       KTextureMixParameters.newParameters(t0, m0, 0.5f, t1, m1);
     f.sourceEvaluateRGBA(config, fb);
@@ -88,8 +90,8 @@ import com.io7m.r1.types.RTransformTextureType;
   {
     final Generator<Texture2DStaticUsableType> tg =
       new RFakeTextures2DStaticGenerator();
-    final Generator<RMatrixI3x3F<RTransformTextureType>> mg =
-      new RMatrixI3x3FGenerator<RTransformTextureType>();
+    final Generator<PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>> mg =
+      new PMatrixI3x3FGenerator<RSpaceTextureType, RSpaceTextureType>();
 
     QuickCheck.forAllVerbose(
       new KTextureMixParametersGenerator(tg, mg),

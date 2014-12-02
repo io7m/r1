@@ -58,6 +58,11 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFrustumMeshCacheType;
 import com.io7m.r1.kernel.types.KFrustumMeshUsableType;
@@ -97,15 +102,9 @@ import com.io7m.r1.kernel.types.KVisibleSetOpaques;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RMatrixM3x3F;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * A deferred renderer for opaque objects.
@@ -147,16 +146,16 @@ import com.io7m.r1.types.RVectorI4F;
     }
   }
 
-  private static final RVectorI4F<RSpaceRGBType>     BLACK;
+  private static final PVectorI4F<RSpaceRGBType>     BLACK;
   private static final Set<FramebufferBlitBuffer>    BLIT_DEPTH_STENCIL;
   private static final GetFramebuffersGL3            GET_FRAMEBUFFERS_GL3;
-  private static final RVectorI3F<RSpaceObjectType>  NORMAL_ZERO;
-  private static final RVectorI2F<RSpaceTextureType> UV_ZERO;
+  private static final PVectorI3F<RSpaceObjectType>  NORMAL_ZERO;
+  private static final PVectorI2F<RSpaceTextureType> UV_ZERO;
 
   static {
-    BLACK = new RVectorI4F<RSpaceRGBType>(0.0f, 0.0f, 0.0f, 1.0f);
-    UV_ZERO = new RVectorI2F<RSpaceTextureType>(0.0f, 0.0f);
-    NORMAL_ZERO = new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f);
+    BLACK = new PVectorI4F<RSpaceRGBType>(0.0f, 0.0f, 0.0f, 1.0f);
+    UV_ZERO = new PVectorI2F<RSpaceTextureType>(0.0f, 0.0f);
+    NORMAL_ZERO = new PVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f);
     GET_FRAMEBUFFERS_GL3 = new GetFramebuffersGL3();
     BLIT_DEPTH_STENCIL =
       NullCheck.notNull(EnumSet.of(
@@ -517,20 +516,22 @@ import com.io7m.r1.types.RVectorI4F;
     }
   }
 
-  private static void renderGroupLightSphericalTexturedCubeWithoutShadow(
-    final KFramebufferDeferredUsableType framebuffer,
-    final TextureUnitType t_map_albedo,
-    final TextureUnitType t_map_depth_stencil,
-    final TextureUnitType t_map_normal,
-    final TextureUnitType t_map_specular,
-    final KTextureUnitContextType texture_unit_context,
-    final KViewRays view_rays,
-    final JCGLInterfaceCommonType gc,
-    final KMatricesInstanceValuesType mwi,
-    final KLightSphereTexturedCubeWithoutShadow ls,
-    final KUnitSphereUsableType s,
-    final KProgramType kp,
-    final RMatrixM3x3F<RTransformTextureType> uv_light_spherical)
+  private static
+    void
+    renderGroupLightSphericalTexturedCubeWithoutShadow(
+      final KFramebufferDeferredUsableType framebuffer,
+      final TextureUnitType t_map_albedo,
+      final TextureUnitType t_map_depth_stencil,
+      final TextureUnitType t_map_normal,
+      final TextureUnitType t_map_specular,
+      final KTextureUnitContextType texture_unit_context,
+      final KViewRays view_rays,
+      final JCGLInterfaceCommonType gc,
+      final KMatricesInstanceValuesType mwi,
+      final KLightSphereTexturedCubeWithoutShadow ls,
+      final KUnitSphereUsableType s,
+      final KProgramType kp,
+      final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv_light_spherical)
   {
     final ArrayBufferUsableType array = s.getArray();
     final IndexBufferUsableType index = s.getIndices();
@@ -663,15 +664,15 @@ import com.io7m.r1.types.RVectorI4F;
     });
   }
 
-  private final KFrustumMeshCacheType               frustum_cache;
-  private final JCGLImplementationType              g;
-  private final KUnitQuadCacheType                  quad_cache;
-  private final KShaderCacheDeferredGeometryType    shader_geo_cache;
-  private final KShaderCacheDeferredLightType       shader_light_cache;
-  private final KUnitSphereCacheType                sphere_cache;
-  private final KTextureUnitAllocator               texture_units;
-  private final RMatrixM3x3F<RTransformTextureType> uv_light_spherical;
-  private final KViewRaysCacheType                  view_rays_cache;
+  private final KFrustumMeshCacheType                              frustum_cache;
+  private final JCGLImplementationType                             g;
+  private final KUnitQuadCacheType                                 quad_cache;
+  private final KShaderCacheDeferredGeometryType                   shader_geo_cache;
+  private final KShaderCacheDeferredLightType                      shader_light_cache;
+  private final KUnitSphereCacheType                               sphere_cache;
+  private final KTextureUnitAllocator                              texture_units;
+  private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv_light_spherical;
+  private final KViewRaysCacheType                                 view_rays_cache;
 
   private KRendererDeferredOpaque(
     final JCGLImplementationType in_g,
@@ -702,7 +703,8 @@ import com.io7m.r1.types.RVectorI4F;
       this.view_rays_cache =
         NullCheck.notNull(in_view_rays_cache, "View rays cache");
 
-      this.uv_light_spherical = new RMatrixM3x3F<RTransformTextureType>();
+      this.uv_light_spherical =
+        new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
     } catch (final JCGLException e) {
       throw RExceptionJCGL.fromJCGLException(e);
     }
@@ -1225,7 +1227,8 @@ import com.io7m.r1.types.RVectorI4F;
     final ArrayBufferUsableType array = s.getArray();
     final IndexBufferUsableType index = s.getIndices();
 
-    final RMatrixI3x3F<RTransformTextureType> id = RMatrixI3x3F.identity();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> id =
+      PMatrixI3x3F.identity();
 
     mdp.withGenericTransform(
       lp.lightGetTransform(),
@@ -1422,11 +1425,12 @@ import com.io7m.r1.types.RVectorI4F;
       this.sphere_cache.cacheGetLU(KUnitSpherePrecision.KUNIT_SPHERE_16);
     final KProgramType kp =
       this.shader_light_cache.cacheGetLU(ls.lightGetCode());
-    final RMatrixM3x3F<RTransformTextureType> uv_temp =
+    final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv_temp =
       KRendererDeferredOpaque.this.uv_light_spherical;
 
     final KTransformType t = ls.lightGetTransform();
-    final RMatrixI3x3F<RTransformTextureType> uv = RMatrixI3x3F.identity();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv =
+      PMatrixI3x3F.identity();
 
     ls.sphereAccept(new KLightSphereVisitorType<Unit, JCGLException>() {
       @Override public Unit sphereTexturedCubeWithoutShadow(

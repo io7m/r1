@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,12 +18,13 @@ package com.io7m.r1.kernel.types;
 
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.Nullable;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * A transformation consisting of an orientation, a scale, and a translation.
@@ -47,19 +48,19 @@ import com.io7m.r1.types.RVectorI3F;
   public static KTransformType newTransform(
     final QuaternionI4F orientation,
     final VectorI3F scale,
-    final RVectorI3F<RSpaceWorldType> translation)
+    final PVectorI3F<RSpaceWorldType> translation)
   {
     return new KTransformOST(orientation, scale, translation);
   }
 
   private final QuaternionI4F               orientation;
   private final VectorI3F                   scale;
-  private final RVectorI3F<RSpaceWorldType> translation;
+  private final PVectorI3F<RSpaceWorldType> translation;
 
   KTransformOST(
     final QuaternionI4F in_orientation,
     final VectorI3F in_scale,
-    final RVectorI3F<RSpaceWorldType> in_translation)
+    final PVectorI3F<RSpaceWorldType> in_translation)
   {
     this.translation = in_translation;
     this.scale = in_scale;
@@ -106,7 +107,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return A translation in world-space
    */
 
-  public RVectorI3F<RSpaceWorldType> getTranslation()
+  public PVectorI3F<RSpaceWorldType> getTranslation()
   {
     return this.translation;
   }
@@ -133,24 +134,26 @@ import com.io7m.r1.types.RVectorI3F;
 
   @Override public void transformMakeMatrix4x4F(
     final KTransformContext context,
-    final MatrixM4x4F m)
+    final PMatrixM4x4F<RSpaceObjectType, RSpaceWorldType> m)
   {
-    MatrixM4x4F.setIdentity(m);
-    MatrixM4x4F.translateByVector3FInPlace(m, this.translation);
+    PMatrixM4x4F.setIdentity(m);
+    PMatrixM4x4F.translateByVector3FInPlace(m, this.translation);
 
     {
-      final MatrixM4x4F temporary = context.getTemporaryMatrix4x4();
+      final PMatrixM4x4F<RSpaceObjectType, RSpaceObjectType> temporary =
+        context.getTemporaryPMatrix4x4();
       QuaternionM4F.makeRotationMatrix4x4(this.orientation, temporary);
-      MatrixM4x4F.multiplyInPlace(m, temporary);
+      PMatrixM4x4F.multiply(m, temporary, m);
     }
 
     {
-      final MatrixM4x4F temporary = context.getTemporaryMatrix4x4();
-      MatrixM4x4F.setIdentity(temporary);
-      MatrixM4x4F.set(temporary, 0, 0, this.scale.getXF());
-      MatrixM4x4F.set(temporary, 1, 1, this.scale.getYF());
-      MatrixM4x4F.set(temporary, 2, 2, this.scale.getZF());
-      MatrixM4x4F.multiplyInPlace(m, temporary);
+      final PMatrixM4x4F<RSpaceObjectType, RSpaceObjectType> temporary =
+        context.getTemporaryPMatrix4x4();
+      PMatrixM4x4F.setIdentity(temporary);
+      PMatrixM4x4F.set(temporary, 0, 0, this.scale.getXF());
+      PMatrixM4x4F.set(temporary, 1, 1, this.scale.getYF());
+      PMatrixM4x4F.set(temporary, 2, 2, this.scale.getZF());
+      PMatrixM4x4F.multiply(m, temporary, m);
     }
   }
 }

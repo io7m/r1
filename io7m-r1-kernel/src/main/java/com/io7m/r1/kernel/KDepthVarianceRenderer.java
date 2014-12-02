@@ -40,6 +40,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KDepthInstancesType;
 import com.io7m.r1.kernel.types.KFaceSelection;
@@ -60,8 +61,8 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RTransformViewType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 /**
  * The default depth-variance renderer implementation.
@@ -335,7 +336,7 @@ import com.io7m.r1.types.RTransformViewType;
   }
 
   @Override public void rendererEvaluateDepthVariance(
-    final RMatrixI4x4F<RTransformViewType> view,
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view,
     final KProjectionType projection,
     final KDepthInstancesType instances,
     final KFramebufferDepthVarianceUsableType framebuffer,
@@ -372,7 +373,7 @@ import com.io7m.r1.types.RTransformViewType;
   }
 
   @Override public void rendererEvaluateDepthVarianceWithBoundFramebuffer(
-    final RMatrixI4x4F<RTransformViewType> view,
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view,
     final KProjectionType projection,
     final KDepthInstancesType instances,
     final AreaInclusive framebuffer_area,

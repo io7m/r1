@@ -26,7 +26,8 @@ import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogUsableType;
-import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KRendererDeferredType;
@@ -43,8 +44,9 @@ import com.io7m.r1.main.R1Type;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.TestShaderCaches;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RTransformViewType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings("static-method") public final class R1Test
 {
@@ -68,11 +70,11 @@ import com.io7m.r1.types.RTransformViewType;
     final KFramebufferDeferredType fb =
       KFramebufferDeferred.newFramebuffer(gi, fb_desc);
 
-    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
-    final MatrixM4x4F temporary = new MatrixM4x4F();
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view =
+      PMatrixI4x4F.identity();
     final KProjectionType projection =
       KProjectionFOV.newProjection(
-        temporary,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         (float) Math.toRadians(90.0f),
         1.0f,
         1.0f,

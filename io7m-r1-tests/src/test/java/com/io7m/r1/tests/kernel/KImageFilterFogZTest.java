@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,6 +30,8 @@ import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogUsableType;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.KFogProgression;
 import com.io7m.r1.kernel.KFogZParameters;
 import com.io7m.r1.kernel.KFogZParametersBuilderType;
@@ -44,10 +46,9 @@ import com.io7m.r1.main.R1Type;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.TestShaderCaches;
-import com.io7m.r1.types.RMatrixI4x4F;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RTransformProjectionType;
-import com.io7m.r1.types.RVectorI3F;
 
 @SuppressWarnings("static-method") public final class KImageFilterFogZTest
 {
@@ -75,11 +76,11 @@ import com.io7m.r1.types.RVectorI3F;
     for (final KFogProgression prog : KFogProgression.values()) {
       assert prog != null;
 
-      final RMatrixI4x4F<RTransformProjectionType> in_projection =
-        RMatrixI4x4F.identity();
+      final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> in_projection =
+        PMatrixI4x4F.identity();
       final KFogZParametersBuilderType b =
         KFogZParameters.newBuilder(in_projection);
-      b.setColor(new RVectorI3F<RSpaceRGBType>(0.33f, 0.33f, 0.33f));
+      b.setColor(new PVectorI3F<RSpaceRGBType>(0.33f, 0.33f, 0.33f));
       b.setFarZ(1.0f);
       b.setNearZ(0.0f);
       b.setProgression(prog);

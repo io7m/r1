@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -23,6 +23,11 @@ import java.util.List;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorReadable3FType;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
+import com.io7m.jtensors.parameterized.PMatrixReadable3x3FType;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
@@ -40,15 +45,10 @@ import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RMatrixReadable3x3FType;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
+import com.io7m.r1.types.RSpaceTextureType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * Miscellaneous utilities for scenes.
@@ -60,260 +60,261 @@ public final class ExampleSceneUtilities
    * Constant opacity, full opacity.
    */
 
-  public static final KMaterialAlphaConstant                         ALPHA_CONSTANT_OPACITY_1;
+  public static final KMaterialAlphaConstant                                        ALPHA_CONSTANT_OPACITY_1;
 
   /**
    * The typical center of the scene, <code>(0, 1, 0)</code>.
    */
 
-  public static final RVectorI3F<RSpaceWorldType>                    CENTER;
+  public static final PVectorI3F<RSpaceWorldType>                                   CENTER;
 
   /**
    * A scale that halves the size on the X and Z axes.
    */
 
-  public static final VectorI3F                                      HALF_SCALE_XZ;
+  public static final VectorI3F                                                     HALF_SCALE_XZ;
 
   /**
    * The identity scale.
    */
 
-  public static final VectorI3F                                      IDENTITY_SCALE;
+  public static final VectorI3F                                                     IDENTITY_SCALE;
 
   /**
    * The identity transform.
    */
 
-  public static final KTransformType                                 IDENTITY_TRANSFORM;
+  public static final KTransformType                                                IDENTITY_TRANSFORM;
 
   /**
    * The identity matrix for UV coordinates.
    */
 
-  public static final RMatrixI3x3F<RTransformTextureType>            IDENTITY_UV;
+  public static final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>            IDENTITY_UV;
 
   /**
    * The identity matrix for UV coordinates.
    */
 
-  public static final RMatrixReadable3x3FType<RTransformTextureType> IDENTITY_UV_M;
+  public static final PMatrixReadable3x3FType<RSpaceTextureType, RSpaceTextureType> IDENTITY_UV_M;
 
   /**
    * A large spherical white light and the center of the scene.
    */
 
-  public static final KLightSphereWithoutShadow                      LIGHT_SPHERICAL_LARGE_WHITE;
+  public static final KLightSphereWithoutShadow                                     LIGHT_SPHERICAL_LARGE_WHITE;
 
   /**
    * No surface emission.
    */
 
-  public static final KMaterialEmissiveNone                          NO_EMISSIVE;
+  public static final KMaterialEmissiveNone                                         NO_EMISSIVE;
 
   /**
    * No environment mapping.
    */
 
-  public static final KMaterialEnvironmentNone                       NO_ENVIRONMENT;
+  public static final KMaterialEnvironmentNone                                      NO_ENVIRONMENT;
 
   /**
    * Ordinary vertex normals.
    */
 
-  public static final KMaterialNormalVertex                          NO_NORMAL_MAP;
+  public static final KMaterialNormalVertex                                         NO_NORMAL_MAP;
 
   /**
    * No specular highlight.
    */
 
-  public static final KMaterialSpecularNone                          NO_SPECULAR;
+  public static final KMaterialSpecularNone                                         NO_SPECULAR;
 
   /**
    * Opaque glossy "plastic" (white specular highlights) red material.
    */
 
-  public static final KMaterialOpaqueRegular                         OPAQUE_GLOSS_PLASTIC_RED;
+  public static final KMaterialOpaqueRegular                                        OPAQUE_GLOSS_PLASTIC_RED;
 
   /**
    * Opaque glossy "plastic" (white specular highlights) white material.
    */
 
-  public static final KMaterialOpaqueRegular                         OPAQUE_GLOSS_PLASTIC_WHITE;
+  public static final KMaterialOpaqueRegular                                        OPAQUE_GLOSS_PLASTIC_WHITE;
 
   /**
    * Opaque matte blue material.
    */
 
-  public static final KMaterialOpaqueRegular                         OPAQUE_MATTE_BLUE;
+  public static final KMaterialOpaqueRegular                                        OPAQUE_MATTE_BLUE;
 
   /**
    * Opaque matte red material.
    */
 
-  public static final KMaterialOpaqueRegular                         OPAQUE_MATTE_RED;
+  public static final KMaterialOpaqueRegular                                        OPAQUE_MATTE_RED;
 
   /**
    * Opaque matte white material.
    */
 
-  public static final KMaterialOpaqueRegular                         OPAQUE_MATTE_WHITE;
+  public static final KMaterialOpaqueRegular                                        OPAQUE_MATTE_WHITE;
 
   /**
    * Plain blue untextured albedo.
    */
 
-  public static final KMaterialAlbedoUntextured                      PLAIN_BLUE_ALBEDO;
+  public static final KMaterialAlbedoUntextured                                     PLAIN_BLUE_ALBEDO;
 
   /**
    * Plain red untextured albedo.
    */
 
-  public static final KMaterialAlbedoUntextured                      PLAIN_RED_ALBEDO;
+  public static final KMaterialAlbedoUntextured                                     PLAIN_RED_ALBEDO;
 
   /**
    * Plain white untextured albedo.
    */
 
-  public static final KMaterialAlbedoUntextured                      PLAIN_WHITE_ALBEDO;
+  public static final KMaterialAlbedoUntextured                                     PLAIN_WHITE_ALBEDO;
 
   /**
    * RGB black.
    */
 
-  public static final RVectorI3F<RSpaceRGBType>                      RGB_BLACK;
+  public static final PVectorI3F<RSpaceRGBType>                                     RGB_BLACK;
 
   /**
    * RGB blue.
    */
 
-  public static final RVectorI3F<RSpaceRGBType>                      RGB_BLUE;
+  public static final PVectorI3F<RSpaceRGBType>                                     RGB_BLUE;
 
   /**
    * RGB green.
    */
 
-  public static final RVectorI3F<RSpaceRGBType>                      RGB_GREEN;
+  public static final PVectorI3F<RSpaceRGBType>                                     RGB_GREEN;
 
   /**
    * RGB red.
    */
 
-  public static final RVectorI3F<RSpaceRGBType>                      RGB_RED;
+  public static final PVectorI3F<RSpaceRGBType>                                     RGB_RED;
 
   /**
    * RGB white.
    */
 
-  public static final RVectorI3F<RSpaceRGBType>                      RGB_WHITE;
+  public static final PVectorI3F<RSpaceRGBType>                                     RGB_WHITE;
 
   /**
    * RGB yellow.
    */
 
-  public static final RVectorI3F<RSpaceRGBType>                      RGB_YELLOW;
+  public static final PVectorI3F<RSpaceRGBType>                                     RGB_YELLOW;
 
   /**
    * RGBA blue.
    */
 
-  public static final RVectorI4F<RSpaceRGBAType>                     RGBA_BLUE;
+  public static final PVectorI4F<RSpaceRGBAType>                                    RGBA_BLUE;
 
   /**
    * RGBA red.
    */
 
-  public static final RVectorI4F<RSpaceRGBAType>                     RGBA_RED;
+  public static final PVectorI4F<RSpaceRGBAType>                                    RGBA_RED;
 
   /**
    * RGBA white.
    */
 
-  public static final RVectorI4F<RSpaceRGBAType>                     RGBA_WHITE;
+  public static final PVectorI4F<RSpaceRGBAType>                                    RGBA_WHITE;
 
   /**
    * RGBA nothing.
    */
 
-  public static final RVectorI4F<RSpaceRGBAType>                     RGBA_NOTHING;
+  public static final PVectorI4F<RSpaceRGBAType>                                    RGBA_NOTHING;
 
   /**
    * A standard view from the left.
    */
 
-  public static final List<ExampleViewType>                          STANDARD_VIEW_LEFT;
+  public static final List<ExampleViewType>                                         STANDARD_VIEW_LEFT;
 
   /**
    * The standard range of 3 views for a scene.
    */
 
-  public static final List<ExampleViewType>                          STANDARD_VIEWS_3;
+  public static final List<ExampleViewType>                                         STANDARD_VIEWS_3;
 
   /**
    * The standard range of 5 views for a scene.
    */
 
-  public static final List<ExampleViewType>                          STANDARD_VIEWS_5;
+  public static final List<ExampleViewType>                                         STANDARD_VIEWS_5;
 
   /**
    * The standard range of 3 close views for a scene.
    */
 
-  public static final List<ExampleViewType>                          STANDARD_VIEWS_CLOSE_3;
+  public static final List<ExampleViewType>                                         STANDARD_VIEWS_CLOSE_3;
 
   /**
    * Translucent matte white material.
    */
 
-  public static final KMaterialTranslucentRegular                    TRANSLUCENT_MATTE_WHITE;
+  public static final KMaterialTranslucentRegular                                   TRANSLUCENT_MATTE_WHITE;
 
   /**
    * A vector representing the global X axis.
    */
 
-  public static final VectorI3F                                      X_AXIS;
+  public static final VectorI3F                                                     X_AXIS;
 
   /**
    * A vector representing the global Y axis.
    */
 
-  public static final VectorI3F                                      Y_AXIS;
+  public static final VectorI3F                                                     Y_AXIS;
 
   /**
    * The standard range of 5 (far) views for a scene.
    */
 
-  public static final List<ExampleViewType>                          FAR_VIEWS_5;
+  public static final List<ExampleViewType>                                         FAR_VIEWS_5;
 
   /**
    * A vector representing the global Z axis.
    */
 
-  public static final VectorReadable3FType                           Z_AXIS;
+  public static final VectorReadable3FType                                          Z_AXIS;
 
   /**
    * The standard range views for a "large room" example.
    */
 
-  public static final List<ExampleViewType>                          LARGE_ROOM_VIEWS;
+  public static final List<ExampleViewType>                                         LARGE_ROOM_VIEWS;
 
   // CHECKSTYLE:OFF
   static {
     // CHECKSTYLE:ON
 
     try {
-      RGB_RED = new RVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f);
-      RGB_GREEN = new RVectorI3F<RSpaceRGBType>(0.0f, 1.0f, 0.0f);
-      RGB_YELLOW = new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 0.0f);
-      RGB_BLUE = new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f);
-      RGB_WHITE = new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
-      RGB_BLACK = new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
-      RGBA_WHITE = new RVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f);
-      RGBA_RED = new RVectorI4F<RSpaceRGBAType>(1.0f, 0.0f, 0.0f, 1.0f);
-      RGBA_BLUE = new RVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 1.0f, 1.0f);
-      RGBA_NOTHING = new RVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.0f);
+      RGB_RED = new PVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f);
+      RGB_GREEN = new PVectorI3F<RSpaceRGBType>(0.0f, 1.0f, 0.0f);
+      RGB_YELLOW = new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 0.0f);
+      RGB_BLUE = new PVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f);
+      RGB_WHITE = new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
+      RGB_BLACK = new PVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
+      RGBA_WHITE = new PVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f);
+      RGBA_RED = new PVectorI4F<RSpaceRGBAType>(1.0f, 0.0f, 0.0f, 1.0f);
+      RGBA_BLUE = new PVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 1.0f, 1.0f);
+      RGBA_NOTHING = new PVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.0f);
 
-      IDENTITY_UV = RMatrixI3x3F.identity();
-      IDENTITY_UV_M = new RMatrixM3x3F<RTransformTextureType>();
+      IDENTITY_UV = PMatrixI3x3F.identity();
+      IDENTITY_UV_M =
+        new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
       IDENTITY_SCALE = new VectorI3F(1.0f, 1.0f, 1.0f);
       HALF_SCALE_XZ = new VectorI3F(0.5f, 1.0f, 0.5f);
 
@@ -321,7 +322,7 @@ public final class ExampleSceneUtilities
         KTransformOST.newTransform(
           QuaternionI4F.IDENTITY,
           ExampleSceneUtilities.IDENTITY_SCALE,
-          new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
+          new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
 
       PLAIN_WHITE_ALBEDO =
         KMaterialAlbedoUntextured
@@ -393,27 +394,27 @@ public final class ExampleSceneUtilities
           ExampleSceneUtilities.NO_NORMAL_MAP,
           ExampleSceneUtilities.NO_SPECULAR);
 
-      CENTER = new RVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f);
+      CENTER = new PVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f);
 
       {
         final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -4.0f,
           2.0f,
           4.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -2.0f,
           2.0f,
           4.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           0.0f,
           2.0f,
           4.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           2.0f,
           2.0f,
           4.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           4.0f,
           2.0f,
           4.0f), ExampleSceneUtilities.CENTER));
@@ -422,15 +423,15 @@ public final class ExampleSceneUtilities
 
       {
         final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -2.0f,
           2.0f,
           4.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           0.0f,
           2.0f,
           4.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           2.0f,
           2.0f,
           4.0f), ExampleSceneUtilities.CENTER));
@@ -439,15 +440,15 @@ public final class ExampleSceneUtilities
 
       {
         final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -2.0f,
           2.0f,
           2.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           0.0f,
           2.0f,
           2.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           2.0f,
           2.0f,
           2.0f), ExampleSceneUtilities.CENTER));
@@ -456,7 +457,7 @@ public final class ExampleSceneUtilities
 
       {
         final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -4.0f,
           2.0f,
           4.0f), ExampleSceneUtilities.CENTER));
@@ -465,23 +466,23 @@ public final class ExampleSceneUtilities
 
       {
         final List<ExampleViewType> views = new ArrayList<ExampleViewType>();
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -6.0f,
           4.0f,
           8.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -3.0f,
           4.0f,
           8.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           0.0f,
           4.0f,
           8.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           3.0f,
           4.0f,
           8.0f), ExampleSceneUtilities.CENTER));
-        views.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        views.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           6.0f,
           4.0f,
           8.0f), ExampleSceneUtilities.CENTER));
@@ -490,55 +491,55 @@ public final class ExampleSceneUtilities
 
       {
         final List<ExampleViewType> v = new ArrayList<ExampleViewType>();
-        final RVectorI3F<RSpaceWorldType> center = RVectorI3F.zero();
+        final PVectorI3F<RSpaceWorldType> center = PVectorI3F.zero();
 
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -6.0f,
           3.0f,
           6.0f), center));
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           0.0f,
           3.0f,
           6.0f), center));
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           6.0f,
           3.0f,
           6.0f), center));
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           6.0f,
           3.0f,
           0.0f), center));
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           6.0f,
           3.0f,
           -6.0f), center));
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           0.0f,
           3.0f,
           -6.0f), center));
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -6.0f,
           3.0f,
           -6.0f), center));
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -6.0f,
           3.0f,
           0.0f), center));
 
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -6.0f,
           -6.0f,
           6.0f), center));
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           6.0f,
           -6.0f,
           6.0f), center));
 
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           6.0f,
           -6.0f,
           -6.0f), center));
-        v.add(ExampleViewLookAt.lookAt(new RVectorI3F<RSpaceWorldType>(
+        v.add(ExampleViewLookAt.lookAt(new PVectorI3F<RSpaceWorldType>(
           -6.0f,
           -6.0f,
           -6.0f), center));
@@ -551,7 +552,7 @@ public final class ExampleSceneUtilities
           KLightSphereWithoutShadow.newBuilder();
         b.setColor(ExampleSceneUtilities.RGB_WHITE);
         b.setFalloff(1.0f);
-        b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f));
+        b.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f));
         b.setRadius(32.0f);
         b.setIntensity(1.0f);
 

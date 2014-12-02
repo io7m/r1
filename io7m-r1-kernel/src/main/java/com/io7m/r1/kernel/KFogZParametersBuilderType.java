@@ -16,10 +16,11 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.r1.types.RMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RTransformProjectionType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * Mutable builder for {@link KFogZParameters}.
@@ -41,7 +42,7 @@ public interface KFogZParametersBuilderType
    */
 
   void setColor(
-    RVectorI3F<RSpaceRGBType> c);
+    PVectorI3F<RSpaceRGBType> c);
 
   /**
    * Set the far Z distance (in <i>eye-space</i>) at which objects are
@@ -84,5 +85,5 @@ public interface KFogZParametersBuilderType
    */
 
   void setProjectionMatrix(
-    RMatrixI4x4F<RTransformProjectionType> p);
+    PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> p);
 }

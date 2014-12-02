@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -29,16 +29,16 @@ import org.junit.Test;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicType;
 import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowBasic;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStaticGenerator;
-import com.io7m.r1.tests.types.RVectorI3FGenerator;
+import com.io7m.r1.tests.types.PVectorI3FGenerator;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 public final class KLightSpherePseudoWithShadowBasicTest
 {
@@ -89,10 +89,10 @@ public final class KLightSpherePseudoWithShadowBasicTest
 
   @Test public void testAttributes()
   {
-    final Generator<RVectorI3F<RSpaceRGBType>> colour_gen1 =
-      new RVectorI3FGenerator<RSpaceRGBType>();
-    final Generator<RVectorI3F<RSpaceWorldType>> position_gen1 =
-      new RVectorI3FGenerator<RSpaceWorldType>();
+    final Generator<PVectorI3F<RSpaceRGBType>> colour_gen1 =
+      new PVectorI3FGenerator<RSpaceRGBType>();
+    final Generator<PVectorI3F<RSpaceWorldType>> position_gen1 =
+      new PVectorI3FGenerator<RSpaceWorldType>();
     final Generator<QuaternionI4F> qg = new QuaternionI4FGenerator();
     final Generator<KProjectionType> pg = new KProjectionGenerator();
     final Generator<Texture2DStaticUsableType> tg =

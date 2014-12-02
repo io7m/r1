@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,19 +25,19 @@ import nu.xom.ValidityException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM3F;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshParserEventsType;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 import com.io7m.r1.types.RXMLException;
 import com.io7m.r1.xml.RXMLUtilities;
 
 /**
  * A mesh parser implementation that parses a document and delivers events to
  * a given {@link RMeshParserEventsType} interface.
- * 
+ *
  * @param <E>
  *          The type of exceptions raised by the event interface.
  */
@@ -47,7 +47,7 @@ import com.io7m.r1.xml.RXMLUtilities;
   /**
    * Construct a new parser from the given document, which is expected to be
    * schema-valid.
-   * 
+   *
    * @param <E>
    *          The type of exceptions raised by the parser.
    * @param d
@@ -55,8 +55,8 @@ import com.io7m.r1.xml.RXMLUtilities;
    * @param events
    *          The parser events interface.
    * @return A parser.
-   * 
-   * 
+   *
+   *
    * @throws E
    *           If required.
    * @throws RXMLException
@@ -78,7 +78,7 @@ import com.io7m.r1.xml.RXMLUtilities;
   /**
    * Construct a new parser from the given element, which is expected to be
    * schema-valid.
-   * 
+   *
    * @param <E>
    *          The type of exceptions raised by the parser.
    * @param e
@@ -86,8 +86,8 @@ import com.io7m.r1.xml.RXMLUtilities;
    * @param events
    *          The parser events interface.
    * @return A parser.
-   * 
-   * 
+   *
+   *
    * @throws E
    *           If required.
    * @throws RXMLException
@@ -162,7 +162,7 @@ import com.io7m.r1.xml.RXMLUtilities;
     events.eventMeshTrianglesEnded();
   }
 
-  private static RVectorI3F<RSpaceObjectType> parseVertexPosition(
+  private static PVectorI3F<RSpaceObjectType> parseVertexPosition(
     final Element v)
     throws RXMLException
   {
@@ -218,7 +218,7 @@ import com.io7m.r1.xml.RXMLUtilities;
 
       events.eventMeshVertexStarted(index);
 
-      final RVectorI3F<RSpaceObjectType> position =
+      final PVectorI3F<RSpaceObjectType> position =
         RXMLMeshParser.parseVertexPosition(v);
 
       bounds_lower.set3F(
@@ -236,7 +236,7 @@ import com.io7m.r1.xml.RXMLUtilities;
       {
         final Element n =
           RXMLUtilities.getChild(v, "n", RXMLConstants.MESHES_URI);
-        final RVectorI3F<RSpaceObjectType> vn =
+        final PVectorI3F<RSpaceObjectType> vn =
           RXMLUtilities.getElementAttributesVector3f(
             n,
             RXMLConstants.MESHES_URI);
@@ -246,7 +246,7 @@ import com.io7m.r1.xml.RXMLUtilities;
       {
         final Element t =
           RXMLUtilities.getChild(v, "t4", RXMLConstants.MESHES_URI);
-        final RVectorI4F<RSpaceObjectType> vt =
+        final PVectorI4F<RSpaceObjectType> vt =
           RXMLUtilities.getElementAttributesVector4f(
             t,
             RXMLConstants.MESHES_URI);
@@ -256,7 +256,7 @@ import com.io7m.r1.xml.RXMLUtilities;
       {
         final Element u =
           RXMLUtilities.getChild(v, "u", RXMLConstants.MESHES_URI);
-        final RVectorI2F<RSpaceTextureType> vu =
+        final PVectorI2F<RSpaceTextureType> vu =
           RXMLUtilities.getElementAttributesVector2f(
             u,
             RXMLConstants.MESHES_URI);
@@ -267,9 +267,9 @@ import com.io7m.r1.xml.RXMLUtilities;
     }
 
     events.eventMeshVerticesEnded(
-      new RVectorI3F<RSpaceObjectType>(bounds_lower.getXF(), bounds_lower
+      new PVectorI3F<RSpaceObjectType>(bounds_lower.getXF(), bounds_lower
         .getYF(), bounds_lower.getZF()),
-      new RVectorI3F<RSpaceObjectType>(bounds_upper.getXF(), bounds_upper
+      new PVectorI3F<RSpaceObjectType>(bounds_upper.getXF(), bounds_upper
         .getYF(), bounds_upper.getZF()));
   }
 

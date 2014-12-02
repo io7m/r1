@@ -22,6 +22,8 @@ import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 
 /**
  * Preallocated storage to allow various function to execute without
@@ -41,12 +43,16 @@ import com.io7m.jtensors.QuaternionM4F;
     return new KTransformContext();
   }
 
-  private final MatrixM3x3F           t_matrix3x3;
-  private final MatrixM3x3F.Context   t_matrix3x3_context;
-  private final MatrixM4x4F           t_matrix4x4;
-  private final MatrixM4x4F.Context   t_matrix4x4_context;
-  private final QuaternionI4F.Context t_quat_context;
-  private final QuaternionM4F         t_rotation;
+  private final MatrixM3x3F                  t_matrix3x3;
+  private final MatrixM3x3F.Context          t_matrix3x3_context;
+  private final MatrixM4x4F                  t_matrix4x4;
+  private final MatrixM4x4F.Context          t_matrix4x4_context;
+  private final PMatrixM3x3F<Object, Object> t_pmatrix3x3;
+  private final PMatrixM3x3F.Context         t_pmatrix3x3_context;
+  private final PMatrixM4x4F<Object, Object> t_pmatrix4x4;
+  private final PMatrixM4x4F.Context         t_pmatrix4x4_context;
+  private final QuaternionI4F.Context        t_quat_context;
+  private final QuaternionM4F                t_rotation;
 
   private KTransformContext()
   {
@@ -55,6 +61,12 @@ import com.io7m.jtensors.QuaternionM4F;
     this.t_matrix4x4_context = new MatrixM4x4F.Context();
     this.t_matrix3x3 = new MatrixM3x3F();
     this.t_matrix3x3_context = new MatrixM3x3F.Context();
+
+    this.t_pmatrix4x4 = new PMatrixM4x4F<Object, Object>();
+    this.t_pmatrix4x4_context = new PMatrixM4x4F.Context();
+    this.t_pmatrix3x3 = new PMatrixM3x3F<Object, Object>();
+    this.t_pmatrix3x3_context = new PMatrixM3x3F.Context();
+
     this.t_quat_context = new QuaternionI4F.Context();
   }
 
@@ -106,6 +118,66 @@ import com.io7m.jtensors.QuaternionM4F;
   public MatrixM4x4F.Context getTemporaryMatrix4x4Context()
   {
     return this.t_matrix4x4_context;
+  }
+
+  /**
+   * @return A reference to a temporary 3x3 matrix. Note that this matrix is
+   *         <i>not</i> recreated on every call, and the returned matrix is
+   *         shared between all callers of this function.
+   *
+   * @param <T0>
+   *          A phantom type parameter.
+   * @param <T1>
+   *          A phantom type parameter.
+   */
+
+  @SuppressWarnings("unchecked") public
+    <T0, T1>
+    PMatrixM3x3F<T0, T1>
+    getTemporaryPMatrix3x3()
+  {
+    return (PMatrixM3x3F<T0, T1>) this.t_pmatrix3x3;
+  }
+
+  /**
+   * @return A reference to a temporary 3x3 matrix context. Note that this
+   *         context is <i>not</i> recreated on every call, and the returned
+   *         context is shared between all callers of this function.
+   */
+
+  public PMatrixM3x3F.Context getTemporaryPMatrix3x3Context()
+  {
+    return this.t_pmatrix3x3_context;
+  }
+
+  /**
+   * @return A reference to a temporary 4x4 matrix. Note that this matrix is
+   *         <i>not</i> recreated on every call, and the returned matrix is
+   *         shared between all callers of this function.
+   * 
+   * @param <T0>
+   *          A phantom type parameter.
+   * @param <T1>
+   *          A phantom type parameter.
+   */
+
+  @SuppressWarnings("unchecked") public
+    <T0, T1>
+    PMatrixM4x4F<T0, T1>
+    getTemporaryPMatrix4x4()
+  {
+    return (PMatrixM4x4F<T0, T1>) this.t_pmatrix4x4;
+  }
+
+  /**
+   * @return A reference to a temporary 4x4 matrix context. Note that this
+   *         context is <i>not</i> recreated on every call, and the returned
+   *         context is shared between all callers of this function.
+   */
+
+  public PMatrixM4x4F.Context getTemporaryPMatrix4x4Context()
+  {
+    return this.t_pmatrix4x4_context;
   }
 
   /**

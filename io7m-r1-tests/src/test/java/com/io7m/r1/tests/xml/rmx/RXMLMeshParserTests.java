@@ -1,10 +1,10 @@
 /*
  * Copyright © 2013 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,12 +28,12 @@ import org.junit.Test;
 import com.io7m.jequality.AlmostEqualFloat.ContextRelative;
 import com.io7m.jnull.NonNull;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshParserEventsType;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 import com.io7m.r1.types.RXMLException;
 import com.io7m.r1.xml.rmx.RXMLMeshAttribute;
 import com.io7m.r1.xml.rmx.RXMLMeshDocument;
@@ -43,10 +43,10 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
 {
   static class Checked implements RMeshParserEventsType<Throwable>
   {
-    private final @NonNull RVectorI3F<RSpaceObjectType> expected_lower;
+    private final @NonNull PVectorI3F<RSpaceObjectType> expected_lower;
     private final @NonNull String                       expected_name;
     private final int                                   expected_triangles;
-    private final @NonNull RVectorI3F<RSpaceObjectType> expected_upper;
+    private final @NonNull PVectorI3F<RSpaceObjectType> expected_upper;
     private final int                                   expected_vertices;
     private boolean                                     mesh_ended;
     private boolean                                     mesh_started;
@@ -68,8 +68,8 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
       final @NonNull String in_expected_name,
       final int in_expected_triangles,
       final int in_vertices_expected,
-      final @NonNull RVectorI3F<RSpaceObjectType> in_expected_lower,
-      final @NonNull RVectorI3F<RSpaceObjectType> in_expected_upper)
+      final @NonNull PVectorI3F<RSpaceObjectType> in_expected_lower,
+      final @NonNull PVectorI3F<RSpaceObjectType> in_expected_upper)
     {
       this.expected_name = in_expected_name;
       this.expected_triangles = in_expected_triangles;
@@ -139,7 +139,7 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
 
     @Override public void eventMeshVertexNormal(
       final long index,
-      final RVectorI3F<RSpaceObjectType> normal)
+      final PVectorI3F<RSpaceObjectType> normal)
       throws Throwable
     {
       this.vertex_normal_called = true;
@@ -147,7 +147,7 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
 
     @Override public void eventMeshVertexPosition(
       final long index,
-      final RVectorI3F<RSpaceObjectType> position)
+      final PVectorI3F<RSpaceObjectType> position)
       throws Throwable
     {
       this.vertex_position_called = true;
@@ -163,7 +163,7 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
 
     @Override public void eventMeshVertexTangent4f(
       final long index,
-      final RVectorI4F<RSpaceObjectType> tangent)
+      final PVectorI4F<RSpaceObjectType> tangent)
       throws Throwable
     {
       this.vertex_tangent4f_called = true;
@@ -171,15 +171,15 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
 
     @Override public void eventMeshVertexUV(
       final long index,
-      final RVectorI2F<RSpaceTextureType> uv)
+      final PVectorI2F<RSpaceTextureType> uv)
       throws Throwable
     {
       this.vertex_uv_called = true;
     }
 
     @Override public void eventMeshVerticesEnded(
-      final RVectorI3F<RSpaceObjectType> lower,
-      final RVectorI3F<RSpaceObjectType> upper)
+      final PVectorI3F<RSpaceObjectType> lower,
+      final PVectorI3F<RSpaceObjectType> upper)
       throws Throwable
     {
       this.vertices_ended = true;
@@ -272,7 +272,7 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
 
     @Override public void eventMeshVertexNormal(
       final long index,
-      final RVectorI3F<RSpaceObjectType> normal)
+      final PVectorI3F<RSpaceObjectType> normal)
       throws Throwable
     {
       // Nothing
@@ -280,7 +280,7 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
 
     @Override public void eventMeshVertexPosition(
       final long index,
-      final RVectorI3F<RSpaceObjectType> position)
+      final PVectorI3F<RSpaceObjectType> position)
       throws Throwable
     {
       // Nothing
@@ -295,7 +295,7 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
 
     @Override public void eventMeshVertexTangent4f(
       final long index,
-      final RVectorI4F<RSpaceObjectType> tangent)
+      final PVectorI4F<RSpaceObjectType> tangent)
       throws Throwable
     {
       // Nothing
@@ -303,15 +303,15 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
 
     @Override public void eventMeshVertexUV(
       final long index,
-      final RVectorI2F<RSpaceTextureType> uv)
+      final PVectorI2F<RSpaceTextureType> uv)
       throws Throwable
     {
       // Nothing
     }
 
     @Override public void eventMeshVerticesEnded(
-      final RVectorI3F<RSpaceObjectType> lower,
-      final RVectorI3F<RSpaceObjectType> upper)
+      final PVectorI3F<RSpaceObjectType> lower,
+      final PVectorI3F<RSpaceObjectType> upper)
       throws Throwable
     {
       // Nothing
@@ -356,8 +356,8 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
           expected_name,
           expected_triangles,
           expected_vertices,
-          new RVectorI3F<RSpaceObjectType>(-23.0f, -34.0f, -11.0f),
-          new RVectorI3F<RSpaceObjectType>(56.0f, 72.0f, 4.0f));
+          new PVectorI3F<RSpaceObjectType>(-23.0f, -34.0f, -11.0f),
+          new PVectorI3F<RSpaceObjectType>(56.0f, 72.0f, 4.0f));
 
       final InputStream s = this.getFile("bounds.rmx");
       final Document d = RXMLMeshDocument.parseFromStreamValidating(s);
@@ -403,8 +403,8 @@ import com.io7m.r1.xml.rmx.RXMLMeshParser;
           expected_name,
           expected_triangles,
           expected_vertices,
-          new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f),
-          new RVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f));
+          new PVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f),
+          new PVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f));
 
       final InputStream s = this.getFile("valid.rmx");
       final Document d = RXMLMeshDocument.parseFromStreamValidating(s);

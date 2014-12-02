@@ -19,6 +19,10 @@ package com.io7m.r1.types;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.parameterized.PVectorM3F;
+import com.io7m.jtensors.parameterized.PVectorM4F;
+import com.io7m.jtensors.parameterized.PVectorReadable3FType;
+import com.io7m.jtensors.parameterized.PVectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
 
 /**
@@ -30,7 +34,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   /**
    * Convert clip-space coordinates ({@link RSpaceClipType}) to normalized
    * device space coordinates ({@link RSpaceNDCType}).
-   * 
+   *
    * @param c
    *          Clip-space coordinates
    * @param n
@@ -38,8 +42,8 @@ import com.io7m.junreachable.UnreachableCodeException;
    */
 
   public static void clipToNDC(
-    final RVectorReadable4FType<RSpaceClipType> c,
-    final RVectorM3F<RSpaceNDCType> n)
+    final PVectorReadable4FType<RSpaceClipType> c,
+    final PVectorM3F<RSpaceNDCType> n)
   {
     n.set3F(
       c.getXF() / c.getWF(),
@@ -49,11 +53,11 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   /**
    * Convert from clip-space coordinates to window-space coordinates.
-   * 
-   * @see #clipToNDC(RVectorReadable4FType, RVectorM3F)
-   * @see #ndcToWindow(RVectorReadable3FType, RVectorM3F, AreaInclusive,
+   *
+   * @see #clipToNDC(PVectorReadable4FType, PVectorM3F)
+   * @see #ndcToWindow(PVectorReadable3FType, PVectorM3F, AreaInclusive,
    *      float, float)
-   * 
+   *
    * @param c
    *          Clip-space coordinates
    * @param w
@@ -69,13 +73,13 @@ import com.io7m.junreachable.UnreachableCodeException;
    */
 
   public static void clipToWindow(
-    final RVectorReadable4FType<RSpaceClipType> c,
-    final RVectorM3F<RSpaceWindowType> w,
+    final PVectorReadable4FType<RSpaceClipType> c,
+    final PVectorM3F<RSpaceWindowType> w,
     final AreaInclusive area,
     final float near,
     final float far)
   {
-    final RVectorM3F<RSpaceNDCType> n = new RVectorM3F<RSpaceNDCType>();
+    final PVectorM3F<RSpaceNDCType> n = new PVectorM3F<RSpaceNDCType>();
     RCoordinates.clipToNDC(c, n);
     RCoordinates.ndcToWindow(n, w, area, near, far);
   }
@@ -83,7 +87,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   /**
    * Calculate clip-space coordinates from the given normalized-device space
    * coordinates.
-   * 
+   *
    * @param c
    *          The resulting clip coordinates
    * @param n
@@ -91,8 +95,8 @@ import com.io7m.junreachable.UnreachableCodeException;
    */
 
   public static void ndcToClip(
-    final RVectorM4F<RSpaceClipType> c,
-    final RVectorReadable4FType<RSpaceNDCType> n)
+    final PVectorM4F<RSpaceClipType> c,
+    final PVectorReadable4FType<RSpaceNDCType> n)
   {
     c.set4F(
       n.getXF() * n.getWF(),
@@ -104,7 +108,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   /**
    * Convert normalized device space coordinates ({@link RSpaceNDCType}) to
    * window space coordinates ({@link RSpaceWindowType}).
-   * 
+   *
    * @param n
    *          Normalized device space coordinates
    * @param w
@@ -120,8 +124,8 @@ import com.io7m.junreachable.UnreachableCodeException;
    */
 
   public static void ndcToWindow(
-    final RVectorReadable3FType<RSpaceNDCType> n,
-    final RVectorM3F<RSpaceWindowType> w,
+    final PVectorReadable3FType<RSpaceNDCType> n,
+    final PVectorM3F<RSpaceWindowType> w,
     final AreaInclusive area,
     final float near,
     final float far)
@@ -145,7 +149,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   /**
    * Convert window-space coordinates ({@link RSpaceWindowType}) to normalized
    * device space coordinates ({@link RSpaceNDCType}).
-   * 
+   *
    * @param n
    *          The resulting normalized device space coordinates
    * @param w
@@ -161,8 +165,8 @@ import com.io7m.junreachable.UnreachableCodeException;
    */
 
   public static void windowToNDC(
-    final RVectorM3F<RSpaceNDCType> n,
-    final RVectorReadable3FType<RSpaceWindowType> w,
+    final PVectorM3F<RSpaceNDCType> n,
+    final PVectorReadable3FType<RSpaceWindowType> w,
     final AreaInclusive area,
     final float near,
     final float far)

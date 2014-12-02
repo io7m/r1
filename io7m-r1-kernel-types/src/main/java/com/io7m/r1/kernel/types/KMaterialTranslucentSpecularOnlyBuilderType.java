@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,8 +16,8 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * The type of mutable builders for {@link KMaterialTranslucentSpecularOnly}.
@@ -28,7 +28,7 @@ public interface KMaterialTranslucentSpecularOnlyBuilderType extends
 {
   /**
    * Set the alpha properties of the material.
-   * 
+   *
    * @param alpha
    *          The alpha properties.
    */
@@ -38,7 +38,7 @@ public interface KMaterialTranslucentSpecularOnlyBuilderType extends
 
   /**
    * Set the normal properties of the material.
-   * 
+   *
    * @param normal
    *          The normal properties.
    */
@@ -48,7 +48,7 @@ public interface KMaterialTranslucentSpecularOnlyBuilderType extends
 
   /**
    * Set the specular properties of the material.
-   * 
+   *
    * @param specular
    *          The specular properties.
    */
@@ -58,11 +58,11 @@ public interface KMaterialTranslucentSpecularOnlyBuilderType extends
 
   /**
    * Set the UV matrix of the material.
-   * 
+   *
    * @param uv_matrix
    *          The UV matrix.
    */
 
   void setUVMatrix(
-    final RMatrixI3x3F<RTransformTextureType> uv_matrix);
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix);
 }

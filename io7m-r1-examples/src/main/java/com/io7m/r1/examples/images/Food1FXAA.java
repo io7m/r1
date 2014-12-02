@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,7 +18,8 @@ package com.io7m.r1.examples.images;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.MatrixM3x3F;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
 import com.io7m.r1.examples.ExampleImageBuilderType;
 import com.io7m.r1.examples.ExampleImageType;
 import com.io7m.r1.examples.ExampleVisitorType;
@@ -29,9 +30,7 @@ import com.io7m.r1.kernel.KTextureMixParameters;
 import com.io7m.r1.kernel.types.KAxes;
 import com.io7m.r1.main.R1Type;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * A demonstration using a texture as an image source.
@@ -39,7 +38,7 @@ import com.io7m.r1.types.RTransformTextureType;
 
 public final class Food1FXAA implements ExampleImageType
 {
-  private final RMatrixM3x3F<RTransformTextureType> uv;
+  private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv;
 
   /**
    * Construct the example.
@@ -47,7 +46,7 @@ public final class Food1FXAA implements ExampleImageType
 
   public Food1FXAA()
   {
-    this.uv = new RMatrixM3x3F<RTransformTextureType>();
+    this.uv = new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
   }
 
   @Override public <A> A exampleAccept(
@@ -73,11 +72,11 @@ public final class Food1FXAA implements ExampleImageType
 
     final Texture2DStaticUsableType t = image.texture("food_640x480.jpg");
 
-    MatrixM3x3F.setIdentity(this.uv);
-    MatrixM3x3F.scale(this.uv, 3.0f, this.uv);
-    MatrixM3x3F.rotate(Math.toRadians(45.0), this.uv, KAxes.AXIS_Z, this.uv);
-    final RMatrixI3x3F<RTransformTextureType> m =
-      RMatrixI3x3F.newFromReadable(this.uv);
+    PMatrixM3x3F.setIdentity(this.uv);
+    PMatrixM3x3F.scale(this.uv, 3.0f, this.uv);
+    PMatrixM3x3F.rotate(Math.toRadians(45.0), this.uv, KAxes.AXIS_Z, this.uv);
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m =
+      PMatrixI3x3F.newFromReadable(this.uv);
 
     final KTextureMixParameters config =
       KTextureMixParameters.newParameters(t, m, 0.0f, t, m);

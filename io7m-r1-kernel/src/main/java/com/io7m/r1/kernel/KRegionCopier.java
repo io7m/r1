@@ -36,14 +36,13 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
-import com.io7m.jtensors.MatrixM3x3F;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCopierSourceEqualsTarget;
 import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionNotSupported;
-import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * The default implementation of the {@link KRegionCopierType} interface.
@@ -87,9 +86,9 @@ import com.io7m.r1.types.RTransformTextureType;
   public static void calculateRegionMatrices(
     final AreaInclusive source_image_area,
     final AreaInclusive source_select_area,
-    final RMatrixM3x3F<RTransformTextureType> matrix_uv)
+    final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> matrix_uv)
   {
-    MatrixM3x3F.setIdentity(matrix_uv);
+    PMatrixM3x3F.setIdentity(matrix_uv);
 
     if (source_image_area.equals(source_select_area) == false) {
       final RangeInclusiveL si_rx = source_image_area.getRangeX();

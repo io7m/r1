@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,6 +20,7 @@ import net.java.quickcheck.Generator;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
@@ -33,13 +34,12 @@ import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 public final class KLightProjectiveGenerator implements
   Generator<KLightProjectiveType>
 {
-  private final Generator<RVectorI3F<RSpaceRGBType>>   colour_gen;
-  private final Generator<RVectorI3F<RSpaceWorldType>> position_gen;
+  private final Generator<PVectorI3F<RSpaceRGBType>>   colour_gen;
+  private final Generator<PVectorI3F<RSpaceWorldType>> position_gen;
   private final Generator<KProjectionType>             proj_gen;
   private final Generator<QuaternionI4F>               quat_gen;
   private final Generator<KShadowMappedBasic>          shad_basic_gen;
@@ -47,8 +47,8 @@ public final class KLightProjectiveGenerator implements
   private final Generator<Texture2DStaticUsableType>   tex_gen;
 
   public KLightProjectiveGenerator(
-    final Generator<RVectorI3F<RSpaceRGBType>> in_colour_gen,
-    final Generator<RVectorI3F<RSpaceWorldType>> in_position_gen,
+    final Generator<PVectorI3F<RSpaceRGBType>> in_colour_gen,
+    final Generator<PVectorI3F<RSpaceWorldType>> in_position_gen,
     final Generator<QuaternionI4F> in_quat_gen,
     final Generator<KProjectionType> in_proj_gen,
     final Generator<Texture2DStaticUsableType> in_tex_gen,

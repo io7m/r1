@@ -15,10 +15,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import com.io7m.jtensors.VectorReadable4FType;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.kernel.KTriangleClipping;
 import com.io7m.r1.types.RSpaceClipType;
 import com.io7m.r1.types.RTriangle4F;
-import com.io7m.r1.types.RVectorI4F;
 
 @SuppressWarnings("boxing") public final class ClippingDemo
 {
@@ -160,20 +160,20 @@ import com.io7m.r1.types.RVectorI4F;
     private void drawClip(
       final Graphics g)
     {
-      final RVectorI4F<RSpaceClipType> p0 =
-        new RVectorI4F<RSpaceClipType>(
+      final PVectorI4F<RSpaceClipType> p0 =
+        new PVectorI4F<RSpaceClipType>(
           this.tri_p0.x,
           this.tri_p0.y,
           0.0f,
           1.0f);
-      final RVectorI4F<RSpaceClipType> p1 =
-        new RVectorI4F<RSpaceClipType>(
+      final PVectorI4F<RSpaceClipType> p1 =
+        new PVectorI4F<RSpaceClipType>(
           this.tri_p1.x,
           this.tri_p1.y,
           0.0f,
           1.0f);
-      final RVectorI4F<RSpaceClipType> p2 =
-        new RVectorI4F<RSpaceClipType>(
+      final PVectorI4F<RSpaceClipType> p2 =
+        new PVectorI4F<RSpaceClipType>(
           this.tri_p2.x,
           this.tri_p2.y,
           0.0f,

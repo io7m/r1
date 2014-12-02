@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,15 +27,15 @@ import com.io7m.jlog.LogType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM3F;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshParserEventsType;
 import com.io7m.r1.types.RBException;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionIO;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * A mesh parser implementation that parses a binary file and delivers events
@@ -78,7 +78,7 @@ import com.io7m.r1.types.RVectorI4F;
     return new RBImporter<E>(new BufferedInputStream(s, 65536), events, log);
   }
 
-  private static RVectorI3F<RSpaceObjectType> readNormal(
+  private static PVectorI3F<RSpaceObjectType> readNormal(
     final ByteBuffer temp,
     final InputStream in_s)
     throws RBException,
@@ -87,10 +87,10 @@ import com.io7m.r1.types.RVectorI4F;
     final float x = RBParsing.readFloat32(temp, in_s);
     final float y = RBParsing.readFloat32(temp, in_s);
     final float z = RBParsing.readFloat32(temp, in_s);
-    return new RVectorI3F<RSpaceObjectType>(x, y, z);
+    return new PVectorI3F<RSpaceObjectType>(x, y, z);
   }
 
-  private static RVectorI3F<RSpaceObjectType> readPosition(
+  private static PVectorI3F<RSpaceObjectType> readPosition(
     final ByteBuffer temp,
     final InputStream in_s)
     throws RBException,
@@ -99,10 +99,10 @@ import com.io7m.r1.types.RVectorI4F;
     final float x = RBParsing.readFloat32(temp, in_s);
     final float y = RBParsing.readFloat32(temp, in_s);
     final float z = RBParsing.readFloat32(temp, in_s);
-    return new RVectorI3F<RSpaceObjectType>(x, y, z);
+    return new PVectorI3F<RSpaceObjectType>(x, y, z);
   }
 
-  private static RVectorI4F<RSpaceObjectType> readTangent(
+  private static PVectorI4F<RSpaceObjectType> readTangent(
     final ByteBuffer temp,
     final InputStream in_s)
     throws RBException,
@@ -112,10 +112,10 @@ import com.io7m.r1.types.RVectorI4F;
     final float y = RBParsing.readFloat32(temp, in_s);
     final float z = RBParsing.readFloat32(temp, in_s);
     final float w = RBParsing.readFloat32(temp, in_s);
-    return new RVectorI4F<RSpaceObjectType>(x, y, z, w);
+    return new PVectorI4F<RSpaceObjectType>(x, y, z, w);
   }
 
-  private static RVectorI2F<RSpaceTextureType> readUV(
+  private static PVectorI2F<RSpaceTextureType> readUV(
     final ByteBuffer temp,
     final InputStream in_s)
     throws RBException,
@@ -123,7 +123,7 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final float x = RBParsing.readFloat32(temp, in_s);
     final float y = RBParsing.readFloat32(temp, in_s);
-    return new RVectorI2F<RSpaceTextureType>(x, y);
+    return new PVectorI2F<RSpaceTextureType>(x, y);
   }
 
   private final RMeshParserEventsType<E> events;
@@ -219,13 +219,13 @@ import com.io7m.r1.types.RVectorI4F;
 
       this.events.eventMeshVertexStarted(index);
 
-      final RVectorI3F<RSpaceObjectType> position =
+      final PVectorI3F<RSpaceObjectType> position =
         RBImporter.readPosition(this.temp, in_s);
-      final RVectorI3F<RSpaceObjectType> normal =
+      final PVectorI3F<RSpaceObjectType> normal =
         RBImporter.readNormal(this.temp, in_s);
-      final RVectorI4F<RSpaceObjectType> tangent =
+      final PVectorI4F<RSpaceObjectType> tangent =
         RBImporter.readTangent(this.temp, in_s);
-      final RVectorI2F<RSpaceTextureType> uv =
+      final PVectorI2F<RSpaceTextureType> uv =
         RBImporter.readUV(this.temp, in_s);
 
       bounds_lower.set3F(
@@ -246,9 +246,9 @@ import com.io7m.r1.types.RVectorI4F;
     }
 
     this.events.eventMeshVerticesEnded(
-      new RVectorI3F<RSpaceObjectType>(bounds_lower.getXF(), bounds_lower
+      new PVectorI3F<RSpaceObjectType>(bounds_lower.getXF(), bounds_lower
         .getYF(), bounds_lower.getZF()),
-      new RVectorI3F<RSpaceObjectType>(bounds_upper.getXF(), bounds_upper
+      new PVectorI3F<RSpaceObjectType>(bounds_upper.getXF(), bounds_upper
         .getYF(), bounds_upper.getZF()));
   }
 }

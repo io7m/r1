@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,11 +16,11 @@
 
 package com.io7m.r1.meshes;
 
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * The type of mutable builders for {@link RMeshTangents}.
@@ -44,11 +44,11 @@ public interface RMeshTangentsBuilderType
    */
 
   void addVertex(
-    final RVectorI3F<RSpaceObjectType> position,
-    final RVectorI3F<RSpaceObjectType> normal,
-    final RVectorI4F<RSpaceObjectType> tangent,
-    final RVectorI3F<RSpaceObjectType> bitangent,
-    final RVectorI2F<RSpaceTextureType> uv);
+    final PVectorI3F<RSpaceObjectType> position,
+    final PVectorI3F<RSpaceObjectType> normal,
+    final PVectorI4F<RSpaceObjectType> tangent,
+    final PVectorI3F<RSpaceObjectType> bitangent,
+    final PVectorI2F<RSpaceTextureType> uv);
 
   /**
    * Add a triangle.

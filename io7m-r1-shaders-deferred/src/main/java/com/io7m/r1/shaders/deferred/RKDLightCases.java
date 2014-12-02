@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,8 +30,9 @@ import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jranges.RangeInclusiveL;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightDirectional;
@@ -54,9 +55,10 @@ import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.types.RException;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 @EqualityReference public final class RKDLightCases
 {
@@ -66,14 +68,14 @@ import com.io7m.r1.types.RVectorI3F;
   {
     try {
       final ArrayList<KLightType> cases = new ArrayList<KLightType>();
-      final RVectorI3F<RSpaceWorldType> v =
-        new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f);
-      final RVectorI3F<RSpaceRGBType> c =
-        new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
+      final PVectorI3F<RSpaceWorldType> v =
+        new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f);
+      final PVectorI3F<RSpaceRGBType> c =
+        new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
 
       final KProjectionFrustum projection =
         KProjectionFrustum.newProjection(
-          new MatrixM4x4F(),
+          new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
           -1.0f,
           1.0f,
           -1.0f,

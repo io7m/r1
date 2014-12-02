@@ -21,6 +21,8 @@ import java.util.List;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -38,11 +40,9 @@ import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RSpaceRGBType;
+import com.io7m.r1.types.RSpaceTextureType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * A simple example with multiple spherical lights on a simple mesh.
@@ -82,7 +82,7 @@ public final class SLMulti0 implements ExampleSceneType
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         8.0f,
         1.0f,
-        8.0f), new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
+        8.0f), new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 0.0f));
 
     final KMaterialOpaqueRegular floor_mat;
     {
@@ -98,8 +98,8 @@ public final class SLMulti0 implements ExampleSceneType
       floor_mat = b.build();
     }
 
-    final RMatrixI3x3F<RTransformTextureType> floor_mat_uv =
-      RMatrixI3x3F.newFromColumns(
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> floor_mat_uv =
+      PMatrixI3x3F.newFromColumns(
         new VectorI3F(16.0f, 0.0f, 0.0f),
         new VectorI3F(0.0f, 16.0f, 0.0f),
         new VectorI3F(0.0f, 0.0f, 16.0f));
@@ -120,16 +120,16 @@ public final class SLMulti0 implements ExampleSceneType
       final KLightSphereWithoutShadowBuilderType b =
         KLightSphereWithoutShadow.newBuilder();
       b.setRadius(2.0f);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(1.0f, 1.0f, 0.0f));
-      b.setColor(new RVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(1.0f, 1.0f, 0.0f));
+      b.setColor(new PVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f));
       gb.groupAddLight(b.build());
 
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(-1.0f, 1.0f, 0.0f));
-      b.setColor(new RVectorI3F<RSpaceRGBType>(0.0f, 1.0f, 0.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(-1.0f, 1.0f, 0.0f));
+      b.setColor(new PVectorI3F<RSpaceRGBType>(0.0f, 1.0f, 0.0f));
       gb.groupAddLight(b.build());
 
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 1.0f));
-      b.setColor(new RVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 1.0f));
+      b.setColor(new PVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 1.0f));
       gb.groupAddLight(b.build());
     }
   }

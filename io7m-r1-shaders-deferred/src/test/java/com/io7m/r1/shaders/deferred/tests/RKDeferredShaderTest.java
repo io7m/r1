@@ -18,6 +18,7 @@ package com.io7m.r1.shaders.deferred.tests;
 
 import org.junit.Test;
 
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.r1.kernel.types.KMaterialDepthConstant;
 import com.io7m.r1.kernel.types.KMaterialEmissiveNone;
@@ -27,8 +28,7 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialSpecularNone;
 import com.io7m.r1.shaders.deferred.RKDeferredShader;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 @SuppressWarnings("static-method") public final class RKDeferredShaderTest
 {
@@ -36,7 +36,8 @@ import com.io7m.r1.types.RTransformTextureType;
     throws RException
   {
     final StringBuilder b = new StringBuilder();
-    final RMatrixI3x3F<RTransformTextureType> id = RMatrixI3x3F.identity();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> id =
+      PMatrixI3x3F.identity();
     final KMaterialOpaqueRegular m =
       KMaterialOpaqueRegular.newMaterial(
         id,

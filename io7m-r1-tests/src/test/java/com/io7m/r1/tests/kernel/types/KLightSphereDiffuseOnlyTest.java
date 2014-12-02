@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,23 +25,23 @@ import org.junit.Test;
 
 import com.io7m.jnull.NullCheckException;
 import com.io7m.jranges.RangeCheckException;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.types.KLightSphereBuilderType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnlyBuilderType;
-import com.io7m.r1.tests.types.RVectorI3FGenerator;
+import com.io7m.r1.tests.types.PVectorI3FGenerator;
 import com.io7m.r1.tests.utilities.TestUtilities;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 @SuppressWarnings("static-method") public final class KLightSphereDiffuseOnlyTest
 {
   @Test public void testAttributes()
   {
-    final Generator<RVectorI3F<RSpaceRGBType>> colour_gen1 =
-      new RVectorI3FGenerator<RSpaceRGBType>();
-    final Generator<RVectorI3F<RSpaceWorldType>> position_gen1 =
-      new RVectorI3FGenerator<RSpaceWorldType>();
+    final Generator<PVectorI3F<RSpaceRGBType>> colour_gen1 =
+      new PVectorI3FGenerator<RSpaceRGBType>();
+    final Generator<PVectorI3F<RSpaceWorldType>> position_gen1 =
+      new PVectorI3FGenerator<RSpaceWorldType>();
     final Generator<KLightSphereWithoutShadowDiffuseOnly> gen =
       new KLightSphereWithoutShadowDiffuseOnlyGenerator(
         colour_gen1,
@@ -92,8 +92,8 @@ import com.io7m.r1.types.RVectorI3F;
               KLightSphereWithoutShadowDiffuseOnly.newBuilder();
             b.copyFromSphere(s);
 
-            final RVectorI3F<RSpaceRGBType> c =
-              new RVectorI3F<RSpaceRGBType>(0.0f, 0.5f, 1.0f);
+            final PVectorI3F<RSpaceRGBType> c =
+              new PVectorI3F<RSpaceRGBType>(0.0f, 0.5f, 1.0f);
 
             b.setColor(c);
             final KLightSphereWithoutShadowDiffuseOnly r = b.build();
@@ -105,8 +105,8 @@ import com.io7m.r1.types.RVectorI3F;
               KLightSphereWithoutShadowDiffuseOnly.newBuilder();
             b.copyFromSphere(s);
 
-            final RVectorI3F<RSpaceWorldType> p =
-              new RVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 1.0f);
+            final PVectorI3F<RSpaceWorldType> p =
+              new PVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 1.0f);
             b.setPosition(p);
             final KLightSphereWithoutShadowDiffuseOnly r = b.build();
             Assert.assertEquals(r.lightGetPosition(), p);
@@ -119,14 +119,14 @@ import com.io7m.r1.types.RVectorI3F;
   {
     final KLightSphereBuilderType b =
       KLightSphereWithoutShadowDiffuseOnly.newBuilder();
-    b.setColor((RVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
+    b.setColor((PVectorI3F<RSpaceRGBType>) TestUtilities.actuallyNull());
   }
 
   @Test(expected = NullCheckException.class) public void testNull_1()
   {
     final KLightSphereBuilderType b =
       KLightSphereWithoutShadowDiffuseOnly.newBuilder();
-    b.setPosition((RVectorI3F<RSpaceWorldType>) TestUtilities.actuallyNull());
+    b.setPosition((PVectorI3F<RSpaceWorldType>) TestUtilities.actuallyNull());
   }
 
   @Test(expected = RangeCheckException.class) public void testZeroFalloff()

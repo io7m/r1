@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,14 +24,14 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.OrthonormalizedI3F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
+import com.io7m.jtensors.parameterized.PVectorM3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RExceptionMeshNameInvalid;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
-import com.io7m.r1.types.RVectorM3F;
 
 /**
  * <p>
@@ -59,16 +59,16 @@ import com.io7m.r1.types.RVectorM3F;
   {
     final String mesh_name = RMeshNames.checkMeshName(in_name);
 
-    final List<RVectorI3F<RSpaceObjectType>> in_normals =
-      new ArrayList<RVectorI3F<RSpaceObjectType>>();
-    final List<RVectorI3F<RSpaceObjectType>> in_positions =
-      new ArrayList<RVectorI3F<RSpaceObjectType>>();
-    final List<RVectorI2F<RSpaceTextureType>> in_uvs =
-      new ArrayList<RVectorI2F<RSpaceTextureType>>();
-    final List<RVectorI4F<RSpaceObjectType>> in_tangents =
-      new ArrayList<RVectorI4F<RSpaceObjectType>>();
-    final List<RVectorI3F<RSpaceObjectType>> in_bitangents =
-      new ArrayList<RVectorI3F<RSpaceObjectType>>();
+    final List<PVectorI3F<RSpaceObjectType>> in_normals =
+      new ArrayList<PVectorI3F<RSpaceObjectType>>();
+    final List<PVectorI3F<RSpaceObjectType>> in_positions =
+      new ArrayList<PVectorI3F<RSpaceObjectType>>();
+    final List<PVectorI2F<RSpaceTextureType>> in_uvs =
+      new ArrayList<PVectorI2F<RSpaceTextureType>>();
+    final List<PVectorI4F<RSpaceObjectType>> in_tangents =
+      new ArrayList<PVectorI4F<RSpaceObjectType>>();
+    final List<PVectorI3F<RSpaceObjectType>> in_bitangents =
+      new ArrayList<PVectorI3F<RSpaceObjectType>>();
     final List<RMeshTriangle> in_triangles = new ArrayList<RMeshTriangle>();
     final List<RMeshTangentsVertex> in_vertices =
       new ArrayList<RMeshTangentsVertex>();
@@ -90,11 +90,11 @@ import com.io7m.r1.types.RVectorM3F;
       }
 
       @Override public void addVertex(
-        final RVectorI3F<RSpaceObjectType> position,
-        final RVectorI3F<RSpaceObjectType> normal,
-        final RVectorI4F<RSpaceObjectType> tangent,
-        final RVectorI3F<RSpaceObjectType> bitangent,
-        final RVectorI2F<RSpaceTextureType> uv)
+        final PVectorI3F<RSpaceObjectType> position,
+        final PVectorI3F<RSpaceObjectType> normal,
+        final PVectorI4F<RSpaceObjectType> tangent,
+        final PVectorI3F<RSpaceObjectType> bitangent,
+        final PVectorI2F<RSpaceTextureType> uv)
       {
         NullCheck.notNull(position, "Position");
         NullCheck.notNull(normal, "Normal");
@@ -184,10 +184,10 @@ import com.io7m.r1.types.RVectorM3F;
     NullCheck.notNull(m, "Mesh");
 
     final RMeshTangents mt = RMeshTangents.copyMesh(m);
-    final RVectorM3F<RSpaceObjectType> tangent =
-      new RVectorM3F<RSpaceObjectType>();
-    final RVectorM3F<RSpaceObjectType> bitangent =
-      new RVectorM3F<RSpaceObjectType>();
+    final PVectorM3F<RSpaceObjectType> tangent =
+      new PVectorM3F<RSpaceObjectType>();
+    final PVectorM3F<RSpaceObjectType> bitangent =
+      new PVectorM3F<RSpaceObjectType>();
 
     /**
      * Generate tangents and bitangents, accumulating the resulting vectors.
@@ -198,30 +198,30 @@ import com.io7m.r1.types.RVectorM3F;
       final RMeshTangentsVertex v1 = mt.vertices.get((int) triangle.getV1());
       final RMeshTangentsVertex v2 = mt.vertices.get((int) triangle.getV2());
 
-      final RVectorI3F<RSpaceObjectType> v0p =
+      final PVectorI3F<RSpaceObjectType> v0p =
         mt.positions.get(v0.getPosition());
-      final RVectorI3F<RSpaceObjectType> v1p =
+      final PVectorI3F<RSpaceObjectType> v1p =
         mt.positions.get(v1.getPosition());
-      final RVectorI3F<RSpaceObjectType> v2p =
+      final PVectorI3F<RSpaceObjectType> v2p =
         mt.positions.get(v2.getPosition());
 
-      final RVectorI4F<RSpaceObjectType> v0t =
+      final PVectorI4F<RSpaceObjectType> v0t =
         mt.tangents.get(v0.getTangent());
-      final RVectorI4F<RSpaceObjectType> v1t =
+      final PVectorI4F<RSpaceObjectType> v1t =
         mt.tangents.get(v1.getTangent());
-      final RVectorI4F<RSpaceObjectType> v2t =
+      final PVectorI4F<RSpaceObjectType> v2t =
         mt.tangents.get(v2.getTangent());
 
-      final RVectorI3F<RSpaceObjectType> v0b =
+      final PVectorI3F<RSpaceObjectType> v0b =
         mt.bitangents.get(v0.getBitangent());
-      final RVectorI3F<RSpaceObjectType> v1b =
+      final PVectorI3F<RSpaceObjectType> v1b =
         mt.bitangents.get(v1.getBitangent());
-      final RVectorI3F<RSpaceObjectType> v2b =
+      final PVectorI3F<RSpaceObjectType> v2b =
         mt.bitangents.get(v2.getBitangent());
 
-      final RVectorI2F<RSpaceTextureType> v0u = mt.uvs.get(v0.getUV());
-      final RVectorI2F<RSpaceTextureType> v1u = mt.uvs.get(v1.getUV());
-      final RVectorI2F<RSpaceTextureType> v2u = mt.uvs.get(v2.getUV());
+      final PVectorI2F<RSpaceTextureType> v0u = mt.uvs.get(v0.getUV());
+      final PVectorI2F<RSpaceTextureType> v1u = mt.uvs.get(v1.getUV());
+      final PVectorI2F<RSpaceTextureType> v2u = mt.uvs.get(v2.getUV());
 
       final double x1 = v1p.getXF() - v0p.getXF();
       final double x2 = v2p.getXF() - v0p.getXF();
@@ -251,20 +251,20 @@ import com.io7m.r1.types.RVectorM3F;
       tangent.set3F((float) tx, (float) ty, (float) tz);
       bitangent.set3F((float) bx, (float) by, (float) bz);
 
-      final RVectorI4F<RSpaceObjectType> v0t_acc =
-        new RVectorI4F<RSpaceObjectType>(
+      final PVectorI4F<RSpaceObjectType> v0t_acc =
+        new PVectorI4F<RSpaceObjectType>(
           v0t.getXF() + tangent.getXF(),
           v0t.getYF() + tangent.getYF(),
           v0t.getZF() + tangent.getZF(),
           1.0f);
-      final RVectorI4F<RSpaceObjectType> v1t_acc =
-        new RVectorI4F<RSpaceObjectType>(
+      final PVectorI4F<RSpaceObjectType> v1t_acc =
+        new PVectorI4F<RSpaceObjectType>(
           v1t.getXF() + tangent.getXF(),
           v1t.getYF() + tangent.getYF(),
           v1t.getZF() + tangent.getZF(),
           1.0f);
-      final RVectorI4F<RSpaceObjectType> v2t_acc =
-        new RVectorI4F<RSpaceObjectType>(
+      final PVectorI4F<RSpaceObjectType> v2t_acc =
+        new PVectorI4F<RSpaceObjectType>(
           v2t.getXF() + tangent.getXF(),
           v2t.getYF() + tangent.getYF(),
           v2t.getZF() + tangent.getZF(),
@@ -274,18 +274,18 @@ import com.io7m.r1.types.RVectorM3F;
       mt.tangents.set(v1.getTangent(), v1t_acc);
       mt.tangents.set(v2.getTangent(), v2t_acc);
 
-      final RVectorI3F<RSpaceObjectType> v0b_acc =
-        new RVectorI3F<RSpaceObjectType>(
+      final PVectorI3F<RSpaceObjectType> v0b_acc =
+        new PVectorI3F<RSpaceObjectType>(
           v0b.getXF() + bitangent.getXF(),
           v0b.getYF() + bitangent.getYF(),
           v0b.getZF() + bitangent.getZF());
-      final RVectorI3F<RSpaceObjectType> v1b_acc =
-        new RVectorI3F<RSpaceObjectType>(
+      final PVectorI3F<RSpaceObjectType> v1b_acc =
+        new PVectorI3F<RSpaceObjectType>(
           v1b.getXF() + bitangent.getXF(),
           v1b.getYF() + bitangent.getYF(),
           v1b.getZF() + bitangent.getZF());
-      final RVectorI3F<RSpaceObjectType> v2b_acc =
-        new RVectorI3F<RSpaceObjectType>(
+      final PVectorI3F<RSpaceObjectType> v2b_acc =
+        new PVectorI3F<RSpaceObjectType>(
           v2b.getXF() + bitangent.getXF(),
           v2b.getYF() + bitangent.getYF(),
           v2b.getZF() + bitangent.getZF());
@@ -310,11 +310,11 @@ import com.io7m.r1.types.RVectorM3F;
      */
 
     for (int index = 0; index < mt.tangents.size(); ++index) {
-      final RVectorI4F<RSpaceObjectType> t = mt.tangents.get(index);
+      final PVectorI4F<RSpaceObjectType> t = mt.tangents.get(index);
       assert t != null;
-      final RVectorI3F<RSpaceObjectType> b = mt.bitangents.get(index);
+      final PVectorI3F<RSpaceObjectType> b = mt.bitangents.get(index);
       assert b != null;
-      final RVectorI3F<RSpaceObjectType> n = mt.normals.get(index);
+      final PVectorI3F<RSpaceObjectType> n = mt.normals.get(index);
       assert n != null;
 
       final OrthonormalizedI3F o = new OrthonormalizedI3F(n, t, b);
@@ -327,29 +327,29 @@ import com.io7m.r1.types.RVectorM3F;
        * component of the tangent vector).
        */
 
-      RVectorI4F<RSpaceObjectType> rt;
-      RVectorI3F<RSpaceObjectType> rb;
+      PVectorI4F<RSpaceObjectType> rt;
+      PVectorI3F<RSpaceObjectType> rb;
       if (VectorI3F.dotProduct(VectorI3F.crossProduct(n, t), b) < 0.0f) {
         rt =
-          new RVectorI4F<RSpaceObjectType>(
+          new PVectorI4F<RSpaceObjectType>(
             ot.getXF(),
             ot.getYF(),
             ot.getZF(),
             -1.0f);
         rb =
-          new RVectorI3F<RSpaceObjectType>(
+          new PVectorI3F<RSpaceObjectType>(
             -ob.getXF(),
             -ob.getYF(),
             -ob.getZF());
       } else {
         rt =
-          new RVectorI4F<RSpaceObjectType>(
+          new PVectorI4F<RSpaceObjectType>(
             ot.getXF(),
             ot.getYF(),
             ot.getZF(),
             1.0f);
         rb =
-          new RVectorI3F<RSpaceObjectType>(ob.getXF(), ob.getYF(), ob.getZF());
+          new PVectorI3F<RSpaceObjectType>(ob.getXF(), ob.getYF(), ob.getZF());
       }
 
       mt.tangents.set(index, rt);
@@ -359,48 +359,48 @@ import com.io7m.r1.types.RVectorM3F;
     return mt;
   }
 
-  private final List<RVectorI3F<RSpaceObjectType>>  normals;
-  private final List<RVectorI4F<RSpaceObjectType>>  tangents;
-  private final List<RVectorI3F<RSpaceObjectType>>  bitangents;
-  private final List<RVectorI3F<RSpaceObjectType>>  positions;
-  private final List<RVectorI2F<RSpaceTextureType>> uvs;
+  private final List<PVectorI3F<RSpaceObjectType>>  normals;
+  private final List<PVectorI4F<RSpaceObjectType>>  tangents;
+  private final List<PVectorI3F<RSpaceObjectType>>  bitangents;
+  private final List<PVectorI3F<RSpaceObjectType>>  positions;
+  private final List<PVectorI2F<RSpaceTextureType>> uvs;
   private final List<RMeshTangentsVertex>           vertices;
   private final List<RMeshTriangle>                 triangles;
   private final String                              name;
 
   private RMeshTangents(
-    final List<RVectorI3F<RSpaceObjectType>> in_normals,
-    final List<RVectorI3F<RSpaceObjectType>> in_positions,
-    final List<RVectorI2F<RSpaceTextureType>> in_uvs,
+    final List<PVectorI3F<RSpaceObjectType>> in_normals,
+    final List<PVectorI3F<RSpaceObjectType>> in_positions,
+    final List<PVectorI2F<RSpaceTextureType>> in_uvs,
     final String in_name)
     throws RExceptionMeshNameInvalid
   {
     this.name = RMeshNames.checkMeshName(in_name);
 
     this.normals =
-      new ArrayList<RVectorI3F<RSpaceObjectType>>(NullCheck.notNullAll(
+      new ArrayList<PVectorI3F<RSpaceObjectType>>(NullCheck.notNullAll(
         in_normals,
         "Normals"));
     this.positions =
-      new ArrayList<RVectorI3F<RSpaceObjectType>>(NullCheck.notNullAll(
+      new ArrayList<PVectorI3F<RSpaceObjectType>>(NullCheck.notNullAll(
         in_positions,
         "Positions"));
     this.uvs =
-      new ArrayList<RVectorI2F<RSpaceTextureType>>(NullCheck.notNullAll(
+      new ArrayList<PVectorI2F<RSpaceTextureType>>(NullCheck.notNullAll(
         in_uvs,
         "UVs"));
 
     this.tangents =
-      new ArrayList<RVectorI4F<RSpaceObjectType>>(this.normals.size());
+      new ArrayList<PVectorI4F<RSpaceObjectType>>(this.normals.size());
     this.bitangents =
-      new ArrayList<RVectorI3F<RSpaceObjectType>>(this.normals.size());
+      new ArrayList<PVectorI3F<RSpaceObjectType>>(this.normals.size());
 
     for (int index = 0; index < this.normals.size(); ++index) {
-      this.tangents.add(new RVectorI4F<RSpaceObjectType>(0, 0, 0, 0));
+      this.tangents.add(new PVectorI4F<RSpaceObjectType>(0, 0, 0, 0));
     }
 
     for (int index = 0; index < this.normals.size(); ++index) {
-      this.bitangents.add(new RVectorI3F<RSpaceObjectType>(0, 0, 0));
+      this.bitangents.add(new PVectorI3F<RSpaceObjectType>(0, 0, 0));
     }
 
     this.vertices = new ArrayList<RMeshTangentsVertex>();
@@ -408,11 +408,11 @@ import com.io7m.r1.types.RVectorM3F;
   }
 
   private RMeshTangents(
-    final List<RVectorI3F<RSpaceObjectType>> in_normals,
-    final List<RVectorI4F<RSpaceObjectType>> in_tangents,
-    final List<RVectorI3F<RSpaceObjectType>> in_bitangents,
-    final List<RVectorI3F<RSpaceObjectType>> in_positions,
-    final List<RVectorI2F<RSpaceTextureType>> in_uvs,
+    final List<PVectorI3F<RSpaceObjectType>> in_normals,
+    final List<PVectorI4F<RSpaceObjectType>> in_tangents,
+    final List<PVectorI3F<RSpaceObjectType>> in_bitangents,
+    final List<PVectorI3F<RSpaceObjectType>> in_positions,
+    final List<PVectorI2F<RSpaceTextureType>> in_uvs,
     final List<RMeshTangentsVertex> in_vertices,
     final List<RMeshTriangle> in_triangles,
     final String in_name)
@@ -431,9 +431,9 @@ import com.io7m.r1.types.RVectorM3F;
    * @return A read-only view of the current list of bitangents.
    */
 
-  public List<RVectorI3F<RSpaceObjectType>> bitangentsGet()
+  public List<PVectorI3F<RSpaceObjectType>> bitangentsGet()
   {
-    final List<RVectorI3F<RSpaceObjectType>> r =
+    final List<PVectorI3F<RSpaceObjectType>> r =
       Collections.unmodifiableList(this.bitangents);
     assert r != null;
     return r;
@@ -452,9 +452,9 @@ import com.io7m.r1.types.RVectorM3F;
    * @return A read-only view of the current list of normals.
    */
 
-  public List<RVectorI3F<RSpaceObjectType>> normalsGet()
+  public List<PVectorI3F<RSpaceObjectType>> normalsGet()
   {
-    final List<RVectorI3F<RSpaceObjectType>> r =
+    final List<PVectorI3F<RSpaceObjectType>> r =
       Collections.unmodifiableList(this.normals);
     assert r != null;
     return r;
@@ -464,9 +464,9 @@ import com.io7m.r1.types.RVectorM3F;
    * @return A read-only view of the current list of positions.
    */
 
-  public List<RVectorI3F<RSpaceObjectType>> positionsGet()
+  public List<PVectorI3F<RSpaceObjectType>> positionsGet()
   {
-    final List<RVectorI3F<RSpaceObjectType>> r =
+    final List<PVectorI3F<RSpaceObjectType>> r =
       Collections.unmodifiableList(this.positions);
     assert r != null;
     return r;
@@ -476,9 +476,9 @@ import com.io7m.r1.types.RVectorM3F;
    * @return A read-only view of the current list of tangents.
    */
 
-  public List<RVectorI4F<RSpaceObjectType>> tangentsGet()
+  public List<PVectorI4F<RSpaceObjectType>> tangentsGet()
   {
-    final List<RVectorI4F<RSpaceObjectType>> r =
+    final List<PVectorI4F<RSpaceObjectType>> r =
       Collections.unmodifiableList(this.tangents);
     assert r != null;
     return r;
@@ -500,9 +500,9 @@ import com.io7m.r1.types.RVectorM3F;
    * @return A read-only view of the current list of UV coordinate vectors.
    */
 
-  public List<RVectorI2F<RSpaceTextureType>> uvsGet()
+  public List<PVectorI2F<RSpaceTextureType>> uvsGet()
   {
-    final List<RVectorI2F<RSpaceTextureType>> r =
+    final List<PVectorI2F<RSpaceTextureType>> r =
       Collections.unmodifiableList(this.uvs);
     assert r != null;
     return r;

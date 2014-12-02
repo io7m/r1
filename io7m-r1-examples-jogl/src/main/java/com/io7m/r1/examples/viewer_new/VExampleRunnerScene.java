@@ -51,6 +51,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.r1.examples.ExampleRendererConstructorType;
 import com.io7m.r1.examples.ExampleRendererDebugType;
@@ -85,8 +86,8 @@ import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionBuilderInvalid;
 import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
 import com.io7m.r1.types.RExceptionLightGroupAlreadyAdded;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RTransformViewType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceWorldType;
 import com.jogamp.newt.opengl.GLWindow;
 
 /**
@@ -473,8 +474,8 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
         snap_interpolated,
         this.matrix_view_temporary);
 
-      final RMatrixI4x4F<RTransformViewType> m =
-        RMatrixI4x4F.newFromReadable(this.matrix_view_temporary);
+      final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> m =
+        PMatrixI4x4F.newFromReadableUntyped(this.matrix_view_temporary);
 
       return KCamera.newCamera(m, view_camera.getProjection());
     }

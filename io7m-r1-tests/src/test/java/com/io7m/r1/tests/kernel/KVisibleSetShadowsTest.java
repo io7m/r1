@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -33,7 +33,10 @@ import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
@@ -57,12 +60,12 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionBuilderInvalid;
 import com.io7m.r1.types.RExceptionLightNonexistent;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RMatrixI4x4F;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceRGBAType;
-import com.io7m.r1.types.RTransformModelType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RVectorI4F;
+import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings({ "null", "static-method" }) public final class KVisibleSetShadowsTest
 {
@@ -105,10 +108,9 @@ import com.io7m.r1.types.RVectorI4F;
     testVisibleNonexistent_0()
       throws RException
   {
-    final MatrixM4x4F temp = new MatrixM4x4F();
     final KProjectionType proj =
       KProjectionFrustum.newProjection(
-        temp,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         0.0f,
         10.0f,
         0.0f,
@@ -133,16 +135,17 @@ import com.io7m.r1.types.RVectorI4F;
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
-    final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
+    final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
+      PMatrixI4x4F.identity();
     final KTransformType t = KTransformMatrix4x4.newTransform(model);
-    final RMatrixI3x3F<RTransformTextureType> uv = RMatrixI3x3F.identity();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv =
+      PMatrixI3x3F.identity();
 
     final KMeshReadableType m =
       KVisibleSetShadowsTest.newMesh(g.getGLCommon());
-    final MatrixM4x4F temp = new MatrixM4x4F();
     final KProjectionType proj =
       KProjectionFrustum.newProjection(
-        temp,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         0.0f,
         10.0f,
         0.0f,
@@ -157,7 +160,7 @@ import com.io7m.r1.types.RVectorI4F;
       KMaterialOpaqueRegular.newBuilder();
     final KMaterialOpaqueRegular mat_0 = mb.build();
     mb.setAlbedo(KMaterialAlbedoTextured.textured(
-      new RVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.0f),
+      new PVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.0f),
       0.0f,
       tex));
     mb.setDepth(KMaterialDepthAlpha.alpha(0.5f));
@@ -198,16 +201,17 @@ import com.io7m.r1.types.RVectorI4F;
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
-    final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
+    final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
+      PMatrixI4x4F.identity();
     final KTransformType t = KTransformMatrix4x4.newTransform(model);
-    final RMatrixI3x3F<RTransformTextureType> uv = RMatrixI3x3F.identity();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv =
+      PMatrixI3x3F.identity();
 
     final KMeshReadableType m =
       KVisibleSetShadowsTest.newMesh(g.getGLCommon());
-    final MatrixM4x4F temp = new MatrixM4x4F();
     final KProjectionType proj =
       KProjectionFrustum.newProjection(
-        temp,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         0.0f,
         10.0f,
         0.0f,

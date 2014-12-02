@@ -23,11 +23,11 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionUserError;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * <p>
@@ -41,11 +41,11 @@ import com.io7m.r1.types.RVectorI3F;
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightProjectiveWithoutShadowBuilderType
   {
-    private RVectorI3F<RSpaceRGBType>   color;
+    private PVectorI3F<RSpaceRGBType>   color;
     private float                       falloff;
     private float                       intensity;
     private QuaternionI4F               orientation;
-    private RVectorI3F<RSpaceWorldType> position;
+    private PVectorI3F<RSpaceWorldType> position;
     private KProjectionType             projection;
     private float                       range;
     private Texture2DStaticUsableType   texture;
@@ -54,10 +54,10 @@ import com.io7m.r1.types.RVectorI3F;
       final Texture2DStaticUsableType in_texture,
       final KProjectionType in_projection)
     {
-      this.color = RVectorI3F.one();
+      this.color = KColors.RGB_WHITE;
       this.intensity = 1.0f;
       this.falloff = 1.0f;
-      this.position = RVectorI3F.zero();
+      this.position = PVectorI3F.zero();
       this.orientation = QuaternionI4F.IDENTITY;
       this.projection = NullCheck.notNull(in_projection, "Projection");
       this.range = 8.0f;
@@ -80,7 +80,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setColor(
-      final RVectorI3F<RSpaceRGBType> in_color)
+      final PVectorI3F<RSpaceRGBType> in_color)
     {
       this.color = NullCheck.notNull(in_color, "Color");
     }
@@ -104,7 +104,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setPosition(
-      final RVectorI3F<RSpaceWorldType> in_position)
+      final PVectorI3F<RSpaceWorldType> in_position)
     {
       this.position = NullCheck.notNull(in_position, "Position");
     }
@@ -163,12 +163,12 @@ import com.io7m.r1.types.RVectorI3F;
     return new Builder(in_texture, in_projection);
   }
 
-  private final RVectorI3F<RSpaceRGBType>   color;
+  private final PVectorI3F<RSpaceRGBType>   color;
   private final float                       falloff;
   private final float                       falloff_inverse;
   private final float                       intensity;
   private final QuaternionI4F               orientation;
-  private final RVectorI3F<RSpaceWorldType> position;
+  private final PVectorI3F<RSpaceWorldType> position;
   private final KProjectionType             projection;
   private final float                       range;
   private final float                       range_inverse;
@@ -178,9 +178,9 @@ import com.io7m.r1.types.RVectorI3F;
 
   private KLightProjectiveWithoutShadow(
     final Texture2DStaticUsableType in_texture,
-    final RVectorI3F<RSpaceWorldType> in_position,
+    final PVectorI3F<RSpaceWorldType> in_position,
     final QuaternionI4F in_orientation,
-    final RVectorI3F<RSpaceRGBType> in_color,
+    final PVectorI3F<RSpaceRGBType> in_color,
     final float in_intensity,
     final float in_range,
     final float in_falloff,
@@ -238,7 +238,7 @@ import com.io7m.r1.types.RVectorI3F;
     return "LProj";
   }
 
-  @Override public RVectorI3F<RSpaceRGBType> lightGetColor()
+  @Override public PVectorI3F<RSpaceRGBType> lightGetColor()
   {
     return this.color;
   }
@@ -268,7 +268,7 @@ import com.io7m.r1.types.RVectorI3F;
     return this.orientation;
   }
 
-  @Override public RVectorI3F<RSpaceWorldType> lightProjectiveGetPosition()
+  @Override public PVectorI3F<RSpaceWorldType> lightProjectiveGetPosition()
   {
     return this.position;
   }

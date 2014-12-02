@@ -32,6 +32,8 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PMatrixDirectReadable4x4FType;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
@@ -53,8 +55,9 @@ import com.io7m.r1.kernel.types.KVisibleSetShadows;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RTransformViewType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceLightEyeType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 /**
  * The default shadow map renderer implementation.
@@ -211,8 +214,19 @@ import com.io7m.r1.types.RTransformViewType;
       gc.depthBufferWriteEnable();
       gc.depthBufferClear(1.0f);
 
-      final RMatrixI4x4F<RTransformViewType> view =
-        RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveView());
+      /**
+       * This spectacular casting is necessary to allow a (World -> LightEye)
+       * matrix to masquerade as a (World -> Eye) matrix. From the perspective
+       * of a depth renderer, the light is the observer, so the change in
+       * types is warranted.
+       */
+
+      final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceLightEyeType> p_view_original =
+        mwp.getMatrixProjectiveView();
+      @SuppressWarnings("unchecked") final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType> p_view =
+        (PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType>) (PMatrixDirectReadable4x4FType<RSpaceWorldType, ?>) p_view_original;
+      final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view =
+        PMatrixI4x4F.newFromReadable(p_view);
 
       /**
        * Basic shadow mapping produces fewer artifacts if only back faces are
@@ -250,8 +264,20 @@ import com.io7m.r1.types.RTransformViewType;
     gc.framebufferDrawBind(fb.kFramebufferGetDepthVariancePassFramebuffer());
 
     try {
-      final RMatrixI4x4F<RTransformViewType> view =
-        RMatrixI4x4F.newFromReadable(mwp.getMatrixProjectiveView());
+
+      /**
+       * This spectacular casting is necessary to allow a (World -> LightEye)
+       * matrix to masquerade as a (World -> Eye) matrix. From the perspective
+       * of a depth renderer, the light is the observer, so the change in
+       * types is warranted.
+       */
+
+      final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceLightEyeType> p_view_original =
+        mwp.getMatrixProjectiveView();
+      @SuppressWarnings("unchecked") final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType> p_view =
+        (PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType>) (PMatrixDirectReadable4x4FType<RSpaceWorldType, ?>) p_view_original;
+      final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view =
+        PMatrixI4x4F.newFromReadable(p_view);
 
       /**
        * Variance shadow mapping does not require front-face culling, so

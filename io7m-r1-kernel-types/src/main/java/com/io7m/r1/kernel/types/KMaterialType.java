@@ -16,9 +16,9 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * The type of materials applied to meshes.
@@ -65,5 +65,5 @@ public interface KMaterialType extends
    * @return The material's UV texture matrix.
    */
 
-  RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix();
+  PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> materialGetUVMatrix();
 }

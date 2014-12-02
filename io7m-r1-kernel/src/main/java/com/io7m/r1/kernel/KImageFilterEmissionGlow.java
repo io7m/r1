@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -37,6 +37,7 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
@@ -45,8 +46,7 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
-import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * The default implementation of an emission and glow filter.
@@ -96,13 +96,13 @@ import com.io7m.r1.types.RTransformTextureType;
       in_blur_rgba);
   }
 
-  private final KImageFilterRGBAType<KBlurParameters> blur;
-  private final KBlurParametersBuilderType            blur_param_b;
-  private final JCGLImplementationType                gi;
-  private final KUnitQuadCacheType                    quad_cache;
-  private final KFramebufferRGBACacheType             rgba_cache;
-  private final KShaderCacheImageType                 shader_cache;
-  private final RMatrixM3x3F<RTransformTextureType>   uv;
+  private final KImageFilterRGBAType<KBlurParameters>              blur;
+  private final KBlurParametersBuilderType                         blur_param_b;
+  private final JCGLImplementationType                             gi;
+  private final KUnitQuadCacheType                                 quad_cache;
+  private final KFramebufferRGBACacheType                          rgba_cache;
+  private final KShaderCacheImageType                              shader_cache;
+  private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv;
 
   private KImageFilterEmissionGlow(
     final JCGLImplementationType in_gi,
@@ -115,7 +115,7 @@ import com.io7m.r1.types.RTransformTextureType;
     this.rgba_cache = NullCheck.notNull(in_rgba_cache, "RGBA cache");
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
     this.quad_cache = NullCheck.notNull(in_quad_cache, "Quad cache");
-    this.uv = new RMatrixM3x3F<RTransformTextureType>();
+    this.uv = new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
     this.blur_param_b = KBlurParameters.newBuilder();
     this.blur = NullCheck.notNull(in_blur_rgba, "Blur");
   }

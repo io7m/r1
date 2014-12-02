@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,7 +22,7 @@ import com.io7m.jcache.LRUCacheConfig;
 import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcache.LRUCacheType;
 import com.io7m.jequality.annotations.EqualityReference;
-import com.io7m.jtensors.MatrixM4x4F.Context;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RException;
 
@@ -45,7 +45,7 @@ import com.io7m.r1.types.RException;
    */
 
   public static KViewRaysCacheType newCacheWithConfig(
-    final Context context,
+    final PMatrixM4x4F.Context context,
     final LRUCacheConfig config)
   {
     final JCacheLoaderType<KProjectionType, KViewRays, RException> loader =

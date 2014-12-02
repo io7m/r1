@@ -23,6 +23,8 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -46,8 +48,6 @@ import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * A demonstration that specular lighting with multiple lights looks correct.
@@ -95,7 +95,7 @@ public final class SLEmission0 implements ExampleSceneType
       room_albedo));
     room_mat_b.setNormal(KMaterialNormalMapped.mapped(room_normal));
     room_mat_b.setSpecular(KMaterialSpecularMapped.mapped(
-      new RVectorI3F<RSpaceRGBType>(0.15f, 0.15f, 0.15f),
+      new PVectorI3F<RSpaceRGBType>(0.15f, 0.15f, 0.15f),
       16.0f,
       room_specular));
     room_mat_b.setEnvironment(KMaterialEnvironmentReflection.reflection(
@@ -104,16 +104,16 @@ public final class SLEmission0 implements ExampleSceneType
 
     final VectorI3F cube_scale = new VectorI3F(1.0f, 1.0f, 1.0f);
 
-    final RVectorI3F<RSpaceWorldType> cube_right_pos =
-      new RVectorI3F<RSpaceWorldType>(2.0f, 1.0f, 1.0f);
+    final PVectorI3F<RSpaceWorldType> cube_right_pos =
+      new PVectorI3F<RSpaceWorldType>(2.0f, 1.0f, 1.0f);
     final KTransformType cube_right_trans =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         cube_scale,
         cube_right_pos);
 
-    final RVectorI3F<RSpaceWorldType> cube_left_pos =
-      new RVectorI3F<RSpaceWorldType>(-2.0f, 1.0f, 1.0f);
+    final PVectorI3F<RSpaceWorldType> cube_left_pos =
+      new PVectorI3F<RSpaceWorldType>(-2.0f, 1.0f, 1.0f);
     final KTransformType cube_left_trans =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
@@ -123,7 +123,7 @@ public final class SLEmission0 implements ExampleSceneType
     final KMaterialOpaqueRegularBuilderType material_b =
       KMaterialOpaqueRegular.newBuilder();
     material_b.setAlbedo(KMaterialAlbedoTextured.textured(
-      new RVectorI4F<RSpaceRGBAType>(1.0f, 0.0f, 0.0f, 1.0f),
+      new PVectorI4F<RSpaceRGBAType>(1.0f, 0.0f, 0.0f, 1.0f),
       0.8f,
       scene.texture("emitcube_albedo.png")));
     material_b.setNormal(KMaterialNormalMapped.mapped(scene
@@ -168,7 +168,7 @@ public final class SLEmission0 implements ExampleSceneType
       final KLightSphereWithoutShadowBuilderType sb =
         KLightSphereWithoutShadow.newBuilder();
       sb.setRadius(32.0f);
-      sb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 2.0f, 0.0f));
+      sb.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 2.0f, 0.0f));
       sb.setIntensity(0.4f);
 
       final KLightSphereWithoutShadow ls = sb.build();

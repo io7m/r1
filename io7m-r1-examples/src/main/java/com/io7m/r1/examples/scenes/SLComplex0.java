@@ -22,6 +22,7 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -39,7 +40,6 @@ import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * A demonstration that specular lighting with multiple lights looks correct.
@@ -71,7 +71,7 @@ public final class SLComplex0 implements ExampleSceneType
     final ExampleSceneBuilderType scene)
     throws RException
   {
-    final RVectorI3F<RSpaceWorldType> z = RVectorI3F.zero();
+    final PVectorI3F<RSpaceWorldType> z = PVectorI3F.zero();
     final KTransformType floor_t =
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         4.0f,
@@ -102,7 +102,7 @@ public final class SLComplex0 implements ExampleSceneType
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setRadius(30.0f);
       b.setIntensity(0.5f);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 3.0f, 2.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 3.0f, 2.0f));
       ks = b.build();
     }
 
@@ -115,8 +115,8 @@ public final class SLComplex0 implements ExampleSceneType
 
     for (float tz = 0.0f; tz < 20.0f; tz += 2.0f) {
       for (float tx = 0.0f; tx < 20.0f; tx += 2.0f) {
-        final RVectorI3F<RSpaceWorldType> translation =
-          new RVectorI3F<RSpaceWorldType>(tx - 10.0f, 1.0f, tz - 10.0f);
+        final PVectorI3F<RSpaceWorldType> translation =
+          new PVectorI3F<RSpaceWorldType>(tx - 10.0f, 1.0f, tz - 10.0f);
 
         final KTransformType mt =
           KTransformOST.newTransform(

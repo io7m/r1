@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,21 +20,21 @@ import javax.annotation.Nonnull;
 
 import net.java.quickcheck.Generator;
 
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnlyBuilderType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 public final class KLightSphereWithoutShadowDiffuseOnlyGenerator implements
   Generator<KLightSphereWithoutShadowDiffuseOnly>
 {
-  private final @Nonnull Generator<RVectorI3F<RSpaceRGBType>>   colour_gen;
-  private final @Nonnull Generator<RVectorI3F<RSpaceWorldType>> position_gen;
+  private final @Nonnull Generator<PVectorI3F<RSpaceRGBType>>   colour_gen;
+  private final @Nonnull Generator<PVectorI3F<RSpaceWorldType>> position_gen;
 
   public KLightSphereWithoutShadowDiffuseOnlyGenerator(
-    final @Nonnull Generator<RVectorI3F<RSpaceRGBType>> colour_gen1,
-    final @Nonnull Generator<RVectorI3F<RSpaceWorldType>> position_gen1)
+    final @Nonnull Generator<PVectorI3F<RSpaceRGBType>> colour_gen1,
+    final @Nonnull Generator<PVectorI3F<RSpaceWorldType>> position_gen1)
   {
     this.colour_gen = colour_gen1;
     this.position_gen = position_gen1;
@@ -44,9 +44,9 @@ public final class KLightSphereWithoutShadowDiffuseOnlyGenerator implements
     KLightSphereWithoutShadowDiffuseOnly
     next()
   {
-    final RVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
+    final PVectorI3F<RSpaceRGBType> colour = this.colour_gen.next();
     final float intensity = (float) Math.random();
-    final RVectorI3F<RSpaceWorldType> position = this.position_gen.next();
+    final PVectorI3F<RSpaceWorldType> position = this.position_gen.next();
     final float radius = (float) Math.random();
     final float falloff = (float) Math.random();
 

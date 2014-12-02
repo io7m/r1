@@ -34,13 +34,13 @@ import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
-import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * A source that mixes two arbitrary textures.
@@ -70,10 +70,10 @@ import com.io7m.r1.types.RTransformTextureType;
     return new KImageSourceRGBAMix(gi, quad_cache, shader_cache);
   }
 
-  private final JCGLImplementationType              gi;
-  private final KUnitQuadCacheType                  quad_cache;
-  private final KShaderCacheImageType               shader_cache;
-  private final RMatrixM3x3F<RTransformTextureType> uv;
+  private final JCGLImplementationType                             gi;
+  private final KUnitQuadCacheType                                 quad_cache;
+  private final KShaderCacheImageType                              shader_cache;
+  private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv;
 
   private KImageSourceRGBAMix(
     final JCGLImplementationType in_gi,
@@ -83,7 +83,7 @@ import com.io7m.r1.types.RTransformTextureType;
     this.gi = NullCheck.notNull(in_gi, "GL implementation");
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
     this.quad_cache = NullCheck.notNull(in_quad_cache, "Quad cache");
-    this.uv = new RMatrixM3x3F<RTransformTextureType>();
+    this.uv = new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
   }
 
   private void evaluate(
@@ -114,7 +114,7 @@ import com.io7m.r1.types.RTransformTextureType;
       gc.texture2DStaticBind(texture_1, config.getRightTexture());
 
       try {
-        final RMatrixM3x3F<RTransformTextureType> m_uv =
+        final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> m_uv =
           KImageSourceRGBAMix.this.uv;
 
         config.getLeftMatrix().makeMatrixM3x3F(m_uv);

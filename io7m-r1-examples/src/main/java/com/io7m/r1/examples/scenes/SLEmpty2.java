@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -34,7 +35,6 @@ import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * An empty example.
@@ -74,8 +74,8 @@ public final class SLEmpty2 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    final RVectorI3F<RSpaceWorldType> north_trans =
-      new RVectorI3F<RSpaceWorldType>(0.0f, 2.0f, -2.0f);
+    final PVectorI3F<RSpaceWorldType> north_trans =
+      new PVectorI3F<RSpaceWorldType>(0.0f, 2.0f, -2.0f);
     final QuaternionI4F north_orient =
       QuaternionI4F.makeFromAxisAngle(
         ExampleSceneUtilities.X_AXIS,
@@ -93,8 +93,8 @@ public final class SLEmpty2 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    final RVectorI3F<RSpaceWorldType> east_trans =
-      new RVectorI3F<RSpaceWorldType>(2.0f, 2.0f, 0.0f);
+    final PVectorI3F<RSpaceWorldType> east_trans =
+      new PVectorI3F<RSpaceWorldType>(2.0f, 2.0f, 0.0f);
     final QuaternionI4F east_orient =
       QuaternionI4F.makeFromAxisAngle(
         ExampleSceneUtilities.Z_AXIS,

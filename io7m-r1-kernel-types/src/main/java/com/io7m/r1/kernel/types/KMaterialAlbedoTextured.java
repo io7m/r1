@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,9 +19,9 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBAType;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * The type of textured albedo properties.
@@ -32,7 +32,7 @@ import com.io7m.r1.types.RVectorI4F;
 {
   /**
    * Construct new albedo properties.
-   * 
+   *
    * @param in_color
    *          The base surface color.
    * @param in_mix
@@ -43,19 +43,19 @@ import com.io7m.r1.types.RVectorI4F;
    */
 
   public static KMaterialAlbedoTextured textured(
-    final RVectorI4F<RSpaceRGBAType> in_color,
+    final PVectorI4F<RSpaceRGBAType> in_color,
     final float in_mix,
     final Texture2DStaticUsableType in_texture)
   {
     return new KMaterialAlbedoTextured(in_color, in_mix, in_texture);
   }
 
-  private final RVectorI4F<RSpaceRGBAType> color;
+  private final PVectorI4F<RSpaceRGBAType> color;
   private final float                      mix;
   private final Texture2DStaticUsableType  texture;
 
   private KMaterialAlbedoTextured(
-    final RVectorI4F<RSpaceRGBAType> in_color,
+    final PVectorI4F<RSpaceRGBAType> in_color,
     final float in_mix,
     final Texture2DStaticUsableType in_texture)
   {
@@ -84,7 +84,7 @@ import com.io7m.r1.types.RVectorI4F;
    * @return The base surface color.
    */
 
-  public RVectorI4F<RSpaceRGBAType> getColor()
+  public PVectorI4F<RSpaceRGBAType> getColor()
   {
     return this.color;
   }

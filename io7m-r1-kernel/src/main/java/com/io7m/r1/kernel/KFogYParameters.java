@@ -20,11 +20,12 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RMatrixI4x4F;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RTransformViewType;
-import com.io7m.r1.types.RVectorI3F;
+import com.io7m.r1.types.RSpaceWorldType;
 
 /**
  * Fog parameters.
@@ -35,18 +36,18 @@ import com.io7m.r1.types.RVectorI3F;
   @EqualityReference private static final class Builder implements
     KFogYParametersBuilderType
   {
-    private RVectorI3F<RSpaceRGBType>        color;
-    private float                            lower_y;
-    private KFogProgression                  progression;
-    private KProjectionType                  projection;
-    private float                            upper_y;
-    private RMatrixI4x4F<RTransformViewType> view;
+    private PVectorI3F<RSpaceRGBType>                    color;
+    private float                                        lower_y;
+    private KFogProgression                              progression;
+    private KProjectionType                              projection;
+    private float                                        upper_y;
+    private PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view;
 
     Builder(
-      final RMatrixI4x4F<RTransformViewType> in_view,
+      final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> in_view,
       final KProjectionType in_projection)
     {
-      this.color = RVectorI3F.zero();
+      this.color = PVectorI3F.zero();
       this.lower_y = 0.0f;
       this.upper_y = 8.0f;
       this.view = NullCheck.notNull(in_view, "View");
@@ -66,7 +67,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setColor(
-      final RVectorI3F<RSpaceRGBType> c)
+      final PVectorI3F<RSpaceRGBType> c)
     {
       this.color = NullCheck.notNull(c, "Color");
     }
@@ -90,7 +91,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setViewMatrix(
-      final RMatrixI4x4F<RTransformViewType> v)
+      final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> v)
     {
       this.view = NullCheck.notNull(v, "View matrix");
     }
@@ -111,24 +112,24 @@ import com.io7m.r1.types.RVectorI3F;
    */
 
   public static KFogYParametersBuilderType newBuilder(
-    final RMatrixI4x4F<RTransformViewType> in_view,
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> in_view,
     final KProjectionType in_projection)
   {
     return new Builder(in_view, in_projection);
   }
 
-  private final RVectorI3F<RSpaceRGBType>        color;
-  private final float                            lower_y;
-  private final KFogProgression                  progression;
-  private final KProjectionType                  projection;
-  private final float                            upper_y;
-  private final RMatrixI4x4F<RTransformViewType> view;
+  private final PVectorI3F<RSpaceRGBType>                    color;
+  private final float                                        lower_y;
+  private final KFogProgression                              progression;
+  private final KProjectionType                              projection;
+  private final float                                        upper_y;
+  private final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view;
 
   private KFogYParameters(
-    final RVectorI3F<RSpaceRGBType> in_color,
+    final PVectorI3F<RSpaceRGBType> in_color,
     final float in_lower_y,
     final float in_upper_y,
-    final RMatrixI4x4F<RTransformViewType> in_view,
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> in_view,
     final KProjectionType in_projection,
     final KFogProgression in_progression)
   {
@@ -166,7 +167,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The fog color.
    */
 
-  public RVectorI3F<RSpaceRGBType> getColor()
+  public PVectorI3F<RSpaceRGBType> getColor()
   {
     return this.color;
   }
@@ -193,7 +194,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The view matrix used to render the scene.
    */
 
-  public RMatrixI4x4F<RTransformViewType> getView()
+  public PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> getView()
   {
     return this.view;
   }

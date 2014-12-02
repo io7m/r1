@@ -22,6 +22,7 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -39,7 +40,6 @@ import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * An example with the viewer being inside of a spherical light source.
@@ -83,7 +83,7 @@ public final class SLSimpleViewerInsideOfLight0 implements ExampleSceneType
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         1.0f,
         1.0f,
-        1.0f), new RVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f));
+        1.0f), new PVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f));
 
     final Texture2DStaticUsableType t = scene.texture("monkey_albedo.png");
 
@@ -108,7 +108,7 @@ public final class SLSimpleViewerInsideOfLight0 implements ExampleSceneType
         KLightSphereWithoutShadow
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setRadius(6.0f);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 3.0f, 2.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 3.0f, 2.0f));
 
       {
         final KVisibleSetLightGroupBuilderType gb =
