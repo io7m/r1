@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,12 +18,14 @@ package com.io7m.r1.kernel;
 
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorM4F;
-import com.io7m.r1.types.RMatrixReadable4x4FType;
-import com.io7m.r1.types.RTransformProjectionInverseType;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixReadable4x4FType;
+import com.io7m.jtensors.parameterized.PVectorI4F;
+import com.io7m.jtensors.parameterized.PVectorM4F;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 
 /**
  * View rays used to reconstruct eye-space positions during deferred
@@ -32,34 +34,34 @@ import com.io7m.r1.types.RTransformProjectionInverseType;
 
 @EqualityReference public final class KViewRays
 {
-  private static final VectorI4F FAR_X0Y0;
-  private static final VectorI4F FAR_X0Y1;
-  private static final VectorI4F FAR_X1Y0;
-  private static final VectorI4F FAR_X1Y1;
-  private static final VectorI4F NEAR_X0Y0;
-  private static final VectorI4F NEAR_X0Y1;
-  private static final VectorI4F NEAR_X1Y0;
-  private static final VectorI4F NEAR_X1Y1;
+  private static final PVectorI4F<RSpaceClipType> FAR_X0Y0;
+  private static final PVectorI4F<RSpaceClipType> FAR_X0Y1;
+  private static final PVectorI4F<RSpaceClipType> FAR_X1Y0;
+  private static final PVectorI4F<RSpaceClipType> FAR_X1Y1;
+  private static final PVectorI4F<RSpaceClipType> NEAR_X0Y0;
+  private static final PVectorI4F<RSpaceClipType> NEAR_X0Y1;
+  private static final PVectorI4F<RSpaceClipType> NEAR_X1Y0;
+  private static final PVectorI4F<RSpaceClipType> NEAR_X1Y1;
 
   static {
-    NEAR_X0Y0 = new VectorI4F(-1.0f, -1.0f, -1.0f, 1.0f);
-    NEAR_X1Y0 = new VectorI4F(1.0f, -1.0f, -1.0f, 1.0f);
-    NEAR_X0Y1 = new VectorI4F(-1.0f, 1.0f, -1.0f, 1.0f);
-    NEAR_X1Y1 = new VectorI4F(1.0f, 1.0f, -1.0f, 1.0f);
+    NEAR_X0Y0 = new PVectorI4F<RSpaceClipType>(-1.0f, -1.0f, -1.0f, 1.0f);
+    NEAR_X1Y0 = new PVectorI4F<RSpaceClipType>(1.0f, -1.0f, -1.0f, 1.0f);
+    NEAR_X0Y1 = new PVectorI4F<RSpaceClipType>(-1.0f, 1.0f, -1.0f, 1.0f);
+    NEAR_X1Y1 = new PVectorI4F<RSpaceClipType>(1.0f, 1.0f, -1.0f, 1.0f);
 
-    FAR_X0Y0 = new VectorI4F(-1.0f, -1.0f, 1.0f, 1.0f);
-    FAR_X1Y0 = new VectorI4F(1.0f, -1.0f, 1.0f, 1.0f);
-    FAR_X0Y1 = new VectorI4F(-1.0f, 1.0f, 1.0f, 1.0f);
-    FAR_X1Y1 = new VectorI4F(1.0f, 1.0f, 1.0f, 1.0f);
+    FAR_X0Y0 = new PVectorI4F<RSpaceClipType>(-1.0f, -1.0f, 1.0f, 1.0f);
+    FAR_X1Y0 = new PVectorI4F<RSpaceClipType>(1.0f, -1.0f, 1.0f, 1.0f);
+    FAR_X0Y1 = new PVectorI4F<RSpaceClipType>(-1.0f, 1.0f, 1.0f, 1.0f);
+    FAR_X1Y1 = new PVectorI4F<RSpaceClipType>(1.0f, 1.0f, 1.0f, 1.0f);
   }
 
   private static void calculateRayAndOrigin(
-    final Context c,
-    final RMatrixReadable4x4FType<RTransformProjectionInverseType> m,
-    final VectorI4F near,
-    final VectorI4F far,
-    final VectorM4F temp_near,
-    final VectorM4F temp_far,
+    final PMatrixM4x4F.Context c,
+    final PMatrixReadable4x4FType<RSpaceClipType, RSpaceEyeType> m,
+    final PVectorI4F<RSpaceClipType> near,
+    final PVectorI4F<RSpaceClipType> far,
+    final PVectorM4F<RSpaceEyeType> temp_near,
+    final PVectorM4F<RSpaceEyeType> temp_far,
     final VectorM4F out_ray,
     final VectorM4F out_origin)
   {
@@ -67,8 +69,8 @@ import com.io7m.r1.types.RTransformProjectionInverseType;
      * Transform NDC → Clip.
      */
 
-    MatrixM4x4F.multiplyVector4FWithContext(c, m, near, temp_near);
-    MatrixM4x4F.multiplyVector4FWithContext(c, m, far, temp_far);
+    PMatrixM4x4F.multiplyVector4FWithContext(c, m, near, temp_near);
+    PMatrixM4x4F.multiplyVector4FWithContext(c, m, far, temp_far);
 
     /**
      * Normalize in terms of w: NDC coordinates would usually be lacking a w
@@ -76,8 +78,8 @@ import com.io7m.r1.types.RTransformProjectionInverseType;
      * is necessary in order to multiply by a 4x4 matrix.
      */
 
-    VectorM4F.scaleInPlace(temp_near, 1.0 / temp_near.getWF());
-    VectorM4F.scaleInPlace(temp_far, 1.0 / temp_far.getWF());
+    PVectorM4F.scaleInPlace(temp_near, 1.0 / temp_near.getWF());
+    PVectorM4F.scaleInPlace(temp_far, 1.0 / temp_far.getWF());
 
     /**
      * Subtract the near corner from the far corner to produce a ray.
@@ -112,11 +114,13 @@ import com.io7m.r1.types.RTransformProjectionInverseType;
    */
 
   public static KViewRays newRays(
-    final Context c,
-    final RMatrixReadable4x4FType<RTransformProjectionInverseType> m)
+    final PMatrixM4x4F.Context c,
+    final PMatrixReadable4x4FType<RSpaceClipType, RSpaceEyeType> m)
   {
-    final VectorM4F temp_near = new VectorM4F();
-    final VectorM4F temp_far = new VectorM4F();
+    final PVectorM4F<RSpaceEyeType> temp_near =
+      new PVectorM4F<RSpaceEyeType>();
+    final PVectorM4F<RSpaceEyeType> temp_far =
+      new PVectorM4F<RSpaceEyeType>();
     final VectorM4F out_ray = new VectorM4F();
     final VectorM4F out_origin = new VectorM4F();
 

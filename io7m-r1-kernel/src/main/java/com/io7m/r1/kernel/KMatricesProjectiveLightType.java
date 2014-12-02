@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,11 +16,11 @@
 
 package com.io7m.r1.kernel;
 
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.kernel.types.KInstanceType;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * Functions for observing a specific instance with the current projective
@@ -61,7 +61,7 @@ public interface KMatricesProjectiveLightType extends
 
   <T, E extends Throwable> T withGenericTransform(
     KTransformType t,
-    RMatrixI3x3F<RTransformTextureType> uv,
+    PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv,
     KMatricesInstanceValuesFunctionType<T, E> f)
     throws RException,
       E;

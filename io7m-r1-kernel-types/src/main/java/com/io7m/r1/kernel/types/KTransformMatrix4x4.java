@@ -18,9 +18,10 @@ package com.io7m.r1.kernel.types;
 
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.Nullable;
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RTransformModelType;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.r1.types.RSpaceObjectType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 /**
  * An object-space to world-space transformation consisting of a 4x4 matrix.
@@ -31,22 +32,22 @@ import com.io7m.r1.types.RTransformModelType;
 {
   /**
    * Construct a new transformation with the given matrix.
-   * 
+   *
    * @param model
    *          The object-to-world matrix
    * @return A new transformation
    */
 
   public static KTransformType newTransform(
-    final RMatrixI4x4F<RTransformModelType> model)
+    final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model)
   {
     return new KTransformMatrix4x4(model);
   }
 
-  private final RMatrixI4x4F<RTransformModelType> model;
+  private final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model;
 
   KTransformMatrix4x4(
-    final RMatrixI4x4F<RTransformModelType> in_model)
+    final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> in_model)
   {
     this.model = in_model;
   }
@@ -71,7 +72,7 @@ import com.io7m.r1.types.RTransformModelType;
    * @return The given object-to-world matrix.
    */
 
-  public RMatrixI4x4F<RTransformModelType> getModel()
+  public PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> getModel()
   {
     return this.model;
   }
@@ -96,7 +97,7 @@ import com.io7m.r1.types.RTransformModelType;
 
   @Override public void transformMakeMatrix4x4F(
     final KTransformContext context,
-    final MatrixM4x4F m)
+    final PMatrixM4x4F<RSpaceObjectType, RSpaceWorldType> m)
   {
     this.model.makeMatrixM4x4F(m);
   }

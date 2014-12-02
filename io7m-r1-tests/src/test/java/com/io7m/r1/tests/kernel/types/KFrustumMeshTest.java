@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -44,7 +44,7 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jranges.RangeCheckException;
 import com.io7m.jranges.RangeInclusiveL;
-import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.r1.kernel.types.KFrustumMesh;
 import com.io7m.r1.kernel.types.KProjectionFOV;
@@ -52,6 +52,8 @@ import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.kernel.types.KProjectionOrthographic;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 
 @SuppressWarnings({ "boxing", "static-method" }) public final class KFrustumMeshTest
 {
@@ -62,10 +64,9 @@ import com.io7m.r1.tests.RFakeShaderControllers;
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
-    final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionFOV p =
       KProjectionFOV.newProjection(
-        mat,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         (float) Math.toRadians(90.0f),
         1.0f,
         1.0f,
@@ -301,10 +302,9 @@ import com.io7m.r1.tests.RFakeShaderControllers;
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
-    final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionFOV p =
       KProjectionFOV.newProjection(
-        mat,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         (float) Math.toRadians(90.0f),
         1.0f,
         1.0f,
@@ -342,10 +342,9 @@ import com.io7m.r1.tests.RFakeShaderControllers;
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
-    final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionFrustum p =
       KProjectionFrustum.newProjection(
-        mat,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         -1.0f,
         1.0f,
         -2.0f,
@@ -385,10 +384,9 @@ import com.io7m.r1.tests.RFakeShaderControllers;
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
 
-    final MatrixM4x4F mat = new MatrixM4x4F();
     final KProjectionOrthographic p =
       KProjectionOrthographic.newProjection(
-        mat,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         -2.0f,
         2.0f,
         -3.0f,

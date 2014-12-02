@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,19 +19,19 @@ package com.io7m.r1.tests.kernel;
 import net.java.quickcheck.Generator;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.kernel.KTextureMixParameters;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 public final class KTextureMixParametersGenerator implements
   Generator<KTextureMixParameters>
 {
-  private final Generator<RMatrixI3x3F<RTransformTextureType>> mat_gen;
-  private final Generator<Texture2DStaticUsableType>           tex_gen;
+  private final Generator<PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>> mat_gen;
+  private final Generator<Texture2DStaticUsableType>                          tex_gen;
 
   public KTextureMixParametersGenerator(
     final Generator<Texture2DStaticUsableType> in_tex_gen,
-    final Generator<RMatrixI3x3F<RTransformTextureType>> in_mat_gen)
+    final Generator<PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>> in_mat_gen)
   {
     this.tex_gen = in_tex_gen;
     this.mat_gen = in_mat_gen;
@@ -41,8 +41,10 @@ public final class KTextureMixParametersGenerator implements
   {
     final Texture2DStaticUsableType t0 = this.tex_gen.next();
     final Texture2DStaticUsableType t1 = this.tex_gen.next();
-    final RMatrixI3x3F<RTransformTextureType> m0 = this.mat_gen.next();
-    final RMatrixI3x3F<RTransformTextureType> m1 = this.mat_gen.next();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m0 =
+      this.mat_gen.next();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m1 =
+      this.mat_gen.next();
     return KTextureMixParameters.newParameters(
       t0,
       m0,

@@ -23,6 +23,8 @@ import java.util.Set;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -50,10 +52,8 @@ import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
+import com.io7m.r1.types.RSpaceTextureType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * A demonstration that (specular-only) translucency with multiple lights
@@ -94,7 +94,7 @@ public final class STranslucentSpecularOnly1 implements ExampleSceneType
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         8.0f,
         1.0f,
-        8.0f), new RVectorI3F<RSpaceWorldType>(0.0f, -4.0f, 0.0f));
+        8.0f), new PVectorI3F<RSpaceWorldType>(0.0f, -4.0f, 0.0f));
 
     final KMaterialOpaqueRegular floor_mat;
     {
@@ -110,8 +110,8 @@ public final class STranslucentSpecularOnly1 implements ExampleSceneType
       floor_mat = b.build();
     }
 
-    final RMatrixI3x3F<RTransformTextureType> floor_mat_uv =
-      RMatrixI3x3F.newFromColumns(
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> floor_mat_uv =
+      PMatrixI3x3F.newFromColumns(
         new VectorI3F(16.0f, 0.0f, 0.0f),
         new VectorI3F(0.0f, 16.0f, 0.0f),
         new VectorI3F(0.0f, 0.0f, 16.0f));
@@ -145,7 +145,7 @@ public final class STranslucentSpecularOnly1 implements ExampleSceneType
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         1.0f,
         1.0f,
-        1.0f), new RVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 0.0f));
+        1.0f), new PVectorI3F<RSpaceWorldType>(0.0f, 0.5f, 0.0f));
 
     final KInstanceTranslucentSpecularOnly glass =
       KInstanceTranslucentSpecularOnly.newInstance(
@@ -184,7 +184,7 @@ public final class STranslucentSpecularOnly1 implements ExampleSceneType
       b.setFalloff(1.0f);
       b.setIntensity(1.0f);
       b.setColor(ExampleSceneUtilities.RGB_WHITE);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 0.0f));
       lb = b.build();
     }
 
@@ -206,23 +206,23 @@ public final class STranslucentSpecularOnly1 implements ExampleSceneType
       b.setIntensity(1.0f);
 
       b.setColor(ExampleSceneUtilities.RGB_RED);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(-1.5f, 1.5f, -1.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(-1.5f, 1.5f, -1.0f));
       l0 = b.build();
 
       b.setColor(ExampleSceneUtilities.RGB_BLUE);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(1.5f, 1.5f, -1.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(1.5f, 1.5f, -1.0f));
       l1 = b.build();
 
       b.setColor(ExampleSceneUtilities.RGB_GREEN);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(-1.5f, 1.5f, 1.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(-1.5f, 1.5f, 1.0f));
       l2 = b.build();
 
       b.setColor(ExampleSceneUtilities.RGB_YELLOW);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(1.5f, 1.5f, 1.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(1.5f, 1.5f, 1.0f));
       l3 = b.build();
 
       b.setColor(ExampleSceneUtilities.RGB_WHITE);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 0.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 0.0f));
       l4 = b.build();
     }
 

@@ -24,6 +24,8 @@ import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -48,10 +50,9 @@ import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixM4x4F;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RTransformProjectionType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * An example with projective lighting and basic shadow mapping, where all
@@ -60,7 +61,7 @@ import com.io7m.r1.types.RVectorI3F;
 
 public final class SPShadowBasic1 implements ExampleSceneType
 {
-  private final RMatrixM4x4F<RTransformProjectionType> projection;
+  private final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType> projection;
 
   /**
    * Construct the example.
@@ -68,7 +69,7 @@ public final class SPShadowBasic1 implements ExampleSceneType
 
   public SPShadowBasic1()
   {
-    this.projection = new RMatrixM4x4F<RTransformProjectionType>();
+    this.projection = new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>();
   }
 
   @Override public <A> A exampleAccept(
@@ -86,7 +87,7 @@ public final class SPShadowBasic1 implements ExampleSceneType
     final ExampleSceneBuilderType scene)
     throws RException
   {
-    final RVectorI3F<RSpaceWorldType> z = RVectorI3F.zero();
+    final PVectorI3F<RSpaceWorldType> z = PVectorI3F.zero();
     final KTransformType floor_t =
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         4.0f,
@@ -105,7 +106,7 @@ public final class SPShadowBasic1 implements ExampleSceneType
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         1.0f,
         1.0f,
-        1.0f), new RVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 1.0f));
+        1.0f), new PVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 1.0f));
 
     final Texture2DStaticUsableType t = scene.texture("monkey_albedo.png");
 
@@ -132,7 +133,7 @@ public final class SPShadowBasic1 implements ExampleSceneType
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setRadius(30.0f);
       b.setIntensity(0.5f);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 3.0f, 2.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 3.0f, 2.0f));
       ks = b.build();
     }
 
@@ -169,7 +170,7 @@ public final class SPShadowBasic1 implements ExampleSceneType
       b.setColor(ExampleSceneUtilities.RGB_RED);
       b.setRange(8.0f);
 
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 3.0f, 3.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 3.0f, 3.0f));
 
       {
         final QuaternionI4F o =
@@ -182,7 +183,7 @@ public final class SPShadowBasic1 implements ExampleSceneType
       kp0 = b.build();
 
       b.setColor(ExampleSceneUtilities.RGB_YELLOW);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(-3.0f, 3.0f, 0.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(-3.0f, 3.0f, 0.0f));
 
       {
         final QuaternionI4F ox =
@@ -202,7 +203,7 @@ public final class SPShadowBasic1 implements ExampleSceneType
       kp1 = b.build();
 
       b.setColor(ExampleSceneUtilities.RGB_BLUE);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(3.0f, 3.0f, 0.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(3.0f, 3.0f, 0.0f));
 
       {
         final QuaternionI4F ox =

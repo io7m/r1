@@ -21,7 +21,9 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.KFogProgression;
 import com.io7m.r1.kernel.KFogYParameters;
 import com.io7m.r1.kernel.KFogYParametersBuilderType;
@@ -37,10 +39,10 @@ import com.io7m.r1.main.R1;
 import com.io7m.r1.main.R1BuilderType;
 import com.io7m.r1.main.R1Type;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI4x4F;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RTransformViewType;
-import com.io7m.r1.types.RVectorI3F;
+import com.io7m.r1.types.RSpaceWorldType;
 
 /**
  * An example renderer using the default deferred renderer.
@@ -49,7 +51,11 @@ import com.io7m.r1.types.RVectorI3F;
 public final class ExampleRendererDeferredWithFogY implements
   ExampleRendererDeferredType
 {
-  private static final MatrixM4x4F TEMPORARY = new MatrixM4x4F();
+  private static final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType> TEMPORARY;
+
+  static {
+    TEMPORARY = new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>();
+  }
 
   /**
    * @return A renderer constructor.
@@ -95,7 +101,8 @@ public final class ExampleRendererDeferredWithFogY implements
     final KRendererDeferredType dr = r.getRendererDeferred();
     final KImageFilterDeferredType<KFogYParameters> p = r.getFilterFogY();
 
-    final RMatrixI4x4F<RTransformViewType> in_view = RMatrixI4x4F.identity();
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> in_view =
+      PMatrixI4x4F.identity();
 
     final KProjectionFrustum projection =
       KProjectionFrustum.newProjection(
@@ -107,8 +114,8 @@ public final class ExampleRendererDeferredWithFogY implements
         1.0f,
         100.0f);
 
-    final RVectorI3F<RSpaceRGBType> grey =
-      new RVectorI3F<RSpaceRGBType>(0.2f, 0.2f, 0.2f);
+    final PVectorI3F<RSpaceRGBType> grey =
+      new PVectorI3F<RSpaceRGBType>(0.2f, 0.2f, 0.2f);
     final KFogYParametersBuilderType fog_b =
       KFogYParameters.newBuilder(in_view, projection);
 

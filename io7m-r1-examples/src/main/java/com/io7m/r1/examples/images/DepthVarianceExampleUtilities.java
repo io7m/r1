@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -26,6 +26,7 @@ import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.examples.ExampleImageBuilderType;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
@@ -37,8 +38,7 @@ import com.io7m.r1.kernel.types.KDepthVariancePrecision;
 import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.r1.main.R1Type;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 final class DepthVarianceExampleUtilities
 {
@@ -97,7 +97,8 @@ final class DepthVarianceExampleUtilities
       final KImageSourceDepthVarianceType<KTextureMixParameters> sdv =
         r1.getSourceDepthVarianceTextureMix();
       final Texture2DStaticUsableType t = image.texture("food_640x480.jpg");
-      final RMatrixI3x3F<RTransformTextureType> m = RMatrixI3x3F.identity();
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m =
+        PMatrixI3x3F.identity();
       final KTextureMixParameters dv_config =
         KTextureMixParameters.newParameters(t, m, 0.0f, t, m);
       sdv.sourceEvaluateDepthVariance(dv_config, r.getValue());

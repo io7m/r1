@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,10 +19,10 @@ package com.io7m.r1.xml.collada;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorM3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorReadable3FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RSpaceType;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorReadable3FType;
 
 /**
  * <p>
@@ -81,7 +81,7 @@ public enum RColladaAxis
    * according to <tt>source_axes</tt>, to the coordinate system with the axes
    * oriented according to <tt>dest_axes</tt>.
    * </p>
-   * 
+   *
    * @param <R>
    *          The type of coordinate system.
    * @param matrix
@@ -92,14 +92,14 @@ public enum RColladaAxis
    *          The source vector.
    * @param dest_axes
    *          The axes of the destination coordinate system.
-   * 
+   *
    * @return The vector in the given destination coordinate system.
    */
 
-  public static <R extends RSpaceType> RVectorI3F<R> convertAxes(
+  public static <R extends RSpaceType> PVectorI3F<R> convertAxes(
     final MatrixM3x3F matrix,
     final RColladaAxis source_axes,
-    final RVectorReadable3FType<R> source,
+    final PVectorReadable3FType<R> source,
     final RColladaAxis dest_axes)
   {
     switch (source_axes) {
@@ -108,33 +108,33 @@ public enum RColladaAxis
         switch (dest_axes) {
           case COLLADA_AXIS_X_UP:
           {
-            return new RVectorI3F<R>(source);
+            return new PVectorI3F<R>(source);
           }
           case COLLADA_AXIS_Y_UP:
           {
             final VectorM3F out = new VectorM3F();
 
             MatrixM3x3F.setIdentity(matrix);
-            MatrixM3x3F.makeRotation(
+            MatrixM3x3F.makeRotationInto(
               Math.toRadians(90),
               RColladaAxis.AXIS_Z,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
+            return new PVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
           case COLLADA_AXIS_Z_UP:
           {
             final VectorM3F out = new VectorM3F();
 
             MatrixM3x3F.setIdentity(matrix);
-            MatrixM3x3F.makeRotation(
+            MatrixM3x3F.makeRotationInto(
               Math.toRadians(-90),
               RColladaAxis.AXIS_Y,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
+            return new PVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
         }
         throw new UnreachableCodeException();
@@ -147,30 +147,30 @@ public enum RColladaAxis
             final VectorM3F out = new VectorM3F();
 
             MatrixM3x3F.setIdentity(matrix);
-            MatrixM3x3F.makeRotation(
+            MatrixM3x3F.makeRotationInto(
               Math.toRadians(-90),
               RColladaAxis.AXIS_Z,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
+            return new PVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
           case COLLADA_AXIS_Y_UP:
           {
-            return new RVectorI3F<R>(source);
+            return new PVectorI3F<R>(source);
           }
           case COLLADA_AXIS_Z_UP:
           {
             final VectorM3F out = new VectorM3F();
 
             MatrixM3x3F.setIdentity(matrix);
-            MatrixM3x3F.makeRotation(
+            MatrixM3x3F.makeRotationInto(
               Math.toRadians(90),
               RColladaAxis.AXIS_X,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
+            return new PVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
         }
         throw new UnreachableCodeException();
@@ -183,30 +183,30 @@ public enum RColladaAxis
             final VectorM3F out = new VectorM3F();
 
             MatrixM3x3F.setIdentity(matrix);
-            MatrixM3x3F.makeRotation(
+            MatrixM3x3F.makeRotationInto(
               Math.toRadians(90),
               RColladaAxis.AXIS_Y,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
+            return new PVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
           case COLLADA_AXIS_Y_UP:
           {
             final VectorM3F out = new VectorM3F();
 
             MatrixM3x3F.setIdentity(matrix);
-            MatrixM3x3F.makeRotation(
+            MatrixM3x3F.makeRotationInto(
               Math.toRadians(-90),
               RColladaAxis.AXIS_X,
               matrix);
 
             MatrixM3x3F.multiplyVector3F(matrix, source, out);
-            return new RVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
+            return new PVectorI3F<R>(out.getXF(), out.getYF(), out.getZF());
           }
           case COLLADA_AXIS_Z_UP:
           {
-            return new RVectorI3F<R>(source);
+            return new PVectorI3F<R>(source);
           }
         }
 

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,8 +20,8 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * Parameters for {@link KImageSourceRGBAMix}.
@@ -47,10 +47,10 @@ import com.io7m.r1.types.RTransformTextureType;
 
   public static KTextureMixParameters newParameters(
     final Texture2DStaticUsableType left,
-    final RMatrixI3x3F<RTransformTextureType> left_matrix,
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> left_matrix,
     final float mix,
     final Texture2DStaticUsableType right,
-    final RMatrixI3x3F<RTransformTextureType> right_matrix)
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> right_matrix)
   {
     return new KTextureMixParameters(
       left,
@@ -60,18 +60,18 @@ import com.io7m.r1.types.RTransformTextureType;
       right_matrix);
   }
 
-  private final Texture2DStaticUsableType           left;
-  private final RMatrixI3x3F<RTransformTextureType> left_matrix;
-  private final float                               mix;
-  private final Texture2DStaticUsableType           right;
-  private final RMatrixI3x3F<RTransformTextureType> right_matrix;
+  private final Texture2DStaticUsableType                          left;
+  private final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> left_matrix;
+  private final float                                              mix;
+  private final Texture2DStaticUsableType                          right;
+  private final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> right_matrix;
 
   private KTextureMixParameters(
     final Texture2DStaticUsableType in_left,
-    final RMatrixI3x3F<RTransformTextureType> in_left_matrix,
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_left_matrix,
     final float in_mix,
     final Texture2DStaticUsableType in_right,
-    final RMatrixI3x3F<RTransformTextureType> in_right_matrix)
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_right_matrix)
   {
     this.left = NullCheck.notNull(in_left, "Left");
     this.left_matrix = NullCheck.notNull(in_left_matrix, "Left matrix");
@@ -104,7 +104,7 @@ import com.io7m.r1.types.RTransformTextureType;
    * @return The matrix for the left texture coordinates.
    */
 
-  public RMatrixI3x3F<RTransformTextureType> getLeftMatrix()
+  public PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> getLeftMatrix()
   {
     return this.left_matrix;
   }
@@ -131,7 +131,7 @@ import com.io7m.r1.types.RTransformTextureType;
    * @return The matrix for the right texture coordinates.
    */
 
-  public RMatrixI3x3F<RTransformTextureType> getRightMatrix()
+  public PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> getRightMatrix()
   {
     return this.right_matrix;
   }

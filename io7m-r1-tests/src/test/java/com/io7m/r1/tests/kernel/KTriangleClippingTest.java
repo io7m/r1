@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,10 +22,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.io7m.jtensors.VectorI4F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.kernel.KTriangleClipping;
 import com.io7m.r1.types.RSpaceClipType;
 import com.io7m.r1.types.RTriangle4F;
-import com.io7m.r1.types.RVectorI4F;
 
 @SuppressWarnings("static-method") public final class KTriangleClippingTest
 {
@@ -33,12 +33,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_NEGATIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -55,12 +55,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_NEGATIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(-2.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(-2.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -90,12 +90,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_NEGATIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(-2.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(-2.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -125,12 +125,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_NEGATIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(-2.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(-2.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -160,12 +160,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_NEGATIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(-2.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(-2.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(-2.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(-2.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(-2.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(-2.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -179,12 +179,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -201,12 +201,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(2.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(2.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -236,12 +236,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(2.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(2.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(2.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(2.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -263,12 +263,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(2.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(2.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(2.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(2.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -290,12 +290,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(2.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(2.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -325,12 +325,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(2.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(2.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(2.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(2.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -352,12 +352,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(2.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(0.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(0.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(2.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 
@@ -387,12 +387,12 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final VectorI4F plane = KTriangleClipping.PLANE_POSITIVE_X;
 
-    final RVectorI4F<RSpaceClipType> p0 =
-      new RVectorI4F<RSpaceClipType>(2.0f, 1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p1 =
-      new RVectorI4F<RSpaceClipType>(2.0f, -1.0f, 0.0f, 1.0f);
-    final RVectorI4F<RSpaceClipType> p2 =
-      new RVectorI4F<RSpaceClipType>(2.0f, 0.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p0 =
+      new PVectorI4F<RSpaceClipType>(2.0f, 1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p1 =
+      new PVectorI4F<RSpaceClipType>(2.0f, -1.0f, 0.0f, 1.0f);
+    final PVectorI4F<RSpaceClipType> p2 =
+      new PVectorI4F<RSpaceClipType>(2.0f, 0.0f, 0.0f, 1.0f);
 
     final RTriangle4F<RSpaceClipType> t = RTriangle4F.newTriangle(p0, p1, p2);
 

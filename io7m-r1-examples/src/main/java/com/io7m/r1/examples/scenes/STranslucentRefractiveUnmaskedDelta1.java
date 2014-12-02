@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,9 +21,12 @@ import java.util.List;
 import java.util.Set;
 
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -50,14 +53,10 @@ import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RMatrixM3x3F;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
+import com.io7m.r1.types.RSpaceTextureType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * A demonstration that unmasked refractive instances work.
@@ -97,22 +96,22 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
       KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
         1.0f,
         1.0f,
-        1.0f), new RVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 1.0f));
+        1.0f), new PVectorI3F<RSpaceWorldType>(0.0f, 1.5f, 1.0f));
 
-    final RMatrixM3x3F<RTransformTextureType> muv_t =
-      new RMatrixM3x3F<RTransformTextureType>();
-    MatrixM3x3F.scale(muv_t, 2.0, muv_t);
+    final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> muv_t =
+      new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
+    PMatrixM3x3F.scale(muv_t, 2.0, muv_t);
 
-    final RMatrixI3x3F<RTransformTextureType> muv =
-      RMatrixI3x3F.newFromReadable(muv_t);
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> muv =
+      PMatrixI3x3F.newFromReadable(muv_t);
 
     final KMaterialTranslucentRegularBuilderType m_tb =
       KMaterialTranslucentRegular
         .newBuilder(ExampleSceneUtilities.TRANSLUCENT_MATTE_WHITE);
     m_tb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new RVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.5f)));
+      .untextured(new PVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.5f)));
     m_tb.setSpecular(KMaterialSpecularConstant.constant(
-      new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f),
+      new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f),
       16.0f));
 
     final KMaterialTranslucentRefractive m_trb =
@@ -147,7 +146,7 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
       final KLightSphereWithoutShadowBuilderType b =
         KLightSphereWithoutShadow
           .newBuilderFrom(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
-      b.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 1.0f));
+      b.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 4.0f, 1.0f));
       final KLightSphereWithoutShadow kls = b.build();
       gb.groupAddLight(kls);
 
@@ -167,23 +166,23 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
             KAxes.AXIS_Z,
             Math.toRadians(-90.0f)),
           floor_scale,
-          new RVectorI3F<RSpaceWorldType>(-8.0f, 0.0f, 0.0f));
+          new PVectorI3F<RSpaceWorldType>(-8.0f, 0.0f, 0.0f));
     final KTransformType plane_trans_neg_y =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         floor_scale,
-        new RVectorI3F<RSpaceWorldType>(0.0f, -8.0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(0.0f, -8.0f, 0.0f));
     final KTransformType plane_trans_neg_z =
       KTransformOST.newTransform(
         QuaternionI4F.makeFromAxisAngle(KAxes.AXIS_X, Math.toRadians(90.0f)),
         floor_scale,
-        new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, -8.0f));
+        new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, -8.0f));
 
     final KTransformType plane_trans_pos_x =
       KTransformOST.newTransform(
         QuaternionI4F.makeFromAxisAngle(KAxes.AXIS_Z, Math.toRadians(90.0f)),
         floor_scale,
-        new RVectorI3F<RSpaceWorldType>(8.0f, 0.0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(8.0f, 0.0f, 0.0f));
     final KTransformType plane_trans_pos_y =
       KTransformOST
         .newTransform(
@@ -191,7 +190,7 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
             KAxes.AXIS_Z,
             Math.toRadians(180.0f)),
           floor_scale,
-          new RVectorI3F<RSpaceWorldType>(0.0f, 8.0f, 0.0f));
+          new PVectorI3F<RSpaceWorldType>(0.0f, 8.0f, 0.0f));
     final KTransformType plane_trans_pos_z =
       KTransformOST
         .newTransform(
@@ -199,14 +198,14 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
             KAxes.AXIS_X,
             Math.toRadians(-90.0f)),
           floor_scale,
-          new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 8.0f));
+          new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 8.0f));
 
     final KMaterialOpaqueRegularBuilderType morb =
       KMaterialOpaqueRegular
         .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_BLUE);
 
     morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new RVectorI4F<RSpaceRGBAType>(1.0f, 0.5f, 0.5f, 1.0f)));
+      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 0.5f, 0.5f, 1.0f)));
 
     final KInstanceOpaqueRegular plane_pos_x =
       KInstanceOpaqueRegular.newInstance(
@@ -217,7 +216,7 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
         KFaceSelection.FACE_RENDER_FRONT);
 
     morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new RVectorI4F<RSpaceRGBAType>(0.5f, 1.0f, 0.5f, 1.0f)));
+      .untextured(new PVectorI4F<RSpaceRGBAType>(0.5f, 1.0f, 0.5f, 1.0f)));
 
     final KInstanceOpaqueRegular plane_pos_y =
       KInstanceOpaqueRegular.newInstance(
@@ -228,7 +227,7 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
         KFaceSelection.FACE_RENDER_FRONT);
 
     morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new RVectorI4F<RSpaceRGBAType>(0.5f, 1.0f, 1.0f, 1.0f)));
+      .untextured(new PVectorI4F<RSpaceRGBAType>(0.5f, 1.0f, 1.0f, 1.0f)));
 
     final KInstanceOpaqueRegular plane_pos_z =
       KInstanceOpaqueRegular.newInstance(
@@ -239,7 +238,7 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
         KFaceSelection.FACE_RENDER_FRONT);
 
     morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new RVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 0.5f, 1.0f)));
+      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 0.5f, 1.0f)));
 
     final KInstanceOpaqueRegular plane_neg_x =
       KInstanceOpaqueRegular.newInstance(
@@ -250,7 +249,7 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
         KFaceSelection.FACE_RENDER_FRONT);
 
     morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new RVectorI4F<RSpaceRGBAType>(1.0f, 0.5f, 1.0f, 1.0f)));
+      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 0.5f, 1.0f, 1.0f)));
 
     final KInstanceOpaqueRegular plane_neg_y =
       KInstanceOpaqueRegular.newInstance(
@@ -261,7 +260,7 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
         KFaceSelection.FACE_RENDER_FRONT);
 
     morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new RVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f)));
+      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f)));
 
     final KInstanceOpaqueRegular plane_neg_z =
       KInstanceOpaqueRegular.newInstance(
@@ -283,7 +282,7 @@ public final class STranslucentRefractiveUnmaskedDelta1 implements
         KTransformOST.newTransform(QuaternionI4F.IDENTITY, new VectorI3F(
           1.0f,
           1.0f,
-          1.0f), new RVectorI3F<RSpaceWorldType>(0.0f, 1.5f, -3.0f));
+          1.0f), new PVectorI3F<RSpaceWorldType>(0.0f, 1.5f, -3.0f));
 
       final KMaterialOpaqueRegularBuilderType mmb =
         KMaterialOpaqueRegular

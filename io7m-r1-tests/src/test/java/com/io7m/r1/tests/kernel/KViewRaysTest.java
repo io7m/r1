@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,15 +21,15 @@ import org.junit.Test;
 
 import com.io7m.jequality.AlmostEqualFloat.ContextRelative;
 import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.r1.kernel.KBilinear;
 import com.io7m.r1.kernel.KViewRays;
 import com.io7m.r1.kernel.types.KProjectionFOV;
 import com.io7m.r1.kernel.types.KProjectionOrthographic;
-import com.io7m.r1.types.RMatrixM4x4F;
-import com.io7m.r1.types.RTransformProjectionInverseType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 
 @SuppressWarnings("static-method") public final class KViewRaysTest
 {
@@ -48,12 +48,12 @@ import com.io7m.r1.types.RTransformProjectionInverseType;
 
   @Test public void testOrthographic0()
   {
-    final Context c = new MatrixM4x4F.Context();
+    final PMatrixM4x4F.Context c = new PMatrixM4x4F.Context();
     final MatrixM4x4F t = new MatrixM4x4F();
 
     final KProjectionOrthographic p =
       KProjectionOrthographic.newProjection(
-        t,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         -320.0f,
         320.0f,
         -240.0f,
@@ -61,10 +61,12 @@ import com.io7m.r1.types.RTransformProjectionInverseType;
         1.0f,
         100.0f);
 
-    final RMatrixM4x4F<RTransformProjectionInverseType> ipm =
-      new RMatrixM4x4F<RTransformProjectionInverseType>();
-    p.projectionGetMatrix().makeMatrixM4x4F(ipm);
-    MatrixM4x4F.invertInPlaceWithContext(c, ipm);
+    final PMatrixM4x4F<RSpaceClipType, RSpaceEyeType> ipm =
+      new PMatrixM4x4F<RSpaceClipType, RSpaceEyeType>();
+    final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType> ipm_tmp =
+      (PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>) (PMatrixM4x4F<?, ?>) ipm;
+    p.projectionGetMatrix().makeMatrixM4x4F(ipm_tmp);
+    PMatrixM4x4F.invertInPlaceWithContext(c, ipm);
 
     final KViewRays vr = KViewRays.newRays(c, ipm);
     KViewRaysTest.dumpViewRays(vr);
@@ -102,21 +104,23 @@ import com.io7m.r1.types.RTransformProjectionInverseType;
 
   @Test public void testPerspective0()
   {
-    final Context c = new MatrixM4x4F.Context();
+    final PMatrixM4x4F.Context c = new PMatrixM4x4F.Context();
     final MatrixM4x4F t = new MatrixM4x4F();
 
     final KProjectionFOV p =
       KProjectionFOV.newProjection(
-        t,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         (float) Math.toRadians(90.0f),
         1.0f,
         1.0f,
         100.0f);
 
-    final RMatrixM4x4F<RTransformProjectionInverseType> ipm =
-      new RMatrixM4x4F<RTransformProjectionInverseType>();
-    p.projectionGetMatrix().makeMatrixM4x4F(ipm);
-    MatrixM4x4F.invertInPlaceWithContext(c, ipm);
+    final PMatrixM4x4F<RSpaceClipType, RSpaceEyeType> ipm =
+      new PMatrixM4x4F<RSpaceClipType, RSpaceEyeType>();
+    final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType> ipm_tmp =
+      (PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>) (PMatrixM4x4F<?, ?>) ipm;
+    p.projectionGetMatrix().makeMatrixM4x4F(ipm_tmp);
+    PMatrixM4x4F.invertInPlaceWithContext(c, ipm);
 
     final KViewRays vr = KViewRays.newRays(c, ipm);
     KViewRaysTest.dumpViewRays(vr);

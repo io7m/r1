@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,11 +16,11 @@
 
 package com.io7m.r1.meshes;
 
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * An interface that accepts events from a mesh parser.
@@ -153,7 +153,7 @@ public interface RMeshParserEventsType<E extends Throwable>
 
   void eventMeshVertexNormal(
     final long index,
-    final RVectorI3F<RSpaceObjectType> normal)
+    final PVectorI3F<RSpaceObjectType> normal)
     throws E;
 
   /**
@@ -169,7 +169,7 @@ public interface RMeshParserEventsType<E extends Throwable>
 
   void eventMeshVertexPosition(
     final long index,
-    final RVectorI3F<RSpaceObjectType> position)
+    final PVectorI3F<RSpaceObjectType> position)
     throws E;
 
   /**
@@ -198,7 +198,7 @@ public interface RMeshParserEventsType<E extends Throwable>
 
   void eventMeshVertexTangent4f(
     final long index,
-    final RVectorI4F<RSpaceObjectType> tangent)
+    final PVectorI4F<RSpaceObjectType> tangent)
     throws E;
 
   /**
@@ -214,7 +214,7 @@ public interface RMeshParserEventsType<E extends Throwable>
 
   void eventMeshVertexUV(
     final long index,
-    final RVectorI2F<RSpaceTextureType> uv)
+    final PVectorI2F<RSpaceTextureType> uv)
     throws E;
 
   /**
@@ -229,8 +229,8 @@ public interface RMeshParserEventsType<E extends Throwable>
    */
 
   void eventMeshVerticesEnded(
-    final RVectorI3F<RSpaceObjectType> bounds_lower,
-    final RVectorI3F<RSpaceObjectType> bounds_upper)
+    final PVectorI3F<RSpaceObjectType> bounds_lower,
+    final PVectorI3F<RSpaceObjectType> bounds_upper)
     throws E;
 
   /**

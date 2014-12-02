@@ -19,8 +19,9 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RTransformViewType;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 /**
  * An orientable "camera" with a specific projection.
@@ -30,7 +31,7 @@ import com.io7m.r1.types.RTransformViewType;
 {
   /**
    * Construct a new camera with the given view and projection.
-   * 
+   *
    * @param view
    *          The world-to-eye matrix.
    * @param projection
@@ -39,7 +40,7 @@ import com.io7m.r1.types.RTransformViewType;
    */
 
   public static KCamera newCamera(
-    final RMatrixI4x4F<RTransformViewType> view,
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view,
     final KProjectionType projection)
   {
     return new KCamera(
@@ -47,11 +48,11 @@ import com.io7m.r1.types.RTransformViewType;
       NullCheck.notNull(projection, "Projection matrix"));
   }
 
-  private final KProjectionType                  projection;
-  private final RMatrixI4x4F<RTransformViewType> view;
+  private final KProjectionType                              projection;
+  private final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view;
 
   private KCamera(
-    final RMatrixI4x4F<RTransformViewType> in_view,
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> in_view,
     final KProjectionType in_projection)
   {
     this.view = in_view;
@@ -93,7 +94,7 @@ import com.io7m.r1.types.RTransformViewType;
    * @return The world-to-eye view matrix
    */
 
-  public RMatrixI4x4F<RTransformViewType> getViewMatrix()
+  public PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> getViewMatrix()
   {
     return this.view;
   }

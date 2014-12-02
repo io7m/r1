@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,13 +18,13 @@ package com.io7m.r1.kernel.types;
 
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionMaterialMissingAlbedoTexture;
 import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
-import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RVectorI3F;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * The type of translucent, specular-only materials.
@@ -37,20 +37,20 @@ import com.io7m.r1.types.RVectorI3F;
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KMaterialTranslucentSpecularOnlyBuilderType
   {
-    private static final RVectorI3F<RSpaceRGBType> WHITE;
+    private static final PVectorI3F<RSpaceRGBType>             WHITE;
 
     static {
-      WHITE = new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
+      WHITE = new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
     }
 
-    private KMaterialAlphaType                     alpha;
-    private KMaterialNormalType                    normal;
-    private KMaterialSpecularNotNoneType           specular;
-    private RMatrixI3x3F<RTransformTextureType>    uv_matrix;
+    private KMaterialAlphaType                                 alpha;
+    private KMaterialNormalType                                normal;
+    private KMaterialSpecularNotNoneType                       specular;
+    private PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix;
 
     public Builder()
     {
-      this.uv_matrix = RMatrixI3x3F.identity();
+      this.uv_matrix = PMatrixI3x3F.identity();
       this.alpha = KMaterialAlphaConstant.constant(1.0f);
       this.normal = KMaterialNormalVertex.vertex();
       this.specular =
@@ -98,7 +98,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setUVMatrix(
-      final RMatrixI3x3F<RTransformTextureType> in_uv_matrix)
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix)
     {
       this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
     }
@@ -140,7 +140,7 @@ import com.io7m.r1.types.RVectorI3F;
    */
 
   public static KMaterialTranslucentSpecularOnly newMaterial(
-    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
     final KMaterialAlphaType in_alpha,
     final KMaterialNormalType in_normal,
     final KMaterialSpecularNotNoneType in_specular)
@@ -164,17 +164,17 @@ import com.io7m.r1.types.RVectorI3F;
       in_specular);
   }
 
-  private final KMaterialAlphaType                  alpha;
-  private final String                              code;
-  private final KMaterialNormalType                 normal;
-  private boolean                                   required_uv;
-  private final KMaterialSpecularNotNoneType        specular;
-  private final int                                 textures_required;
-  private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
+  private final KMaterialAlphaType                                 alpha;
+  private final String                                             code;
+  private final KMaterialNormalType                                normal;
+  private boolean                                                  required_uv;
+  private final KMaterialSpecularNotNoneType                       specular;
+  private final int                                                textures_required;
+  private final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix;
 
   private KMaterialTranslucentSpecularOnly(
     final String in_code,
-    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
     final KMaterialAlphaType in_alpha,
     final KMaterialNormalType in_normal,
     final KMaterialSpecularNotNoneType in_specular)
@@ -240,7 +240,9 @@ import com.io7m.r1.types.RVectorI3F;
     return this.normal;
   }
 
-  @Override public RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix()
+  @Override public
+    PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>
+    materialGetUVMatrix()
   {
     return this.uv_matrix;
   }

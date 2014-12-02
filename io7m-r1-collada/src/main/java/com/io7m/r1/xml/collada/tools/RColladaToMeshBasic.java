@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,6 +25,8 @@ import com.io7m.jranges.RangeCheckException;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.meshes.RMeshBasic;
 import com.io7m.r1.types.RExceptionMeshMissingNormals;
 import com.io7m.r1.types.RExceptionMeshMissingPositions;
@@ -32,22 +34,20 @@ import com.io7m.r1.types.RExceptionMeshMissingUVs;
 import com.io7m.r1.types.RExceptionMeshNameInvalid;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
 import com.io7m.r1.xml.collada.RColladaAxis;
 import com.io7m.r1.xml.collada.RColladaDocument;
 import com.io7m.r1.xml.collada.RColladaGeometry;
+import com.io7m.r1.xml.collada.RColladaGeometry.RColladaMesh;
 import com.io7m.r1.xml.collada.RColladaGeometryID;
 import com.io7m.r1.xml.collada.RColladaInput;
 import com.io7m.r1.xml.collada.RColladaPoly;
 import com.io7m.r1.xml.collada.RColladaPolylist;
 import com.io7m.r1.xml.collada.RColladaSemantic;
 import com.io7m.r1.xml.collada.RColladaSource;
-import com.io7m.r1.xml.collada.RColladaVertex;
-import com.io7m.r1.xml.collada.RColladaGeometry.RColladaMesh;
 import com.io7m.r1.xml.collada.RColladaSource.ColladaSourceArray2F;
 import com.io7m.r1.xml.collada.RColladaSource.ColladaSourceArray3F;
 import com.io7m.r1.xml.collada.RColladaSource.ColladaVertices;
+import com.io7m.r1.xml.collada.RColladaVertex;
 
 /**
  * An importer that can load a {@link RMeshBasic} from a COLLADA document.
@@ -190,7 +190,7 @@ import com.io7m.r1.xml.collada.RColladaSource.ColladaVertices;
   {
     final List<VectorI2F> a = source.getArray2f();
     for (final VectorI2F v : a) {
-      m.uvAdd(new RVectorI2F<RSpaceTextureType>(v.getXF(), v.getYF()));
+      m.uvAdd(new PVectorI2F<RSpaceTextureType>(v.getXF(), v.getYF()));
     }
   }
 
@@ -227,8 +227,8 @@ import com.io7m.r1.xml.collada.RColladaSource.ColladaVertices;
 
     final List<VectorI3F> a = source.getArray3f();
     for (final VectorI3F v : a) {
-      final RVectorI3F<RSpaceObjectType> vec =
-        new RVectorI3F<RSpaceObjectType>(v.getXF(), v.getYF(), v.getZF());
+      final PVectorI3F<RSpaceObjectType> vec =
+        new PVectorI3F<RSpaceObjectType>(v.getXF(), v.getYF(), v.getZF());
 
       if (source_axis != RColladaAxis.COLLADA_AXIS_Y_UP) {
         m.normalAdd(RColladaAxis.convertAxes(
@@ -256,8 +256,8 @@ import com.io7m.r1.xml.collada.RColladaSource.ColladaVertices;
 
     final List<VectorI3F> a = source.getArray3f();
     for (final VectorI3F v : a) {
-      final RVectorI3F<RSpaceObjectType> vec =
-        new RVectorI3F<RSpaceObjectType>(v.getXF(), v.getYF(), v.getZF());
+      final PVectorI3F<RSpaceObjectType> vec =
+        new PVectorI3F<RSpaceObjectType>(v.getXF(), v.getYF(), v.getZF());
 
       if (source_axis != RColladaAxis.COLLADA_AXIS_Y_UP) {
         m.positionAdd(RColladaAxis.convertAxes(

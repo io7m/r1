@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,6 +21,8 @@ import java.util.List;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -45,8 +47,6 @@ import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * Examples for the documentation.
@@ -85,7 +85,7 @@ public final class SLEmission1 implements ExampleSceneType
     final KMaterialOpaqueRegularBuilderType material_b =
       KMaterialOpaqueRegular.newBuilder();
     material_b.setAlbedo(KMaterialAlbedoTextured.textured(
-      new RVectorI4F<RSpaceRGBAType>(1.0f, 0.0f, 0.0f, 1.0f),
+      new PVectorI4F<RSpaceRGBAType>(1.0f, 0.0f, 0.0f, 1.0f),
       0.8f,
       scene.texture("emitcube_albedo.png")));
     material_b.setNormal(KMaterialNormalMapped.mapped(scene
@@ -104,8 +104,8 @@ public final class SLEmission1 implements ExampleSceneType
      */
 
     final VectorI3F scale = new VectorI3F(1.0f, 1.0f, 1.0f);
-    final RVectorI3F<RSpaceWorldType> translation =
-      new RVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f);
+    final PVectorI3F<RSpaceWorldType> translation =
+      new PVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f);
     final QuaternionI4F orientation =
       QuaternionI4F.makeFromAxisAngle(
         ExampleSceneUtilities.X_AXIS,
@@ -129,16 +129,16 @@ public final class SLEmission1 implements ExampleSceneType
      * Configure lighting.
      */
 
-    final RVectorI3F<RSpaceWorldType> dir =
-      RVectorI3F.fromI3F(VectorI3F
-        .normalize(new VectorI3F(0.0f, -1.0f, -1.0f)));
+    final PVectorI3F<RSpaceWorldType> dir =
+      PVectorI3F
+        .normalize(new PVectorI3F<RSpaceWorldType>(0.0f, -1.0f, -1.0f));
     final KLightDirectionalBuilderType db = KLightDirectional.newBuilder();
     db.setDirection(dir);
 
     final KLightSphereWithoutShadowBuilderType sb =
       KLightSphereWithoutShadow.newBuilder();
-    sb.setColor(new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f));
-    sb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 2.0f, 1.0f));
+    sb.setColor(new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f));
+    sb.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 2.0f, 1.0f));
     sb.setRadius(8.0f);
 
     /**

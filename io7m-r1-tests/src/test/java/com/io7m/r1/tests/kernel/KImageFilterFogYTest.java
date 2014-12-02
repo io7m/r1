@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,7 +30,9 @@ import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogUsableType;
-import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.KFogProgression;
 import com.io7m.r1.kernel.KFogYParameters;
 import com.io7m.r1.kernel.KFogYParametersBuilderType;
@@ -46,10 +48,10 @@ import com.io7m.r1.main.R1Type;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.TestShaderCaches;
-import com.io7m.r1.types.RMatrixI4x4F;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RTransformViewType;
-import com.io7m.r1.types.RVectorI3F;
+import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings("static-method") public final class KImageFilterFogYTest
 {
@@ -79,17 +81,17 @@ import com.io7m.r1.types.RVectorI3F;
 
       final KProjectionFOV in_projection =
         KProjectionFOV.newProjection(
-          new MatrixM4x4F(),
+          new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
           (float) Math.toRadians(90.0f),
           1.0f,
           1.0f,
           100.0f);
-      final RMatrixI4x4F<RTransformViewType> in_view =
-        RMatrixI4x4F.identity();
+      final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> in_view =
+        PMatrixI4x4F.identity();
 
       final KFogYParametersBuilderType b =
         KFogYParameters.newBuilder(in_view, in_projection);
-      b.setColor(new RVectorI3F<RSpaceRGBType>(0.33f, 0.33f, 0.33f));
+      b.setColor(new PVectorI3F<RSpaceRGBType>(0.33f, 0.33f, 0.33f));
       b.setUpperY(1.0f);
       b.setLowerY(0.0f);
       b.setProgression(prog);

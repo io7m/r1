@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -14,29 +14,21 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.types;
+package com.io7m.r1.tests.types;
 
-import com.io7m.jequality.annotations.EqualityStructural;
-import com.io7m.jtensors.MatrixM3x3F;
+import net.java.quickcheck.Generator;
 
-/**
- * A mutable 3x3 matrix type indexed by the type {@link RTransformType} the
- * matrix represents and backed by direct memory for passing to native code.
- * 
- * @param <T>
- *          A phantom type parameter describing the type of transform
- */
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.r1.types.RSpaceType;
 
-@EqualityStructural public final class RMatrixM3x3F<T extends RTransformType> extends
-  MatrixM3x3F implements RMatrixReadable3x3FType<T>
+public final class PVectorI3FGenerator<T extends RSpaceType> implements
+  Generator<PVectorI3F<T>>
 {
-  /**
-   * Create a new identity matrix.
-   */
-
-  public RMatrixM3x3F()
+  @Override public PVectorI3F<T> next()
   {
-    super();
+    return new PVectorI3F<T>(
+      (float) Math.random(),
+      (float) Math.random(),
+      (float) Math.random());
   }
-
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -26,14 +26,14 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jintegers.Unsigned16;
 import com.io7m.jintegers.Unsigned32;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshTangents;
 import com.io7m.r1.meshes.RMeshTangentsVertex;
 import com.io7m.r1.meshes.RMeshTriangle;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * An exporter to serialize {@link RMeshTangents} meshes to a stream in a
@@ -138,11 +138,11 @@ import com.io7m.r1.types.RVectorI4F;
 
   private void writeNormal(
     final OutputStream s,
-    final List<RVectorI3F<RSpaceObjectType>> normals,
+    final List<PVectorI3F<RSpaceObjectType>> normals,
     final RMeshTangentsVertex v)
     throws IOException
   {
-    final RVectorI3F<RSpaceObjectType> n = normals.get(v.getNormal());
+    final PVectorI3F<RSpaceObjectType> n = normals.get(v.getNormal());
     this.writeFloat32(n.getXF(), s);
     this.writeFloat32(n.getYF(), s);
     this.writeFloat32(n.getZF(), s);
@@ -150,11 +150,11 @@ import com.io7m.r1.types.RVectorI4F;
 
   private void writePosition(
     final OutputStream s,
-    final List<RVectorI3F<RSpaceObjectType>> positions,
+    final List<PVectorI3F<RSpaceObjectType>> positions,
     final RMeshTangentsVertex v)
     throws IOException
   {
-    final RVectorI3F<RSpaceObjectType> p = positions.get(v.getPosition());
+    final PVectorI3F<RSpaceObjectType> p = positions.get(v.getPosition());
     this.writeFloat32(p.getXF(), s);
     this.writeFloat32(p.getYF(), s);
     this.writeFloat32(p.getZF(), s);
@@ -162,11 +162,11 @@ import com.io7m.r1.types.RVectorI4F;
 
   private void writeTangent(
     final OutputStream s,
-    final List<RVectorI4F<RSpaceObjectType>> tangents,
+    final List<PVectorI4F<RSpaceObjectType>> tangents,
     final RMeshTangentsVertex v)
     throws IOException
   {
-    final RVectorI4F<RSpaceObjectType> t = tangents.get(v.getTangent());
+    final PVectorI4F<RSpaceObjectType> t = tangents.get(v.getTangent());
     this.writeFloat32(t.getXF(), s);
     this.writeFloat32(t.getYF(), s);
     this.writeFloat32(t.getZF(), s);
@@ -219,12 +219,12 @@ import com.io7m.r1.types.RVectorI4F;
 
   private void writeUV(
     final OutputStream s,
-    final List<RVectorI2F<RSpaceTextureType>> uvs,
+    final List<PVectorI2F<RSpaceTextureType>> uvs,
     final RMeshTangentsVertex v)
     throws IOException
   {
     {
-      final RVectorI2F<RSpaceTextureType> u = uvs.get(v.getUV());
+      final PVectorI2F<RSpaceTextureType> u = uvs.get(v.getUV());
       this.writeFloat32(u.getXF(), s);
       this.writeFloat32(u.getYF(), s);
     }
@@ -236,10 +236,10 @@ import com.io7m.r1.types.RVectorI4F;
     throws IOException
   {
     final List<RMeshTangentsVertex> vertices = m.verticesGet();
-    final List<RVectorI3F<RSpaceObjectType>> positions = m.positionsGet();
-    final List<RVectorI3F<RSpaceObjectType>> normals = m.normalsGet();
-    final List<RVectorI2F<RSpaceTextureType>> uvs = m.uvsGet();
-    final List<RVectorI4F<RSpaceObjectType>> tangents = m.tangentsGet();
+    final List<PVectorI3F<RSpaceObjectType>> positions = m.positionsGet();
+    final List<PVectorI3F<RSpaceObjectType>> normals = m.normalsGet();
+    final List<PVectorI2F<RSpaceTextureType>> uvs = m.uvsGet();
+    final List<PVectorI4F<RSpaceObjectType>> tangents = m.tangentsGet();
 
     for (final RMeshTangentsVertex v : vertices) {
       assert v != null;

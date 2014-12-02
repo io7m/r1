@@ -44,9 +44,10 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NonNull;
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.MatrixM4x4F.Context;
 import com.io7m.jtensors.VectorI4F;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
@@ -109,11 +110,11 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.RFakeTexturesCubeStatic;
 import com.io7m.r1.tests.TestShaderCaches;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RTransformModelType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RTransformViewType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceObjectType;
+import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings({ "null", "static-method" }) public final class KRendererDeferredOpaqueTest
 {
@@ -167,7 +168,7 @@ import com.io7m.r1.types.RTransformViewType;
         LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(60));
       final KViewRaysCacheType vrc =
         KViewRaysCache.newCacheWithConfig(
-          new Context(),
+          new PMatrixM4x4F.Context(),
           view_rays_cache_config);
 
       final KRendererDeferredOpaqueType r =
@@ -246,20 +247,23 @@ import com.io7m.r1.types.RTransformViewType;
     final KShadowMapRendererType sr =
       KShadowMapRenderer.newRenderer(g, dr, dvr, pbdv, sc, in_log);
 
-    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view =
+      PMatrixI4x4F.identity();
     final KProjectionType projection =
       KProjectionFOV.newProjection(
-        new MatrixM4x4F(),
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         (float) Math.toRadians(90.0f),
         1.0f,
         1.0f,
         100.0f);
 
-    final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
+    final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
+      PMatrixI4x4F.identity();
     final KTransformType transform = KTransformMatrix4x4.newTransform(model);
     final KMeshReadableType mesh =
       KRendererDeferredOpaqueTest.makeMesh(g.getGLCommon());
-    final RMatrixI3x3F<RTransformTextureType> m_uv = RMatrixI3x3F.identity();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m_uv =
+      PMatrixI3x3F.identity();
 
     final KCamera camera = KCamera.newCamera(view, projection);
     final KVisibleSetBuilderWithCreateType tb =

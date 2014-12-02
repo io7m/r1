@@ -17,18 +17,15 @@
 package com.io7m.r1.types;
 
 /**
- * <p>
- * A transformation from world ({@link RSpaceWorldType}) space to eye (
- * {@link RSpaceEyeType}) space.
- * </p>
- * <p>
- * This is identical to a {@link RTransformViewType} transformation, but is
- * type-distinct in order to allow the resulting transformation matrices to be
- * type-distinct.
- * </p>
+ * A type representing the eye space (for <i>normal</i> vectors).
+ *
+ * This is distinct from {@link RSpaceEyeType} because normal vectors are
+ * transformed without a translation component, so it's not correct to
+ * transform arbitrary vectors using an
+ * <code>&lt..., RSpaceNormalEyeType></code> transform matrix.
  */
 
-public interface RTransformProjectiveViewType extends RTransformType
+public interface RSpaceNormalEyeType extends RSpaceType
 {
   // No value-level representation.
 }

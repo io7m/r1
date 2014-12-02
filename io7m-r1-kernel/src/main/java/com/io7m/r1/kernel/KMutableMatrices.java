@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -23,9 +23,12 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.jtensors.MatrixM3x3F;
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.MatrixM4x4F.Context;
+import com.io7m.jtensors.parameterized.PMatrixDirectReadable3x3FType;
+import com.io7m.jtensors.parameterized.PMatrixDirectReadable4x4FType;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
@@ -52,24 +55,14 @@ import com.io7m.r1.types.RExceptionMatricesObserverActive;
 import com.io7m.r1.types.RExceptionMatricesObserverInactive;
 import com.io7m.r1.types.RExceptionMatricesProjectiveActive;
 import com.io7m.r1.types.RExceptionMatricesProjectiveInactive;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RMatrixM4x4F;
-import com.io7m.r1.types.RMatrixReadable3x3FType;
-import com.io7m.r1.types.RMatrixReadable4x4FType;
-import com.io7m.r1.types.RTransformDeferredProjectionType;
-import com.io7m.r1.types.RTransformModelType;
-import com.io7m.r1.types.RTransformModelViewType;
-import com.io7m.r1.types.RTransformNormalType;
-import com.io7m.r1.types.RTransformProjectionInverseType;
-import com.io7m.r1.types.RTransformProjectionType;
-import com.io7m.r1.types.RTransformProjectiveModelViewType;
-import com.io7m.r1.types.RTransformProjectiveProjectionType;
-import com.io7m.r1.types.RTransformProjectiveViewType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RTransformViewInverseType;
-import com.io7m.r1.types.RTransformViewType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceLightClipType;
+import com.io7m.r1.types.RSpaceLightEyeType;
+import com.io7m.r1.types.RSpaceNormalEyeType;
+import com.io7m.r1.types.RSpaceObjectType;
+import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 /**
  * <p>
@@ -89,7 +82,7 @@ import com.io7m.r1.types.RTransformViewType;
  * </p>
  * <p>
  * As a concrete example, the user calls
- * {@link #withObserver(RMatrixI4x4F, KProjectionType, KMatricesObserverFunctionType)}
+ * {@link #withObserver(PMatrixI4x4F, KProjectionType, KMatricesObserverFunctionType)}
  * with a projection matrix, view matrix, and a function <code>f</code>. The
  * function <code>f</code> is then evaluated with a value of type
  * {@link KMatricesObserverType}, which then allows the user to specify an
@@ -113,32 +106,37 @@ import com.io7m.r1.types.RTransformViewType;
   @EqualityReference private final class InstanceFromObserver implements
     KMatricesInstanceType
   {
-    private final RMatrixM4x4F<RTransformModelType>     matrix_model;
-    private final RMatrixM4x4F<RTransformModelViewType> matrix_modelview;
-    private final RMatrixM3x3F<RTransformNormalType>    matrix_normal;
-    private final RMatrixM3x3F<RTransformTextureType>   matrix_uv;
-    private final RMatrixM3x3F<RTransformTextureType>   matrix_uv_temp;
-    private final Observer                              parent;
+    private final PMatrixM4x4F<RSpaceObjectType, RSpaceWorldType>     matrix_model;
+    private final PMatrixM4x4F<RSpaceObjectType, RSpaceEyeType>       matrix_modelview;
+    private final PMatrixM3x3F<RSpaceObjectType, RSpaceNormalEyeType> matrix_normal;
+    private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>  matrix_uv;
+    private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>  matrix_uv_temp;
+    private final Observer                                            parent;
 
     InstanceFromObserver(
       final Observer in_parent)
     {
       this.parent = NullCheck.notNull(in_parent, "Parent");
 
-      this.matrix_model = new RMatrixM4x4F<RTransformModelType>();
-      this.matrix_modelview = new RMatrixM4x4F<RTransformModelViewType>();
-      this.matrix_normal = new RMatrixM3x3F<RTransformNormalType>();
-      this.matrix_uv = new RMatrixM3x3F<RTransformTextureType>();
-      this.matrix_uv_temp = new RMatrixM3x3F<RTransformTextureType>();
+      this.matrix_model =
+        new PMatrixM4x4F<RSpaceObjectType, RSpaceWorldType>();
+      this.matrix_modelview =
+        new PMatrixM4x4F<RSpaceObjectType, RSpaceEyeType>();
+      this.matrix_normal =
+        new PMatrixM3x3F<RSpaceObjectType, RSpaceNormalEyeType>();
+      this.matrix_uv =
+        new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
+      this.matrix_uv_temp =
+        new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
     }
 
-    @Override public Context getMatrixContext()
+    @Override public PMatrixM4x4F.Context getMatrixContext()
     {
       return this.parent.getMatrixContext();
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformModelType>
+      PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceWorldType>
       getMatrixModel()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -147,7 +145,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformModelViewType>
+      PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceEyeType>
       getMatrixModelView()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -156,7 +154,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable3x3FType<RTransformNormalType>
+      PMatrixDirectReadable3x3FType<RSpaceObjectType, RSpaceNormalEyeType>
       getMatrixNormal()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -165,14 +163,14 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformProjectionType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceClipType>
       getMatrixProjection()
     {
       return this.parent.getMatrixProjection();
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformProjectionInverseType>
+      PMatrixDirectReadable4x4FType<RSpaceClipType, RSpaceEyeType>
       getMatrixProjectionInverse()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -180,7 +178,9 @@ import com.io7m.r1.types.RTransformViewType;
       return this.parent.getMatrixProjectionInverse();
     }
 
-    @Override public RMatrixM3x3F<RTransformTextureType> getMatrixUV()
+    @Override public
+      PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>
+      getMatrixUV()
     {
       assert KMutableMatrices.this.observerIsActive();
       assert KMutableMatrices.this.instanceIsActive();
@@ -188,14 +188,14 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformViewType>
+      PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType>
       getMatrixView()
     {
       return this.parent.getMatrixView();
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformViewInverseType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceWorldType>
       getMatrixViewInverse()
     {
       return this.parent.getMatrixViewInverse();
@@ -232,7 +232,7 @@ import com.io7m.r1.types.RTransformViewType;
                   throws RException
                 {
                   final KMaterialOpaqueType mat = or.getMaterial();
-                  final RMatrixI3x3F<RTransformTextureType> mat_uv_m =
+                  final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> mat_uv_m =
                     mat.materialGetUVMatrix();
 
                   mat_uv_m
@@ -254,7 +254,7 @@ import com.io7m.r1.types.RTransformViewType;
                   throws RException
                 {
                   final KMaterialTranslucentRefractive mat = tr.getMaterial();
-                  final RMatrixI3x3F<RTransformTextureType> mat_uv_m =
+                  final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> mat_uv_m =
                     mat.materialGetUVMatrix();
 
                   mat_uv_m
@@ -267,7 +267,7 @@ import com.io7m.r1.types.RTransformViewType;
                   throws RException
                 {
                   final KMaterialTranslucentRegular mat = tr.getMaterial();
-                  final RMatrixI3x3F<RTransformTextureType> mat_uv_m =
+                  final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> mat_uv_m =
                     mat.materialGetUVMatrix();
 
                   mat_uv_m
@@ -281,7 +281,7 @@ import com.io7m.r1.types.RTransformViewType;
                 {
                   final KMaterialTranslucentSpecularOnly mat =
                     ts.getMaterial();
-                  final RMatrixI3x3F<RTransformTextureType> mat_uv_m =
+                  final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> mat_uv_m =
                     mat.materialGetUVMatrix();
 
                   mat_uv_m
@@ -297,12 +297,15 @@ import com.io7m.r1.types.RTransformViewType;
         throw new UnreachableCodeException(e);
       }
 
-      MatrixM3x3F.multiplyInPlace(this.matrix_uv, this.matrix_uv_temp);
+      PMatrixM3x3F.multiply(
+        this.matrix_uv,
+        this.matrix_uv_temp,
+        this.matrix_uv);
     }
 
     private void instanceStartWithTransform(
       final KTransformType transform,
-      final RMatrixI3x3F<RTransformTextureType> uv)
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv)
     {
       assert KMutableMatrices.this.observerIsActive();
       KMutableMatrices.this.instanceSetStarted();
@@ -315,7 +318,7 @@ import com.io7m.r1.types.RTransformViewType;
         KMutableMatrices.this.transform_context,
         this.matrix_model);
 
-      MatrixM4x4F.multiply(
+      PMatrixM4x4F.multiply(
         this.parent.getMatrixView(),
         this.matrix_model,
         this.matrix_modelview);
@@ -359,38 +362,43 @@ import com.io7m.r1.types.RTransformViewType;
   @EqualityReference private final class InstanceFromProjective implements
     KMatricesInstanceWithProjectiveType
   {
-    private final RMatrixM4x4F<RTransformDeferredProjectionType>  matrix_deferred_projection;
-    private final RMatrixM4x4F<RTransformModelType>               matrix_model;
-    private final RMatrixM4x4F<RTransformModelViewType>           matrix_modelview;
-    private final RMatrixM3x3F<RTransformNormalType>              matrix_normal;
-    private final RMatrixM4x4F<RTransformProjectiveModelViewType> matrix_projective_modelview;
-    private final RMatrixM3x3F<RTransformTextureType>             matrix_uv;
-    private final RMatrixM3x3F<RTransformTextureType>             matrix_uv_temp;
-    private final ProjectiveFromObserver                          parent;
+    private final PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>    matrix_deferred_projection;
+    private final PMatrixM4x4F<RSpaceObjectType, RSpaceWorldType>     matrix_model;
+    private final PMatrixM4x4F<RSpaceObjectType, RSpaceEyeType>       matrix_modelview;
+    private final PMatrixM3x3F<RSpaceObjectType, RSpaceNormalEyeType> matrix_normal;
+    private final PMatrixM4x4F<RSpaceObjectType, RSpaceLightEyeType>  matrix_projective_modelview;
+    private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>  matrix_uv;
+    private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>  matrix_uv_temp;
+    private final ProjectiveFromObserver                              parent;
 
     InstanceFromProjective(
       final ProjectiveFromObserver in_parent)
     {
       this.parent = NullCheck.notNull(in_parent, "Parent");
 
-      this.matrix_model = new RMatrixM4x4F<RTransformModelType>();
-      this.matrix_modelview = new RMatrixM4x4F<RTransformModelViewType>();
-      this.matrix_normal = new RMatrixM3x3F<RTransformNormalType>();
-      this.matrix_uv = new RMatrixM3x3F<RTransformTextureType>();
-      this.matrix_uv_temp = new RMatrixM3x3F<RTransformTextureType>();
+      this.matrix_model =
+        new PMatrixM4x4F<RSpaceObjectType, RSpaceWorldType>();
+      this.matrix_modelview =
+        new PMatrixM4x4F<RSpaceObjectType, RSpaceEyeType>();
+      this.matrix_normal =
+        new PMatrixM3x3F<RSpaceObjectType, RSpaceNormalEyeType>();
+      this.matrix_uv =
+        new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
+      this.matrix_uv_temp =
+        new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
       this.matrix_projective_modelview =
-        new RMatrixM4x4F<RTransformProjectiveModelViewType>();
+        new PMatrixM4x4F<RSpaceObjectType, RSpaceLightEyeType>();
       this.matrix_deferred_projection =
-        new RMatrixM4x4F<RTransformDeferredProjectionType>();
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>();
     }
 
-    @Override public Context getMatrixContext()
+    @Override public PMatrixM4x4F.Context getMatrixContext()
     {
       return this.parent.getMatrixContext();
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformDeferredProjectionType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightClipType>
       getMatrixDeferredProjection()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -400,7 +408,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformModelType>
+      PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceWorldType>
       getMatrixModel()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -410,7 +418,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformModelViewType>
+      PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceEyeType>
       getMatrixModelView()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -420,7 +428,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable3x3FType<RTransformNormalType>
+      PMatrixDirectReadable3x3FType<RSpaceObjectType, RSpaceNormalEyeType>
       getMatrixNormal()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -430,14 +438,14 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformProjectionType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceClipType>
       getMatrixProjection()
     {
       return this.parent.getMatrixProjection();
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformProjectionInverseType>
+      PMatrixDirectReadable4x4FType<RSpaceClipType, RSpaceEyeType>
       getMatrixProjectionInverse()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -447,27 +455,29 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixM4x4F<RTransformProjectiveModelViewType>
+      PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceLightEyeType>
       getMatrixProjectiveModelView()
     {
       return this.matrix_projective_modelview;
     }
 
     @Override public
-      RMatrixM4x4F<RTransformProjectiveProjectionType>
+      PMatrixDirectReadable4x4FType<RSpaceLightEyeType, RSpaceLightClipType>
       getMatrixProjectiveProjection()
     {
       return this.parent.getMatrixProjectiveProjection();
     }
 
     @Override public
-      RMatrixM4x4F<RTransformProjectiveViewType>
+      PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceLightEyeType>
       getMatrixProjectiveView()
     {
       return this.parent.getMatrixProjectiveView();
     }
 
-    @Override public RMatrixM3x3F<RTransformTextureType> getMatrixUV()
+    @Override public
+      PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>
+      getMatrixUV()
     {
       assert KMutableMatrices.this.observerIsActive();
       assert KMutableMatrices.this.projectiveLightIsActive();
@@ -476,14 +486,14 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformViewType>
+      PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType>
       getMatrixView()
     {
       return this.parent.getMatrixView();
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformViewInverseType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceWorldType>
       getMatrixViewInverse()
     {
       return this.parent.getMatrixViewInverse();
@@ -515,7 +525,7 @@ import com.io7m.r1.types.RTransformViewType;
         KMutableMatrices.this.transform_context,
         this.matrix_model);
 
-      MatrixM4x4F.multiply(
+      PMatrixM4x4F.multiply(
         this.parent.getMatrixView(),
         this.matrix_model,
         this.matrix_modelview);
@@ -532,7 +542,7 @@ import com.io7m.r1.types.RTransformViewType;
        * Produce a model → eye transformation matrix for the given light.
        */
 
-      MatrixM4x4F.multiply(
+      PMatrixM4x4F.multiply(
         this.parent.getMatrixProjectiveView(),
         this.matrix_model,
         this.matrix_projective_modelview);
@@ -540,7 +550,7 @@ import com.io7m.r1.types.RTransformViewType;
 
     private void instanceStartWithTransform(
       final KTransformType t,
-      final RMatrixI3x3F<RTransformTextureType> uv)
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv)
     {
       assert KMutableMatrices.this.observerIsActive();
       assert KMutableMatrices.this.projectiveLightIsActive();
@@ -554,7 +564,7 @@ import com.io7m.r1.types.RTransformViewType;
         KMutableMatrices.this.transform_context,
         this.matrix_model);
 
-      MatrixM4x4F.multiply(
+      PMatrixM4x4F.multiply(
         this.parent.getMatrixView(),
         this.matrix_model,
         this.matrix_modelview);
@@ -571,7 +581,7 @@ import com.io7m.r1.types.RTransformViewType;
        * Produce a model → eye transformation matrix for the given light.
        */
 
-      MatrixM4x4F.multiply(
+      PMatrixM4x4F.multiply(
         this.parent.getMatrixProjectiveView(),
         this.matrix_model,
         this.matrix_projective_modelview);
@@ -580,7 +590,7 @@ import com.io7m.r1.types.RTransformViewType;
     private void makeTextureTransform(
       final KInstanceType i)
     {
-      final RMatrixI3x3F<RTransformTextureType> instance_uv_m =
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> instance_uv_m =
         i.instanceGetUVMatrix();
       instance_uv_m.makeMatrixM3x3F(this.matrix_uv);
 
@@ -603,7 +613,7 @@ import com.io7m.r1.types.RTransformViewType;
                   throws RException
                 {
                   final KMaterialOpaqueType mat = or.getMaterial();
-                  final RMatrixI3x3F<RTransformTextureType> mat_uv_m =
+                  final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> mat_uv_m =
                     mat.materialGetUVMatrix();
 
                   mat_uv_m
@@ -625,7 +635,7 @@ import com.io7m.r1.types.RTransformViewType;
                   throws RException
                 {
                   final KMaterialTranslucentRefractive mat = tr.getMaterial();
-                  final RMatrixI3x3F<RTransformTextureType> mat_uv_m =
+                  final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> mat_uv_m =
                     mat.materialGetUVMatrix();
 
                   mat_uv_m
@@ -638,7 +648,7 @@ import com.io7m.r1.types.RTransformViewType;
                   throws RException
                 {
                   final KMaterialTranslucentRegular mat = tr.getMaterial();
-                  final RMatrixI3x3F<RTransformTextureType> mat_uv_m =
+                  final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> mat_uv_m =
                     mat.materialGetUVMatrix();
 
                   mat_uv_m
@@ -652,7 +662,7 @@ import com.io7m.r1.types.RTransformViewType;
                 {
                   final KMaterialTranslucentSpecularOnly mat =
                     ts.getMaterial();
-                  final RMatrixI3x3F<RTransformTextureType> mat_uv_m =
+                  final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> mat_uv_m =
                     mat.materialGetUVMatrix();
 
                   mat_uv_m
@@ -668,7 +678,10 @@ import com.io7m.r1.types.RTransformViewType;
         throw new UnreachableCodeException(e);
       }
 
-      MatrixM3x3F.multiplyInPlace(this.matrix_uv, this.matrix_uv_temp);
+      PMatrixM3x3F.multiply(
+        this.matrix_uv,
+        this.matrix_uv_temp,
+        this.matrix_uv);
     }
   }
 
@@ -679,30 +692,31 @@ import com.io7m.r1.types.RTransformViewType;
   @EqualityReference private final class Observer implements
     KMatricesObserverType
   {
-    private final RMatrixM4x4F<RTransformProjectionType>        matrix_projection;
-    private final RMatrixM4x4F<RTransformProjectionInverseType> matrix_projection_inv;
-    private final RMatrixM4x4F<RTransformViewType>              matrix_view;
-    private final RMatrixM4x4F<RTransformViewInverseType>       matrix_view_inverse;
-    private @Nullable KProjectionType                           projection;
+    private final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>  matrix_projection;
+    private final PMatrixM4x4F<RSpaceClipType, RSpaceEyeType>  matrix_projection_inv;
+    private final PMatrixM4x4F<RSpaceWorldType, RSpaceEyeType> matrix_view;
+    private final PMatrixM4x4F<RSpaceEyeType, RSpaceWorldType> matrix_view_inverse;
+    private @Nullable KProjectionType                          projection;
 
     Observer()
     {
-      this.matrix_view = new RMatrixM4x4F<RTransformViewType>();
+      this.matrix_view = new PMatrixM4x4F<RSpaceWorldType, RSpaceEyeType>();
       this.matrix_view_inverse =
-        new RMatrixM4x4F<RTransformViewInverseType>();
-      this.matrix_projection = new RMatrixM4x4F<RTransformProjectionType>();
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceWorldType>();
+      this.matrix_projection =
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>();
       this.matrix_projection_inv =
-        new RMatrixM4x4F<RTransformProjectionInverseType>();
+        new PMatrixM4x4F<RSpaceClipType, RSpaceEyeType>();
     }
 
-    @Override public Context getMatrixContext()
+    @Override public PMatrixM4x4F.Context getMatrixContext()
     {
       assert KMutableMatrices.this.observerIsActive();
       return KMutableMatrices.this.matrix_context;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformProjectionType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceClipType>
       getMatrixProjection()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -710,7 +724,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformProjectionInverseType>
+      PMatrixDirectReadable4x4FType<RSpaceClipType, RSpaceEyeType>
       getMatrixProjectionInverse()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -718,7 +732,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformViewType>
+      PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType>
       getMatrixView()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -726,7 +740,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformViewInverseType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceWorldType>
       getMatrixViewInverse()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -741,7 +755,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     private void observerStart(
-      final RMatrixI4x4F<RTransformViewType> view,
+      final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view,
       final KProjectionType in_projection)
     {
       KMutableMatrices.this.observerSetStarted();
@@ -755,7 +769,7 @@ import com.io7m.r1.types.RTransformViewType;
       in_projection.projectionGetMatrix().makeMatrixM4x4F(
         this.matrix_projection);
 
-      MatrixM4x4F.invertWithContext(
+      PMatrixM4x4F.invertWithContext(
         KMutableMatrices.this.matrix_context,
         this.matrix_view,
         this.matrix_view_inverse);
@@ -763,7 +777,7 @@ import com.io7m.r1.types.RTransformViewType;
 
     @Override public <T, E extends Throwable> T withGenericTransform(
       final KTransformType t,
-      final RMatrixI3x3F<RTransformTextureType> uv,
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv,
       final KMatricesInstanceFunctionType<T, E> f)
       throws RException,
         E
@@ -849,13 +863,13 @@ import com.io7m.r1.types.RTransformViewType;
   @EqualityReference private final class ProjectiveFromInstance implements
     KMatricesInstanceWithProjectiveType
   {
-    private final RMatrixM4x4F<RTransformDeferredProjectionType>   matrix_deferred_projection;
-    private final RMatrixM4x4F<RTransformProjectiveModelViewType>  matrix_projective_modelview;
-    private final RMatrixM4x4F<RTransformProjectiveProjectionType> matrix_projective_projection;
-    private final RMatrixM4x4F<RTransformProjectiveViewType>       matrix_projective_view;
-    private final InstanceFromObserver                             parent;
-    private @Nullable KProjectionType                              projection;
-    private final MatrixM4x4F                                      temp;
+    private final PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>      matrix_deferred_projection;
+    private final PMatrixM4x4F<RSpaceObjectType, RSpaceLightEyeType>    matrix_projective_modelview;
+    private final PMatrixM4x4F<RSpaceLightEyeType, RSpaceLightClipType> matrix_projective_projection;
+    private final PMatrixM4x4F<RSpaceWorldType, RSpaceLightEyeType>     matrix_projective_view;
+    private final InstanceFromObserver                                  parent;
+    private @Nullable KProjectionType                                   projection;
+    private final PMatrixM4x4F<?, ?>                                    temp;
 
     ProjectiveFromInstance(
       final InstanceFromObserver in_parent)
@@ -863,25 +877,25 @@ import com.io7m.r1.types.RTransformViewType;
       this.parent = NullCheck.notNull(in_parent, "Parent");
 
       this.matrix_projective_projection =
-        new RMatrixM4x4F<RTransformProjectiveProjectionType>();
+        new PMatrixM4x4F<RSpaceLightEyeType, RSpaceLightClipType>();
       this.matrix_projective_view =
-        new RMatrixM4x4F<RTransformProjectiveViewType>();
+        new PMatrixM4x4F<RSpaceWorldType, RSpaceLightEyeType>();
       this.matrix_projective_modelview =
-        new RMatrixM4x4F<RTransformProjectiveModelViewType>();
+        new PMatrixM4x4F<RSpaceObjectType, RSpaceLightEyeType>();
 
-      this.temp = new MatrixM4x4F();
+      this.temp = new PMatrixM4x4F<Object, Object>();
       this.matrix_deferred_projection =
-        new RMatrixM4x4F<RTransformDeferredProjectionType>();
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>();
     }
 
-    @Override public Context getMatrixContext()
+    @Override public PMatrixM4x4F.Context getMatrixContext()
     {
       assert KMutableMatrices.this.instanceIsActive();
       return this.parent.getMatrixContext();
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformDeferredProjectionType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightClipType>
       getMatrixDeferredProjection()
     {
       assert KMutableMatrices.this.instanceIsActive();
@@ -890,7 +904,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformModelType>
+      PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceWorldType>
       getMatrixModel()
     {
       assert KMutableMatrices.this.instanceIsActive();
@@ -899,7 +913,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformModelViewType>
+      PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceEyeType>
       getMatrixModelView()
     {
       assert KMutableMatrices.this.instanceIsActive();
@@ -908,7 +922,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable3x3FType<RTransformNormalType>
+      PMatrixDirectReadable3x3FType<RSpaceObjectType, RSpaceNormalEyeType>
       getMatrixNormal()
     {
       assert KMutableMatrices.this.instanceIsActive();
@@ -917,7 +931,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformProjectionType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceClipType>
       getMatrixProjection()
     {
       assert KMutableMatrices.this.instanceIsActive();
@@ -926,7 +940,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformProjectionInverseType>
+      PMatrixDirectReadable4x4FType<RSpaceClipType, RSpaceEyeType>
       getMatrixProjectionInverse()
     {
       assert KMutableMatrices.this.instanceIsActive();
@@ -935,7 +949,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixM4x4F<RTransformProjectiveModelViewType>
+      PMatrixM4x4F<RSpaceObjectType, RSpaceLightEyeType>
       getMatrixProjectiveModelView()
     {
       assert KMutableMatrices.this.instanceIsActive();
@@ -944,7 +958,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixM4x4F<RTransformProjectiveProjectionType>
+      PMatrixDirectReadable4x4FType<RSpaceLightEyeType, RSpaceLightClipType>
       getMatrixProjectiveProjection()
     {
       assert KMutableMatrices.this.instanceIsActive();
@@ -953,7 +967,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixM4x4F<RTransformProjectiveViewType>
+      PMatrixM4x4F<RSpaceWorldType, RSpaceLightEyeType>
       getMatrixProjectiveView()
     {
       assert KMutableMatrices.this.instanceIsActive();
@@ -961,7 +975,9 @@ import com.io7m.r1.types.RTransformViewType;
       return this.matrix_projective_view;
     }
 
-    @Override public RMatrixM3x3F<RTransformTextureType> getMatrixUV()
+    @Override public
+      PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>
+      getMatrixUV()
     {
       assert KMutableMatrices.this.instanceIsActive();
       assert KMutableMatrices.this.projectiveLightIsActive();
@@ -969,7 +985,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformViewType>
+      PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType>
       getMatrixView()
     {
       assert KMutableMatrices.this.instanceIsActive();
@@ -978,7 +994,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformViewInverseType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceWorldType>
       getMatrixViewInverse()
     {
       assert KMutableMatrices.this.instanceIsActive();
@@ -1003,13 +1019,21 @@ import com.io7m.r1.types.RTransformViewType;
 
     private void makeDeferredProjective()
     {
-      MatrixM4x4F.multiply(
+      /**
+       * The temporary matrix needs to be considered as a matrix that
+       * transforms from world space to light-clip space.
+       */
+
+      @SuppressWarnings("unchecked") final PMatrixM4x4F<RSpaceWorldType, RSpaceLightClipType> temp0 =
+        (PMatrixM4x4F<RSpaceWorldType, RSpaceLightClipType>) this.temp;
+
+      PMatrixM4x4F.multiply(
         this.getMatrixProjectiveProjection(),
         this.getMatrixProjectiveView(),
-        this.temp);
+        temp0);
 
-      MatrixM4x4F.multiply(
-        this.temp,
+      PMatrixM4x4F.multiply(
+        temp0,
         this.getMatrixViewInverse(),
         this.matrix_deferred_projection);
     }
@@ -1037,10 +1061,11 @@ import com.io7m.r1.types.RTransformViewType;
        */
 
       final KProjectionType proj = p.lightProjectiveGetProjection();
-
       this.projection = proj;
-      proj.projectionGetMatrix().makeMatrixM4x4F(
-        this.matrix_projective_projection);
+
+      @SuppressWarnings("unchecked") final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType> m =
+        (PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>) (PMatrixM4x4F<?, ?>) this.matrix_projective_projection;
+      proj.projectionGetMatrix().makeMatrixM4x4F(m);
 
       this.makeDeferredProjective();
     }
@@ -1053,12 +1078,12 @@ import com.io7m.r1.types.RTransformViewType;
   @EqualityReference private final class ProjectiveFromObserver implements
     KMatricesProjectiveLightType
   {
-    private final RMatrixM4x4F<RTransformDeferredProjectionType>   matrix_deferred_projection;
-    private final RMatrixM4x4F<RTransformProjectiveProjectionType> matrix_projective_projection;
-    private final RMatrixM4x4F<RTransformProjectiveViewType>       matrix_projective_view;
-    private final Observer                                         parent;
-    private @Nullable KProjectionType                              projection;
-    private final MatrixM4x4F                                      temp;
+    private final PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>      matrix_deferred_projection;
+    private final PMatrixM4x4F<RSpaceLightEyeType, RSpaceLightClipType> matrix_projective_projection;
+    private final PMatrixM4x4F<RSpaceWorldType, RSpaceLightEyeType>     matrix_projective_view;
+    private final Observer                                              parent;
+    private @Nullable KProjectionType                                   projection;
+    private final PMatrixM4x4F<?, ?>                                    temp;
 
     ProjectiveFromObserver(
       final Observer in_observer)
@@ -1066,35 +1091,35 @@ import com.io7m.r1.types.RTransformViewType;
       this.parent = NullCheck.notNull(in_observer, "Parent");
 
       this.matrix_projective_projection =
-        new RMatrixM4x4F<RTransformProjectiveProjectionType>();
+        new PMatrixM4x4F<RSpaceLightEyeType, RSpaceLightClipType>();
       this.matrix_projective_view =
-        new RMatrixM4x4F<RTransformProjectiveViewType>();
-      this.temp = new MatrixM4x4F();
+        new PMatrixM4x4F<RSpaceWorldType, RSpaceLightEyeType>();
+      this.temp = new PMatrixM4x4F<Object, Object>();
       this.matrix_deferred_projection =
-        new RMatrixM4x4F<RTransformDeferredProjectionType>();
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>();
     }
 
-    @Override public Context getMatrixContext()
+    @Override public PMatrixM4x4F.Context getMatrixContext()
     {
       return this.parent.getMatrixContext();
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformDeferredProjectionType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightClipType>
       getMatrixDeferredProjection()
     {
       return this.matrix_deferred_projection;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformProjectionType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceClipType>
       getMatrixProjection()
     {
       return this.parent.getMatrixProjection();
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformProjectionInverseType>
+      PMatrixDirectReadable4x4FType<RSpaceClipType, RSpaceEyeType>
       getMatrixProjectionInverse()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -1103,7 +1128,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixM4x4F<RTransformProjectiveProjectionType>
+      PMatrixM4x4F<RSpaceLightEyeType, RSpaceLightClipType>
       getMatrixProjectiveProjection()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -1112,7 +1137,7 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixM4x4F<RTransformProjectiveViewType>
+      PMatrixM4x4F<RSpaceWorldType, RSpaceLightEyeType>
       getMatrixProjectiveView()
     {
       assert KMutableMatrices.this.observerIsActive();
@@ -1121,14 +1146,14 @@ import com.io7m.r1.types.RTransformViewType;
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformViewType>
+      PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType>
       getMatrixView()
     {
       return this.parent.getMatrixView();
     }
 
     @Override public
-      RMatrixReadable4x4FType<RTransformViewInverseType>
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceWorldType>
       getMatrixViewInverse()
     {
       return this.parent.getMatrixViewInverse();
@@ -1153,13 +1178,21 @@ import com.io7m.r1.types.RTransformViewType;
 
     private void makeDeferredProjective()
     {
-      MatrixM4x4F.multiply(
+      /**
+       * The temporary matrix needs to be considered as a matrix that
+       * transforms from world space to light-clip space.
+       */
+
+      @SuppressWarnings("unchecked") final PMatrixM4x4F<RSpaceWorldType, RSpaceLightClipType> temp0 =
+        (PMatrixM4x4F<RSpaceWorldType, RSpaceLightClipType>) this.temp;
+
+      PMatrixM4x4F.multiply(
         this.getMatrixProjectiveProjection(),
         this.getMatrixProjectiveView(),
-        this.temp);
+        temp0);
 
-      MatrixM4x4F.multiply(
-        this.temp,
+      PMatrixM4x4F.multiply(
+        temp0,
         this.getMatrixViewInverse(),
         this.matrix_deferred_projection);
     }
@@ -1188,15 +1221,16 @@ import com.io7m.r1.types.RTransformViewType;
       final KProjectionType proj = p.lightProjectiveGetProjection();
 
       this.projection = proj;
-      proj.projectionGetMatrix().makeMatrixM4x4F(
-        this.matrix_projective_projection);
+      @SuppressWarnings("unchecked") final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType> mpp =
+        (PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>) (PMatrixM4x4F<?, ?>) this.matrix_projective_projection;
+      proj.projectionGetMatrix().makeMatrixM4x4F(mpp);
 
       this.makeDeferredProjective();
     }
 
     @Override public <T, E extends Throwable> T withGenericTransform(
       final KTransformType t,
-      final RMatrixI3x3F<RTransformTextureType> uv,
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv,
       final KMatricesInstanceValuesFunctionType<T, E> f)
       throws RException,
         E
@@ -1268,7 +1302,7 @@ import com.io7m.r1.types.RTransformViewType;
   private final AtomicBoolean          instance_active;
   private final InstanceFromObserver   instance_from_observer;
   private final InstanceFromProjective instance_from_projective;
-  private final MatrixM4x4F.Context    matrix_context;
+  private final PMatrixM4x4F.Context   matrix_context;
   private final Observer               observer;
   private final AtomicBoolean          observer_active;
   private final AtomicBoolean          projective_active;
@@ -1285,7 +1319,7 @@ import com.io7m.r1.types.RTransformViewType;
       new ProjectiveFromInstance(this.instance_from_observer);
     this.instance_from_projective =
       new InstanceFromProjective(this.projective_from_observer);
-    this.matrix_context = new MatrixM4x4F.Context();
+    this.matrix_context = new PMatrixM4x4F.Context();
     this.transform_context = KTransformContext.newContext();
 
     this.observer_active = new AtomicBoolean();
@@ -1364,7 +1398,7 @@ import com.io7m.r1.types.RTransformViewType;
    */
 
   public <T, E extends Throwable> T withObserver(
-    final RMatrixI4x4F<RTransformViewType> view,
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view,
     final KProjectionType projection,
     final KMatricesObserverFunctionType<T, E> f)
     throws E,

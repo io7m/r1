@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,7 +30,7 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
-import com.io7m.jtensors.MatrixM4x4F.Context;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.r1.kernel.KCopyParameters;
 import com.io7m.r1.kernel.KDepthRenderer;
@@ -839,7 +839,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
       if (this.view_rays_cache != null) {
         in_view_rays_cache = this.view_rays_cache;
       } else {
-        final Context context = new Context();
+        final PMatrixM4x4F.Context context = new PMatrixM4x4F.Context();
         final BigInteger capacity =
           BigInteger.valueOf(this.view_ray_cache_count);
         assert capacity != null;

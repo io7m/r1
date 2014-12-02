@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,18 +28,17 @@ import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.jtensors.VectorReadable4FType;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
+import com.io7m.jtensors.parameterized.PVectorReadable3FType;
+import com.io7m.jtensors.parameterized.PVectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RMatrixI4x4F;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceType;
-import com.io7m.r1.types.RTransformType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
-import com.io7m.r1.types.RVectorReadable3FType;
-import com.io7m.r1.types.RVectorReadable4FType;
 import com.io7m.r1.types.RXMLException;
 
 /**
@@ -158,7 +157,7 @@ import com.io7m.r1.types.RXMLException;
    *          The element.
    * @param name
    *          The local name of the attribute.
-   * 
+   *
    * @return The attribute with <code>name</code> in the default namespace.
    * @throws RXMLException
    *           If the attribute does not exist.
@@ -276,7 +275,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Load a matrix column from attributes on the given element.
-   * 
+   *
    * @param <T>
    *          The type of vector space.
    * @param e
@@ -292,7 +291,7 @@ import com.io7m.r1.types.RXMLException;
 
   public static
     <T extends RSpaceType>
-    RVectorI3F<T>
+    PVectorI3F<T>
     getElementAttributesMatrixColumn3(
       final Element e,
       final URI uri)
@@ -301,7 +300,7 @@ import com.io7m.r1.types.RXMLException;
     final Attribute a0 = RXMLUtilities.getAttribute(e, "r0", uri);
     final Attribute a1 = RXMLUtilities.getAttribute(e, "r1", uri);
     final Attribute a2 = RXMLUtilities.getAttribute(e, "r2", uri);
-    return new RVectorI3F<T>(
+    return new PVectorI3F<T>(
       RXMLUtilities.getAttributeFloat(a0),
       RXMLUtilities.getAttributeFloat(a1),
       RXMLUtilities.getAttributeFloat(a2));
@@ -309,7 +308,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Load a matrix column from attributes on the given element.
-   * 
+   *
    * @param <T>
    *          The type of vector space.
    * @param e
@@ -325,7 +324,7 @@ import com.io7m.r1.types.RXMLException;
 
   public static
     <T extends RSpaceType>
-    RVectorI4F<T>
+    PVectorI4F<T>
     getElementAttributesMatrixColumn4(
       final Element e,
       final URI uri)
@@ -335,7 +334,7 @@ import com.io7m.r1.types.RXMLException;
     final Attribute a1 = RXMLUtilities.getAttribute(e, "r1", uri);
     final Attribute a2 = RXMLUtilities.getAttribute(e, "r2", uri);
     final Attribute a3 = RXMLUtilities.getAttribute(e, "r3", uri);
-    return new RVectorI4F<T>(
+    return new PVectorI4F<T>(
       RXMLUtilities.getAttributeFloat(a0),
       RXMLUtilities.getAttributeFloat(a1),
       RXMLUtilities.getAttributeFloat(a2),
@@ -344,7 +343,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Load a quaternion from attributes on the given element.
-   * 
+   *
    * @param e
    *          The element.
    * @param uri
@@ -372,7 +371,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Load a color vector from attributes on the given element.
-   * 
+   *
    * @param e
    *          The element.
    * @param uri
@@ -380,11 +379,11 @@ import com.io7m.r1.types.RXMLException;
    * @return The matrix column.
    * @throws RXMLException
    *           If attributes are missing or have the wrong types.
-   * @see #putElementAttributesRGB(Element, RVectorReadable3FType, String,
+   * @see #putElementAttributesRGB(Element, PVectorReadable3FType, String,
    *      URI)
    */
 
-  public static RVectorI3F<RSpaceRGBType> getElementAttributesRGB(
+  public static PVectorI3F<RSpaceRGBType> getElementAttributesRGB(
     final Element e,
     final URI uri)
     throws RXMLException
@@ -392,7 +391,7 @@ import com.io7m.r1.types.RXMLException;
     final Attribute ax = RXMLUtilities.getAttribute(e, "r", uri);
     final Attribute ay = RXMLUtilities.getAttribute(e, "g", uri);
     final Attribute az = RXMLUtilities.getAttribute(e, "b", uri);
-    return new RVectorI3F<RSpaceRGBType>(
+    return new PVectorI3F<RSpaceRGBType>(
       RXMLUtilities.getAttributeFloat(ax),
       RXMLUtilities.getAttributeFloat(ay),
       RXMLUtilities.getAttributeFloat(az));
@@ -400,7 +399,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Load a color vector from attributes on the given element.
-   * 
+   *
    * @param e
    *          The element.
    * @param uri
@@ -408,11 +407,11 @@ import com.io7m.r1.types.RXMLException;
    * @return The matrix column.
    * @throws RXMLException
    *           If attributes are missing or have the wrong types.
-   * @see #putElementAttributesRGBA(Element, RVectorReadable4FType, String,
+   * @see #putElementAttributesRGBA(Element, PVectorReadable4FType, String,
    *      URI)
    */
 
-  public static RVectorI4F<RSpaceRGBAType> getElementAttributesRGBA(
+  public static PVectorI4F<RSpaceRGBAType> getElementAttributesRGBA(
     final Element e,
     final URI uri)
     throws RXMLException
@@ -421,7 +420,7 @@ import com.io7m.r1.types.RXMLException;
     final Attribute ay = RXMLUtilities.getAttribute(e, "g", uri);
     final Attribute az = RXMLUtilities.getAttribute(e, "b", uri);
     final Attribute aw = RXMLUtilities.getAttribute(e, "a", uri);
-    return new RVectorI4F<RSpaceRGBAType>(
+    return new PVectorI4F<RSpaceRGBAType>(
       RXMLUtilities.getAttributeFloat(ax),
       RXMLUtilities.getAttributeFloat(ay),
       RXMLUtilities.getAttributeFloat(az),
@@ -430,7 +429,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Load a vector from attributes on the given element.
-   * 
+   *
    * @param <T>
    *          The type of vector space.
    * @param e
@@ -444,7 +443,7 @@ import com.io7m.r1.types.RXMLException;
 
   public static
     <T extends RSpaceType>
-    RVectorI2F<T>
+    PVectorI2F<T>
     getElementAttributesVector2f(
       final Element e,
       final URI uri)
@@ -452,14 +451,14 @@ import com.io7m.r1.types.RXMLException;
   {
     final Attribute ax = RXMLUtilities.getAttribute(e, "x", uri);
     final Attribute ay = RXMLUtilities.getAttribute(e, "y", uri);
-    return new RVectorI2F<T>(
+    return new PVectorI2F<T>(
       RXMLUtilities.getAttributeFloat(ax),
       RXMLUtilities.getAttributeFloat(ay));
   }
 
   /**
    * Load a vector from attributes on the given element.
-   * 
+   *
    * @param <T>
    *          The type of vector space.
    * @param e
@@ -469,13 +468,13 @@ import com.io7m.r1.types.RXMLException;
    * @return The matrix column.
    * @throws RXMLException
    *           If attributes are missing or have the wrong types.
-   * @see #putElementAttributesVector3f(Element, RVectorReadable3FType,
+   * @see #putElementAttributesVector3f(Element, PVectorReadable3FType,
    *      String, URI)
    */
 
   public static
     <T extends RSpaceType>
-    RVectorI3F<T>
+    PVectorI3F<T>
     getElementAttributesVector3f(
       final Element e,
       final URI uri)
@@ -484,7 +483,7 @@ import com.io7m.r1.types.RXMLException;
     final Attribute ax = RXMLUtilities.getAttribute(e, "x", uri);
     final Attribute ay = RXMLUtilities.getAttribute(e, "y", uri);
     final Attribute az = RXMLUtilities.getAttribute(e, "z", uri);
-    return new RVectorI3F<T>(
+    return new PVectorI3F<T>(
       RXMLUtilities.getAttributeFloat(ax),
       RXMLUtilities.getAttributeFloat(ay),
       RXMLUtilities.getAttributeFloat(az));
@@ -492,7 +491,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Load a vector from attributes on the given element.
-   * 
+   *
    * @param <T>
    *          The type of vector space.
    * @param e
@@ -502,13 +501,13 @@ import com.io7m.r1.types.RXMLException;
    * @return The matrix column.
    * @throws RXMLException
    *           If attributes are missing or have the wrong types.
-   * @see #putElementAttributesVector4f(Element, RVectorReadable4FType,
+   * @see #putElementAttributesVector4f(Element, PVectorReadable4FType,
    *      String, URI)
    */
 
   public static
     <T extends RSpaceType>
-    RVectorI4F<T>
+    PVectorI4F<T>
     getElementAttributesVector4f(
       final Element e,
       final URI uri)
@@ -518,7 +517,7 @@ import com.io7m.r1.types.RXMLException;
     final Attribute ay = RXMLUtilities.getAttribute(e, "y", uri);
     final Attribute az = RXMLUtilities.getAttribute(e, "z", uri);
     final Attribute aw = RXMLUtilities.getAttribute(e, "w", uri);
-    return new RVectorI4F<T>(
+    return new PVectorI4F<T>(
       RXMLUtilities.getAttributeFloat(ax),
       RXMLUtilities.getAttributeFloat(ay),
       RXMLUtilities.getAttributeFloat(az),
@@ -626,9 +625,11 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Load a matrix from the given element.
-   * 
-   * @param <T>
-   *          The type of matrix transform.
+   *
+   * @param <S0>
+   *          The source coordinate space.
+   * @param <S1>
+   *          The target coordinate space.
    * @param e
    *          The element.
    * @param uri
@@ -639,8 +640,8 @@ import com.io7m.r1.types.RXMLException;
    */
 
   public static
-    <T extends RTransformType>
-    RMatrixI3x3F<T>
+    <S0 extends RSpaceType, S1 extends RSpaceType>
+    PMatrixI3x3F<S0, S1>
     getElementMatrixI3x3F(
       final Element e,
       final URI uri)
@@ -653,24 +654,26 @@ import com.io7m.r1.types.RXMLException;
     }
 
     final Element ec0 = eus.get(0);
-    final RVectorI3F<RSpaceType> c0 =
+    final PVectorI3F<RSpaceType> c0 =
       RXMLUtilities.getElementAttributesMatrixColumn3(ec0, uri);
     final Element ec1 = eus.get(1);
-    final RVectorI3F<RSpaceType> c1 =
+    final PVectorI3F<RSpaceType> c1 =
       RXMLUtilities.getElementAttributesMatrixColumn3(ec1, uri);
     final Element ec2 = eus.get(2);
-    final RVectorI3F<RSpaceType> c2 =
+    final PVectorI3F<RSpaceType> c2 =
       RXMLUtilities.getElementAttributesMatrixColumn3(ec2, uri);
 
-    final RMatrixI3x3F<T> m = RMatrixI3x3F.newFromColumns(c0, c1, c2);
+    final PMatrixI3x3F<S0, S1> m = PMatrixI3x3F.newFromColumns(c0, c1, c2);
     return m;
   }
 
   /**
    * Load a matrix from the given element.
-   * 
-   * @param <T>
-   *          The type of matrix transform.
+   *
+   * @param <S0>
+   *          The source coordinate space.
+   * @param <S1>
+   *          The target coordinate space.
    * @param e
    *          The element.
    * @param uri
@@ -681,8 +684,8 @@ import com.io7m.r1.types.RXMLException;
    */
 
   public static
-    <T extends RTransformType>
-    RMatrixI4x4F<T>
+    <S0 extends RSpaceType, S1 extends RSpaceType>
+    PMatrixI4x4F<S0, S1>
     getElementMatrixI4x4F(
       final Element e,
       final URI uri)
@@ -695,19 +698,20 @@ import com.io7m.r1.types.RXMLException;
     }
 
     final Element ec0 = eus.get(0);
-    final RVectorI4F<RSpaceType> c0 =
+    final PVectorI4F<RSpaceType> c0 =
       RXMLUtilities.getElementAttributesMatrixColumn4(ec0, uri);
     final Element ec1 = eus.get(1);
-    final RVectorI4F<RSpaceType> c1 =
+    final PVectorI4F<RSpaceType> c1 =
       RXMLUtilities.getElementAttributesMatrixColumn4(ec1, uri);
     final Element ec2 = eus.get(2);
-    final RVectorI4F<RSpaceType> c2 =
+    final PVectorI4F<RSpaceType> c2 =
       RXMLUtilities.getElementAttributesMatrixColumn4(ec2, uri);
     final Element ec3 = eus.get(3);
-    final RVectorI4F<RSpaceType> c3 =
+    final PVectorI4F<RSpaceType> c3 =
       RXMLUtilities.getElementAttributesMatrixColumn4(ec3, uri);
 
-    final RMatrixI4x4F<T> m = RMatrixI4x4F.newFromColumns(c0, c1, c2, c3);
+    final PMatrixI4x4F<S0, S1> m =
+      PMatrixI4x4F.newFromColumns(c0, c1, c2, c3);
     return m;
   }
 
@@ -734,7 +738,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Load a color vector from the given element.
-   * 
+   *
    * @param e
    *          The element.
    * @param uri
@@ -744,7 +748,7 @@ import com.io7m.r1.types.RXMLException;
    *           IF the an error occurred whilst trying to parse a vector.
    */
 
-  public static RVectorI3F<RSpaceRGBType> getElementRGB(
+  public static PVectorI3F<RSpaceRGBType> getElementRGB(
     final Element e,
     final URI uri)
     throws RXMLException
@@ -752,7 +756,7 @@ import com.io7m.r1.types.RXMLException;
     final Element er = RXMLUtilities.getChild(e, "r", uri);
     final Element eg = RXMLUtilities.getChild(e, "g", uri);
     final Element eb = RXMLUtilities.getChild(e, "b", uri);
-    return new RVectorI3F<RSpaceRGBType>(
+    return new PVectorI3F<RSpaceRGBType>(
       RXMLUtilities.getElementFloat(er),
       RXMLUtilities.getElementFloat(eg),
       RXMLUtilities.getElementFloat(eb));
@@ -760,7 +764,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Load a vector from the given element.
-   * 
+   *
    * @param <T>
    *          The vector coordinate space.
    * @param e
@@ -772,7 +776,7 @@ import com.io7m.r1.types.RXMLException;
    *           IF the an error occurred whilst trying to parse a vector.
    */
 
-  public static <T extends RSpaceType> RVectorI3F<T> getElementVector3f(
+  public static <T extends RSpaceType> PVectorI3F<T> getElementVector3f(
     final Element e,
     final URI uri)
     throws RXMLException
@@ -780,7 +784,7 @@ import com.io7m.r1.types.RXMLException;
     final Element ex = RXMLUtilities.getChild(e, "x", uri);
     final Element ey = RXMLUtilities.getChild(e, "y", uri);
     final Element ez = RXMLUtilities.getChild(e, "z", uri);
-    return new RVectorI3F<T>(
+    return new PVectorI3F<T>(
       RXMLUtilities.getElementFloat(ex),
       RXMLUtilities.getElementFloat(ey),
       RXMLUtilities.getElementFloat(ez));
@@ -878,7 +882,7 @@ import com.io7m.r1.types.RXMLException;
    * Add an attribute with local name <code>name</code>, prefix
    * <code>prefix</code>, and namespace <code>uri</code> to <code>e</code>,
    * with the value <code>value</code>.
-   * 
+   *
    * @param e
    *          The element.
    * @param prefix
@@ -908,7 +912,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Add the given matrix column as attributes to the element <code>e</code>.
-   * 
+   *
    * @param e
    *          The element.
    * @param prefix
@@ -942,7 +946,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Add the given matrix column as attributes to the element <code>e</code>.
-   * 
+   *
    * @param e
    *          The element.
    * @param prefix
@@ -980,7 +984,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Serialize the given vector to attributes on the given element.
-   * 
+   *
    * @param e
    *          The element.
    * @param rgb
@@ -994,7 +998,7 @@ import com.io7m.r1.types.RXMLException;
 
   public static void putElementAttributesRGB(
     final Element e,
-    final RVectorReadable3FType<RSpaceRGBType> rgb,
+    final PVectorReadable3FType<RSpaceRGBType> rgb,
     final String prefix,
     final URI uri)
   {
@@ -1021,7 +1025,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Serialize the given vector to attributes on the given element.
-   * 
+   *
    * @param e
    *          The element.
    * @param rgba
@@ -1035,7 +1039,7 @@ import com.io7m.r1.types.RXMLException;
 
   public static void putElementAttributesRGBA(
     final Element e,
-    final RVectorReadable4FType<RSpaceRGBAType> rgba,
+    final PVectorReadable4FType<RSpaceRGBAType> rgba,
     final String prefix,
     final URI uri)
   {
@@ -1062,7 +1066,7 @@ import com.io7m.r1.types.RXMLException;
    * Add an attribute with local name <code>name</code>, prefix
    * <code>prefix</code>, and namespace <code>uri</code> to <code>e</code>,
    * with the value <code>value</code>.
-   * 
+   *
    * @param e
    *          The element.
    * @param prefix
@@ -1089,7 +1093,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Serialize the given vector to attributes on the given element.
-   * 
+   *
    * @param <T>
    *          The type of vector coordinate space.
    * @param e
@@ -1105,7 +1109,7 @@ import com.io7m.r1.types.RXMLException;
 
   public static <T extends RSpaceType> void putElementAttributesVector3f(
     final Element e,
-    final RVectorReadable3FType<T> v,
+    final PVectorReadable3FType<T> v,
     final String prefix,
     final URI uri)
   {
@@ -1123,7 +1127,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Serialize the given vector to attributes on the given element.
-   * 
+   *
    * @param <T>
    *          The type of vector coordinate space.
    * @param e
@@ -1139,7 +1143,7 @@ import com.io7m.r1.types.RXMLException;
 
   public static <T extends RSpaceType> void putElementAttributesVector4f(
     final Element e,
-    final RVectorReadable4FType<T> v,
+    final PVectorReadable4FType<T> v,
     final String prefix,
     final URI uri)
   {
@@ -1162,7 +1166,7 @@ import com.io7m.r1.types.RXMLException;
    * Add an element with local name <code>name</code>, prefix
    * <code>prefix</code>, and namespace <code>uri</code> to <code>e</code>,
    * with the value <code>value</code>.
-   * 
+   *
    * @param e
    *          The element.
    * @param prefix
@@ -1192,7 +1196,7 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Serialize the given matrix to attributes on the given element.
-   * 
+   *
    * @param <T>
    *          The type of matrix transform.
    * @param e
@@ -1205,16 +1209,19 @@ import com.io7m.r1.types.RXMLException;
    *          The namespace URI.
    */
 
-  public static <T extends RTransformType> void putElementMatrixI3x3F(
-    final Element e,
-    final String prefix,
-    final RMatrixI3x3F<T> m,
-    final URI uri)
+  public static
+    <S0 extends RSpaceType, S1 extends RSpaceType>
+    void
+    putElementMatrixI3x3F(
+      final Element e,
+      final String prefix,
+      final PMatrixI3x3F<S0, S1> m,
+      final URI uri)
   {
     for (int c = 0; c < 3; ++c) {
       final Element emc = new Element("s:column", uri.toString());
-      final RVectorI3F<RSpaceType> col =
-        new RVectorI3F<RSpaceType>(m.getRowColumnF(0, c), m.getRowColumnF(
+      final PVectorI3F<RSpaceType> col =
+        new PVectorI3F<RSpaceType>(m.getRowColumnF(0, c), m.getRowColumnF(
           1,
           c), m.getRowColumnF(2, c));
 
@@ -1225,9 +1232,11 @@ import com.io7m.r1.types.RXMLException;
 
   /**
    * Serialize the given matrix to attributes on the given element.
-   * 
-   * @param <T>
-   *          The type of matrix transform.
+   *
+   * @param <S0>
+   *          The source coordinate space.
+   * @param <S1>
+   *          The target coordinate space.
    * @param e
    *          The element.
    * @param m
@@ -1238,16 +1247,19 @@ import com.io7m.r1.types.RXMLException;
    *          The namespace URI.
    */
 
-  public static <T extends RTransformType> void putElementMatrixI4x4F(
-    final Element e,
-    final String prefix,
-    final RMatrixI4x4F<T> m,
-    final URI uri)
+  public static
+    <S0 extends RSpaceType, S1 extends RSpaceType>
+    void
+    putElementMatrixI4x4F(
+      final Element e,
+      final String prefix,
+      final PMatrixI4x4F<S0, S1> m,
+      final URI uri)
   {
     for (int c = 0; c < 4; ++c) {
       final Element emc = new Element("s:column", uri.toString());
-      final RVectorI4F<RSpaceType> col =
-        new RVectorI4F<RSpaceType>(m.getRowColumnF(0, c), m.getRowColumnF(
+      final PVectorI4F<RSpaceType> col =
+        new PVectorI4F<RSpaceType>(m.getRowColumnF(0, c), m.getRowColumnF(
           1,
           c), m.getRowColumnF(2, c), m.getRowColumnF(3, c));
 
@@ -1260,7 +1272,7 @@ import com.io7m.r1.types.RXMLException;
    * Add an element with local name <code>name</code>, prefix
    * <code>prefix</code>, and namespace <code>uri</code> to <code>e</code>,
    * with the value <code>value</code>.
-   * 
+   *
    * @param e
    *          The element.
    * @param prefix

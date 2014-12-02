@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -31,6 +31,9 @@ import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
@@ -65,12 +68,9 @@ import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.r1.kernel.types.KMaterialVerification;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
+import com.io7m.r1.types.RSpaceTextureType;
 
 @EqualityReference public final class RKFMaterialCases
 {
@@ -106,8 +106,8 @@ import com.io7m.r1.types.RVectorI4F;
     try {
       final List<KMaterialTranslucentRegular> cases =
         new ArrayList<KMaterialTranslucentRegular>();
-      final RMatrixI3x3F<RTransformTextureType> uv_matrix =
-        RMatrixI3x3F.identity();
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix =
+        PMatrixI3x3F.identity();
 
       for (final KMaterialAlbedoType a : cases_albedo) {
         assert a != null;
@@ -153,8 +153,8 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final List<KMaterialTranslucentSpecularOnly> cases =
       new ArrayList<KMaterialTranslucentSpecularOnly>();
-    final RMatrixI3x3F<RTransformTextureType> uv_matrix =
-      RMatrixI3x3F.identity();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix =
+      PMatrixI3x3F.identity();
 
     for (final KMaterialAlphaType al : cases_alpha) {
       assert al != null;
@@ -182,8 +182,8 @@ import com.io7m.r1.types.RVectorI4F;
       final List<KMaterialRefractiveType> cases_refractive)
   {
     try {
-      final RMatrixI3x3F<RTransformTextureType> uv_matrix =
-        RMatrixI3x3F.identity();
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix =
+        PMatrixI3x3F.identity();
       final List<KMaterialTranslucentRefractive> cases =
         new ArrayList<KMaterialTranslucentRefractive>();
 
@@ -256,9 +256,10 @@ import com.io7m.r1.types.RVectorI4F;
       final List<KMaterialNormalType> cases_normal)
   {
     try {
-      final RMatrixI3x3F<RTransformTextureType> uv_matrix =
-        RMatrixI3x3F.identity();
-      final RVectorI3F<RSpaceRGBType> color = RVectorI3F.one();
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix =
+        PMatrixI3x3F.identity();
+      final PVectorI3F<RSpaceRGBType> color =
+        new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
 
       final List<KMaterialTranslucentRegular> cases =
         new ArrayList<KMaterialTranslucentRegular>();
@@ -340,8 +341,8 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final List<KMaterialRefractiveType> cases =
       new ArrayList<KMaterialRefractiveType>();
-    final RVectorI4F<RSpaceRGBAType> color =
-      new RVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f);
+    final PVectorI4F<RSpaceRGBAType> color =
+      new PVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f);
 
     cases.add(KMaterialRefractiveMaskedNormals.create(1.0f, color));
     cases.add(KMaterialRefractiveMaskedDeltaTextured.create(1.0f, t, color));
@@ -356,8 +357,8 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final List<KMaterialSpecularType> cases =
       new ArrayList<KMaterialSpecularType>();
-    final RVectorI3F<RSpaceRGBType> color =
-      new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
+    final PVectorI3F<RSpaceRGBType> color =
+      new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
     cases.add(KMaterialSpecularNone.none());
     cases.add(KMaterialSpecularConstant.constant(color, 1.0f));
     cases.add(KMaterialSpecularMapped.mapped(color, 1.0f, t));
@@ -369,8 +370,8 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final List<KMaterialSpecularNotNoneType> cases =
       new ArrayList<KMaterialSpecularNotNoneType>();
-    final RVectorI3F<RSpaceRGBType> color =
-      new RVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
+    final PVectorI3F<RSpaceRGBType> color =
+      new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
     cases.add(KMaterialSpecularConstant.constant(color, 1.0f));
     cases.add(KMaterialSpecularMapped.mapped(color, 1.0f, t));
     return cases;

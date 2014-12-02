@@ -21,6 +21,8 @@ import java.util.List;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -39,8 +41,6 @@ import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * Examples for the documentation.
@@ -79,7 +79,7 @@ public final class DocMaterialAlbedoRed implements ExampleSceneType
     final KMaterialOpaqueRegularBuilderType material_b =
       KMaterialOpaqueRegular.newBuilder();
     material_b.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new RVectorI4F<RSpaceRGBAType>(1.0f, 0.0f, 0.0f, 1.0f)));
+      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 0.0f, 0.0f, 1.0f)));
     final KMaterialOpaqueRegular material = material_b.build();
 
     /**
@@ -87,8 +87,8 @@ public final class DocMaterialAlbedoRed implements ExampleSceneType
      */
 
     final VectorI3F scale = new VectorI3F(1.0f, 1.0f, 1.0f);
-    final RVectorI3F<RSpaceWorldType> translation =
-      new RVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f);
+    final PVectorI3F<RSpaceWorldType> translation =
+      new PVectorI3F<RSpaceWorldType>(0.0f, 1.0f, 0.0f);
     final QuaternionI4F orientation =
       QuaternionI4F.makeFromAxisAngle(
         ExampleSceneUtilities.X_AXIS,
@@ -112,9 +112,9 @@ public final class DocMaterialAlbedoRed implements ExampleSceneType
      * Configure lighting.
      */
 
-    final RVectorI3F<RSpaceWorldType> dir =
-      RVectorI3F.fromI3F(VectorI3F
-        .normalize(new VectorI3F(0.0f, -1.0f, -1.0f)));
+    final PVectorI3F<RSpaceWorldType> dir =
+      PVectorI3F
+        .normalize(new PVectorI3F<RSpaceWorldType>(0.0f, -1.0f, -1.0f));
     final KLightDirectionalBuilderType b = KLightDirectional.newBuilder();
     b.setDirection(dir);
 

@@ -19,6 +19,7 @@ package com.io7m.r1.examples.images;
 import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.examples.ExampleImageBuilderType;
 import com.io7m.r1.examples.ExampleImageType;
 import com.io7m.r1.examples.ExampleVisitorType;
@@ -32,8 +33,7 @@ import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
 import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.r1.main.R1Type;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * A demonstration using depth-variance blurring.
@@ -94,7 +94,7 @@ public final class FoodDV0_Blur_Pass0_Scale1_Size1 implements
     {
       final Texture2DStaticUsableType t =
         rr1.getValue().kFramebufferGetDepthVarianceTexture();
-      final RMatrixI3x3F<RTransformTextureType> m = RMatrixI3x3F.identity();
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m = PMatrixI3x3F.identity();
       final KTextureMixParameters config =
         KTextureMixParameters.newParameters(t, m, 0.0f, t, m);
       sr.sourceEvaluateRGBA(config, fb);

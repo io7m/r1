@@ -23,6 +23,7 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
@@ -43,7 +44,6 @@ import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * A demo room.
@@ -106,12 +106,12 @@ public final class DemoRoom1 implements ExampleSceneType
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         one,
-        new RVectorI3F<RSpaceWorldType>(-8.0f, 0.0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(-8.0f, 0.0f, 0.0f));
     final KTransformType room_trans_right =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         one,
-        new RVectorI3F<RSpaceWorldType>(8.0f, 0.0f, 0.0f));
+        new PVectorI3F<RSpaceWorldType>(8.0f, 0.0f, 0.0f));
 
     final KInstanceOpaqueRegular room_center =
       KInstanceOpaqueRegular.newInstance(
@@ -155,7 +155,7 @@ public final class DemoRoom1 implements ExampleSceneType
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
         one,
-        new RVectorI3F<RSpaceWorldType>(0.0f, 0.1f, -1.0f));
+        new PVectorI3F<RSpaceWorldType>(0.0f, 0.1f, -1.0f));
 
     final KInstanceOpaqueRegular sofa =
       KInstanceOpaqueRegular.newInstance(
@@ -170,12 +170,12 @@ public final class DemoRoom1 implements ExampleSceneType
         KLightSphereTexturedCubeWithoutShadow.newBuilder(scene
           .cubeTextureRepeated("toronto/cube.rxc"));
       door_sb.setRadius(3.0f);
-      door_sb.setPosition(new RVectorI3F<RSpaceWorldType>(-4.0f, 1.0f, 1.0f));
+      door_sb.setPosition(new PVectorI3F<RSpaceWorldType>(-4.0f, 1.0f, 1.0f));
       door_sb.setColor(ExampleSceneUtilities.RGB_RED);
       final KLightSphereTexturedCubeWithoutShadow door_s_red =
         door_sb.build();
 
-      door_sb.setPosition(new RVectorI3F<RSpaceWorldType>(4.0f, 1.0f, 1.0f));
+      door_sb.setPosition(new PVectorI3F<RSpaceWorldType>(4.0f, 1.0f, 1.0f));
       door_sb.setColor(ExampleSceneUtilities.RGB_BLUE);
       final KLightSphereTexturedCubeWithoutShadow door_s_blue =
         door_sb.build();
@@ -187,7 +187,7 @@ public final class DemoRoom1 implements ExampleSceneType
           KLightSphereTexturedCubeWithoutShadow.newBuilder(scene
             .cubeTextureRepeated("toronto/cube.rxc"));
         sb.setRadius(32.0f);
-        sb.setPosition(new RVectorI3F<RSpaceWorldType>(0.0f, 2.0f, 0.0f));
+        sb.setPosition(new PVectorI3F<RSpaceWorldType>(0.0f, 2.0f, 0.0f));
 
         gb.groupAddLight(sb.build());
         gb.groupAddLight(door_s_red);
@@ -204,7 +204,7 @@ public final class DemoRoom1 implements ExampleSceneType
             .cubeTextureRepeated("toronto/cube.rxc"));
         sb.setRadius(32.0f);
         sb.setColor(ExampleSceneUtilities.RGB_RED);
-        sb.setPosition(new RVectorI3F<RSpaceWorldType>(-6.0f, 2.0f, 0.0f));
+        sb.setPosition(new PVectorI3F<RSpaceWorldType>(-6.0f, 2.0f, 0.0f));
 
         gb.groupAddLight(sb.build());
         gb.groupAddLight(door_s_red);
@@ -219,7 +219,7 @@ public final class DemoRoom1 implements ExampleSceneType
             .cubeTextureRepeated("toronto/cube.rxc"));
         sb.setRadius(32.0f);
         sb.setColor(ExampleSceneUtilities.RGB_BLUE);
-        sb.setPosition(new RVectorI3F<RSpaceWorldType>(6.0f, 2.0f, 0.0f));
+        sb.setPosition(new PVectorI3F<RSpaceWorldType>(6.0f, 2.0f, 0.0f));
 
         gb.groupAddLight(sb.build());
         gb.groupAddLight(door_s_blue);

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,6 +18,8 @@ package com.io7m.r1.types;
 
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jtensors.VectorM2F;
+import com.io7m.jtensors.parameterized.PVectorM3F;
+import com.io7m.jtensors.parameterized.PVectorReadable3FType;
 import com.io7m.junreachable.UnreachableCodeException;
 
 /**
@@ -29,7 +31,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   /**
    * Decode the vector <code>n</code>, returning a normal vector in
    * <code>r</code>.
-   * 
+   *
    * @param n
    *          The encoded normal
    * @param r
@@ -38,7 +40,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   public static void decode(
     final VectorM2F n,
-    final RVectorM3F<RSpaceEyeType> r)
+    final PVectorM3F<RSpaceEyeType> r)
   {
     final VectorM2F enc =
       new VectorM2F((n.getXF() * 4) - 2, (n.getYF() * 4) - 2);
@@ -54,7 +56,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   /**
    * Encode the normal vector <code>n</code>, returning the encoded values in
    * <code>r</code>.
-   * 
+   *
    * @param n
    *          The normal vector
    * @param r
@@ -62,7 +64,7 @@ import com.io7m.junreachable.UnreachableCodeException;
    */
 
   public static void encode(
-    final RVectorReadable3FType<RSpaceEyeType> n,
+    final PVectorReadable3FType<RSpaceEyeType> n,
     final VectorM2F r)
   {
     final float p = (float) Math.sqrt((n.getZF() * 8) + 8);

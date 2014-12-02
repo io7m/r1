@@ -18,18 +18,31 @@ package com.io7m.r1.tests.types;
 
 import net.java.quickcheck.Generator;
 
+import com.io7m.jtensors.VectorI3F;
+import com.io7m.jtensors.VectorReadable3FType;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.types.RSpaceType;
-import com.io7m.r1.types.RVectorI4F;
 
-public final class RVectorI4FGenerator<T extends RSpaceType> implements
-  Generator<RVectorI4F<T>>
+public final class PMatrixI3x3FGenerator<S0 extends RSpaceType, S1 extends RSpaceType> implements
+  Generator<PMatrixI3x3F<S0, S1>>
 {
-  @Override public RVectorI4F<T> next()
+  @Override public PMatrixI3x3F<S0, S1> next()
   {
-    return new RVectorI4F<T>(
-      (float) Math.random(),
-      (float) Math.random(),
-      (float) Math.random(),
-      (float) Math.random());
+    final VectorReadable3FType column_0 =
+      new VectorI3F(
+        (float) Math.random(),
+        (float) Math.random(),
+        (float) Math.random());
+    final VectorReadable3FType column_1 =
+      new VectorI3F(
+        (float) Math.random(),
+        (float) Math.random(),
+        (float) Math.random());
+    final VectorReadable3FType column_2 =
+      new VectorI3F(
+        (float) Math.random(),
+        (float) Math.random(),
+        (float) Math.random());
+    return PMatrixI3x3F.newFromColumns(column_0, column_1, column_2);
   }
 }

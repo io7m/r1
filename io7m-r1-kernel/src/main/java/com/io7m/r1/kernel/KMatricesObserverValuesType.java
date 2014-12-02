@@ -16,13 +16,12 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixDirectReadable4x4FType;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RMatrixReadable4x4FType;
-import com.io7m.r1.types.RTransformProjectionInverseType;
-import com.io7m.r1.types.RTransformProjectionType;
-import com.io7m.r1.types.RTransformViewInverseType;
-import com.io7m.r1.types.RTransformViewType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 /**
  * Access to the matrices for a given observer.
@@ -34,25 +33,28 @@ public interface KMatricesObserverValuesType
    * @return The matrix context
    */
 
-  MatrixM4x4F.Context getMatrixContext();
+  PMatrixM4x4F.Context getMatrixContext();
 
   /**
    * @return The current projection matrix for an observer
    */
 
-  RMatrixReadable4x4FType<RTransformProjectionType> getMatrixProjection();
+    PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceClipType>
+    getMatrixProjection();
 
   /**
    * @return The current view matrix for an observer
    */
 
-  RMatrixReadable4x4FType<RTransformViewType> getMatrixView();
+    PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType>
+    getMatrixView();
 
   /**
    * @return The current inverse view matrix for an observer
    */
 
-  RMatrixReadable4x4FType<RTransformViewInverseType> getMatrixViewInverse();
+    PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceWorldType>
+    getMatrixViewInverse();
 
   /**
    * @return The current projection for the observer
@@ -64,6 +66,6 @@ public interface KMatricesObserverValuesType
    * @return The current inverse projection matrix for an observer
    */
 
-    RMatrixReadable4x4FType<RTransformProjectionInverseType>
+    PMatrixDirectReadable4x4FType<RSpaceClipType, RSpaceEyeType>
     getMatrixProjectionInverse();
 }

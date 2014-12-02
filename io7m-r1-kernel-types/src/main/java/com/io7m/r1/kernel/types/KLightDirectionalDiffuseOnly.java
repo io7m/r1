@@ -19,10 +19,10 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * <p>
@@ -38,14 +38,14 @@ import com.io7m.r1.types.RVectorI3F;
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KLightDirectionalDiffuseOnlyBuilderType
   {
-    private RVectorI3F<RSpaceRGBType>                           color;
-    private RVectorI3F<RSpaceWorldType>                         direction;
+    private PVectorI3F<RSpaceRGBType>                           color;
+    private PVectorI3F<RSpaceWorldType>                         direction;
     private @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
 
     Builder()
     {
-      this.color = RVectorI3F.one();
-      this.direction = new RVectorI3F<RSpaceWorldType>(0.0f, 0.0f, -1.0f);
+      this.color = KColors.RGB_WHITE;
+      this.direction = new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, -1.0f);
       this.intensity = 1.0f;
     }
 
@@ -58,13 +58,13 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setColor(
-      final RVectorI3F<RSpaceRGBType> in_color)
+      final PVectorI3F<RSpaceRGBType> in_color)
     {
       this.color = NullCheck.notNull(in_color, "Color");
     }
 
     @Override public void setDirection(
-      final RVectorI3F<RSpaceWorldType> in_direction)
+      final PVectorI3F<RSpaceWorldType> in_direction)
     {
       this.direction = NullCheck.notNull(in_direction, "Direction");
     }
@@ -111,8 +111,8 @@ import com.io7m.r1.types.RVectorI3F;
    */
 
   public static KLightDirectionalDiffuseOnly newLight(
-    final RVectorI3F<RSpaceWorldType> in_direction,
-    final RVectorI3F<RSpaceRGBType> in_color,
+    final PVectorI3F<RSpaceWorldType> in_direction,
+    final PVectorI3F<RSpaceRGBType> in_color,
     final float in_intensity)
   {
     return new KLightDirectionalDiffuseOnly(
@@ -121,13 +121,13 @@ import com.io7m.r1.types.RVectorI3F;
       in_intensity);
   }
 
-  private final RVectorI3F<RSpaceRGBType>                           color;
-  private final RVectorI3F<RSpaceWorldType>                         direction;
+  private final PVectorI3F<RSpaceRGBType>                           color;
+  private final PVectorI3F<RSpaceWorldType>                         direction;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
 
   private KLightDirectionalDiffuseOnly(
-    final RVectorI3F<RSpaceWorldType> in_direction,
-    final RVectorI3F<RSpaceRGBType> in_color,
+    final PVectorI3F<RSpaceWorldType> in_direction,
+    final PVectorI3F<RSpaceRGBType> in_color,
     final float in_intensity)
   {
     this.color = NullCheck.notNull(in_color, "Color");
@@ -160,12 +160,12 @@ import com.io7m.r1.types.RVectorI3F;
     return "LDirDiffuseOnly";
   }
 
-  @Override public RVectorI3F<RSpaceRGBType> lightGetColor()
+  @Override public PVectorI3F<RSpaceRGBType> lightGetColor()
   {
     return this.color;
   }
 
-  @Override public RVectorI3F<RSpaceWorldType> lightGetDirection()
+  @Override public PVectorI3F<RSpaceWorldType> lightGetDirection()
   {
     return this.direction;
   }

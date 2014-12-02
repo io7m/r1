@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,14 +21,16 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionUserError;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * <p>
@@ -74,7 +76,7 @@ import com.io7m.r1.types.RVectorI3F;
         QuaternionI4F.makeFromAxisAngle(KAxes.AXIS_Y, Math.toRadians(180.0f));
     }
 
-    private RVectorI3F<RSpaceRGBType>   color;
+    private PVectorI3F<RSpaceRGBType>   color;
     private float                       compensation_bias;
     private boolean                     diffuse_only;
     private float                       exponent;
@@ -83,7 +85,7 @@ import com.io7m.r1.types.RVectorI3F;
     private boolean                     negative_x;
     private boolean                     negative_y;
     private boolean                     negative_z;
-    private RVectorI3F<RSpaceWorldType> position;
+    private PVectorI3F<RSpaceWorldType> position;
     private boolean                     positive_x;
     private boolean                     positive_y;
     private boolean                     positive_z;
@@ -94,11 +96,11 @@ import com.io7m.r1.types.RVectorI3F;
     {
       this.compensation_bias = (float) Math.toRadians(3.7f);
       this.near_clip = Builder.DEFAULT_NEAR_CLIP;
-      this.color = RVectorI3F.one();
+      this.color = KColors.RGB_WHITE;
       this.intensity = 1.0f;
       this.exponent = 1.0f;
       this.radius = 8.0f;
-      this.position = RVectorI3F.zero();
+      this.position = PVectorI3F.zero();
       this.shadow = KShadowMappedVariance.getDefault();
       this.negative_x = true;
       this.negative_y = true;
@@ -115,7 +117,8 @@ import com.io7m.r1.types.RVectorI3F;
     {
       final float fov = Builder.FOV_BASE + this.compensation_bias;
 
-      final MatrixM4x4F temporary = context.getTemporaryMatrix4x4();
+      final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType> temporary =
+        context.getTemporaryPMatrix4x4();
       final KProjectionFOV p =
         KProjectionFOV.newProjection(
           temporary,
@@ -233,7 +236,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setColor(
-      final RVectorI3F<RSpaceRGBType> in_color)
+      final PVectorI3F<RSpaceRGBType> in_color)
     {
       this.color = NullCheck.notNull(in_color, "Color");
     }
@@ -305,7 +308,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setPosition(
-      final RVectorI3F<RSpaceWorldType> in_position)
+      final PVectorI3F<RSpaceWorldType> in_position)
     {
       this.position = NullCheck.notNull(in_position, "Position");
     }
@@ -486,7 +489,7 @@ import com.io7m.r1.types.RVectorI3F;
     return this.shadow;
   }
 
-  @Override public RVectorI3F<RSpaceRGBType> lightGetColor()
+  @Override public PVectorI3F<RSpaceRGBType> lightGetColor()
   {
     return this.sphere.lightGetColor();
   }
@@ -506,7 +509,7 @@ import com.io7m.r1.types.RVectorI3F;
     return this.sphere.lightGetIntensity();
   }
 
-  @Override public RVectorI3F<RSpaceWorldType> lightGetPosition()
+  @Override public PVectorI3F<RSpaceWorldType> lightGetPosition()
   {
     return this.sphere.lightGetPosition();
   }

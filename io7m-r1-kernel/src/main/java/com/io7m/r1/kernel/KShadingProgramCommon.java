@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,9 +27,16 @@ import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.MatrixM4x4F;
-import com.io7m.jtensors.VectorM4F;
 import com.io7m.jtensors.VectorReadable4FType;
+import com.io7m.jtensors.parameterized.PMatrixDirectReadable3x3FType;
+import com.io7m.jtensors.parameterized.PMatrixDirectReadable4x4FType;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
+import com.io7m.jtensors.parameterized.PVectorM4F;
+import com.io7m.jtensors.parameterized.PVectorReadable3FType;
+import com.io7m.jtensors.parameterized.PVectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
@@ -60,30 +67,16 @@ import com.io7m.r1.kernel.types.KMeshAttributes;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RMatrixReadable3x3FType;
-import com.io7m.r1.types.RMatrixReadable4x4FType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceLightClipType;
+import com.io7m.r1.types.RSpaceLightEyeType;
+import com.io7m.r1.types.RSpaceNormalEyeType;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceTextureType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RTransformDeferredProjectionType;
-import com.io7m.r1.types.RTransformModelType;
-import com.io7m.r1.types.RTransformModelViewType;
-import com.io7m.r1.types.RTransformNormalType;
-import com.io7m.r1.types.RTransformProjectionInverseType;
-import com.io7m.r1.types.RTransformProjectionType;
-import com.io7m.r1.types.RTransformProjectiveModelViewType;
-import com.io7m.r1.types.RTransformProjectiveProjectionType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RTransformViewInverseType;
-import com.io7m.r1.types.RTransformViewType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
-import com.io7m.r1.types.RVectorReadable3FType;
-import com.io7m.r1.types.RVectorReadable4FType;
 
 /**
  * <p>
@@ -108,8 +101,6 @@ import com.io7m.r1.types.RVectorReadable4FType;
   private static final String MATRIX_NAME_MODELVIEW              =
                                                                    "m_modelview";
   private static final String MATRIX_NAME_NORMAL                 = "m_normal";
-  private static final String MATRIX_NAME_POSITION               =
-                                                                   "m_position";
   private static final String MATRIX_NAME_PROJECTION             =
                                                                    "m_projection";
   private static final String MATRIX_NAME_PROJECTION_INVERSE     =
@@ -561,7 +552,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putAttributeNormal(
     final JCBProgramType program,
-    final RVectorReadable3FType<RSpaceObjectType> r)
+    final PVectorReadable3FType<RSpaceObjectType> r)
     throws JCGLException
   {
     program.programAttributePutVector3F("v_normal", r);
@@ -569,7 +560,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putAttributeTangent4(
     final JCBProgramType program,
-    final RVectorI4F<RSpaceObjectType> t)
+    final PVectorI4F<RSpaceObjectType> t)
     throws JCGLException
   {
     program.programAttributePutVector4F("v_tangent4", t);
@@ -577,7 +568,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putAttributeUV(
     final JCBProgramType program,
-    final RVectorI2F<RSpaceTextureType> uv)
+    final PVectorI2F<RSpaceTextureType> uv)
     throws JCGLException
   {
     program.programAttributePutVector2F(
@@ -627,8 +618,8 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putLightDirectional(
     final JCBProgramType e,
-    final MatrixM4x4F.Context context,
-    final RMatrixReadable4x4FType<RTransformViewType> view,
+    final PMatrixM4x4F.Context context,
+    final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType> view,
     final KLightDirectionalType light)
     throws JCGLException
   {
@@ -645,7 +636,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putLightDirectionalColor(
     final JCBProgramType e,
-    final RVectorReadable3FType<RSpaceRGBType> color)
+    final PVectorReadable3FType<RSpaceRGBType> color)
     throws JCGLException
   {
     e.programUniformPutVector3f("light_directional.color", color);
@@ -660,17 +651,19 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putLightDirectionalDirection(
     final JCBProgramType e,
-    final MatrixM4x4F.Context context,
-    final RMatrixReadable4x4FType<RTransformViewType> view,
-    final RVectorReadable3FType<RSpaceWorldType> direction)
+    final PMatrixM4x4F.Context context,
+    final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType> view,
+    final PVectorReadable3FType<RSpaceWorldType> direction)
     throws JCGLException
   {
-    final VectorM4F light_eye = new VectorM4F();
-    final VectorM4F light_world = new VectorM4F();
+    final PVectorM4F<RSpaceEyeType> light_eye =
+      new PVectorM4F<RSpaceEyeType>();
+    final PVectorM4F<RSpaceWorldType> light_world =
+      new PVectorM4F<RSpaceWorldType>();
     light_world.copyFrom3F(direction);
     light_world.setWF(0.0f);
 
-    MatrixM4x4F.multiplyVector4FWithContext(
+    PMatrixM4x4F.multiplyVector4FWithContext(
       context,
       view,
       light_world,
@@ -711,7 +704,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putLightProjectiveColor(
     final JCBProgramType e,
-    final RVectorReadable3FType<RSpaceRGBType> color)
+    final PVectorReadable3FType<RSpaceRGBType> color)
     throws JCGLException
   {
     e.programUniformPutVector3f("light_projective.color", color);
@@ -758,17 +751,19 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putLightProjectivePosition(
     final JCBProgramType program,
-    final MatrixM4x4F.Context context,
-    final RMatrixReadable4x4FType<RTransformViewType> view,
-    final RVectorReadable3FType<RSpaceWorldType> position)
+    final PMatrixM4x4F.Context context,
+    final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType> view,
+    final PVectorReadable3FType<RSpaceWorldType> position)
     throws JCGLException
   {
-    final VectorM4F light_eye = new VectorM4F();
-    final VectorM4F light_world = new VectorM4F();
+    final PVectorM4F<RSpaceEyeType> light_eye =
+      new PVectorM4F<RSpaceEyeType>();
+    final PVectorM4F<RSpaceWorldType> light_world =
+      new PVectorM4F<RSpaceWorldType>();
     light_world.copyFrom3F(position);
     light_world.setWF(1.0f);
 
-    MatrixM4x4F.multiplyVector4FWithContext(
+    PMatrixM4x4F.multiplyVector4FWithContext(
       context,
       view,
       light_world,
@@ -800,8 +795,8 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putLightProjectiveWithoutTextureProjection(
     final JCBProgramType program,
-    final MatrixM4x4F.Context context,
-    final RMatrixReadable4x4FType<RTransformViewType> view,
+    final PMatrixM4x4F.Context context,
+    final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType> view,
     final KLightProjectiveType light)
     throws JCGLException
   {
@@ -894,8 +889,8 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putLightSpherical(
     final JCBProgramType program,
-    final MatrixM4x4F.Context context,
-    final RMatrixReadable4x4FType<RTransformViewType> view,
+    final PMatrixM4x4F.Context context,
+    final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType> view,
     final KLightSphereType light)
     throws JCGLException
   {
@@ -905,7 +900,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
       view,
       light.lightGetPosition());
 
-    final RVectorI3F<RSpaceRGBType> color = light.lightGetColor();
+    final PVectorI3F<RSpaceRGBType> color = light.lightGetColor();
     KShadingProgramCommon.putLightSphericalColor(program, color);
     final float intensity = light.lightGetIntensity();
     KShadingProgramCommon.putLightSphericalIntensity(program, intensity);
@@ -917,7 +912,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putLightSphericalColor(
     final JCBProgramType program,
-    final RVectorReadable3FType<RSpaceRGBType> color)
+    final PVectorReadable3FType<RSpaceRGBType> color)
     throws JCGLException
   {
     program.programUniformPutVector3f("light_spherical.color", color);
@@ -964,18 +959,20 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putLightSphericalPosition(
     final JCBProgramType program,
-    final MatrixM4x4F.Context context,
-    final RMatrixReadable4x4FType<RTransformViewType> view,
-    final RVectorReadable3FType<RSpaceWorldType> position)
+    final PMatrixM4x4F.Context context,
+    final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType> view,
+    final PVectorReadable3FType<RSpaceWorldType> position)
     throws JCGLException
   {
-    final VectorM4F light_eye = new VectorM4F();
-    final VectorM4F light_world = new VectorM4F();
+    final PVectorM4F<RSpaceEyeType> light_eye =
+      new PVectorM4F<RSpaceEyeType>();
+    final PVectorM4F<RSpaceWorldType> light_world =
+      new PVectorM4F<RSpaceWorldType>();
 
     light_world.copyFrom3F(position);
     light_world.setWF(1.0f);
 
-    MatrixM4x4F.multiplyVector4FWithContext(
+    PMatrixM4x4F.multiplyVector4FWithContext(
       context,
       view,
       light_world,
@@ -1034,7 +1031,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putMaterialAlbedoColor(
     final JCBProgramType program,
-    final RVectorReadable4FType<RSpaceRGBAType> rgba)
+    final PVectorReadable4FType<RSpaceRGBAType> rgba)
     throws JCGLException
   {
     program.programUniformPutVector4f("p_albedo.color", rgba);
@@ -1209,7 +1206,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putMaterialSpecularColor(
     final JCBProgramType program,
-    final RVectorReadable3FType<RSpaceRGBType> color)
+    final PVectorReadable3FType<RSpaceRGBType> color)
     throws JCGLException
   {
     program.programUniformPutVector3f("p_specular.color", color);
@@ -1245,10 +1242,12 @@ import com.io7m.r1.types.RVectorReadable4FType;
     KShadingProgramCommon.putMaterialSpecularColor(program, m.getColor());
   }
 
-  static void putMatrixDeferredProjection(
-    final JCBProgramType program,
-    final RMatrixReadable4x4FType<RTransformDeferredProjectionType> m)
-    throws JCGLException
+  static
+    void
+    putMatrixDeferredProjection(
+      final JCBProgramType program,
+      final PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightClipType> m)
+      throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_DEFERRED_PROJECTION,
@@ -1257,7 +1256,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putMatrixInverseProjection(
     final JCBProgramType program,
-    final RMatrixReadable4x4FType<RTransformProjectionInverseType> m)
+    final PMatrixDirectReadable4x4FType<RSpaceClipType, RSpaceEyeType> m)
     throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
@@ -1267,7 +1266,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putMatrixInverseView(
     final JCBProgramType program,
-    final RMatrixReadable4x4FType<RTransformViewInverseType> m)
+    final PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceWorldType> m)
     throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
@@ -1275,10 +1274,12 @@ import com.io7m.r1.types.RVectorReadable4FType;
       m);
   }
 
-  static void putMatrixLightSpherical(
-    final JCBProgramType program,
-    final RMatrixReadable3x3FType<RTransformTextureType> m)
-    throws JCGLException
+  static
+    void
+    putMatrixLightSpherical(
+      final JCBProgramType program,
+      final PMatrixDirectReadable3x3FType<RSpaceTextureType, RSpaceTextureType> m)
+      throws JCGLException
   {
     program.programUniformPutMatrix3x3f(
       KShadingProgramCommon.MATRIX_NAME_LIGHT_SPHERICAL,
@@ -1287,7 +1288,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putMatrixModel(
     final JCBProgramType program,
-    final RMatrixReadable4x4FType<RTransformModelType> m)
+    final PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceWorldType> m)
     throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
@@ -1308,7 +1309,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   public static void putMatrixModelView(
     final JCBProgramType program,
-    final RMatrixReadable4x4FType<RTransformModelViewType> m)
+    final PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceEyeType> m)
     throws JCGLException
   {
     KShadingProgramCommon.putMatrixModelViewUnchecked(
@@ -1318,7 +1319,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putMatrixModelViewUnchecked(
     final JCBProgramType program,
-    final RMatrixReadable4x4FType<RTransformModelViewType> m)
+    final PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceEyeType> m)
     throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
@@ -1326,24 +1327,16 @@ import com.io7m.r1.types.RVectorReadable4FType;
       m);
   }
 
-  static void putMatrixNormal(
-    final JCBProgramType program,
-    final RMatrixReadable3x3FType<RTransformNormalType> mn)
-    throws JCGLException
+  static
+    void
+    putMatrixNormal(
+      final JCBProgramType program,
+      final PMatrixDirectReadable3x3FType<RSpaceObjectType, RSpaceNormalEyeType> mn)
+      throws JCGLException
   {
     program.programUniformPutMatrix3x3f(
       KShadingProgramCommon.MATRIX_NAME_NORMAL,
       mn);
-  }
-
-  static void putMatrixPosition(
-    final JCBProgramType program,
-    final RMatrixM3x3F<RTransformModelType> m)
-    throws JCGLException
-  {
-    program.programUniformPutMatrix3x3f(
-      KShadingProgramCommon.MATRIX_NAME_POSITION,
-      m);
   }
 
   /**
@@ -1359,7 +1352,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   public static void putMatrixProjection(
     final JCBProgramType p,
-    final RMatrixReadable4x4FType<RTransformProjectionType> m)
+    final PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceClipType> m)
     throws JCGLException
   {
     KShadingProgramCommon.putMatrixProjectionUnchecked(
@@ -1376,7 +1369,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
 
   static void putMatrixProjectionUnchecked(
     final JCBProgramType p,
-    final RMatrixReadable4x4FType<RTransformProjectionType> m)
+    final PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceClipType> m)
     throws JCGLException
   {
     p.programUniformPutMatrix4x4f(
@@ -1384,10 +1377,12 @@ import com.io7m.r1.types.RVectorReadable4FType;
       m);
   }
 
-  static void putMatrixProjectiveModelView(
-    final JCBProgramType program,
-    final RMatrixReadable4x4FType<RTransformProjectiveModelViewType> m)
-    throws JCGLException
+  static
+    void
+    putMatrixProjectiveModelView(
+      final JCBProgramType program,
+      final PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceLightEyeType> m)
+      throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_MODELVIEW,
@@ -1402,10 +1397,12 @@ import com.io7m.r1.types.RVectorReadable4FType;
       .programUniformUseExisting(KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_MODELVIEW);
   }
 
-  static void putMatrixProjectiveProjection(
-    final JCBProgramType program,
-    final RMatrixReadable4x4FType<RTransformProjectiveProjectionType> m)
-    throws JCGLException
+  static
+    void
+    putMatrixProjectiveProjection(
+      final JCBProgramType program,
+      final PMatrixDirectReadable4x4FType<RSpaceLightEyeType, RSpaceLightClipType> m)
+      throws JCGLException
   {
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_PROJECTION,
@@ -1431,20 +1428,24 @@ import com.io7m.r1.types.RVectorReadable4FType;
    *           If an OpenGL error occurs
    */
 
-  public static void putMatrixUV(
-    final JCBProgramType program,
-    final RMatrixReadable3x3FType<RTransformTextureType> m)
-    throws JCGLException
+  public static
+    void
+    putMatrixUV(
+      final JCBProgramType program,
+      final PMatrixDirectReadable3x3FType<RSpaceTextureType, RSpaceTextureType> m)
+      throws JCGLException
   {
     KShadingProgramCommon.putMatrixUVUnchecked(
       NullCheck.notNull(program, "Program"),
       NullCheck.notNull(m, "Matrix"));
   }
 
-  static void putMatrixUVUnchecked(
-    final JCBProgramType program,
-    final RMatrixReadable3x3FType<RTransformTextureType> m)
-    throws JCGLException
+  static
+    void
+    putMatrixUVUnchecked(
+      final JCBProgramType program,
+      final PMatrixDirectReadable3x3FType<RSpaceTextureType, RSpaceTextureType> m)
+      throws JCGLException
   {
     program.programUniformPutMatrix3x3f(
       KShadingProgramCommon.MATRIX_NAME_UV,

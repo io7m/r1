@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,14 +24,14 @@ import nu.xom.Element;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshTangents;
 import com.io7m.r1.meshes.RMeshTangentsVertex;
 import com.io7m.r1.meshes.RMeshTriangle;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * An exporter to produce XML descriptions of {@link RMeshTangents} meshes.
@@ -107,10 +107,10 @@ import com.io7m.r1.types.RVectorI4F;
   {
     final String uri = RXMLConstants.MESHES_URI.toString();
     final List<RMeshTangentsVertex> vertices = m.verticesGet();
-    final List<RVectorI3F<RSpaceObjectType>> positions = m.positionsGet();
-    final List<RVectorI3F<RSpaceObjectType>> normals = m.normalsGet();
-    final List<RVectorI2F<RSpaceTextureType>> uvs = m.uvsGet();
-    final List<RVectorI4F<RSpaceObjectType>> tangents = m.tangentsGet();
+    final List<PVectorI3F<RSpaceObjectType>> positions = m.positionsGet();
+    final List<PVectorI3F<RSpaceObjectType>> normals = m.normalsGet();
+    final List<PVectorI2F<RSpaceTextureType>> uvs = m.uvsGet();
+    final List<PVectorI4F<RSpaceObjectType>> tangents = m.tangentsGet();
 
     final Element evs = new Element("m:vertices", uri);
     evs.addAttribute(RXMLExporter.intAttribute("m:count", vertices.size()));
@@ -119,14 +119,14 @@ import com.io7m.r1.types.RVectorI4F;
       final Element ev = new Element("m:v", uri);
 
       final Element ep = new Element("m:p", uri);
-      final RVectorI3F<RSpaceObjectType> p = positions.get(v.getPosition());
+      final PVectorI3F<RSpaceObjectType> p = positions.get(v.getPosition());
       ep.addAttribute(RXMLExporter.floatAttribute("m:x", p.getXF()));
       ep.addAttribute(RXMLExporter.floatAttribute("m:y", p.getYF()));
       ep.addAttribute(RXMLExporter.floatAttribute("m:z", p.getZF()));
       ev.appendChild(ep);
 
       final Element en = new Element("m:n", uri);
-      final RVectorI3F<RSpaceObjectType> n = normals.get(v.getNormal());
+      final PVectorI3F<RSpaceObjectType> n = normals.get(v.getNormal());
       en.addAttribute(RXMLExporter.floatAttribute("m:x", n.getXF()));
       en.addAttribute(RXMLExporter.floatAttribute("m:y", n.getYF()));
       en.addAttribute(RXMLExporter.floatAttribute("m:z", n.getZF()));
@@ -134,7 +134,7 @@ import com.io7m.r1.types.RVectorI4F;
 
       {
         final Element et = new Element("m:t4", uri);
-        final RVectorI4F<RSpaceObjectType> t = tangents.get(v.getTangent());
+        final PVectorI4F<RSpaceObjectType> t = tangents.get(v.getTangent());
         et.addAttribute(RXMLExporter.floatAttribute("m:x", t.getXF()));
         et.addAttribute(RXMLExporter.floatAttribute("m:y", t.getYF()));
         et.addAttribute(RXMLExporter.floatAttribute("m:z", t.getZF()));
@@ -143,7 +143,7 @@ import com.io7m.r1.types.RVectorI4F;
       }
 
       final Element eu = new Element("m:u", uri);
-      final RVectorI2F<RSpaceTextureType> u = uvs.get(v.getUV());
+      final PVectorI2F<RSpaceTextureType> u = uvs.get(v.getUV());
       eu.addAttribute(RXMLExporter.floatAttribute("m:x", u.getXF()));
       eu.addAttribute(RXMLExporter.floatAttribute("m:y", u.getYF()));
       ev.appendChild(eu);

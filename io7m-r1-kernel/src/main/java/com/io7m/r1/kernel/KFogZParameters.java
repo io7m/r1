@@ -20,10 +20,11 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.r1.types.RMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RTransformProjectionType;
-import com.io7m.r1.types.RVectorI3F;
 
 /**
  * Fog parameters.
@@ -34,16 +35,16 @@ import com.io7m.r1.types.RVectorI3F;
   @EqualityReference private static final class Builder implements
     KFogZParametersBuilderType
   {
-    private RVectorI3F<RSpaceRGBType>              color;
-    private float                                  far_z;
-    private float                                  near_z;
-    private KFogProgression                        progression;
-    private RMatrixI4x4F<RTransformProjectionType> projection;
+    private PVectorI3F<RSpaceRGBType>                   color;
+    private float                                       far_z;
+    private float                                       near_z;
+    private KFogProgression                             progression;
+    private PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> projection;
 
     Builder(
-      final RMatrixI4x4F<RTransformProjectionType> in_projection)
+      final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> in_projection)
     {
-      this.color = RVectorI3F.zero();
+      this.color = PVectorI3F.zero();
       this.near_z = 0.0f;
       this.far_z = 8.0f;
       this.projection = NullCheck.notNull(in_projection, "Projection");
@@ -61,7 +62,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setColor(
-      final RVectorI3F<RSpaceRGBType> c)
+      final PVectorI3F<RSpaceRGBType> c)
     {
       this.color = NullCheck.notNull(c, "Color");
     }
@@ -85,7 +86,7 @@ import com.io7m.r1.types.RVectorI3F;
     }
 
     @Override public void setProjectionMatrix(
-      final RMatrixI4x4F<RTransformProjectionType> p)
+      final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> p)
     {
       this.projection = NullCheck.notNull(p, "Projection");
     }
@@ -98,22 +99,22 @@ import com.io7m.r1.types.RVectorI3F;
    */
 
   public static KFogZParametersBuilderType newBuilder(
-    final RMatrixI4x4F<RTransformProjectionType> in_projection)
+    final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> in_projection)
   {
     return new Builder(in_projection);
   }
 
-  private final RVectorI3F<RSpaceRGBType>              color;
-  private final float                                  far_z;
-  private final float                                  near_z;
-  private final KFogProgression                        progression;
-  private final RMatrixI4x4F<RTransformProjectionType> projection;
+  private final PVectorI3F<RSpaceRGBType>                   color;
+  private final float                                       far_z;
+  private final float                                       near_z;
+  private final KFogProgression                             progression;
+  private final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> projection;
 
   private KFogZParameters(
-    final RVectorI3F<RSpaceRGBType> in_color,
+    final PVectorI3F<RSpaceRGBType> in_color,
     final float in_near_z,
     final float in_far_z,
-    final RMatrixI4x4F<RTransformProjectionType> in_projection,
+    final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> in_projection,
     final KFogProgression in_progression)
   {
     this.color = NullCheck.notNull(in_color);
@@ -149,7 +150,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The fog color.
    */
 
-  public RVectorI3F<RSpaceRGBType> getColor()
+  public PVectorI3F<RSpaceRGBType> getColor()
   {
     return this.color;
   }
@@ -186,7 +187,7 @@ import com.io7m.r1.types.RVectorI3F;
    * @return The projection matrix used to render the scene.
    */
 
-  public RMatrixI4x4F<RTransformProjectionType> getProjection()
+  public PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> getProjection()
   {
     return this.projection;
   }

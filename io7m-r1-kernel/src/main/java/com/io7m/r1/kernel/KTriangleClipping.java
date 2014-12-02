@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,11 +25,11 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable4FType;
+import com.io7m.jtensors.parameterized.PVectorI4F;
+import com.io7m.jtensors.parameterized.PVectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RSpaceType;
 import com.io7m.r1.types.RTriangle4F;
-import com.io7m.r1.types.RVectorI4F;
-import com.io7m.r1.types.RVectorReadable4FType;
 
 /**
  * Functions for performing clipping on triangles.
@@ -105,7 +105,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
   /**
    * Clip the given triangle against the given plane, returning the resulting
    * triangles (if any).
-   * 
+   *
    * @param triangle
    *          The triangle
    * @param plane
@@ -134,9 +134,9 @@ import com.io7m.r1.types.RVectorReadable4FType;
       final RTriangle4F<S> triangle,
       final VectorI4F plane)
   {
-    final RVectorI4F<S> p0 = triangle.getP0();
-    final RVectorI4F<S> p1 = triangle.getP1();
-    final RVectorI4F<S> p2 = triangle.getP2();
+    final PVectorI4F<S> p0 = triangle.getP0();
+    final PVectorI4F<S> p1 = triangle.getP1();
+    final PVectorI4F<S> p2 = triangle.getP2();
 
     final float p0_dot = VectorI4F.dotProduct(p0, plane);
     final float p1_dot = VectorI4F.dotProduct(p1, plane);
@@ -175,9 +175,9 @@ import com.io7m.r1.types.RVectorReadable4FType;
         assert p1_inside;
         assert !p2_inside;
 
-        final RVectorI4F<S> ip1p2 =
+        final PVectorI4F<S> ip1p2 =
           KTriangleClipping.intersectLinePlane(p1, p2, plane);
-        final RVectorI4F<S> ip0p2 =
+        final PVectorI4F<S> ip0p2 =
           KTriangleClipping.intersectLinePlane(p0, p2, plane);
 
         results.add(RTriangle4F.newTriangle(p0, p1, ip1p2));
@@ -190,9 +190,9 @@ import com.io7m.r1.types.RVectorReadable4FType;
         assert !p1_inside;
         assert p2_inside;
 
-        final RVectorI4F<S> ip0p1 =
+        final PVectorI4F<S> ip0p1 =
           KTriangleClipping.intersectLinePlane(p0, p1, plane);
-        final RVectorI4F<S> ip2p1 =
+        final PVectorI4F<S> ip2p1 =
           KTriangleClipping.intersectLinePlane(p2, p1, plane);
 
         results.add(RTriangle4F.newTriangle(p0, p2, ip2p1));
@@ -204,9 +204,9 @@ import com.io7m.r1.types.RVectorReadable4FType;
       assert !p1_inside;
       assert !p2_inside;
 
-      final RVectorI4F<S> ip0p1 =
+      final PVectorI4F<S> ip0p1 =
         KTriangleClipping.intersectLinePlane(p0, p1, plane);
-      final RVectorI4F<S> ip0p2 =
+      final PVectorI4F<S> ip0p2 =
         KTriangleClipping.intersectLinePlane(p0, p2, plane);
 
       results.add(RTriangle4F.newTriangle(p0, ip0p2, ip0p1));
@@ -219,9 +219,9 @@ import com.io7m.r1.types.RVectorReadable4FType;
         assert p1_inside;
         assert p2_inside;
 
-        final RVectorI4F<S> ip1p0 =
+        final PVectorI4F<S> ip1p0 =
           KTriangleClipping.intersectLinePlane(p1, p0, plane);
-        final RVectorI4F<S> ip2p0 =
+        final PVectorI4F<S> ip2p0 =
           KTriangleClipping.intersectLinePlane(p2, p0, plane);
 
         final RTriangle4F<S> t0 = RTriangle4F.newTriangle(p1, p2, ip2p0);
@@ -235,9 +235,9 @@ import com.io7m.r1.types.RVectorReadable4FType;
       assert p1_inside;
       assert !p2_inside;
 
-      final RVectorI4F<S> ip0p1 =
+      final PVectorI4F<S> ip0p1 =
         KTriangleClipping.intersectLinePlane(p1, p0, plane);
-      final RVectorI4F<S> ip1p2 =
+      final PVectorI4F<S> ip1p2 =
         KTriangleClipping.intersectLinePlane(p1, p2, plane);
 
       results.add(RTriangle4F.newTriangle(p1, ip1p2, ip0p1));
@@ -249,9 +249,9 @@ import com.io7m.r1.types.RVectorReadable4FType;
       assert !p1_inside;
       assert p2_inside;
 
-      final RVectorI4F<S> ip0p2 =
+      final PVectorI4F<S> ip0p2 =
         KTriangleClipping.intersectLinePlane(p0, p2, plane);
-      final RVectorI4F<S> ip1p2 =
+      final PVectorI4F<S> ip1p2 =
         KTriangleClipping.intersectLinePlane(p1, p2, plane);
 
       results.add(RTriangle4F.newTriangle(p2, ip0p2, ip1p2));
@@ -264,7 +264,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
   /**
    * Clip the given triangle against the given planes, writing the resulting
    * triangles to <code>results</code>.
-   * 
+   *
    * @param triangle
    *          The triangle
    * @param planes
@@ -319,16 +319,16 @@ import com.io7m.r1.types.RVectorReadable4FType;
     return KTriangleClipping.clipTrianglesPlanesInner(results, planes);
   }
 
-  private static <S extends RSpaceType> RVectorI4F<S> intersectLinePlane(
-    final RVectorReadable4FType<S> p0,
-    final RVectorReadable4FType<S> p1,
+  private static <S extends RSpaceType> PVectorI4F<S> intersectLinePlane(
+    final PVectorReadable4FType<S> p0,
+    final PVectorReadable4FType<S> p1,
     final VectorReadable4FType plane)
   {
     final VectorI4F slope = VectorI4F.subtract(p1, p0);
     final float p0_dot = VectorI4F.dotProduct(p0, plane);
     final float t = -p0_dot / VectorI4F.dotProduct(slope, plane);
     final VectorI4F s = VectorI4F.addScaled(p0, slope, t);
-    return new RVectorI4F<S>(s.getXF(), s.getYF(), s.getZF(), s.getWF());
+    return new PVectorI4F<S>(s.getXF(), s.getYF(), s.getZF(), s.getWF());
   }
 
   private static boolean isInside(
@@ -340,7 +340,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
   /**
    * Return <code>true</code> iff the given point is inside or on the given
    * plane.
-   * 
+   *
    * @param <S>
    *          The type of the coordinate space
    * @param point
@@ -352,7 +352,7 @@ import com.io7m.r1.types.RVectorReadable4FType;
    */
 
   public static <S extends RSpaceType> boolean pointIsInside(
-    final RVectorI4F<S> point,
+    final PVectorI4F<S> point,
     final VectorI4F plane)
   {
     return KTriangleClipping.isInside(VectorI4F.dotProduct(point, plane));

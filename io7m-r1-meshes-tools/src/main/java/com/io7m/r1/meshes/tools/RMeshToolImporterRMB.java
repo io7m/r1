@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,6 +27,9 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jlog.LogUsableType;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshParserEventsType;
 import com.io7m.r1.meshes.RMeshTangents;
 import com.io7m.r1.meshes.RMeshTangentsBuilderType;
@@ -37,9 +40,6 @@ import com.io7m.r1.types.RExceptionIO;
 import com.io7m.r1.types.RExceptionMeshNameInvalid;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RVectorI2F;
-import com.io7m.r1.types.RVectorI3F;
-import com.io7m.r1.types.RVectorI4F;
 
 /**
  * RMB mesh importer.
@@ -73,10 +73,10 @@ public final class RMeshToolImporterRMB implements RMeshToolImporterType
 
     final RMeshParserEventsType<RException> events =
       new RMeshParserEventsType<RException>() {
-        private RVectorI3F<RSpaceObjectType>  normal   = RVectorI3F.zero();
-        private RVectorI3F<RSpaceObjectType>  position = RVectorI3F.zero();
-        private RVectorI4F<RSpaceObjectType>  tangent  = RVectorI4F.zero();
-        private RVectorI2F<RSpaceTextureType> uv       = RVectorI2F.zero();
+        private PVectorI3F<RSpaceObjectType>  normal   = PVectorI3F.zero();
+        private PVectorI3F<RSpaceObjectType>  position = PVectorI3F.zero();
+        private PVectorI4F<RSpaceObjectType>  tangent  = PVectorI4F.zero();
+        private PVectorI2F<RSpaceTextureType> uv       = PVectorI2F.zero();
 
         @Override public void eventError(
           final Exception e)
@@ -131,7 +131,7 @@ public final class RMeshToolImporterRMB implements RMeshToolImporterType
           final long index)
           throws RException
         {
-          final RVectorI3F<RSpaceObjectType> bitangents = RVectorI3F.zero();
+          final PVectorI3F<RSpaceObjectType> bitangents = PVectorI3F.zero();
           b.addVertex(
             this.position,
             this.normal,
@@ -142,7 +142,7 @@ public final class RMeshToolImporterRMB implements RMeshToolImporterType
 
         @Override public void eventMeshVertexNormal(
           final long index,
-          final RVectorI3F<RSpaceObjectType> in_normal)
+          final PVectorI3F<RSpaceObjectType> in_normal)
           throws RException
         {
           this.normal = in_normal;
@@ -150,7 +150,7 @@ public final class RMeshToolImporterRMB implements RMeshToolImporterType
 
         @Override public void eventMeshVertexPosition(
           final long index,
-          final RVectorI3F<RSpaceObjectType> in_position)
+          final PVectorI3F<RSpaceObjectType> in_position)
           throws RException
         {
           this.position = in_position;
@@ -165,7 +165,7 @@ public final class RMeshToolImporterRMB implements RMeshToolImporterType
 
         @Override public void eventMeshVertexTangent4f(
           final long index,
-          final RVectorI4F<RSpaceObjectType> in_tangent)
+          final PVectorI4F<RSpaceObjectType> in_tangent)
           throws RException
         {
           this.tangent = in_tangent;
@@ -173,15 +173,15 @@ public final class RMeshToolImporterRMB implements RMeshToolImporterType
 
         @Override public void eventMeshVertexUV(
           final long index,
-          final RVectorI2F<RSpaceTextureType> in_uv)
+          final PVectorI2F<RSpaceTextureType> in_uv)
           throws RException
         {
           this.uv = in_uv;
         }
 
         @Override public void eventMeshVerticesEnded(
-          final RVectorI3F<RSpaceObjectType> bounds_lower,
-          final RVectorI3F<RSpaceObjectType> bounds_upper)
+          final PVectorI3F<RSpaceObjectType> bounds_lower,
+          final PVectorI3F<RSpaceObjectType> bounds_upper)
           throws RException
         {
           // Nothing.

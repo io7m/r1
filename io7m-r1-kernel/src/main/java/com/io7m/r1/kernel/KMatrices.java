@@ -17,25 +17,23 @@
 package com.io7m.r1.kernel;
 
 import com.io7m.jequality.annotations.EqualityReference;
-import com.io7m.jtensors.MatrixM3x3F;
-import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.QuaternionReadable4FType;
 import com.io7m.jtensors.VectorM3F;
+import com.io7m.jtensors.parameterized.PMatrixDirectReadable3x3FType;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixReadable4x4FType;
+import com.io7m.jtensors.parameterized.PVectorReadable3FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KTransformContext;
-import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RMatrixM4x4F;
-import com.io7m.r1.types.RMatrixReadable3x3FType;
-import com.io7m.r1.types.RMatrixReadable4x4FType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceLightEyeType;
+import com.io7m.r1.types.RSpaceNormalEyeType;
+import com.io7m.r1.types.RSpaceObjectType;
+import com.io7m.r1.types.RSpaceTextureType;
 import com.io7m.r1.types.RSpaceWorldType;
-import com.io7m.r1.types.RTransformModelViewType;
-import com.io7m.r1.types.RTransformNormalType;
-import com.io7m.r1.types.RTransformProjectiveViewType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RTransformViewType;
-import com.io7m.r1.types.RVectorReadable3FType;
 
 /**
  * Miscellaneous matrix functions.
@@ -47,10 +45,10 @@ import com.io7m.r1.types.RVectorReadable3FType;
    * The 3x3 identity matrix.
    */
 
-  public static final RMatrixReadable3x3FType<RTransformTextureType> IDENTITY_UV;
+  public static final PMatrixDirectReadable3x3FType<RSpaceTextureType, RSpaceTextureType> IDENTITY_UV;
 
   static {
-    IDENTITY_UV = new RMatrixM3x3F<RTransformTextureType>();
+    IDENTITY_UV = new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
   }
 
   /**
@@ -63,8 +61,8 @@ import com.io7m.r1.types.RVectorReadable3FType;
    */
 
   public static void makeNormalMatrix(
-    final RMatrixReadable4x4FType<RTransformModelViewType> m,
-    final RMatrixM3x3F<RTransformNormalType> mr)
+    final PMatrixReadable4x4FType<RSpaceObjectType, RSpaceEyeType> m,
+    final PMatrixM3x3F<RSpaceObjectType, RSpaceNormalEyeType> mr)
   {
     mr.set(0, 0, m.getRowColumnF(0, 0));
     mr.set(1, 0, m.getRowColumnF(1, 0));
@@ -75,8 +73,8 @@ import com.io7m.r1.types.RVectorReadable3FType;
     mr.set(0, 2, m.getRowColumnF(0, 2));
     mr.set(1, 2, m.getRowColumnF(1, 2));
     mr.set(2, 2, m.getRowColumnF(2, 2));
-    MatrixM3x3F.invertInPlace(mr);
-    MatrixM3x3F.transposeInPlace(mr);
+    PMatrixM3x3F.invertInPlace(mr);
+    PMatrixM3x3F.transposeInPlace(mr);
   }
 
   /**
@@ -95,9 +93,9 @@ import com.io7m.r1.types.RVectorReadable3FType;
 
   public static void makeViewMatrix(
     final KTransformContext context,
-    final RVectorReadable3FType<RSpaceWorldType> position,
+    final PVectorReadable3FType<RSpaceWorldType> position,
     final QuaternionReadable4FType orientation,
-    final RMatrixM4x4F<RTransformViewType> view)
+    final PMatrixM4x4F<RSpaceWorldType, RSpaceEyeType> view)
   {
     KMatrices.makeViewMatrixActual(context, position, orientation, view);
   }
@@ -107,23 +105,28 @@ import com.io7m.r1.types.RVectorReadable3FType;
    * <code>orientation</code>.
    */
 
-  private static void makeViewMatrixActual(
+  @SuppressWarnings("unchecked") private static void makeViewMatrixActual(
     final KTransformContext context,
-    final RVectorReadable3FType<RSpaceWorldType> position,
+    final PVectorReadable3FType<RSpaceWorldType> position,
     final QuaternionReadable4FType orientation,
-    final RMatrixM4x4F<?> view)
+    final PMatrixM4x4F<?, ?> view)
   {
-    MatrixM4x4F.setIdentity(view);
+    PMatrixM4x4F.setIdentity(view);
 
     final QuaternionI4F inverse_orient = QuaternionI4F.conjugate(orientation);
-    final MatrixM4x4F m4x4 = context.getTemporaryMatrix4x4();
+    final PMatrixM4x4F<Object, Object> m4x4 =
+      context.getTemporaryPMatrix4x4();
     QuaternionM4F.makeRotationMatrix4x4(inverse_orient, m4x4);
-    MatrixM4x4F.multiplyInPlace(view, m4x4);
+
+    PMatrixM4x4F.multiply(
+      (PMatrixM4x4F<Object, Object>) view,
+      m4x4,
+      (PMatrixM4x4F<Object, Object>) view);
 
     final VectorM3F translate = new VectorM3F();
     translate.set3F(-position.getXF(), -position.getYF(), -position.getZF());
 
-    MatrixM4x4F.translateByVector3FInPlace(view, translate);
+    PMatrixM4x4F.translateByVector3FInPlace(view, translate);
   }
 
   /**
@@ -133,7 +136,7 @@ import com.io7m.r1.types.RVectorReadable3FType;
    * </p>
    * <p>
    * Identical to
-   * {@link #makeViewMatrix(KTransformContext, RVectorReadable3FType, QuaternionReadable4FType, RMatrixM4x4F)}
+   * {@link #makeViewMatrix(KTransformContext, PVectorReadable3FType, QuaternionReadable4FType, PMatrixM4x4F)}
    * but with a different phantom type parameter on the view matrix type.
    * </p>
    *
@@ -149,9 +152,9 @@ import com.io7m.r1.types.RVectorReadable3FType;
 
   public static void makeViewMatrixProjective(
     final KTransformContext context,
-    final RVectorReadable3FType<RSpaceWorldType> position,
+    final PVectorReadable3FType<RSpaceWorldType> position,
     final QuaternionReadable4FType orientation,
-    final RMatrixM4x4F<RTransformProjectiveViewType> view)
+    final PMatrixM4x4F<RSpaceWorldType, RSpaceLightEyeType> view)
   {
     KMatrices.makeViewMatrixActual(context, position, orientation, view);
   }

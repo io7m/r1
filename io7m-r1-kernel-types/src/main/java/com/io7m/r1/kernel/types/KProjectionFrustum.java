@@ -20,10 +20,11 @@ import com.io7m.jcanephora.ProjectionMatrix;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RTransformProjectionType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
 
 /**
  * A perspective projection based on an explicit frustum.
@@ -53,7 +54,7 @@ import com.io7m.r1.types.RTransformProjectionType;
    */
 
   public static KProjectionFrustum newProjection(
-    final MatrixM4x4F temporary,
+    final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType> temporary,
     final float in_x_min,
     final float in_x_max,
     final float in_y_min,
@@ -72,8 +73,8 @@ import com.io7m.r1.types.RTransformProjectionType;
       in_z_near,
       in_z_far);
 
-    final RMatrixI4x4F<RTransformProjectionType> m =
-      RMatrixI4x4F.newFromReadable(temporary);
+    final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> m =
+      PMatrixI4x4F.newFromReadable(temporary);
 
     return new KProjectionFrustum(
       in_x_min,
@@ -85,13 +86,13 @@ import com.io7m.r1.types.RTransformProjectionType;
       m);
   }
 
-  private final RMatrixI4x4F<RTransformProjectionType> matrix;
-  private final float                                  x_max;
-  private final float                                  x_min;
-  private final float                                  y_max;
-  private final float                                  y_min;
-  private final float                                  z_far;
-  private final float                                  z_near;
+  private final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> matrix;
+  private final float                                       x_max;
+  private final float                                       x_min;
+  private final float                                       y_max;
+  private final float                                       y_min;
+  private final float                                       z_far;
+  private final float                                       z_near;
 
   private KProjectionFrustum(
     final float in_x_min,
@@ -100,7 +101,7 @@ import com.io7m.r1.types.RTransformProjectionType;
     final float in_y_max,
     final float in_z_near,
     final float in_z_far,
-    final RMatrixI4x4F<RTransformProjectionType> in_matrix)
+    final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> in_matrix)
   {
     this.x_min = in_x_min;
     this.x_max = in_x_max;
@@ -160,7 +161,7 @@ import com.io7m.r1.types.RTransformProjectionType;
   }
 
   @Override public
-    RMatrixI4x4F<RTransformProjectionType>
+    PMatrixI4x4F<RSpaceEyeType, RSpaceClipType>
     projectionGetMatrix()
   {
     return this.matrix;

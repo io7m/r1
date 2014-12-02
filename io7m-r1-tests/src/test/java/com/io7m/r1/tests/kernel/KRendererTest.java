@@ -31,7 +31,9 @@ import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogUsableType;
-import com.io7m.jtensors.MatrixM4x4F;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.r1.kernel.KFXAAParameters;
 import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
@@ -76,11 +78,11 @@ import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.RFakeTexturesCubeStatic;
 import com.io7m.r1.tests.TestShaderCaches;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RMatrixI4x4F;
-import com.io7m.r1.types.RTransformModelType;
-import com.io7m.r1.types.RTransformTextureType;
-import com.io7m.r1.types.RTransformViewType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceObjectType;
+import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings("static-method") public final class KRendererTest
 {
@@ -104,21 +106,23 @@ import com.io7m.r1.types.RTransformViewType;
     final KFramebufferDeferredType fb =
       KFramebufferDeferred.newFramebuffer(gi, fb_desc);
 
-    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
-    final MatrixM4x4F temporary = new MatrixM4x4F();
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view =
+      PMatrixI4x4F.identity();
     final KProjectionType projection =
       KProjectionFOV.newProjection(
-        temporary,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         (float) Math.toRadians(90.0f),
         1.0f,
         1.0f,
         100.0f);
 
-    final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
+    final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
+      PMatrixI4x4F.identity();
     final KTransformType transform = KTransformMatrix4x4.newTransform(model);
     final KMeshReadableType mesh =
       KRendererDeferredOpaqueTest.makeMesh(gi.getGLCommon());
-    final RMatrixI3x3F<RTransformTextureType> m_uv = RMatrixI3x3F.identity();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m_uv =
+      PMatrixI3x3F.identity();
 
     final KCamera camera = KCamera.newCamera(view, projection);
     final KVisibleSetBuilderWithCreateType tb =
@@ -306,21 +310,23 @@ import com.io7m.r1.types.RTransformViewType;
     final KFramebufferDeferredType fb =
       KFramebufferDeferred.newFramebuffer(gi, fb_desc);
 
-    final RMatrixI4x4F<RTransformViewType> view = RMatrixI4x4F.identity();
-    final MatrixM4x4F temporary = new MatrixM4x4F();
+    final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view =
+      PMatrixI4x4F.identity();
     final KProjectionType projection =
       KProjectionFOV.newProjection(
-        temporary,
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         (float) Math.toRadians(90.0f),
         1.0f,
         1.0f,
         100.0f);
 
-    final RMatrixI4x4F<RTransformModelType> model = RMatrixI4x4F.identity();
+    final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
+      PMatrixI4x4F.identity();
     final KTransformType transform = KTransformMatrix4x4.newTransform(model);
     final KMeshReadableType mesh =
       KRendererDeferredOpaqueTest.makeMesh(gi.getGLCommon());
-    final RMatrixI3x3F<RTransformTextureType> m_uv = RMatrixI3x3F.identity();
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m_uv =
+      PMatrixI3x3F.identity();
 
     final KCamera camera = KCamera.newCamera(view, projection);
     final KVisibleSetBuilderWithCreateType tb =

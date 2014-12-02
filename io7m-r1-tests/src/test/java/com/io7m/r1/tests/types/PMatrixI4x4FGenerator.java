@@ -18,31 +18,41 @@ package com.io7m.r1.tests.types;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.jtensors.VectorI3F;
-import com.io7m.jtensors.VectorReadable3FType;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformType;
+import com.io7m.jtensors.VectorI4F;
+import com.io7m.jtensors.VectorReadable4FType;
+import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.r1.types.RSpaceType;
 
-public final class RMatrixI3x3FGenerator<T extends RTransformType> implements
-  Generator<RMatrixI3x3F<T>>
+public final class PMatrixI4x4FGenerator<S0 extends RSpaceType, S1 extends RSpaceType> implements
+  Generator<PMatrixI4x4F<S0, S1>>
 {
-  @Override public RMatrixI3x3F<T> next()
+  @Override public PMatrixI4x4F<S0, S1> next()
   {
-    final VectorReadable3FType column_0 =
-      new VectorI3F(
+    final VectorReadable4FType column_0 =
+      new VectorI4F(
         (float) Math.random(),
-        (float) Math.random(),
-        (float) Math.random());
-    final VectorReadable3FType column_1 =
-      new VectorI3F(
         (float) Math.random(),
         (float) Math.random(),
         (float) Math.random());
-    final VectorReadable3FType column_2 =
-      new VectorI3F(
+    final VectorReadable4FType column_1 =
+      new VectorI4F(
+        (float) Math.random(),
         (float) Math.random(),
         (float) Math.random(),
         (float) Math.random());
-    return RMatrixI3x3F.newFromColumns(column_0, column_1, column_2);
+    final VectorReadable4FType column_2 =
+      new VectorI4F(
+        (float) Math.random(),
+        (float) Math.random(),
+        (float) Math.random(),
+        (float) Math.random());
+    final VectorReadable4FType column_3 =
+      new VectorI4F(
+        (float) Math.random(),
+        (float) Math.random(),
+        (float) Math.random(),
+        (float) Math.random());
+    return PMatrixI4x4F
+      .newFromColumns(column_0, column_1, column_2, column_3);
   }
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,9 +18,9 @@ package com.io7m.r1.kernel.types;
 
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RMatrixI3x3F;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * The type of translucent, refractive materials.
@@ -43,7 +43,7 @@ import com.io7m.r1.types.RTransformTextureType;
    */
 
   public static KMaterialTranslucentRefractive newMaterial(
-    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
     final KMaterialNormalType in_normal,
     final KMaterialRefractiveType in_refractive)
   {
@@ -63,16 +63,16 @@ import com.io7m.r1.types.RTransformTextureType;
       in_refractive);
   }
 
-  private final String                              code;
-  private final KMaterialNormalType                 normal;
-  private final KMaterialRefractiveType             refractive;
-  private boolean                                   required_uv;
-  private final int                                 textures_required;
-  private final RMatrixI3x3F<RTransformTextureType> uv_matrix;
+  private final String                                             code;
+  private final KMaterialNormalType                                normal;
+  private final KMaterialRefractiveType                            refractive;
+  private boolean                                                  required_uv;
+  private final int                                                textures_required;
+  private final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix;
 
   private KMaterialTranslucentRefractive(
     final String in_code,
-    final RMatrixI3x3F<RTransformTextureType> in_uv_matrix,
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
     final KMaterialNormalType in_normal,
     final KMaterialRefractiveType in_refractive)
   {
@@ -125,7 +125,9 @@ import com.io7m.r1.types.RTransformTextureType;
     return this.code;
   }
 
-  @Override public RMatrixI3x3F<RTransformTextureType> materialGetUVMatrix()
+  @Override public
+    PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>
+    materialGetUVMatrix()
   {
     return this.uv_matrix;
   }

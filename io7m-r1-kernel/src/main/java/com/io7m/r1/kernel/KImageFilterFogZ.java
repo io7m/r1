@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -35,6 +35,8 @@ import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.parameterized.PMatrixM3x3F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
@@ -42,10 +44,9 @@ import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionJCGL;
-import com.io7m.r1.types.RMatrixM3x3F;
-import com.io7m.r1.types.RMatrixM4x4F;
-import com.io7m.r1.types.RTransformProjectionType;
-import com.io7m.r1.types.RTransformTextureType;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceTextureType;
 
 /**
  * A fog filter based on the local Z axis.
@@ -91,13 +92,13 @@ import com.io7m.r1.types.RTransformTextureType;
       shader_cache);
   }
 
-  private final KRegionCopierType                      copier;
-  private final JCGLImplementationType                 gi;
-  private final RMatrixM3x3F<RTransformTextureType>    matrix_uv;
-  private final RMatrixM4x4F<RTransformProjectionType> projection;
-  private final KUnitQuadCacheType                     quad_cache;
-  private final KFramebufferRGBACacheType              rgba_cache;
-  private final KShaderCacheImageType                  shader_cache;
+  private final KRegionCopierType                                  copier;
+  private final JCGLImplementationType                             gi;
+  private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> matrix_uv;
+  private final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>        projection;
+  private final KUnitQuadCacheType                                 quad_cache;
+  private final KFramebufferRGBACacheType                          rgba_cache;
+  private final KShaderCacheImageType                              shader_cache;
 
   private KImageFilterFogZ(
     final JCGLImplementationType in_gi,
@@ -112,8 +113,8 @@ import com.io7m.r1.types.RTransformTextureType;
       NullCheck.notNull(in_rgba_cache, "RGBA framebuffer cache");
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
     this.quad_cache = NullCheck.notNull(in_quad_cache, "Quad cache");
-    this.matrix_uv = new RMatrixM3x3F<RTransformTextureType>();
-    this.projection = new RMatrixM4x4F<RTransformProjectionType>();
+    this.matrix_uv = new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
+    this.projection = new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>();
   }
 
   private void evaluateFog(
