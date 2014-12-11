@@ -26,14 +26,16 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.CLASS) public @interface KSuggestedRangeF
 {
+  // CHECKSTYLE_JAVADOC:OFF
+
   /**
-   * The suggested inclusive lower bound of the value.
+   * @return The suggested inclusive lower bound of the value.
    */
 
   float lower();
 
   /**
-   * The suggested inclusive upper bound of the value.
+   * @return The suggested inclusive upper bound of the value.
    */
 
   float upper();

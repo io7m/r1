@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -156,7 +156,7 @@ import com.io7m.r1.types.RSpaceWorldType;
           in_original
             .projectiveAccept(new KLightProjectiveVisitorType<KShadowMappedBasic, UnreachableCodeException>() {
               @Override public KShadowMappedBasic projectiveWithoutShadow(
-                final KLightProjectiveWithoutShadow _)
+                final KLightProjectiveWithoutShadow unused)
               {
                 return KShadowMappedBasic.getDefault();
               }
@@ -164,7 +164,7 @@ import com.io7m.r1.types.RSpaceWorldType;
               @Override public
                 KShadowMappedBasic
                 projectiveWithoutShadowDiffuseOnly(
-                  final KLightProjectiveWithoutShadowDiffuseOnly _)
+                  final KLightProjectiveWithoutShadowDiffuseOnly unused)
               {
                 return KShadowMappedBasic.getDefault();
               }
@@ -186,7 +186,7 @@ import com.io7m.r1.types.RSpaceWorldType;
               @Override public
                 KShadowMappedBasic
                 projectiveWithShadowVariance(
-                  final KLightProjectiveWithShadowVariance _)
+                  final KLightProjectiveWithShadowVariance unused)
               {
                 return KShadowMappedBasic.getDefault();
               }
@@ -194,7 +194,7 @@ import com.io7m.r1.types.RSpaceWorldType;
               @Override public
                 KShadowMappedBasic
                 projectiveWithShadowVarianceDiffuseOnly(
-                  final KLightProjectiveWithShadowVarianceDiffuseOnly _)
+                  final KLightProjectiveWithShadowVarianceDiffuseOnly unused)
               {
                 return KShadowMappedBasic.getDefault();
               }

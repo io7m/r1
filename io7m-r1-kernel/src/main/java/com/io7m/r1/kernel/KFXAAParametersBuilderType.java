@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -39,7 +39,6 @@ public interface KFXAAParametersBuilderType
    * <p>
    * Interesting values are:
    * </p>
-   * <p>
    * <ul>
    * <li><tt>0.333</tt> - Lowest quality, but fastest</li>
    * <li><tt>0.250</tt> - Low quality</li>
@@ -47,7 +46,6 @@ public interface KFXAAParametersBuilderType
    * <li><tt>0.125</tt> - High quality</li>
    * <li><tt>0.063</tt> - Overkill (and slower)</li>
    * </ul>
-   * </p>
    *
    * @param e
    *          The edge threshold
@@ -67,13 +65,11 @@ public interface KFXAAParametersBuilderType
    * <p>
    * Interesting values are:
    * </p>
-   * <p>
    * <ul>
    * <li><tt>0.0833</tt> - The default, and the upper limit</li>
    * <li><tt>0.0625</tt> - High quality</li>
    * <li><tt>0.0312</tt> - Lower visible limit (and slower)</li>
    * </ul>
-   * </p>
    *
    * @param m
    *          The edge threshold minimum
@@ -85,7 +81,7 @@ public interface KFXAAParametersBuilderType
   /**
    * Set the overall algorithm quality. Higher values give better visual
    * results at the cost of more expensive processing.
-   * 
+   *
    * @param q
    *          The quality
    */
@@ -100,7 +96,6 @@ public interface KFXAAParametersBuilderType
    * <p>
    * Interesting values are:
    * </p>
-   * <p>
    * <ul>
    * <li><tt>1.0</tt> - The upper limit, and will result in a soft image</li>
    * <li><tt>0.75</tt> - The default</li>
@@ -108,7 +103,6 @@ public interface KFXAAParametersBuilderType
    * <li><tt>0.25</tt> - Almost off</li>
    * <li><tt>0.0</tt> - No aliasing removal</li>
    * </ul>
-   * </p>
    *
    * @param r
    *          The aliasing removal factor
