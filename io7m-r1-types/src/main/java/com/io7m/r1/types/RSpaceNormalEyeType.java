@@ -22,7 +22,7 @@ package com.io7m.r1.types;
  * This is distinct from {@link RSpaceEyeType} because normal vectors are
  * transformed without a translation component, so it's not correct to
  * transform arbitrary vectors using an
- * <code>&lt..., RSpaceNormalEyeType></code> transform matrix.
+ * <code>&lt;..., RSpaceNormalEyeType&gt;</code> transform matrix.
  */
 
 public interface RSpaceNormalEyeType extends RSpaceType

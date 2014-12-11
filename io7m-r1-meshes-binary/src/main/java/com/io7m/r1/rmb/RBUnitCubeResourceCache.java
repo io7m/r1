@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -202,11 +202,11 @@ import com.io7m.r1.types.RExceptionJCGL;
    * <p>
    * Concretely, if given a class <code>x.y.Z</code>, the loader will attempt
    * to load meshes from resources (in order of precedence):
+   * </p>
    * <ul>
    * <li><code>/x/y/cube.rmbz</code> (a compressed mesh)</li>
    * <li><code>/x/y/cube.rmb</code> (an uncompressed mesh)</li>
    * </ul>
-   * </p>
    *
    * @param <G>
    *          The precise type of OpenGL interface

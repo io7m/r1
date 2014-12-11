@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -39,6 +39,7 @@ import com.io7m.r1.types.RSpaceTextureType;
 public final class Food1FXAA implements ExampleImageType
 {
   private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv;
+  private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> temporary;
 
   /**
    * Construct the example.
@@ -47,6 +48,7 @@ public final class Food1FXAA implements ExampleImageType
   public Food1FXAA()
   {
     this.uv = new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
+    this.temporary = new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
   }
 
   @Override public <A> A exampleAccept(
@@ -74,7 +76,13 @@ public final class Food1FXAA implements ExampleImageType
 
     PMatrixM3x3F.setIdentity(this.uv);
     PMatrixM3x3F.scale(this.uv, 3.0f, this.uv);
-    PMatrixM3x3F.rotate(Math.toRadians(45.0), this.uv, KAxes.AXIS_Z, this.uv);
+
+    PMatrixM3x3F.makeRotationInto(
+      Math.toRadians(45.0),
+      KAxes.AXIS_Z,
+      this.temporary);
+    PMatrixM3x3F.multiply(this.uv, this.temporary, this.uv);
+
     final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m =
       PMatrixI3x3F.newFromReadable(this.uv);
 

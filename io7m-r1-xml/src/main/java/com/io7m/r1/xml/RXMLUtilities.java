@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -1197,8 +1197,10 @@ import com.io7m.r1.types.RXMLException;
   /**
    * Serialize the given matrix to attributes on the given element.
    *
-   * @param <T>
-   *          The type of matrix transform.
+   * @param <S0>
+   *          The type of source coordinate system.
+   * @param <S1>
+   *          The type of target coordinate system.
    * @param e
    *          The element.
    * @param m
