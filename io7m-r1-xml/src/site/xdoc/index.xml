@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document
+  xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+  <properties>
+    <title>io7m-r1-xml</title>
+  </properties>
+
+  <body>
+    <subsection name="r1-xml">
+      The <var>r1-xml</var> package contains functions and types used
+      by any package that manipulates XML.
+    </subsection>
+  </body>
+
+</document>
