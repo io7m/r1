@@ -587,6 +587,9 @@ import com.io7m.r1.types.RSpaceTextureType;
         KShadingProgramCommon.putMatrixModelView(
           program,
           mwi.getMatrixModelView());
+        KShadingProgramCommon.putDepthCoefficient(
+          program,
+          KRendererCommon.depthCoefficient(mwi.getProjection()));
 
         program.programExecute(new JCBProgramProcedureType<JCGLException>() {
           @Override public void call()
@@ -652,6 +655,9 @@ import com.io7m.r1.types.RSpaceTextureType;
           mwi.getMatrixViewInverse());
         KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
         KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
+        KShadingProgramCommon.putDepthCoefficient(
+          program,
+          KRendererCommon.depthCoefficient(mwi.getProjection()));
 
         program.programExecute(new JCBProgramProcedureType<JCGLException>() {
           @Override public void call()
@@ -864,6 +870,8 @@ import com.io7m.r1.types.RSpaceTextureType;
           program,
           KMatrices.IDENTITY_UV);
 
+        KShadingProgramCommon.putDepthCoefficient(program, 1.0f);
+
         program.programUniformPutVector4f(
           "f_ccolor",
           KRendererDeferredOpaque.BLACK);
@@ -906,6 +914,8 @@ import com.io7m.r1.types.RSpaceTextureType;
         KShadingProgramCommon.putMatrixUVUnchecked(
           program,
           KMatrices.IDENTITY_UV);
+
+        KShadingProgramCommon.putDepthCoefficient(program, 1.0f);
 
         program.programUniformPutVector4f(
           "f_ccolor",
@@ -963,6 +973,10 @@ import com.io7m.r1.types.RSpaceTextureType;
               KShadingProgramCommon.putMatrixProjection(
                 program,
                 mwo.getMatrixProjection());
+
+              KShadingProgramCommon.putDepthCoefficient(
+                program,
+                KRendererCommon.depthCoefficient(mwo.getProjection()));
 
               KRendererDeferredOpaque.renderGroupGeometryBatchInstances(
                 gc,
@@ -1286,6 +1300,9 @@ import com.io7m.r1.types.RSpaceTextureType;
               KShadingProgramCommon.putMatrixUVUnchecked(
                 program,
                 KMatrices.IDENTITY_UV);
+              KShadingProgramCommon.putDepthCoefficient(
+                program,
+                KRendererCommon.depthCoefficient(mi.getProjection()));
 
               KShadingProgramCommon.putViewRays(program, view_rays);
 
@@ -1626,6 +1643,10 @@ import com.io7m.r1.types.RSpaceTextureType;
               KShadingProgramCommon.putMatrixProjection(
                 program,
                 mwo.getMatrixProjection());
+
+              KShadingProgramCommon.putDepthCoefficient(
+                program,
+                KRendererCommon.depthCoefficient(mwo.getProjection()));
 
               KRendererDeferredOpaque.renderGroupGeometryBatchInstances(
                 gc,

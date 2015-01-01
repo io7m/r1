@@ -31,6 +31,8 @@ import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.VectorI2F;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -441,12 +443,29 @@ import com.io7m.r1.types.RExceptionJCGL;
               program,
               mi.getMatrixModelView());
 
+            KShadingProgramCommon.putDepthCoefficient(
+              program,
+              KRendererCommon.depthCoefficient(mi.getProjection()));
+
             final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
             final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
             gc.arrayBufferBind(array);
             KShadingProgramCommon.bindAttributePositionUnchecked(
               program,
               array);
+
+            /**
+             * The standard vertex shader requires these attributes, but they
+             * are optimized out.
+             */
+
+            KShadingProgramCommon.putAttributeUVUnchecked(
+              program,
+              VectorI2F.ZERO);
+            KShadingProgramCommon.putAttributeNormalUnchecked(
+              program,
+              VectorI3F.ZERO);
+            KRefractionRenderer.putInstanceMatrices(program, mi);
 
             program
               .programExecute(new JCBProgramProcedureType<JCGLException>() {
@@ -514,6 +533,10 @@ import com.io7m.r1.types.RExceptionJCGL;
               KShadingProgramCommon.putMatrixProjectionUnchecked(
                 program,
                 mi.getMatrixProjection());
+
+              KShadingProgramCommon.putDepthCoefficient(
+                program,
+                KRendererCommon.depthCoefficient(mi.getProjection()));
 
               KRefractionRenderer.putInstanceMatrices(program, mi);
 
@@ -604,6 +627,10 @@ import com.io7m.r1.types.RExceptionJCGL;
                 program,
                 mi.getMatrixProjection());
 
+              KShadingProgramCommon.putDepthCoefficient(
+                program,
+                KRendererCommon.depthCoefficient(mi.getProjection()));
+
               KRefractionRenderer.putInstanceMatrices(program, mi);
 
               KRefractionRenderer.putTextures(
@@ -688,6 +715,10 @@ import com.io7m.r1.types.RExceptionJCGL;
                 program,
                 mi.getMatrixProjection());
 
+              KShadingProgramCommon.putDepthCoefficient(
+                program,
+                KRendererCommon.depthCoefficient(mi.getProjection()));
+
               KRefractionRenderer.putInstanceMatrices(program, mi);
 
               KRefractionRenderer.putTextures(
@@ -771,6 +802,10 @@ import com.io7m.r1.types.RExceptionJCGL;
               KShadingProgramCommon.putMatrixProjectionUnchecked(
                 program,
                 mi.getMatrixProjection());
+
+              KShadingProgramCommon.putDepthCoefficient(
+                program,
+                KRendererCommon.depthCoefficient(mi.getProjection()));
 
               KRefractionRenderer.putInstanceMatrices(program, mi);
 

@@ -29,23 +29,14 @@ module VertexShaders is
   import com.io7m.parasol.Sampler2D  as S;
   import com.io7m.parasol.Float      as F;
 
-  import com.io7m.r1.core.Albedo;
-  import com.io7m.r1.core.CubeMap;
-  import com.io7m.r1.core.DirectionalLight;
-  import com.io7m.r1.core.Emission;
-  import com.io7m.r1.core.Environment;
-  import com.io7m.r1.core.Light;
   import com.io7m.r1.core.Normals;
-  import com.io7m.r1.core.ProjectiveLight;
-  import com.io7m.r1.core.Refraction;
-  import com.io7m.r1.core.ShadowBasic;
-  import com.io7m.r1.core.ShadowVariance;
-  import com.io7m.r1.core.Specular;
-  import com.io7m.r1.core.SphericalLight;
-  import com.io7m.r1.core.VectorAux;
+  import com.io7m.r1.core.LogDepth;
 
   --
   -- Standard vertex shader with per-vertex normals.
+  -- 
+  -- The computed clip-space Z is clamped to [0.000001, ∞] and
+  -- calculated to be used for a logarithmic depth buffer.
   --
 
   shader vertex standard is
@@ -53,6 +44,10 @@ module VertexShaders is
     in v_position              : vector_3f;
     out f_position_eye         : vector_4f;
     out vertex f_position_clip : vector_4f;
+    out f_log_depth            : float;
+
+    -- Log depth coefficient (2.0 / log2 (far + 1.0))
+    parameter depth_coefficient : float;
 
     -- Standard matrices
     parameter m_modelview      : matrix_4x4f;
@@ -81,6 +76,11 @@ module VertexShaders is
         new vector_4f (v_position, 1.0)
       );
 
+    value position_clip_log =
+      LogDepth.make_position (position_clip, depth_coefficient);
+    value log_depth =
+      LogDepth.make_vertex_interpolant (position_clip);
+
     -- Transformed UV coordinates
     value uv =
       M3.multiply_vector (
@@ -93,13 +93,17 @@ module VertexShaders is
       M3.multiply_vector (m_normal, v_normal);
   as
     out f_normal_eye    = normal_eye;
-    out f_position_clip = position_clip;
+    out f_position_clip = position_clip_log;
     out f_position_eye  = position_eye;
     out f_uv            = uv;
+    out f_log_depth     = log_depth;
   end;
 
   --
   -- Standard vertex shader for mapped normals.
+  --
+  -- The computed clip-space Z is clamped to [0.000001, ∞] and
+  -- calculated to be used for a logarithmic depth buffer.
   --
 
   shader vertex standard_NorM is
@@ -107,6 +111,10 @@ module VertexShaders is
     in v_position              : vector_3f;
     out f_position_eye         : vector_4f;
     out vertex f_position_clip : vector_4f;
+    out f_log_depth            : float;
+
+    -- Log depth coefficient (2.0 / log2 (far + 1.0))
+    parameter depth_coefficient : float;
 
     -- Standard matrices
     parameter m_modelview      : matrix_4x4f;
@@ -137,6 +145,11 @@ module VertexShaders is
         new vector_4f (v_position, 1.0)
       );
 
+    value position_clip_log =
+      LogDepth.make_position (position_clip, depth_coefficient);
+    value log_depth =
+      LogDepth.make_vertex_interpolant (position_clip);
+
     -- Transformed UV coordinates
     value uv =
       M3.multiply_vector (
@@ -154,9 +167,10 @@ module VertexShaders is
     out f_tangent      = tangent;
     out f_bitangent    = bitangent;
 
-    out f_position_clip = position_clip;
+    out f_position_clip = position_clip_log;
     out f_position_eye  = position_eye;
     out f_uv            = uv;
+    out f_log_depth     = log_depth;
   end;
 
   --
@@ -171,14 +185,25 @@ module VertexShaders is
     in         v_uv            : vector_2f;
     out vertex f_position_clip : vector_4f;
     out        f_uv            : vector_2f;
+    out        f_log_depth     : float;
+
+    -- Log depth coefficient (2.0 / log2 (far + 1.0))
+    parameter depth_coefficient : float;
   with
     value position_clip =
       new vector_4f (v_position, 1.0);
+
+    value position_clip_log =
+      LogDepth.make_position (position_clip, depth_coefficient);
+    value log_depth =
+      LogDepth.make_vertex_interpolant (position_clip);
+
     value uv =
       M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
   as
     out f_uv            = uv;
-    out f_position_clip = position_clip;
+    out f_position_clip = position_clip_log;
+    out f_log_depth     = log_depth;
   end;
 
   --
@@ -196,17 +221,28 @@ module VertexShaders is
     out vertex f_position_clip  : vector_4f;
     out        f_position_eye   : vector_4f;
     out        f_uv             : vector_2f;
+    out        f_log_depth      : float;
+
+    -- Log depth coefficient (2.0 / log2 (far + 1.0))
+    parameter depth_coefficient : float;
   with
     value position_clip =
       new vector_4f (v_position, 1.0);
+
+    value position_clip_log =
+      LogDepth.make_position (position_clip, depth_coefficient);
+    value log_depth =
+      LogDepth.make_vertex_interpolant (position_clip);
+
     value position_eye =
       M4.multiply_vector (m_projection_inv, position_clip);
     value uv =
       M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
   as
     out f_uv            = uv;
-    out f_position_clip = position_clip;
+    out f_position_clip = position_clip_log;
     out f_position_eye  = position_eye;
+    out f_log_depth     = log_depth;
   end;
 
 end;
