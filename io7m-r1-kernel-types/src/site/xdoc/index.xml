@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document
+  xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+  <properties>
+    <title>io7m-r1-kernel-types</title>
+  </properties>
+
+  <body>
+    <subsection name="r1-kernel-types">
+      The <var>r1-kernel-types</var> package contains types shared between
+      the kernel and other packages in the renderer.
+    </subsection>
+  </body>
+
+</document>
