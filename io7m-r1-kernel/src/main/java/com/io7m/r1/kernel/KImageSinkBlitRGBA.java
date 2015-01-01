@@ -100,6 +100,8 @@ import com.io7m.r1.types.RSpaceTextureType;
       KShadingProgramCommon.bindAttributeUV(p, array);
       KShadingProgramCommon.putMatrixUV(p, this.uv);
 
+      KShadingProgramCommon.putDepthCoefficient(p, 1.0f);
+
       p.programExecute(new JCBProgramProcedureType<JCGLException>() {
         @Override public void call()
           throws JCGLException

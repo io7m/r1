@@ -27,6 +27,7 @@ module Refraction is
   import com.io7m.parasol.Matrix4x4f;
 
   import com.io7m.r1.core.Transform;
+  import com.io7m.r1.core.VertexShaders;
 
   --
   -- Refraction parameters.
@@ -135,21 +136,6 @@ module Refraction is
   -- "Constant color" shader for refraction masks.
   --
 
-  shader vertex mask_v is
-    in v_position              : vector_3f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-    out vertex f_position_clip : vector_4f;
-  with
-    value clip_position =
-      Matrix4x4f.multiply_vector (
-        Matrix4x4f.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-  as
-    out f_position_clip = clip_position;
-  end;
-
   shader fragment mask_f is
     parameter f_ccolor : vector_4f;
     out       out_0    : vector_4f as 0;
@@ -158,7 +144,7 @@ module Refraction is
   end;
 
   shader program mask is
-    vertex   mask_v;
+    vertex   VertexShaders.standard;
     fragment mask_f;
   end;
 

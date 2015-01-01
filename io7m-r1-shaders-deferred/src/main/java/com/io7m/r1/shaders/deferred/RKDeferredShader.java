@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -84,8 +84,10 @@ import com.io7m.r1.types.RException;
     final boolean requires_uv)
   {
     b.append("  -- Standard declarations\n");
-    b.append("  in f_position_eye  : vector_4f;\n");
-    b.append("  in f_position_clip : vector_4f;\n");
+    b.append("  in f_position_eye           : vector_4f;\n");
+    b.append("  in f_position_clip          : vector_4f;\n");
+    b.append("  in f_log_depth              : float;\n");
+    b.append("  parameter depth_coefficient : float;\n");
     b.append("\n");
 
     if (requires_uv) {
@@ -95,9 +97,10 @@ import com.io7m.r1.types.RException;
     }
 
     b.append("  -- G-Buffer outputs\n");
-    b.append("  out out_albedo     : vector_4f as 0;\n");
-    b.append("  out out_normal     : vector_2f as 1;\n");
-    b.append("  out out_specular   : vector_4f as 2;\n");
+    b.append("  out out_albedo      : vector_4f as 0;\n");
+    b.append("  out out_normal      : vector_2f as 1;\n");
+    b.append("  out out_specular    : vector_4f as 2;\n");
+    b.append("  out depth out_depth : float;\n");
     b.append("\n");
   }
 
@@ -186,6 +189,7 @@ import com.io7m.r1.types.RException;
     b.append("  out out_albedo    = r_albedo;\n");
     b.append("  out out_normal    = r_normal;\n");
     b.append("  out out_specular  = r_specular;\n");
+    b.append("  out out_depth     = r_depth;\n");
     b.append("end;\n");
     b.append("\n");
   }
@@ -202,6 +206,10 @@ import com.io7m.r1.types.RException;
         .append("  -- The eye-space position of the current light volume fragment\n");
       b.append("  in f_position_eye : vector_4f;\n");
       b.append("\n");
+      b.append("  -- Logarithmic depth parameters\n");
+      b.append("  in f_log_depth              : float;\n");
+      b.append("  parameter depth_coefficient : float;\n");
+      b.append("\n");
       b.append("  -- Matrices\n");
       b.append("  parameter m_view_inv   : matrix_4x4f;\n");
       b.append("  parameter m_projection : matrix_4x4f;\n");
@@ -213,7 +221,8 @@ import com.io7m.r1.types.RException;
       b.append("  parameter t_map_depth     : sampler_2d;\n");
       b.append("\n");
       b.append("  -- Standard declarations\n");
-      b.append("  out out_0 : vector_4f as 0;\n");
+      b.append("  out out_0           : vector_4f as 0;\n");
+      b.append("  out depth out_depth : float;\n");
       b.append("\n");
       b.append("  parameter view_rays : ViewRays.t;\n");
       b.append("  parameter viewport  : Viewport.t;\n");
@@ -356,9 +365,15 @@ import com.io7m.r1.types.RException;
       b.append("      Fragment.coordinate [x y]\n");
       b.append("    );\n");
       b.append("\n");
+      b.append("  value r_depth =\n");
+      b
+        .append("    LogDepth.make_fragment_depth (f_log_depth, depth_coefficient);\n");
+      b.append("\n");
       b.append("  -- Reconstruct eye-space position.\n");
-      b.append("  value depth_sample = \n");
+      b.append("  value log_depth =\n");
       b.append("    S.texture (t_map_depth, position_uv) [x];\n");
+      b.append("  value depth_sample =\n");
+      b.append("    LogDepth.reconstruct (log_depth, depth_coefficient);\n");
       b.append("  value eye_position =\n");
       b.append("    Reconstruction.reconstruct_eye (\n");
       b.append("      depth_sample,\n");
@@ -729,6 +744,7 @@ import com.io7m.r1.types.RException;
 
       b.append("as\n");
       b.append("  out out_0 = rgba;\n");
+      b.append("  out out_depth = r_depth;\n");
       b.append("end;\n");
       b.append("\n");
 
@@ -794,6 +810,11 @@ import com.io7m.r1.types.RException;
       b.append("\n");
       b.append("  value r_albedo =\n");
       b.append("    surface;\n");
+      b.append("\n");
+
+      b.append("  value r_depth =\n");
+      b
+        .append("    LogDepth.make_fragment_depth (f_log_depth, depth_coefficient);\n");
       b.append("\n");
 
       specular
@@ -1054,6 +1075,7 @@ import com.io7m.r1.types.RException;
     b.append("import com.io7m.r1.core.Emission;\n");
     b.append("import com.io7m.r1.core.Environment;\n");
     b.append("import com.io7m.r1.core.Light;\n");
+    b.append("import com.io7m.r1.core.LogDepth;\n");
     b.append("import com.io7m.r1.core.Normals;\n");
     b.append("import com.io7m.r1.core.ProjectiveLight;\n");
     b.append("import com.io7m.r1.core.Refraction;\n");
