@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -86,7 +86,7 @@ import com.io7m.r1.types.RException;
     b.append("  -- Standard declarations\n");
     b.append("  in f_position_eye           : vector_4f;\n");
     b.append("  in f_position_clip          : vector_4f;\n");
-    b.append("  in f_log_depth              : float;\n");
+    b.append("  in f_depth_log              : float;\n");
     b.append("  parameter depth_coefficient : float;\n");
     b.append("\n");
 
@@ -207,7 +207,7 @@ import com.io7m.r1.types.RException;
       b.append("  in f_position_eye : vector_4f;\n");
       b.append("\n");
       b.append("  -- Logarithmic depth parameters\n");
-      b.append("  in f_log_depth              : float;\n");
+      b.append("  in f_depth_log              : float;\n");
       b.append("  parameter depth_coefficient : float;\n");
       b.append("\n");
       b.append("  -- Matrices\n");
@@ -367,16 +367,17 @@ import com.io7m.r1.types.RException;
       b.append("\n");
       b.append("  value r_depth =\n");
       b
-        .append("    LogDepth.make_fragment_depth (f_log_depth, depth_coefficient);\n");
+        .append("    LogDepth.encode_partial (f_depth_log, depth_coefficient);\n");
       b.append("\n");
       b.append("  -- Reconstruct eye-space position.\n");
       b.append("  value log_depth =\n");
       b.append("    S.texture (t_map_depth, position_uv) [x];\n");
-      b.append("  value depth_sample =\n");
-      b.append("    LogDepth.reconstruct (log_depth, depth_coefficient);\n");
+      b.append("  value eye_depth =\n");
+      b
+        .append("    F.negate (LogDepth.decode (log_depth, depth_coefficient));\n");
       b.append("  value eye_position =\n");
-      b.append("    Reconstruction.reconstruct_eye (\n");
-      b.append("      depth_sample,\n");
+      b.append("    Reconstruction.reconstruct_eye_with_eye_z (\n");
+      b.append("      eye_depth,\n");
       b.append("      position_uv,\n");
       b.append("      m_projection,\n");
       b.append("      view_rays\n");
@@ -814,7 +815,7 @@ import com.io7m.r1.types.RException;
 
       b.append("  value r_depth =\n");
       b
-        .append("    LogDepth.make_fragment_depth (f_log_depth, depth_coefficient);\n");
+        .append("    LogDepth.encode_full (f_depth_log, depth_coefficient);\n");
       b.append("\n");
 
       specular

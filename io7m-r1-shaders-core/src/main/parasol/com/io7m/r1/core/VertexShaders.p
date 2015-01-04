@@ -42,9 +42,10 @@ module VertexShaders is
   shader vertex standard is
     -- Vertex position coordinates
     in v_position              : vector_3f;
+
     out f_position_eye         : vector_4f;
     out vertex f_position_clip : vector_4f;
-    out f_log_depth            : float;
+    out f_depth_log            : float;
 
     -- Log depth coefficient (2.0 / log2 (far + 1.0))
     parameter depth_coefficient : float;
@@ -77,9 +78,14 @@ module VertexShaders is
       );
 
     value position_clip_log =
-      LogDepth.make_position (position_clip, depth_coefficient);
-    value log_depth =
-      LogDepth.make_vertex_interpolant (position_clip);
+      new vector_4f (
+        position_clip [x y],
+        LogDepth.encode_full (position_clip [w], depth_coefficient),
+        position_clip [w]
+      );
+
+    value depth_log =
+      F.add (position_clip [w], 1.0);
 
     -- Transformed UV coordinates
     value uv =
@@ -96,7 +102,7 @@ module VertexShaders is
     out f_position_clip = position_clip_log;
     out f_position_eye  = position_eye;
     out f_uv            = uv;
-    out f_log_depth     = log_depth;
+    out f_depth_log     = depth_log;
   end;
 
   --
@@ -111,7 +117,7 @@ module VertexShaders is
     in v_position              : vector_3f;
     out f_position_eye         : vector_4f;
     out vertex f_position_clip : vector_4f;
-    out f_log_depth            : float;
+    out f_depth_log            : float;
 
     -- Log depth coefficient (2.0 / log2 (far + 1.0))
     parameter depth_coefficient : float;
@@ -146,9 +152,14 @@ module VertexShaders is
       );
 
     value position_clip_log =
-      LogDepth.make_position (position_clip, depth_coefficient);
-    value log_depth =
-      LogDepth.make_vertex_interpolant (position_clip);
+      new vector_4f (
+        position_clip [x y],
+        LogDepth.encode_full (position_clip [w], depth_coefficient),
+        position_clip [w]
+      );
+
+    value depth_log =
+      F.add (position_clip [w], 1.0);
 
     -- Transformed UV coordinates
     value uv =
@@ -170,7 +181,7 @@ module VertexShaders is
     out f_position_clip = position_clip_log;
     out f_position_eye  = position_eye;
     out f_uv            = uv;
-    out f_log_depth     = log_depth;
+    out f_depth_log     = depth_log;
   end;
 
   --
@@ -185,25 +196,31 @@ module VertexShaders is
     in         v_uv            : vector_2f;
     out vertex f_position_clip : vector_4f;
     out        f_uv            : vector_2f;
-    out        f_log_depth     : float;
+    out        f_depth_log     : float;
 
     -- Log depth coefficient (2.0 / log2 (far + 1.0))
     parameter depth_coefficient : float;
+
   with
     value position_clip =
       new vector_4f (v_position, 1.0);
 
     value position_clip_log =
-      LogDepth.make_position (position_clip, depth_coefficient);
-    value log_depth =
-      LogDepth.make_vertex_interpolant (position_clip);
+      new vector_4f (
+        position_clip [x y],
+        LogDepth.encode_full (position_clip [w], depth_coefficient),
+        position_clip [w]
+      );
+
+    value depth_log =
+      F.add (position_clip [w], 1.0);
 
     value uv =
       M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
   as
     out f_uv            = uv;
     out f_position_clip = position_clip_log;
-    out f_log_depth     = log_depth;
+    out f_depth_log     = depth_log;
   end;
 
   --
@@ -221,7 +238,7 @@ module VertexShaders is
     out vertex f_position_clip  : vector_4f;
     out        f_position_eye   : vector_4f;
     out        f_uv             : vector_2f;
-    out        f_log_depth      : float;
+    out        f_depth_log      : float;
 
     -- Log depth coefficient (2.0 / log2 (far + 1.0))
     parameter depth_coefficient : float;
@@ -230,9 +247,14 @@ module VertexShaders is
       new vector_4f (v_position, 1.0);
 
     value position_clip_log =
-      LogDepth.make_position (position_clip, depth_coefficient);
-    value log_depth =
-      LogDepth.make_vertex_interpolant (position_clip);
+      new vector_4f (
+        position_clip [x y],
+        LogDepth.encode_full (position_clip [w], depth_coefficient),
+        position_clip [w]
+      );
+
+    value depth_log =
+      F.add (position_clip [w], 1.0);
 
     value position_eye =
       M4.multiply_vector (m_projection_inv, position_clip);
@@ -242,7 +264,7 @@ module VertexShaders is
     out f_uv            = uv;
     out f_position_clip = position_clip_log;
     out f_position_eye  = position_eye;
-    out f_log_depth     = log_depth;
+    out f_depth_log     = depth_log;
   end;
 
 end;
