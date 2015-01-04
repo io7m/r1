@@ -91,4 +91,34 @@ module LogDepth is
       F.subtract (unlog_z, 1.0)
     end;
 
+  function encode_partial (
+    z                 : float,
+    depth_coefficient : float  
+  ) : float =
+    let 
+      value half_co = F.multiply (depth_coefficient, 0.5);
+      value clamp_z = F.maximum (0.000001, z);
+    in
+      F.multiply (F.log2 (clamp_z), half_co)
+    end;
+
+  function encode_full (
+    z                 : float,
+    depth_coefficient : float  
+  ) : float =
+    let 
+      value half_co = F.multiply (depth_coefficient, 0.5);
+      value clamp_z = F.maximum (0.000001, F.add (z, 1.0));
+    in
+      F.multiply (F.log2 (clamp_z), half_co)
+    end;
+
+  function decode (
+    z                 : float,
+    depth_coefficient : float  
+  ) : float =
+    let value half_co = F.multiply (depth_coefficient, 0.5); in
+      F.subtract (F.power (2.0, F.divide (z, half_co)), 1.0)
+    end;
+
 end;

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -263,24 +263,6 @@ import com.io7m.r1.types.RSpaceWorldType;
     program.programAttributeBind(
       KShadingProgramCommon.ATTRIBUTE_NAME_VERTEX_UV,
       a);
-  }
-
-  static void putAttributeUVUnchecked(
-    final JCBProgramType program,
-    final VectorReadable2FType uv)
-    throws JCGLException
-  {
-    program.programAttributePutVector2F(
-      KShadingProgramCommon.ATTRIBUTE_NAME_VERTEX_UV,
-      uv);
-  }
-
-  static void putAttributeNormalUnchecked(
-    final JCBProgramType program,
-    final VectorReadable3FType n)
-    throws JCGLException
-  {
-    program.programAttributePutVector3F("v_normal", n);
   }
 
   static void bindPutTextureAlbedo(
@@ -578,6 +560,14 @@ import com.io7m.r1.types.RSpaceWorldType;
     program.programAttributePutVector3F("v_normal", r);
   }
 
+  static void putAttributeNormalUnchecked(
+    final JCBProgramType program,
+    final VectorReadable3FType n)
+    throws JCGLException
+  {
+    program.programAttributePutVector3F("v_normal", n);
+  }
+
   static void putAttributeTangent4(
     final JCBProgramType program,
     final PVectorI4F<RSpaceObjectType> t)
@@ -589,6 +579,16 @@ import com.io7m.r1.types.RSpaceWorldType;
   static void putAttributeUV(
     final JCBProgramType program,
     final PVectorI2F<RSpaceTextureType> uv)
+    throws JCGLException
+  {
+    program.programAttributePutVector2F(
+      KShadingProgramCommon.ATTRIBUTE_NAME_VERTEX_UV,
+      uv);
+  }
+
+  static void putAttributeUVUnchecked(
+    final JCBProgramType program,
+    final VectorReadable2FType uv)
     throws JCGLException
   {
     program.programAttributePutVector2F(
@@ -641,6 +641,12 @@ import com.io7m.r1.types.RSpaceWorldType;
     final float c)
   {
     program.programUniformPutFloat("depth_coefficient", c);
+  }
+
+  static void putDepthCoefficientReuse(
+    final JCBProgramType p)
+  {
+    p.programUniformUseExisting("depth_coefficient");
   }
 
   static void putLightDirectional(
