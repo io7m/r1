@@ -14,8 +14,8 @@
    id="svg4161"
    version="1.1"
    inkscape:version="0.48.5 r10040"
-   sodipodi:docname="matrix_clip_w_simple.svg"
-   inkscape:export-filename="/home/m0/fossil/com.io7m.cirrus/io7m-renderer/io7m-r1-documentation/src/main/resources/com/io7m/r1/documentation/images/matrix_clip_w_simple.png"
+   sodipodi:docname="matrix_clip_w_simple_orthographic.svg"
+   inkscape:export-filename="/home/m0/fossil/com.io7m/io7m-r1/io7m-r1-documentation/src/main/resources/com/io7m/r1/documentation/images/matrix_clip_w_simple_orthographic.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -28,7 +28,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
-     inkscape:cx="426.92568"
+     inkscape:cx="372.19594"
      inkscape:cy="63.687479"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -64,7 +64,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -198,7 +198,7 @@
          y="410.71933"
          x="80.214294"
          id="tspan13586"
-         sodipodi:role="line">c</tspan></text>
+         sodipodi:role="line">0</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline"
        d="m 0.21429,300.71933 -10,0 0,130 10,0"
@@ -277,7 +277,7 @@
          y="410.71933"
          x="120.21429"
          id="tspan13608"
-         sodipodi:role="line">d</tspan></text>
+         sodipodi:role="line">1</tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text13610"
@@ -579,7 +579,7 @@
          y="425.71933"
          x="290.21429"
          sodipodi:role="line"
-         id="tspan3418">  + (c * eye_z) + (d * 1)</tspan></text>
+         id="tspan3418">  + (0 * eye_z) + (1 * 1)</tspan></text>
     <text
        inkscape:export-ydpi="110"
        inkscape:export-xdpi="110"
@@ -646,14 +646,14 @@
        sodipodi:nodetypes="cccc"
        inkscape:connector-curvature="0"
        id="path3380-9"
-       d="m 650.21429,300.71933 10,0 0,130 -10,0"
+       d="m 550.21429,300.71933 10,0 0,130 -10,0"
        style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline"
        inkscape:export-filename="/home/m0/fossil/com.io7m/io7m-jtensors/src/main/images/matrix_rx.png"
        inkscape:export-xdpi="110"
        inkscape:export-ydpi="110" />
     <path
        style="fill:#b3b3b3;stroke:#cccccc;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline"
-       d="m 530.21429,330.71933 120,0"
+       d="m 530.21429,330.71933 20,0"
        id="path3382-7"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc"
@@ -663,7 +663,7 @@
     <path
        inkscape:connector-curvature="0"
        id="path3384-8"
-       d="m 530.21429,360.71933 120,0"
+       d="m 530.21429,360.71933 20,0"
        style="fill:#b3b3b3;stroke:#cccccc;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline"
        sodipodi:nodetypes="cc"
        inkscape:export-filename="/home/m0/fossil/com.io7m/io7m-jtensors/src/main/images/matrix_rx.png"
@@ -671,7 +671,7 @@
        inkscape:export-ydpi="110" />
     <path
        style="fill:#b3b3b3;stroke:#cccccc;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline"
-       d="m 530.21429,390.71933 120,0"
+       d="m 530.21429,390.71933 20,0"
        id="path3386-9"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc"
@@ -681,7 +681,7 @@
     <path
        inkscape:connector-curvature="0"
        id="path3388-8"
-       d="m 530.21429,420.71933 120,0"
+       d="m 530.21429,420.71933 20,0"
        style="fill:#b3b3b3;stroke:#cccccc;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline"
        sodipodi:nodetypes="cc"
        inkscape:export-filename="/home/m0/fossil/com.io7m/io7m-jtensors/src/main/images/matrix_rx.png"
@@ -700,7 +700,7 @@
          y="410.71933"
          x="530.21429"
          sodipodi:role="line"
-         id="tspan3418-5">(c * eye_z) + d</tspan></text>
+         id="tspan3418-5">1</tspan></text>
     <text
        inkscape:export-ydpi="110"
        inkscape:export-xdpi="110"

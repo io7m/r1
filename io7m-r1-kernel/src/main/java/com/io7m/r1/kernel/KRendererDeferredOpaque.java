@@ -1167,6 +1167,9 @@ import com.io7m.r1.types.RSpaceTextureType;
         KShadingProgramCommon.putMatrixProjectionUnchecked(
           program,
           mwo.getMatrixProjection());
+        KShadingProgramCommon.putDepthCoefficient(
+          program,
+          KRendererCommon.depthCoefficient(mwo.getProjection()));
 
         KShadingProgramCommon.putViewRays(program, view_rays);
 

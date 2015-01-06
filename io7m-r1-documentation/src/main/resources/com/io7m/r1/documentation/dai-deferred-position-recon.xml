@@ -219,6 +219,35 @@
       <s:verbatim><xi:include href="haskell/ClipSpaceWSimple.hs" parse="text"/></s:verbatim>
     </s:formal-item>
     <s:paragraph>
+      It should be noted that for perspective matrices in the
+      <s:term s:type="package">${project.parent.name}</s:term> package,
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 2) == -1</s:term> and
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 3) == 0</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Clip-space W Simple (Perspective, Diagram)</s:formal-item-title>
+      <s:image s:source="images/matrix_clip_w_simple_perspective.png">Clip-space W Simple (Perspective, Diagram)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      This means that the <s:term s:type="variable">w</s:term> component of the
+      resulting clip-space coordinates is equal to the negated (and therefore positive)
+      eye-space <s:term s:type="variable">z</s:term> of the original coordinates.
+    </s:paragraph>
+    <s:paragraph>
+      For orthographic projections in the
+      <s:term s:type="package">${project.parent.name}</s:term> package,
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 2) == 0</s:term> and
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 3) == 1</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Clip-space W Simple (Orthographic, Diagram)</s:formal-item-title>
+      <s:image s:source="images/matrix_clip_w_simple_orthographic.png">Clip-space W Simple (Orthographic, Diagram)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      This means that the <s:term s:type="variable">w</s:term> component of the
+      resulting clip-space coordinates is always equal to <s:term s:type="constant">1</s:term>.
+    </s:paragraph>
+    <s:paragraph>
       As stated previously, normalized-device space coordinates are calculated
       by dividing a set of clip-space coordinates by their own 
       <s:term s:type="variable">w</s:term> component. So, given
