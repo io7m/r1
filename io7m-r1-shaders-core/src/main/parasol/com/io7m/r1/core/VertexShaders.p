@@ -85,7 +85,7 @@ module VertexShaders is
       );
 
     value depth_log =
-      F.add (position_clip [w], 1.0);
+      F.add (F.negate (position_eye [z]), 1.0);
 
     -- Transformed UV coordinates
     value uv =
@@ -159,7 +159,7 @@ module VertexShaders is
       );
 
     value depth_log =
-      F.add (position_clip [w], 1.0);
+      F.add (F.negate (position_eye [z]), 1.0);
 
     -- Transformed UV coordinates
     value uv =
@@ -253,11 +253,12 @@ module VertexShaders is
         position_clip [w]
       );
 
+    value position_eye =
+      M4.multiply_vector (m_projection_inv, position_clip);
+
     value depth_log =
       F.add (position_clip [w], 1.0);
 
-    value position_eye =
-      M4.multiply_vector (m_projection_inv, position_clip);
     value uv =
       M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
   as
