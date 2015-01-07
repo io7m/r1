@@ -86,7 +86,7 @@ import com.io7m.r1.types.RException;
     b.append("  -- Standard declarations\n");
     b.append("  in f_position_eye           : vector_4f;\n");
     b.append("  in f_position_clip          : vector_4f;\n");
-    b.append("  in f_depth_log              : float;\n");
+    b.append("  in f_positive_eye_z         : float;\n");
     b.append("  parameter depth_coefficient : float;\n");
     b.append("\n");
 
@@ -207,7 +207,7 @@ import com.io7m.r1.types.RException;
       b.append("  in f_position_eye : vector_4f;\n");
       b.append("\n");
       b.append("  -- Logarithmic depth parameters\n");
-      b.append("  in f_depth_log              : float;\n");
+      b.append("  in f_positive_eye_z         : float;\n");
       b.append("  parameter depth_coefficient : float;\n");
       b.append("\n");
       b.append("  -- Matrices\n");
@@ -262,8 +262,10 @@ import com.io7m.r1.types.RException;
               {
                 b
                   .append("  -- Projective light (shadow mapping) parameters\n");
-                b.append("  parameter t_shadow_basic : sampler_2d;\n");
-                b.append("  parameter shadow_basic   : ShadowBasic.t;\n");
+                b
+                  .append("  parameter t_shadow_distance_basic : sampler_2d;\n");
+                b
+                  .append("  parameter shadow_basic            : ShadowBasic.t;\n");
                 b.append("\n");
                 return Unit.unit();
               }
@@ -291,8 +293,10 @@ import com.io7m.r1.types.RException;
               {
                 b
                   .append("  -- Projective light (shadow mapping) parameters\n");
-                b.append("  parameter t_shadow_basic : sampler_2d;\n");
-                b.append("  parameter shadow_basic   : ShadowBasic.t;\n");
+                b
+                  .append("  parameter t_shadow_distance_basic : sampler_2d;\n");
+                b
+                  .append("  parameter shadow_basic            : ShadowBasic.t;\n");
                 b.append("\n");
                 return Unit.unit();
               }
@@ -367,7 +371,7 @@ import com.io7m.r1.types.RException;
       b.append("\n");
       b.append("  value r_depth =\n");
       b
-        .append("    LogDepth.encode_partial (f_depth_log, depth_coefficient);\n");
+        .append("    LogDepth.encode_partial (f_positive_eye_z, depth_coefficient);\n");
       b.append("\n");
       b.append("  -- Reconstruct eye-space position.\n");
       b.append("  value log_depth =\n");
@@ -498,8 +502,10 @@ import com.io7m.r1.types.RException;
                 b.append("  -- Basic shadow mapping\n");
                 b.append("  value light_shadow =\n");
                 b.append("    ShadowBasic.factor (\n");
+                b.append("      light_projective,\n");
+                b.append("      light_vectors.vectors,\n");
                 b.append("      shadow_basic,\n");
-                b.append("      t_shadow_basic,\n");
+                b.append("      t_shadow_distance_basic,\n");
                 b.append("      position_light_clip\n");
                 b.append("    );\n");
                 b.append("\n");
@@ -547,8 +553,10 @@ import com.io7m.r1.types.RException;
                 b.append("  -- Basic shadow mapping\n");
                 b.append("  value light_shadow =\n");
                 b.append("    ShadowBasic.factor (\n");
+                b.append("      light_projective,\n");
+                b.append("      light_vectors.vectors,\n");
                 b.append("      shadow_basic,\n");
-                b.append("      t_shadow_basic,\n");
+                b.append("      t_shadow_distance_basic,\n");
                 b.append("      position_light_clip\n");
                 b.append("    );\n");
                 b.append("\n");
@@ -815,7 +823,7 @@ import com.io7m.r1.types.RException;
 
       b.append("  value r_depth =\n");
       b
-        .append("    LogDepth.encode_full (f_depth_log, depth_coefficient);\n");
+        .append("    LogDepth.encode_partial (f_positive_eye_z, depth_coefficient);\n");
       b.append("\n");
 
       specular

@@ -229,7 +229,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
     KShadingProgramCommon.putRefractionTextureScene(
       program,
-      context.withTexture2D(scene.rgbaGetTexture()));
+      context.withTexture2D(scene.getRGBATexture()));
   }
 
   private static void rendererRefractionEvaluateForInstanceMasked(
@@ -249,16 +249,16 @@ import com.io7m.r1.types.RExceptionJCGL;
     final KMeshReadableType mesh = r.instanceGetMesh();
 
     final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthUsableType> scene_mask =
-      rgba_cache.bluCacheGet(scene.rgbaGetDescription());
+      rgba_cache.bluCacheGet(scene.getRGBADescription());
 
     try {
       final KFramebufferRGBAWithDepthUsableType mask = scene_mask.getValue();
 
       copier.copierCopyDepthOnly(
         scene,
-        scene.kFramebufferGetArea(),
+        scene.getArea(),
         mask,
-        scene.kFramebufferGetArea());
+        scene.getArea());
 
       KRefractionRenderer.rendererRefractionEvaluateRenderMask(
         g,
@@ -418,7 +418,7 @@ import com.io7m.r1.types.RExceptionJCGL;
             RException
         {
           try {
-            gc.framebufferDrawBind(scene_mask.rgbaGetColorFramebuffer());
+            gc.framebufferDrawBind(scene_mask.getRGBAColorFramebuffer());
 
             program.programUniformPutVector4f(
               "f_ccolor",
@@ -512,7 +512,7 @@ import com.io7m.r1.types.RExceptionJCGL;
           throws JCGLException,
             RException
         {
-          gc.framebufferDrawBind(scene.rgbaGetColorFramebuffer());
+          gc.framebufferDrawBind(scene.getRGBAColorFramebuffer());
 
           gc.blendingDisable();
 
@@ -548,7 +548,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
               KShadingProgramCommon.putRefractionTextureSceneMask(
                 program,
-                context.withTexture2D(scene_mask.rgbaGetTexture()));
+                context.withTexture2D(scene_mask.getRGBATexture()));
 
               KShadingProgramCommon.putRefractionTextureDelta(
                 program,
@@ -605,7 +605,7 @@ import com.io7m.r1.types.RExceptionJCGL;
           throws JCGLException,
             RException
         {
-          gc.framebufferDrawBind(scene.rgbaGetColorFramebuffer());
+          gc.framebufferDrawBind(scene.getRGBAColorFramebuffer());
 
           gc.blendingDisable();
 
@@ -641,7 +641,7 @@ import com.io7m.r1.types.RExceptionJCGL;
 
               KShadingProgramCommon.putRefractionTextureSceneMask(
                 program,
-                context.withTexture2D(scene_mask.rgbaGetTexture()));
+                context.withTexture2D(scene_mask.getRGBATexture()));
 
               KRefractionRenderer.putMaterial(material, program);
 
@@ -693,7 +693,7 @@ import com.io7m.r1.types.RExceptionJCGL;
           throws JCGLException,
             RException
         {
-          gc.framebufferDrawBind(scene.rgbaGetColorFramebuffer());
+          gc.framebufferDrawBind(scene.getRGBAColorFramebuffer());
 
           gc.blendingDisable();
 
@@ -781,7 +781,7 @@ import com.io7m.r1.types.RExceptionJCGL;
           throws JCGLException,
             RException
         {
-          gc.framebufferDrawBind(scene.rgbaGetColorFramebuffer());
+          gc.framebufferDrawBind(scene.getRGBAColorFramebuffer());
 
           gc.blendingDisable();
 
@@ -884,7 +884,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     try {
       final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 
-      if (gc.framebufferDrawIsBound(scene.rgbaGetColorFramebuffer()) == false) {
+      if (gc.framebufferDrawIsBound(scene.getRGBAColorFramebuffer()) == false) {
         throw new RExceptionFramebufferNotBound("Framebuffer is not bound");
       }
 
@@ -908,7 +908,7 @@ import com.io7m.r1.types.RExceptionJCGL;
           }
         });
 
-      if (gc.framebufferDrawIsBound(scene.rgbaGetColorFramebuffer()) == false) {
+      if (gc.framebufferDrawIsBound(scene.getRGBAColorFramebuffer()) == false) {
         throw new RExceptionFramebufferNotBound("Framebuffer is not bound");
       }
 
@@ -929,7 +929,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     gc.blendingDisable();
 
     final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAWithDepthUsableType> temporary =
-      this.rgba_cache.bluCacheGet(scene.rgbaGetDescription());
+      this.rgba_cache.bluCacheGet(scene.getRGBADescription());
 
     try {
       final KFramebufferRGBAWithDepthUsableType scene_copy =
@@ -937,9 +937,9 @@ import com.io7m.r1.types.RExceptionJCGL;
 
       this.copier.copierCopyRGBAOnly(
         scene,
-        scene.kFramebufferGetArea(),
+        scene.getArea(),
         scene_copy,
-        scene.kFramebufferGetArea());
+        scene.getArea());
 
       final KMaterialTranslucentRefractive material = r.getMaterial();
 

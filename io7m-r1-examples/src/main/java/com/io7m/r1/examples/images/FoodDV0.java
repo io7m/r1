@@ -73,7 +73,7 @@ public final class FoodDV0 implements ExampleImageType
 
     {
       final Texture2DStaticUsableType t =
-        r.getValue().kFramebufferGetDepthVarianceTexture();
+        r.getValue().getDepthVarianceTexture();
       final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m = PMatrixI3x3F.identity();
       final KTextureMixParameters config =
         KTextureMixParameters.newParameters(t, m, 0.0f, t, m);

@@ -169,12 +169,12 @@ import com.io7m.r1.types.RSpaceTextureType;
 
       try {
         gc.framebufferDrawBind(output
-          .kFramebufferGetDepthVariancePassFramebuffer());
+          .getDepthVariancePassFramebuffer());
 
         gc.blendingDisable();
         gc.colorBufferMask(true, true, true, true);
         gc.cullingDisable();
-        gc.viewportSet(output.kFramebufferGetArea());
+        gc.viewportSet(output.getArea());
 
         if (gc.depthBufferGetBits() > 0) {
           gc.depthBufferTestDisable();

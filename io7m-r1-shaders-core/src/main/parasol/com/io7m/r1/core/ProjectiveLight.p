@@ -137,33 +137,6 @@ module ProjectiveLight is
   -- color based on [d], sampling the current light texel from [t_light].
   --
 
-  function diffuse_only_shadowed_basic (
-    light        : Light.t,
-    n            : vector_3f,
-    p            : vector_3f,
-    t_light      : sampler_2d,
-    p_light_clip : vector_4f,
-    t_shadow     : sampler_2d,
-    shadow       : ShadowBasic.t
-  ) : vector_3f =
-    let
-      value r  = Light.calculate (light, p, n);
-
-      value tx  = light_texel (t_light, p_light_clip);
-      value lc  = V3.multiply (light.color, tx [x y z]);
-      value dc  = diffuse_color (light, r.vectors, lc);
-
-      value sf = ShadowBasic.factor (shadow, t_shadow, p_light_clip);
-      value sa = F.multiply (sf, r.attenuation);
-    in
-      V3.multiply_scalar (dc, sa)
-    end;
-
-  --
-  -- Given a projective light [light], calculate the diffuse
-  -- color based on [d], sampling the current light texel from [t_light].
-  --
-
   function diffuse_only_shadowed_variance (
     light        : Light.t,
     n            : vector_3f,
@@ -184,35 +157,6 @@ module ProjectiveLight is
       value sa = F.multiply (sf, r.attenuation);
     in
       V3.multiply_scalar (dc, sa)
-    end;
-
-  --
-  -- Given a projective light [light], calculate the diffuse and 
-  -- specular terms for the surface.
-  --
-
-  function diffuse_specular_shadowed_basic (
-    light        : Light.t,
-    n            : vector_3f,
-    p            : vector_3f,
-    s            : Specular.t,
-    t_light      : sampler_2d,
-    p_light_clip : vector_4f,
-    t_shadow     : sampler_2d,
-    shadow       : ShadowBasic.t
-  ) : vector_3f =
-    let
-      value r  = Light.calculate (light, p, n);
-
-      value tx = light_texel (t_light, p_light_clip);
-      value lc = V3.multiply (light.color, tx [x y z]);
-      value dc = diffuse_color (light, r.vectors, lc);
-      value sc = specular_color (light, r.vectors, lc, s);
-
-      value sf = ShadowBasic.factor (shadow, t_shadow, p_light_clip);
-      value sa = F.multiply (sf, r.attenuation);
-    in
-      V3.multiply_scalar (V3.add (dc, sc), sa)
     end;
 
   function diffuse_specular_shadowed_variance (

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -315,7 +315,7 @@ import com.io7m.r1.types.RSpaceTextureType;
     final KFramebufferDeferredUsableType framebuffer,
     final JCBProgramType program)
   {
-    final AreaInclusive area = framebuffer.kFramebufferGetArea();
+    final AreaInclusive area = framebuffer.getArea();
     final RangeInclusiveL range_x = area.getRangeX();
     final RangeInclusiveL range_y = area.getRangeY();
 
@@ -334,12 +334,12 @@ import com.io7m.r1.types.RSpaceTextureType;
     final JCGLFramebuffersGL3Type gf3,
     final KFramebufferDeferredUsableType framebuffer)
   {
-    assert gf3.framebufferDrawIsBound(framebuffer.rgbaGetColorFramebuffer());
+    assert gf3.framebufferDrawIsBound(framebuffer.getRGBAColorFramebuffer());
     assert gf3.framebufferReadAnyIsBound() == false;
 
     final KGeometryBufferUsableType gbuffer =
       framebuffer.deferredGetGeometryBuffer();
-    final AreaInclusive area = framebuffer.kFramebufferGetArea();
+    final AreaInclusive area = framebuffer.getArea();
 
     try {
       gf3.framebufferReadBind(gbuffer.geomGetFramebuffer());
@@ -730,7 +730,7 @@ import com.io7m.r1.types.RSpaceTextureType;
         this.view_rays_cache.cacheGetLU(mwo.getProjection());
 
       final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-      gc.viewportSet(framebuffer.kFramebufferGetArea());
+      gc.viewportSet(framebuffer.getArea());
 
       final Set<String> group_names = opaques.getGroupNames();
       for (final String group_name : group_names) {
@@ -771,12 +771,12 @@ import com.io7m.r1.types.RSpaceTextureType;
           this.g
             .implementationAccept(KRendererDeferredOpaque.GET_FRAMEBUFFERS_GL3);
 
-        gc.viewportSet(framebuffer.kFramebufferGetArea());
+        gc.viewportSet(framebuffer.getArea());
         this.renderUnlitGeometry(framebuffer, depth_function, mwo, opaques);
 
         try {
           final FramebufferUsableType render_fb =
-            framebuffer.rgbaGetColorFramebuffer();
+            framebuffer.getRGBAColorFramebuffer();
           gc.framebufferDrawBind(render_fb);
 
           KRendererDeferredOpaque.renderCopyGBufferDepthStencil(
@@ -1360,7 +1360,7 @@ import com.io7m.r1.types.RSpaceTextureType;
         .implementationAccept(KRendererDeferredOpaque.GET_FRAMEBUFFERS_GL3);
 
     final FramebufferUsableType render_fb =
-      framebuffer.rgbaGetColorFramebuffer();
+      framebuffer.getRGBAColorFramebuffer();
 
     try {
       gc.framebufferDrawBind(render_fb);
@@ -1593,6 +1593,8 @@ import com.io7m.r1.types.RSpaceTextureType;
         KShadingProgramCommon.putMatrixUVUnchecked(
           program,
           KMatrices.IDENTITY_UV);
+
+        KShadingProgramCommon.putDepthCoefficient(program, 1.0f);
 
         program.programUniformPutTextureUnit(
           "t_image",

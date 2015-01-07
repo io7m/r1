@@ -150,7 +150,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       RException
   {
     final KFramebufferRGBADescription description =
-      input.rgbaGetDescription();
+      input.getRGBADescription();
     final KFramebufferRGBADescription scaled_description =
       KImageFilterBlurRGBA.makeScaledDescription(parameters, description);
 
@@ -174,9 +174,9 @@ import com.io7m.r1.types.RExceptionJCGL;
 
         this.copier.copierCopyRGBAOnly(
           input,
-          input.kFramebufferGetArea(),
+          input.getArea(),
           temporary_a,
-          temporary_a.kFramebufferGetArea());
+          temporary_a.getArea());
 
         /**
          * If only one pass is required, blur TA → TB, then TB → TA, then copy
@@ -190,26 +190,26 @@ import com.io7m.r1.types.RExceptionJCGL;
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
-            temporary_a.rgbaGetTexture(),
-            temporary_a.kFramebufferGetArea(),
-            temporary_b.rgbaGetColorFramebuffer(),
-            temporary_b.kFramebufferGetArea());
+            temporary_a.getRGBATexture(),
+            temporary_a.getArea(),
+            temporary_b.getRGBAColorFramebuffer(),
+            temporary_b.getArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
             this.gi,
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
-            temporary_b.rgbaGetTexture(),
-            temporary_b.kFramebufferGetArea(),
-            temporary_a.rgbaGetColorFramebuffer(),
-            temporary_a.kFramebufferGetArea());
+            temporary_b.getRGBATexture(),
+            temporary_b.getArea(),
+            temporary_a.getRGBAColorFramebuffer(),
+            temporary_a.getArea());
 
           this.copier.copierCopyRGBAOnly(
             temporary_a,
-            temporary_a.kFramebufferGetArea(),
+            temporary_a.getArea(),
             output,
-            output.kFramebufferGetArea());
+            output.getArea());
           return;
         }
 
@@ -226,27 +226,27 @@ import com.io7m.r1.types.RExceptionJCGL;
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
-            temporary_a.rgbaGetTexture(),
-            temporary_a.kFramebufferGetArea(),
-            temporary_b.rgbaGetColorFramebuffer(),
-            temporary_b.kFramebufferGetArea());
+            temporary_a.getRGBATexture(),
+            temporary_a.getArea(),
+            temporary_b.getRGBAColorFramebuffer(),
+            temporary_b.getArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
             this.gi,
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
-            temporary_b.rgbaGetTexture(),
-            temporary_b.kFramebufferGetArea(),
-            temporary_a.rgbaGetColorFramebuffer(),
-            temporary_a.kFramebufferGetArea());
+            temporary_b.getRGBATexture(),
+            temporary_b.getArea(),
+            temporary_a.getRGBAColorFramebuffer(),
+            temporary_a.getArea());
         }
 
         this.copier.copierCopyRGBAOnly(
           temporary_a,
-          temporary_a.kFramebufferGetArea(),
+          temporary_a.getArea(),
           output,
-          output.kFramebufferGetArea());
+          output.getArea());
 
       } finally {
         receipt_b.returnToCache();
@@ -269,7 +269,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       RException
   {
     final KFramebufferRGBADescription description =
-      input.rgbaGetDescription();
+      input.getRGBADescription();
     final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt_a =
       this.rgba_cache.bluCacheGet(description);
 
@@ -289,20 +289,20 @@ import com.io7m.r1.types.RExceptionJCGL;
           parameters.getBlurSize(),
           this.quad_cache,
           this.getProgramBlurHorizontal(),
-          input.rgbaGetTexture(),
-          input.kFramebufferGetArea(),
-          temporary_a.rgbaGetColorFramebuffer(),
-          temporary_a.kFramebufferGetArea());
+          input.getRGBATexture(),
+          input.getArea(),
+          temporary_a.getRGBAColorFramebuffer(),
+          temporary_a.getArea());
 
         KImageFilterBlurCommon.evaluateBlurV(
           this.gi,
           this.quad_cache,
           parameters.getBlurSize(),
           this.getProgramBlurVertical(),
-          temporary_a.rgbaGetTexture(),
-          temporary_a.kFramebufferGetArea(),
-          output.rgbaGetColorFramebuffer(),
-          output.kFramebufferGetArea());
+          temporary_a.getRGBATexture(),
+          temporary_a.getArea(),
+          output.getRGBAColorFramebuffer(),
+          output.getArea());
 
         return;
       }
@@ -329,20 +329,20 @@ import com.io7m.r1.types.RExceptionJCGL;
           parameters.getBlurSize(),
           this.quad_cache,
           this.getProgramBlurHorizontal(),
-          input.rgbaGetTexture(),
-          input.kFramebufferGetArea(),
-          temporary_a.rgbaGetColorFramebuffer(),
-          temporary_a.kFramebufferGetArea());
+          input.getRGBATexture(),
+          input.getArea(),
+          temporary_a.getRGBAColorFramebuffer(),
+          temporary_a.getArea());
 
         KImageFilterBlurCommon.evaluateBlurV(
           this.gi,
           this.quad_cache,
           parameters.getBlurSize(),
           this.getProgramBlurVertical(),
-          temporary_a.rgbaGetTexture(),
-          temporary_a.kFramebufferGetArea(),
-          temporary_b.rgbaGetColorFramebuffer(),
-          temporary_b.kFramebufferGetArea());
+          temporary_a.getRGBATexture(),
+          temporary_a.getArea(),
+          temporary_b.getRGBAColorFramebuffer(),
+          temporary_b.getArea());
 
         /**
          * Then, for all remaining passes, blur TB → TA, and then TA → TB.
@@ -354,27 +354,27 @@ import com.io7m.r1.types.RExceptionJCGL;
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
-            temporary_b.rgbaGetTexture(),
-            temporary_b.kFramebufferGetArea(),
-            temporary_a.rgbaGetColorFramebuffer(),
-            temporary_a.kFramebufferGetArea());
+            temporary_b.getRGBATexture(),
+            temporary_b.getArea(),
+            temporary_a.getRGBAColorFramebuffer(),
+            temporary_a.getArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
             this.gi,
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
-            temporary_a.rgbaGetTexture(),
-            temporary_a.kFramebufferGetArea(),
-            temporary_b.rgbaGetColorFramebuffer(),
-            temporary_b.kFramebufferGetArea());
+            temporary_a.getRGBATexture(),
+            temporary_a.getArea(),
+            temporary_b.getRGBAColorFramebuffer(),
+            temporary_b.getArea());
         }
 
         this.copier.copierCopyRGBAOnly(
           temporary_b,
-          temporary_b.kFramebufferGetArea(),
+          temporary_b.getArea(),
           output,
-          output.kFramebufferGetArea());
+          output.getArea());
 
       } finally {
         receipt_b.returnToCache();
@@ -396,7 +396,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       RException
   {
     final KFramebufferRGBADescription description =
-      input.rgbaGetDescription();
+      input.getRGBADescription();
     final KFramebufferRGBADescription scaled_description =
       KImageFilterBlurRGBA.makeScaledDescription(params, description);
     final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt_a =
@@ -407,15 +407,15 @@ import com.io7m.r1.types.RExceptionJCGL;
 
       this.copier.copierCopyRGBAOnly(
         input,
-        input.kFramebufferGetArea(),
+        input.getArea(),
         temporary_a,
-        temporary_a.kFramebufferGetArea());
+        temporary_a.getArea());
 
       this.copier.copierCopyRGBAOnly(
         temporary_a,
-        temporary_a.kFramebufferGetArea(),
+        temporary_a.getArea(),
         output,
-        output.kFramebufferGetArea());
+        output.getArea());
 
     } finally {
       receipt_a.returnToCache();
@@ -466,9 +466,9 @@ import com.io7m.r1.types.RExceptionJCGL;
         if (input != output) {
           this.copier.copierCopyRGBAOnly(
             input,
-            input.kFramebufferGetArea(),
+            input.getArea(),
             output,
-            output.kFramebufferGetArea());
+            output.getArea());
         }
         return;
       }

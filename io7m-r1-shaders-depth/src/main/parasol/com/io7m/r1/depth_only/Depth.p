@@ -27,28 +27,8 @@ module Depth is
   import com.io7m.parasol.Fragment;
 
   import com.io7m.r1.core.Albedo;
-
-  shader vertex depth_simple_v is
-    in v_position              : vector_3f;
-    out f_position             : vector_4f;
-    out vertex f_position_clip : vector_4f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-    value position =
-      M4.multiply_vector (
-        m_modelview,
-        new vector_4f (v_position, 1.0)
-      );
-  as
-    out f_position_clip = clip_position;
-    out f_position      = position;
-  end;
+  import com.io7m.r1.core.LogDepth;
+  import com.io7m.r1.core.VertexShaders;
 
   --
   -- Rendering of the depth values of constant-depth objects into the depth buffer.
@@ -56,17 +36,22 @@ module Depth is
   --
 
   shader fragment depth_DepC_f is
-    in f_position : vector_4f;
-    out out_0     : vector_4f as 0;
+    in f_positive_eye_z         : float;
+    parameter depth_coefficient : float;
+    out depth out_depth         : float;
+    out out_0                   : vector_4f as 0;
   with
+    value log_z =
+      LogDepth.encode_partial (f_positive_eye_z, depth_coefficient);
     value rgba =
-      new vector_4f (0.0, Fragment.coordinate [z], 1.0, 1.0);
+      new vector_4f (0.0, log_z, 1.0, 1.0);
   as
-    out out_0 = rgba;
+    out out_0     = rgba;
+    out out_depth = log_z;
   end;
 
   shader program depth_DepC is
-    vertex   depth_simple_v;
+    vertex   VertexShaders.standard;
     fragment depth_DepC_f;
   end;
 
@@ -77,57 +62,37 @@ module Depth is
   -- The color value is expected to be ignored with glColorMask.
   --
 
-  shader vertex depth_textured_v is
-    in v_position              : vector_3f;
-    out f_position             : vector_4f;
-    out vertex f_position_clip : vector_4f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-    in v_uv                    : vector_2f;
-    out f_uv                   : vector_2f;
-    parameter m_uv             : matrix_3x3f;
-  with
-    value clip_position =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-    value position =
-      M4.multiply_vector (
-        m_modelview,
-        new vector_4f (v_position, 1.0)
-      );
-    value uv =
-      M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
-  as
-    out f_position_clip = clip_position;
-    out f_position      = position;
-    out f_uv            = uv;
-  end;
-  
   shader fragment depth_DepA_f is
-    in f_uv                 : vector_2f;
-    in f_position           : vector_4f;
-    out out_0               : vector_4f as 0;
-    parameter p_albedo      : Albedo.t;
-    parameter p_alpha_depth : float;
-    parameter t_albedo      : sampler_2d;
+    in f_positive_eye_z         : float;
+    in f_uv                     : vector_2f;
+    out depth out_depth         : float;
+    out out_0                   : vector_4f as 0;
+    parameter depth_coefficient : float;
+    parameter p_albedo          : Albedo.t;
+    parameter p_alpha_depth     : float;
+    parameter t_albedo          : sampler_2d;
   with
+    value log_z =
+      LogDepth.encode_partial (f_positive_eye_z, depth_coefficient);
+
     value albedo : vector_4f =
       Albedo.textured (
         t_albedo,
         f_uv,
         p_albedo
       );
+
     discard (F.lesser (albedo [w], p_alpha_depth));
+
     value rgba =
-      new vector_4f (0.0, Fragment.coordinate [z], 1.0, 1.0);
+      new vector_4f (0.0, log_z, 1.0, 1.0);
   as
-    out out_0 = rgba;
+    out out_0     = rgba;
+    out out_depth = log_z;
   end;
 
   shader program depth_DepA is
-    vertex   depth_textured_v;
+    vertex   VertexShaders.standard;
     fragment depth_DepA_f;
   end;
 

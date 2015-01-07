@@ -37,6 +37,8 @@ import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
 import com.io7m.r1.kernel.KDepthVarianceRendererType;
+import com.io7m.r1.kernel.KDistanceRenderer;
+import com.io7m.r1.kernel.KDistanceRendererType;
 import com.io7m.r1.kernel.KFXAAParameters;
 import com.io7m.r1.kernel.KFogYParameters;
 import com.io7m.r1.kernel.KFogZParameters;
@@ -104,6 +106,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
     R1BuilderType
   {
     private @Nullable KRegionCopierType                                    copier;
+    private @Nullable KDistanceRendererType                                distance_renderer;
     private @Nullable KDepthRendererType                                   depth_renderer;
     private @Nullable KImageFilterDepthVarianceType<KBlurParameters>       depth_variance_blur;
     private @Nullable KFramebufferDepthVarianceCacheType                   depth_variance_cache;
@@ -186,6 +189,9 @@ import com.io7m.r1.types.RExceptionFilesystem;
         final KDepthRendererType in_depth_renderer =
           this.makeDepthRenderer(in_shader_caches);
 
+        final KDistanceRendererType in_distance_renderer =
+          this.makeDistanceRenderer(in_shader_caches);
+
         final KRegionCopierType in_copier = this.makeRegionCopier();
 
         final KUnitQuadCacheType in_quad_cache = this.makeQuadCache();
@@ -205,7 +211,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
         final KShadowMapRendererType in_shadow_renderer =
           this.makeShadowRenderer(
             in_depth_variance_renderer,
-            in_depth_renderer,
+            in_distance_renderer,
             in_depth_variance_blur,
             in_shadow_cache);
 
@@ -309,6 +315,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
           in_depth_variance_blur,
           in_depth_variance_cache,
           in_depth_variance_renderer,
+          in_distance_renderer,
           in_frustum_cache,
           in_post_emission,
           in_post_emission_glow,
@@ -337,6 +344,23 @@ import com.io7m.r1.types.RExceptionFilesystem;
       } catch (final FilesystemError e) {
         throw RExceptionFilesystem.fromFilesystemException(e);
       }
+    }
+
+    private KDistanceRendererType makeDistanceRenderer(
+      final KShaderCacheSetType in_shader_caches)
+      throws RException
+    {
+      final KDistanceRendererType in_distance_renderer;
+      if (this.distance_renderer != null) {
+        in_distance_renderer = this.distance_renderer;
+      } else {
+        in_distance_renderer =
+          KDistanceRenderer.newRenderer(
+            this.gl,
+            in_shader_caches.getShaderDepthCache(),
+            this.log);
+      }
+      return in_distance_renderer;
     }
 
     private KRendererDeferredOpaqueType makeDeferredOpaque(
@@ -729,7 +753,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
       KShadowMapRendererType
       makeShadowRenderer(
         final KDepthVarianceRendererType in_depth_variance_renderer,
-        final KDepthRendererType in_depth_renderer,
+        final KDistanceRendererType in_distance_renderer,
         final KImageFilterDepthVarianceType<KBlurParameters> in_depth_variance_blur,
         final KShadowMapCacheType in_shadow_cache)
     {
@@ -740,7 +764,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
         in_shadow_renderer =
           KShadowMapRenderer.newRenderer(
             this.gl,
-            in_depth_renderer,
+            in_distance_renderer,
             in_depth_variance_renderer,
             in_depth_variance_blur,
             in_shadow_cache,
@@ -1154,6 +1178,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
   }
 
   private final KRegionCopierType                                    copier;
+  private final KDistanceRendererType                                distance_renderer;
   private final KDepthRendererType                                   depth_renderer;
   private final KImageFilterDepthVarianceType<KBlurParameters>       depth_variance_blur;
   private final KFramebufferDepthVarianceCacheType                   depth_variance_cache;
@@ -1189,6 +1214,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
     final KImageFilterDepthVarianceType<KBlurParameters> in_depth_variance_blur,
     final KFramebufferDepthVarianceCacheType in_depth_variance_cache,
     final KDepthVarianceRendererType in_depth_variance_renderer,
+    final KDistanceRendererType in_distance_renderer,
     final KFrustumMeshCacheType in_frustum_cache,
     final KImageFilterDeferredType<Unit> in_post_emission,
     final KImageFilterDeferredType<KGlowParameters> in_post_emission_glow,
@@ -1220,6 +1246,7 @@ import com.io7m.r1.types.RExceptionFilesystem;
     this.depth_variance_blur = NullCheck.notNull(in_depth_variance_blur);
     this.depth_variance_renderer =
       NullCheck.notNull(in_depth_variance_renderer);
+    this.distance_renderer = NullCheck.notNull(in_distance_renderer);
     this.frustum_cache = NullCheck.notNull(in_frustum_cache);
     this.filter_emission = NullCheck.notNull(in_post_emission);
     this.filter_emission_glow = NullCheck.notNull(in_post_emission_glow);

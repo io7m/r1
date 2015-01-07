@@ -132,11 +132,11 @@ import com.io7m.r1.types.RSpaceTextureType;
     try {
       final KProgramType emission = this.shader_cache.cacheGetLU("emission");
 
-      gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
       gc.blendingDisable();
       gc.colorBufferMask(true, true, true, true);
       gc.cullingDisable();
-      gc.viewportSet(output.kFramebufferGetArea());
+      gc.viewportSet(output.getArea());
 
       final JCBExecutorType e = emission.getExecutable();
       e.execRun(new JCBExecutorProcedureType<RException>() {
@@ -199,11 +199,11 @@ import com.io7m.r1.types.RSpaceTextureType;
       final KProgramType emission =
         this.shader_cache.cacheGetLU("emission_glow");
 
-      gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
       gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
       gc.colorBufferMask(true, true, true, true);
       gc.cullingDisable();
-      gc.viewportSet(output.kFramebufferGetArea());
+      gc.viewportSet(output.getArea());
 
       final JCBExecutorType e = emission.getExecutable();
       e.execRun(new JCBExecutorProcedureType<RException>() {
@@ -270,7 +270,7 @@ import com.io7m.r1.types.RSpaceTextureType;
       final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
       final List<TextureUnitType> units = gc.textureGetUnits();
       final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt =
-        this.rgba_cache.bluCacheGet(output.rgbaGetDescription());
+        this.rgba_cache.bluCacheGet(output.getRGBADescription());
 
       try {
         final KFramebufferRGBAUsableType emission_fb = receipt.getValue();
@@ -293,7 +293,7 @@ import com.io7m.r1.types.RSpaceTextureType;
           config,
           gc,
           units,
-          emission_fb.rgbaGetTexture(),
+          emission_fb.getRGBATexture(),
           output);
 
       } finally {

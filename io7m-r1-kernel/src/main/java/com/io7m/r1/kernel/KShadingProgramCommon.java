@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -140,8 +140,8 @@ import com.io7m.r1.types.RSpaceWorldType;
                                                                    "t_refraction_scene";
   private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK =
                                                                    "t_refraction_scene_mask";
-  private static final String TEXTURE_NAME_SHADOW_BASIC          =
-                                                                   "t_shadow_basic";
+  private static final String TEXTURE_NAME_SHADOW_DISTANCE_BASIC =
+                                                                   "t_shadow_distance_basic";
   private static final String TEXTURE_NAME_SHADOW_VARIANCE       =
                                                                    "t_shadow_variance";
   private static final String TEXTURE_NAME_SPECULAR              =
@@ -340,7 +340,9 @@ import com.io7m.r1.types.RSpaceWorldType;
     throws JCGLException
   {
     gt.texture2DStaticBind(texture_unit, texture);
-    KShadingProgramCommon.putTextureShadowMapBasic(program, texture_unit);
+    KShadingProgramCommon.putTextureShadowMapDistanceBasic(
+      program,
+      texture_unit);
   }
 
   static void bindPutTextureSpecular(
@@ -1734,13 +1736,13 @@ import com.io7m.r1.types.RSpaceWorldType;
       .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_PROJECTION);
   }
 
-  static void putTextureShadowMapBasic(
+  static void putTextureShadowMapDistanceBasic(
     final JCBProgramType program,
     final TextureUnitType unit)
     throws JCGLException
   {
     program.programUniformPutTextureUnit(
-      KShadingProgramCommon.TEXTURE_NAME_SHADOW_BASIC,
+      KShadingProgramCommon.TEXTURE_NAME_SHADOW_DISTANCE_BASIC,
       unit);
   }
 
@@ -1749,7 +1751,7 @@ import com.io7m.r1.types.RSpaceWorldType;
     throws JCGLException
   {
     program
-      .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_SHADOW_BASIC);
+      .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_SHADOW_DISTANCE_BASIC);
   }
 
   static void putTextureShadowMapVariance(
@@ -1822,5 +1824,18 @@ import com.io7m.r1.types.RSpaceWorldType;
   private KShadingProgramCommon()
   {
     throw new UnreachableCodeException();
+  }
+
+  static void putDistanceRange(
+    final JCBProgramType jp,
+    final float r)
+  {
+    jp.programUniformPutFloat("distance_range", r);
+  }
+
+  static void putDistanceRangeReuse(
+    final JCBProgramType jp)
+  {
+    jp.programUniformUseExisting("distance_range");
   }
 }

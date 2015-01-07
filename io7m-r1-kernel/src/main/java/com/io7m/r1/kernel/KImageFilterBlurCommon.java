@@ -89,6 +89,7 @@ import com.io7m.r1.types.RException;
             KShadingProgramCommon.putMatrixUVUnchecked(
               p,
               KMatrices.IDENTITY_UV);
+            KShadingProgramCommon.putDepthCoefficient(p, 1.0f);
 
             final int width = (int) input_area.getRangeX().getInterval();
             p.programUniformPutFloat("image_width", width / blur_size);
@@ -169,6 +170,7 @@ import com.io7m.r1.types.RException;
             KShadingProgramCommon.putMatrixUVUnchecked(
               p,
               KMatrices.IDENTITY_UV);
+            KShadingProgramCommon.putDepthCoefficient(p, 1.0f);
 
             final int height = (int) input_area.getRangeY().getInterval();
             p.programUniformPutFloat("image_height", height / blur_size);

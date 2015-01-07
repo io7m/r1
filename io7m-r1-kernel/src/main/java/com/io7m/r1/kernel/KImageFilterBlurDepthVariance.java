@@ -154,7 +154,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       RException
   {
     final KFramebufferDepthVarianceDescription description =
-      input.kFramebufferGetDepthVarianceDescription();
+      input.getDepthVarianceDescription();
     final KFramebufferDepthVarianceDescription scaled_description =
       KImageFilterBlurDepthVariance.makeScaledDescription(
         parameters,
@@ -182,9 +182,9 @@ import com.io7m.r1.types.RExceptionJCGL;
 
         this.copier.copierCopyDepthVarianceOnly(
           input,
-          input.kFramebufferGetArea(),
+          input.getArea(),
           temporary_a,
-          temporary_a.kFramebufferGetArea());
+          temporary_a.getArea());
 
         /**
          * If only one pass is required, blur TA → TB, then TB → TA, then copy
@@ -198,26 +198,26 @@ import com.io7m.r1.types.RExceptionJCGL;
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
-            temporary_a.kFramebufferGetDepthVarianceTexture(),
-            temporary_a.kFramebufferGetArea(),
-            temporary_b.kFramebufferGetDepthVariancePassFramebuffer(),
-            temporary_b.kFramebufferGetArea());
+            temporary_a.getDepthVarianceTexture(),
+            temporary_a.getArea(),
+            temporary_b.getDepthVariancePassFramebuffer(),
+            temporary_b.getArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
             this.gi,
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
-            temporary_b.kFramebufferGetDepthVarianceTexture(),
-            temporary_b.kFramebufferGetArea(),
-            temporary_a.kFramebufferGetDepthVariancePassFramebuffer(),
-            temporary_a.kFramebufferGetArea());
+            temporary_b.getDepthVarianceTexture(),
+            temporary_b.getArea(),
+            temporary_a.getDepthVariancePassFramebuffer(),
+            temporary_a.getArea());
 
           this.copier.copierCopyDepthVarianceOnly(
             temporary_a,
-            temporary_a.kFramebufferGetArea(),
+            temporary_a.getArea(),
             output,
-            output.kFramebufferGetArea());
+            output.getArea());
           return;
         }
 
@@ -234,27 +234,27 @@ import com.io7m.r1.types.RExceptionJCGL;
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
-            temporary_a.kFramebufferGetDepthVarianceTexture(),
-            temporary_a.kFramebufferGetArea(),
-            temporary_b.kFramebufferGetDepthVariancePassFramebuffer(),
-            temporary_b.kFramebufferGetArea());
+            temporary_a.getDepthVarianceTexture(),
+            temporary_a.getArea(),
+            temporary_b.getDepthVariancePassFramebuffer(),
+            temporary_b.getArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
             this.gi,
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
-            temporary_b.kFramebufferGetDepthVarianceTexture(),
-            temporary_b.kFramebufferGetArea(),
-            temporary_a.kFramebufferGetDepthVariancePassFramebuffer(),
-            temporary_a.kFramebufferGetArea());
+            temporary_b.getDepthVarianceTexture(),
+            temporary_b.getArea(),
+            temporary_a.getDepthVariancePassFramebuffer(),
+            temporary_a.getArea());
         }
 
         this.copier.copierCopyDepthVarianceOnly(
           temporary_a,
-          temporary_a.kFramebufferGetArea(),
+          temporary_a.getArea(),
           output,
-          output.kFramebufferGetArea());
+          output.getArea());
 
       } finally {
         receipt_b.returnToCache();
@@ -277,7 +277,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       RException
   {
     final KFramebufferDepthVarianceDescription description =
-      input.kFramebufferGetDepthVarianceDescription();
+      input.getDepthVarianceDescription();
     final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceUsableType> receipt_a =
       this.depth_variance_cache.bluCacheGet(description);
 
@@ -298,20 +298,20 @@ import com.io7m.r1.types.RExceptionJCGL;
           parameters.getBlurSize(),
           this.quad_cache,
           this.getProgramBlurHorizontal(),
-          input.kFramebufferGetDepthVarianceTexture(),
-          input.kFramebufferGetArea(),
-          temporary_a.kFramebufferGetDepthVariancePassFramebuffer(),
-          temporary_a.kFramebufferGetArea());
+          input.getDepthVarianceTexture(),
+          input.getArea(),
+          temporary_a.getDepthVariancePassFramebuffer(),
+          temporary_a.getArea());
 
         KImageFilterBlurCommon.evaluateBlurV(
           this.gi,
           this.quad_cache,
           parameters.getBlurSize(),
           this.getProgramBlurVertical(),
-          temporary_a.kFramebufferGetDepthVarianceTexture(),
-          temporary_a.kFramebufferGetArea(),
-          output.kFramebufferGetDepthVariancePassFramebuffer(),
-          output.kFramebufferGetArea());
+          temporary_a.getDepthVarianceTexture(),
+          temporary_a.getArea(),
+          output.getDepthVariancePassFramebuffer(),
+          output.getArea());
 
         return;
       }
@@ -339,20 +339,20 @@ import com.io7m.r1.types.RExceptionJCGL;
           parameters.getBlurSize(),
           this.quad_cache,
           this.getProgramBlurHorizontal(),
-          input.kFramebufferGetDepthVarianceTexture(),
-          input.kFramebufferGetArea(),
-          temporary_a.kFramebufferGetDepthVariancePassFramebuffer(),
-          temporary_a.kFramebufferGetArea());
+          input.getDepthVarianceTexture(),
+          input.getArea(),
+          temporary_a.getDepthVariancePassFramebuffer(),
+          temporary_a.getArea());
 
         KImageFilterBlurCommon.evaluateBlurV(
           this.gi,
           this.quad_cache,
           parameters.getBlurSize(),
           this.getProgramBlurVertical(),
-          temporary_a.kFramebufferGetDepthVarianceTexture(),
-          temporary_a.kFramebufferGetArea(),
-          temporary_b.kFramebufferGetDepthVariancePassFramebuffer(),
-          temporary_b.kFramebufferGetArea());
+          temporary_a.getDepthVarianceTexture(),
+          temporary_a.getArea(),
+          temporary_b.getDepthVariancePassFramebuffer(),
+          temporary_b.getArea());
 
         /**
          * Then, for all passes except the last, blur TB → TA, and then TA →
@@ -365,27 +365,27 @@ import com.io7m.r1.types.RExceptionJCGL;
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
-            temporary_b.kFramebufferGetDepthVarianceTexture(),
-            temporary_b.kFramebufferGetArea(),
-            temporary_a.kFramebufferGetDepthVariancePassFramebuffer(),
-            temporary_a.kFramebufferGetArea());
+            temporary_b.getDepthVarianceTexture(),
+            temporary_b.getArea(),
+            temporary_a.getDepthVariancePassFramebuffer(),
+            temporary_a.getArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
             this.gi,
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
-            temporary_a.kFramebufferGetDepthVarianceTexture(),
-            temporary_a.kFramebufferGetArea(),
-            temporary_b.kFramebufferGetDepthVariancePassFramebuffer(),
-            temporary_b.kFramebufferGetArea());
+            temporary_a.getDepthVarianceTexture(),
+            temporary_a.getArea(),
+            temporary_b.getDepthVariancePassFramebuffer(),
+            temporary_b.getArea());
         }
 
         this.copier.copierCopyDepthVarianceOnly(
           temporary_b,
-          temporary_b.kFramebufferGetArea(),
+          temporary_b.getArea(),
           output,
-          output.kFramebufferGetArea());
+          output.getArea());
 
       } finally {
         receipt_b.returnToCache();
@@ -407,7 +407,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       RException
   {
     final KFramebufferDepthVarianceDescription description =
-      input.kFramebufferGetDepthVarianceDescription();
+      input.getDepthVarianceDescription();
     final KFramebufferDepthVarianceDescription scaled_description =
       KImageFilterBlurDepthVariance.makeScaledDescription(
         parameters,
@@ -421,15 +421,15 @@ import com.io7m.r1.types.RExceptionJCGL;
 
       this.copier.copierCopyDepthVarianceOnly(
         input,
-        input.kFramebufferGetArea(),
+        input.getArea(),
         temporary_a,
-        temporary_a.kFramebufferGetArea());
+        temporary_a.getArea());
 
       this.copier.copierCopyDepthVarianceOnly(
         temporary_a,
-        temporary_a.kFramebufferGetArea(),
+        temporary_a.getArea(),
         output,
-        output.kFramebufferGetArea());
+        output.getArea());
 
     } finally {
       receipt_a.returnToCache();
@@ -480,9 +480,9 @@ import com.io7m.r1.types.RExceptionJCGL;
         if (input != output) {
           this.copier.copierCopyDepthVarianceOnly(
             input,
-            input.kFramebufferGetArea(),
+            input.getArea(),
             output,
-            output.kFramebufferGetArea());
+            output.getArea());
         }
         return;
       }

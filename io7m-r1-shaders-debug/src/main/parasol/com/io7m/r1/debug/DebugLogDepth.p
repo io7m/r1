@@ -27,44 +27,7 @@ module DebugLogDepth is
   import com.io7m.parasol.Fragment;
   
   import com.io7m.r1.core.LogDepth;
-
-  shader vertex v is
-    in v_position              : vector_3f;
-    parameter m_modelview      : matrix_4x4f;
-    parameter m_projection     : matrix_4x4f;
-    out vertex f_position_clip : vector_4f;
-    out f_positive_eye_depth   : float;
-  with
-    value position_clip =
-      M4.multiply_vector (
-        M4.multiply (m_projection, m_modelview),
-        new vector_4f (v_position, 1.0)
-      );
-    value positive_eye_depth =
-      position_clip [w];
-  as
-    out f_position_clip      = position_clip;
-    out f_positive_eye_depth = positive_eye_depth;
-  end;
-
-  function encode (
-    z                 : float,
-    depth_coefficient : float  
-  ) : float =
-    let 
-      value half_co = F.multiply (depth_coefficient, 0.5);
-      value clamp_z = F.maximum (0.000001, F.add (z, 1.0));
-    in
-      F.multiply (F.log2 (clamp_z), half_co)
-    end;
-
-  function decode (
-    z                 : float,
-    depth_coefficient : float  
-  ) : float =
-    let value half_co = F.multiply (depth_coefficient, 0.5); in
-      F.subtract (F.power (2.0, F.divide (z, half_co)), 1.0)
-    end;
+  import com.io7m.r1.core.VertexShaders;
 
   shader fragment show_log_depths_f is
     out out_depth_log    : float as 0;
@@ -72,16 +35,16 @@ module DebugLogDepth is
     out out_depth_recon  : float as 2;
     out out_depth_diff   : float as 3;
 
-    in f_positive_eye_depth : float;
+    in f_positive_eye_z : float;
 
     parameter depth_coefficient : float;
   with
     value depth_linear =
-      f_positive_eye_depth;
+      f_positive_eye_z;
     value depth_log =
-      encode (depth_linear, depth_coefficient);
+      LogDepth.encode_partial (depth_linear, depth_coefficient);
     value depth_recon =
-      decode (depth_log, depth_coefficient);
+      LogDepth.decode (depth_log, depth_coefficient);
     value depth_diff =
       F.absolute (F.subtract (depth_recon, depth_linear));
   as
@@ -92,7 +55,7 @@ module DebugLogDepth is
   end;
 
   shader program show_log_depths is
-    vertex   v;
+    vertex   VertexShaders.standard;
     fragment show_log_depths_f;
   end;
   

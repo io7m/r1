@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -40,14 +40,16 @@ import com.io7m.r1.types.RException;
     private int                        exponent;
     private TextureFilterMagnification filter_mag;
     private TextureFilterMinification  filter_min;
-    private KDepthPrecision            precision;
+    private KDepthPrecision            precision_depth;
+    private final KDistancePrecision   precision_distance;
 
     Builder()
     {
       this.exponent = 8;
       this.filter_min = TextureFilterMinification.TEXTURE_FILTER_NEAREST;
       this.filter_mag = TextureFilterMagnification.TEXTURE_FILTER_NEAREST;
-      this.precision = KDepthPrecision.DEPTH_PRECISION_24;
+      this.precision_depth = KDepthPrecision.DEPTH_PRECISION_24;
+      this.precision_distance = KDistancePrecision.DISTANCE_PRECISION_32;
     }
 
     Builder(
@@ -57,7 +59,8 @@ import com.io7m.r1.types.RException;
       this.exponent = d.size_exponent;
       this.filter_mag = d.framebuffer_desc.getFilterMagnification();
       this.filter_min = d.framebuffer_desc.getFilterMinification();
-      this.precision = d.framebuffer_desc.getDepthPrecision();
+      this.precision_depth = d.framebuffer_desc.getDepthPrecision();
+      this.precision_distance = d.framebuffer_desc.getDistancePrecision();
     }
 
     @Override public KShadowMapDescriptionBasic build()
@@ -70,13 +73,14 @@ import com.io7m.r1.types.RException;
         area,
         this.filter_mag,
         this.filter_min,
-        this.precision);
+        this.precision_depth,
+        this.precision_distance);
     }
 
     @Override public void setDepthPrecision(
       final KDepthPrecision p)
     {
-      this.precision = NullCheck.notNull(p, "Precision");
+      this.precision_depth = NullCheck.notNull(p, "Precision");
     }
 
     @Override public void setMagnificationFilter(
@@ -140,15 +144,16 @@ import com.io7m.r1.types.RException;
     return new Builder(d);
   }
 
-  private final KFramebufferDepthDescription framebuffer_desc;
-  private final int                          size_exponent;
+  private final KFramebufferDistanceDescription framebuffer_desc;
+  private final int                             size_exponent;
 
   private KShadowMapDescriptionBasic(
     final int in_size_exponent,
     final AreaInclusive in_area,
     final TextureFilterMagnification in_filter_mag,
     final TextureFilterMinification in_filter_min,
-    final KDepthPrecision in_precision_depth)
+    final KDepthPrecision in_precision_depth,
+    final KDistancePrecision in_precision_distance)
   {
     this.size_exponent =
       (int) RangeCheck.checkGreater(
@@ -158,11 +163,12 @@ import com.io7m.r1.types.RException;
         "Minimum exponent");
 
     this.framebuffer_desc =
-      KFramebufferDepthDescription.newDescription(
+      KFramebufferDistanceDescription.newDescription(
         in_area,
         in_filter_mag,
         in_filter_min,
-        in_precision_depth);
+        in_precision_depth,
+        in_precision_distance);
   }
 
   @Override public boolean equals(
@@ -192,7 +198,7 @@ import com.io7m.r1.types.RException;
    *         map.
    */
 
-  public KFramebufferDepthDescription getFramebufferDescription()
+  public KFramebufferDistanceDescription getFramebufferDescription()
   {
     return this.framebuffer_desc;
   }

@@ -155,12 +155,12 @@ import com.io7m.r1.types.RSpaceWorldType;
     final KProgramType fog = this.getFogProgram(config);
 
     try {
-      gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
 
       gc.blendingDisable();
       gc.colorBufferMask(true, true, true, true);
       gc.cullingDisable();
-      gc.viewportSet(output.kFramebufferGetArea());
+      gc.viewportSet(output.getArea());
 
       if (gc.depthBufferGetBits() > 0) {
         gc.depthBufferTestDisable();
@@ -196,7 +196,7 @@ import com.io7m.r1.types.RSpaceWorldType;
             assert t_depth != null;
 
             try {
-              gc.texture2DStaticBind(t_image, input.rgbaGetTexture());
+              gc.texture2DStaticBind(t_image, input.getRGBATexture());
               gc.texture2DStaticBind(
                 t_depth,
                 gbuffer.geomGetTextureDepthStencil());
@@ -263,15 +263,15 @@ import com.io7m.r1.types.RSpaceWorldType;
 
     try {
       final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt =
-        this.rgba_cache.bluCacheGet(input.rgbaGetDescription());
+        this.rgba_cache.bluCacheGet(input.getRGBADescription());
 
       try {
         final KFramebufferRGBAUsableType temp = receipt.getValue();
         this.copier.copierCopyRGBAOnly(
           input,
-          input.kFramebufferGetArea(),
+          input.getArea(),
           temp,
-          temp.kFramebufferGetArea());
+          temp.getArea());
         this.evaluateFog(
           config,
           input.deferredGetGeometryBuffer(),

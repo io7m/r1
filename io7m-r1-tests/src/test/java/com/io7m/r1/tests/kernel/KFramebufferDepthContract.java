@@ -55,9 +55,9 @@ public abstract class KFramebufferDepthContract extends TestContract
 
     final KFramebufferDepthType f =
       KFramebufferDepth.newDepthFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
-    f.kFramebufferDelete(gi);
+    f.deleteFramebuffer(gi);
     Assert.assertTrue(f.resourceIsDeleted());
   }
 
@@ -76,9 +76,9 @@ public abstract class KFramebufferDepthContract extends TestContract
 
     final KFramebufferDepthType f =
       KFramebufferDepth.newDepthFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
-    f.kFramebufferDelete(gi);
+    f.deleteFramebuffer(gi);
     Assert.assertTrue(f.resourceIsDeleted());
   }
 
@@ -97,9 +97,9 @@ public abstract class KFramebufferDepthContract extends TestContract
 
     final KFramebufferDepthType f =
       KFramebufferDepth.newDepthFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
-    f.kFramebufferDelete(gi);
+    f.deleteFramebuffer(gi);
     Assert.assertTrue(f.resourceIsDeleted());
   }
 

@@ -71,7 +71,7 @@ import com.io7m.r1.types.RException;
     final KFramebufferRGBAWithDepthType v)
     throws RException
   {
-    v.kFramebufferDelete(this.gi);
+    v.deleteFramebuffer(this.gi);
   }
 
   @Override public KFramebufferRGBAWithDepthType cacheValueLoad(
@@ -84,7 +84,7 @@ import com.io7m.r1.types.RException;
   @Override public BigInteger cacheValueSizeOf(
     final KFramebufferRGBAWithDepthType v)
   {
-    final BigInteger r = BigInteger.valueOf(v.kFramebufferGetSizeBytes());
+    final BigInteger r = BigInteger.valueOf(v.getSizeBytes());
     assert r != null;
     return r;
   }

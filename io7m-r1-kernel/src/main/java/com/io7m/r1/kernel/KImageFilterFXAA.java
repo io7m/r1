@@ -125,7 +125,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     final KProgramType program = this.getProgram(config);
 
     try {
-      gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
 
       gc.blendingDisable();
       gc.colorBufferMask(true, true, true, true);
@@ -136,7 +136,7 @@ import com.io7m.r1.types.RExceptionJCGL;
         gc.depthBufferWriteDisable();
       }
 
-      gc.viewportSet(output.kFramebufferGetArea());
+      gc.viewportSet(output.getArea());
 
       final JCBExecutorType e = program.getExecutable();
       e.execRun(new JCBExecutorProcedureType<RException>() {
@@ -158,9 +158,9 @@ import com.io7m.r1.types.RExceptionJCGL;
             final TextureUnitType image_unit = units.get(0);
             assert image_unit != null;
 
-            gc.texture2DStaticBind(image_unit, input.rgbaGetTexture());
+            gc.texture2DStaticBind(image_unit, input.getRGBATexture());
 
-            final AreaInclusive area = output.kFramebufferGetArea();
+            final AreaInclusive area = output.getArea();
             final long width = area.getRangeX().getInterval();
             final long height = area.getRangeY().getInterval();
             KImageFilterFXAA.this.screen.set2F(1.0f / width, 1.0f / height);
@@ -245,16 +245,16 @@ import com.io7m.r1.types.RExceptionJCGL;
 
     try {
       final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt =
-        this.rgba_cache.bluCacheGet(input.rgbaGetDescription());
+        this.rgba_cache.bluCacheGet(input.getRGBADescription());
 
       try {
         final KFramebufferRGBAUsableType temp = receipt.getValue();
         this.evaluateFXAA(input, config, temp);
         this.copier.copierCopyRGBAOnly(
           temp,
-          temp.kFramebufferGetArea(),
+          temp.getArea(),
           output,
-          output.kFramebufferGetArea());
+          output.getArea());
       } finally {
         receipt.returnToCache();
       }

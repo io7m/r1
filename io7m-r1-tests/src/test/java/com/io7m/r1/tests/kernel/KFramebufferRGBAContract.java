@@ -55,9 +55,9 @@ public abstract class KFramebufferRGBAContract extends TestContract
 
     final KFramebufferRGBAType f =
       KFramebufferRGBA.newFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
-    f.kFramebufferDelete(gi);
+    f.deleteFramebuffer(gi);
     Assert.assertTrue(f.resourceIsDeleted());
   }
 
@@ -76,9 +76,9 @@ public abstract class KFramebufferRGBAContract extends TestContract
 
     final KFramebufferRGBAType f =
       KFramebufferRGBA.newFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
-    f.kFramebufferDelete(gi);
+    f.deleteFramebuffer(gi);
     Assert.assertTrue(f.resourceIsDeleted());
   }
 
@@ -97,9 +97,9 @@ public abstract class KFramebufferRGBAContract extends TestContract
 
     final KFramebufferRGBAType f =
       KFramebufferRGBA.newFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
-    f.kFramebufferDelete(gi);
+    f.deleteFramebuffer(gi);
     Assert.assertTrue(f.resourceIsDeleted());
   }
 }

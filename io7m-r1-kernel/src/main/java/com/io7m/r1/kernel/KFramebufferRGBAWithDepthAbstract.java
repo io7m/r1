@@ -95,7 +95,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
       this.description = desc;
     }
 
-    @Override public void kFramebufferDelete(
+    @Override public void deleteFramebuffer(
       final JCGLImplementationType g)
       throws RException
     {
@@ -110,17 +110,17 @@ import com.io7m.r1.types.RExceptionNotSupported;
       }
     }
 
-    @Override public FramebufferUsableType rgbaGetColorFramebuffer()
+    @Override public FramebufferUsableType getRGBAColorFramebuffer()
     {
       return this.framebuffer;
     }
 
-    @Override public KFramebufferRGBADescription rgbaGetDescription()
+    @Override public KFramebufferRGBADescription getRGBADescription()
     {
       return this.description;
     }
 
-    @Override public Texture2DStaticUsableType rgbaGetTexture()
+    @Override public Texture2DStaticUsableType getRGBATexture()
     {
       return this.color;
     }
@@ -214,7 +214,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
       this.description = desc;
     }
 
-    @Override public void kFramebufferDelete(
+    @Override public void deleteFramebuffer(
       final JCGLImplementationType g)
       throws RException
     {
@@ -229,17 +229,17 @@ import com.io7m.r1.types.RExceptionNotSupported;
       }
     }
 
-    @Override public FramebufferUsableType rgbaGetColorFramebuffer()
+    @Override public FramebufferUsableType getRGBAColorFramebuffer()
     {
       return this.framebuffer;
     }
 
-    @Override public KFramebufferRGBADescription rgbaGetDescription()
+    @Override public KFramebufferRGBADescription getRGBADescription()
     {
       return this.description;
     }
 
-    @Override public Texture2DStaticUsableType rgbaGetTexture()
+    @Override public Texture2DStaticUsableType getRGBATexture()
     {
       return this.color;
     }
@@ -306,12 +306,12 @@ import com.io7m.r1.types.RExceptionNotSupported;
     this.deleted = false;
   }
 
-  @Override public final AreaInclusive kFramebufferGetArea()
+  @Override public final AreaInclusive getArea()
   {
     return this.area;
   }
 
-  @Override public final long kFramebufferGetSizeBytes()
+  @Override public final long getSizeBytes()
   {
     return this.size;
   }

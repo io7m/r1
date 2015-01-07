@@ -593,7 +593,7 @@ import com.io7m.r1.types.RExceptionResource;
     final KTextureUnitAllocator units = this.texture_units;
 
     try {
-      gc.framebufferDrawBind(framebuffer.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(framebuffer.getRGBAColorFramebuffer());
 
       // Enabled by each translucent instance
       gc.blendingDisable();

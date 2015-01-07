@@ -217,7 +217,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       this.description = in_description;
     }
 
-    @Override public void kFramebufferDelete(
+    @Override public void deleteFramebuffer(
       final JCGLImplementationType g)
       throws RException
     {
@@ -235,21 +235,21 @@ import com.io7m.r1.types.RExceptionJCGL;
 
     @Override public
       KFramebufferDepthVarianceDescription
-      kFramebufferGetDepthVarianceDescription()
+      getDepthVarianceDescription()
     {
       return this.description;
     }
 
     @Override public
       FramebufferUsableType
-      kFramebufferGetDepthVariancePassFramebuffer()
+      getDepthVariancePassFramebuffer()
     {
       return this.framebuffer;
     }
 
     @Override public
       Texture2DStaticUsableType
-      kFramebufferGetDepthVarianceTexture()
+      getDepthVarianceTexture()
     {
       return this.variance;
     }
@@ -268,12 +268,12 @@ import com.io7m.r1.types.RExceptionJCGL;
     this.deleted = false;
   }
 
-  @Override public final AreaInclusive kFramebufferGetArea()
+  @Override public final AreaInclusive getArea()
   {
     return this.area;
   }
 
-  @Override public final long kFramebufferGetSizeBytes()
+  @Override public final long getSizeBytes()
   {
     return this.size;
   }

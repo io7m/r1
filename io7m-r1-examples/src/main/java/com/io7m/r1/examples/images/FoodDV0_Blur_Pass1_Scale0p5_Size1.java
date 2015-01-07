@@ -93,7 +93,7 @@ public final class FoodDV0_Blur_Pass1_Scale0p5_Size1 implements
 
     {
       final Texture2DStaticUsableType t =
-        rr1.getValue().kFramebufferGetDepthVarianceTexture();
+        rr1.getValue().getDepthVarianceTexture();
       final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> m = PMatrixI3x3F.identity();
       final KTextureMixParameters config =
         KTextureMixParameters.newParameters(t, m, 0.0f, t, m);

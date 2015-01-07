@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -49,10 +49,10 @@ import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.kernel.KDepthRenderer;
-import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
 import com.io7m.r1.kernel.KDepthVarianceRendererType;
+import com.io7m.r1.kernel.KDistanceRenderer;
+import com.io7m.r1.kernel.KDistanceRendererType;
 import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredUsableType;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCache;
@@ -223,8 +223,9 @@ import com.io7m.r1.types.RSpaceWorldType;
         in_log);
 
     final KRegionCopierType copier = KRegionCopier.newCopier(g, in_log);
-    final KDepthRendererType dr =
-      KDepthRenderer.newRenderer(g, tc.getShaderDepthCache(), in_log);
+
+    final KDistanceRendererType dist_r =
+      KDistanceRenderer.newRenderer(g, tc.getShaderDepthCache(), in_log);
     final KDepthVarianceRendererType dvr =
       KDepthVarianceRenderer.newRenderer(g, tc.getShaderDepthVarianceCache());
     final KImageFilterDepthVarianceType<KBlurParameters> pbdv =
@@ -245,7 +246,7 @@ import com.io7m.r1.types.RSpaceWorldType;
     final KShadowMapCacheType sc =
       KShadowMapCache.newCacheWithConfig(g, shadow_cache_config, in_log);
     final KShadowMapRendererType sr =
-      KShadowMapRenderer.newRenderer(g, dr, dvr, pbdv, sc, in_log);
+      KShadowMapRenderer.newRenderer(g, dist_r, dvr, pbdv, sc, in_log);
 
     final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view =
       PMatrixI4x4F.identity();

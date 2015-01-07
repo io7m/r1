@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -43,6 +43,10 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PVectorI2F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorReadable2FType;
+import com.io7m.jtensors.parameterized.PVectorReadable3FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KDepthInstancesType;
 import com.io7m.r1.kernel.types.KFaceSelection;
@@ -64,6 +68,8 @@ import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.types.RSpaceObjectType;
+import com.io7m.r1.types.RSpaceTextureType;
 import com.io7m.r1.types.RSpaceWorldType;
 
 /**
@@ -177,17 +183,26 @@ import com.io7m.r1.types.RSpaceWorldType;
       final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
       final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
 
+      final PVectorReadable3FType<RSpaceObjectType> normal =
+        PVectorI3F.zero();
+      final PVectorReadable2FType<RSpaceTextureType> uv = PVectorI2F.zero();
+
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(jp, array);
+      KShadingProgramCommon.putAttributeNormal(jp, normal);
+      KShadingProgramCommon.putAttributeUVUnchecked(jp, uv);
 
       /**
-       * Upload matrices.
+       * Upload matrices and depth parameters.
        */
 
+      KShadingProgramCommon.putMatrixNormal(jp, mwi.getMatrixNormal());
+      KShadingProgramCommon.putMatrixUVUnchecked(jp, mwi.getMatrixUV());
       KShadingProgramCommon.putMatrixProjectionReuse(jp);
       KShadingProgramCommon.putMatrixModelViewUnchecked(
         jp,
         mwi.getMatrixModelView());
+      KShadingProgramCommon.putDepthCoefficientReuse(jp);
 
       final KMaterialDepthType depth = material.materialOpaqueGetDepth();
       depth.depthAccept(new KMaterialDepthVisitorType<Unit, JCGLException>() {
@@ -215,9 +230,6 @@ import com.io7m.r1.types.RSpaceWorldType;
                       throws RException,
                         JCGLException
                     {
-                      KShadingProgramCommon.putMatrixUVUnchecked(
-                        jp,
-                        mwi.getMatrixUV());
                       KShadingProgramCommon.putMaterialAlphaDepthThreshold(
                         jp,
                         mda.getAlphaThreshold());
@@ -342,6 +354,10 @@ import com.io7m.r1.types.RSpaceWorldType;
           KShadingProgramCommon.putMatrixProjectionUnchecked(
             jp,
             mwo.getMatrixProjection());
+          KShadingProgramCommon.putDepthCoefficient(
+            jp,
+            KRendererCommon.depthCoefficient(mwo.getProjection()));
+
           KDepthRenderer.renderDepthPassBatch(gc, mwo, jp, batch, faces);
         }
       });
@@ -364,7 +380,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
     final FramebufferUsableType fb =
-      framebuffer.kFramebufferGetDepthPassFramebuffer();
+      framebuffer.getDepthPassFramebuffer();
 
     try {
       gc.framebufferDrawBind(fb);
@@ -373,7 +389,7 @@ import com.io7m.r1.types.RSpaceWorldType;
           view,
           projection,
           instances,
-          framebuffer.kFramebufferGetArea(),
+          framebuffer.getArea(),
           faces);
       } finally {
         gc.framebufferDrawUnbind();

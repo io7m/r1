@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -77,7 +77,7 @@ import com.io7m.r1.types.RSpaceWorldType;
    *
    * @param gl
    *          An OpenGL implementation
-   * @param in_depth_renderer
+   * @param in_distance_renderer
    *          A depth renderer
    * @param in_depth_variance_renderer
    *          A depth variance renderer
@@ -92,7 +92,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 
   public static KShadowMapRendererType newRenderer(
     final JCGLImplementationType gl,
-    final KDepthRendererType in_depth_renderer,
+    final KDistanceRendererType in_distance_renderer,
     final KDepthVarianceRendererType in_depth_variance_renderer,
     final KImageFilterDepthVarianceType<KBlurParameters> in_blur,
     final KShadowMapCacheType in_shadow_cache,
@@ -100,7 +100,7 @@ import com.io7m.r1.types.RSpaceWorldType;
   {
     return new KShadowMapRenderer(
       gl,
-      in_depth_renderer,
+      in_distance_renderer,
       in_depth_variance_renderer,
       in_blur,
       in_shadow_cache,
@@ -115,7 +115,7 @@ import com.io7m.r1.types.RSpaceWorldType;
       final KMatricesObserverType observer,
       final KShadowMapCacheType sc,
       final JCGLInterfaceCommonType gc,
-      final KDepthRendererType dr,
+      final KDistanceRendererType dr,
       final KLightWithShadowType light,
       final KLightProjectiveWithShadowBasicType lp)
       throws RException
@@ -129,7 +129,6 @@ import com.io7m.r1.types.RSpaceWorldType;
     receipts.put(light, r);
 
     final KShadowMapBasic sm = (KShadowMapBasic) r.getValue();
-
     return observer.withProjectiveLight(
       lp,
       new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
@@ -199,15 +198,15 @@ import com.io7m.r1.types.RSpaceWorldType;
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mwp,
     final KVisibleSetShadows shadows,
-    final KDepthRendererType dr,
+    final KDistanceRendererType dr,
     final KLightProjectiveWithShadowBasicType lp,
     final KShadowMapBasic sm)
     throws JCGLException,
       RException
   {
-    final KFramebufferDepthType fb = sm.getFramebuffer();
+    final KFramebufferDistanceType fb = sm.getFramebuffer();
 
-    gc.framebufferDrawBind(fb.kFramebufferGetDepthPassFramebuffer());
+    gc.framebufferDrawBind(fb.getDistancePassFramebuffer());
     try {
       gc.colorBufferMask(true, true, true, true);
       gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -233,11 +232,11 @@ import com.io7m.r1.types.RSpaceWorldType;
        * rendered.
        */
 
-      dr.rendererEvaluateDepthWithBoundFramebuffer(
+      dr.rendererEvaluateDistanceWithBoundFramebuffer(
         view,
         mwp.getProjectiveProjection(),
         shadows.getInstancesForLight(lp),
-        fb.kFramebufferGetArea(),
+        fb.getArea(),
         Option.some(KFaceSelection.FACE_RENDER_BACK));
 
     } finally {
@@ -261,7 +260,7 @@ import com.io7m.r1.types.RSpaceWorldType;
     final KFramebufferDepthVarianceDescription description =
       sm.getDescription().getFramebufferDescription();
 
-    gc.framebufferDrawBind(fb.kFramebufferGetDepthVariancePassFramebuffer());
+    gc.framebufferDrawBind(fb.getDepthVariancePassFramebuffer());
 
     try {
 
@@ -289,7 +288,7 @@ import com.io7m.r1.types.RSpaceWorldType;
         view,
         mwp.getProjectiveProjection(),
         shadows.getInstancesForLight(lp),
-        fb.kFramebufferGetArea(),
+        fb.getArea(),
         none);
 
     } finally {
@@ -313,8 +312,7 @@ import com.io7m.r1.types.RSpaceWorldType;
       case TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR:
       case TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST:
       {
-        gc.texture2DStaticRegenerateMipmaps(fb
-          .kFramebufferGetDepthVarianceTexture());
+        gc.texture2DStaticRegenerateMipmaps(fb.getDepthVarianceTexture());
         break;
       }
     }
@@ -335,7 +333,7 @@ import com.io7m.r1.types.RSpaceWorldType;
   }
 
   private final KImageFilterDepthVarianceType<KBlurParameters> blur;
-  private final KDepthRendererType                             depth_renderer;
+  private final KDistanceRendererType                          distance_renderer;
   private final KDepthVarianceRendererType                     depth_variance_renderer;
   private final JCGLImplementationType                         g;
   private final LogUsableType                                  log;
@@ -344,7 +342,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 
   private KShadowMapRenderer(
     final JCGLImplementationType gl,
-    final KDepthRendererType in_depth_renderer,
+    final KDistanceRendererType in_distance_renderer,
     final KDepthVarianceRendererType in_depth_variance_renderer,
     final KImageFilterDepthVarianceType<KBlurParameters> in_blur,
     final KShadowMapCacheType in_shadow_cache,
@@ -354,8 +352,8 @@ import com.io7m.r1.types.RSpaceWorldType;
     this.g = NullCheck.notNull(gl, "OpenGL implementation");
     this.shadow_cache = NullCheck.notNull(in_shadow_cache, "Shadow cache");
 
-    this.depth_renderer =
-      NullCheck.notNull(in_depth_renderer, "Depth renderer");
+    this.distance_renderer =
+      NullCheck.notNull(in_distance_renderer, "Distance renderer");
     this.depth_variance_renderer =
       NullCheck
         .notNull(in_depth_variance_renderer, "Depth variance renderer");
@@ -444,7 +442,7 @@ import com.io7m.r1.types.RSpaceWorldType;
   {
     final KShadowMapCacheType sc = this.shadow_cache;
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-    final KDepthRendererType dr = this.depth_renderer;
+    final KDistanceRendererType dr = this.distance_renderer;
     final KDepthVarianceRendererType dvr = this.depth_variance_renderer;
     final KImageFilterDepthVarianceType<KBlurParameters> pb = this.blur;
 
@@ -456,9 +454,7 @@ import com.io7m.r1.types.RSpaceWorldType;
         .withShadowAccept(new KLightWithShadowVisitorType<Unit, JCacheException>() {
           @Override public Unit projectiveWithShadowBasic(
             final KLightProjectiveWithShadowBasic lp)
-            throws RException,
-              JCacheException,
-              JCGLException
+            throws RException
           {
             return KShadowMapRenderer.projectiveWithShadowBasic(
               shadows,
@@ -473,8 +469,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 
           @Override public Unit projectiveWithShadowBasicDiffuseOnly(
             final KLightProjectiveWithShadowBasicDiffuseOnly lp)
-            throws RException,
-              JCacheException
+            throws RException
           {
             return KShadowMapRenderer.projectiveWithShadowBasic(
               shadows,
@@ -489,9 +484,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 
           @Override public Unit projectiveWithShadowVariance(
             final KLightProjectiveWithShadowVariance lp)
-            throws RException,
-              JCacheException,
-              JCGLException
+            throws RException
           {
             return KShadowMapRenderer.projectiveWithShadowVariance(
               shadows,
@@ -507,8 +500,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 
           @Override public Unit projectiveWithShadowVarianceDiffuseOnly(
             final KLightProjectiveWithShadowVarianceDiffuseOnly lp)
-            throws RException,
-              JCacheException
+            throws RException
           {
             return KShadowMapRenderer.projectiveWithShadowVariance(
               shadows,

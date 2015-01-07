@@ -395,7 +395,7 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
       final JCGLImplementationType g = this.gi;
       if (g != null) {
         if (this.framebuffer != null) {
-          this.framebuffer.kFramebufferDelete(g);
+          this.framebuffer.deleteFramebuffer(g);
         }
       }
     } catch (final RException e) {
@@ -407,7 +407,7 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
   {
     final KFramebufferDeferredType fb = this.framebuffer;
     if (fb != null) {
-      final AreaInclusive area = fb.kFramebufferGetArea();
+      final AreaInclusive area = fb.getArea();
       final int width = (int) area.getRangeX().getInterval();
       final int height = (int) area.getRangeY().getInterval();
 
@@ -550,7 +550,7 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
         this.framebuffer = new_fb;
 
         if (old_fb != null) {
-          old_fb.kFramebufferDelete(g);
+          old_fb.deleteFramebuffer(g);
         }
       }
 

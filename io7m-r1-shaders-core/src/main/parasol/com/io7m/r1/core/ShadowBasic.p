@@ -25,6 +25,8 @@ module ShadowBasic is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S2;
 
+  import com.io7m.r1.core.Light;
+  import com.io7m.r1.core.LogDepth;
   import com.io7m.r1.core.Transform;
 
   --
@@ -37,15 +39,18 @@ module ShadowBasic is
   end;
 
   --
-  -- Given a shadow map [t_shadow], and clip-coordinates [p], return
-  -- the amount of light that could be reaching [p] (where
-  -- 0.0 is fully shadowed and 1.0 is fully lit).
+  -- Given a distance map [t_distance], light vectors [vectors],
+  -- and clip-coordinates [p], return the amount of light that 
+  -- could be reaching [p] (where 0.0 is fully shadowed and 1.0 
+  -- is fully lit).
   --
 
   function factor (
-    shadow   : t,
-    t_shadow : sampler_2d,
-    p        : vector_4f
+    light      : Light.t,
+    vectors    : Light.vectors,
+    shadow     : t,
+    t_distance : sampler_2d,
+    p          : vector_4f
   ) : float =
     if F.lesser (p [w], 0.0) then
       0.0
@@ -53,12 +58,14 @@ module ShadowBasic is
       let
         value current_tex =
           Transform.clip_to_texture (p);
-        value map_depth =
-          S2.texture (t_shadow, current_tex [x y]) [x];
-        value map_depth_adjusted =
-          F.add (map_depth, shadow.depth_bias);
+        value map_distance =
+          S2.texture (t_distance, current_tex [x y]) [x];
+        value map_distance_eye = 
+          F.divide (map_distance, light.inverse_range);
+        value map_distance_eye_adjusted =
+          F.add (map_distance, shadow.depth_bias);
       in
-        if F.lesser (current_tex [z], map_depth_adjusted) then
+        if F.lesser (vectors.distance, map_distance_eye_adjusted) then
           1.0
         else
           shadow.factor_min

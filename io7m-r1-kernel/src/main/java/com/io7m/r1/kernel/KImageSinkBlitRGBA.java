@@ -159,7 +159,7 @@ import com.io7m.r1.types.RSpaceTextureType;
         final List<TextureUnitType> units = gc.textureGetUnits();
         final TextureUnitType unit = units.get(0);
         assert unit != null;
-        gc.texture2DStaticBind(unit, input.rgbaGetTexture());
+        gc.texture2DStaticBind(unit, input.getRGBATexture());
         p.programUniformPutTextureUnit("t_image", unit);
         final KUnitQuadUsableType q =
           KImageSinkBlitRGBA.this.quad_cache.cacheGetLU(Unit.unit());

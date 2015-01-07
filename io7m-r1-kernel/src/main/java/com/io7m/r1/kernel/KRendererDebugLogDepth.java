@@ -334,7 +334,7 @@ public final class KRendererDebugLogDepth implements KRendererDebugType
     final @Nullable DebugGBuffer previous,
     final KFramebufferRGBAUsableType framebuffer)
   {
-    final AreaInclusive area = framebuffer.kFramebufferGetArea();
+    final AreaInclusive area = framebuffer.getArea();
     if (previous == null) {
       return DebugGBuffer.newGBuffer(gi, area);
     }

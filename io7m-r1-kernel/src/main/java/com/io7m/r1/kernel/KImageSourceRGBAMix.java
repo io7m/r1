@@ -166,12 +166,12 @@ import com.io7m.r1.types.RSpaceTextureType;
       final KProgramType p = this.shader_cache.cacheGetLU("mix");
 
       try {
-        gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+        gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
 
         gc.blendingDisable();
         gc.colorBufferMask(true, true, true, true);
         gc.cullingDisable();
-        gc.viewportSet(output.kFramebufferGetArea());
+        gc.viewportSet(output.getArea());
 
         if (gc.depthBufferGetBits() > 0) {
           gc.depthBufferTestDisable();

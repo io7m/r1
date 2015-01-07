@@ -49,19 +49,19 @@ import com.io7m.r1.types.RException;
     NullCheck.notNull(g, "OpenGL implementation");
     NullCheck.notNull(description, "Description");
 
-    final KFramebufferDepthType f =
-      KFramebufferDepth.newDepthFramebuffer(
+    final KFramebufferDistanceType f =
+      KFramebufferDistance.newDistanceFramebuffer(
         g,
         description.getFramebufferDescription());
     return new KShadowMapBasic(description, f);
   }
 
   private final KShadowMapDescriptionBasic description;
-  private final KFramebufferDepthType      framebuffer;
+  private final KFramebufferDistanceType   framebuffer;
 
   private KShadowMapBasic(
     final KShadowMapDescriptionBasic in_description,
-    final KFramebufferDepthType in_framebuffer)
+    final KFramebufferDistanceType in_framebuffer)
   {
     this.description = NullCheck.notNull(in_description, "Description");
     this.framebuffer = NullCheck.notNull(in_framebuffer, "Framebuffer");
@@ -80,7 +80,7 @@ import com.io7m.r1.types.RException;
    * @return The framebuffer
    */
 
-  public KFramebufferDepthType getFramebuffer()
+  public KFramebufferDistanceType getFramebuffer()
   {
     return this.framebuffer;
   }
@@ -94,7 +94,7 @@ import com.io7m.r1.types.RException;
     final JCGLImplementationType g)
     throws RException
   {
-    this.framebuffer.kFramebufferDelete(g);
+    this.framebuffer.deleteFramebuffer(g);
   }
 
   @Override public <T, E extends Throwable> T shadowMapAccept(
@@ -107,6 +107,6 @@ import com.io7m.r1.types.RException;
 
   @Override public long shadowMapGetSizeBytes()
   {
-    return this.framebuffer.kFramebufferGetSizeBytes();
+    return this.framebuffer.getSizeBytes();
   }
 }

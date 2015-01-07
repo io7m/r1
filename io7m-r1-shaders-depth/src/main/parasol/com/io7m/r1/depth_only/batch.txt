@@ -1,2 +1,4 @@
 DepC : com.io7m.r1.depth_only.Depth.depth_DepC
 DepA : com.io7m.r1.depth_only.Depth.depth_DepA
+distance_DepC : com.io7m.r1.depth_only.Distance.distance_DepC
+distance_DepA : com.io7m.r1.depth_only.Distance.distance_DepA

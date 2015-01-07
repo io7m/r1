@@ -73,6 +73,8 @@ import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRenderer;
 import com.io7m.r1.kernel.KDepthVarianceRendererType;
+import com.io7m.r1.kernel.KDistanceRenderer;
+import com.io7m.r1.kernel.KDistanceRendererType;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceUsableType;
 import com.io7m.r1.kernel.KImageFilterDepthVarianceType;
 import com.io7m.r1.kernel.KImageFilterVisitorType;
@@ -292,6 +294,8 @@ import com.io7m.r1.types.RSpaceWorldType;
       final KShaderCacheDepthVarianceType depth_variance_shader_cache =
         KShaderCache.wrapDepthVariance(dvc);
 
+      final KDistanceRendererType distance_renderer =
+        KDistanceRenderer.newRenderer(g, depth_shader_cache, log);
       final KDepthRendererType depth_renderer =
         KDepthRenderer.newRenderer(g, depth_shader_cache, log);
       final KDepthVarianceRendererType depth_variance_renderer =
@@ -385,7 +389,7 @@ import com.io7m.r1.types.RSpaceWorldType;
       this.shadow_map_renderer =
         KShadowMapRenderer.newRenderer(
           g,
-          depth_renderer,
+          distance_renderer,
           depth_variance_renderer,
           blur,
           shadow_cache,
