@@ -19,7 +19,6 @@ package com.io7m.r1.kernel;
 import java.math.BigInteger;
 
 import com.io7m.jcache.JCacheLoaderType;
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.JCGLSLVersion;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
@@ -28,7 +27,6 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * <p>
@@ -85,32 +83,23 @@ import com.io7m.r1.types.RExceptionJCGL;
     throws RException
   {
     final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
-
-    try {
-      gc.programDelete(v.getProgram());
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+    gc.programDelete(v.getProgram());
   }
 
   @Override public KProgram cacheValueLoad(
     final String name)
     throws RException
   {
-    try {
-      final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
-      final JCGLSLVersion version = gc.metaGetSLVersion();
+    final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
+    final JCGLSLVersion version = gc.metaGetSLVersion();
 
-      return KProgram.newProgramFromFilesystem(
-        this.gi,
-        version.getNumber(),
-        version.getAPI(),
-        this.fs,
-        name,
-        this.log);
-    } catch (final JCGLException x) {
-      throw RExceptionJCGL.fromJCGLException(x);
-    }
+    return KProgram.newProgramFromFilesystem(
+      this.gi,
+      version.getNumber(),
+      version.getAPI(),
+      this.fs,
+      name,
+      this.log);
   }
 
   @Override public BigInteger cacheValueSizeOf(

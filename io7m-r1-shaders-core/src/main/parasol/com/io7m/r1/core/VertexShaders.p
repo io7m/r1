@@ -45,7 +45,7 @@ module VertexShaders is
 
     out f_position_eye         : vector_4f;
     out vertex f_position_clip : vector_4f;
-    out f_depth_log            : float;
+    out f_positive_eye_z       : float;
 
     -- Log depth coefficient (2.0 / log2 (far + 1.0))
     parameter depth_coefficient : float;
@@ -84,7 +84,7 @@ module VertexShaders is
         position_clip [w]
       );
 
-    value depth_log =
+    value positive_eye_z =
       F.add (F.negate (position_eye [z]), 1.0);
 
     -- Transformed UV coordinates
@@ -98,11 +98,11 @@ module VertexShaders is
     value normal_eye =
       M3.multiply_vector (m_normal, v_normal);
   as
-    out f_normal_eye    = normal_eye;
-    out f_position_clip = position_clip_log;
-    out f_position_eye  = position_eye;
-    out f_uv            = uv;
-    out f_depth_log     = depth_log;
+    out f_normal_eye     = normal_eye;
+    out f_position_clip  = position_clip_log;
+    out f_position_eye   = position_eye;
+    out f_uv             = uv;
+    out f_positive_eye_z = positive_eye_z;
   end;
 
   --
@@ -117,7 +117,7 @@ module VertexShaders is
     in v_position              : vector_3f;
     out f_position_eye         : vector_4f;
     out vertex f_position_clip : vector_4f;
-    out f_depth_log            : float;
+    out f_positive_eye_z            : float;
 
     -- Log depth coefficient (2.0 / log2 (far + 1.0))
     parameter depth_coefficient : float;
@@ -158,7 +158,7 @@ module VertexShaders is
         position_clip [w]
       );
 
-    value depth_log =
+    value positive_eye_z =
       F.add (F.negate (position_eye [z]), 1.0);
 
     -- Transformed UV coordinates
@@ -178,10 +178,10 @@ module VertexShaders is
     out f_tangent      = tangent;
     out f_bitangent    = bitangent;
 
-    out f_position_clip = position_clip_log;
-    out f_position_eye  = position_eye;
-    out f_uv            = uv;
-    out f_depth_log     = depth_log;
+    out f_position_clip  = position_clip_log;
+    out f_position_eye   = position_eye;
+    out f_uv             = uv;
+    out f_positive_eye_z = positive_eye_z;
   end;
 
   --
@@ -191,12 +191,12 @@ module VertexShaders is
   --
 
   shader vertex standard_clip is
-    parameter  m_uv            : matrix_3x3f;
-    in         v_position      : vector_3f;
-    in         v_uv            : vector_2f;
-    out vertex f_position_clip : vector_4f;
-    out        f_uv            : vector_2f;
-    out        f_depth_log     : float;
+    parameter  m_uv             : matrix_3x3f;
+    in         v_position       : vector_3f;
+    in         v_uv             : vector_2f;
+    out vertex f_position_clip  : vector_4f;
+    out        f_uv             : vector_2f;
+    out        f_positive_eye_z : float;
 
     -- Log depth coefficient (2.0 / log2 (far + 1.0))
     parameter depth_coefficient : float;
@@ -212,7 +212,11 @@ module VertexShaders is
         position_clip [w]
       );
 
-    value depth_log =
+    -- XXX: This is not really correct; it assumes that a
+    --      perspective projection placed the positive eye-space Z
+    --      into the [w] component of the clip-space coordinates.
+
+    value positive_eye_z =
       F.add (position_clip [w], 1.0);
 
     value uv =
@@ -220,7 +224,7 @@ module VertexShaders is
   as
     out f_uv            = uv;
     out f_position_clip = position_clip_log;
-    out f_depth_log     = depth_log;
+    out f_positive_eye_z     = positive_eye_z;
   end;
 
   --
@@ -238,7 +242,7 @@ module VertexShaders is
     out vertex f_position_clip  : vector_4f;
     out        f_position_eye   : vector_4f;
     out        f_uv             : vector_2f;
-    out        f_depth_log      : float;
+    out        f_positive_eye_z      : float;
 
     -- Log depth coefficient (2.0 / log2 (far + 1.0))
     parameter depth_coefficient : float;
@@ -256,16 +260,16 @@ module VertexShaders is
     value position_eye =
       M4.multiply_vector (m_projection_inv, position_clip);
 
-    value depth_log =
-      F.add (position_clip [w], 1.0);
+    value positive_eye_z =
+      F.add (position_eye [z], 1.0);
 
     value uv =
       M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
   as
-    out f_uv            = uv;
-    out f_position_clip = position_clip_log;
-    out f_position_eye  = position_eye;
-    out f_depth_log     = depth_log;
+    out f_uv             = uv;
+    out f_position_clip  = position_clip_log;
+    out f_position_eye   = position_eye;
+    out f_positive_eye_z = positive_eye_z;
   end;
 
 end;

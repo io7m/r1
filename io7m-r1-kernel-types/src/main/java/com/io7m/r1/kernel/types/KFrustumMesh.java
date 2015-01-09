@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -43,7 +43,6 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * A frustum mesh.
@@ -123,28 +122,20 @@ import com.io7m.r1.types.RExceptionJCGL;
         final KFrustumMesh m)
         throws RException
       {
-        try {
-          m.delete(g);
-        } catch (final JCGLException e) {
-          throw RExceptionJCGL.fromJCGLException(e);
-        }
+        m.delete(g);
       }
 
       @Override public KFrustumMesh cacheValueLoad(
         final KProjectionType p)
         throws RException
       {
-        try {
-          if (log.wouldLog(LogLevel.LOG_DEBUG)) {
-            final String s =
-              String.format("constructing frustum mesh for %s", p);
-            assert s != null;
-            log.debug(s);
-          }
-          return KFrustumMesh.newFromGeneral(g, au_cons, iu_cons, p);
-        } catch (final JCGLException e) {
-          throw RExceptionJCGL.fromJCGLException(e);
+        if (log.wouldLog(LogLevel.LOG_DEBUG)) {
+          final String s =
+            String.format("constructing frustum mesh for %s", p);
+          assert s != null;
+          log.debug(s);
         }
+        return KFrustumMesh.newFromGeneral(g, au_cons, iu_cons, p);
       }
 
       @Override public BigInteger cacheValueSizeOf(

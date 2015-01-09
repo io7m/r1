@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -44,7 +44,6 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceClipType;
 import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceTextureType;
@@ -281,8 +280,6 @@ import com.io7m.r1.types.RSpaceWorldType;
         receipt.returnToCache();
       }
 
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
       throw RExceptionCache.fromJCacheException(e);
     }

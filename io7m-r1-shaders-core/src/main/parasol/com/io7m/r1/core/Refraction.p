@@ -67,8 +67,8 @@ module Refraction is
     let
       value n           = Vector3f.multiply_scalar (n, refraction.scale);
       value displaced   = new vector_4f (Vector3f.add (p [x y z], n), p [w]);
-      value uv_there    = Transform.clip_to_texture (displaced) [x y];
-      value uv_here     = Transform.clip_to_texture (p) [x y];
+      value uv_there    = Transform.clip_to_texture3 (displaced) [x y];
+      value uv_here     = Transform.clip_to_texture3 (p) [x y];
       value scene_there = Sampler2D.texture (t_scene, uv_there);
       value scene_here  = Sampler2D.texture (t_scene, uv_here);
       value mask_there  = Sampler2D.texture (t_scene_mask, uv_there) [x];
@@ -85,7 +85,7 @@ module Refraction is
     let
       value n           = Vector3f.multiply_scalar (n, refraction.scale);
       value displaced   = new vector_4f (Vector3f.add (p [x y z], n), p [w]);
-      value uv_there    = Transform.clip_to_texture (displaced) [x y];
+      value uv_there    = Transform.clip_to_texture3 (displaced) [x y];
       value scene_there = Sampler2D.texture (t_scene, uv_there);
     in
       Vector4f.multiply (scene_there, refraction.color)
@@ -106,7 +106,7 @@ module Refraction is
   ) : vector_4f =
     let
       value delta       = delta_get (t_delta, uv, refraction.scale);
-      value uv_here     = Transform.clip_to_texture (p) [x y];
+      value uv_here     = Transform.clip_to_texture3 (p) [x y];
       value uv_there    = Vector2f.add (uv_here, delta);
       value scene_here  = Sampler2D.texture (t_scene, uv_here);
       value scene_there = Sampler2D.texture (t_scene, uv_there);
@@ -125,7 +125,7 @@ module Refraction is
   ) : vector_4f =
     let
       value delta       = delta_get (t_delta, uv, refraction.scale);
-      value uv_here     = Transform.clip_to_texture (p) [x y];
+      value uv_here     = Transform.clip_to_texture3 (p) [x y];
       value uv_there    = Vector2f.add (uv_here, delta);
       value scene_there = Sampler2D.texture (t_scene, uv_there);
     in

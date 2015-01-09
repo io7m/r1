@@ -120,9 +120,14 @@ module Transform is
   -- Transform clip-space coordinates to texture coordinates.
   --
 
-  function clip_to_texture (
+  function clip_to_texture3 (
     p : vector_4f
   ) : vector_3f =
     ndc_to_texture3 (clip_to_ndc (p));
+ 
+  function clip_to_texture2 (
+    p : vector_4f
+  ) : vector_2f =
+    ndc_to_texture2 (clip_to_ndc (p) [x y]);
 
 end;

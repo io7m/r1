@@ -602,6 +602,10 @@ import com.io7m.r1.types.RException;
             unit_context.withTexture2D(framebuffer
               .kFramebufferGetDepthTexture());
 
+          KShadingProgramCommon.putShadowBasicDepthCoefficient(
+            program,
+            KRendererCommon.depthCoefficient(lp
+              .lightProjectiveGetProjection()));
           KShadingProgramCommon.putShadowBasic(
             program,
             lp.lightGetShadowBasic());
@@ -621,6 +625,10 @@ import com.io7m.r1.types.RException;
             unit_context.withTexture2D(framebuffer
               .kFramebufferGetDepthTexture());
 
+          KShadingProgramCommon.putShadowBasicDepthCoefficient(
+            program,
+            KRendererCommon.depthCoefficient(lp
+              .lightProjectiveGetProjection()));
           KShadingProgramCommon.putShadowBasic(
             program,
             lp.lightGetShadowBasic());

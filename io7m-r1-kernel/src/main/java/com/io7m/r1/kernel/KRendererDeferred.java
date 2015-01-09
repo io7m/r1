@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -33,7 +33,6 @@ import com.io7m.r1.kernel.types.KVisibleSetOpaques;
 import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * The primary forward renderer.
@@ -141,83 +140,79 @@ import com.io7m.r1.types.RExceptionJCGL;
     final KRendererDeferredOpaqueType or =
       KRendererDeferred.this.opaque_renderer;
 
-    try {
-      this.matrices.withObserver(
-        camera.getViewMatrix(),
-        camera.getProjection(),
-        new KMatricesObserverFunctionType<Unit, JCGLException>() {
-          @Override public Unit run(
-            final KMatricesObserverType mwo)
-            throws JCGLException,
-              RException
-          {
-            try {
-              /**
-               * Render shadow maps.
-               */
+    this.matrices.withObserver(
+      camera.getViewMatrix(),
+      camera.getProjection(),
+      new KMatricesObserverFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final KMatricesObserverType mwo)
+          throws JCGLException,
+            RException
+        {
+          try {
+            /**
+             * Render shadow maps.
+             */
 
-              return smr.rendererEvaluateShadowMaps(
-                camera,
-                visible.getShadows(),
-                new KShadowMapWithType<Unit, JCacheException>() {
-                  @Override public Unit withMaps(
-                    final KShadowMapContextType shadow_context)
-                    throws JCGLException,
-                      RException
-                  {
-                    procedure.call(new KRendererDeferredControlType() {
-                      @Override public void rendererEvaluateOpaques()
-                        throws RException
-                      {
-                        or.rendererEvaluateOpaqueLit(
-                          framebuffer,
-                          shadow_context,
-                          depth_function,
-                          mwo,
-                          opaques);
+            return smr.rendererEvaluateShadowMaps(
+              camera,
+              visible.getShadows(),
+              new KShadowMapWithType<Unit, JCacheException>() {
+                @Override public Unit withMaps(
+                  final KShadowMapContextType shadow_context)
+                  throws JCGLException,
+                    RException
+                {
+                  procedure.call(new KRendererDeferredControlType() {
+                    @Override public void rendererEvaluateOpaques()
+                      throws RException
+                    {
+                      or.rendererEvaluateOpaqueLit(
+                        framebuffer,
+                        shadow_context,
+                        depth_function,
+                        mwo,
+                        opaques);
 
-                        or.rendererEvaluateOpaqueUnlit(
-                          framebuffer,
-                          shadow_context,
-                          depth_function,
-                          mwo,
-                          opaques);
-                      }
+                      or.rendererEvaluateOpaqueUnlit(
+                        framebuffer,
+                        shadow_context,
+                        depth_function,
+                        mwo,
+                        opaques);
+                    }
 
-                      @Override public void rendererEvaluateTranslucents()
-                        throws RException
-                      {
-                        tr.rendererEvaluateTranslucents(
-                          framebuffer,
-                          mwo,
-                          translucents);
-                      }
+                    @Override public void rendererEvaluateTranslucents()
+                      throws RException
+                    {
+                      tr.rendererEvaluateTranslucents(
+                        framebuffer,
+                        mwo,
+                        translucents);
+                    }
 
-                      @Override public
-                        KMatricesObserverType
-                        rendererGetObserver()
-                      {
-                        return mwo;
-                      }
+                    @Override public
+                      KMatricesObserverType
+                      rendererGetObserver()
+                    {
+                      return mwo;
+                    }
 
-                      @Override public
-                        KShadowMapContextType
-                        rendererGetShadowMapContext()
-                      {
-                        return shadow_context;
-                      }
-                    });
-                    return Unit.unit();
-                  }
-                });
-            } catch (final JCacheException e) {
-              throw RExceptionCache.fromJCacheException(e);
-            }
+                    @Override public
+                      KShadowMapContextType
+                      rendererGetShadowMapContext()
+                    {
+                      return shadow_context;
+                    }
+                  });
+                  return Unit.unit();
+                }
+              });
+          } catch (final JCacheException e) {
+            throw RExceptionCache.fromJCacheException(e);
           }
-        });
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+        }
+      });
   }
 
   @Override public void rendererDeferredEvaluateFull(
