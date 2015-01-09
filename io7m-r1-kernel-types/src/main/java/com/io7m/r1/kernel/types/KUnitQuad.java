@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -44,7 +44,6 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * A unit quad, from <code>(-1, -1, -1)</code> to <code>(1, 1, -1)</code>,
@@ -79,22 +78,14 @@ import com.io7m.r1.types.RExceptionJCGL;
         final KUnitQuad v)
         throws RException
       {
-        try {
-          v.delete(gl);
-        } catch (final JCGLException e) {
-          throw RExceptionJCGL.fromJCGLException(e);
-        }
+        v.delete(gl);
       }
 
       @Override public KUnitQuad cacheValueLoad(
         final Unit unused)
         throws RException
       {
-        try {
-          return KUnitQuad.newQuad(gl, log);
-        } catch (final JCGLException e) {
-          throw RExceptionJCGL.fromJCGLException(e);
-        }
+        return KUnitQuad.newQuad(gl, log);
       }
 
       @Override public BigInteger cacheValueSizeOf(

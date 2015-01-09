@@ -25,6 +25,8 @@ module ShadowBasic is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S2;
 
+  import com.io7m.r1.core.Light;
+  import com.io7m.r1.core.LogDepth;
   import com.io7m.r1.core.Transform;
 
   --
@@ -32,8 +34,9 @@ module ShadowBasic is
   --
 
   type t is record
-    depth_bias : float,
-    factor_min : float
+    depth_bias        : float,
+    depth_coefficient : float,
+    factor_min        : float
   end;
 
   --
@@ -43,6 +46,7 @@ module ShadowBasic is
   --
 
   function factor (
+    vectors  : Light.vectors,
     shadow   : t,
     t_shadow : sampler_2d,
     p        : vector_4f
@@ -52,13 +56,16 @@ module ShadowBasic is
     else
       let
         value current_tex =
-          Transform.clip_to_texture (p);
-        value map_depth =
+          Transform.clip_to_texture3 (p);
+        value current_depth =
+          LogDepth.encode_full (p [w], shadow.depth_coefficient);
+          
+        value map_depth_log =
           S2.texture (t_shadow, current_tex [x y]) [x];
-        value map_depth_adjusted =
-          F.add (map_depth, shadow.depth_bias);
+        value map_depth =
+          F.add (map_depth_log, shadow.depth_bias);
       in
-        if F.lesser (current_tex [z], map_depth_adjusted) then
+        if F.lesser (current_depth, map_depth) then
           1.0
         else
           shadow.factor_min

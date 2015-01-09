@@ -69,7 +69,7 @@ module ShadowVariance is
       value not_behind =
         new float (F.greater_or_equal (p [w], 0.0));
       value current_tex =
-        Transform.clip_to_texture (p);
+        Transform.clip_to_texture3 (p);
       value moments =
         S2.texture (t_shadow_variance, current_tex [x y]) [x y];
       value p_max =

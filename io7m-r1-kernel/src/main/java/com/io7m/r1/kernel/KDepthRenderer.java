@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -42,6 +42,8 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.VectorI2F;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KDepthInstancesType;
@@ -62,7 +64,6 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueVisitorType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceWorldType;
 
@@ -179,6 +180,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(jp, array);
+      KShadingProgramCommon.putAttributeNormalUnchecked(jp, VectorI3F.ZERO);
 
       /**
        * Upload matrices.
@@ -188,13 +190,15 @@ import com.io7m.r1.types.RSpaceWorldType;
       KShadingProgramCommon.putMatrixModelViewUnchecked(
         jp,
         mwi.getMatrixModelView());
+      KShadingProgramCommon.putDepthCoefficientReuse(jp);
+      KShadingProgramCommon.putMatrixNormal(jp, mwi.getMatrixNormal());
+      KShadingProgramCommon.putMatrixUVUnchecked(jp, mwi.getMatrixUV());
 
       final KMaterialDepthType depth = material.materialOpaqueGetDepth();
       depth.depthAccept(new KMaterialDepthVisitorType<Unit, JCGLException>() {
         @Override public Unit alpha(
           final KMaterialDepthAlpha mda)
-          throws RException,
-            JCGLException
+          throws RException
         {
           /**
            * Material is alpha-to-depth; must upload albedo texture, matrices,
@@ -205,19 +209,14 @@ import com.io7m.r1.types.RSpaceWorldType;
             .opaqueAccept(new KMaterialOpaqueVisitorType<Unit, JCGLException>() {
               @Override public Unit materialOpaqueRegular(
                 final KMaterialOpaqueRegular mor)
-                throws RException,
-                  JCGLException
+                throws RException
               {
                 return mor.materialRegularGetAlbedo().albedoAccept(
                   new KMaterialAlbedoVisitorType<Unit, JCGLException>() {
                     @Override public Unit textured(
                       final KMaterialAlbedoTextured mat)
-                      throws RException,
-                        JCGLException
+                      throws RException
                     {
-                      KShadingProgramCommon.putMatrixUVUnchecked(
-                        jp,
-                        mwi.getMatrixUV());
                       KShadingProgramCommon.putMaterialAlphaDepthThreshold(
                         jp,
                         mda.getAlphaThreshold());
@@ -259,6 +258,7 @@ import com.io7m.r1.types.RSpaceWorldType;
           throws RException,
             JCGLException
         {
+          KShadingProgramCommon.putAttributeUVUnchecked(jp, VectorI2F.ZERO);
           return Unit.unit();
         }
       });
@@ -342,6 +342,10 @@ import com.io7m.r1.types.RSpaceWorldType;
           KShadingProgramCommon.putMatrixProjectionUnchecked(
             jp,
             mwo.getMatrixProjection());
+          KShadingProgramCommon.putDepthCoefficient(
+            jp,
+            KRendererCommon.depthCoefficient(mwo.getProjection()));
+
           KDepthRenderer.renderDepthPassBatch(gc, mwo, jp, batch, faces);
         }
       });
@@ -366,20 +370,16 @@ import com.io7m.r1.types.RSpaceWorldType;
     final FramebufferUsableType fb =
       framebuffer.kFramebufferGetDepthPassFramebuffer();
 
+    gc.framebufferDrawBind(fb);
     try {
-      gc.framebufferDrawBind(fb);
-      try {
-        this.rendererEvaluateDepthWithBoundFramebuffer(
-          view,
-          projection,
-          instances,
-          framebuffer.kFramebufferGetArea(),
-          faces);
-      } finally {
-        gc.framebufferDrawUnbind();
-      }
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
+      this.rendererEvaluateDepthWithBoundFramebuffer(
+        view,
+        projection,
+        instances,
+        framebuffer.kFramebufferGetArea(),
+        faces);
+    } finally {
+      gc.framebufferDrawUnbind();
     }
   }
 
@@ -404,32 +404,28 @@ import com.io7m.r1.types.RSpaceWorldType;
 
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 
-    try {
-      this.matrices.withObserver(
-        view,
-        projection,
-        new KMatricesObserverFunctionType<Unit, JCGLException>() {
-          @Override public Unit run(
-            final KMatricesObserverType mwo)
-            throws RException,
-              JCGLException
-          {
-            try {
-              KDepthRenderer.this.renderScene(
-                gc,
-                instances,
-                framebuffer_area,
-                mwo,
-                faces);
-              return Unit.unit();
-            } catch (final JCacheException e) {
-              throw new UnreachableCodeException(e);
-            }
+    this.matrices.withObserver(
+      view,
+      projection,
+      new KMatricesObserverFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final KMatricesObserverType mwo)
+          throws RException,
+            JCGLException
+        {
+          try {
+            KDepthRenderer.this.renderScene(
+              gc,
+              instances,
+              framebuffer_area,
+              mwo,
+              faces);
+            return Unit.unit();
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
           }
-        });
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+        }
+      });
   }
 
   private void renderScene(

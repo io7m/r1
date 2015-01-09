@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -37,7 +37,6 @@ import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionNotSupported;
 
 @EqualityReference abstract class KFramebufferRGBAAbstract implements
@@ -95,8 +94,6 @@ import com.io7m.r1.types.RExceptionNotSupported;
         final JCGLInterfaceCommonType gc = g.getGLCommon();
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.color);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -209,8 +206,6 @@ import com.io7m.r1.types.RExceptionNotSupported;
         final JCGLInterfaceCommonType gc = g.getGLCommon();
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.color);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -60,7 +60,6 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueVisitorType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceWorldType;
 
@@ -349,26 +348,21 @@ import com.io7m.r1.types.RSpaceWorldType;
     NullCheck.notNull(framebuffer, "Framebuffer");
     NullCheck.notNull(faces, "Faces");
 
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+
+    final FramebufferUsableType fb =
+      framebuffer.kFramebufferGetDepthVariancePassFramebuffer();
+
+    gc.framebufferDrawBind(fb);
     try {
-      final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-
-      final FramebufferUsableType fb =
-        framebuffer.kFramebufferGetDepthVariancePassFramebuffer();
-
-      gc.framebufferDrawBind(fb);
-      try {
-        this.rendererEvaluateDepthVarianceWithBoundFramebuffer(
-          view,
-          projection,
-          instances,
-          framebuffer.kFramebufferGetArea(),
-          faces);
-      } finally {
-        gc.framebufferDrawUnbind();
-      }
-
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
+      this.rendererEvaluateDepthVarianceWithBoundFramebuffer(
+        view,
+        projection,
+        instances,
+        framebuffer.kFramebufferGetArea(),
+        faces);
+    } finally {
+      gc.framebufferDrawUnbind();
     }
   }
 
@@ -386,31 +380,27 @@ import com.io7m.r1.types.RSpaceWorldType;
     NullCheck.notNull(framebuffer_area, "Framebuffer area");
     NullCheck.notNull(faces, "Faces");
 
-    try {
-      this.matrices.withObserver(
-        view,
-        projection,
-        new KMatricesObserverFunctionType<Unit, JCGLException>() {
-          @Override public Unit run(
-            final KMatricesObserverType mwo)
-            throws RException,
-              JCGLException
-          {
-            try {
-              KDepthVarianceRenderer.this.renderScene(
-                instances,
-                framebuffer_area,
-                mwo,
-                faces);
-              return Unit.unit();
-            } catch (final JCacheException e) {
-              throw new UnreachableCodeException(e);
-            }
+    this.matrices.withObserver(
+      view,
+      projection,
+      new KMatricesObserverFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final KMatricesObserverType mwo)
+          throws RException,
+            JCGLException
+        {
+          try {
+            KDepthVarianceRenderer.this.renderScene(
+              instances,
+              framebuffer_area,
+              mwo,
+              faces);
+            return Unit.unit();
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
           }
-        });
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+        }
+      });
   }
 
   @Override public String rendererGetName()

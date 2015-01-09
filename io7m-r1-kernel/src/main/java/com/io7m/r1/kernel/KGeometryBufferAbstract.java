@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -50,7 +50,6 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KGeometryBufferDescription;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 
 @EqualityReference abstract class KGeometryBufferAbstract implements
   KGeometryBufferType
@@ -198,17 +197,13 @@ import com.io7m.r1.types.RExceptionJCGL;
         throws RException
     {
       try {
-        try {
-          gc.framebufferDrawBind(this.fb);
-          gc.colorBufferMask(true, true, true, true);
-          gc.depthBufferWriteEnable();
-          gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xffffffff);
-          gc.clear(KGeometryBufferAbstract.CLEAR_SPEC);
-        } finally {
-          gc.framebufferDrawUnbind();
-        }
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
+        gc.framebufferDrawBind(this.fb);
+        gc.colorBufferMask(true, true, true, true);
+        gc.depthBufferWriteEnable();
+        gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xffffffff);
+        gc.clear(KGeometryBufferAbstract.CLEAR_SPEC);
+      } finally {
+        gc.framebufferDrawUnbind();
       }
     }
 
@@ -223,8 +218,6 @@ import com.io7m.r1.types.RExceptionJCGL;
         gc.texture2DStaticDelete(this.depth);
         gc.texture2DStaticDelete(this.normal);
         gc.texture2DStaticDelete(this.specular);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -267,7 +260,7 @@ import com.io7m.r1.types.RExceptionJCGL;
     CLEAR_SPEC = b.build();
   }
 
-  private boolean deleted;
+  private boolean                 deleted;
 
   public final boolean isDeleted()
   {

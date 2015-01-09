@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,7 +27,6 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionNotSupported;
 
 /**
@@ -58,44 +57,40 @@ import com.io7m.r1.types.RExceptionNotSupported;
     final KFramebufferDepthDescription description)
     throws RException
   {
-    try {
-      return gl
-        .implementationAccept(new JCGLImplementationVisitorType<KFramebufferDepthAbstract, RException>() {
-          @Override public KFramebufferDepthAbstract implementationIsGL2(
-            final JCGLInterfaceGL2Type gl2)
-            throws JCGLException
-          {
-            return KFramebufferDepthAbstract.KFramebufferDepthGL2
-              .newDepthFramebuffer(gl2, description);
-          }
+    return gl
+      .implementationAccept(new JCGLImplementationVisitorType<KFramebufferDepthAbstract, RException>() {
+        @Override public KFramebufferDepthAbstract implementationIsGL2(
+          final JCGLInterfaceGL2Type gl2)
+          throws JCGLException
+        {
+          return KFramebufferDepthAbstract.KFramebufferDepthGL2
+            .newDepthFramebuffer(gl2, description);
+        }
 
-          @Override public KFramebufferDepthAbstract implementationIsGL3(
-            final JCGLInterfaceGL3Type gl3)
-            throws JCGLException
-          {
-            return KFramebufferDepthAbstract.KFramebufferDepthGL3ES3
-              .newDepthFramebuffer(gl3, description);
-          }
+        @Override public KFramebufferDepthAbstract implementationIsGL3(
+          final JCGLInterfaceGL3Type gl3)
+          throws JCGLException
+        {
+          return KFramebufferDepthAbstract.KFramebufferDepthGL3ES3
+            .newDepthFramebuffer(gl3, description);
+        }
 
-          @Override public KFramebufferDepthAbstract implementationIsGLES2(
-            final JCGLInterfaceGLES2Type gles2)
-            throws JCGLException,
-              RExceptionNotSupported
-          {
-            throw RExceptionNotSupported.versionNotSupported(gles2
-              .metaGetVersion());
-          }
+        @Override public KFramebufferDepthAbstract implementationIsGLES2(
+          final JCGLInterfaceGLES2Type gles2)
+          throws JCGLException,
+            RExceptionNotSupported
+        {
+          throw RExceptionNotSupported.versionNotSupported(gles2
+            .metaGetVersion());
+        }
 
-          @Override public KFramebufferDepthAbstract implementationIsGLES3(
-            final JCGLInterfaceGLES3Type gl3)
-            throws JCGLException
-          {
-            return KFramebufferDepthAbstract.KFramebufferDepthGL3ES3
-              .newDepthFramebuffer(gl3, description);
-          }
-        });
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+        @Override public KFramebufferDepthAbstract implementationIsGLES3(
+          final JCGLInterfaceGLES3Type gl3)
+          throws JCGLException
+        {
+          return KFramebufferDepthAbstract.KFramebufferDepthGL3ES3
+            .newDepthFramebuffer(gl3, description);
+        }
+      });
   }
 }

@@ -59,7 +59,6 @@ import com.io7m.r1.kernel.types.KTranslucentVisitorType;
 import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionResource;
 
 /**
@@ -535,28 +534,23 @@ import com.io7m.r1.types.RExceptionResource;
     final KShaderCacheForwardTranslucentLitType in_shader_lit_cache,
     final KRefractionRendererType in_refraction_renderer,
     final LogUsableType in_log)
-    throws RException
   {
-    try {
-      this.log =
-        NullCheck.notNull(in_log, "Log").with(KTranslucentRenderer.NAME);
-      this.g = NullCheck.notNull(in_g, "GL implementation");
+    this.log =
+      NullCheck.notNull(in_log, "Log").with(KTranslucentRenderer.NAME);
+    this.g = NullCheck.notNull(in_g, "GL implementation");
 
-      this.shader_unlit_cache =
-        NullCheck.notNull(in_shader_unlit_cache, "Shader unlit cache");
-      this.shader_lit_cache =
-        NullCheck.notNull(in_shader_lit_cache, "Shader lit cache");
+    this.shader_unlit_cache =
+      NullCheck.notNull(in_shader_unlit_cache, "Shader unlit cache");
+    this.shader_lit_cache =
+      NullCheck.notNull(in_shader_lit_cache, "Shader lit cache");
 
-      this.texture_units =
-        KTextureUnitAllocator.newAllocator(in_g.getGLCommon());
-      this.refraction_renderer =
-        NullCheck.notNull(in_refraction_renderer, "Refraction renderer");
+    this.texture_units =
+      KTextureUnitAllocator.newAllocator(in_g.getGLCommon());
+    this.refraction_renderer =
+      NullCheck.notNull(in_refraction_renderer, "Refraction renderer");
 
-      if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
-        this.log.debug("initialized");
-      }
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
+    if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
+      this.log.debug("initialized");
     }
   }
 
@@ -572,9 +566,6 @@ import com.io7m.r1.types.RExceptionResource;
       NullCheck.notNull(translucents, "Translucents");
 
       this.rendererEvaluateTranslucentsActual(framebuffer, mwo, translucents);
-
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
       throw RExceptionCache.fromJCacheException(e);
     }

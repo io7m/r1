@@ -27,54 +27,72 @@ module DepthVariance is
   import com.io7m.parasol.Fragment;
 
   import com.io7m.r1.core.Albedo;
+  import com.io7m.r1.core.LogDepth;
+  import com.io7m.r1.core.VertexShaders;
   import com.io7m.r1.depth_only.Depth;
 
   function variance (d : float) : vector_2f =
     new vector_2f (d, F.multiply (d, d));
 
   shader fragment depth_variance_C_f is
-    in f_position : vector_4f;
-    out out_0     : vector_4f as 0;
+    in f_positive_eye_z         : float;
+    parameter depth_coefficient : float;
+    out depth out_depth         : float;
+    out out_0                   : vector_4f as 0;
   with
+    value log_z =
+      LogDepth.encode_partial (f_positive_eye_z, depth_coefficient);
     value rgba =
-      new vector_4f (variance (Fragment.coordinate [z]), 0.0, 1.0);
+      new vector_4f (variance (log_z), 0.0, 1.0);
   as
-    out out_0 = rgba;
+    out out_0     = rgba;
+    out out_depth = log_z;
   end;
 
   shader program depth_variance_C is
-    vertex   Depth.depth_simple_v;
+    vertex   VertexShaders.standard;
     fragment depth_variance_C_f;
   end;
 
   shader fragment depth_variance_U_f is
-    in f_position           : vector_4f;
-    parameter p_albedo      : Albedo.t;
-    parameter p_alpha_depth : float;
-    out out_0               : vector_4f as 0;
+    in f_positive_eye_z         : float;
+    parameter depth_coefficient : float;
+    parameter p_albedo          : Albedo.t;
+    parameter p_alpha_depth     : float;
+    out depth out_depth         : float;
+    out out_0                   : vector_4f as 0;
   with
+    value log_z =
+      LogDepth.encode_partial (f_positive_eye_z, depth_coefficient);
+
     value albedo : vector_4f = p_albedo.color;
     discard (F.lesser (albedo [w], p_alpha_depth));
 
     value rgba =
-      new vector_4f (variance (Fragment.coordinate [z]), 0.0, 1.0);
+      new vector_4f (variance (log_z), 0.0, 1.0);
   as
-    out out_0 = rgba;
+    out out_0     = rgba;
+    out out_depth = log_z;
   end;
 
   shader program depth_variance_U is
-    vertex   Depth.depth_simple_v;
+    vertex   VertexShaders.standard;
     fragment depth_variance_U_f;
   end;
 
   shader fragment depth_variance_A_f is
-    in f_uv                 : vector_2f;
-    in f_position           : vector_4f;
-    out out_0               : vector_4f as 0;
-    parameter p_albedo      : Albedo.t;
-    parameter p_alpha_depth : float;
-    parameter t_albedo      : sampler_2d;
+    in f_uv                     : vector_2f;
+    in f_positive_eye_z         : float;
+    parameter depth_coefficient : float;
+    out depth out_depth         : float;
+    out out_0                   : vector_4f as 0;
+    parameter p_albedo          : Albedo.t;
+    parameter p_alpha_depth     : float;
+    parameter t_albedo          : sampler_2d;
   with
+    value log_z =
+      LogDepth.encode_partial (f_positive_eye_z, depth_coefficient);
+
     value albedo : vector_4f =
       Albedo.textured (
         t_albedo,
@@ -85,13 +103,14 @@ module DepthVariance is
     discard (F.lesser (albedo [w], p_alpha_depth));
 
     value rgba =
-      new vector_4f (variance (Fragment.coordinate [z]), 0.0, 1.0);
+      new vector_4f (variance (log_z), 0.0, 1.0);
   as
-    out out_0 = rgba;
+    out out_0     = rgba;
+    out out_depth = log_z;
   end;
 
   shader program depth_variance_A is
-    vertex   Depth.depth_textured_v;
+    vertex   VertexShaders.standard;
     fragment depth_variance_A_f;
   end;
 

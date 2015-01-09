@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -42,7 +42,6 @@ import com.io7m.r1.kernel.types.KUnitSphereUsableType;
 import com.io7m.r1.meshes.RMeshParserEventsVBO;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionIO;
-import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * A cache that can load compressed and uncompressed binary meshes
@@ -105,8 +104,6 @@ import com.io7m.r1.types.RExceptionJCGL;
 
     } catch (final IOException e) {
       throw RExceptionIO.fromIOException(e);
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } finally {
       try {
         if (s != null) {
@@ -239,11 +236,7 @@ import com.io7m.r1.types.RExceptionJCGL;
         final KUnitSphere v)
         throws RException
       {
-        try {
-          v.delete(g);
-        } catch (final JCGLException e) {
-          throw RExceptionJCGL.fromJCGLException(e);
-        }
+        v.delete(g);
       }
 
       @SuppressWarnings("synthetic-access") @Override public

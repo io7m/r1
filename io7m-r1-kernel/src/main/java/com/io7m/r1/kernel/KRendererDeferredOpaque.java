@@ -101,7 +101,6 @@ import com.io7m.r1.kernel.types.KVisibleSetLightGroup;
 import com.io7m.r1.kernel.types.KVisibleSetOpaques;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceTextureType;
@@ -690,31 +689,26 @@ import com.io7m.r1.types.RSpaceTextureType;
     final KShaderCacheDeferredGeometryType in_shader_geo_cache,
     final KShaderCacheDeferredLightType in_shader_light_cache,
     final KViewRaysCacheType in_view_rays_cache)
-    throws RException
   {
-    try {
-      this.g = NullCheck.notNull(in_g, "GL");
-      this.texture_units =
-        KTextureUnitAllocator.newAllocator(this.g.getGLCommon());
+    this.g = NullCheck.notNull(in_g, "GL");
+    this.texture_units =
+      KTextureUnitAllocator.newAllocator(this.g.getGLCommon());
 
-      this.shader_geo_cache =
-        NullCheck.notNull(in_shader_geo_cache, "Geometry-pass shader cache");
-      this.shader_light_cache =
-        NullCheck.notNull(in_shader_light_cache, "Light-pass shader cache");
+    this.shader_geo_cache =
+      NullCheck.notNull(in_shader_geo_cache, "Geometry-pass shader cache");
+    this.shader_light_cache =
+      NullCheck.notNull(in_shader_light_cache, "Light-pass shader cache");
 
-      this.quad_cache = NullCheck.notNull(in_quad_cache, "Unit quad cache");
-      this.sphere_cache =
-        NullCheck.notNull(in_sphere_cache, "Unit sphere cache");
-      this.frustum_cache =
-        NullCheck.notNull(in_frustum_cache, "Frustum mesh cache");
-      this.view_rays_cache =
-        NullCheck.notNull(in_view_rays_cache, "View rays cache");
+    this.quad_cache = NullCheck.notNull(in_quad_cache, "Unit quad cache");
+    this.sphere_cache =
+      NullCheck.notNull(in_sphere_cache, "Unit sphere cache");
+    this.frustum_cache =
+      NullCheck.notNull(in_frustum_cache, "Frustum mesh cache");
+    this.view_rays_cache =
+      NullCheck.notNull(in_view_rays_cache, "View rays cache");
 
-      this.uv_light_spherical =
-        new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+    this.uv_light_spherical =
+      new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
   }
 
   @Override public void rendererEvaluateOpaqueLit(
@@ -746,9 +740,6 @@ import com.io7m.r1.types.RSpaceTextureType;
           mwo,
           group);
       }
-
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
       throw new UnreachableCodeException(e);
     }
@@ -803,8 +794,6 @@ import com.io7m.r1.types.RSpaceTextureType;
         }
 
       }
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
       throw new UnreachableCodeException(e);
     }

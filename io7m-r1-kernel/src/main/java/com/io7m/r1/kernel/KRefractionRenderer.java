@@ -52,7 +52,6 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
 import com.io7m.r1.types.RExceptionFramebufferNotBound;
-import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * The default implementation of the refraction renderer interface.
@@ -849,21 +848,15 @@ import com.io7m.r1.types.RExceptionJCGL;
     final KRegionCopierType in_copier,
     final KShaderCacheForwardTranslucentUnlitType in_shader_cache,
     final KFramebufferRGBAWithDepthCacheType in_forward_cache)
-    throws RException
   {
-    try {
-      this.g = NullCheck.notNull(gl, "OpenGL implementation");
-      this.copier = NullCheck.notNull(in_copier, "Copier");
-      this.rgba_cache =
-        NullCheck.notNull(in_forward_cache, "Forward framebuffer cache");
-      this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
+    this.g = NullCheck.notNull(gl, "OpenGL implementation");
+    this.copier = NullCheck.notNull(in_copier, "Copier");
+    this.rgba_cache =
+      NullCheck.notNull(in_forward_cache, "Forward framebuffer cache");
+    this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
 
-      this.texture_units =
-        KTextureUnitAllocator.newAllocator(this.g.getGLCommon());
-
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+    this.texture_units =
+      KTextureUnitAllocator.newAllocator(this.g.getGLCommon());
   }
 
   @Override public String rendererGetName()
@@ -881,39 +874,34 @@ import com.io7m.r1.types.RExceptionJCGL;
     NullCheck.notNull(observer, "Observer");
     NullCheck.notNull(r, "Refractive instance");
 
-    try {
-      final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
 
-      if (gc.framebufferDrawIsBound(scene.rgbaGetColorFramebuffer()) == false) {
-        throw new RExceptionFramebufferNotBound("Framebuffer is not bound");
-      }
+    if (gc.framebufferDrawIsBound(scene.rgbaGetColorFramebuffer()) == false) {
+      throw new RExceptionFramebufferNotBound("Framebuffer is not bound");
+    }
 
-      observer.withInstance(
-        r,
-        new KMatricesInstanceFunctionType<Unit, JCGLException>() {
-          @Override public Unit run(
-            final KMatricesInstanceType mi)
-            throws RException,
-              JCGLException
-          {
-            try {
-              KRefractionRenderer.this.rendererRefractionEvaluateForInstance(
-                scene,
-                r,
-                mi);
-            } catch (final JCacheException e) {
-              throw RExceptionCache.fromJCacheException(e);
-            }
-            return Unit.unit();
+    observer.withInstance(
+      r,
+      new KMatricesInstanceFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final KMatricesInstanceType mi)
+          throws RException,
+            JCGLException
+        {
+          try {
+            KRefractionRenderer.this.rendererRefractionEvaluateForInstance(
+              scene,
+              r,
+              mi);
+          } catch (final JCacheException e) {
+            throw RExceptionCache.fromJCacheException(e);
           }
-        });
+          return Unit.unit();
+        }
+      });
 
-      if (gc.framebufferDrawIsBound(scene.rgbaGetColorFramebuffer()) == false) {
-        throw new RExceptionFramebufferNotBound("Framebuffer is not bound");
-      }
-
-    } catch (final JCGLException x) {
-      throw RExceptionJCGL.fromJCGLException(x);
+    if (gc.framebufferDrawIsBound(scene.rgbaGetColorFramebuffer()) == false) {
+      throw new RExceptionFramebufferNotBound("Framebuffer is not bound");
     }
   }
 

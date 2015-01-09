@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -54,7 +54,6 @@ import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.kernel.types.KVisibleSetShadows;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceLightEyeType;
 import com.io7m.r1.types.RSpaceWorldType;
@@ -379,51 +378,47 @@ import com.io7m.r1.types.RSpaceWorldType;
     NullCheck.notNull(shadows, "Shadows");
     NullCheck.notNull(with, "With");
 
+    final Map<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts =
+      new HashMap<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>>();
+
     try {
-      final Map<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts =
-        new HashMap<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>>();
-
-      try {
-        this.matrices.withObserver(
-          camera.getViewMatrix(),
-          camera.getProjection(),
-          new KMatricesObserverFunctionType<Unit, JCGLException>() {
-            @Override public Unit run(
-              final KMatricesObserverType mo)
-              throws RException,
-                JCGLException
-            {
-              try {
-                KShadowMapRenderer.this.shadowMapsRenderAll(
-                  shadows,
-                  receipts,
-                  mo);
-                return Unit.unit();
-              } catch (final JCacheException e) {
-                throw RExceptionCache.fromJCacheException(e);
-              }
-            }
-          });
-
-        final A r = with.withMaps(new KShadowMapContextType() {
-          @Override public KShadowMapUsableType getShadowMap(
-            final KLightWithShadowType light)
-            throws RException
+      this.matrices.withObserver(
+        camera.getViewMatrix(),
+        camera.getProjection(),
+        new KMatricesObserverFunctionType<Unit, JCGLException>() {
+          @Override public Unit run(
+            final KMatricesObserverType mo)
+            throws RException,
+              JCGLException
           {
-            assert receipts.containsKey(light);
-            final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> rr =
-              receipts.get(light);
-            assert rr != null;
-            return rr.getValue();
+            try {
+              KShadowMapRenderer.this.shadowMapsRenderAll(
+                shadows,
+                receipts,
+                mo);
+              return Unit.unit();
+            } catch (final JCacheException e) {
+              throw RExceptionCache.fromJCacheException(e);
+            }
           }
         });
 
-        return r;
-      } finally {
-        KShadowMapRenderer.returnReceipts(receipts);
-      }
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
+      final A r = with.withMaps(new KShadowMapContextType() {
+        @Override public KShadowMapUsableType getShadowMap(
+          final KLightWithShadowType light)
+          throws RException
+        {
+          assert receipts.containsKey(light);
+          final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> rr =
+            receipts.get(light);
+          assert rr != null;
+          return rr.getValue();
+        }
+      });
+
+      return r;
+    } finally {
+      KShadowMapRenderer.returnReceipts(receipts);
     }
   }
 
