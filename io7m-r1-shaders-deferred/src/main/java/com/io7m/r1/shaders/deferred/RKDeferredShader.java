@@ -244,9 +244,10 @@ import com.io7m.r1.types.RException;
           throws RException
         {
           b.append("  -- Projective light parameters\n");
-          b.append("  parameter light_projective      : Light.t;\n");
-          b.append("  parameter t_projection          : sampler_2d;\n");
-          b.append("  parameter m_deferred_projective : matrix_4x4f;\n");
+          b.append("  parameter light_projective   : Light.t;\n");
+          b.append("  parameter t_projection       : sampler_2d;\n");
+          b.append("  parameter m_eye_to_light_eye : matrix_4x4f;\n");
+          b.append("  parameter m_light_projection : matrix_4x4f;\n");
           b.append("\n");
 
           return lp
@@ -453,11 +454,18 @@ import com.io7m.r1.types.RException;
           final KLightProjectiveType lp)
           throws RException
         {
-          b.append("  -- Projective light clip-space position\n");
+          b.append("  -- Projective light-eye-space position\n");
+          b.append("  value position_light_eye =\n");
+          b.append("    M4.multiply_vector (\n");
+          b.append("      m_eye_to_light_eye,\n");
+          b.append("      eye_position\n");
+          b.append("   );\n");
+          b.append("\n");
+          b.append("  -- Projective light-clip-space position\n");
           b.append("  value position_light_clip =\n");
           b.append("    M4.multiply_vector (\n");
-          b.append("      m_deferred_projective,\n");
-          b.append("      eye_position\n");
+          b.append("      m_light_projection,\n");
+          b.append("      position_light_eye\n");
           b.append("   );\n");
           b.append("\n");
           b.append("  -- Projective light vectors/attenuation\n");
@@ -501,6 +509,7 @@ import com.io7m.r1.types.RException;
                 b.append("      light_vectors.vectors,\n");
                 b.append("      shadow_basic,\n");
                 b.append("      t_shadow_basic,\n");
+                b.append("      position_light_eye,\n");
                 b.append("      position_light_clip\n");
                 b.append("    );\n");
                 b.append("\n");
@@ -551,6 +560,7 @@ import com.io7m.r1.types.RException;
                 b.append("      light_vectors.vectors,\n");
                 b.append("      shadow_basic,\n");
                 b.append("      t_shadow_basic,\n");
+                b.append("      position_light_eye,\n");
                 b.append("      position_light_clip\n");
                 b.append("    );\n");
                 b.append("\n");

@@ -24,6 +24,9 @@ module LogDepth is
 
   import com.io7m.parasol.Float as F;
 
+  function prepare_eye_z (z : float) : float =
+    F.add (F.negate (z), 1.0);
+
   function encode_partial (
     z                 : float,
     depth_coefficient : float  

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -362,7 +362,6 @@ import com.io7m.r1.types.RSpaceWorldType;
   @EqualityReference private final class InstanceFromProjective implements
     KMatricesInstanceWithProjectiveType
   {
-    private final PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>    matrix_deferred_projection;
     private final PMatrixM4x4F<RSpaceObjectType, RSpaceWorldType>     matrix_model;
     private final PMatrixM4x4F<RSpaceObjectType, RSpaceEyeType>       matrix_modelview;
     private final PMatrixM3x3F<RSpaceObjectType, RSpaceNormalEyeType> matrix_normal;
@@ -388,8 +387,6 @@ import com.io7m.r1.types.RSpaceWorldType;
         new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
       this.matrix_projective_modelview =
         new PMatrixM4x4F<RSpaceObjectType, RSpaceLightEyeType>();
-      this.matrix_deferred_projection =
-        new PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>();
     }
 
     @Override public PMatrixM4x4F.Context getMatrixContext()
@@ -398,13 +395,13 @@ import com.io7m.r1.types.RSpaceWorldType;
     }
 
     @Override public
-      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightClipType>
-      getMatrixDeferredProjection()
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightEyeType>
+      getMatrixProjectiveEyeToLightEye()
     {
       assert KMutableMatrices.this.observerIsActive();
       assert KMutableMatrices.this.projectiveLightIsActive();
       assert KMutableMatrices.this.instanceIsActive();
-      return this.matrix_deferred_projection;
+      return this.parent.getMatrixProjectiveEyeToLightEye();
     }
 
     @Override public
@@ -863,13 +860,12 @@ import com.io7m.r1.types.RSpaceWorldType;
   @EqualityReference private final class ProjectiveFromInstance implements
     KMatricesInstanceWithProjectiveType
   {
-    private final PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>      matrix_deferred_projection;
+    private final PMatrixM4x4F<RSpaceEyeType, RSpaceLightEyeType>       matrix_eye_to_light_eye;
     private final PMatrixM4x4F<RSpaceObjectType, RSpaceLightEyeType>    matrix_projective_modelview;
     private final PMatrixM4x4F<RSpaceLightEyeType, RSpaceLightClipType> matrix_projective_projection;
     private final PMatrixM4x4F<RSpaceWorldType, RSpaceLightEyeType>     matrix_projective_view;
     private final InstanceFromObserver                                  parent;
     private @Nullable KProjectionType                                   projection;
-    private final PMatrixM4x4F<?, ?>                                    temp;
 
     ProjectiveFromInstance(
       final InstanceFromObserver in_parent)
@@ -882,10 +878,8 @@ import com.io7m.r1.types.RSpaceWorldType;
         new PMatrixM4x4F<RSpaceWorldType, RSpaceLightEyeType>();
       this.matrix_projective_modelview =
         new PMatrixM4x4F<RSpaceObjectType, RSpaceLightEyeType>();
-
-      this.temp = new PMatrixM4x4F<Object, Object>();
-      this.matrix_deferred_projection =
-        new PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>();
+      this.matrix_eye_to_light_eye =
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceLightEyeType>();
     }
 
     @Override public PMatrixM4x4F.Context getMatrixContext()
@@ -895,12 +889,12 @@ import com.io7m.r1.types.RSpaceWorldType;
     }
 
     @Override public
-      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightClipType>
-      getMatrixDeferredProjection()
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightEyeType>
+      getMatrixProjectiveEyeToLightEye()
     {
       assert KMutableMatrices.this.instanceIsActive();
       assert KMutableMatrices.this.projectiveLightIsActive();
-      return this.matrix_deferred_projection;
+      return this.matrix_eye_to_light_eye;
     }
 
     @Override public
@@ -1017,27 +1011,6 @@ import com.io7m.r1.types.RSpaceWorldType;
       return this.projection;
     }
 
-    private void makeDeferredProjective()
-    {
-      /**
-       * The temporary matrix needs to be considered as a matrix that
-       * transforms from world space to light-clip space.
-       */
-
-      @SuppressWarnings("unchecked") final PMatrixM4x4F<RSpaceWorldType, RSpaceLightClipType> temp0 =
-        (PMatrixM4x4F<RSpaceWorldType, RSpaceLightClipType>) this.temp;
-
-      PMatrixM4x4F.multiply(
-        this.getMatrixProjectiveProjection(),
-        this.getMatrixProjectiveView(),
-        temp0);
-
-      PMatrixM4x4F.multiply(
-        temp0,
-        this.getMatrixViewInverse(),
-        this.matrix_deferred_projection);
-    }
-
     private void projectiveStart(
       final KLightProjectiveType p)
     {
@@ -1067,7 +1040,15 @@ import com.io7m.r1.types.RSpaceWorldType;
         (PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>) (PMatrixM4x4F<?, ?>) this.matrix_projective_projection;
       proj.projectionGetMatrix().makeMatrixM4x4F(m);
 
-      this.makeDeferredProjective();
+      /**
+       * Produce the eye → world → light-eye transformation matrix for the
+       * given light.
+       */
+
+      PMatrixM4x4F.multiply(
+        this.matrix_projective_view,
+        this.parent.getMatrixViewInverse(),
+        this.matrix_eye_to_light_eye);
     }
   }
 
@@ -1078,12 +1059,11 @@ import com.io7m.r1.types.RSpaceWorldType;
   @EqualityReference private final class ProjectiveFromObserver implements
     KMatricesProjectiveLightType
   {
-    private final PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>      matrix_deferred_projection;
+    private final PMatrixM4x4F<RSpaceEyeType, RSpaceLightEyeType>       matrix_eye_to_light_eye;
     private final PMatrixM4x4F<RSpaceLightEyeType, RSpaceLightClipType> matrix_projective_projection;
     private final PMatrixM4x4F<RSpaceWorldType, RSpaceLightEyeType>     matrix_projective_view;
     private final Observer                                              parent;
     private @Nullable KProjectionType                                   projection;
-    private final PMatrixM4x4F<?, ?>                                    temp;
 
     ProjectiveFromObserver(
       final Observer in_observer)
@@ -1094,9 +1074,8 @@ import com.io7m.r1.types.RSpaceWorldType;
         new PMatrixM4x4F<RSpaceLightEyeType, RSpaceLightClipType>();
       this.matrix_projective_view =
         new PMatrixM4x4F<RSpaceWorldType, RSpaceLightEyeType>();
-      this.temp = new PMatrixM4x4F<Object, Object>();
-      this.matrix_deferred_projection =
-        new PMatrixM4x4F<RSpaceEyeType, RSpaceLightClipType>();
+      this.matrix_eye_to_light_eye =
+        new PMatrixM4x4F<RSpaceEyeType, RSpaceLightEyeType>();
     }
 
     @Override public PMatrixM4x4F.Context getMatrixContext()
@@ -1105,10 +1084,10 @@ import com.io7m.r1.types.RSpaceWorldType;
     }
 
     @Override public
-      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightClipType>
-      getMatrixDeferredProjection()
+      PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightEyeType>
+      getMatrixProjectiveEyeToLightEye()
     {
-      return this.matrix_deferred_projection;
+      return this.matrix_eye_to_light_eye;
     }
 
     @Override public
@@ -1172,31 +1151,6 @@ import com.io7m.r1.types.RSpaceWorldType;
       return this.projection;
     }
 
-    /**
-     * Produce an (eye → world → projective clip) matrix.
-     */
-
-    private void makeDeferredProjective()
-    {
-      /**
-       * The temporary matrix needs to be considered as a matrix that
-       * transforms from world space to light-clip space.
-       */
-
-      @SuppressWarnings("unchecked") final PMatrixM4x4F<RSpaceWorldType, RSpaceLightClipType> temp0 =
-        (PMatrixM4x4F<RSpaceWorldType, RSpaceLightClipType>) this.temp;
-
-      PMatrixM4x4F.multiply(
-        this.getMatrixProjectiveProjection(),
-        this.getMatrixProjectiveView(),
-        temp0);
-
-      PMatrixM4x4F.multiply(
-        temp0,
-        this.getMatrixViewInverse(),
-        this.matrix_deferred_projection);
-    }
-
     private void projectiveStart(
       final KLightProjectiveType p)
     {
@@ -1225,7 +1179,15 @@ import com.io7m.r1.types.RSpaceWorldType;
         (PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>) (PMatrixM4x4F<?, ?>) this.matrix_projective_projection;
       proj.projectionGetMatrix().makeMatrixM4x4F(mpp);
 
-      this.makeDeferredProjective();
+      /**
+       * Produce the eye → world → light-eye transformation matrix for the
+       * given light.
+       */
+
+      PMatrixM4x4F.multiply(
+        this.matrix_projective_view,
+        this.parent.getMatrixViewInverse(),
+        this.matrix_eye_to_light_eye);
     }
 
     @Override public <T, E extends Throwable> T withGenericTransform(

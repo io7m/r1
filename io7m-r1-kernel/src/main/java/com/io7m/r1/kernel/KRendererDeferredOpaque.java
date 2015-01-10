@@ -1287,9 +1287,13 @@ import com.io7m.r1.types.RSpaceTextureType;
               KShadingProgramCommon.putMatrixNormal(
                 program,
                 mi.getMatrixNormal());
-              KShadingProgramCommon.putMatrixDeferredProjection(
+              KShadingProgramCommon.putMatrixEyeToLightEye(
                 program,
-                mdp.getMatrixDeferredProjection());
+                mdp.getMatrixProjectiveEyeToLightEye());
+              KShadingProgramCommon.putMatrixLightProjection(
+                program,
+                mdp.getMatrixProjectiveProjection());
+
               KShadingProgramCommon.putMatrixUVUnchecked(
                 program,
                 KMatrices.IDENTITY_UV);

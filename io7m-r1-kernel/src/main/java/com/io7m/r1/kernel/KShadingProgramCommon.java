@@ -1287,6 +1287,13 @@ import com.io7m.r1.types.RSpaceWorldType;
       m);
   }
 
+  static void putMatrixEyeToLightEye(
+    final JCBProgramType program,
+    final PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightEyeType> m)
+  {
+    program.programUniformPutMatrix4x4f("m_eye_to_light_eye", m);
+  }
+
   static void putMatrixInverseProjection(
     final JCBProgramType program,
     final PMatrixDirectReadable4x4FType<RSpaceClipType, RSpaceEyeType> m)
@@ -1305,6 +1312,15 @@ import com.io7m.r1.types.RSpaceWorldType;
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_VIEW_INVERSE,
       m);
+  }
+
+  static
+    void
+    putMatrixLightProjection(
+      final JCBProgramType program,
+      final PMatrixDirectReadable4x4FType<RSpaceLightEyeType, RSpaceLightClipType> m)
+  {
+    program.programUniformPutMatrix4x4f("m_light_projection", m);
   }
 
   static
