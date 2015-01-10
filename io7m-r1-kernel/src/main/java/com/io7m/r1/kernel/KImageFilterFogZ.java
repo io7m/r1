@@ -39,6 +39,7 @@ import com.io7m.jtensors.parameterized.PMatrixM3x3F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
+import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
@@ -125,7 +126,9 @@ import com.io7m.r1.types.RSpaceTextureType;
       RException,
       JCacheException
   {
-    config.getProjection().makeMatrixM4x4F(this.projection);
+    final KProjectionType projection_description = config.getProjection();
+    projection_description.projectionGetMatrix().makeMatrixM4x4F(
+      this.projection);
 
     final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
@@ -167,6 +170,10 @@ import com.io7m.r1.types.RSpaceTextureType;
             gc.arrayBufferBind(array);
             KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
             KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
+
+            KShadingProgramCommon.putDepthCoefficient(
+              p,
+              KRendererCommon.depthCoefficient(projection_description));
 
             final TextureUnitType t_image = units.get(0);
             assert t_image != null;

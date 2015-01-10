@@ -159,7 +159,7 @@ module VertexShaders is
       );
 
     value positive_eye_z =
-      F.add (F.negate (position_eye [z]), 1.0);
+      LogDepth.prepare_eye_z (position_eye [z]);
 
     -- Transformed UV coordinates
     value uv =
@@ -230,6 +230,30 @@ module VertexShaders is
   --
   -- Standard vertex shader for vertex positions that are
   -- already specified in clip-space, and allow for modifying
+  -- UV coordinates via a matrix.
+  --
+  -- This variant of the shader does not use logarithmic depth.
+  --
+
+  shader vertex standard_clip_without_log is
+    parameter  m_uv             : matrix_3x3f;
+    in         v_position       : vector_3f;
+    in         v_uv             : vector_2f;
+    out vertex f_position_clip  : vector_4f;
+    out        f_uv             : vector_2f;
+  with
+    value position_clip =
+      new vector_4f (v_position, 1.0);
+    value uv =
+      M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
+  as
+    out f_uv            = uv;
+    out f_position_clip = position_clip;
+  end;
+
+  --
+  -- Standard vertex shader for vertex positions that are
+  -- already specified in clip-space, and allow for modifying
   -- UV coordinates via a matrix, but provide eye-space positions
   -- to the fragment shader.
   --
@@ -242,7 +266,7 @@ module VertexShaders is
     out vertex f_position_clip  : vector_4f;
     out        f_position_eye   : vector_4f;
     out        f_uv             : vector_2f;
-    out        f_positive_eye_z      : float;
+    out        f_positive_eye_z : float;
 
     -- Log depth coefficient (2.0 / log2 (far + 1.0))
     parameter depth_coefficient : float;
@@ -261,7 +285,7 @@ module VertexShaders is
       M4.multiply_vector (m_projection_inv, position_clip);
 
     value positive_eye_z =
-      F.add (position_eye [z], 1.0);
+      LogDepth.prepare_eye_z (position_eye [z]);
 
     value uv =
       M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
