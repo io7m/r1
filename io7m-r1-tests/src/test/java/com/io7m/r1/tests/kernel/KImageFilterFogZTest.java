@@ -30,7 +30,7 @@ import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogUsableType;
-import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.KFogProgression;
 import com.io7m.r1.kernel.KFogZParameters;
@@ -40,6 +40,7 @@ import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KImageFilterDeferredType;
 import com.io7m.r1.kernel.types.KFramebufferDeferredDescription;
 import com.io7m.r1.kernel.types.KFramebufferDeferredDescriptionBuilderType;
+import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.main.R1;
 import com.io7m.r1.main.R1BuilderType;
 import com.io7m.r1.main.R1Type;
@@ -72,19 +73,29 @@ import com.io7m.r1.types.RSpaceRGBType;
       KFramebufferDeferred.newFramebuffer(gi, fb_desc);
 
     final KImageFilterDeferredType<KFogZParameters> f = r1.getFilterFogZ();
+    final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType> temporary =
+      new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>();
 
     for (final KFogProgression prog : KFogProgression.values()) {
       assert prog != null;
 
-      final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> in_projection =
-        PMatrixI4x4F.identity();
+      final KProjectionFrustum in_projection =
+        KProjectionFrustum.newProjection(
+          temporary,
+          -1.0f,
+          1.0f,
+          -1.0f,
+          1.0f,
+          1.0f,
+          100.0f);
+
       final KFogZParametersBuilderType b =
         KFogZParameters.newBuilder(in_projection);
       b.setColor(new PVectorI3F<RSpaceRGBType>(0.33f, 0.33f, 0.33f));
       b.setFarZ(1.0f);
       b.setNearZ(0.0f);
       b.setProgression(prog);
-      b.setProjectionMatrix(in_projection);
+      b.setProjection(in_projection);
       f.filterEvaluateDeferred(b.build(), fb, fb);
     }
   }

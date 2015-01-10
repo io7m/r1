@@ -40,7 +40,7 @@ module ImageFilterEmission is
   end;
 
   shader program emission is
-    vertex   VertexShaders.standard_clip;
+    vertex   VertexShaders.standard_clip_without_log;
     fragment emission_f;
   end;
 
@@ -70,7 +70,7 @@ module ImageFilterEmission is
   end;
 
   shader program emission_glow is
-    vertex   VertexShaders.standard_clip;
+    vertex   VertexShaders.standard_clip_without_log;
     fragment emission_glow_f;
   end;
 

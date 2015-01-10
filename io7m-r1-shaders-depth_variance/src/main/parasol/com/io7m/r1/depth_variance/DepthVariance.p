@@ -31,6 +31,9 @@ module DepthVariance is
   import com.io7m.r1.core.VertexShaders;
   import com.io7m.r1.depth_only.Depth;
 
+  function variance_rgba (z : float) : vector_4f =
+    new vector_4f (variance (z), 1.0, 1.0);
+
   function variance (d : float) : vector_2f =
     new vector_2f (d, F.multiply (d, d));
 
@@ -43,7 +46,7 @@ module DepthVariance is
     value log_z =
       LogDepth.encode_partial (f_positive_eye_z, depth_coefficient);
     value rgba =
-      new vector_4f (variance (log_z), 0.0, 1.0);
+      variance_rgba (log_z);
   as
     out out_0     = rgba;
     out out_depth = log_z;
@@ -69,7 +72,7 @@ module DepthVariance is
     discard (F.lesser (albedo [w], p_alpha_depth));
 
     value rgba =
-      new vector_4f (variance (log_z), 0.0, 1.0);
+      variance_rgba (log_z);
   as
     out out_0     = rgba;
     out out_depth = log_z;
@@ -103,7 +106,7 @@ module DepthVariance is
     discard (F.lesser (albedo [w], p_alpha_depth));
 
     value rgba =
-      new vector_4f (variance (log_z), 0.0, 1.0);
+      variance_rgba (log_z);
   as
     out out_0     = rgba;
     out out_depth = log_z;

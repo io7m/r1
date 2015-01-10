@@ -444,27 +444,11 @@ import com.io7m.r1.types.RSpaceWorldType;
         final FakeProgram fp = (FakeProgram) program;
 
         if ("DepC".equals(name)) {
-          uniforms.put("m_projection", FakeProgramUniform.newUniform(
-            fp.getContext(),
+          KShadowMapRendererTest.this.configureProgramDepC(
             program,
-            0,
-            0,
-            "m_projection",
-            JCGLType.TYPE_FLOAT_MATRIX_4));
-          uniforms.put("m_modelview", FakeProgramUniform.newUniform(
-            fp.getContext(),
-            program,
-            0,
-            0,
-            "m_modelview",
-            JCGLType.TYPE_FLOAT_MATRIX_4));
-          attributes.put("v_position", FakeProgramAttribute.newAttribute(
-            fp.getContext(),
-            program,
-            0,
-            0,
-            "v_position",
-            JCGLType.TYPE_FLOAT_VECTOR_3));
+            uniforms,
+            attributes,
+            fp);
         }
       }
 
@@ -595,27 +579,11 @@ import com.io7m.r1.types.RSpaceWorldType;
         final FakeProgram fp = (FakeProgram) program;
 
         if ("DepC".equals(name)) {
-          uniforms.put("m_projection", FakeProgramUniform.newUniform(
-            fp.getContext(),
+          KShadowMapRendererTest.this.configureProgramDepC(
             program,
-            0,
-            0,
-            "m_projection",
-            JCGLType.TYPE_FLOAT_MATRIX_4));
-          uniforms.put("m_modelview", FakeProgramUniform.newUniform(
-            fp.getContext(),
-            program,
-            0,
-            0,
-            "m_modelview",
-            JCGLType.TYPE_FLOAT_MATRIX_4));
-          attributes.put("v_position", FakeProgramAttribute.newAttribute(
-            fp.getContext(),
-            program,
-            0,
-            0,
-            "v_position",
-            JCGLType.TYPE_FLOAT_VECTOR_3));
+            uniforms,
+            attributes,
+            fp);
         }
       }
 
@@ -730,5 +698,69 @@ import com.io7m.r1.types.RSpaceWorldType;
 
     Assert.assertEquals(3, r.cache_loads.intValue());
     Assert.assertEquals(9, r.cache_retrieves.intValue());
+  }
+
+  private void configureProgramDepC(
+    final ProgramUsableType program,
+    final Map<String, ProgramUniformType> uniforms,
+    final Map<String, ProgramAttributeType> attributes,
+    final FakeProgram fp)
+  {
+    uniforms.put("m_projection", FakeProgramUniform.newUniform(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "m_projection",
+      JCGLType.TYPE_FLOAT_MATRIX_4));
+    uniforms.put("m_normal", FakeProgramUniform.newUniform(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "m_normal",
+      JCGLType.TYPE_FLOAT_MATRIX_3));
+    uniforms.put("m_uv", FakeProgramUniform.newUniform(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "m_uv",
+      JCGLType.TYPE_FLOAT_MATRIX_3));
+    uniforms.put("depth_coefficient", FakeProgramUniform.newUniform(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "depth_coefficient",
+      JCGLType.TYPE_FLOAT));
+    uniforms.put("m_modelview", FakeProgramUniform.newUniform(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "m_modelview",
+      JCGLType.TYPE_FLOAT_MATRIX_4));
+    attributes.put("v_position", FakeProgramAttribute.newAttribute(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "v_position",
+      JCGLType.TYPE_FLOAT_VECTOR_3));
+    attributes.put("v_normal", FakeProgramAttribute.newAttribute(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "v_normal",
+      JCGLType.TYPE_FLOAT_VECTOR_3));
+    attributes.put("v_uv", FakeProgramAttribute.newAttribute(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "v_uv",
+      JCGLType.TYPE_FLOAT_VECTOR_2));
   }
 }

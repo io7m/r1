@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,7 +21,7 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.KFogProgression;
 import com.io7m.r1.kernel.KFogZParameters;
@@ -32,6 +32,7 @@ import com.io7m.r1.kernel.KRendererDeferredControlType;
 import com.io7m.r1.kernel.KRendererDeferredType;
 import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.kernel.types.KCamera;
+import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.kernel.types.KVisibleSet;
 import com.io7m.r1.main.R1;
 import com.io7m.r1.main.R1BuilderType;
@@ -92,8 +93,18 @@ public final class ExampleRendererDeferredWithFogZ implements
     final KRendererDeferredType dr = r.getRendererDeferred();
     final KImageFilterDeferredType<KFogZParameters> p = r.getFilterFogZ();
 
-    final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> in_projection =
-      PMatrixI4x4F.identity();
+    final PMatrixM4x4F<RSpaceEyeType, RSpaceClipType> temporary =
+      new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>();
+    final KProjectionFrustum in_projection =
+      KProjectionFrustum.newProjection(
+        temporary,
+        -1.0f,
+        1.0f,
+        -1.0f,
+        1.0f,
+        1.0f,
+        100.0f);
+
     final PVectorI3F<RSpaceRGBType> grey =
       new PVectorI3F<RSpaceRGBType>(0.2f, 0.2f, 0.2f);
     final KFogZParametersBuilderType fog_b =
@@ -115,9 +126,7 @@ public final class ExampleRendererDeferredWithFogZ implements
         dr.rendererDeferredEvaluate(framebuffer, scene, procedure);
 
         final KCamera camera = scene.getCamera();
-        fog_b.setProjectionMatrix(camera
-          .getProjection()
-          .projectionGetMatrix());
+        fog_b.setProjection(camera.getProjection());
         fog_b.setNearZ(near);
         fog_b.setFarZ(far);
         fog_b.setColor(grey);
@@ -133,9 +142,7 @@ public final class ExampleRendererDeferredWithFogZ implements
         dr.rendererDeferredEvaluateFull(framebuffer, scene);
 
         final KCamera camera = scene.getCamera();
-        fog_b.setProjectionMatrix(camera
-          .getProjection()
-          .projectionGetMatrix());
+        fog_b.setProjection(camera.getProjection());
         fog_b.setNearZ(near);
         fog_b.setFarZ(far);
         fog_b.setColor(grey);

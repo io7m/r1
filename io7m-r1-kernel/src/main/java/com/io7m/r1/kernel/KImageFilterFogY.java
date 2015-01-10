@@ -216,6 +216,9 @@ import com.io7m.r1.types.RSpaceWorldType;
               KShadingProgramCommon.putMatrixProjectionUnchecked(
                 p,
                 KImageFilterFogY.this.projection);
+              KShadingProgramCommon.putDepthCoefficient(
+                p,
+                KRendererCommon.depthCoefficient(c_proj));
 
               p.programExecute(new JCBProgramProcedureType<JCGLException>() {
                 @Override public void call()

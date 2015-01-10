@@ -26,6 +26,7 @@ module Refraction is
   import com.io7m.parasol.Vector4f;
   import com.io7m.parasol.Matrix4x4f;
 
+  import com.io7m.r1.core.LogDepth;
   import com.io7m.r1.core.Transform;
   import com.io7m.r1.core.VertexShaders;
 
@@ -137,10 +138,17 @@ module Refraction is
   --
 
   shader fragment mask_f is
-    parameter f_ccolor : vector_4f;
-    out       out_0    : vector_4f as 0;
+    parameter f_ccolor          : vector_4f;
+    parameter depth_coefficient : float;
+    in        f_positive_eye_z  : float;
+    out depth out_depth         : float;
+    out       out_0             : vector_4f as 0;
+  with
+    value r_depth =
+      LogDepth.encode_partial (f_positive_eye_z, depth_coefficient);
   as
-    out out_0 = f_ccolor;
+    out out_depth = r_depth;
+    out out_0     = f_ccolor;
   end;
 
   shader program mask is

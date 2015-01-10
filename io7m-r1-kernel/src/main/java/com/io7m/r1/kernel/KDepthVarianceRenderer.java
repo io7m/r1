@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -40,6 +40,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.VectorI2F;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KDepthInstancesType;
@@ -171,6 +173,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(jp, array);
+      KShadingProgramCommon.putAttributeNormalUnchecked(jp, VectorI3F.ZERO);
 
       /**
        * Upload matrices.
@@ -180,6 +183,9 @@ import com.io7m.r1.types.RSpaceWorldType;
       KShadingProgramCommon.putMatrixModelViewUnchecked(
         jp,
         mwi.getMatrixModelView());
+      KShadingProgramCommon.putDepthCoefficientReuse(jp);
+      KShadingProgramCommon.putMatrixNormal(jp, mwi.getMatrixNormal());
+      KShadingProgramCommon.putMatrixUVUnchecked(jp, mwi.getMatrixUV());
 
       final KMaterialDepthType depth = material.materialOpaqueGetDepth();
       depth.depthAccept(new KMaterialDepthVisitorType<Unit, JCGLException>() {
@@ -251,6 +257,7 @@ import com.io7m.r1.types.RSpaceWorldType;
           throws RException,
             JCGLException
         {
+          KShadingProgramCommon.putAttributeUVUnchecked(jp, VectorI2F.ZERO);
           return Unit.unit();
         }
       });
@@ -323,6 +330,10 @@ import com.io7m.r1.types.RSpaceWorldType;
           KShadingProgramCommon.putMatrixProjectionUnchecked(
             jp,
             mwo.getMatrixProjection());
+          KShadingProgramCommon.putDepthCoefficient(
+            jp,
+            KRendererCommon.depthCoefficient(mwo.getProjection()));
+
           KDepthVarianceRenderer.renderDepthPassBatch(
             gc,
             mwo,

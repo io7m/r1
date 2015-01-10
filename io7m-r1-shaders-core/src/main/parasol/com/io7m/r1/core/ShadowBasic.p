@@ -25,7 +25,6 @@ module ShadowBasic is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S2;
 
-  import com.io7m.r1.core.Light;
   import com.io7m.r1.core.LogDepth;
   import com.io7m.r1.core.Transform;
 
@@ -46,7 +45,6 @@ module ShadowBasic is
   --
 
   function factor (
-    vectors        : Light.vectors,
     shadow         : t,
     t_shadow       : sampler_2d,
     pos_light_eye  : vector_4f,
