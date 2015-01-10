@@ -40,26 +40,30 @@ module ShadowBasic is
   end;
 
   --
-  -- Given a shadow map [t_shadow], and clip-coordinates [p], return
-  -- the amount of light that could be reaching [p] (where
-  -- 0.0 is fully shadowed and 1.0 is fully lit).
+  -- Given a shadow map [t_shadow], light-clip-coordinates [pos_light_clip], and
+  -- light-eye-coordinates [pos_light_eye], return the amount of light that could 
+  -- be reaching [pos_light_clip] (where 0.0 is fully shadowed and 1.0 is fully lit).
   --
 
   function factor (
-    vectors  : Light.vectors,
-    shadow   : t,
-    t_shadow : sampler_2d,
-    p        : vector_4f
+    vectors        : Light.vectors,
+    shadow         : t,
+    t_shadow       : sampler_2d,
+    pos_light_eye  : vector_4f,
+    pos_light_clip : vector_4f
   ) : float =
-    if F.lesser (p [w], 0.0) then
+    if F.lesser (pos_light_clip [w], 0.0) then
       0.0
     else
       let
         value current_tex =
-          Transform.clip_to_texture3 (p);
+          Transform.clip_to_texture3 (pos_light_clip);
         value current_depth =
-          LogDepth.encode_full (p [w], shadow.depth_coefficient);
-          
+          LogDepth.encode_partial (
+            LogDepth.prepare_eye_z (pos_light_eye [z]),
+            shadow.depth_coefficient
+          );
+
         value map_depth_log =
           S2.texture (t_shadow, current_tex [x y]) [x];
         value map_depth =

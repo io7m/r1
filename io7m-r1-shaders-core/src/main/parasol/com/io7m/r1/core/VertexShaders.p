@@ -85,7 +85,7 @@ module VertexShaders is
       );
 
     value positive_eye_z =
-      F.add (F.negate (position_eye [z]), 1.0);
+      LogDepth.prepare_eye_z (position_eye [z]);
 
     -- Transformed UV coordinates
     value uv =
