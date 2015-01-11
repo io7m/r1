@@ -62,7 +62,7 @@
       The image is produced by rendering the instances from the point of view of
       <s:term s:type="expression">k</s:term>. The red
       channel of each pixel in the image represents the 
-      <s:link s:target="r1.dai.coords.screen-space">screen-space depth</s:link>
+      <s:link s:target="r1.dai.log_depth">logarithmic depth</s:link>
       of the closest surface at that pixel, and the green channel represents
       the depth squared (literally <s:term s:type="expression">depth * depth</s:term>). 
       For example:
