@@ -86,7 +86,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
       this.description = desc;
     }
 
-    @Override public void kFramebufferDelete(
+    @Override public void delete(
       final JCGLImplementationType g)
       throws RException
     {
@@ -99,17 +99,17 @@ import com.io7m.r1.types.RExceptionNotSupported;
       }
     }
 
-    @Override public FramebufferUsableType rgbaGetColorFramebuffer()
+    @Override public FramebufferUsableType getRGBAColorFramebuffer()
     {
       return this.framebuffer;
     }
 
-    @Override public KFramebufferRGBADescription rgbaGetDescription()
+    @Override public KFramebufferRGBADescription getRGBADescription()
     {
       return this.description;
     }
 
-    @Override public Texture2DStaticUsableType rgbaGetTexture()
+    @Override public Texture2DStaticUsableType getRGBATexture()
     {
       return this.color;
     }
@@ -198,7 +198,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
       this.description = desc;
     }
 
-    @Override public void kFramebufferDelete(
+    @Override public void delete(
       final JCGLImplementationType g)
       throws RException
     {
@@ -211,17 +211,17 @@ import com.io7m.r1.types.RExceptionNotSupported;
       }
     }
 
-    @Override public FramebufferUsableType rgbaGetColorFramebuffer()
+    @Override public FramebufferUsableType getRGBAColorFramebuffer()
     {
       return this.framebuffer;
     }
 
-    @Override public KFramebufferRGBADescription rgbaGetDescription()
+    @Override public KFramebufferRGBADescription getRGBADescription()
     {
       return this.description;
     }
 
-    @Override public Texture2DStaticUsableType rgbaGetTexture()
+    @Override public Texture2DStaticUsableType getRGBATexture()
     {
       return this.color;
     }

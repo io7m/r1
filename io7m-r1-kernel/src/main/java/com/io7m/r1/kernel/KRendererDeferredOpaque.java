@@ -333,7 +333,7 @@ import com.io7m.r1.types.RSpaceTextureType;
     final JCGLFramebuffersGL3Type gf3,
     final KFramebufferDeferredUsableType framebuffer)
   {
-    assert gf3.framebufferDrawIsBound(framebuffer.rgbaGetColorFramebuffer());
+    assert gf3.framebufferDrawIsBound(framebuffer.getRGBAColorFramebuffer());
     assert gf3.framebufferReadAnyIsBound() == false;
 
     final KGeometryBufferUsableType gbuffer =
@@ -767,7 +767,7 @@ import com.io7m.r1.types.RSpaceTextureType;
 
         try {
           final FramebufferUsableType render_fb =
-            framebuffer.rgbaGetColorFramebuffer();
+            framebuffer.getRGBAColorFramebuffer();
           gc.framebufferDrawBind(render_fb);
 
           KRendererDeferredOpaque.renderCopyGBufferDepthStencil(
@@ -1353,7 +1353,7 @@ import com.io7m.r1.types.RSpaceTextureType;
         .implementationAccept(KRendererDeferredOpaque.GET_FRAMEBUFFERS_GL3);
 
     final FramebufferUsableType render_fb =
-      framebuffer.rgbaGetColorFramebuffer();
+      framebuffer.getRGBAColorFramebuffer();
 
     try {
       gc.framebufferDrawBind(render_fb);

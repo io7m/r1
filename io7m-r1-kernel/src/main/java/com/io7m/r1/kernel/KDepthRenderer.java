@@ -368,7 +368,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
     final FramebufferUsableType fb =
-      framebuffer.kFramebufferGetDepthPassFramebuffer();
+      framebuffer.getDepthPassFramebuffer();
 
     gc.framebufferDrawBind(fb);
     try {

@@ -206,7 +206,7 @@ import com.io7m.r1.types.RSpaceWorldType;
   {
     final KFramebufferDepthType fb = sm.getFramebuffer();
 
-    gc.framebufferDrawBind(fb.kFramebufferGetDepthPassFramebuffer());
+    gc.framebufferDrawBind(fb.getDepthPassFramebuffer());
     try {
       gc.colorBufferMask(true, true, true, true);
       gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -260,7 +260,7 @@ import com.io7m.r1.types.RSpaceWorldType;
     final KFramebufferDepthVarianceDescription description =
       sm.getDescription().getFramebufferDescription();
 
-    gc.framebufferDrawBind(fb.kFramebufferGetDepthVariancePassFramebuffer());
+    gc.framebufferDrawBind(fb.getDepthVariancePassFramebuffer());
 
     try {
 
@@ -313,7 +313,7 @@ import com.io7m.r1.types.RSpaceWorldType;
       case TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST:
       {
         gc.texture2DStaticRegenerateMipmaps(fb
-          .kFramebufferGetDepthVarianceTexture());
+          .getDepthVarianceTexture());
         break;
       }
     }

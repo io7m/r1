@@ -124,7 +124,7 @@ import com.io7m.r1.types.RExceptionCache;
     final KProgramType program = this.getProgram(config);
 
     try {
-      gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
 
       gc.blendingDisable();
       gc.colorBufferMask(true, true, true, true);
@@ -157,7 +157,7 @@ import com.io7m.r1.types.RExceptionCache;
             final TextureUnitType image_unit = units.get(0);
             assert image_unit != null;
 
-            gc.texture2DStaticBind(image_unit, input.rgbaGetTexture());
+            gc.texture2DStaticBind(image_unit, input.getRGBATexture());
 
             final AreaInclusive area = output.kFramebufferGetArea();
             final long width = area.getRangeX().getInterval();
@@ -244,7 +244,7 @@ import com.io7m.r1.types.RExceptionCache;
 
     try {
       final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt =
-        this.rgba_cache.bluCacheGet(input.rgbaGetDescription());
+        this.rgba_cache.bluCacheGet(input.getRGBADescription());
 
       try {
         final KFramebufferRGBAUsableType temp = receipt.getValue();

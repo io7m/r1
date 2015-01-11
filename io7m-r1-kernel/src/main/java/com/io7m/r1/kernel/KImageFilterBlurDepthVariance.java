@@ -152,7 +152,7 @@ import com.io7m.r1.types.RExceptionCache;
       RException
   {
     final KFramebufferDepthVarianceDescription description =
-      input.kFramebufferGetDepthVarianceDescription();
+      input.getDepthVarianceDescription();
     final KFramebufferDepthVarianceDescription scaled_description =
       KImageFilterBlurDepthVariance.makeScaledDescription(
         parameters,
@@ -196,9 +196,9 @@ import com.io7m.r1.types.RExceptionCache;
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
-            temporary_a.kFramebufferGetDepthVarianceTexture(),
+            temporary_a.getDepthVarianceTexture(),
             temporary_a.kFramebufferGetArea(),
-            temporary_b.kFramebufferGetDepthVariancePassFramebuffer(),
+            temporary_b.getDepthVariancePassFramebuffer(),
             temporary_b.kFramebufferGetArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
@@ -206,9 +206,9 @@ import com.io7m.r1.types.RExceptionCache;
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
-            temporary_b.kFramebufferGetDepthVarianceTexture(),
+            temporary_b.getDepthVarianceTexture(),
             temporary_b.kFramebufferGetArea(),
-            temporary_a.kFramebufferGetDepthVariancePassFramebuffer(),
+            temporary_a.getDepthVariancePassFramebuffer(),
             temporary_a.kFramebufferGetArea());
 
           this.copier.copierCopyDepthVarianceOnly(
@@ -232,9 +232,9 @@ import com.io7m.r1.types.RExceptionCache;
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
-            temporary_a.kFramebufferGetDepthVarianceTexture(),
+            temporary_a.getDepthVarianceTexture(),
             temporary_a.kFramebufferGetArea(),
-            temporary_b.kFramebufferGetDepthVariancePassFramebuffer(),
+            temporary_b.getDepthVariancePassFramebuffer(),
             temporary_b.kFramebufferGetArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
@@ -242,9 +242,9 @@ import com.io7m.r1.types.RExceptionCache;
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
-            temporary_b.kFramebufferGetDepthVarianceTexture(),
+            temporary_b.getDepthVarianceTexture(),
             temporary_b.kFramebufferGetArea(),
-            temporary_a.kFramebufferGetDepthVariancePassFramebuffer(),
+            temporary_a.getDepthVariancePassFramebuffer(),
             temporary_a.kFramebufferGetArea());
         }
 
@@ -275,7 +275,7 @@ import com.io7m.r1.types.RExceptionCache;
       RException
   {
     final KFramebufferDepthVarianceDescription description =
-      input.kFramebufferGetDepthVarianceDescription();
+      input.getDepthVarianceDescription();
     final BLUCacheReceiptType<KFramebufferDepthVarianceDescription, KFramebufferDepthVarianceUsableType> receipt_a =
       this.depth_variance_cache.bluCacheGet(description);
 
@@ -296,9 +296,9 @@ import com.io7m.r1.types.RExceptionCache;
           parameters.getBlurSize(),
           this.quad_cache,
           this.getProgramBlurHorizontal(),
-          input.kFramebufferGetDepthVarianceTexture(),
+          input.getDepthVarianceTexture(),
           input.kFramebufferGetArea(),
-          temporary_a.kFramebufferGetDepthVariancePassFramebuffer(),
+          temporary_a.getDepthVariancePassFramebuffer(),
           temporary_a.kFramebufferGetArea());
 
         KImageFilterBlurCommon.evaluateBlurV(
@@ -306,9 +306,9 @@ import com.io7m.r1.types.RExceptionCache;
           this.quad_cache,
           parameters.getBlurSize(),
           this.getProgramBlurVertical(),
-          temporary_a.kFramebufferGetDepthVarianceTexture(),
+          temporary_a.getDepthVarianceTexture(),
           temporary_a.kFramebufferGetArea(),
-          output.kFramebufferGetDepthVariancePassFramebuffer(),
+          output.getDepthVariancePassFramebuffer(),
           output.kFramebufferGetArea());
 
         return;
@@ -337,9 +337,9 @@ import com.io7m.r1.types.RExceptionCache;
           parameters.getBlurSize(),
           this.quad_cache,
           this.getProgramBlurHorizontal(),
-          input.kFramebufferGetDepthVarianceTexture(),
+          input.getDepthVarianceTexture(),
           input.kFramebufferGetArea(),
-          temporary_a.kFramebufferGetDepthVariancePassFramebuffer(),
+          temporary_a.getDepthVariancePassFramebuffer(),
           temporary_a.kFramebufferGetArea());
 
         KImageFilterBlurCommon.evaluateBlurV(
@@ -347,9 +347,9 @@ import com.io7m.r1.types.RExceptionCache;
           this.quad_cache,
           parameters.getBlurSize(),
           this.getProgramBlurVertical(),
-          temporary_a.kFramebufferGetDepthVarianceTexture(),
+          temporary_a.getDepthVarianceTexture(),
           temporary_a.kFramebufferGetArea(),
-          temporary_b.kFramebufferGetDepthVariancePassFramebuffer(),
+          temporary_b.getDepthVariancePassFramebuffer(),
           temporary_b.kFramebufferGetArea());
 
         /**
@@ -363,9 +363,9 @@ import com.io7m.r1.types.RExceptionCache;
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
-            temporary_b.kFramebufferGetDepthVarianceTexture(),
+            temporary_b.getDepthVarianceTexture(),
             temporary_b.kFramebufferGetArea(),
-            temporary_a.kFramebufferGetDepthVariancePassFramebuffer(),
+            temporary_a.getDepthVariancePassFramebuffer(),
             temporary_a.kFramebufferGetArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
@@ -373,9 +373,9 @@ import com.io7m.r1.types.RExceptionCache;
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
-            temporary_a.kFramebufferGetDepthVarianceTexture(),
+            temporary_a.getDepthVarianceTexture(),
             temporary_a.kFramebufferGetArea(),
-            temporary_b.kFramebufferGetDepthVariancePassFramebuffer(),
+            temporary_b.getDepthVariancePassFramebuffer(),
             temporary_b.kFramebufferGetArea());
         }
 
@@ -405,7 +405,7 @@ import com.io7m.r1.types.RExceptionCache;
       RException
   {
     final KFramebufferDepthVarianceDescription description =
-      input.kFramebufferGetDepthVarianceDescription();
+      input.getDepthVarianceDescription();
     final KFramebufferDepthVarianceDescription scaled_description =
       KImageFilterBlurDepthVariance.makeScaledDescription(
         parameters,

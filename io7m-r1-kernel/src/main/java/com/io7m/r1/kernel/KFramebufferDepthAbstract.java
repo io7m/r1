@@ -91,7 +91,7 @@ import com.io7m.r1.types.RException;
       this.description = in_description;
     }
 
-    @Override public void kFramebufferDelete(
+    @Override public void delete(
       final JCGLImplementationType g)
       throws RException
     {
@@ -106,19 +106,19 @@ import com.io7m.r1.types.RException;
 
     @Override public
       KFramebufferDepthDescription
-      kFramebufferGetDepthDescription()
+      getDepthDescription()
     {
       return this.description;
     }
 
     @Override public
       FramebufferUsableType
-      kFramebufferGetDepthPassFramebuffer()
+      getDepthPassFramebuffer()
     {
       return this.framebuffer;
     }
 
-    @Override public Texture2DStaticUsableType kFramebufferGetDepthTexture()
+    @Override public Texture2DStaticUsableType getDepthTexture()
     {
       return this.depth;
     }
@@ -211,7 +211,7 @@ import com.io7m.r1.types.RException;
       this.description = d;
     }
 
-    @Override public void kFramebufferDelete(
+    @Override public void delete(
       final JCGLImplementationType g)
       throws RException
     {
@@ -226,19 +226,19 @@ import com.io7m.r1.types.RException;
 
     @Override public
       KFramebufferDepthDescription
-      kFramebufferGetDepthDescription()
+      getDepthDescription()
     {
       return this.description;
     }
 
     @Override public
       FramebufferUsableType
-      kFramebufferGetDepthPassFramebuffer()
+      getDepthPassFramebuffer()
     {
       return this.framebuffer;
     }
 
-    @Override public Texture2DStaticUsableType kFramebufferGetDepthTexture()
+    @Override public Texture2DStaticUsableType getDepthTexture()
     {
       return this.depth;
     }

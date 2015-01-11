@@ -600,7 +600,7 @@ import com.io7m.r1.types.RException;
           final KFramebufferDepthType framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
-              .kFramebufferGetDepthTexture());
+              .getDepthTexture());
 
           KShadingProgramCommon.putShadowBasicDepthCoefficient(
             program,
@@ -623,7 +623,7 @@ import com.io7m.r1.types.RException;
           final KFramebufferDepthType framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
-              .kFramebufferGetDepthTexture());
+              .getDepthTexture());
 
           KShadingProgramCommon.putShadowBasicDepthCoefficient(
             program,
@@ -647,7 +647,7 @@ import com.io7m.r1.types.RException;
             map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
-              .kFramebufferGetDepthVarianceTexture());
+              .getDepthVarianceTexture());
 
           KShadingProgramCommon.putShadowVarianceDepthCoefficient(
             program,
@@ -671,7 +671,7 @@ import com.io7m.r1.types.RException;
             map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
-              .kFramebufferGetDepthVarianceTexture());
+              .getDepthVarianceTexture());
 
           KShadingProgramCommon.putShadowVarianceDepthCoefficient(
             program,

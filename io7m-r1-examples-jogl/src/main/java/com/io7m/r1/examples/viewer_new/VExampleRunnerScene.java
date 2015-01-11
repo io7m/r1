@@ -395,7 +395,7 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
       final JCGLImplementationType g = this.gi;
       if (g != null) {
         if (this.framebuffer != null) {
-          this.framebuffer.kFramebufferDelete(g);
+          this.framebuffer.delete(g);
         }
       }
     } catch (final RException e) {
@@ -550,7 +550,7 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
         this.framebuffer = new_fb;
 
         if (old_fb != null) {
-          old_fb.kFramebufferDelete(g);
+          old_fb.delete(g);
         }
       }
 

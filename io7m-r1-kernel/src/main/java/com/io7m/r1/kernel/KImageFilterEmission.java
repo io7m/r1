@@ -107,7 +107,7 @@ import com.io7m.r1.types.RSpaceTextureType;
     final KProgramType emission = this.shader_cache.cacheGetLU("emission");
 
     try {
-      gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
 
       gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
       gc.colorBufferMask(true, true, true, true);
