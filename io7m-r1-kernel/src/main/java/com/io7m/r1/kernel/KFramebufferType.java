@@ -35,7 +35,7 @@ public interface KFramebufferType extends KFramebufferUsableType
    *           Iff an internal OpenGL error occurs.
    */
 
-  void kFramebufferDelete(
+  void delete(
     final JCGLImplementationType g)
     throws RException;
 }

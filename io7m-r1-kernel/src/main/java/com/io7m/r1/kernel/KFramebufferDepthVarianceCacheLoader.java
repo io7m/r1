@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,14 +19,12 @@ package com.io7m.r1.kernel;
 import java.math.BigInteger;
 
 import com.io7m.jcache.JCacheLoaderType;
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 
 /**
  * A cache loader that can construct depth-variance framebuffers of type
@@ -73,20 +71,15 @@ import com.io7m.r1.types.RExceptionJCGL;
     final KFramebufferDepthVarianceType v)
     throws RException
   {
-    v.kFramebufferDelete(this.gi);
+    v.delete(this.gi);
   }
 
   @Override public KFramebufferDepthVarianceType cacheValueLoad(
     final KFramebufferDepthVarianceDescription key)
     throws RException
   {
-    try {
-      return KFramebufferDepthVariance.newDepthVarianceFramebuffer(
-        this.gi,
-        key);
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+    return KFramebufferDepthVariance
+      .newDepthVarianceFramebuffer(this.gi, key);
   }
 
   @Override public BigInteger cacheValueSizeOf(

@@ -29,30 +29,26 @@ module VertexShaders is
   import com.io7m.parasol.Sampler2D  as S;
   import com.io7m.parasol.Float      as F;
 
-  import com.io7m.r1.core.Albedo;
-  import com.io7m.r1.core.CubeMap;
-  import com.io7m.r1.core.DirectionalLight;
-  import com.io7m.r1.core.Emission;
-  import com.io7m.r1.core.Environment;
-  import com.io7m.r1.core.Light;
   import com.io7m.r1.core.Normals;
-  import com.io7m.r1.core.ProjectiveLight;
-  import com.io7m.r1.core.Refraction;
-  import com.io7m.r1.core.ShadowBasic;
-  import com.io7m.r1.core.ShadowVariance;
-  import com.io7m.r1.core.Specular;
-  import com.io7m.r1.core.SphericalLight;
-  import com.io7m.r1.core.VectorAux;
+  import com.io7m.r1.core.LogDepth;
 
   --
   -- Standard vertex shader with per-vertex normals.
+  -- 
+  -- The computed clip-space Z is clamped to [0.000001, ∞] and
+  -- calculated to be used for a logarithmic depth buffer.
   --
 
   shader vertex standard is
     -- Vertex position coordinates
     in v_position              : vector_3f;
+
     out f_position_eye         : vector_4f;
     out vertex f_position_clip : vector_4f;
+    out f_positive_eye_z       : float;
+
+    -- Log depth coefficient (2.0 / log2 (far + 1.0))
+    parameter depth_coefficient : float;
 
     -- Standard matrices
     parameter m_modelview      : matrix_4x4f;
@@ -81,6 +77,16 @@ module VertexShaders is
         new vector_4f (v_position, 1.0)
       );
 
+    value position_clip_log =
+      new vector_4f (
+        position_clip [x y],
+        LogDepth.encode_full (position_clip [w], depth_coefficient),
+        position_clip [w]
+      );
+
+    value positive_eye_z =
+      LogDepth.prepare_eye_z (position_eye [z]);
+
     -- Transformed UV coordinates
     value uv =
       M3.multiply_vector (
@@ -92,14 +98,18 @@ module VertexShaders is
     value normal_eye =
       M3.multiply_vector (m_normal, v_normal);
   as
-    out f_normal_eye    = normal_eye;
-    out f_position_clip = position_clip;
-    out f_position_eye  = position_eye;
-    out f_uv            = uv;
+    out f_normal_eye     = normal_eye;
+    out f_position_clip  = position_clip_log;
+    out f_position_eye   = position_eye;
+    out f_uv             = uv;
+    out f_positive_eye_z = positive_eye_z;
   end;
 
   --
   -- Standard vertex shader for mapped normals.
+  --
+  -- The computed clip-space Z is clamped to [0.000001, ∞] and
+  -- calculated to be used for a logarithmic depth buffer.
   --
 
   shader vertex standard_NorM is
@@ -107,6 +117,10 @@ module VertexShaders is
     in v_position              : vector_3f;
     out f_position_eye         : vector_4f;
     out vertex f_position_clip : vector_4f;
+    out f_positive_eye_z            : float;
+
+    -- Log depth coefficient (2.0 / log2 (far + 1.0))
+    parameter depth_coefficient : float;
 
     -- Standard matrices
     parameter m_modelview      : matrix_4x4f;
@@ -137,6 +151,16 @@ module VertexShaders is
         new vector_4f (v_position, 1.0)
       );
 
+    value position_clip_log =
+      new vector_4f (
+        position_clip [x y],
+        LogDepth.encode_full (position_clip [w], depth_coefficient),
+        position_clip [w]
+      );
+
+    value positive_eye_z =
+      LogDepth.prepare_eye_z (position_eye [z]);
+
     -- Transformed UV coordinates
     value uv =
       M3.multiply_vector (
@@ -154,9 +178,10 @@ module VertexShaders is
     out f_tangent      = tangent;
     out f_bitangent    = bitangent;
 
-    out f_position_clip = position_clip;
-    out f_position_eye  = position_eye;
-    out f_uv            = uv;
+    out f_position_clip  = position_clip_log;
+    out f_position_eye   = position_eye;
+    out f_uv             = uv;
+    out f_positive_eye_z = positive_eye_z;
   end;
 
   --
@@ -166,11 +191,56 @@ module VertexShaders is
   --
 
   shader vertex standard_clip is
-    parameter  m_uv            : matrix_3x3f;
-    in         v_position      : vector_3f;
-    in         v_uv            : vector_2f;
-    out vertex f_position_clip : vector_4f;
-    out        f_uv            : vector_2f;
+    parameter  m_uv             : matrix_3x3f;
+    in         v_position       : vector_3f;
+    in         v_uv             : vector_2f;
+    out vertex f_position_clip  : vector_4f;
+    out        f_uv             : vector_2f;
+    out        f_positive_eye_z : float;
+
+    -- Log depth coefficient (2.0 / log2 (far + 1.0))
+    parameter depth_coefficient : float;
+
+  with
+    value position_clip =
+      new vector_4f (v_position, 1.0);
+
+    value position_clip_log =
+      new vector_4f (
+        position_clip [x y],
+        LogDepth.encode_full (position_clip [w], depth_coefficient),
+        position_clip [w]
+      );
+
+    -- XXX: This is not really correct; it assumes that a
+    --      perspective projection placed the positive eye-space Z
+    --      into the [w] component of the clip-space coordinates.
+
+    value positive_eye_z =
+      F.add (position_clip [w], 1.0);
+
+    value uv =
+      M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
+  as
+    out f_uv            = uv;
+    out f_position_clip = position_clip_log;
+    out f_positive_eye_z     = positive_eye_z;
+  end;
+
+  --
+  -- Standard vertex shader for vertex positions that are
+  -- already specified in clip-space, and allow for modifying
+  -- UV coordinates via a matrix.
+  --
+  -- This variant of the shader does not use logarithmic depth.
+  --
+
+  shader vertex standard_clip_without_log is
+    parameter  m_uv             : matrix_3x3f;
+    in         v_position       : vector_3f;
+    in         v_uv             : vector_2f;
+    out vertex f_position_clip  : vector_4f;
+    out        f_uv             : vector_2f;
   with
     value position_clip =
       new vector_4f (v_position, 1.0);
@@ -196,17 +266,34 @@ module VertexShaders is
     out vertex f_position_clip  : vector_4f;
     out        f_position_eye   : vector_4f;
     out        f_uv             : vector_2f;
+    out        f_positive_eye_z : float;
+
+    -- Log depth coefficient (2.0 / log2 (far + 1.0))
+    parameter depth_coefficient : float;
   with
     value position_clip =
       new vector_4f (v_position, 1.0);
+
+    value position_clip_log =
+      new vector_4f (
+        position_clip [x y],
+        LogDepth.encode_full (position_clip [w], depth_coefficient),
+        position_clip [w]
+      );
+
     value position_eye =
       M4.multiply_vector (m_projection_inv, position_clip);
+
+    value positive_eye_z =
+      LogDepth.prepare_eye_z (position_eye [z]);
+
     value uv =
       M3.multiply_vector (m_uv, new vector_3f (v_uv, 1.0)) [x y];
   as
-    out f_uv            = uv;
-    out f_position_clip = position_clip;
-    out f_position_eye  = position_eye;
+    out f_uv             = uv;
+    out f_position_clip  = position_clip_log;
+    out f_position_eye   = position_eye;
+    out f_positive_eye_z = positive_eye_z;
   end;
 
 end;

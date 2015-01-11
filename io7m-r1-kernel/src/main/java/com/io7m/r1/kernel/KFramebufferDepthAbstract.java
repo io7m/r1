@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -38,7 +38,6 @@ import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 
 @EqualityReference abstract class KFramebufferDepthAbstract implements
   KFramebufferDepthType
@@ -92,7 +91,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       this.description = in_description;
     }
 
-    @Override public void kFramebufferDelete(
+    @Override public void delete(
       final JCGLImplementationType g)
       throws RException
     {
@@ -100,8 +99,6 @@ import com.io7m.r1.types.RExceptionJCGL;
         final JCGLInterfaceCommonType gc = g.getGLCommon();
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.depth);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -109,19 +106,19 @@ import com.io7m.r1.types.RExceptionJCGL;
 
     @Override public
       KFramebufferDepthDescription
-      kFramebufferGetDepthDescription()
+      getDepthDescription()
     {
       return this.description;
     }
 
     @Override public
       FramebufferUsableType
-      kFramebufferGetDepthPassFramebuffer()
+      getDepthPassFramebuffer()
     {
       return this.framebuffer;
     }
 
-    @Override public Texture2DStaticUsableType kFramebufferGetDepthTexture()
+    @Override public Texture2DStaticUsableType getDepthTexture()
     {
       return this.depth;
     }
@@ -214,7 +211,7 @@ import com.io7m.r1.types.RExceptionJCGL;
       this.description = d;
     }
 
-    @Override public void kFramebufferDelete(
+    @Override public void delete(
       final JCGLImplementationType g)
       throws RException
     {
@@ -222,8 +219,6 @@ import com.io7m.r1.types.RExceptionJCGL;
         final JCGLInterfaceCommonType gc = g.getGLCommon();
         gc.framebufferDelete(this.framebuffer);
         gc.texture2DStaticDelete(this.depth);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
@@ -231,19 +226,19 @@ import com.io7m.r1.types.RExceptionJCGL;
 
     @Override public
       KFramebufferDepthDescription
-      kFramebufferGetDepthDescription()
+      getDepthDescription()
     {
       return this.description;
     }
 
     @Override public
       FramebufferUsableType
-      kFramebufferGetDepthPassFramebuffer()
+      getDepthPassFramebuffer()
     {
       return this.framebuffer;
     }
 
-    @Override public Texture2DStaticUsableType kFramebufferGetDepthTexture()
+    @Override public Texture2DStaticUsableType getDepthTexture()
     {
       return this.depth;
     }

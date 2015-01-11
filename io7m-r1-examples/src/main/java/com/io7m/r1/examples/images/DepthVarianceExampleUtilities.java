@@ -68,7 +68,7 @@ final class DepthVarianceExampleUtilities
 
     final KFramebufferDepthVarianceUsableType dvfb = r.getValue();
     gc
-      .framebufferDrawBind(dvfb.kFramebufferGetDepthVariancePassFramebuffer());
+      .framebufferDrawBind(dvfb.getDepthVariancePassFramebuffer());
     {
       final ClearSpecificationBuilderType bb =
         ClearSpecification.newBuilder();

@@ -36,7 +36,6 @@ import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.FragmentShaderType;
 import com.io7m.jcanephora.IndexBufferType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.JCGLExceptionProgramCompileError;
 import com.io7m.jcanephora.JCGLType;
 import com.io7m.jcanephora.ProgramAttributeType;
 import com.io7m.jcanephora.ProgramType;
@@ -112,7 +111,6 @@ import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionMaterialMissingAlbedoTexture;
 import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
 import com.io7m.r1.types.RExceptionMeshMissingNormals;
@@ -156,57 +154,49 @@ import com.io7m.r1.types.RSpaceWorldType;
               final String key)
               throws RException
             {
-              try {
-                System.out.println("key: " + key);
+              System.out.println("key: " + key);
 
-                final List<String> lines = new ArrayList<String>();
-                lines.add("Nothing!");
-                final VertexShaderType v = gc.vertexShaderCompile(key, lines);
-                final FragmentShaderType f =
-                  gc.fragmentShaderCompile(key, lines);
-                final ProgramType p = gc.programCreateCommon(key, v, f);
+              final List<String> lines = new ArrayList<String>();
+              lines.add("Nothing!");
+              final VertexShaderType v = gc.vertexShaderCompile(key, lines);
+              final FragmentShaderType f =
+                gc.fragmentShaderCompile(key, lines);
+              final ProgramType p = gc.programCreateCommon(key, v, f);
 
-                final JCBExecutorType exec =
-                  JCBExecutor.newExecutorWithoutDeclarations(gc, p, log);
+              final JCBExecutorType exec =
+                JCBExecutor.newExecutorWithoutDeclarations(gc, p, log);
 
-                return new KProgramType() {
-                  @Override public JCBExecutorType getExecutable()
-                  {
-                    return exec;
-                  }
+              return new KProgramType() {
+                @Override public JCBExecutorType getExecutable()
+                {
+                  return exec;
+                }
 
-                  @Override public
-                    JPFragmentShaderMetaType
-                    getFragmentShaderMeta()
-                  {
-                    // TODO Auto-generated method stub
-                    throw new UnimplementedCodeException();
-                  }
+                @Override public
+                  JPFragmentShaderMetaType
+                  getFragmentShaderMeta()
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
 
-                  @Override public JPUncompactedProgramShaderMeta getMeta()
-                  {
-                    // TODO Auto-generated method stub
-                    throw new UnimplementedCodeException();
-                  }
+                @Override public JPUncompactedProgramShaderMeta getMeta()
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
 
-                  @Override public ProgramType getProgram()
-                  {
-                    return p;
-                  }
+                @Override public ProgramType getProgram()
+                {
+                  return p;
+                }
 
-                  @Override public
-                    JPVertexShaderMetaType
-                    getVertexShaderMeta()
-                  {
-                    // TODO Auto-generated method stub
-                    throw new UnimplementedCodeException();
-                  }
-                };
-              } catch (final JCGLExceptionProgramCompileError e) {
-                throw RExceptionJCGL.fromJCGLException(e);
-              } catch (final JCGLException e) {
-                throw RExceptionJCGL.fromJCGLException(e);
-              }
+                @Override public JPVertexShaderMetaType getVertexShaderMeta()
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
+              };
             }
 
             @Override public BigInteger cacheValueSizeOf(
@@ -232,55 +222,47 @@ import com.io7m.r1.types.RSpaceWorldType;
               final String key)
               throws RException
             {
-              try {
-                System.out.println("key: " + key);
+              System.out.println("key: " + key);
 
-                final List<String> lines = new ArrayList<String>();
-                lines.add("Nothing!");
-                final VertexShaderType v = gc.vertexShaderCompile(key, lines);
-                final FragmentShaderType f =
-                  gc.fragmentShaderCompile(key, lines);
-                final ProgramType p = gc.programCreateCommon(key, v, f);
+              final List<String> lines = new ArrayList<String>();
+              lines.add("Nothing!");
+              final VertexShaderType v = gc.vertexShaderCompile(key, lines);
+              final FragmentShaderType f =
+                gc.fragmentShaderCompile(key, lines);
+              final ProgramType p = gc.programCreateCommon(key, v, f);
 
-                return new KProgramType() {
-                  @Override public JCBExecutorType getExecutable()
-                  {
-                    // TODO Auto-generated method stub
-                    throw new UnimplementedCodeException();
-                  }
+              return new KProgramType() {
+                @Override public JCBExecutorType getExecutable()
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
 
-                  @Override public
-                    JPFragmentShaderMetaType
-                    getFragmentShaderMeta()
-                  {
-                    // TODO Auto-generated method stub
-                    throw new UnimplementedCodeException();
-                  }
+                @Override public
+                  JPFragmentShaderMetaType
+                  getFragmentShaderMeta()
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
 
-                  @Override public JPUncompactedProgramShaderMeta getMeta()
-                  {
-                    // TODO Auto-generated method stub
-                    throw new UnimplementedCodeException();
-                  }
+                @Override public JPUncompactedProgramShaderMeta getMeta()
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
 
-                  @Override public ProgramType getProgram()
-                  {
-                    return p;
-                  }
+                @Override public ProgramType getProgram()
+                {
+                  return p;
+                }
 
-                  @Override public
-                    JPVertexShaderMetaType
-                    getVertexShaderMeta()
-                  {
-                    // TODO Auto-generated method stub
-                    throw new UnimplementedCodeException();
-                  }
-                };
-              } catch (final JCGLExceptionProgramCompileError e) {
-                throw RExceptionJCGL.fromJCGLException(e);
-              } catch (final JCGLException e) {
-                throw RExceptionJCGL.fromJCGLException(e);
-              }
+                @Override public JPVertexShaderMetaType getVertexShaderMeta()
+                {
+                  // TODO Auto-generated method stub
+                  throw new UnimplementedCodeException();
+                }
+              };
             }
 
             @Override public BigInteger cacheValueSizeOf(
@@ -462,27 +444,11 @@ import com.io7m.r1.types.RSpaceWorldType;
         final FakeProgram fp = (FakeProgram) program;
 
         if ("DepC".equals(name)) {
-          uniforms.put("m_projection", FakeProgramUniform.newUniform(
-            fp.getContext(),
+          KShadowMapRendererTest.this.configureProgramDepC(
             program,
-            0,
-            0,
-            "m_projection",
-            JCGLType.TYPE_FLOAT_MATRIX_4));
-          uniforms.put("m_modelview", FakeProgramUniform.newUniform(
-            fp.getContext(),
-            program,
-            0,
-            0,
-            "m_modelview",
-            JCGLType.TYPE_FLOAT_MATRIX_4));
-          attributes.put("v_position", FakeProgramAttribute.newAttribute(
-            fp.getContext(),
-            program,
-            0,
-            0,
-            "v_position",
-            JCGLType.TYPE_FLOAT_VECTOR_3));
+            uniforms,
+            attributes,
+            fp);
         }
       }
 
@@ -613,27 +579,11 @@ import com.io7m.r1.types.RSpaceWorldType;
         final FakeProgram fp = (FakeProgram) program;
 
         if ("DepC".equals(name)) {
-          uniforms.put("m_projection", FakeProgramUniform.newUniform(
-            fp.getContext(),
+          KShadowMapRendererTest.this.configureProgramDepC(
             program,
-            0,
-            0,
-            "m_projection",
-            JCGLType.TYPE_FLOAT_MATRIX_4));
-          uniforms.put("m_modelview", FakeProgramUniform.newUniform(
-            fp.getContext(),
-            program,
-            0,
-            0,
-            "m_modelview",
-            JCGLType.TYPE_FLOAT_MATRIX_4));
-          attributes.put("v_position", FakeProgramAttribute.newAttribute(
-            fp.getContext(),
-            program,
-            0,
-            0,
-            "v_position",
-            JCGLType.TYPE_FLOAT_VECTOR_3));
+            uniforms,
+            attributes,
+            fp);
         }
       }
 
@@ -748,5 +698,69 @@ import com.io7m.r1.types.RSpaceWorldType;
 
     Assert.assertEquals(3, r.cache_loads.intValue());
     Assert.assertEquals(9, r.cache_retrieves.intValue());
+  }
+
+  private void configureProgramDepC(
+    final ProgramUsableType program,
+    final Map<String, ProgramUniformType> uniforms,
+    final Map<String, ProgramAttributeType> attributes,
+    final FakeProgram fp)
+  {
+    uniforms.put("m_projection", FakeProgramUniform.newUniform(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "m_projection",
+      JCGLType.TYPE_FLOAT_MATRIX_4));
+    uniforms.put("m_normal", FakeProgramUniform.newUniform(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "m_normal",
+      JCGLType.TYPE_FLOAT_MATRIX_3));
+    uniforms.put("m_uv", FakeProgramUniform.newUniform(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "m_uv",
+      JCGLType.TYPE_FLOAT_MATRIX_3));
+    uniforms.put("depth_coefficient", FakeProgramUniform.newUniform(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "depth_coefficient",
+      JCGLType.TYPE_FLOAT));
+    uniforms.put("m_modelview", FakeProgramUniform.newUniform(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "m_modelview",
+      JCGLType.TYPE_FLOAT_MATRIX_4));
+    attributes.put("v_position", FakeProgramAttribute.newAttribute(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "v_position",
+      JCGLType.TYPE_FLOAT_VECTOR_3));
+    attributes.put("v_normal", FakeProgramAttribute.newAttribute(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "v_normal",
+      JCGLType.TYPE_FLOAT_VECTOR_3));
+    attributes.put("v_uv", FakeProgramAttribute.newAttribute(
+      fp.getContext(),
+      program,
+      0,
+      0,
+      "v_uv",
+      JCGLType.TYPE_FLOAT_VECTOR_2));
   }
 }

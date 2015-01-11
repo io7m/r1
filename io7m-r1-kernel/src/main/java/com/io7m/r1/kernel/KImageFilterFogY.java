@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -44,7 +44,6 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceClipType;
 import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceTextureType;
@@ -155,7 +154,7 @@ import com.io7m.r1.types.RSpaceWorldType;
     final KProgramType fog = this.getFogProgram(config);
 
     try {
-      gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
 
       gc.blendingDisable();
       gc.colorBufferMask(true, true, true, true);
@@ -196,7 +195,7 @@ import com.io7m.r1.types.RSpaceWorldType;
             assert t_depth != null;
 
             try {
-              gc.texture2DStaticBind(t_image, input.rgbaGetTexture());
+              gc.texture2DStaticBind(t_image, input.getRGBATexture());
               gc.texture2DStaticBind(
                 t_depth,
                 gbuffer.geomGetTextureDepthStencil());
@@ -217,6 +216,9 @@ import com.io7m.r1.types.RSpaceWorldType;
               KShadingProgramCommon.putMatrixProjectionUnchecked(
                 p,
                 KImageFilterFogY.this.projection);
+              KShadingProgramCommon.putDepthCoefficient(
+                p,
+                KRendererCommon.depthCoefficient(c_proj));
 
               p.programExecute(new JCBProgramProcedureType<JCGLException>() {
                 @Override public void call()
@@ -263,7 +265,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 
     try {
       final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt =
-        this.rgba_cache.bluCacheGet(input.rgbaGetDescription());
+        this.rgba_cache.bluCacheGet(input.getRGBADescription());
 
       try {
         final KFramebufferRGBAUsableType temp = receipt.getValue();
@@ -281,8 +283,6 @@ import com.io7m.r1.types.RSpaceWorldType;
         receipt.returnToCache();
       }
 
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
       throw RExceptionCache.fromJCacheException(e);
     }

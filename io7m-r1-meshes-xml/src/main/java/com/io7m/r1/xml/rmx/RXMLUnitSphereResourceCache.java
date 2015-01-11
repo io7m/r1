@@ -42,7 +42,6 @@ import com.io7m.r1.kernel.types.KUnitSpherePrecision;
 import com.io7m.r1.kernel.types.KUnitSphereUsableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionIO;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RXMLException;
 
 /**
@@ -114,8 +113,6 @@ import com.io7m.r1.types.RXMLException;
 
     } catch (final IOException e) {
       throw RExceptionIO.fromIOException(e);
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } finally {
       try {
         if (s != null) {
@@ -235,11 +232,7 @@ import com.io7m.r1.types.RXMLException;
         final KUnitSphere v)
         throws RException
       {
-        try {
-          v.delete(g);
-        } catch (final JCGLException e) {
-          throw RExceptionJCGL.fromJCGLException(e);
-        }
+        v.delete(g);
       }
 
       @SuppressWarnings("synthetic-access") @Override public

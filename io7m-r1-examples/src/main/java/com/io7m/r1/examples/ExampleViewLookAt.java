@@ -88,7 +88,7 @@ import com.io7m.r1.types.RSpaceWorldType;
         new PMatrixM4x4F<RSpaceEyeType, RSpaceClipType>(),
         (float) Math.toRadians(90),
         640.0f / 480.0f,
-        0.1f,
+        0.01f,
         100.0f);
 
     this.camera = KCamera.newCamera(view, projection);

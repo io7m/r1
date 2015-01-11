@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -45,7 +45,6 @@ import com.io7m.r1.kernel.types.KGlowParameters;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceTextureType;
 
 /**
@@ -132,7 +131,7 @@ import com.io7m.r1.types.RSpaceTextureType;
     try {
       final KProgramType emission = this.shader_cache.cacheGetLU("emission");
 
-      gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
       gc.blendingDisable();
       gc.colorBufferMask(true, true, true, true);
       gc.cullingDisable();
@@ -199,7 +198,7 @@ import com.io7m.r1.types.RSpaceTextureType;
       final KProgramType emission =
         this.shader_cache.cacheGetLU("emission_glow");
 
-      gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
       gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
       gc.colorBufferMask(true, true, true, true);
       gc.cullingDisable();
@@ -266,41 +265,37 @@ import com.io7m.r1.types.RSpaceTextureType;
     NullCheck.notNull(input, "Input");
     NullCheck.notNull(output, "Output");
 
+    final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+    final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt =
+      this.rgba_cache.bluCacheGet(output.getRGBADescription());
+
     try {
-      final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
-      final List<TextureUnitType> units = gc.textureGetUnits();
-      final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt =
-        this.rgba_cache.bluCacheGet(output.rgbaGetDescription());
+      final KFramebufferRGBAUsableType emission_fb = receipt.getValue();
+      this.emissionPass(
+        input.deferredGetGeometryBuffer(),
+        gc,
+        units,
+        emission_fb);
 
-      try {
-        final KFramebufferRGBAUsableType emission_fb = receipt.getValue();
-        this.emissionPass(
-          input.deferredGetGeometryBuffer(),
-          gc,
-          units,
-          emission_fb);
+      this.blur_param_b.setBlurSize(config.getBlurSize());
+      this.blur_param_b.setPasses(config.getPasses());
+      this.blur_param_b.setScale(config.getScale());
+      this.blur.filterEvaluateRGBA(
+        this.blur_param_b.build(),
+        emission_fb,
+        emission_fb);
 
-        this.blur_param_b.setBlurSize(config.getBlurSize());
-        this.blur_param_b.setPasses(config.getPasses());
-        this.blur_param_b.setScale(config.getScale());
-        this.blur.filterEvaluateRGBA(
-          this.blur_param_b.build(),
-          emission_fb,
-          emission_fb);
+      this.emissionPlusGlowPass(
+        input.deferredGetGeometryBuffer(),
+        config,
+        gc,
+        units,
+        emission_fb.getRGBATexture(),
+        output);
 
-        this.emissionPlusGlowPass(
-          input.deferredGetGeometryBuffer(),
-          config,
-          gc,
-          units,
-          emission_fb.rgbaGetTexture(),
-          output);
-
-      } finally {
-        receipt.returnToCache();
-      }
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
+    } finally {
+      receipt.returnToCache();
     }
   }
 

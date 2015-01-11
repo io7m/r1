@@ -51,12 +51,12 @@ module ImageFilterBlur is
   end;
 
   shader program blur_horizontal_4f is
-    vertex   VertexShaders.standard_clip;
+    vertex   VertexShaders.standard_clip_without_log;
     fragment blur_horizontal_4f_f;
   end;
 
   shader program blur_vertical_4f is
-    vertex   VertexShaders.standard_clip;
+    vertex   VertexShaders.standard_clip_without_log;
     fragment blur_vertical_4f_f;
   end;
 
@@ -85,12 +85,12 @@ module ImageFilterBlur is
   end;
 
   shader program blur_horizontal_2f is
-    vertex   VertexShaders.standard_clip;
+    vertex   VertexShaders.standard_clip_without_log;
     fragment blur_horizontal_2f_f;
   end;
 
   shader program blur_vertical_2f is
-    vertex   VertexShaders.standard_clip;
+    vertex   VertexShaders.standard_clip_without_log;
     fragment blur_vertical_2f_f;
   end;
 

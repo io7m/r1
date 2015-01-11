@@ -78,12 +78,13 @@
     <s:paragraph>
       The algorithm that the <s:term s:type="package">${project.parent.name}</s:term> package
       uses for position reconstruction is generalized to handle both orthographic
-      and perspective projections, and uses only the existing 
-      <s:term s:type="term">post-projective</s:term> depth values that were written
-      to the depth buffer during scene rendering. This keeps the g-buffer compact,
-      and memory bandwidth requirements comparatively low. The algorithm works with
-      symmetric and asymmetric viewing frustums, but will only work with near and
-      far planes that are parallel to the screen.
+      and perspective projections, and uses only the existing
+      <s:link s:target="r1.dai.log_depth">logarithmic depth values</s:link>
+      that were written to the depth buffer during scene rendering. 
+      This keeps the g-buffer compact, and memory bandwidth requirements 
+      comparatively low. The algorithm works with symmetric and asymmetric viewing 
+      frustums, but will only work with near and far planes that are parallel to the 
+      screen.
     </s:paragraph>
     <s:paragraph>
       The algorithm works in two steps: Firstly, the original 
@@ -114,8 +115,8 @@
     </s:paragraph>
     <s:paragraph xml:id="r1.dai.deferred-position-recon.eye-space-z.initial">
       The first step required is to recover the original eye-space Z value
-      of <s:term s:type="variable">f</s:term>. This involves sampling the
-      screen-space depth value from the current depth buffer. Sampling
+      of <s:term s:type="variable">f</s:term>. This involves sampling a
+      depth value from the current depth buffer. Sampling
       from the depth buffer is achieved as with any other texture: A particular
       texel is addressed by using coordinates in the range 
       <s:term s:type="expression">[(0, 0), (1, 1)]</s:term>.
@@ -128,7 +129,7 @@
       and assuming that the screen-space position of the current light volume fragment 
       being shaded is <s:term s:type="expression">position = (screen_x, screen_y)</s:term>, 
       the texture coordinates <s:term s:type="expression">(screen_uv_x, screen_uv_y)</s:term> 
-      used to access the current screen-space depth value are given by:
+      used to access the current depth value are given by:
     </s:paragraph>
     <s:formal-item s:kind="equation">
       <s:formal-item-title>Screen to texture</s:formal-item-title>
@@ -143,7 +144,38 @@
       the current screen-space position is the exact center of the screen.
     </s:paragraph>
     <s:paragraph>
-      Given the screen-space depth value <s:term s:type="variable">screen_depth</s:term>
+      Originally, the <s:term s:type="package">${project.parent.name}</s:term> package
+      used a standard depth buffer and so recovering the eye-space Z value
+      required a slightly different method compared to the steps required for the
+      <s:link s:target="r1.dai.log_depth">logarithmic depth encoding</s:link> that
+      the package now uses. For historical reasons and for completeness, the method
+      to reconstruct an eye-space Z value from a traditional screen-space depth
+      value is given in the section on
+      <s:link s:target="r1.dai.deferred-position-recon.eye-space-z.screen-space-encoding">screen-space depth encoding</s:link>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred-position-recon.eye-space-z.log-depth-encoding">
+    <s:subsection-title>Recovering Eye-space Z (Logarithmic depth encoding)</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">${project.parent.name}</s:term> package now
+      uses a <s:link s:target="r1.dai.log_depth">logarithmic depth buffer</s:link>.
+      Depth values sampled from any depth buffer produced by the package can be
+      transformed to a negated eye-space Z value by with a simple decoding
+      <s:link s:target="r1.dai.log_depth.encoding">equation</s:link>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred-position-recon.eye-space-z.screen-space-encoding">
+    <s:subsection-title>Recovering Eye-space Z (Screen-space depth encoding)</s:subsection-title>
+    <s:paragraph>
+      Note: This section is for completeness and historical interest. Please skip
+      ahead to the section on
+      <s:link s:target="r1.dai.deferred-position-recon.eye-space">eye-space position reconstruction</s:link>
+      if you are not interested.
+    </s:paragraph>
+    <s:paragraph>
+      Assuming a screen-space depth value <s:term s:type="variable">screen_depth</s:term>
       sampled from the depth buffer at <s:term s:type="expression">(screen_uv_x, screen_uv_y)</s:term>,
       it's now necessary to transform the depth value back into
       normalized-device space. In OpenGL, screen-space depth values are in the range
@@ -218,6 +250,35 @@
       <s:formal-item-title>Clip-space W Simple</s:formal-item-title>
       <s:verbatim><xi:include href="haskell/ClipSpaceWSimple.hs" parse="text"/></s:verbatim>
     </s:formal-item>
+    <s:paragraph>
+      It should be noted that for perspective matrices in the
+      <s:term s:type="package">${project.parent.name}</s:term> package,
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 2) == -1</s:term> and
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 3) == 0</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Clip-space W Simple (Perspective, Diagram)</s:formal-item-title>
+      <s:image s:source="images/matrix_clip_w_simple_perspective.png">Clip-space W Simple (Perspective, Diagram)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      This means that the <s:term s:type="variable">w</s:term> component of the
+      resulting clip-space coordinates is equal to the negated (and therefore positive)
+      eye-space <s:term s:type="variable">z</s:term> of the original coordinates.
+    </s:paragraph>
+    <s:paragraph>
+      For orthographic projections in the
+      <s:term s:type="package">${project.parent.name}</s:term> package,
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 2) == 0</s:term> and
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 3) == 1</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Clip-space W Simple (Orthographic, Diagram)</s:formal-item-title>
+      <s:image s:source="images/matrix_clip_w_simple_orthographic.png">Clip-space W Simple (Orthographic, Diagram)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      This means that the <s:term s:type="variable">w</s:term> component of the
+      resulting clip-space coordinates is always equal to <s:term s:type="constant">1</s:term>.
+    </s:paragraph>
     <s:paragraph>
       As stated previously, normalized-device space coordinates are calculated
       by dividing a set of clip-space coordinates by their own 
@@ -387,10 +448,16 @@
     </s:paragraph>
     <s:paragraph>
       The actual position reconstruction is performed in a
-       <s:term s:type="term">fragment shader</s:term>, and the entire process
-       is encapsulated in the following
-       <s:term s:type="package">Parasol</s:term> function:
+       <s:term s:type="term">fragment shader</s:term>, producing an eye-space
+       Z value using the <s:term s:type="package">Parasol</s:term> functions in
+       [<s:link-external s:target="parasol/LogDepth.p">LogDepth.p</s:link-external>]
+       and the final position in
+       [<s:link-external s:target="parasol/Reconstruction.p">Reconstruction.p</s:link-external>]:
     </s:paragraph>
+    <s:formal-item s:kind="listing">
+      <s:formal-item-title>Position reconstruction (LogDepth)</s:formal-item-title>
+      <s:verbatim><xi:include href="parasol/LogDepth.p" parse="text"/></s:verbatim>
+    </s:formal-item>
     <s:formal-item s:kind="listing">
       <s:formal-item-title>Position reconstruction (Parasol)</s:formal-item-title>
       <s:verbatim><xi:include href="parasol/Reconstruction.p" parse="text"/></s:verbatim>

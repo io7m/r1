@@ -26,6 +26,7 @@ module ImageFilterFogY is
   import com.io7m.parasol.Vector4f   as V4;
   import com.io7m.parasol.Sampler2D  as S;
 
+  import com.io7m.r1.core.LogDepth;
   import com.io7m.r1.core.Reconstruction;
   import com.io7m.r1.core.Transform;
   import com.io7m.r1.core.VectorAux;
@@ -56,28 +57,32 @@ module ImageFilterFogY is
     end;
 
   shader fragment fog_linear_y_floor_f is
-    parameter fog          : t;
-    parameter m_view_inv   : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
-    parameter t_map_depth  : sampler_2d;
-    parameter t_image      : sampler_2d;
-    parameter view_rays    : ViewRays.t;
-    in f_uv                : vector_2f;
-    out out_0              : vector_4f as 0;
+    parameter fog               : t;
+    parameter m_view_inv        : matrix_4x4f;
+    parameter m_projection      : matrix_4x4f;
+    parameter t_map_depth       : sampler_2d;
+    parameter t_image           : sampler_2d;
+    parameter view_rays         : ViewRays.t;
+    parameter depth_coefficient : float;
+    in f_uv                     : vector_2f;
+    out out_0                   : vector_4f as 0;
   with
     value color_sample =
       S.texture (t_image, f_uv);
 
     -- Reconstruct eye-space position.
-    value depth_sample = 
+    value log_depth =
       S.texture (t_map_depth, f_uv) [x];
+    value eye_depth =
+      F.negate (LogDepth.decode (log_depth, depth_coefficient));
     value eye_position =
-      Reconstruction.reconstruct_eye (
-        depth_sample,
+      Reconstruction.reconstruct_eye_with_eye_z (
+        eye_depth,
         f_uv,
         m_projection,
         view_rays
       );
+      
     value world_position =
       M4.multiply_vector (m_view_inv, eye_position);
 
@@ -95,28 +100,32 @@ module ImageFilterFogY is
   end;
 
   shader fragment fog_exponential_y_floor_f is
-    parameter fog          : t;
-    parameter m_view_inv   : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
-    parameter t_map_depth  : sampler_2d;
-    parameter t_image      : sampler_2d;
-    parameter view_rays    : ViewRays.t;
-    in f_uv                : vector_2f;
-    out out_0              : vector_4f as 0;
+    parameter fog               : t;
+    parameter m_view_inv        : matrix_4x4f;
+    parameter m_projection      : matrix_4x4f;
+    parameter t_map_depth       : sampler_2d;
+    parameter t_image           : sampler_2d;
+    parameter view_rays         : ViewRays.t;
+    parameter depth_coefficient : float;
+    in f_uv                     : vector_2f;
+    out out_0                   : vector_4f as 0;
   with
     value color_sample =
       S.texture (t_image, f_uv);
 
     -- Reconstruct eye-space position.
-    value depth_sample = 
+    value log_depth =
       S.texture (t_map_depth, f_uv) [x];
+    value eye_depth =
+      F.negate (LogDepth.decode (log_depth, depth_coefficient));
     value eye_position =
-      Reconstruction.reconstruct_eye (
-        depth_sample,
+      Reconstruction.reconstruct_eye_with_eye_z (
+        eye_depth,
         f_uv,
         m_projection,
         view_rays
       );
+
     value world_position =
       M4.multiply_vector (m_view_inv, eye_position);
 
@@ -134,14 +143,15 @@ module ImageFilterFogY is
   end;
 
   shader fragment fog_logarithmic_y_floor_f is
-    parameter fog          : t;
-    parameter m_view_inv   : matrix_4x4f;
-    parameter m_projection : matrix_4x4f;
-    parameter t_map_depth  : sampler_2d;
-    parameter t_image      : sampler_2d;
-    parameter view_rays    : ViewRays.t;
-    in f_uv                : vector_2f;
-    out out_0              : vector_4f as 0;
+    parameter fog               : t;
+    parameter m_view_inv        : matrix_4x4f;
+    parameter m_projection      : matrix_4x4f;
+    parameter t_map_depth       : sampler_2d;
+    parameter t_image           : sampler_2d;
+    parameter view_rays         : ViewRays.t;
+    parameter depth_coefficient : float;
+    in f_uv                     : vector_2f;
+    out out_0                   : vector_4f as 0;
   with
     value color_sample =
       S.texture (t_image, f_uv);

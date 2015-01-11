@@ -139,9 +139,12 @@ import com.io7m.r1.types.RException;
     final KMaterialType m)
   {
     b.append("  -- Standard declarations\n");
-    b.append("  in f_position_eye  : vector_4f;\n");
-    b.append("  in f_position_clip : vector_4f;\n");
-    b.append("  out out_0          : vector_4f as 0;\n");
+    b.append("  in f_position_eye           : vector_4f;\n");
+    b.append("  in f_position_clip          : vector_4f;\n");
+    b.append("  in f_positive_eye_z         : float;\n");
+    b.append("  parameter depth_coefficient : float;\n");
+    b.append("  out out_0                   : vector_4f as 0;\n");
+    b.append("  out depth out_depth         : float;\n");
     b.append("\n");
 
     if (m.materialRequiresUVCoordinates()) {
@@ -513,6 +516,7 @@ import com.io7m.r1.types.RException;
     RKForwardShader.fragmentShaderDeclarationsSpecular(b, specular);
     RKForwardShader.fragmentShaderDeclarationsEnvironment(b, envi);
     b.append("with\n");
+    RKForwardShader.fragmentShaderValuesDepth(b);
     RKForwardShader.fragmentShaderValuesNormal(b, normal);
     RKForwardShader.fragmentShaderValuesAlpha(b, alpha);
     RKForwardShader.fragmentShaderValuesSpecular(b, specular);
@@ -522,7 +526,8 @@ import com.io7m.r1.types.RException;
     RKForwardShader.fragmentShaderValuesSurfaceTranslucent(b, envi);
     RKForwardShader.fragmentShaderValuesRGBATranslucentLit(b, specular);
     b.append("as\n");
-    b.append("  out out_0 = rgba;\n");
+    b.append("  out out_depth = r_depth;\n");
+    b.append("  out out_0     = rgba;\n");
     b.append("end;\n");
     b.append("\n");
   }
@@ -543,6 +548,7 @@ import com.io7m.r1.types.RException;
     RKForwardShader.fragmentShaderDeclarationsNormal(b, normal);
     RKForwardShader.fragmentShaderDeclarationsSpecular(b, specular);
     b.append("with\n");
+    RKForwardShader.fragmentShaderValuesDepth(b);
     RKForwardShader.fragmentShaderValuesNormal(b, normal);
     RKForwardShader.fragmentShaderValuesAlpha(b, alpha);
     RKForwardShader.fragmentShaderValuesSpecularOnly(b, specular);
@@ -551,7 +557,8 @@ import com.io7m.r1.types.RException;
       b,
       specular);
     b.append("as\n");
-    b.append("  out out_0 = rgba;\n");
+    b.append("  out out_depth = r_depth;\n");
+    b.append("  out out_0     = rgba;\n");
     b.append("end;\n");
     b.append("\n");
   }
@@ -568,9 +575,11 @@ import com.io7m.r1.types.RException;
     RKForwardShader.fragmentShaderDeclarationsNormal(b, normal);
     RKForwardShader.fragmentShaderDeclarationsRefractive(b, refractive);
     b.append("with\n");
+    RKForwardShader.fragmentShaderValuesDepth(b);
     RKForwardShader.fragmentShaderValuesRefractionRGBA(b, normal, refractive);
     b.append("as\n");
-    b.append("  out out_0 = rgba;\n");
+    b.append("  out out_depth = r_depth;\n");
+    b.append("  out out_0     = rgba;\n");
     b.append("end;\n");
   }
 
@@ -592,6 +601,7 @@ import com.io7m.r1.types.RException;
     RKForwardShader.fragmentShaderDeclarationsSpecular(b, specular);
     RKForwardShader.fragmentShaderDeclarationsEnvironment(b, envi);
     b.append("with\n");
+    RKForwardShader.fragmentShaderValuesDepth(b);
     RKForwardShader.fragmentShaderValuesNormal(b, normal);
     RKForwardShader.fragmentShaderValuesAlpha(b, alpha);
     RKForwardShader.fragmentShaderValuesSpecular(b, specular);
@@ -600,9 +610,18 @@ import com.io7m.r1.types.RException;
     RKForwardShader.fragmentShaderValuesSurfaceTranslucent(b, envi);
     RKForwardShader.fragmentShaderValuesRGBATranslucentUnlit(b);
     b.append("as\n");
-    b.append("  out out_0 = rgba;\n");
+    b.append("  out out_depth = r_depth;\n");
+    b.append("  out out_0     = rgba;\n");
     b.append("end;\n");
     b.append("\n");
+  }
+
+  private static void fragmentShaderValuesDepth(
+    final StringBuilder b)
+  {
+    b.append("  value r_depth =\n");
+    b
+      .append("    LogDepth.encode_partial (f_positive_eye_z, depth_coefficient);\n");
   }
 
   public static void fragmentShaderValuesAlbedoOpaque(
@@ -2106,11 +2125,9 @@ import com.io7m.r1.types.RException;
     b.append("import com.io7m.r1.core.Emission;\n");
     b.append("import com.io7m.r1.core.Environment;\n");
     b.append("import com.io7m.r1.core.Light;\n");
+    b.append("import com.io7m.r1.core.LogDepth;\n");
     b.append("import com.io7m.r1.core.Normals;\n");
-    b.append("import com.io7m.r1.core.ProjectiveLight;\n");
     b.append("import com.io7m.r1.core.Refraction;\n");
-    b.append("import com.io7m.r1.core.ShadowBasic;\n");
-    b.append("import com.io7m.r1.core.ShadowVariance;\n");
     b.append("import com.io7m.r1.core.Specular;\n");
     b.append("import com.io7m.r1.core.SphericalLight;\n");
     b.append("import com.io7m.r1.core.VectorAux;\n");

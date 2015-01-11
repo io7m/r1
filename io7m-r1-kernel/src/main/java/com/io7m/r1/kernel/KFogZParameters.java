@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -20,10 +20,8 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RSpaceRGBType;
 
 /**
@@ -35,14 +33,14 @@ import com.io7m.r1.types.RSpaceRGBType;
   @EqualityReference private static final class Builder implements
     KFogZParametersBuilderType
   {
-    private PVectorI3F<RSpaceRGBType>                   color;
-    private float                                       far_z;
-    private float                                       near_z;
-    private KFogProgression                             progression;
-    private PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> projection;
+    private PVectorI3F<RSpaceRGBType> color;
+    private float                     far_z;
+    private float                     near_z;
+    private KFogProgression           progression;
+    private KProjectionType           projection;
 
     Builder(
-      final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> in_projection)
+      final KProjectionType in_projection)
     {
       this.color = PVectorI3F.zero();
       this.near_z = 0.0f;
@@ -85,8 +83,8 @@ import com.io7m.r1.types.RSpaceRGBType;
       this.progression = NullCheck.notNull(p, "Progression");
     }
 
-    @Override public void setProjectionMatrix(
-      final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> p)
+    @Override public void setProjection(
+      final KProjectionType p)
     {
       this.projection = NullCheck.notNull(p, "Projection");
     }
@@ -99,22 +97,22 @@ import com.io7m.r1.types.RSpaceRGBType;
    */
 
   public static KFogZParametersBuilderType newBuilder(
-    final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> in_projection)
+    final KProjectionType in_projection)
   {
     return new Builder(in_projection);
   }
 
-  private final PVectorI3F<RSpaceRGBType>                   color;
-  private final float                                       far_z;
-  private final float                                       near_z;
-  private final KFogProgression                             progression;
-  private final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> projection;
+  private final PVectorI3F<RSpaceRGBType> color;
+  private final float                     far_z;
+  private final float                     near_z;
+  private final KFogProgression           progression;
+  private final KProjectionType           projection;
 
   private KFogZParameters(
     final PVectorI3F<RSpaceRGBType> in_color,
     final float in_near_z,
     final float in_far_z,
-    final PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> in_projection,
+    final KProjectionType in_projection,
     final KFogProgression in_progression)
   {
     this.color = NullCheck.notNull(in_color);
@@ -187,7 +185,7 @@ import com.io7m.r1.types.RSpaceRGBType;
    * @return The projection matrix used to render the scene.
    */
 
-  public PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> getProjection()
+  public KProjectionType getProjection()
   {
     return this.projection;
   }

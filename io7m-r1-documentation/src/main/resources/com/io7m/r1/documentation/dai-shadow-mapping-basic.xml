@@ -49,7 +49,7 @@
       associated with <s:term s:type="expression">k</s:term>
       in the visible set, rendered from the point of
       view of <s:term s:type="expression">k</s:term>. Each pixel in the image
-      represents the <s:link s:target="r1.dai.coords.screen-space">screen-space depth</s:link>
+      represents the <s:link s:target="r1.dai.log_depth">logarithmic depth</s:link>
       of the closest surface at that pixel. For example:
     </s:paragraph>
     <s:formal-item s:kind="diagram">
@@ -66,16 +66,23 @@
       scene, a given <s:link s:target="r1.dai.coords.eye-space">eye space</s:link>
       position <s:term s:type="expression">p</s:term> is transformed to
       <s:link s:target="r1.dai.lighting-projective.algorithm">light-clip space</s:link>
-      and then mapped to the range
-      <s:term s:type="expression">[(0, 0, 0), (1, 1, 1)]</s:term> in order
-      to sample from the shadow map (as with sampling from a projected texture
-      with projective lighting),
-      and the <s:term s:type="expression">z</s:term> component of 
-      <s:term s:type="expression">p</s:term> is compared against the
-      corresponding depth value <s:term s:type="expression">d</s:term> 
-      stored in the shadow map. If the 
-      <s:term s:type="expression">z</s:term> component of
-      <s:term s:type="expression">p</s:term> (now in the range <s:term s:type="expression">[0, 1]</s:term>)
+      and mapped to the range
+      <s:term s:type="expression">[(0, 0, 0), (1, 1, 1)]</s:term>, producing
+      a position <s:term s:type="variable">pos_light_clip</s:term>. The
+      same <s:term s:type="expression">p</s:term> is also transformed to
+      light-eye space, producing a position 
+      <s:term s:type="variable">pos_light_eye</s:term>.
+      The <s:term s:type="variable">pos_light_clip</s:term> position is used
+      directly in order to sample a value <s:term s:type="expression">d</s:term>
+      from the shadow map (as with sampling from a projected texture with projective 
+      lighting). The negated <s:term s:type="expression">z</s:term> component of 
+      <s:term s:type="expression">pos_light_eye</s:term> is encoded as a logarithmic
+      depth value using the same <s:term s:type="term">depth coefficient</s:term>
+      as was used when populating the shadow map, producing a value
+      <s:term s:type="expression">k</s:term>. Then,
+      <s:term s:type="expression">k</s:term> is compared against
+      <s:term s:type="expression">d</s:term>. If the 
+      <s:term s:type="expression">k</s:term>
       is less than <s:term s:type="expression">d</s:term>, then this
       means that <s:term s:type="expression">p</s:term> is closer to
       the light than whatever surface resulted in 

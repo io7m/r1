@@ -25,12 +25,14 @@ module ShadowVariance is
   import com.io7m.parasol.Float      as F;
   import com.io7m.parasol.Sampler2D  as S2;
 
+  import com.io7m.r1.core.LogDepth;
   import com.io7m.r1.core.Transform;
 
   type t is record
-    factor_min      : float,
-    variance_min    : float,
-    bleed_reduction : float
+    factor_min        : float,
+    variance_min      : float,
+    bleed_reduction   : float,
+    depth_coefficient : float
   end;
 
   function chebyshev_upper_bound (
@@ -63,17 +65,24 @@ module ShadowVariance is
   function factor (
     config            : t,
     t_shadow_variance : sampler_2d,
-    p                 : vector_4f
+    pos_light_eye     : vector_4f,
+    pos_light_clip    : vector_4f
   ) : float =
     let
       value not_behind =
-        new float (F.greater_or_equal (p [w], 0.0));
+        new float (F.greater_or_equal (pos_light_clip [w], 0.0));
       value current_tex =
-        Transform.clip_to_texture (p);
+        Transform.clip_to_texture3 (pos_light_clip);
+      value current_depth =
+        LogDepth.encode_partial (
+          LogDepth.prepare_eye_z (pos_light_eye [z]),
+          config.depth_coefficient
+        );
+
       value moments =
         S2.texture (t_shadow_variance, current_tex [x y]) [x y];
       value p_max =
-        chebyshev_upper_bound (config, moments, current_tex [z]);
+        chebyshev_upper_bound (config, moments, current_depth);
       value clamped =
         F.maximum (
           linear_step (config.bleed_reduction, 1.0, p_max),

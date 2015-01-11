@@ -40,6 +40,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.VectorI2F;
+import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KDepthInstancesType;
@@ -60,7 +62,6 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueVisitorType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceWorldType;
 
@@ -172,6 +173,7 @@ import com.io7m.r1.types.RSpaceWorldType;
 
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(jp, array);
+      KShadingProgramCommon.putAttributeNormalUnchecked(jp, VectorI3F.ZERO);
 
       /**
        * Upload matrices.
@@ -181,6 +183,9 @@ import com.io7m.r1.types.RSpaceWorldType;
       KShadingProgramCommon.putMatrixModelViewUnchecked(
         jp,
         mwi.getMatrixModelView());
+      KShadingProgramCommon.putDepthCoefficientReuse(jp);
+      KShadingProgramCommon.putMatrixNormal(jp, mwi.getMatrixNormal());
+      KShadingProgramCommon.putMatrixUVUnchecked(jp, mwi.getMatrixUV());
 
       final KMaterialDepthType depth = material.materialOpaqueGetDepth();
       depth.depthAccept(new KMaterialDepthVisitorType<Unit, JCGLException>() {
@@ -252,6 +257,7 @@ import com.io7m.r1.types.RSpaceWorldType;
           throws RException,
             JCGLException
         {
+          KShadingProgramCommon.putAttributeUVUnchecked(jp, VectorI2F.ZERO);
           return Unit.unit();
         }
       });
@@ -324,6 +330,10 @@ import com.io7m.r1.types.RSpaceWorldType;
           KShadingProgramCommon.putMatrixProjectionUnchecked(
             jp,
             mwo.getMatrixProjection());
+          KShadingProgramCommon.putDepthCoefficient(
+            jp,
+            KRendererCommon.depthCoefficient(mwo.getProjection()));
+
           KDepthVarianceRenderer.renderDepthPassBatch(
             gc,
             mwo,
@@ -349,26 +359,21 @@ import com.io7m.r1.types.RSpaceWorldType;
     NullCheck.notNull(framebuffer, "Framebuffer");
     NullCheck.notNull(faces, "Faces");
 
+    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+
+    final FramebufferUsableType fb =
+      framebuffer.getDepthVariancePassFramebuffer();
+
+    gc.framebufferDrawBind(fb);
     try {
-      final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-
-      final FramebufferUsableType fb =
-        framebuffer.kFramebufferGetDepthVariancePassFramebuffer();
-
-      gc.framebufferDrawBind(fb);
-      try {
-        this.rendererEvaluateDepthVarianceWithBoundFramebuffer(
-          view,
-          projection,
-          instances,
-          framebuffer.kFramebufferGetArea(),
-          faces);
-      } finally {
-        gc.framebufferDrawUnbind();
-      }
-
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
+      this.rendererEvaluateDepthVarianceWithBoundFramebuffer(
+        view,
+        projection,
+        instances,
+        framebuffer.kFramebufferGetArea(),
+        faces);
+    } finally {
+      gc.framebufferDrawUnbind();
     }
   }
 
@@ -386,31 +391,27 @@ import com.io7m.r1.types.RSpaceWorldType;
     NullCheck.notNull(framebuffer_area, "Framebuffer area");
     NullCheck.notNull(faces, "Faces");
 
-    try {
-      this.matrices.withObserver(
-        view,
-        projection,
-        new KMatricesObserverFunctionType<Unit, JCGLException>() {
-          @Override public Unit run(
-            final KMatricesObserverType mwo)
-            throws RException,
-              JCGLException
-          {
-            try {
-              KDepthVarianceRenderer.this.renderScene(
-                instances,
-                framebuffer_area,
-                mwo,
-                faces);
-              return Unit.unit();
-            } catch (final JCacheException e) {
-              throw new UnreachableCodeException(e);
-            }
+    this.matrices.withObserver(
+      view,
+      projection,
+      new KMatricesObserverFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final KMatricesObserverType mwo)
+          throws RException,
+            JCGLException
+        {
+          try {
+            KDepthVarianceRenderer.this.renderScene(
+              instances,
+              framebuffer_area,
+              mwo,
+              faces);
+            return Unit.unit();
+          } catch (final JCacheException e) {
+            throw new UnreachableCodeException(e);
           }
-        });
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+        }
+      });
   }
 
   @Override public String rendererGetName()

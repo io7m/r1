@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,7 +22,6 @@ import java.util.Set;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.r1.examples.tools.EMeshCache;
@@ -40,7 +39,6 @@ import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionBuilderInvalid;
 import com.io7m.r1.types.RExceptionIO;
 import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionLightGroupAlreadyAdded;
 import com.io7m.r1.types.RXMLException;
 
@@ -92,8 +90,6 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
       throw RXMLException.validityException(e);
     } catch (final IOException e) {
       throw RExceptionIO.fromIOException(e);
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final ParsingException e) {
       throw RXMLException.parsingException(e);
     }
@@ -111,8 +107,6 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
       throw RXMLException.validityException(e);
     } catch (final IOException e) {
       throw RExceptionIO.fromIOException(e);
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final ParsingException e) {
       throw RXMLException.parsingException(e);
     }
@@ -137,8 +131,6 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
       return tc.loadTexture(name);
     } catch (final IOException e) {
       throw RExceptionIO.fromIOException(e);
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 
@@ -152,8 +144,6 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
       return tc.loadTextureClamped(name);
     } catch (final IOException e) {
       throw RExceptionIO.fromIOException(e);
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     }
   }
 

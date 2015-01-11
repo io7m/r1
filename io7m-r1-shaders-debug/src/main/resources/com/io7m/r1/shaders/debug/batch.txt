@@ -12,3 +12,4 @@ show_tangents_vertex_eye         : com.io7m.r1.debug.DebugNormals.show_tangents_
 show_tangents_vertex_local       : com.io7m.r1.debug.DebugNormals.show_tangents_vertex_local
 show_uv                          : com.io7m.r1.debug.Debug.show_uv
 show_vcolor                      : com.io7m.r1.debug.Debug.show_vcolor
+show_log_depths                  : com.io7m.r1.debug.DebugLogDepth.show_log_depths
