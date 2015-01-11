@@ -124,10 +124,10 @@ import com.io7m.r1.types.RSpaceTextureType;
       throws JCGLException
   {
     gc.framebufferReadBind(source
-      .kFramebufferGetDepthVariancePassFramebuffer());
+      .getDepthVariancePassFramebuffer());
     try {
       gc.framebufferDrawBind(target
-        .kFramebufferGetDepthVariancePassFramebuffer());
+        .getDepthVariancePassFramebuffer());
       try {
         gc.framebufferBlit(
           source_area,
@@ -153,9 +153,9 @@ import com.io7m.r1.types.RSpaceTextureType;
       final AreaInclusive target_area)
       throws JCGLException
   {
-    gc.framebufferReadBind(source.rgbaGetColorFramebuffer());
+    gc.framebufferReadBind(source.getRGBAColorFramebuffer());
     try {
-      gc.framebufferDrawBind(target.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(target.getRGBAColorFramebuffer());
       try {
         gc.framebufferBlit(
           source_area,
@@ -183,9 +183,9 @@ import com.io7m.r1.types.RSpaceTextureType;
     final AreaInclusive target_area)
     throws JCGLException
   {
-    gc.framebufferReadBind(source.rgbaGetColorFramebuffer());
+    gc.framebufferReadBind(source.getRGBAColorFramebuffer());
     try {
-      gc.framebufferDrawBind(target.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(target.getRGBAColorFramebuffer());
       try {
         gc.framebufferBlit(
           source_area,
@@ -211,9 +211,9 @@ import com.io7m.r1.types.RSpaceTextureType;
       final AreaInclusive target_area)
       throws JCGLException
   {
-    gc.framebufferReadBind(source.rgbaGetColorFramebuffer());
+    gc.framebufferReadBind(source.getRGBAColorFramebuffer());
     try {
-      gc.framebufferDrawBind(target.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(target.getRGBAColorFramebuffer());
       try {
         gc.framebufferBlit(
           source_area,

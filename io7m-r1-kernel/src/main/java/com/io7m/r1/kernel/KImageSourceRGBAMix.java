@@ -165,7 +165,7 @@ import com.io7m.r1.types.RSpaceTextureType;
       final KProgramType p = this.shader_cache.cacheGetLU("mix");
 
       try {
-        gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+        gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
 
         gc.blendingDisable();
         gc.colorBufferMask(true, true, true, true);

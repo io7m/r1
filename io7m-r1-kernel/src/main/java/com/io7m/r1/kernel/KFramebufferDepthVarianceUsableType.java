@@ -37,7 +37,7 @@ public interface KFramebufferDepthVarianceUsableType extends
    */
 
     KFramebufferDepthVarianceDescription
-    kFramebufferGetDepthVarianceDescription();
+    getDepthVarianceDescription();
 
   /**
    * <p>
@@ -48,7 +48,7 @@ public interface KFramebufferDepthVarianceUsableType extends
    * @return A reference to the framebuffer
    */
 
-  FramebufferUsableType kFramebufferGetDepthVariancePassFramebuffer();
+  FramebufferUsableType getDepthVariancePassFramebuffer();
 
   /**
    * <p>
@@ -58,5 +58,5 @@ public interface KFramebufferDepthVarianceUsableType extends
    * @return A reference to the texture that backs the depth-variance buffer
    */
 
-  Texture2DStaticUsableType kFramebufferGetDepthVarianceTexture();
+  Texture2DStaticUsableType getDepthVarianceTexture();
 }

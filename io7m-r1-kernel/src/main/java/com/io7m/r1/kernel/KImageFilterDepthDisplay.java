@@ -116,7 +116,7 @@ import com.io7m.r1.types.RSpaceTextureType;
         this.shader_cache.cacheGetLU("copy_depth_to_rgba");
 
       try {
-        gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+        gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
 
         gc.blendingDisable();
         gc.colorBufferMask(true, true, true, true);
@@ -152,7 +152,7 @@ import com.io7m.r1.types.RSpaceTextureType;
 
               gc.texture2DStaticBind(
                 depth_unit,
-                input.kFramebufferGetDepthTexture());
+                input.getDepthTexture());
 
               p.programUniformPutMatrix3x3f(
                 "m_uv",

@@ -35,7 +35,7 @@ public interface KFramebufferDepthUsableType extends KFramebufferUsableType
    *         other framebuffers with the same configuration
    */
 
-  KFramebufferDepthDescription kFramebufferGetDepthDescription();
+  KFramebufferDepthDescription getDepthDescription();
 
   /**
    * <p>
@@ -46,7 +46,7 @@ public interface KFramebufferDepthUsableType extends KFramebufferUsableType
    * @return A reference to the framebuffer
    */
 
-  FramebufferUsableType kFramebufferGetDepthPassFramebuffer();
+  FramebufferUsableType getDepthPassFramebuffer();
 
   /**
    * <p>
@@ -59,5 +59,5 @@ public interface KFramebufferDepthUsableType extends KFramebufferUsableType
    * @return A reference to the texture that backs the depth buffer
    */
 
-  Texture2DStaticUsableType kFramebufferGetDepthTexture();
+  Texture2DStaticUsableType getDepthTexture();
 }

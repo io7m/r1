@@ -168,7 +168,7 @@ import com.io7m.r1.types.RSpaceTextureType;
 
       try {
         gc.framebufferDrawBind(output
-          .kFramebufferGetDepthVariancePassFramebuffer());
+          .getDepthVariancePassFramebuffer());
 
         gc.blendingDisable();
         gc.colorBufferMask(true, true, true, true);
