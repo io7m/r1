@@ -37,6 +37,7 @@
   <xi:include href="dai-visible-sets.xml"/>
   <xi:include href="dai-deferred.xml"/>
   <xi:include href="dai-deferred-position-recon.xml"/>
+  <xi:include href="dai-log-depth.xml"/>
   <xi:include href="dai-forward-translucents.xml"/>
   <xi:include href="dai-normal-mapping.xml"/>
   <xi:include href="dai-environment-mapping.xml"/>
