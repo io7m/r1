@@ -59,6 +59,7 @@ import com.io7m.r1.kernel.types.KMaterialSpecularType;
 import com.io7m.r1.kernel.types.KMaterialSpecularVisitorType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
+import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.types.RException;
 
 /**
@@ -67,6 +68,19 @@ import com.io7m.r1.types.RException;
 
 @EqualityReference final class KRendererCommon
 {
+  static float depthCoefficient(
+    final KProjectionType projection)
+  {
+    final float far = projection.projectionGetZFar();
+    return 2.0f / KRendererCommon.log2(far + 1.0f);
+  }
+
+  private static float log2(
+    final float x)
+  {
+    return (float) (Math.log(x) / Math.log(2.0));
+  }
+
   /**
    * <p>
    * Produce a "normal" matrix from the given matrix <code>m</code>, writing
@@ -586,8 +600,35 @@ import com.io7m.r1.types.RException;
           final KFramebufferDepthType framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
-              .kFramebufferGetDepthTexture());
+              .getDepthTexture());
 
+          KShadingProgramCommon.putShadowBasicDepthCoefficient(
+            program,
+            KRendererCommon.depthCoefficient(lp
+              .lightProjectiveGetProjection()));
+          KShadingProgramCommon.putShadowBasic(
+            program,
+            lp.lightGetShadowBasic());
+          KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasicDiffuseOnly(
+          final KLightProjectiveWithShadowBasicDiffuseOnly lp)
+          throws RException,
+            JCGLException
+        {
+          final KShadowMapBasic map =
+            (KShadowMapBasic) shadow_context.getShadowMap(lp);
+          final KFramebufferDepthType framebuffer = map.getFramebuffer();
+          final TextureUnitType unit =
+            unit_context.withTexture2D(framebuffer
+              .getDepthTexture());
+
+          KShadingProgramCommon.putShadowBasicDepthCoefficient(
+            program,
+            KRendererCommon.depthCoefficient(lp
+              .lightProjectiveGetProjection()));
           KShadingProgramCommon.putShadowBasic(
             program,
             lp.lightGetShadowBasic());
@@ -606,31 +647,16 @@ import com.io7m.r1.types.RException;
             map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
-              .kFramebufferGetDepthVarianceTexture());
+              .getDepthVarianceTexture());
 
+          KShadingProgramCommon.putShadowVarianceDepthCoefficient(
+            program,
+            KRendererCommon.depthCoefficient(lp
+              .lightProjectiveGetProjection()));
           KShadingProgramCommon.putShadowVariance(
             program,
             lp.lightGetShadowVariance());
           KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
-          return Unit.unit();
-        }
-
-        @Override public Unit projectiveWithShadowBasicDiffuseOnly(
-          final KLightProjectiveWithShadowBasicDiffuseOnly lp)
-          throws RException,
-            JCGLException
-        {
-          final KShadowMapBasic map =
-            (KShadowMapBasic) shadow_context.getShadowMap(lp);
-          final KFramebufferDepthType framebuffer = map.getFramebuffer();
-          final TextureUnitType unit =
-            unit_context.withTexture2D(framebuffer
-              .kFramebufferGetDepthTexture());
-
-          KShadingProgramCommon.putShadowBasic(
-            program,
-            lp.lightGetShadowBasic());
-          KShadingProgramCommon.putTextureShadowMapBasic(program, unit);
           return Unit.unit();
         }
 
@@ -645,8 +671,12 @@ import com.io7m.r1.types.RException;
             map.getFramebuffer();
           final TextureUnitType unit =
             unit_context.withTexture2D(framebuffer
-              .kFramebufferGetDepthVarianceTexture());
+              .getDepthVarianceTexture());
 
+          KShadingProgramCommon.putShadowVarianceDepthCoefficient(
+            program,
+            KRendererCommon.depthCoefficient(lp
+              .lightProjectiveGetProjection()));
           KShadingProgramCommon.putShadowVariance(
             program,
             lp.lightGetShadowVariance());
@@ -674,16 +704,6 @@ import com.io7m.r1.types.RException;
           return Unit.unit();
         }
 
-        @Override public Unit projectiveWithShadowVariance(
-          final KLightProjectiveWithShadowVariance _)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putShadowVarianceReuse(program);
-          KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
-          return Unit.unit();
-        }
-
         @Override public Unit projectiveWithShadowBasicDiffuseOnly(
           final KLightProjectiveWithShadowBasicDiffuseOnly _)
           throws RException,
@@ -691,6 +711,16 @@ import com.io7m.r1.types.RException;
         {
           KShadingProgramCommon.putShadowBasicReuse(program);
           KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowVariance(
+          final KLightProjectiveWithShadowVariance _)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putShadowVarianceReuse(program);
+          KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
           return Unit.unit();
         }
 

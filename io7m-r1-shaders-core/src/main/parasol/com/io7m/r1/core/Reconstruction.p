@@ -39,6 +39,27 @@ module Reconstruction is
     view_rays    : ViewRays.t
   ) : vector_4f =
     let
+      value eye_depth =
+        Transform.ndc_to_eye_z (
+          m_projection,
+          Transform.screen_depth_to_ndc (screen_depth)
+        );
+    in
+      reconstruct_eye_with_eye_z (
+        eye_depth, 
+        screen_uv, 
+        m_projection, 
+        view_rays
+      )
+    end;
+
+  function reconstruct_eye_with_eye_z (
+    eye_depth    : float,
+    screen_uv    : vector_2f,
+    m_projection : matrix_4x4f,
+    view_rays    : ViewRays.t
+  ) : vector_4f =
+    let
       value origin =
         Bilinear.interpolate_3f (
           view_rays.origin_x0y0,
@@ -56,17 +77,11 @@ module Reconstruction is
           view_rays.ray_x1y1,
           screen_uv
         );
-
-      value linear_z =
-        Transform.ndc_to_eye_z (
-          m_projection,
-          Transform.screen_depth_to_ndc (screen_depth)
-        );
         
       value ray =
         V3.multiply_scalar (
           ray_normal,
-          linear_z
+          eye_depth
         );
     in
       new vector_4f (V3.add (origin, ray), 1.0)

@@ -40,7 +40,6 @@ import com.io7m.jtensors.parameterized.PMatrixM3x3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCopierSourceEqualsTarget;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionNotSupported;
 import com.io7m.r1.types.RSpaceTextureType;
 
@@ -125,10 +124,10 @@ import com.io7m.r1.types.RSpaceTextureType;
       throws JCGLException
   {
     gc.framebufferReadBind(source
-      .kFramebufferGetDepthVariancePassFramebuffer());
+      .getDepthVariancePassFramebuffer());
     try {
       gc.framebufferDrawBind(target
-        .kFramebufferGetDepthVariancePassFramebuffer());
+        .getDepthVariancePassFramebuffer());
       try {
         gc.framebufferBlit(
           source_area,
@@ -154,9 +153,9 @@ import com.io7m.r1.types.RSpaceTextureType;
       final AreaInclusive target_area)
       throws JCGLException
   {
-    gc.framebufferReadBind(source.rgbaGetColorFramebuffer());
+    gc.framebufferReadBind(source.getRGBAColorFramebuffer());
     try {
-      gc.framebufferDrawBind(target.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(target.getRGBAColorFramebuffer());
       try {
         gc.framebufferBlit(
           source_area,
@@ -184,9 +183,9 @@ import com.io7m.r1.types.RSpaceTextureType;
     final AreaInclusive target_area)
     throws JCGLException
   {
-    gc.framebufferReadBind(source.rgbaGetColorFramebuffer());
+    gc.framebufferReadBind(source.getRGBAColorFramebuffer());
     try {
-      gc.framebufferDrawBind(target.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(target.getRGBAColorFramebuffer());
       try {
         gc.framebufferBlit(
           source_area,
@@ -212,9 +211,9 @@ import com.io7m.r1.types.RSpaceTextureType;
       final AreaInclusive target_area)
       throws JCGLException
   {
-    gc.framebufferReadBind(source.rgbaGetColorFramebuffer());
+    gc.framebufferReadBind(source.getRGBAColorFramebuffer());
     try {
-      gc.framebufferDrawBind(target.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(target.getRGBAColorFramebuffer());
       try {
         gc.framebufferBlit(
           source_area,
@@ -358,64 +357,60 @@ import com.io7m.r1.types.RSpaceTextureType;
         "Source framebuffer must not be equal to target framebuffer");
     }
 
-    try {
-      this.g
-        .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
-          @Override public Unit implementationIsGL2(
-            final JCGLInterfaceGL2Type gl)
-            throws JCGLException,
-              RException
-          {
-            KRegionCopier.copyDepthVarianceOnlyGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
+    this.g
+      .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
+        @Override public Unit implementationIsGL2(
+          final JCGLInterfaceGL2Type gl)
+          throws JCGLException,
+            RException
+        {
+          KRegionCopier.copyDepthVarianceOnlyGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
 
-          @Override public Unit implementationIsGL3(
-            final JCGLInterfaceGL3Type gl)
-            throws JCGLException,
-              RException
-          {
-            KRegionCopier.copyDepthVarianceOnlyGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
+        @Override public Unit implementationIsGL3(
+          final JCGLInterfaceGL3Type gl)
+          throws JCGLException,
+            RException
+        {
+          KRegionCopier.copyDepthVarianceOnlyGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
 
-          @Override public Unit implementationIsGLES2(
-            final JCGLInterfaceGLES2Type gl)
-            throws JCGLException,
-              RException
-          {
-            throw RExceptionNotSupported.versionNotSupported(gl
-              .metaGetVersion());
-          }
+        @Override public Unit implementationIsGLES2(
+          final JCGLInterfaceGLES2Type gl)
+          throws JCGLException,
+            RException
+        {
+          throw RExceptionNotSupported.versionNotSupported(gl
+            .metaGetVersion());
+        }
 
-          @Override public Unit implementationIsGLES3(
-            final JCGLInterfaceGLES3Type gl)
-            throws JCGLException,
+        @Override public Unit implementationIsGLES3(
+          final JCGLInterfaceGLES3Type gl)
+          throws JCGLException,
 
-              RException
-          {
-            KRegionCopier.copyDepthVarianceOnlyGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
-        });
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+            RException
+        {
+          KRegionCopier.copyDepthVarianceOnlyGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
+      });
   }
 
   @Override public void copierCopyRGBAOnly(
@@ -435,64 +430,60 @@ import com.io7m.r1.types.RSpaceTextureType;
         "Source framebuffer must not be equal to target framebuffer");
     }
 
-    try {
-      this.g
-        .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
-          @Override public Unit implementationIsGL2(
-            final JCGLInterfaceGL2Type gl)
-            throws JCGLException,
-              RException
-          {
-            KRegionCopier.copyRGBAOnlyGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
+    this.g
+      .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
+        @Override public Unit implementationIsGL2(
+          final JCGLInterfaceGL2Type gl)
+          throws JCGLException,
+            RException
+        {
+          KRegionCopier.copyRGBAOnlyGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
 
-          @Override public Unit implementationIsGL3(
-            final JCGLInterfaceGL3Type gl)
-            throws JCGLException,
-              RException
-          {
-            KRegionCopier.copyRGBAOnlyGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
+        @Override public Unit implementationIsGL3(
+          final JCGLInterfaceGL3Type gl)
+          throws JCGLException,
+            RException
+        {
+          KRegionCopier.copyRGBAOnlyGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
 
-          @Override public Unit implementationIsGLES2(
-            final JCGLInterfaceGLES2Type gl)
-            throws JCGLException,
-              RException
-          {
-            throw RExceptionNotSupported.versionNotSupported(gl
-              .metaGetVersion());
-          }
+        @Override public Unit implementationIsGLES2(
+          final JCGLInterfaceGLES2Type gl)
+          throws JCGLException,
+            RException
+        {
+          throw RExceptionNotSupported.versionNotSupported(gl
+            .metaGetVersion());
+        }
 
-          @Override public Unit implementationIsGLES3(
-            final JCGLInterfaceGLES3Type gl)
-            throws JCGLException,
+        @Override public Unit implementationIsGLES3(
+          final JCGLInterfaceGLES3Type gl)
+          throws JCGLException,
 
-              RException
-          {
-            KRegionCopier.copyRGBAOnlyGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
-        });
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+            RException
+        {
+          KRegionCopier.copyRGBAOnlyGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
+      });
   }
 
   @Override public void copierCopyRGBAWithDepth(
@@ -512,62 +503,58 @@ import com.io7m.r1.types.RSpaceTextureType;
         "Source framebuffer must not be equal to target framebuffer");
     }
 
-    try {
-      this.g
-        .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
-          @Override public Unit implementationIsGL2(
-            final JCGLInterfaceGL2Type gl)
-            throws JCGLException,
-              RException
-          {
-            KRegionCopier.copyRGBADepthGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
+    this.g
+      .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
+        @Override public Unit implementationIsGL2(
+          final JCGLInterfaceGL2Type gl)
+          throws JCGLException,
+            RException
+        {
+          KRegionCopier.copyRGBADepthGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
 
-          @Override public Unit implementationIsGL3(
-            final JCGLInterfaceGL3Type gl)
-            throws JCGLException,
-              RException
-          {
-            KRegionCopier.copyRGBADepthGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
+        @Override public Unit implementationIsGL3(
+          final JCGLInterfaceGL3Type gl)
+          throws JCGLException,
+            RException
+        {
+          KRegionCopier.copyRGBADepthGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
 
-          @Override public Unit implementationIsGLES2(
-            final JCGLInterfaceGLES2Type gl)
-            throws JCGLException,
-              RException
-          {
-            throw new UnreachableCodeException();
-          }
+        @Override public Unit implementationIsGLES2(
+          final JCGLInterfaceGLES2Type gl)
+          throws JCGLException,
+            RException
+        {
+          throw new UnreachableCodeException();
+        }
 
-          @Override public Unit implementationIsGLES3(
-            final JCGLInterfaceGLES3Type gl)
-            throws JCGLException,
-              RException
-          {
-            KRegionCopier.copyRGBADepthGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
-        });
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+        @Override public Unit implementationIsGLES3(
+          final JCGLInterfaceGLES3Type gl)
+          throws JCGLException,
+            RException
+        {
+          KRegionCopier.copyRGBADepthGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
+      });
   }
 
   @Override public void copierCopyDepthOnly(
@@ -587,61 +574,57 @@ import com.io7m.r1.types.RSpaceTextureType;
         "Source framebuffer must not be equal to target framebuffer");
     }
 
-    try {
-      this.g
-        .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
-          @Override public Unit implementationIsGL2(
-            final JCGLInterfaceGL2Type gl)
-            throws JCGLException,
-              RException
-          {
-            KRegionCopier.copyDepthGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
+    this.g
+      .implementationAccept(new JCGLImplementationVisitorType<Unit, RException>() {
+        @Override public Unit implementationIsGL2(
+          final JCGLInterfaceGL2Type gl)
+          throws JCGLException,
+            RException
+        {
+          KRegionCopier.copyDepthGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
 
-          @Override public Unit implementationIsGL3(
-            final JCGLInterfaceGL3Type gl)
-            throws JCGLException,
-              RException
-          {
-            KRegionCopier.copyDepthGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
+        @Override public Unit implementationIsGL3(
+          final JCGLInterfaceGL3Type gl)
+          throws JCGLException,
+            RException
+        {
+          KRegionCopier.copyDepthGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
 
-          @Override public Unit implementationIsGLES2(
-            final JCGLInterfaceGLES2Type gl)
-            throws JCGLException,
-              RException
-          {
-            throw new UnreachableCodeException();
-          }
+        @Override public Unit implementationIsGLES2(
+          final JCGLInterfaceGLES2Type gl)
+          throws JCGLException,
+            RException
+        {
+          throw new UnreachableCodeException();
+        }
 
-          @Override public Unit implementationIsGLES3(
-            final JCGLInterfaceGLES3Type gl)
-            throws JCGLException,
-              RException
-          {
-            KRegionCopier.copyDepthGL3(
-              gl,
-              source,
-              source_area,
-              target,
-              target_area);
-            return Unit.unit();
-          }
-        });
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+        @Override public Unit implementationIsGLES3(
+          final JCGLInterfaceGLES3Type gl)
+          throws JCGLException,
+            RException
+        {
+          KRegionCopier.copyDepthGL3(
+            gl,
+            source,
+            source_area,
+            target,
+            target_area);
+          return Unit.unit();
+        }
+      });
   }
 }

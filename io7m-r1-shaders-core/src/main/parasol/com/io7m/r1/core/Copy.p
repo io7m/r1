@@ -26,7 +26,7 @@ module Copy is
   import com.io7m.r1.core.VertexShaders;
 
   shader program copy_rgba is
-    vertex   VertexShaders.standard_clip;
+    vertex   VertexShaders.standard_clip_without_log;
     fragment copy_rgba_f;
   end;
 
@@ -42,7 +42,7 @@ module Copy is
   end;
 
   shader program copy_rgba_depth is
-    vertex   VertexShaders.standard_clip;
+    vertex   VertexShaders.standard_clip_without_log;
     fragment copy_rgba_depth_f;
   end;
 
@@ -67,7 +67,7 @@ module Copy is
   --
 
   shader program copy_depth_to_rgba is
-    vertex   VertexShaders.standard_clip;
+    vertex   VertexShaders.standard_clip_without_log;
     fragment copy_depth_to_rgba_f;
   end;
 
@@ -89,7 +89,7 @@ module Copy is
   --
 
   shader program copy_depth_variance_to_rgba is
-    vertex   VertexShaders.standard_clip;
+    vertex   VertexShaders.standard_clip_without_log;
     fragment copy_depth_variance_to_rgba_f;
   end;
 

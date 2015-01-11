@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -39,11 +39,11 @@ import com.io7m.jtensors.parameterized.PMatrixM3x3F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
+import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceClipType;
 import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceTextureType;
@@ -126,7 +126,9 @@ import com.io7m.r1.types.RSpaceTextureType;
       RException,
       JCacheException
   {
-    config.getProjection().makeMatrixM4x4F(this.projection);
+    final KProjectionType projection_description = config.getProjection();
+    projection_description.projectionGetMatrix().makeMatrixM4x4F(
+      this.projection);
 
     final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
     final List<TextureUnitType> units = gc.textureGetUnits();
@@ -134,7 +136,7 @@ import com.io7m.r1.types.RSpaceTextureType;
     final KProgramType fog = this.getFogProgram(config);
 
     try {
-      gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
 
       gc.blendingDisable();
       gc.colorBufferMask(true, true, true, true);
@@ -169,13 +171,17 @@ import com.io7m.r1.types.RSpaceTextureType;
             KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
             KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
 
+            KShadingProgramCommon.putDepthCoefficient(
+              p,
+              KRendererCommon.depthCoefficient(projection_description));
+
             final TextureUnitType t_image = units.get(0);
             assert t_image != null;
             final TextureUnitType t_depth = units.get(1);
             assert t_depth != null;
 
             try {
-              gc.texture2DStaticBind(t_image, input.rgbaGetTexture());
+              gc.texture2DStaticBind(t_image, input.getRGBATexture());
               gc.texture2DStaticBind(
                 t_depth,
                 gbuffer.geomGetTextureDepthStencil());
@@ -238,7 +244,7 @@ import com.io7m.r1.types.RSpaceTextureType;
 
     try {
       final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt =
-        this.rgba_cache.bluCacheGet(input.rgbaGetDescription());
+        this.rgba_cache.bluCacheGet(input.getRGBADescription());
 
       try {
         final KFramebufferRGBAUsableType temp = receipt.getValue();
@@ -255,9 +261,6 @@ import com.io7m.r1.types.RSpaceTextureType;
       } finally {
         receipt.returnToCache();
       }
-
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
       throw RExceptionCache.fromJCacheException(e);
     }

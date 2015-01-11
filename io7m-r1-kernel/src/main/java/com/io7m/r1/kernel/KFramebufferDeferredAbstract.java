@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -52,7 +52,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KFramebufferDeferredDescription;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionNotSupported;
 
 /**
@@ -183,7 +182,7 @@ import com.io7m.r1.types.RExceptionNotSupported;
       this.gbuffer = in_gbuffer;
     }
 
-    @Override public void kFramebufferDelete(
+    @Override public void delete(
       final JCGLImplementationType g)
       throws RException
     {
@@ -193,14 +192,12 @@ import com.io7m.r1.types.RExceptionNotSupported;
         gc.texture2DStaticDelete(this.color);
         gc.texture2DStaticDelete(this.depth);
         this.gbuffer.geomDelete(g);
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
       } finally {
         super.setDeleted(true);
       }
     }
 
-    @Override public FramebufferUsableType rgbaGetColorFramebuffer()
+    @Override public FramebufferUsableType getRGBAColorFramebuffer()
     {
       return this.framebuffer;
     }
@@ -210,12 +207,12 @@ import com.io7m.r1.types.RExceptionNotSupported;
       return this.gbuffer;
     }
 
-    @Override public KFramebufferRGBADescription rgbaGetDescription()
+    @Override public KFramebufferRGBADescription getRGBADescription()
     {
       return this.description.getRGBADescription();
     }
 
-    @Override public Texture2DStaticUsableType rgbaGetTexture()
+    @Override public Texture2DStaticUsableType getRGBATexture()
     {
       return this.color;
     }
@@ -234,20 +231,15 @@ import com.io7m.r1.types.RExceptionNotSupported;
       NullCheck.notNull(in_color, "Color");
 
       try {
-        try {
-          this.gbuffer.geomClear(in_gc);
-          in_gc.framebufferDrawBind(this.framebuffer);
-          in_gc.colorBufferMask(true, true, true, true);
-          in_gc.depthBufferWriteEnable();
-          in_gc.stencilBufferMask(
-            FaceSelection.FACE_FRONT_AND_BACK,
-            0xffffffff);
-          in_gc.clear(KGeometryBufferAbstract.CLEAR_SPEC);
-        } finally {
-          in_gc.framebufferDrawUnbind();
-        }
-      } catch (final JCGLException e) {
-        throw RExceptionJCGL.fromJCGLException(e);
+        this.gbuffer.geomClear(in_gc);
+        in_gc.framebufferDrawBind(this.framebuffer);
+        in_gc.colorBufferMask(true, true, true, true);
+        in_gc.depthBufferWriteEnable();
+        in_gc
+          .stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xffffffff);
+        in_gc.clear(KGeometryBufferAbstract.CLEAR_SPEC);
+      } finally {
+        in_gc.framebufferDrawUnbind();
       }
     }
   }

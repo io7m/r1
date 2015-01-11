@@ -93,7 +93,7 @@ import com.io7m.r1.types.RExceptionCache;
 
       if (input == output) {
         final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> r =
-          this.rgba_cache.bluCacheGet(input.rgbaGetDescription());
+          this.rgba_cache.bluCacheGet(input.getRGBADescription());
 
         try {
           final KFramebufferRGBAUsableType temp = r.getValue();

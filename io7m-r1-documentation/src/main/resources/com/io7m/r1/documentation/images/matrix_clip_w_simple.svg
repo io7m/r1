@@ -28,7 +28,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
-     inkscape:cx="508.15607"
+     inkscape:cx="426.92568"
      inkscape:cy="63.687479"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -39,10 +39,10 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-width="1011"
-     inkscape:window-height="756"
-     inkscape:window-x="64"
-     inkscape:window-y="70"
+     inkscape:window-width="1231"
+     inkscape:window-height="844"
+     inkscape:window-x="2"
+     inkscape:window-y="0"
      inkscape:window-maximized="0"
      showguides="true"
      inkscape:guide-bbox="true">
@@ -546,7 +546,7 @@
        inkscape:export-ydpi="110" />
     <path
        style="fill:#b3b3b3;stroke:#cccccc;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline"
-       d="m 290.21429,410.71933 190,0"
+       d="m 290.21429,390.71933 190,0"
        id="path3386"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc"
@@ -565,18 +565,18 @@
     <text
        sodipodi:linespacing="125%"
        id="text3398"
-       y="380.71933"
+       y="410.71933"
        x="290.21429"
        style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:DejaVu Sans Mono;-inkscape-font-specification:DejaVu Sans Mono"
        xml:space="preserve"
        inkscape:export-filename="/home/m0/fossil/com.io7m/io7m-jtensors/src/main/images/matrix_rx.png"
        inkscape:export-xdpi="110"
        inkscape:export-ydpi="110"><tspan
-         y="380.71933"
+         y="410.71933"
          x="290.21429"
          id="tspan3400"
          sodipodi:role="line">(0 * eye_x) + (0 * eye_y) </tspan><tspan
-         y="395.71933"
+         y="425.71933"
          x="290.21429"
          sodipodi:role="line"
          id="tspan3418">  + (c * eye_z) + (d * 1)</tspan></text>
@@ -615,13 +615,13 @@
        xml:space="preserve"
        style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:DejaVu Sans Mono;-inkscape-font-specification:DejaVu Sans Mono"
        x="290.21429"
-       y="430.71933"
+       y="380.71933"
        id="text3414"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3416"
          x="290.21429"
-         y="430.71933">...</tspan></text>
+         y="380.71933">...</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
@@ -690,14 +690,14 @@
     <text
        sodipodi:linespacing="125%"
        id="text3398-8"
-       y="380.71933"
+       y="410.71933"
        x="530.21429"
        style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:DejaVu Sans Mono;-inkscape-font-specification:DejaVu Sans Mono"
        xml:space="preserve"
        inkscape:export-filename="/home/m0/fossil/com.io7m/io7m-jtensors/src/main/images/matrix_rx.png"
        inkscape:export-xdpi="110"
        inkscape:export-ydpi="110"><tspan
-         y="380.71933"
+         y="410.71933"
          x="530.21429"
          sodipodi:role="line"
          id="tspan3418-5">(c * eye_z) + d</tspan></text>
@@ -736,13 +736,13 @@
        xml:space="preserve"
        style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:DejaVu Sans Mono;-inkscape-font-specification:DejaVu Sans Mono"
        x="530.21429"
-       y="410.71933"
+       y="380.71933"
        id="text3414-5"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3416-4"
          x="530.21429"
-         y="410.71933">...</tspan></text>
+         y="380.71933">...</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"

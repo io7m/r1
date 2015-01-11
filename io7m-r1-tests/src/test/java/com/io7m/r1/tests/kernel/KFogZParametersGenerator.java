@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -18,27 +18,24 @@ package com.io7m.r1.tests.kernel;
 
 import net.java.quickcheck.Generator;
 
-import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.KFogProgression;
 import com.io7m.r1.kernel.KFogZParameters;
 import com.io7m.r1.kernel.KFogZParametersBuilderType;
-import com.io7m.r1.tests.types.PMatrixI4x4FGenerator;
+import com.io7m.r1.kernel.types.KProjectionType;
+import com.io7m.r1.tests.kernel.types.KProjectionGenerator;
 import com.io7m.r1.tests.types.PVectorI3FGenerator;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
 import com.io7m.r1.types.RSpaceRGBType;
 
 @SuppressWarnings("null") public final class KFogZParametersGenerator implements
   Generator<KFogZParameters>
 {
-  private final Generator<PVectorI3F<RSpaceRGBType>>                   color_gen;
-  private final Generator<PMatrixI4x4F<RSpaceEyeType, RSpaceClipType>> proj_gen;
+  private final Generator<PVectorI3F<RSpaceRGBType>> color_gen;
+  private final Generator<KProjectionType>           proj_gen;
 
   public KFogZParametersGenerator()
   {
-    this.proj_gen =
-      new PMatrixI4x4FGenerator<RSpaceEyeType, RSpaceClipType>();
+    this.proj_gen = new KProjectionGenerator();
     this.color_gen = new PVectorI3FGenerator<RSpaceRGBType>();
   }
 
@@ -52,7 +49,7 @@ import com.io7m.r1.types.RSpaceRGBType;
     final KFogProgression[] progressions = KFogProgression.values();
     b
       .setProgression(progressions[(int) (Math.random() * progressions.length)]);
-    b.setProjectionMatrix(this.proj_gen.next());
+    b.setProjection(this.proj_gen.next());
     return b.build();
   }
 }

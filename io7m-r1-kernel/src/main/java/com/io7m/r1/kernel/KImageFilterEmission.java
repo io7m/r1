@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -37,7 +37,6 @@ import com.io7m.jtensors.parameterized.PMatrixM3x3F;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceTextureType;
 
 /**
@@ -100,68 +99,64 @@ import com.io7m.r1.types.RSpaceTextureType;
     NullCheck.notNull(input, "Input");
     NullCheck.notNull(output, "Output");
 
+    final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
+    final List<TextureUnitType> units = gc.textureGetUnits();
+
+    final KGeometryBufferUsableType gbuffer =
+      input.deferredGetGeometryBuffer();
+    final KProgramType emission = this.shader_cache.cacheGetLU("emission");
+
     try {
-      final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
-      final List<TextureUnitType> units = gc.textureGetUnits();
+      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
 
-      final KGeometryBufferUsableType gbuffer =
-        input.deferredGetGeometryBuffer();
-      final KProgramType emission = this.shader_cache.cacheGetLU("emission");
+      gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+      gc.colorBufferMask(true, true, true, true);
+      gc.cullingDisable();
+      gc.viewportSet(output.kFramebufferGetArea());
 
-      try {
-        gc.framebufferDrawBind(output.rgbaGetColorFramebuffer());
+      final JCBExecutorType e = emission.getExecutable();
+      e.execRun(new JCBExecutorProcedureType<RException>() {
+        @SuppressWarnings("synthetic-access") @Override public void call(
+          final JCBProgramType p)
+          throws JCGLException,
+            RException
+        {
+          try {
+            final KUnitQuadUsableType quad =
+              KImageFilterEmission.this.quad_cache.cacheGetLU(Unit.unit());
 
-        gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
-        gc.colorBufferMask(true, true, true, true);
-        gc.cullingDisable();
-        gc.viewportSet(output.kFramebufferGetArea());
+            final ArrayBufferUsableType array = quad.getArray();
+            final IndexBufferUsableType indices = quad.getIndices();
 
-        final JCBExecutorType e = emission.getExecutable();
-        e.execRun(new JCBExecutorProcedureType<RException>() {
-          @SuppressWarnings("synthetic-access") @Override public void call(
-            final JCBProgramType p)
-            throws JCGLException,
-              RException
-          {
-            try {
-              final KUnitQuadUsableType quad =
-                KImageFilterEmission.this.quad_cache.cacheGetLU(Unit.unit());
+            gc.arrayBufferBind(array);
+            KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
+            KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
 
-              final ArrayBufferUsableType array = quad.getArray();
-              final IndexBufferUsableType indices = quad.getIndices();
+            final TextureUnitType albedo_unit = units.get(0);
+            assert albedo_unit != null;
 
-              gc.arrayBufferBind(array);
-              KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
-              KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
+            gc.texture2DStaticBind(
+              albedo_unit,
+              gbuffer.geomGetTextureAlbedo());
 
-              final TextureUnitType albedo_unit = units.get(0);
-              assert albedo_unit != null;
-
-              gc.texture2DStaticBind(
-                albedo_unit,
-                gbuffer.geomGetTextureAlbedo());
-
-              KShadingProgramCommon.putMatrixUVUnchecked(
-                p,
-                KImageFilterEmission.this.uv);
-              p.programUniformPutTextureUnit("t_map_albedo", albedo_unit);
-              p.programExecute(new JCBProgramProcedureType<JCGLException>() {
-                @Override public void call()
-                  throws JCGLException
-                {
-                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                }
-              });
-            } finally {
-              gc.arrayBufferUnbind();
-            }
+            KShadingProgramCommon.putMatrixUVUnchecked(
+              p,
+              KImageFilterEmission.this.uv);
+            p.programUniformPutTextureUnit("t_map_albedo", albedo_unit);
+            p.programExecute(new JCBProgramProcedureType<JCGLException>() {
+              @Override public void call()
+                throws JCGLException
+              {
+                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+              }
+            });
+          } finally {
+            gc.arrayBufferUnbind();
           }
-        });
-      } finally {
-        gc.framebufferDrawUnbind();
-      }
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
+        }
+      });
+    } finally {
+      gc.framebufferDrawUnbind();
     }
   }
 

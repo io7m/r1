@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -59,7 +59,6 @@ import com.io7m.r1.kernel.types.KTranslucentVisitorType;
 import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RExceptionResource;
 
 /**
@@ -183,6 +182,9 @@ import com.io7m.r1.types.RExceptionResource;
     KShadingProgramCommon.putMatrixProjectionUnchecked(
       program,
       mwo.getMatrixProjection());
+    KShadingProgramCommon.putDepthCoefficient(
+      program,
+      KRendererCommon.depthCoefficient(mwo.getProjection()));
     KRendererCommon.putMaterialTranslucentRegularLit(
       program,
       instance.getMaterial());
@@ -375,6 +377,9 @@ import com.io7m.r1.types.RExceptionResource;
     KShadingProgramCommon.putMatrixProjectionUnchecked(
       program,
       mwo.getMatrixProjection());
+    KShadingProgramCommon.putDepthCoefficient(
+      program,
+      KRendererCommon.depthCoefficient(mwo.getProjection()));
 
     light
       .lightTranslucentAccept(new KLightTranslucentVisitorType<Unit, JCGLException>() {
@@ -529,28 +534,23 @@ import com.io7m.r1.types.RExceptionResource;
     final KShaderCacheForwardTranslucentLitType in_shader_lit_cache,
     final KRefractionRendererType in_refraction_renderer,
     final LogUsableType in_log)
-    throws RException
   {
-    try {
-      this.log =
-        NullCheck.notNull(in_log, "Log").with(KTranslucentRenderer.NAME);
-      this.g = NullCheck.notNull(in_g, "GL implementation");
+    this.log =
+      NullCheck.notNull(in_log, "Log").with(KTranslucentRenderer.NAME);
+    this.g = NullCheck.notNull(in_g, "GL implementation");
 
-      this.shader_unlit_cache =
-        NullCheck.notNull(in_shader_unlit_cache, "Shader unlit cache");
-      this.shader_lit_cache =
-        NullCheck.notNull(in_shader_lit_cache, "Shader lit cache");
+    this.shader_unlit_cache =
+      NullCheck.notNull(in_shader_unlit_cache, "Shader unlit cache");
+    this.shader_lit_cache =
+      NullCheck.notNull(in_shader_lit_cache, "Shader lit cache");
 
-      this.texture_units =
-        KTextureUnitAllocator.newAllocator(in_g.getGLCommon());
-      this.refraction_renderer =
-        NullCheck.notNull(in_refraction_renderer, "Refraction renderer");
+    this.texture_units =
+      KTextureUnitAllocator.newAllocator(in_g.getGLCommon());
+    this.refraction_renderer =
+      NullCheck.notNull(in_refraction_renderer, "Refraction renderer");
 
-      if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
-        this.log.debug("initialized");
-      }
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
+    if (this.log.wouldLog(LogLevel.LOG_DEBUG)) {
+      this.log.debug("initialized");
     }
   }
 
@@ -566,9 +566,6 @@ import com.io7m.r1.types.RExceptionResource;
       NullCheck.notNull(translucents, "Translucents");
 
       this.rendererEvaluateTranslucentsActual(framebuffer, mwo, translucents);
-
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
       throw RExceptionCache.fromJCacheException(e);
     }
@@ -587,7 +584,7 @@ import com.io7m.r1.types.RExceptionResource;
     final KTextureUnitAllocator units = this.texture_units;
 
     try {
-      gc.framebufferDrawBind(framebuffer.rgbaGetColorFramebuffer());
+      gc.framebufferDrawBind(framebuffer.getRGBAColorFramebuffer());
 
       // Enabled by each translucent instance
       gc.blendingDisable();
@@ -804,6 +801,10 @@ import com.io7m.r1.types.RExceptionResource;
                     KShadingProgramCommon.putMatrixProjectionUnchecked(
                       program,
                       mwi.getMatrixProjection());
+
+                    KShadingProgramCommon.putDepthCoefficient(
+                      program,
+                      KRendererCommon.depthCoefficient(mwi.getProjection()));
 
                     KRendererCommon.putInstanceTexturesRegularUnlit(
                       texture_unit_ctx,

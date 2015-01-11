@@ -94,7 +94,7 @@ import com.io7m.r1.types.RException;
     final JCGLImplementationType g)
     throws RException
   {
-    this.framebuffer.kFramebufferDelete(g);
+    this.framebuffer.delete(g);
   }
 
   @Override public <T, E extends Throwable> T shadowMapAccept(

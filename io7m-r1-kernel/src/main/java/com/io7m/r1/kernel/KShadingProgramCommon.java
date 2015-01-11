@@ -27,6 +27,8 @@ import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jtensors.VectorReadable2FType;
+import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.jtensors.parameterized.PMatrixDirectReadable3x3FType;
 import com.io7m.jtensors.parameterized.PMatrixDirectReadable4x4FType;
@@ -132,10 +134,10 @@ import com.io7m.r1.types.RSpaceWorldType;
   private static final String TEXTURE_NAME_NORMAL                = "t_normal";
   private static final String TEXTURE_NAME_PROJECTION            =
                                                                    "t_projection";
-  private static final String TEXTURE_NAME_REFRACTION_SCENE      =
-                                                                   "t_refraction_scene";
   private static final String TEXTURE_NAME_REFRACTION_DELTA      =
                                                                    "t_refraction_delta";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE      =
+                                                                   "t_refraction_scene";
   private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK =
                                                                    "t_refraction_scene_mask";
   private static final String TEXTURE_NAME_SHADOW_BASIC          =
@@ -558,6 +560,14 @@ import com.io7m.r1.types.RSpaceWorldType;
     program.programAttributePutVector3F("v_normal", r);
   }
 
+  static void putAttributeNormalUnchecked(
+    final JCBProgramType program,
+    final VectorReadable3FType n)
+    throws JCGLException
+  {
+    program.programAttributePutVector3F("v_normal", n);
+  }
+
   static void putAttributeTangent4(
     final JCBProgramType program,
     final PVectorI4F<RSpaceObjectType> t)
@@ -569,6 +579,16 @@ import com.io7m.r1.types.RSpaceWorldType;
   static void putAttributeUV(
     final JCBProgramType program,
     final PVectorI2F<RSpaceTextureType> uv)
+    throws JCGLException
+  {
+    program.programAttributePutVector2F(
+      KShadingProgramCommon.ATTRIBUTE_NAME_VERTEX_UV,
+      uv);
+  }
+
+  static void putAttributeUVUnchecked(
+    final JCBProgramType program,
+    final VectorReadable2FType uv)
     throws JCGLException
   {
     program.programAttributePutVector2F(
@@ -614,6 +634,19 @@ import com.io7m.r1.types.RSpaceWorldType;
     program.programUniformPutTextureUnit(
       KShadingProgramCommon.TEXTURE_NAME_DEFERRED_SPECULAR,
       unit);
+  }
+
+  static void putDepthCoefficient(
+    final JCBProgramType program,
+    final float c)
+  {
+    program.programUniformPutFloat("depth_coefficient", c);
+  }
+
+  static void putDepthCoefficientReuse(
+    final JCBProgramType p)
+  {
+    p.programUniformUseExisting("depth_coefficient");
   }
 
   static void putLightDirectional(
@@ -841,8 +874,25 @@ import com.io7m.r1.types.RSpaceWorldType;
           return Unit.unit();
         }
 
+        @Override public Unit projectiveWithoutShadowDiffuseOnly(
+          final KLightProjectiveWithoutShadowDiffuseOnly unused)
+          throws RException,
+            JCGLException
+        {
+          return Unit.unit();
+        }
+
         @Override public Unit projectiveWithShadowBasic(
           final KLightProjectiveWithShadowBasic unused)
+          throws RException,
+            JCGLException
+        {
+          KShadingProgramCommon.putShadowBasicReuse(program);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasicDiffuseOnly(
+          final KLightProjectiveWithShadowBasicDiffuseOnly unused)
           throws RException,
             JCGLException
         {
@@ -856,23 +906,6 @@ import com.io7m.r1.types.RSpaceWorldType;
             JCGLException
         {
           KShadingProgramCommon.putShadowVarianceReuse(program);
-          return Unit.unit();
-        }
-
-        @Override public Unit projectiveWithoutShadowDiffuseOnly(
-          final KLightProjectiveWithoutShadowDiffuseOnly unused)
-          throws RException,
-            JCGLException
-        {
-          return Unit.unit();
-        }
-
-        @Override public Unit projectiveWithShadowBasicDiffuseOnly(
-          final KLightProjectiveWithShadowBasicDiffuseOnly unused)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putShadowBasicReuse(program);
           return Unit.unit();
         }
 
@@ -1147,6 +1180,21 @@ import com.io7m.r1.types.RSpaceWorldType;
     KShadingProgramCommon.putMaterialEnvironmentMix(program, envi.getMix());
   }
 
+  static void putMaterialRefractiveColor(
+    final JCBProgramType program,
+    final VectorReadable4FType color)
+  {
+    program.programUniformPutVector4f("p_refraction.color", color);
+  }
+
+  static void putMaterialRefractiveMaskedDeltaTextured(
+    final JCBProgramType program,
+    final KMaterialRefractiveMaskedDeltaTextured m)
+  {
+    KShadingProgramCommon.putMaterialRefractiveScale(program, m.getScale());
+    KShadingProgramCommon.putMaterialRefractiveColor(program, m.getColor());
+  }
+
   static void putMaterialRefractiveMaskedNormals(
     final JCBProgramType program,
     final KMaterialRefractiveMaskedNormals material)
@@ -1160,20 +1208,20 @@ import com.io7m.r1.types.RSpaceWorldType;
       material.getColor());
   }
 
-  static void putMaterialRefractiveMaskedDeltaTextured(
-    final JCBProgramType program,
-    final KMaterialRefractiveMaskedDeltaTextured m)
-  {
-    KShadingProgramCommon.putMaterialRefractiveScale(program, m.getScale());
-    KShadingProgramCommon.putMaterialRefractiveColor(program, m.getColor());
-  }
-
   static void putMaterialRefractiveScale(
     final JCBProgramType program,
     final float scale)
     throws JCGLException
   {
     program.programUniformPutFloat("p_refraction.scale", scale);
+  }
+
+  static void putMaterialRefractiveUnmaskedDeltaTextured(
+    final JCBProgramType program,
+    final KMaterialRefractiveUnmaskedDeltaTextured m)
+  {
+    KShadingProgramCommon.putMaterialRefractiveScale(program, m.getScale());
+    KShadingProgramCommon.putMaterialRefractiveColor(program, m.getColor());
   }
 
   static void putMaterialRefractiveUnmaskedNormals(
@@ -1187,21 +1235,6 @@ import com.io7m.r1.types.RSpaceWorldType;
     KShadingProgramCommon.putMaterialRefractiveColor(
       program,
       material.getColor());
-  }
-
-  static void putMaterialRefractiveColor(
-    final JCBProgramType program,
-    final VectorReadable4FType color)
-  {
-    program.programUniformPutVector4f("p_refraction.color", color);
-  }
-
-  static void putMaterialRefractiveUnmaskedDeltaTextured(
-    final JCBProgramType program,
-    final KMaterialRefractiveUnmaskedDeltaTextured m)
-  {
-    KShadingProgramCommon.putMaterialRefractiveScale(program, m.getScale());
-    KShadingProgramCommon.putMaterialRefractiveColor(program, m.getColor());
   }
 
   static void putMaterialSpecularColor(
@@ -1254,6 +1287,13 @@ import com.io7m.r1.types.RSpaceWorldType;
       m);
   }
 
+  static void putMatrixEyeToLightEye(
+    final JCBProgramType program,
+    final PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceLightEyeType> m)
+  {
+    program.programUniformPutMatrix4x4f("m_eye_to_light_eye", m);
+  }
+
   static void putMatrixInverseProjection(
     final JCBProgramType program,
     final PMatrixDirectReadable4x4FType<RSpaceClipType, RSpaceEyeType> m)
@@ -1272,6 +1312,15 @@ import com.io7m.r1.types.RSpaceWorldType;
     program.programUniformPutMatrix4x4f(
       KShadingProgramCommon.MATRIX_NAME_VIEW_INVERSE,
       m);
+  }
+
+  static
+    void
+    putMatrixLightProjection(
+      final JCBProgramType program,
+      final PMatrixDirectReadable4x4FType<RSpaceLightEyeType, RSpaceLightClipType> m)
+  {
+    program.programUniformPutMatrix4x4f("m_light_projection", m);
   }
 
   static
@@ -1452,6 +1501,15 @@ import com.io7m.r1.types.RSpaceWorldType;
       m);
   }
 
+  static void putRefractionTextureDelta(
+    final JCBProgramType program,
+    final TextureUnitType t)
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_REFRACTION_DELTA,
+      t);
+  }
+
   static void putRefractionTextureScene(
     final JCBProgramType program,
     final TextureUnitType unit)
@@ -1498,6 +1556,19 @@ import com.io7m.r1.types.RSpaceWorldType;
     program.programUniformUseExisting("shadow_basic.depth_bias");
   }
 
+  static void putShadowBasicDepthCoefficient(
+    final JCBProgramType program,
+    final float c)
+  {
+    program.programUniformPutFloat("shadow_basic.depth_coefficient", c);
+  }
+
+  static void putShadowBasicDepthCoefficientReuse(
+    final JCBProgramType program)
+  {
+    program.programUniformUseExisting("shadow_basic.depth_coefficient");
+  }
+
   static void putShadowBasicFactorMinimum(
 
     final JCBProgramType program,
@@ -1536,6 +1607,19 @@ import com.io7m.r1.types.RSpaceWorldType;
     KShadingProgramCommon.putShadowVarianceLightBleedReduction(
       program,
       s.getLightBleedReduction());
+  }
+
+  static void putShadowVarianceDepthCoefficient(
+    final JCBProgramType program,
+    final float c)
+  {
+    program.programUniformPutFloat("shadow_variance.depth_coefficient", c);
+  }
+
+  static void putShadowVarianceDepthCoefficientReuse(
+    final JCBProgramType program)
+  {
+    program.programUniformUseExisting("shadow_variance.depth_coefficient");
   }
 
   static void putShadowVarianceFactorMinimum(
@@ -1780,14 +1864,5 @@ import com.io7m.r1.types.RSpaceWorldType;
   private KShadingProgramCommon()
   {
     throw new UnreachableCodeException();
-  }
-
-  static void putRefractionTextureDelta(
-    final JCBProgramType program,
-    final TextureUnitType t)
-  {
-    program.programUniformPutTextureUnit(
-      KShadingProgramCommon.TEXTURE_NAME_REFRACTION_DELTA,
-      t);
   }
 }

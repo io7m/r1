@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -101,7 +101,6 @@ import com.io7m.r1.kernel.types.KVisibleSetLightGroup;
 import com.io7m.r1.kernel.types.KVisibleSetOpaques;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RExceptionJCGL;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceTextureType;
@@ -334,7 +333,7 @@ import com.io7m.r1.types.RSpaceTextureType;
     final JCGLFramebuffersGL3Type gf3,
     final KFramebufferDeferredUsableType framebuffer)
   {
-    assert gf3.framebufferDrawIsBound(framebuffer.rgbaGetColorFramebuffer());
+    assert gf3.framebufferDrawIsBound(framebuffer.getRGBAColorFramebuffer());
     assert gf3.framebufferReadAnyIsBound() == false;
 
     final KGeometryBufferUsableType gbuffer =
@@ -418,6 +417,7 @@ import com.io7m.r1.types.RSpaceTextureType;
       i.instanceGetFaceSelection());
 
     KShadingProgramCommon.putMatrixProjectionReuse(program);
+    KShadingProgramCommon.putDepthCoefficientReuse(program);
     KRendererCommon.putInstanceMatricesRegular(program, mwi, material);
     KRendererCommon.putInstanceTexturesRegularLit(
       texture_unit_context,
@@ -587,6 +587,9 @@ import com.io7m.r1.types.RSpaceTextureType;
         KShadingProgramCommon.putMatrixModelView(
           program,
           mwi.getMatrixModelView());
+        KShadingProgramCommon.putDepthCoefficient(
+          program,
+          KRendererCommon.depthCoefficient(mwi.getProjection()));
 
         program.programExecute(new JCBProgramProcedureType<JCGLException>() {
           @Override public void call()
@@ -652,6 +655,9 @@ import com.io7m.r1.types.RSpaceTextureType;
           mwi.getMatrixViewInverse());
         KShadingProgramCommon.putMatrixNormal(program, mwi.getMatrixNormal());
         KShadingProgramCommon.putMatrixUVUnchecked(program, mwi.getMatrixUV());
+        KShadingProgramCommon.putDepthCoefficient(
+          program,
+          KRendererCommon.depthCoefficient(mwi.getProjection()));
 
         program.programExecute(new JCBProgramProcedureType<JCGLException>() {
           @Override public void call()
@@ -683,31 +689,26 @@ import com.io7m.r1.types.RSpaceTextureType;
     final KShaderCacheDeferredGeometryType in_shader_geo_cache,
     final KShaderCacheDeferredLightType in_shader_light_cache,
     final KViewRaysCacheType in_view_rays_cache)
-    throws RException
   {
-    try {
-      this.g = NullCheck.notNull(in_g, "GL");
-      this.texture_units =
-        KTextureUnitAllocator.newAllocator(this.g.getGLCommon());
+    this.g = NullCheck.notNull(in_g, "GL");
+    this.texture_units =
+      KTextureUnitAllocator.newAllocator(this.g.getGLCommon());
 
-      this.shader_geo_cache =
-        NullCheck.notNull(in_shader_geo_cache, "Geometry-pass shader cache");
-      this.shader_light_cache =
-        NullCheck.notNull(in_shader_light_cache, "Light-pass shader cache");
+    this.shader_geo_cache =
+      NullCheck.notNull(in_shader_geo_cache, "Geometry-pass shader cache");
+    this.shader_light_cache =
+      NullCheck.notNull(in_shader_light_cache, "Light-pass shader cache");
 
-      this.quad_cache = NullCheck.notNull(in_quad_cache, "Unit quad cache");
-      this.sphere_cache =
-        NullCheck.notNull(in_sphere_cache, "Unit sphere cache");
-      this.frustum_cache =
-        NullCheck.notNull(in_frustum_cache, "Frustum mesh cache");
-      this.view_rays_cache =
-        NullCheck.notNull(in_view_rays_cache, "View rays cache");
+    this.quad_cache = NullCheck.notNull(in_quad_cache, "Unit quad cache");
+    this.sphere_cache =
+      NullCheck.notNull(in_sphere_cache, "Unit sphere cache");
+    this.frustum_cache =
+      NullCheck.notNull(in_frustum_cache, "Frustum mesh cache");
+    this.view_rays_cache =
+      NullCheck.notNull(in_view_rays_cache, "View rays cache");
 
-      this.uv_light_spherical =
-        new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
-    }
+    this.uv_light_spherical =
+      new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
   }
 
   @Override public void rendererEvaluateOpaqueLit(
@@ -739,9 +740,6 @@ import com.io7m.r1.types.RSpaceTextureType;
           mwo,
           group);
       }
-
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
       throw new UnreachableCodeException(e);
     }
@@ -769,7 +767,7 @@ import com.io7m.r1.types.RSpaceTextureType;
 
         try {
           final FramebufferUsableType render_fb =
-            framebuffer.rgbaGetColorFramebuffer();
+            framebuffer.getRGBAColorFramebuffer();
           gc.framebufferDrawBind(render_fb);
 
           KRendererDeferredOpaque.renderCopyGBufferDepthStencil(
@@ -796,8 +794,6 @@ import com.io7m.r1.types.RSpaceTextureType;
         }
 
       }
-    } catch (final JCGLException e) {
-      throw RExceptionJCGL.fromJCGLException(e);
     } catch (final JCacheException e) {
       throw new UnreachableCodeException(e);
     }
@@ -864,6 +860,8 @@ import com.io7m.r1.types.RSpaceTextureType;
           program,
           KMatrices.IDENTITY_UV);
 
+        KShadingProgramCommon.putDepthCoefficient(program, 1.0f);
+
         program.programUniformPutVector4f(
           "f_ccolor",
           KRendererDeferredOpaque.BLACK);
@@ -906,6 +904,8 @@ import com.io7m.r1.types.RSpaceTextureType;
         KShadingProgramCommon.putMatrixUVUnchecked(
           program,
           KMatrices.IDENTITY_UV);
+
+        KShadingProgramCommon.putDepthCoefficient(program, 1.0f);
 
         program.programUniformPutVector4f(
           "f_ccolor",
@@ -963,6 +963,10 @@ import com.io7m.r1.types.RSpaceTextureType;
               KShadingProgramCommon.putMatrixProjection(
                 program,
                 mwo.getMatrixProjection());
+
+              KShadingProgramCommon.putDepthCoefficient(
+                program,
+                KRendererCommon.depthCoefficient(mwo.getProjection()));
 
               KRendererDeferredOpaque.renderGroupGeometryBatchInstances(
                 gc,
@@ -1152,6 +1156,9 @@ import com.io7m.r1.types.RSpaceTextureType;
         KShadingProgramCommon.putMatrixProjectionUnchecked(
           program,
           mwo.getMatrixProjection());
+        KShadingProgramCommon.putDepthCoefficient(
+          program,
+          KRendererCommon.depthCoefficient(mwo.getProjection()));
 
         KShadingProgramCommon.putViewRays(program, view_rays);
 
@@ -1280,12 +1287,19 @@ import com.io7m.r1.types.RSpaceTextureType;
               KShadingProgramCommon.putMatrixNormal(
                 program,
                 mi.getMatrixNormal());
-              KShadingProgramCommon.putMatrixDeferredProjection(
+              KShadingProgramCommon.putMatrixEyeToLightEye(
                 program,
-                mdp.getMatrixDeferredProjection());
+                mdp.getMatrixProjectiveEyeToLightEye());
+              KShadingProgramCommon.putMatrixLightProjection(
+                program,
+                mdp.getMatrixProjectiveProjection());
+
               KShadingProgramCommon.putMatrixUVUnchecked(
                 program,
                 KMatrices.IDENTITY_UV);
+              KShadingProgramCommon.putDepthCoefficient(
+                program,
+                KRendererCommon.depthCoefficient(mi.getProjection()));
 
               KShadingProgramCommon.putViewRays(program, view_rays);
 
@@ -1339,7 +1353,7 @@ import com.io7m.r1.types.RSpaceTextureType;
         .implementationAccept(KRendererDeferredOpaque.GET_FRAMEBUFFERS_GL3);
 
     final FramebufferUsableType render_fb =
-      framebuffer.rgbaGetColorFramebuffer();
+      framebuffer.getRGBAColorFramebuffer();
 
     try {
       gc.framebufferDrawBind(render_fb);
@@ -1626,6 +1640,10 @@ import com.io7m.r1.types.RSpaceTextureType;
               KShadingProgramCommon.putMatrixProjection(
                 program,
                 mwo.getMatrixProjection());
+
+              KShadingProgramCommon.putDepthCoefficient(
+                program,
+                KRendererCommon.depthCoefficient(mwo.getProjection()));
 
               KRendererDeferredOpaque.renderGroupGeometryBatchInstances(
                 gc,

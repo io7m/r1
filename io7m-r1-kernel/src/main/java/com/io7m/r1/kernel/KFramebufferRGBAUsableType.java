@@ -34,7 +34,7 @@ public interface KFramebufferRGBAUsableType extends KFramebufferUsableType
    * @return A reference to the color framebuffer
    */
 
-  FramebufferUsableType rgbaGetColorFramebuffer();
+  FramebufferUsableType getRGBAColorFramebuffer();
 
   /**
    * <p>
@@ -45,7 +45,7 @@ public interface KFramebufferRGBAUsableType extends KFramebufferUsableType
    *         other framebuffers with the same configuration
    */
 
-  KFramebufferRGBADescription rgbaGetDescription();
+  KFramebufferRGBADescription getRGBADescription();
 
   /**
    * <p>
@@ -55,5 +55,5 @@ public interface KFramebufferRGBAUsableType extends KFramebufferUsableType
    * @return A reference to the texture that backs the color buffer
    */
 
-  Texture2DStaticUsableType rgbaGetTexture();
+  Texture2DStaticUsableType getRGBATexture();
 }
