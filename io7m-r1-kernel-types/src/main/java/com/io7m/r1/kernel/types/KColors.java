@@ -20,8 +20,8 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RSpaceRGBAType;
-import com.io7m.r1.types.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceRGBAType;
+import com.io7m.r1.spaces.RSpaceRGBType;
 
 /**
  * Convenient names for common colors.

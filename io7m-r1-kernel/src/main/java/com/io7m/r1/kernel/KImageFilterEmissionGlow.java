@@ -38,14 +38,14 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PMatrixM3x3F;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.kernel.types.KGlowParameters;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 /**
  * The default implementation of an emission and glow filter.

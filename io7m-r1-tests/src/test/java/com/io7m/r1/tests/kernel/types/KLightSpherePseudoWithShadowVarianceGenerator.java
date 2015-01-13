@@ -26,8 +26,8 @@ import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowVarianceBuilderType;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.kernel.types.KTransformContext;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 public final class KLightSpherePseudoWithShadowVarianceGenerator implements
   Generator<KLightSpherePseudoWithShadowVariance>

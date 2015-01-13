@@ -18,10 +18,10 @@ package com.io7m.r1.kernel;
 
 import com.io7m.jtensors.parameterized.PMatrixDirectReadable4x4FType;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceLightClipType;
-import com.io7m.r1.types.RSpaceLightEyeType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceLightClipType;
+import com.io7m.r1.spaces.RSpaceLightEyeType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * Matrices available within the context of a projective light.

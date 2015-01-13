@@ -24,9 +24,9 @@ import com.io7m.jtensors.parameterized.PVectorM4F;
 import com.io7m.jtensors.parameterized.PVectorReadable3FType;
 import com.io7m.jtensors.parameterized.PVectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceNDCType;
-import com.io7m.r1.types.RSpaceWindowType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceNDCType;
+import com.io7m.r1.spaces.RSpaceWindowType;
 
 /**
  * Functions to convert between coordinate spaces.

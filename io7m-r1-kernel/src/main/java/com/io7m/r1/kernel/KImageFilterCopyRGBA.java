@@ -21,9 +21,9 @@ import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionCache;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionCache;
 
 /**
  * A filter that copies the input RGBA data to the output.

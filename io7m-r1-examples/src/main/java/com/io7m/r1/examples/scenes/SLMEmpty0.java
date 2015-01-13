@@ -26,6 +26,7 @@ import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
@@ -33,8 +34,7 @@ import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadowBuilderType
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * An example of spherical mapped lighting.

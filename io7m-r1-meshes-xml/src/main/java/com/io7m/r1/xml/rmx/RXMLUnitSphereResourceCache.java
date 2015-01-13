@@ -36,12 +36,12 @@ import com.io7m.jcanephora.api.JCGLIndexBuffersType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionIO;
 import com.io7m.r1.kernel.types.KUnitSphere;
 import com.io7m.r1.kernel.types.KUnitSphereCacheType;
 import com.io7m.r1.kernel.types.KUnitSpherePrecision;
 import com.io7m.r1.kernel.types.KUnitSphereUsableType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionIO;
 import com.io7m.r1.xml.RXMLException;
 
 /**

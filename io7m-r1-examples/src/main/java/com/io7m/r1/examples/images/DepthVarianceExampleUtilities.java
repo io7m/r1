@@ -29,6 +29,7 @@ import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.examples.ExampleImageBuilderType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceUsableType;
 import com.io7m.r1.kernel.KImageSourceDepthVarianceType;
@@ -37,8 +38,7 @@ import com.io7m.r1.kernel.types.KDepthPrecision;
 import com.io7m.r1.kernel.types.KDepthVariancePrecision;
 import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.r1.main.R1Type;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 final class DepthVarianceExampleUtilities
 {

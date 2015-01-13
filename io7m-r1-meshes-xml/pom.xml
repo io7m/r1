@@ -79,11 +79,6 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-r1-types</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>io7m-r1-xml</artifactId>
       <version>${project.version}</version>
     </dependency>

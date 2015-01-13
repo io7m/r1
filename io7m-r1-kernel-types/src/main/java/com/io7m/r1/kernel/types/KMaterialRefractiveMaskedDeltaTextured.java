@@ -20,7 +20,7 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorReadable4FType;
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * Properties for masked refraction.

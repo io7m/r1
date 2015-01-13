@@ -24,12 +24,12 @@ import com.io7m.r1.kernel.KFogProgression;
 import com.io7m.r1.kernel.KFogYParameters;
 import com.io7m.r1.kernel.KFogYParametersBuilderType;
 import com.io7m.r1.kernel.types.KProjectionType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 import com.io7m.r1.tests.kernel.types.KProjectionGenerator;
 import com.io7m.r1.tests.types.PMatrixI4x4FGenerator;
 import com.io7m.r1.tests.types.PVectorI3FGenerator;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings("null") public final class KFogYParametersGenerator implements
   Generator<KFogYParameters>

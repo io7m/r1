@@ -27,8 +27,8 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 public final class KLightProjectiveWithShadowVarianceGenerator implements
   Generator<KLightProjectiveWithShadowVariance>

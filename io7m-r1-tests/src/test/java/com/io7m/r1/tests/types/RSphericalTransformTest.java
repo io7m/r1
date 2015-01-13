@@ -21,7 +21,7 @@ import com.io7m.jtensors.VectorM2F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorM3F;
 import com.io7m.r1.kernel.RSphericalTransform;
-import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceEyeType;
 
 @SuppressWarnings("static-method") public final class RSphericalTransformTest
 {

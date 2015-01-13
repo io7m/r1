@@ -21,6 +21,7 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.KFXAAParameters;
 import com.io7m.r1.kernel.KFXAAParameters.Quality;
 import com.io7m.r1.kernel.KFXAAParametersBuilderType;
@@ -33,7 +34,6 @@ import com.io7m.r1.kernel.types.KVisibleSet;
 import com.io7m.r1.main.R1;
 import com.io7m.r1.main.R1BuilderType;
 import com.io7m.r1.main.R1Type;
-import com.io7m.r1.types.RException;
 
 /**
  * An example renderer using the default deferred renderer.

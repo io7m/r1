@@ -19,9 +19,9 @@ package com.io7m.r1.kernel.types;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionMaterialMissingAlbedoTexture;
-import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionMaterialMissingAlbedoTexture;
+import com.io7m.r1.exceptions.RExceptionMaterialMissingSpecularTexture;
 
 /**
  * Functions to verify that materials are correctly constructed.

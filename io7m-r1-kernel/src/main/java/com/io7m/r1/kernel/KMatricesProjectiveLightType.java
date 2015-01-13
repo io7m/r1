@@ -17,10 +17,10 @@
 package com.io7m.r1.kernel;
 
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KInstanceType;
 import com.io7m.r1.kernel.types.KTransformType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 /**
  * Functions for observing a specific instance with the current projective

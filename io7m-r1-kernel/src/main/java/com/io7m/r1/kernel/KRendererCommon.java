@@ -27,6 +27,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixReadable4x4FType;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
@@ -60,7 +61,6 @@ import com.io7m.r1.kernel.types.KMaterialSpecularVisitorType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RException;
 
 /**
  * Functions common to all renderers.

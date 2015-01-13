@@ -22,8 +22,8 @@ import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedNormals;
 import com.io7m.r1.kernel.types.KMaterialRefractiveType;
 import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedNormals;
+import com.io7m.r1.spaces.RSpaceRGBAType;
 import com.io7m.r1.tests.types.PVectorI4FGenerator;
-import com.io7m.r1.types.RSpaceRGBAType;
 
 public final class KMaterialRefractiveGenerator implements
   Generator<KMaterialRefractiveType>

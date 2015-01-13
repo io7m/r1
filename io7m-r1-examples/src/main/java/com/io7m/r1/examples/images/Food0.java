@@ -22,12 +22,12 @@ import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.examples.ExampleImageBuilderType;
 import com.io7m.r1.examples.ExampleImageType;
 import com.io7m.r1.examples.ExampleVisitorType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KImageSourceRGBAType;
 import com.io7m.r1.kernel.KTextureMixParameters;
 import com.io7m.r1.main.R1Type;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 /**
  * A demonstration using a texture as an image source.

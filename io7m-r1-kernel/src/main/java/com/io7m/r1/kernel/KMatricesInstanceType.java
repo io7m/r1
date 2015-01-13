@@ -16,8 +16,8 @@
 
 package com.io7m.r1.kernel;
 
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
-import com.io7m.r1.types.RException;
 
 /**
  * Matrices available within the context of a transformed instance.

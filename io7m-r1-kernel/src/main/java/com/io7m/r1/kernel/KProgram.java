@@ -72,12 +72,12 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.PathVirtual;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionFilesystem;
-import com.io7m.r1.types.RExceptionIO;
-import com.io7m.r1.types.RExceptionNotSupported;
-import com.io7m.r1.types.RExceptionProgramInvalid;
-import com.io7m.r1.types.RExceptionShaderFragmentConflictingOutputs;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionFilesystem;
+import com.io7m.r1.exceptions.RExceptionIO;
+import com.io7m.r1.exceptions.RExceptionNotSupported;
+import com.io7m.r1.exceptions.RExceptionProgramInvalid;
+import com.io7m.r1.exceptions.RExceptionShaderFragmentConflictingOutputs;
 
 /**
  * A kernel program.

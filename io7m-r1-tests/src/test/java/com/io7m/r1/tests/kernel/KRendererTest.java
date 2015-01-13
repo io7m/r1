@@ -73,16 +73,16 @@ import com.io7m.r1.shaders.deferred.RKDLightCases;
 import com.io7m.r1.shaders.deferred.RKDMaterialCases;
 import com.io7m.r1.shaders.forward.RKFLightCases;
 import com.io7m.r1.shaders.forward.RKFMaterialCases;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.RFakeTexturesCubeStatic;
 import com.io7m.r1.tests.TestShaderCaches;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings("static-method") public final class KRendererTest
 {

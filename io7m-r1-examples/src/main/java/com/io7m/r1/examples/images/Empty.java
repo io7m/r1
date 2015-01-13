@@ -20,8 +20,8 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.r1.examples.ExampleImageBuilderType;
 import com.io7m.r1.examples.ExampleImageType;
 import com.io7m.r1.examples.ExampleVisitorType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
-import com.io7m.r1.types.RException;
 
 /**
  * A demonstration with nothing onscreen.

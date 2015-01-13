@@ -23,10 +23,10 @@ import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import com.io7m.jlog.LogUsableType;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionIO;
 import com.io7m.r1.meshes.RMeshTangents;
 import com.io7m.r1.rmb.RBExporter;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionIO;
 
 /**
  * Exporter for the RMBZ format.

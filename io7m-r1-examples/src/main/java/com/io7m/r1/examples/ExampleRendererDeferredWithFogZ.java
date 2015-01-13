@@ -23,6 +23,7 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.KFogProgression;
 import com.io7m.r1.kernel.KFogZParameters;
 import com.io7m.r1.kernel.KFogZParametersBuilderType;
@@ -37,10 +38,9 @@ import com.io7m.r1.kernel.types.KVisibleSet;
 import com.io7m.r1.main.R1;
 import com.io7m.r1.main.R1BuilderType;
 import com.io7m.r1.main.R1Type;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceRGBType;
 
 /**
  * An example renderer using the default deferred renderer.

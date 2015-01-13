@@ -23,7 +23,7 @@ import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialAlbedoType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
-import com.io7m.r1.types.RSpaceRGBAType;
+import com.io7m.r1.spaces.RSpaceRGBAType;
 
 @SuppressWarnings("null") public final class KMaterialAlbedoGenerator implements
   Generator<KMaterialAlbedoType>

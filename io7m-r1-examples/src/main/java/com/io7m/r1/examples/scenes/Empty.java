@@ -24,7 +24,7 @@ import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * A demonstration with nothing onscreen.

@@ -23,8 +23,8 @@ import com.io7m.jtensors.QuaternionM4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * A transformation consisting of an orientation, a scale, and a translation.

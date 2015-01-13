@@ -65,6 +65,10 @@ import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.tools.EMeshCache;
 import com.io7m.r1.examples.tools.ETexture2DCache;
 import com.io7m.r1.examples.tools.ETextureCubeCache;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RExceptionInstanceAlreadyVisible;
+import com.io7m.r1.exceptions.RExceptionLightGroupAlreadyAdded;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KImageSinkBlitRGBA;
 import com.io7m.r1.kernel.KImageSinkRGBAType;
@@ -81,12 +85,8 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KVisibleSet;
 import com.io7m.r1.kernel.types.KVisibleSetBuilderWithCreateType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionBuilderInvalid;
-import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
-import com.io7m.r1.types.RExceptionLightGroupAlreadyAdded;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 import com.jogamp.newt.opengl.GLWindow;
 
 /**

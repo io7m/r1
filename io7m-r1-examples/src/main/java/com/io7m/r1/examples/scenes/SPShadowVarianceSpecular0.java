@@ -31,6 +31,7 @@ import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
 import com.io7m.r1.kernel.types.KDepthPrecision;
@@ -53,10 +54,9 @@ import com.io7m.r1.kernel.types.KShadowMappedVarianceBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * An example with projective lighting and variance shadow mapping, where only

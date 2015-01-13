@@ -22,7 +22,7 @@ import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.kernel.types.KMaterialNormalType;
 import com.io7m.r1.kernel.types.KMaterialRefractiveType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 public final class KMaterialTranslucentRefractiveGenerator implements
   Generator<KMaterialTranslucentRefractive>

@@ -29,9 +29,9 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.jtensors.parameterized.PVectorM3F;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RExceptionMeshNameInvalid;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.exceptions.RExceptionMeshNameInvalid;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 /**
  * <p>

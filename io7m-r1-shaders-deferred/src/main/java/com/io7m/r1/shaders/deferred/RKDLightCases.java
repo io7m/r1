@@ -35,6 +35,7 @@ import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KLightDirectional;
 import com.io7m.r1.kernel.types.KLightDirectionalDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
@@ -54,11 +55,10 @@ import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 @EqualityReference public final class RKDLightCases
 {

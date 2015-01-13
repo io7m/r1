@@ -16,7 +16,7 @@
 
 package com.io7m.r1.rmb;
 
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * Exceptions raised upon errors whilst parsing RMB meshes.

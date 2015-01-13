@@ -21,7 +21,7 @@ import java.util.Set;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.Nullable;
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * A regular translucent instance lit by a set of lights.

@@ -34,11 +34,11 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceType;
 import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowVariance;
 import com.io7m.r1.kernel.types.KProjectionType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStaticGenerator;
 import com.io7m.r1.tests.types.PVectorI3FGenerator;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
 
 public final class KLightSpherePseudoWithShadowVarianceTest
 {

@@ -21,7 +21,7 @@ import com.io7m.jtensors.VectorM2F;
 import com.io7m.jtensors.parameterized.PVectorM3F;
 import com.io7m.jtensors.parameterized.PVectorReadable3FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceEyeType;
 
 /**
  * Functions to encode and decode normals using a spheremap transform.
