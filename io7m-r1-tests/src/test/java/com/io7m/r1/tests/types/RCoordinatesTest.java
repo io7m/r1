@@ -24,7 +24,7 @@ import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.jtensors.parameterized.PVectorM3F;
-import com.io7m.r1.types.RCoordinates;
+import com.io7m.r1.kernel.RCoordinates;
 import com.io7m.r1.types.RSpaceClipType;
 import com.io7m.r1.types.RSpaceNDCType;
 import com.io7m.r1.types.RSpaceWindowType;

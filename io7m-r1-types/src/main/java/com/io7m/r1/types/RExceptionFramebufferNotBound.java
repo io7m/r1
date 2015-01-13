@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -35,7 +35,7 @@ import com.io7m.jnull.NullCheck;
 
   /**
    * Construct an exception with the given message.
-   * 
+   *
    * @param message
    *          The message.
    */
@@ -44,12 +44,5 @@ import com.io7m.jnull.NullCheck;
     final String message)
   {
     super(NullCheck.notNull(message, "Message"));
-  }
-
-  @Override <T, E extends Throwable> T exceptionAccept(
-    final RExceptionVisitorType<T, E> v)
-    throws E
-  {
-    return v.exceptionVisitUserErrorException(this);
   }
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -14,13 +14,13 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.types;
+package com.io7m.r1.rmb;
 
 /**
  * Exceptions raised upon errors whilst parsing RMB meshes.
  */
 
-public abstract class RBException extends RException
+public final class RBExceptionUnexpectedEOF extends RBException
 {
   private static final long serialVersionUID;
 
@@ -35,23 +35,10 @@ public abstract class RBException extends RException
    *          The message
    */
 
-  public RBException(
+  public RBExceptionUnexpectedEOF(
     final String message)
   {
     super(message);
-  }
-
-  /**
-   * Construct an exception.
-   *
-   * @param e
-   *          The cause
-   */
-
-  public RBException(
-    final Throwable e)
-  {
-    super(e);
   }
 
   /**
@@ -63,17 +50,23 @@ public abstract class RBException extends RException
    *          The message
    */
 
-  public RBException(
+  public RBExceptionUnexpectedEOF(
     final Throwable x,
     final String message)
   {
     super(x, message);
   }
 
-  @Override final <T, E extends Throwable> T exceptionAccept(
-    final RExceptionVisitorType<T, E> v)
-    throws E
+  /**
+   * Construct an exception.
+   *
+   * @param e
+   *          The cause
+   */
+
+  public RBExceptionUnexpectedEOF(
+    final Throwable e)
   {
-    return v.exceptionVisitRBException(this);
+    super(e);
   }
 }

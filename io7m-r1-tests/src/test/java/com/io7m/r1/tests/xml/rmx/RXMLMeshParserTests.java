@@ -34,7 +34,7 @@ import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshParserEventsType;
 import com.io7m.r1.types.RSpaceObjectType;
 import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RXMLException;
+import com.io7m.r1.xml.RXMLException;
 import com.io7m.r1.xml.rmx.RXMLMeshAttribute;
 import com.io7m.r1.xml.rmx.RXMLMeshDocument;
 import com.io7m.r1.xml.rmx.RXMLMeshParser;

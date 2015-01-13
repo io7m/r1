@@ -16,56 +16,44 @@
 
 package com.io7m.r1.types;
 
+import com.io7m.jequality.annotations.EqualityReference;
+
 /**
- * Exceptions raised upon errors whilst parsing RMB meshes.
+ * An exception representing an attempt to load a program that had corrupt
+ * metadata or sources.
  */
 
-public final class RBExceptionInvalidMagicNumber extends RBException
+@EqualityReference public final class RExceptionProgramInvalid extends
+  RException
 {
   private static final long serialVersionUID;
 
   static {
-    serialVersionUID = -1189812950538543213L;
+    serialVersionUID = -9182739182738971982L;
   }
 
   /**
-   * Construct an exception.
+   * Construct an exception with the given message.
    *
    * @param message
-   *          The message
+   *          The message.
    */
 
-  public RBExceptionInvalidMagicNumber(
+  public RExceptionProgramInvalid(
     final String message)
   {
     super(message);
   }
 
   /**
-   * Construct an exception.
-   *
-   * @param x
-   *          The cause
-   * @param message
-   *          The message
-   */
-
-  public RBExceptionInvalidMagicNumber(
-    final Throwable x,
-    final String message)
-  {
-    super(x, message);
-  }
-
-  /**
-   * Construct an exception.
+   * Construct an exception with the given cause.
    *
    * @param e
-   *          The cause
+   *          The cause.
    */
 
-  public RBExceptionInvalidMagicNumber(
-    final Throwable e)
+  public RExceptionProgramInvalid(
+    final Exception e)
   {
     super(e);
   }

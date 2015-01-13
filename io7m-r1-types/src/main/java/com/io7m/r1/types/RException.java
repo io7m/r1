@@ -49,23 +49,4 @@ import com.io7m.jnull.NullCheck;
   {
     super(message, x);
   }
-
-  /**
-   * Be visited by the given generic visitor.
-   *
-   * @param v
-   *          The visitor
-   * @return The value returned by the visitor
-   * @throws E
-   *           Iff the visitor raises <code>E</code>
-   *
-   * @param <T>
-   *          The return type of the visitor
-   * @param <E>
-   *          The type of exceptions raised by the visitor
-   */
-
-  abstract <T, E extends Throwable> T exceptionAccept(
-    final RExceptionVisitorType<T, E> v)
-    throws E;
 }

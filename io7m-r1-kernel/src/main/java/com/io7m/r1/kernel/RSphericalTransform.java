@@ -14,13 +14,14 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.types;
+package com.io7m.r1.kernel;
 
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jtensors.VectorM2F;
 import com.io7m.jtensors.parameterized.PVectorM3F;
 import com.io7m.jtensors.parameterized.PVectorReadable3FType;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.types.RSpaceEyeType;
 
 /**
  * Functions to encode and decode normals using a spheremap transform.

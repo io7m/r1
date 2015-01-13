@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -23,12 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Element;
-import nu.xom.ParsingException;
-import nu.xom.ValidityException;
+import java.util.Properties;
 
 import com.io7m.jcanephora.CMFNegativeXKind;
 import com.io7m.jcanephora.CMFNegativeYKind;
@@ -49,8 +44,8 @@ import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.r1.types.RXMLException;
-import com.io7m.r1.xml.cubemap.CubeMap;
+import com.io7m.jproperties.JPropertyException;
+import com.io7m.r1.examples.ECubeMap;
 
 /**
  * A trivial texture cube cache.
@@ -239,21 +234,15 @@ public final class ETextureCubeCache
    *           On I/O errors.
    * @throws JCGLException
    *           On GL errors.
-   * @throws ValidityException
-   *           On XML errors.
-   * @throws ParsingException
-   *           On XML errors.
-   * @throws RXMLException
-   *           On XML errors.
+   * @throws JPropertyException
+   *           On parse errors.
    */
 
   public TextureCubeStaticUsableType loadCubeClamped(
     final String name)
     throws IOException,
       JCGLException,
-      ValidityException,
-      ParsingException,
-      RXMLException
+      JPropertyException
   {
     return this.loadCubeWithWrap(
       name,
@@ -272,21 +261,15 @@ public final class ETextureCubeCache
    *           On I/O errors.
    * @throws JCGLException
    *           On GL errors.
-   * @throws ValidityException
-   *           On XML errors.
-   * @throws ParsingException
-   *           On XML errors.
-   * @throws RXMLException
-   *           On XML errors.
+   * @throws JPropertyException
+   *           On parse errors
    */
 
   public TextureCubeStaticUsableType loadCubeRepeat(
     final String name)
     throws IOException,
       JCGLException,
-      ValidityException,
-      ParsingException,
-      RXMLException
+      JPropertyException
   {
     return this.loadCubeWithWrap(
       name,
@@ -302,11 +285,9 @@ public final class ETextureCubeCache
       final TextureWrapR wrap_r,
       final TextureWrapS wrap_s,
       final TextureWrapT wrap_t)
-      throws ParsingException,
-        ValidityException,
-        IOException,
-        RXMLException,
-        JCGLException
+      throws IOException,
+        JCGLException,
+        JPropertyException
   {
     /**
      * Store the name along with the wrapping modes in the cache, to allow for
@@ -358,10 +339,9 @@ public final class ETextureCubeCache
       }
       streams.add(meta_stream);
 
-      final Builder builder = new Builder();
-      final Document document = builder.build(meta_stream);
-      final Element root = document.getRootElement();
-      final CubeMap cube = CubeMap.fromXML(NullCheck.notNull(root));
+      final Properties p = new Properties();
+      p.load(meta_stream);
+      final ECubeMap cube = ECubeMap.fromProperties(p);
 
       final String positive_z_name =
         String.format("%s/%s", directory, cube.getPositiveZ());

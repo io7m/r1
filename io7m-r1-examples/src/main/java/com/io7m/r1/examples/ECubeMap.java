@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -14,85 +14,48 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.xml.cubemap;
+package com.io7m.r1.examples;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import nu.xom.Attribute;
-import nu.xom.Element;
+import java.util.Properties;
 
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RXMLException;
-import com.io7m.r1.xml.RXMLUtilities;
+import com.io7m.jproperties.JProperties;
+import com.io7m.jproperties.JPropertyException;
 
 /**
- * XML descriptions of cube maps.
+ * Descriptions of cube maps.
  */
 
-@EqualityStructural public final class CubeMap
+@EqualityStructural public final class ECubeMap
 {
   /**
-   * The URI for the XML schema.
-   */
-
-  public static final URI XML_URI;
-
-  static {
-    try {
-      XML_URI = new URI("http://schemas.io7m.com/renderer/1.0.0/cube-maps");
-    } catch (final URISyntaxException e) {
-      throw new UnreachableCodeException();
-    }
-  }
-
-  /**
-   * Load a cube map description from the given element.
-   * 
-   * @param e
-   *          The element.
+   * Load a cube map description from the given properties.
+   *
+   * @param p
+   *          The properties.
    * @return A cube map description.
-   * @throws RXMLException
-   *           If a cube map description cannot be parsed.
+   * @throws JPropertyException
+   *           If a cube map description cannot be parsed
    */
 
-  public static CubeMap fromXML(
-    final Element e)
-    throws RXMLException
+  public static ECubeMap fromProperties(
+    final Properties p)
+    throws JPropertyException
   {
-    NullCheck.notNull(e, "Element");
-
-    final Attribute an =
-      RXMLUtilities.getAttribute(e, "name", CubeMap.XML_URI);
-
-    final Element pz =
-      RXMLUtilities.getChild(e, "positive-z", CubeMap.XML_URI);
-    final Element nz =
-      RXMLUtilities.getChild(e, "negative-z", CubeMap.XML_URI);
-    final Element py =
-      RXMLUtilities.getChild(e, "positive-y", CubeMap.XML_URI);
-    final Element ny =
-      RXMLUtilities.getChild(e, "negative-y", CubeMap.XML_URI);
-    final Element px =
-      RXMLUtilities.getChild(e, "positive-x", CubeMap.XML_URI);
-    final Element nx =
-      RXMLUtilities.getChild(e, "negative-x", CubeMap.XML_URI);
-
-    return new CubeMap(
-      RXMLUtilities.getAttributeNonEmptyString(an),
-      RXMLUtilities.getElementNonEmptyString(pz),
-      RXMLUtilities.getElementNonEmptyString(nz),
-      RXMLUtilities.getElementNonEmptyString(py),
-      RXMLUtilities.getElementNonEmptyString(ny),
-      RXMLUtilities.getElementNonEmptyString(px),
-      RXMLUtilities.getElementNonEmptyString(nx));
+    NullCheck.notNull(p, "Properties");
+    final String an = JProperties.getString(p, "name");
+    final String pz = JProperties.getString(p, "positive-z");
+    final String nz = JProperties.getString(p, "negative-z");
+    final String py = JProperties.getString(p, "positive-y");
+    final String ny = JProperties.getString(p, "negative-y");
+    final String px = JProperties.getString(p, "positive-x");
+    final String nx = JProperties.getString(p, "negative-x");
+    return new ECubeMap(an, pz, nz, py, ny, px, nx);
   }
 
   private final String name;
-
   private final String negative_x;
   private final String negative_y;
   private final String negative_z;
@@ -102,7 +65,7 @@ import com.io7m.r1.xml.RXMLUtilities;
 
   /**
    * Construct a cube map description.
-   * 
+   *
    * @param in_name
    *          The name of the mesh.
    * @param pz
@@ -119,7 +82,7 @@ import com.io7m.r1.xml.RXMLUtilities;
    *          The negative X image.
    */
 
-  public CubeMap(
+  public ECubeMap(
     final String in_name,
     final String pz,
     final String nz,
@@ -157,7 +120,7 @@ import com.io7m.r1.xml.RXMLUtilities;
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final CubeMap other = (CubeMap) obj;
+    final ECubeMap other = (ECubeMap) obj;
 
     return this.name.equals(other.name)
       && this.negative_x.equals(other.negative_x)
@@ -243,61 +206,5 @@ import com.io7m.r1.xml.RXMLUtilities;
     result = (prime * result) + this.positive_y.hashCode();
     result = (prime * result) + this.positive_z.hashCode();
     return result;
-  }
-
-  /**
-   * @return The current cube-map description as XML.
-   */
-
-  public Element toXML()
-  {
-    final String uri = CubeMap.XML_URI.toString();
-    final Element e = new Element("c:cube-map", uri);
-
-    RXMLUtilities.putElementAttributeString(
-      e,
-      "c",
-      "name",
-      this.name,
-      CubeMap.XML_URI);
-
-    RXMLUtilities.putElementString(
-      e,
-      "c",
-      "positive-z",
-      this.positive_z,
-      CubeMap.XML_URI);
-    RXMLUtilities.putElementString(
-      e,
-      "c",
-      "positive-y",
-      this.positive_y,
-      CubeMap.XML_URI);
-    RXMLUtilities.putElementString(
-      e,
-      "c",
-      "positive-x",
-      this.positive_x,
-      CubeMap.XML_URI);
-    RXMLUtilities.putElementString(
-      e,
-      "c",
-      "negative-z",
-      this.negative_z,
-      CubeMap.XML_URI);
-    RXMLUtilities.putElementString(
-      e,
-      "c",
-      "negative-y",
-      this.negative_y,
-      CubeMap.XML_URI);
-    RXMLUtilities.putElementString(
-      e,
-      "c",
-      "negative-x",
-      this.negative_x,
-      CubeMap.XML_URI);
-
-    return e;
   }
 }
