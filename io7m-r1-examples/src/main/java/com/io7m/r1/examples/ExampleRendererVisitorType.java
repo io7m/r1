@@ -16,7 +16,7 @@
 
 package com.io7m.r1.examples;
 
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * The type of renderer visitors.

@@ -22,12 +22,12 @@ import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.types.KFramebufferDeferredDescription;
 import com.io7m.r1.kernel.types.KFramebufferDeferredDescriptionBuilderType;
 import com.io7m.r1.kernel.types.KRGBAPrecision;
-import com.io7m.r1.types.RException;
 
 /**
  * Example framebuffer construction.

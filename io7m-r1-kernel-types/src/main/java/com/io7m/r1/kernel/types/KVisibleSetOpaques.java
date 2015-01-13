@@ -26,13 +26,13 @@ import java.util.Set;
 
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.r1.types.RExceptionBuilderInvalid;
-import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
-import com.io7m.r1.types.RExceptionLightGroupAlreadyAdded;
-import com.io7m.r1.types.RExceptionLightGroupLacksInstances;
-import com.io7m.r1.types.RExceptionLightGroupLacksLights;
-import com.io7m.r1.types.RExceptionLightGroupNonexistent;
-import com.io7m.r1.types.RExceptionMaterialNonexistent;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RExceptionInstanceAlreadyVisible;
+import com.io7m.r1.exceptions.RExceptionLightGroupAlreadyAdded;
+import com.io7m.r1.exceptions.RExceptionLightGroupLacksInstances;
+import com.io7m.r1.exceptions.RExceptionLightGroupLacksLights;
+import com.io7m.r1.exceptions.RExceptionLightGroupNonexistent;
+import com.io7m.r1.exceptions.RExceptionMaterialNonexistent;
 
 /**
  * The set of visible instances.

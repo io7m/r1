@@ -28,6 +28,7 @@ import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.FilesystemType;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.shaders.debug.RShadersDebug;
 import com.io7m.r1.shaders.deferred.geometry.RShadersDeferredGeometry;
 import com.io7m.r1.shaders.deferred.light.RShadersDeferredLight;
@@ -36,7 +37,6 @@ import com.io7m.r1.shaders.depth_variance.RShadersDepthVariance;
 import com.io7m.r1.shaders.forward.translucent.lit.RShadersForwardTranslucentLit;
 import com.io7m.r1.shaders.forward.translucent.unlit.RShadersForwardTranslucentUnlit;
 import com.io7m.r1.shaders.image.RShadersImage;
-import com.io7m.r1.types.RException;
 
 /**
  * Sets of shader caches that are loaded from archives on the classpath.

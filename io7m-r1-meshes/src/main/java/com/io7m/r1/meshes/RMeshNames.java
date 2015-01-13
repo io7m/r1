@@ -19,7 +19,7 @@ package com.io7m.r1.meshes;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RExceptionMeshNameInvalid;
+import com.io7m.r1.exceptions.RExceptionMeshNameInvalid;
 
 /**
  * Functions to check the validity of mesh names.

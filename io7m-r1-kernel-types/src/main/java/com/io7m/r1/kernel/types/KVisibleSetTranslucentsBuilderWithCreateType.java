@@ -16,7 +16,7 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.types.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
 
 /**
  * A mutable "builder" interface for creating immutable

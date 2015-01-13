@@ -51,6 +51,8 @@ import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionResource;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepth;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCache;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCacheType;
@@ -89,19 +91,17 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 import com.io7m.r1.kernel.types.KVisibleSetTranslucentsBuilderWithCreateType;
 import com.io7m.r1.shaders.forward.RKFLightCases;
 import com.io7m.r1.shaders.forward.RKFMaterialCases;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.RFakeTexturesCubeStatic;
 import com.io7m.r1.tests.TestShaderCaches;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionResource;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings({ "null", "static-method" }) public final class KTranslucentRendererTest
 {

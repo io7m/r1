@@ -25,7 +25,7 @@ import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KMaterialSpecularNone;
 import com.io7m.r1.kernel.types.KMaterialSpecularType;
-import com.io7m.r1.types.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceRGBType;
 
 public final class KMaterialSpecularGenerator implements
   Generator<KMaterialSpecularType>

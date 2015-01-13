@@ -24,8 +24,8 @@ import java.util.Set;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
 
 /**
  * An immutable set of visible translucent instances.

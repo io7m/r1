@@ -24,8 +24,8 @@ import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jtensors.parameterized.PMatrixReadable4x4FType;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.jtensors.parameterized.PVectorM4F;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
 
 /**
  * View rays used to reconstruct eye-space positions during deferred

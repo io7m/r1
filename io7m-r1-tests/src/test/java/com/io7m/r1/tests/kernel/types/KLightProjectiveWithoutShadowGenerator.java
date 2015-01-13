@@ -26,8 +26,8 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 public final class KLightProjectiveWithoutShadowGenerator implements
   Generator<KLightProjectiveWithoutShadow>

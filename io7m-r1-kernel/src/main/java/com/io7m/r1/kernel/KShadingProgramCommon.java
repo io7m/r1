@@ -40,6 +40,7 @@ import com.io7m.jtensors.parameterized.PVectorM4F;
 import com.io7m.jtensors.parameterized.PVectorReadable3FType;
 import com.io7m.jtensors.parameterized.PVectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
@@ -68,17 +69,16 @@ import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KMeshAttributes;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceLightClipType;
-import com.io7m.r1.types.RSpaceLightEyeType;
-import com.io7m.r1.types.RSpaceNormalEyeType;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceRGBAType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceLightClipType;
+import com.io7m.r1.spaces.RSpaceLightEyeType;
+import com.io7m.r1.spaces.RSpaceNormalEyeType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceRGBAType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * <p>

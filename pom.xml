@@ -19,6 +19,7 @@
     <module>io7m-r1-documentation</module>
     <module>io7m-r1-examples-jogl</module>
     <module>io7m-r1-examples</module>
+    <module>io7m-r1-exceptions</module>
     <module>io7m-r1-kernel-types</module>
     <module>io7m-r1-kernel</module>
     <module>io7m-r1-main</module>
@@ -37,9 +38,9 @@
     <module>io7m-r1-shaders-forward-translucent-unlit</module>
     <module>io7m-r1-shaders-forward</module>
     <module>io7m-r1-shaders-image</module>
+    <module>io7m-r1-spaces</module>
     <module>io7m-r1-tests-jogl</module>
     <module>io7m-r1-tests</module>
-    <module>io7m-r1-types</module>
     <module>io7m-r1-xml</module>
   </modules>
 

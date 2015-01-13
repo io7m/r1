@@ -17,8 +17,8 @@
 package com.io7m.r1.kernel;
 
 import com.io7m.jtensors.parameterized.PMatrixDirectReadable4x4FType;
-import com.io7m.r1.types.RSpaceLightEyeType;
-import com.io7m.r1.types.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceLightEyeType;
+import com.io7m.r1.spaces.RSpaceObjectType;
 
 /**
  * The matrices available within the context of a transformed instance,

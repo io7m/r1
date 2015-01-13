@@ -37,11 +37,11 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorM2F;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionCache;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionCache;
 
 /**
  * A filter implementing "Fast Approximate Anti-Aliasing".

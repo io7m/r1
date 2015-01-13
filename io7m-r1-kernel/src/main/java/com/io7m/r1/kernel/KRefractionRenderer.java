@@ -36,6 +36,9 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorI4F;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionCache;
+import com.io7m.r1.exceptions.RExceptionFramebufferNotBound;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
@@ -49,9 +52,6 @@ import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedNormals;
 import com.io7m.r1.kernel.types.KMaterialRefractiveVisitorType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.r1.kernel.types.KMeshReadableType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RExceptionFramebufferNotBound;
 
 /**
  * The default implementation of the refraction renderer interface.

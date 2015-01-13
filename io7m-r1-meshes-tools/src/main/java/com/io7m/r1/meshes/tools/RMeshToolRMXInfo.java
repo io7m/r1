@@ -24,8 +24,8 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.meshes.RMeshParserEventsType;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 /**
  * A simple parser events implementation that prints info about the parsed

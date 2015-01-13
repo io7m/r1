@@ -35,8 +35,8 @@ import com.io7m.r1.rmb.RBExceptionInvalidMagicNumber;
 import com.io7m.r1.rmb.RBExceptionUnsupportedVersion;
 import com.io7m.r1.rmb.RBImporter;
 import com.io7m.r1.rmb.RBInfo;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 @SuppressWarnings("static-method") public final class RBImporterTest
 {

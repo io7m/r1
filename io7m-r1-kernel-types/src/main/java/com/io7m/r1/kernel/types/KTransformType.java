@@ -17,8 +17,8 @@
 package com.io7m.r1.kernel.types;
 
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * The type of transforms, applied to instances ( {@link KInstanceType} ).

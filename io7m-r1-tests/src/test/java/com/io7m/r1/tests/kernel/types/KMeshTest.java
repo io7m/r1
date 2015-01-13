@@ -30,15 +30,15 @@ import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionMeshMissingNormals;
+import com.io7m.r1.exceptions.RExceptionMeshMissingPositions;
+import com.io7m.r1.exceptions.RExceptionMeshMissingTangents;
+import com.io7m.r1.exceptions.RExceptionMeshMissingUVs;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KMeshAttributes;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionMeshMissingNormals;
-import com.io7m.r1.types.RExceptionMeshMissingPositions;
-import com.io7m.r1.types.RExceptionMeshMissingTangents;
-import com.io7m.r1.types.RExceptionMeshMissingUVs;
 
 @SuppressWarnings("static-method") public final class KMeshTest
 {

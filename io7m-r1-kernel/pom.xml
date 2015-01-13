@@ -77,7 +77,6 @@
       <artifactId>io7m-r1-kernel-types</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-r1-shaders-debug</artifactId>

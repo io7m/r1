@@ -18,7 +18,7 @@ package com.io7m.r1.kernel.types;
 
 import java.util.Set;
 
-import com.io7m.r1.types.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
 
 /**
  * A mutable "builder" interface for creating immutable lists of translucent

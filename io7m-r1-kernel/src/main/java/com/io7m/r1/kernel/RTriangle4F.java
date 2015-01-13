@@ -22,7 +22,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.NullCheckException;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.parameterized.PVectorI4F;
-import com.io7m.r1.types.RSpaceType;
+import com.io7m.r1.spaces.RSpaceType;
 
 /**
  * An immutable triangle with four-dimensional (likely homogeneous) points

@@ -44,6 +44,7 @@ import com.io7m.jtensors.VectorI2F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KDepthInstancesType;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
@@ -61,9 +62,8 @@ import com.io7m.r1.kernel.types.KMaterialOpaqueType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueVisitorType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * The default depth-variance renderer implementation.

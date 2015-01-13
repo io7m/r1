@@ -28,9 +28,9 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KProjectionFOV;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * Look at a target from a source.

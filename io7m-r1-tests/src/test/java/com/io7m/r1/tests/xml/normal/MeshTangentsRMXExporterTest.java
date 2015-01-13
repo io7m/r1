@@ -26,11 +26,11 @@ import org.junit.Test;
 
 import com.io7m.jlog.LogType;
 import com.io7m.jnull.NonNull;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionMeshMissingUVs;
 import com.io7m.r1.meshes.RMeshBasic;
 import com.io7m.r1.meshes.RMeshTangents;
 import com.io7m.r1.tests.xml.collada.ColladaDocumentTest;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionMeshMissingUVs;
 import com.io7m.r1.xml.collada.RColladaDocument;
 import com.io7m.r1.xml.collada.RColladaGeometry;
 import com.io7m.r1.xml.collada.RColladaGeometryID;

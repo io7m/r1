@@ -32,11 +32,11 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
+import com.io7m.r1.spaces.RSpaceRGBType;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.types.PVectorI3FGenerator;
-import com.io7m.r1.types.RSpaceRGBType;
 
 @SuppressWarnings({ "static-method", "null" }) public final class KMaterialSpecularTest
 {

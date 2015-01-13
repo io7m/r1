@@ -27,11 +27,11 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.types.PVectorI3FGenerator;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
 
 public final class KLightGenerator implements Generator<KLightType>
 {

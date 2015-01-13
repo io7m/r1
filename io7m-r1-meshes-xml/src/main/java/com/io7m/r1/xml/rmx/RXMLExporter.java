@@ -30,8 +30,8 @@ import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshTangents;
 import com.io7m.r1.meshes.RMeshTangentsVertex;
 import com.io7m.r1.meshes.RMeshTriangle;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 /**
  * An exporter to produce XML descriptions of {@link RMeshTangents} meshes.

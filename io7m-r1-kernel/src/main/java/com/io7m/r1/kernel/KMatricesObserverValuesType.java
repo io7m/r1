@@ -19,9 +19,9 @@ package com.io7m.r1.kernel;
 import com.io7m.jtensors.parameterized.PMatrixDirectReadable4x4FType;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * Access to the matrices for a given observer.

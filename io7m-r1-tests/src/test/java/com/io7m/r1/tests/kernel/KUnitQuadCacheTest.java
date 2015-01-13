@@ -30,12 +30,12 @@ import com.io7m.jlog.Log;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogPolicyAllOn;
 import com.io7m.jlog.LogUsableType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KUnitQuadCache;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
-import com.io7m.r1.types.RException;
 
 @SuppressWarnings("static-method") public final class KUnitQuadCacheTest
 {

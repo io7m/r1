@@ -16,8 +16,8 @@
 
 package com.io7m.r1.kernel;
 
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
-import com.io7m.r1.types.RException;
 
 /**
  * The type of renderers that can render translucent objects.

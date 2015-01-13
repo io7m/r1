@@ -34,6 +34,7 @@ import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialAlbedoType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
@@ -57,9 +58,8 @@ import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KMaterialSpecularNone;
 import com.io7m.r1.kernel.types.KMaterialSpecularType;
 import com.io7m.r1.kernel.types.KMaterialVerification;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 @EqualityReference public final class RKDMaterialCases
 {

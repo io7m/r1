@@ -17,6 +17,7 @@
 package com.io7m.r1.main;
 
 import com.io7m.jfunctional.Unit;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.KDepthRendererType;
 import com.io7m.r1.kernel.KDepthVarianceRendererType;
 import com.io7m.r1.kernel.KFXAAParameters;
@@ -33,7 +34,6 @@ import com.io7m.r1.kernel.types.KFrustumMeshCacheType;
 import com.io7m.r1.kernel.types.KGlowParameters;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitSphereCacheType;
-import com.io7m.r1.types.RException;
 
 /**
  * The type of mutable builders for the <tt>R1</tt> package.

@@ -19,8 +19,8 @@ package com.io7m.r1.kernel;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
-import com.io7m.r1.types.RException;
 
 /**
  * A simple RGBA "image-only" framebuffer with a depth and stencil

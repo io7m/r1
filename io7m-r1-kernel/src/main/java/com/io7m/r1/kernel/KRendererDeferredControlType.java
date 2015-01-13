@@ -16,7 +16,7 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * A type that represents a rendering call in progress.

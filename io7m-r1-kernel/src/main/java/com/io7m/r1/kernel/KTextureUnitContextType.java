@@ -20,7 +20,7 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
 import com.io7m.jcanephora.TextureUnitType;
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * Access to the current texture unit context.

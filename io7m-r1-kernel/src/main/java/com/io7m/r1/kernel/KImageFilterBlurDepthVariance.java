@@ -25,11 +25,11 @@ import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionCache;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionCache;
 
 /**
  * The default implementation of a depth-variance blur filter.

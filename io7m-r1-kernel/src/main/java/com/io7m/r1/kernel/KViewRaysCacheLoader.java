@@ -22,10 +22,10 @@ import com.io7m.jcache.JCacheLoaderType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
 
 /**
  * A cache loader that constructs and caches view rays for projections.
