@@ -27,8 +27,6 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 
-import nu.xom.ParsingException;
-
 import com.io7m.jcamera.JCameraFPSStyle;
 import com.io7m.jcamera.JCameraFPSStyle.Context;
 import com.io7m.jcamera.JCameraFPSStyleIntegrator;
@@ -49,6 +47,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.jproperties.JPropertyException;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
@@ -227,7 +226,7 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
             return cc.loadCubeClamped(name);
           } catch (final IOException e) {
             throw new RuntimeException(e);
-          } catch (final ParsingException e) {
+          } catch (final JPropertyException e) {
             throw new RuntimeException(e);
           }
         }
@@ -240,7 +239,7 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
             return cc.loadCubeRepeat(name);
           } catch (final IOException e) {
             throw new RuntimeException(e);
-          } catch (final ParsingException e) {
+          } catch (final JPropertyException e) {
             throw new RuntimeException(e);
           }
         }

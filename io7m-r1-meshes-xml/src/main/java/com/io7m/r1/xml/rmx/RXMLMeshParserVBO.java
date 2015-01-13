@@ -30,7 +30,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.meshes.RMeshParserEventsVBO;
 import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RXMLException;
+import com.io7m.r1.xml.RXMLException;
 
 /**
  * The glue between a {@link RXMLMeshParser} and a

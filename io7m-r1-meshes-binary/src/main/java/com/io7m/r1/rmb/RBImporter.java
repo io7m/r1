@@ -31,7 +31,6 @@ import com.io7m.jtensors.parameterized.PVectorI2F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshParserEventsType;
-import com.io7m.r1.types.RBException;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionIO;
 import com.io7m.r1.types.RSpaceObjectType;

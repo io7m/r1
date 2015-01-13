@@ -25,9 +25,6 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
-import com.io7m.r1.types.RBException;
-import com.io7m.r1.types.RBExceptionInvalidMagicNumber;
-import com.io7m.r1.types.RBExceptionUnsupportedVersion;
 
 /**
  * Information about an RMB mesh.

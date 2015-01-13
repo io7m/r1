@@ -17,8 +17,8 @@ import javax.swing.WindowConstants;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.kernel.KTriangleClipping;
+import com.io7m.r1.kernel.RTriangle4F;
 import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RTriangle4F;
 
 @SuppressWarnings("boxing") public final class ClippingDemo
 {

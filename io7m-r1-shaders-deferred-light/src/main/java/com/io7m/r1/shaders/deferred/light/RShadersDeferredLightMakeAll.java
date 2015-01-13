@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -45,6 +45,8 @@ import com.io7m.jparasol.frontend.CopyZip;
 import com.io7m.jparasol.glsl.serialization.GSerializerType;
 import com.io7m.jparasol.glsl.serialization.GSerializerZip;
 import com.io7m.jparasol.lexer.Position;
+import com.io7m.jparasol.metaserializer.JPMetaSerializerType;
+import com.io7m.jparasol.metaserializer.protobuf.JPProtobufMetaSerializer;
 import com.io7m.jparasol.typed.ast.TASTShaderNameFlat;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightType;
@@ -88,9 +90,7 @@ import com.io7m.r1.shaders.deferred.RKDeferredShader;
       p.setProperty("com.io7m.r1.logs.generator.pipeline", "false");
       p.setProperty("com.io7m.r1.logs.generator.gpipeline", "false");
       p.setProperty("com.io7m.r1.logs.generator.compactor", "false");
-      p.setProperty(
-        "com.io7m.r1.logs.generator.serializer-zip",
-        "false");
+      p.setProperty("com.io7m.r1.logs.generator.serializer-zip", "false");
 
       final LogPolicyType policy =
         LogPolicyProperties.newPolicy(p, "com.io7m.r1");
@@ -133,12 +133,12 @@ import com.io7m.r1.shaders.deferred.RKDeferredShader;
         batch.addShaderWithOutputName(
           TASTShaderNameFlat.parse("com.io7m.r1.core.Empty.p", meta),
           "empty");
-        batch.addShaderWithOutputName(TASTShaderNameFlat.parse(
-          "com.io7m.r1.core.Flat.flat_clip",
-          meta), "flat_clip");
-        batch.addShaderWithOutputName(TASTShaderNameFlat.parse(
-          "com.io7m.r1.core.Copy.copy_rgba",
-          meta), "copy_rgba");
+        batch.addShaderWithOutputName(
+          TASTShaderNameFlat.parse("com.io7m.r1.core.Flat.flat_clip", meta),
+          "flat_clip");
+        batch.addShaderWithOutputName(
+          TASTShaderNameFlat.parse("com.io7m.r1.core.Copy.copy_rgba", meta),
+          "copy_rgba");
       }
 
       final List<File> sources =
@@ -153,8 +153,10 @@ import com.io7m.r1.shaders.deferred.RKDeferredShader;
       try {
         final ZipOutputStream archive_stream =
           CopyZip.copyZip(log, out_archive);
+        final JPMetaSerializerType meta_s =
+          JPProtobufMetaSerializer.newSerializer();
         final GSerializerType serializer =
-          GSerializerZip.newSerializer(archive_stream, log);
+          GSerializerZip.newSerializer(meta_s, archive_stream, log);
 
         final Compiler c = Compiler.newCompiler(log, exec);
         c.setCompacting(true);

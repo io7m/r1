@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.types;
+package com.io7m.r1.kernel;
 
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jfunctional.PartialFunctionType;
@@ -22,6 +22,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.NullCheckException;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.parameterized.PVectorI4F;
+import com.io7m.r1.types.RSpaceType;
 
 /**
  * An immutable triangle with four-dimensional (likely homogeneous) points

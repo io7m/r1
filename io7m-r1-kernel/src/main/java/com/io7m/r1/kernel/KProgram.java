@@ -56,23 +56,18 @@ import com.io7m.jparasol.core.GVersionES;
 import com.io7m.jparasol.core.GVersionFull;
 import com.io7m.jparasol.core.GVersionType;
 import com.io7m.jparasol.core.GVersionVisitorType;
-import com.io7m.jparasol.core.JPCompactedFragmentShaderMeta;
-import com.io7m.jparasol.core.JPCompactedVertexShaderMeta;
 import com.io7m.jparasol.core.JPCompiledShaderMetaType;
-import com.io7m.jparasol.core.JPCompiledShaderMetaVisitorType;
 import com.io7m.jparasol.core.JPFragmentOutput;
 import com.io7m.jparasol.core.JPFragmentParameter;
 import com.io7m.jparasol.core.JPFragmentShaderMetaType;
-import com.io7m.jparasol.core.JPMissingHash;
 import com.io7m.jparasol.core.JPSourceLines;
-import com.io7m.jparasol.core.JPUncompactedFragmentShaderMeta;
 import com.io7m.jparasol.core.JPUncompactedProgramShaderMeta;
-import com.io7m.jparasol.core.JPUncompactedVertexShaderMeta;
 import com.io7m.jparasol.core.JPVertexInput;
 import com.io7m.jparasol.core.JPVertexParameter;
 import com.io7m.jparasol.core.JPVertexShaderMetaType;
-import com.io7m.jparasol.xml.JPXMLException;
-import com.io7m.jparasol.xml.XMLMeta;
+import com.io7m.jparasol.metaserializer.JPMetaDeserializerType;
+import com.io7m.jparasol.metaserializer.JPSerializerException;
+import com.io7m.jparasol.metaserializer.protobuf.JPProtobufMetaDeserializer;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.jvvfs.FSCapabilityReadType;
 import com.io7m.jvvfs.FilesystemError;
@@ -81,17 +76,14 @@ import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionFilesystem;
 import com.io7m.r1.types.RExceptionIO;
 import com.io7m.r1.types.RExceptionNotSupported;
-import com.io7m.r1.types.RExceptionProgramNotProgram;
+import com.io7m.r1.types.RExceptionProgramInvalid;
 import com.io7m.r1.types.RExceptionShaderFragmentConflictingOutputs;
-import com.io7m.r1.types.RExceptionShaderNotFragmentShader;
-import com.io7m.r1.types.RExceptionShaderNotVertexShader;
-import com.io7m.r1.types.RXMLException;
 
 /**
  * A kernel program.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" }) @EqualityStructural public final class KProgram implements
+@SuppressWarnings({ "boxing" }) @EqualityStructural public final class KProgram implements
   KProgramType
 {
   private static void checkProgramVersionSupport(
@@ -129,54 +121,10 @@ import com.io7m.r1.types.RXMLException;
     });
   }
 
-  private static String expectedFragmentShader(
-    final PathVirtual path,
-    final String type)
-  {
-    final StringBuilder s = new StringBuilder();
-    s.append("Expected a fragment shader, but got a ");
-    s.append(type);
-    s.append(" (");
-    s.append(path.toString());
-    s.append(")");
-    final String r = s.toString();
-    assert r != null;
-    return r;
-  }
-
-  private static String expectedProgram(
-    final PathVirtual name,
-    final String type)
-  {
-    final StringBuilder s = new StringBuilder();
-    s.append("Expected a program, but got a ");
-    s.append(type);
-    s.append(" (");
-    s.append(name.toString());
-    s.append(")");
-    final String r = s.toString();
-    assert r != null;
-    return r;
-  }
-
-  private static String expectedVertexShader(
-    final PathVirtual path,
-    final String type)
-  {
-    final StringBuilder s = new StringBuilder();
-    s.append("Expected a vertex shader, but got a ");
-    s.append(type);
-    s.append(" (");
-    s.append(path.toString());
-    s.append(")");
-    final String r = s.toString();
-    assert r != null;
-    return r;
-  }
-
   private static
     JPFragmentShaderMetaType
     getFragmentShaderMetaFromFilesystem(
+      final JPMetaDeserializerType deserial,
       final FSCapabilityReadType fs,
       final PathVirtual path,
       final LogUsableType log)
@@ -185,50 +133,11 @@ import com.io7m.r1.types.RXMLException;
     InputStream stream = null;
     try {
       try {
-        stream = fs.openFile(path.appendName("meta.xml"));
-
-        final JPCompiledShaderMetaType meta = XMLMeta.fromStream(stream, log);
-        return meta
-          .matchMeta(new JPCompiledShaderMetaVisitorType<JPFragmentShaderMetaType, RException>() {
-            @Override public JPFragmentShaderMetaType compactedFragment(
-              final JPCompactedFragmentShaderMeta m)
-              throws RExceptionShaderNotVertexShader
-            {
-              return m;
-            }
-
-            @Override public JPFragmentShaderMetaType compactedVertex(
-              final JPCompactedVertexShaderMeta m)
-              throws RExceptionShaderNotFragmentShader
-            {
-              throw new RExceptionShaderNotFragmentShader(KProgram
-                .expectedFragmentShader(path, "compacted vertex shader"));
-            }
-
-            @Override public JPFragmentShaderMetaType uncompactedFragment(
-              final JPUncompactedFragmentShaderMeta m)
-              throws RExceptionShaderNotVertexShader
-            {
-              return m;
-            }
-
-            @Override public JPFragmentShaderMetaType uncompactedProgram(
-              final JPUncompactedProgramShaderMeta m)
-              throws RExceptionShaderNotVertexShader,
-                RExceptionShaderNotFragmentShader
-            {
-              throw new RExceptionShaderNotFragmentShader(KProgram
-                .expectedFragmentShader(path, "program"));
-            }
-
-            @Override public JPFragmentShaderMetaType uncompactedVertex(
-              final JPUncompactedVertexShaderMeta m)
-              throws RExceptionShaderNotFragmentShader
-            {
-              throw new RExceptionShaderNotFragmentShader(KProgram
-                .expectedFragmentShader(path, "vertex shader"));
-            }
-          });
+        stream =
+          fs.openFile(path.appendName(deserial.metaGetSuggestedFilename()));
+        return deserial.metaDeserializeFragmentShader(stream);
+      } catch (final JPSerializerException e) {
+        throw new RExceptionProgramInvalid(e);
       } finally {
         if (stream != null) {
           stream.close();
@@ -236,76 +145,26 @@ import com.io7m.r1.types.RXMLException;
       }
     } catch (final FilesystemError e) {
       throw RExceptionFilesystem.fromFilesystemException(e);
-    } catch (final JPXMLException e) {
-      throw RXMLException.fromJPXMLException(e);
-    } catch (final JPMissingHash e) {
-      throw new UnreachableCodeException(e);
     } catch (final IOException e) {
       throw RExceptionIO.fromIOException(e);
     }
   }
 
   private static JPUncompactedProgramShaderMeta getProgramMetaFromFilesystem(
+    final JPMetaDeserializerType deserial,
     final FSCapabilityReadType fs,
     final PathVirtual name,
     final LogUsableType log)
     throws FilesystemError,
-      JPXMLException,
-      JPMissingHash,
       IOException,
-      RException
+      RExceptionProgramInvalid
   {
     InputStream stream = null;
     try {
-      stream = fs.openFile(name.appendName("meta.xml"));
-
-      final JPCompiledShaderMetaType meta = XMLMeta.fromStream(stream, log);
-      return meta
-        .matchMeta(new JPCompiledShaderMetaVisitorType<JPUncompactedProgramShaderMeta, RException>() {
-          @Override public JPUncompactedProgramShaderMeta compactedFragment(
-            final JPCompactedFragmentShaderMeta m)
-            throws RExceptionProgramNotProgram
-          {
-            throw new RExceptionProgramNotProgram(KProgram.expectedProgram(
-              name,
-              "compacted fragment shader"));
-          }
-
-          @Override public JPUncompactedProgramShaderMeta compactedVertex(
-            final JPCompactedVertexShaderMeta m)
-            throws RExceptionProgramNotProgram
-          {
-            throw new RExceptionProgramNotProgram(KProgram.expectedProgram(
-              name,
-              "compacted vertex shader"));
-          }
-
-          @Override public
-            JPUncompactedProgramShaderMeta
-            uncompactedFragment(
-              final JPUncompactedFragmentShaderMeta m)
-              throws RExceptionProgramNotProgram
-          {
-            throw new RExceptionProgramNotProgram(KProgram.expectedProgram(
-              name,
-              "fragment shader"));
-          }
-
-          @Override public JPUncompactedProgramShaderMeta uncompactedProgram(
-            final JPUncompactedProgramShaderMeta m)
-          {
-            return m;
-          }
-
-          @Override public JPUncompactedProgramShaderMeta uncompactedVertex(
-            final JPUncompactedVertexShaderMeta m)
-            throws RExceptionProgramNotProgram
-          {
-            throw new RExceptionProgramNotProgram(KProgram.expectedProgram(
-              name,
-              "vertex shader"));
-          }
-        });
+      stream = fs.openFile(name.appendName(deserial.metaGetSuggestedFilename()));
+      return deserial.metaDeserializeProgramShaderUncompacted(stream);
+    } catch (final JPSerializerException e) {
+      throw new RExceptionProgramInvalid(e);
     } finally {
       if (stream != null) {
         stream.close();
@@ -314,6 +173,7 @@ import com.io7m.r1.types.RXMLException;
   }
 
   private static JPVertexShaderMetaType getVertexShaderMetaFromFilesystem(
+    final JPMetaDeserializerType deserial,
     final FSCapabilityReadType fs,
     final PathVirtual path,
     final LogUsableType log)
@@ -322,47 +182,10 @@ import com.io7m.r1.types.RXMLException;
     InputStream stream = null;
     try {
       try {
-        stream = fs.openFile(path.appendName("meta.xml"));
-
-        final JPCompiledShaderMetaType meta = XMLMeta.fromStream(stream, log);
-        return meta
-          .matchMeta(new JPCompiledShaderMetaVisitorType<JPVertexShaderMetaType, RException>() {
-            @Override public JPVertexShaderMetaType compactedFragment(
-              final JPCompactedFragmentShaderMeta m)
-              throws RExceptionShaderNotVertexShader
-            {
-              throw new RExceptionShaderNotVertexShader(KProgram
-                .expectedVertexShader(path, "compacted fragment shader"));
-            }
-
-            @Override public JPVertexShaderMetaType compactedVertex(
-              final JPCompactedVertexShaderMeta m)
-            {
-              return m;
-            }
-
-            @Override public JPVertexShaderMetaType uncompactedFragment(
-              final JPUncompactedFragmentShaderMeta m)
-              throws RExceptionShaderNotVertexShader
-            {
-              throw new RExceptionShaderNotVertexShader(KProgram
-                .expectedVertexShader(path, "fragment shader"));
-            }
-
-            @Override public JPVertexShaderMetaType uncompactedProgram(
-              final JPUncompactedProgramShaderMeta m)
-              throws RExceptionShaderNotVertexShader
-            {
-              throw new RExceptionShaderNotVertexShader(KProgram
-                .expectedVertexShader(path, "program"));
-            }
-
-            @Override public JPVertexShaderMetaType uncompactedVertex(
-              final JPUncompactedVertexShaderMeta m)
-            {
-              return m;
-            }
-          });
+        stream = fs.openFile(path.appendName(deserial.metaGetSuggestedFilename()));
+        return deserial.metaDeserializeVertexShader(stream);
+      } catch (final JPSerializerException e) {
+        throw new RExceptionProgramInvalid(e);
       } finally {
         if (stream != null) {
           stream.close();
@@ -370,10 +193,6 @@ import com.io7m.r1.types.RXMLException;
       }
     } catch (final FilesystemError e) {
       throw RExceptionFilesystem.fromFilesystemException(e);
-    } catch (final JPXMLException e) {
-      throw RXMLException.fromJPXMLException(e);
-    } catch (final JPMissingHash e) {
-      throw new UnreachableCodeException(e);
     } catch (final IOException e) {
       throw RExceptionIO.fromIOException(e);
     }
@@ -541,8 +360,10 @@ import com.io7m.r1.types.RXMLException;
       final GVersionType v = KProgram.versionNumber(version, api);
 
       final PathVirtual program_base = PathVirtual.ROOT.appendName(name);
+      final JPMetaDeserializerType d =
+        JPProtobufMetaDeserializer.newDeserializer();
       final JPUncompactedProgramShaderMeta program_meta =
-        KProgram.getProgramMetaFromFilesystem(fs, program_base, log);
+        KProgram.getProgramMetaFromFilesystem(d, fs, program_base, log);
 
       KProgram.checkProgramVersionSupport(v, program_base, program_meta);
 
@@ -552,6 +373,7 @@ import com.io7m.r1.types.RXMLException;
         PathVirtual.ROOT.appendName(fragment_shader_name);
       final JPFragmentShaderMetaType fragment_shader_meta =
         KProgram.getFragmentShaderMetaFromFilesystem(
+          d,
           fs,
           fragment_shader_path,
           log);
@@ -570,6 +392,7 @@ import com.io7m.r1.types.RXMLException;
         PathVirtual.ROOT.appendName(vertex_shader_name);
       final JPVertexShaderMetaType vertex_shader_meta =
         KProgram.getVertexShaderMetaFromFilesystem(
+          d,
           fs,
           vertex_shader_path,
           log);
@@ -605,10 +428,6 @@ import com.io7m.r1.types.RXMLException;
       throw RExceptionIO.fromIOException(e);
     } catch (final FilesystemError e) {
       throw RExceptionFilesystem.fromFilesystemException(e);
-    } catch (final JPXMLException e) {
-      throw RXMLException.fromJPXMLException(e);
-    } catch (final JPMissingHash e) {
-      throw new UnreachableCodeException(e);
     }
   }
 
@@ -655,7 +474,6 @@ import com.io7m.r1.types.RXMLException;
     final JPVertexShaderMetaType meta)
     throws FilesystemError,
       IOException,
-      JCGLExceptionProgramCompileError,
       JCGLException
   {
     final List<String> source =

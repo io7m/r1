@@ -29,7 +29,6 @@ import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.jtensors.parameterized.PVectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RSpaceType;
-import com.io7m.r1.types.RTriangle4F;
 
 /**
  * Functions for performing clipping on triangles.

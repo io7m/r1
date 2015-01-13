@@ -42,7 +42,7 @@ import com.io7m.r1.kernel.types.KUnitSpherePrecision;
 import com.io7m.r1.kernel.types.KUnitSphereUsableType;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionIO;
-import com.io7m.r1.types.RXMLException;
+import com.io7m.r1.xml.RXMLException;
 
 /**
  * A cache that can load compressed and uncompressed XML meshes representing

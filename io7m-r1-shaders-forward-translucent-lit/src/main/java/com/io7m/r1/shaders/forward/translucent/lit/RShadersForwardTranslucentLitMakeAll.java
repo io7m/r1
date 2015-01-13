@@ -46,6 +46,8 @@ import com.io7m.jparasol.frontend.JPBatchInvalidOutput;
 import com.io7m.jparasol.glsl.serialization.GSerializerType;
 import com.io7m.jparasol.glsl.serialization.GSerializerZip;
 import com.io7m.jparasol.lexer.Position;
+import com.io7m.jparasol.metaserializer.JPMetaSerializerType;
+import com.io7m.jparasol.metaserializer.protobuf.JPProtobufMetaSerializer;
 import com.io7m.jparasol.typed.ast.TASTShaderNameFlat;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
@@ -185,8 +187,10 @@ import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
     assert e != null;
 
     final ZipOutputStream archive_stream = CopyZip.copyZip(log, out_archive);
+    final JPMetaSerializerType meta_s =
+      JPProtobufMetaSerializer.newSerializer();
     final GSerializerType serializer =
-      GSerializerZip.newSerializer(archive_stream, log);
+      GSerializerZip.newSerializer(meta_s, archive_stream, log);
 
     final Compiler c = Compiler.newCompiler(log, e);
     c.setCompacting(true);

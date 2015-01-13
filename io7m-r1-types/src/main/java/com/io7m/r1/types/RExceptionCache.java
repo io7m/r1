@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -39,24 +39,15 @@ import com.io7m.jnull.NullCheck;
     super(NullCheck.notNull(e, "Exception"));
   }
 
-  @Override public <T, E extends Throwable> T exceptionAccept(
-    final RExceptionVisitorType<T, E> v)
-    throws E
-  {
-    final JCacheException x = (JCacheException) this.getCause();
-    assert x != null;
-    return v.exceptionVisitJCacheException(x);
-  }
-
   /**
    * Construct an {@link RException} using the given exception as the cause.
-   * 
+   *
    * @see Exception#getCause()
    * @param e
    *          The exception
    * @return A new exception
    */
-  
+
   public static RException fromJCacheException(
     final JCacheException e)
   {

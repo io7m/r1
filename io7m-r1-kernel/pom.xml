@@ -121,7 +121,7 @@
 
     <dependency>
       <groupId>com.io7m.jparasol</groupId>
-      <artifactId>io7m-jparasol-xml</artifactId>
+      <artifactId>io7m-jparasol-metaserializer-protobuf</artifactId>
       <version>${com.io7m.jparasol.versionRange}</version>
     </dependency>
     <dependency>

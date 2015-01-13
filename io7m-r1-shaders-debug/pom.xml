@@ -86,12 +86,6 @@
       <version>${com.io7m.jparasol.versionRange}</version>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>com.io7m.jparasol</groupId>
-      <artifactId>io7m-jparasol-xml</artifactId>
-      <version>${com.io7m.jparasol.versionRange}</version>
-      <optional>true</optional>
-    </dependency>
   </dependencies>
 
   <reporting>

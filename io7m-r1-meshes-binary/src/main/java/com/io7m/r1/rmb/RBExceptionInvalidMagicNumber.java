@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -14,41 +14,59 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.types;
-
-import com.io7m.jequality.annotations.EqualityReference;
+package com.io7m.r1.rmb;
 
 /**
- * An exception representing an attempt to use part of the matrices API that
- * cannot be used when a spherical light is not active.
+ * Exceptions raised upon errors whilst parsing RMB meshes.
  */
 
-@EqualityReference public final class RExceptionMatricesSphericalInactive extends
-  RExceptionUserError
+public final class RBExceptionInvalidMagicNumber extends RBException
 {
   private static final long serialVersionUID;
 
   static {
-    serialVersionUID = -1247042439663984309L;
+    serialVersionUID = -1189812950538543213L;
   }
 
   /**
-   * Construct an exception with the given message.
+   * Construct an exception.
    *
    * @param message
-   *          The message.
+   *          The message
    */
 
-  public RExceptionMatricesSphericalInactive(
+  public RBExceptionInvalidMagicNumber(
     final String message)
   {
     super(message);
   }
 
-  @Override <T, E extends Throwable> T exceptionAccept(
-    final RExceptionVisitorType<T, E> v)
-    throws E
+  /**
+   * Construct an exception.
+   *
+   * @param x
+   *          The cause
+   * @param message
+   *          The message
+   */
+
+  public RBExceptionInvalidMagicNumber(
+    final Throwable x,
+    final String message)
   {
-    return v.exceptionVisitUserErrorException(this);
+    super(x, message);
+  }
+
+  /**
+   * Construct an exception.
+   *
+   * @param e
+   *          The cause
+   */
+
+  public RBExceptionInvalidMagicNumber(
+    final Throwable e)
+  {
+    super(e);
   }
 }

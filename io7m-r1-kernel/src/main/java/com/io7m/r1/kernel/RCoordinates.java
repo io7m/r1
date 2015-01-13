@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.types;
+package com.io7m.r1.kernel;
 
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jequality.annotations.EqualityReference;
@@ -24,6 +24,9 @@ import com.io7m.jtensors.parameterized.PVectorM4F;
 import com.io7m.jtensors.parameterized.PVectorReadable3FType;
 import com.io7m.jtensors.parameterized.PVectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.types.RSpaceClipType;
+import com.io7m.r1.types.RSpaceNDCType;
+import com.io7m.r1.types.RSpaceWindowType;
 
 /**
  * Functions to convert between coordinate spaces.

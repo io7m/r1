@@ -14,42 +14,59 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.types;
-
-import com.io7m.jequality.annotations.EqualityReference;
+package com.io7m.r1.rmb;
 
 /**
- * An exception representing an attempt to add an instance to a scene with a
- * shadow after having already added the instance to the scene without a
- * shadow.
+ * Exceptions raised upon errors whilst parsing RMB meshes.
  */
 
-@EqualityReference public final class RExceptionInstanceAlreadyUnshadowed extends
-  RExceptionUserError
+public final class RBExceptionShortRead extends RBException
 {
   private static final long serialVersionUID;
 
   static {
-    serialVersionUID = -5056847802203769250L;
+    serialVersionUID = -1189812950538543213L;
   }
 
   /**
-   * Construct an exception with the given message.
-   * 
+   * Construct an exception.
+   *
    * @param message
-   *          The message.
+   *          The message
    */
 
-  public RExceptionInstanceAlreadyUnshadowed(
+  public RBExceptionShortRead(
     final String message)
   {
     super(message);
   }
 
-  @Override <T, E extends Throwable> T exceptionAccept(
-    final RExceptionVisitorType<T, E> v)
-    throws E
+  /**
+   * Construct an exception.
+   *
+   * @param x
+   *          The cause
+   * @param message
+   *          The message
+   */
+
+  public RBExceptionShortRead(
+    final Throwable x,
+    final String message)
   {
-    return v.exceptionVisitUserErrorException(this);
+    super(x, message);
+  }
+
+  /**
+   * Construct an exception.
+   *
+   * @param e
+   *          The cause
+   */
+
+  public RBExceptionShortRead(
+    final Throwable e)
+  {
+    super(e);
   }
 }

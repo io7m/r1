@@ -37,7 +37,7 @@ import com.io7m.r1.meshes.RMeshTangents;
 import com.io7m.r1.types.RException;
 import com.io7m.r1.types.RExceptionIO;
 import com.io7m.r1.types.RExceptionMeshNonexistent;
-import com.io7m.r1.types.RXMLException;
+import com.io7m.r1.xml.RXMLException;
 import com.io7m.r1.xml.collada.RColladaDocument;
 import com.io7m.r1.xml.collada.RColladaGeometry;
 import com.io7m.r1.xml.collada.RColladaGeometryID;

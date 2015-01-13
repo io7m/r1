@@ -39,7 +39,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.types.RSpaceRGBAType;
 import com.io7m.r1.types.RSpaceRGBType;
 import com.io7m.r1.types.RSpaceType;
-import com.io7m.r1.types.RXMLException;
 
 /**
  * Utilities for reading XML documents.

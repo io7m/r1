@@ -37,7 +37,7 @@ import com.io7m.jlog.LogType;
 import com.io7m.jnull.NonNull;
 import com.io7m.jproperties.JPropertyException;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RXMLException;
+import com.io7m.r1.xml.RXMLException;
 import com.io7m.r1.xml.collada.RColladaDocument;
 import com.io7m.r1.xml.collada.RColladaGeometry;
 import com.io7m.r1.xml.collada.RColladaGeometryID;

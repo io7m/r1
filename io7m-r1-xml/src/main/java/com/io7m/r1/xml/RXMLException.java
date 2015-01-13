@@ -14,7 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.types;
+package com.io7m.r1.xml;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ import org.xml.sax.SAXException;
 
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jparasol.xml.JPXMLException;
+import com.io7m.r1.types.RException;
 
 /**
  * The root type of exceptions raised by XML parsers and validators.
@@ -36,33 +36,6 @@ import com.io7m.jparasol.xml.JPXMLException;
 @SuppressWarnings("synthetic-access") @EqualityReference public abstract class RXMLException extends
   RException
 {
-  /**
-   * An exception caused by a {@link JPXMLException}.
-   */
-
-  @EqualityReference public static final class RJPXMLException extends
-    RXMLException
-  {
-    private static final long serialVersionUID = -7586780514130613772L;
-
-    private RJPXMLException(
-      final JPXMLException x)
-    {
-      super(x);
-    }
-
-    /**
-     * @return The cause of this exception as a specific type.
-     */
-
-    public ValidityException getValidityException()
-    {
-      final ValidityException x = (ValidityException) this.getCause();
-      assert x != null;
-      return x;
-    }
-  }
-
   /**
    * An exception caused by a {@link NumberFormatException}.
    */
@@ -80,7 +53,7 @@ import com.io7m.jparasol.xml.JPXMLException;
 
     /**
      * Construct a new exception with a specific cause and message.
-     * 
+     *
      * @param x
      *          The cause
      * @param message
@@ -247,21 +220,7 @@ import com.io7m.jparasol.xml.JPXMLException;
 
   /**
    * Construct an {@link RXMLException} from the given exception.
-   * 
-   * @param e
-   *          The cause
-   * @return A new exception
-   */
-
-  public static RXMLException fromJPXMLException(
-    final JPXMLException e)
-  {
-    return new RJPXMLException(e);
-  }
-
-  /**
-   * Construct an {@link RXMLException} from the given exception.
-   * 
+   *
    * @param x
    *          The cause
    * @return A new exception
@@ -275,7 +234,7 @@ import com.io7m.jparasol.xml.JPXMLException;
 
   /**
    * Construct an {@link RXMLException} from the given exception.
-   * 
+   *
    * @param x
    *          The cause
    * @return A new exception
@@ -289,7 +248,7 @@ import com.io7m.jparasol.xml.JPXMLException;
 
   /**
    * Construct an {@link RXMLException} from the given exception.
-   * 
+   *
    * @param x
    *          The cause
    * @return A new exception
@@ -303,7 +262,7 @@ import com.io7m.jparasol.xml.JPXMLException;
 
   /**
    * Construct an {@link RXMLException} from the given exceptions.
-   * 
+   *
    * @param xs
    *          The list of causes
    * @return A new exception
@@ -318,7 +277,7 @@ import com.io7m.jparasol.xml.JPXMLException;
 
   /**
    * Construct an {@link RXMLException} from the given exception.
-   * 
+   *
    * @param x
    *          The cause
    * @return A new exception
@@ -341,12 +300,5 @@ import com.io7m.jparasol.xml.JPXMLException;
     final Throwable x)
   {
     super(x);
-  }
-
-  @Override public final <T, E extends Throwable> T exceptionAccept(
-    final RExceptionVisitorType<T, E> v)
-    throws E
-  {
-    return v.exceptionVisitXMLException(this);
   }
 }
