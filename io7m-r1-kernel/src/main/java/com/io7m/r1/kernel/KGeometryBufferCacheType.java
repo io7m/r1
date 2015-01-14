@@ -17,8 +17,8 @@
 package com.io7m.r1.kernel;
 
 import com.io7m.jcache.BLUCacheType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KGeometryBufferDescription;
-import com.io7m.r1.types.RException;
 
 /**
  * The type of geometry buffer caches.

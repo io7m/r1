@@ -94,7 +94,7 @@
     </dependency>
     <dependency>
       <groupId>com.io7m.jparasol</groupId>
-      <artifactId>io7m-jparasol-xml</artifactId>
+      <artifactId>io7m-jparasol-core</artifactId>
       <version>${com.io7m.jparasol.versionRange}</version>
     </dependency>
     <dependency>
@@ -106,11 +106,6 @@
       <groupId>com.io7m.jvvfs</groupId>
       <artifactId>io7m-jvvfs-core</artifactId>
       <version>${com.io7m.jvvfs.versionRange}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.io7m.xom</groupId>
-      <artifactId>xom</artifactId>
-      <version>1.2.10</version>
     </dependency>
   </dependencies>
 

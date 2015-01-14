@@ -29,6 +29,7 @@ import com.io7m.jvvfs.Filesystem;
 import com.io7m.jvvfs.FilesystemError;
 import com.io7m.jvvfs.FilesystemType;
 import com.io7m.jvvfs.PathVirtual;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.KProgramType;
 import com.io7m.r1.kernel.KShaderCache;
 import com.io7m.r1.kernel.KShaderCacheDebugType;
@@ -42,7 +43,6 @@ import com.io7m.r1.kernel.KShaderCacheForwardTranslucentUnlitType;
 import com.io7m.r1.kernel.KShaderCacheImageType;
 import com.io7m.r1.kernel.KShaderCacheSetClasspath;
 import com.io7m.r1.kernel.KShaderCacheSetType;
-import com.io7m.r1.types.RException;
 
 /**
  * Cache loading from the classpath or from target directories.

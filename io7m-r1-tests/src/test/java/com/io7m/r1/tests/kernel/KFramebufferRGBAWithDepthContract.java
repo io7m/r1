@@ -24,6 +24,7 @@ import org.junit.Test;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepth;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthType;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
@@ -31,7 +32,6 @@ import com.io7m.r1.kernel.types.KRGBAPrecision;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.TestContext;
 import com.io7m.r1.tests.TestContract;
-import com.io7m.r1.types.RException;
 
 public abstract class KFramebufferRGBAWithDepthContract extends TestContract
 {

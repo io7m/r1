@@ -16,7 +16,7 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * A generic spherical light visitor, returning values of type <code>A</code>

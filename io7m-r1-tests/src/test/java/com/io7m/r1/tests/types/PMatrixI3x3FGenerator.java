@@ -21,7 +21,7 @@ import net.java.quickcheck.Generator;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
-import com.io7m.r1.types.RSpaceType;
+import com.io7m.r1.spaces.RSpaceType;
 
 public final class PMatrixI3x3FGenerator<S0 extends RSpaceType, S1 extends RSpaceType> implements
   Generator<PMatrixI3x3F<S0, S1>>

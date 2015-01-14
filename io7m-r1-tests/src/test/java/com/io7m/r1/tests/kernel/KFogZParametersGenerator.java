@@ -23,9 +23,9 @@ import com.io7m.r1.kernel.KFogProgression;
 import com.io7m.r1.kernel.KFogZParameters;
 import com.io7m.r1.kernel.KFogZParametersBuilderType;
 import com.io7m.r1.kernel.types.KProjectionType;
+import com.io7m.r1.spaces.RSpaceRGBType;
 import com.io7m.r1.tests.kernel.types.KProjectionGenerator;
 import com.io7m.r1.tests.types.PVectorI3FGenerator;
-import com.io7m.r1.types.RSpaceRGBType;
 
 @SuppressWarnings("null") public final class KFogZParametersGenerator implements
   Generator<KFogZParameters>

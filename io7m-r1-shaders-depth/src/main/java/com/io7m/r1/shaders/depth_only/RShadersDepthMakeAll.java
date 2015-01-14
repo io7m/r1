@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -39,6 +39,8 @@ import com.io7m.jparasol.frontend.CompilerBatch;
 import com.io7m.jparasol.frontend.CopyZip;
 import com.io7m.jparasol.glsl.serialization.GSerializerType;
 import com.io7m.jparasol.glsl.serialization.GSerializerZip;
+import com.io7m.jparasol.metaserializer.JPMetaSerializerType;
+import com.io7m.jparasol.metaserializer.protobuf.JPProtobufMetaSerializer;
 
 @SuppressWarnings("resource") @EqualityReference public final class RShadersDepthMakeAll
 {
@@ -89,8 +91,10 @@ import com.io7m.jparasol.glsl.serialization.GSerializerZip;
     assert e != null;
 
     final ZipOutputStream archive_stream = CopyZip.copyZip(log, out_archive);
+    final JPMetaSerializerType meta_s =
+      JPProtobufMetaSerializer.newSerializer();
     final GSerializerType serializer =
-      GSerializerZip.newSerializer(archive_stream, log);
+      GSerializerZip.newSerializer(meta_s, archive_stream, log);
 
     final Compiler c = Compiler.newCompiler(log, e);
     c.setCompacting(true);

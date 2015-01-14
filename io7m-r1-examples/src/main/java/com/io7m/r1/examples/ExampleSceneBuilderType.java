@@ -18,9 +18,9 @@ package com.io7m.r1.examples;
 
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KVisibleSetBuilderType;
-import com.io7m.r1.types.RException;
 
 /**
  * The type of example scene builders.

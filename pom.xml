@@ -19,6 +19,7 @@
     <module>io7m-r1-documentation</module>
     <module>io7m-r1-examples-jogl</module>
     <module>io7m-r1-examples</module>
+    <module>io7m-r1-exceptions</module>
     <module>io7m-r1-kernel-types</module>
     <module>io7m-r1-kernel</module>
     <module>io7m-r1-main</module>
@@ -37,9 +38,9 @@
     <module>io7m-r1-shaders-forward-translucent-unlit</module>
     <module>io7m-r1-shaders-forward</module>
     <module>io7m-r1-shaders-image</module>
+    <module>io7m-r1-spaces</module>
     <module>io7m-r1-tests-jogl</module>
     <module>io7m-r1-tests</module>
-    <module>io7m-r1-types</module>
     <module>io7m-r1-xml</module>
   </modules>
 
@@ -58,7 +59,7 @@
     <com.io7m.jintegers.versionRange>[1.0.0, 2.0.0)</com.io7m.jintegers.versionRange>
     <com.io7m.jlog.versionRange>[3.1.0, 4.0.0)</com.io7m.jlog.versionRange>
     <com.io7m.jnull.versionRange>[1.0.0, 2.0.0)</com.io7m.jnull.versionRange>
-    <com.io7m.jparasol.versionRange>[0.10.7, 0.11.0)</com.io7m.jparasol.versionRange>
+    <com.io7m.jparasol.versionRange>[0.11.2, 0.12.0)</com.io7m.jparasol.versionRange>
     <com.io7m.jproperties.versionRange>[1.0.0, 2.0.0)</com.io7m.jproperties.versionRange>
     <com.io7m.jranges.versionRange>[1.0.0, 2.0.0)</com.io7m.jranges.versionRange>
     <com.io7m.jtensors.versionRange>[7.0.0-b2, 7.0.0)</com.io7m.jtensors.versionRange>

@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.KGeometryBuffer;
 import com.io7m.r1.kernel.KGeometryBufferType;
 import com.io7m.r1.kernel.types.KGeometryBufferDescription;
@@ -29,7 +30,6 @@ import com.io7m.r1.kernel.types.KNormalPrecision;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.TestContext;
 import com.io7m.r1.tests.TestContract;
-import com.io7m.r1.types.RException;
 
 public abstract class KGeometryBufferContract extends TestContract
 {

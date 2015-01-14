@@ -27,8 +27,6 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 
-import nu.xom.ParsingException;
-
 import com.io7m.jcamera.JCameraFPSStyle;
 import com.io7m.jcamera.JCameraFPSStyle.Context;
 import com.io7m.jcamera.JCameraFPSStyleIntegrator;
@@ -49,6 +47,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.jproperties.JPropertyException;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM4x4F;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
@@ -66,6 +65,10 @@ import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.tools.EMeshCache;
 import com.io7m.r1.examples.tools.ETexture2DCache;
 import com.io7m.r1.examples.tools.ETextureCubeCache;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RExceptionInstanceAlreadyVisible;
+import com.io7m.r1.exceptions.RExceptionLightGroupAlreadyAdded;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KImageSinkBlitRGBA;
 import com.io7m.r1.kernel.KImageSinkRGBAType;
@@ -82,12 +85,8 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KVisibleSet;
 import com.io7m.r1.kernel.types.KVisibleSetBuilderWithCreateType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionBuilderInvalid;
-import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
-import com.io7m.r1.types.RExceptionLightGroupAlreadyAdded;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 import com.jogamp.newt.opengl.GLWindow;
 
 /**
@@ -227,7 +226,7 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
             return cc.loadCubeClamped(name);
           } catch (final IOException e) {
             throw new RuntimeException(e);
-          } catch (final ParsingException e) {
+          } catch (final JPropertyException e) {
             throw new RuntimeException(e);
           }
         }
@@ -240,7 +239,7 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
             return cc.loadCubeRepeat(name);
           } catch (final IOException e) {
             throw new RuntimeException(e);
-          } catch (final ParsingException e) {
+          } catch (final JPropertyException e) {
             throw new RuntimeException(e);
           }
         }

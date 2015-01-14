@@ -36,6 +36,9 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RExceptionInstanceAlreadyVisible;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
@@ -53,14 +56,11 @@ import com.io7m.r1.kernel.types.KVisibleSetLightGroup;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderWithCreateType;
 import com.io7m.r1.kernel.types.KVisibleSetShadows;
 import com.io7m.r1.kernel.types.KVisibleSetShadowsBuilderType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionBuilderInvalid;
-import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings({ "null", "static-method" }) public final class KVisibleSetLightGroupTest
 {

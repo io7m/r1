@@ -79,7 +79,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>io7m-r1-types</artifactId>
+      <artifactId>io7m-r1-exceptions</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

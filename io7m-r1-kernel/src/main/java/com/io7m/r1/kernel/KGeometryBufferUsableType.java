@@ -23,7 +23,7 @@ import com.io7m.jcanephora.api.JCGLColorBufferType;
 import com.io7m.jcanephora.api.JCGLDepthBufferType;
 import com.io7m.jcanephora.api.JCGLFramebuffersCommonType;
 import com.io7m.jcanephora.api.JCGLStencilBufferType;
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * The type of usable geometry buffers.

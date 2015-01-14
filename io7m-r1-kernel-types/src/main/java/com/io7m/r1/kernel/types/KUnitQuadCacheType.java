@@ -18,7 +18,7 @@ package com.io7m.r1.kernel.types;
 
 import com.io7m.jcache.LUCacheType;
 import com.io7m.jfunctional.Unit;
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * The type of caches for unit quads.

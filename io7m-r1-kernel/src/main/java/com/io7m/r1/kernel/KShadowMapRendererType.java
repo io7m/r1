@@ -16,9 +16,9 @@
 
 package com.io7m.r1.kernel;
 
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KVisibleSetShadows;
-import com.io7m.r1.types.RException;
 
 /**
  * The type of shadow map renderers.

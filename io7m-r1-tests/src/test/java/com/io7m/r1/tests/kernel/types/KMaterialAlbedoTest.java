@@ -32,11 +32,11 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
+import com.io7m.r1.spaces.RSpaceRGBAType;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.types.PVectorI4FGenerator;
-import com.io7m.r1.types.RSpaceRGBAType;
 
 @SuppressWarnings({ "static-method", "null" }) public final class KMaterialAlbedoTest
 {

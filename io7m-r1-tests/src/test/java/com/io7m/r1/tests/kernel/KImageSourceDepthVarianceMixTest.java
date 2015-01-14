@@ -40,11 +40,11 @@ import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.r1.main.R1;
 import com.io7m.r1.main.R1BuilderType;
 import com.io7m.r1.main.R1Type;
+import com.io7m.r1.spaces.RSpaceTextureType;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.TestShaderCaches;
-import com.io7m.r1.types.RSpaceTextureType;
 
 @SuppressWarnings("static-method") public final class KImageSourceDepthVarianceMixTest
 {

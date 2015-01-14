@@ -19,8 +19,8 @@ package com.io7m.r1.kernel;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
-import com.io7m.r1.types.RException;
 
 /**
  * The type of directional basic shadow maps.

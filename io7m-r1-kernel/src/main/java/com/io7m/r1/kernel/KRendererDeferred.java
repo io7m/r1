@@ -27,12 +27,12 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionCache;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KVisibleSet;
 import com.io7m.r1.kernel.types.KVisibleSetOpaques;
 import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionCache;
 
 /**
  * The primary forward renderer.

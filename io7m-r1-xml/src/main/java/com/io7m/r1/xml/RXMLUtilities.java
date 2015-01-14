@@ -36,10 +36,9 @@ import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.jtensors.parameterized.PVectorReadable3FType;
 import com.io7m.jtensors.parameterized.PVectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RSpaceRGBAType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceType;
-import com.io7m.r1.types.RXMLException;
+import com.io7m.r1.spaces.RSpaceRGBAType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceType;
 
 /**
  * Utilities for reading XML documents.

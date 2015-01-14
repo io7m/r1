@@ -40,7 +40,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheckException;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RXMLException;
+import com.io7m.r1.xml.RXMLException;
 import com.io7m.r1.xml.RXMLUtilities;
 import com.io7m.r1.xml.collada.RColladaSource.ColladaSourceArray2F;
 import com.io7m.r1.xml.collada.RColladaSource.ColladaSourceArray3F;

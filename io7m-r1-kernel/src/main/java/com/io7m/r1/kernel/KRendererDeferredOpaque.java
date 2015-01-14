@@ -64,6 +64,8 @@ import com.io7m.jtensors.parameterized.PVectorI2F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionCache;
 import com.io7m.r1.kernel.types.KFrustumMeshCacheType;
 import com.io7m.r1.kernel.types.KFrustumMeshUsableType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
@@ -99,11 +101,9 @@ import com.io7m.r1.kernel.types.KUnitSpherePrecision;
 import com.io7m.r1.kernel.types.KUnitSphereUsableType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroup;
 import com.io7m.r1.kernel.types.KVisibleSetOpaques;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 /**
  * A deferred renderer for opaque objects.

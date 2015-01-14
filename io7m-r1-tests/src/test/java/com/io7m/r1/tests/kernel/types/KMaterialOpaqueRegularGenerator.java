@@ -26,6 +26,7 @@ import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KMaterialAlbedoType;
 import com.io7m.r1.kernel.types.KMaterialDepthType;
 import com.io7m.r1.kernel.types.KMaterialEmissiveType;
@@ -33,15 +34,14 @@ import com.io7m.r1.kernel.types.KMaterialEnvironmentType;
 import com.io7m.r1.kernel.types.KMaterialNormalType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialSpecularType;
+import com.io7m.r1.spaces.RSpaceRGBAType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.RFakeTexturesCubeStatic;
 import com.io7m.r1.tests.types.PMatrixI3x3FGenerator;
 import com.io7m.r1.tests.types.PVectorI3FGenerator;
 import com.io7m.r1.tests.types.PVectorI4FGenerator;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceRGBAType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceTextureType;
 
 public final class KMaterialOpaqueRegularGenerator implements
   Generator<KMaterialOpaqueRegular>

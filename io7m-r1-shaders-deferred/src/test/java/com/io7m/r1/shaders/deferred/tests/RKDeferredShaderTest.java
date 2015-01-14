@@ -19,6 +19,7 @@ package com.io7m.r1.shaders.deferred.tests;
 import org.junit.Test;
 
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.r1.kernel.types.KMaterialDepthConstant;
 import com.io7m.r1.kernel.types.KMaterialEmissiveNone;
@@ -27,8 +28,7 @@ import com.io7m.r1.kernel.types.KMaterialNormalVertex;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialSpecularNone;
 import com.io7m.r1.shaders.deferred.RKDeferredShader;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 @SuppressWarnings("static-method") public final class RKDeferredShaderTest
 {

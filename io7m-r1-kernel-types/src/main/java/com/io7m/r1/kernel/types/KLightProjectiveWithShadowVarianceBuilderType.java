@@ -16,8 +16,8 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionUserError;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionUserError;
 
 /**
  * The type of mutable builders for projective lights that have mapped

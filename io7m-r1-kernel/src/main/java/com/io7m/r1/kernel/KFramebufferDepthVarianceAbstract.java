@@ -34,8 +34,8 @@ import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
-import com.io7m.r1.types.RException;
 
 @EqualityReference abstract class KFramebufferDepthVarianceAbstract implements
   KFramebufferDepthVarianceType

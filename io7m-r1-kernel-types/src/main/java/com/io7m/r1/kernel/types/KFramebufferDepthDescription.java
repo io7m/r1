@@ -23,7 +23,7 @@ import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * A description of a depth-only framebuffer.

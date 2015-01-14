@@ -16,9 +16,9 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.types.RExceptionBuilderInvalid;
-import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
-import com.io7m.r1.types.RExceptionLightGroupAlreadyAdded;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RExceptionInstanceAlreadyVisible;
+import com.io7m.r1.exceptions.RExceptionLightGroupAlreadyAdded;
 
 /**
  * A mutable "builder" interface for creating immutable

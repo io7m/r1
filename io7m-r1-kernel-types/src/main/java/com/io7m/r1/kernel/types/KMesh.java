@@ -35,10 +35,10 @@ import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RExceptionMeshMissingNormals;
-import com.io7m.r1.types.RExceptionMeshMissingPositions;
-import com.io7m.r1.types.RExceptionMeshMissingTangents;
-import com.io7m.r1.types.RExceptionMeshMissingUVs;
+import com.io7m.r1.exceptions.RExceptionMeshMissingNormals;
+import com.io7m.r1.exceptions.RExceptionMeshMissingPositions;
+import com.io7m.r1.exceptions.RExceptionMeshMissingTangents;
+import com.io7m.r1.exceptions.RExceptionMeshMissingUVs;
 
 /**
  * <p>

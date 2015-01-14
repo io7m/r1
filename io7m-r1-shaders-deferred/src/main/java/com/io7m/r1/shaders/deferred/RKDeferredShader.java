@@ -20,6 +20,7 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KLightDiffuseOnlyType;
 import com.io7m.r1.kernel.types.KLightDirectional;
 import com.io7m.r1.kernel.types.KLightDirectionalDiffuseOnly;
@@ -66,7 +67,6 @@ import com.io7m.r1.kernel.types.KMaterialSpecularNone;
 import com.io7m.r1.kernel.types.KMaterialSpecularType;
 import com.io7m.r1.kernel.types.KMaterialSpecularVisitorType;
 import com.io7m.r1.shaders.forward.RKForwardShader;
-import com.io7m.r1.types.RException;
 
 @EqualityReference public final class RKDeferredShader
 {

@@ -18,7 +18,7 @@ package com.io7m.r1.examples;
 
 import java.util.List;
 
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * The type of examples that render 3D scenes.

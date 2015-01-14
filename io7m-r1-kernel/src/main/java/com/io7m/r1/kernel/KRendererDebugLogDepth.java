@@ -63,13 +63,13 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KVisibleSet;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroup;
 import com.io7m.r1.kernel.types.KVisibleSetOpaques;
-import com.io7m.r1.types.RException;
 
 /**
  * Debugging depth renderer.

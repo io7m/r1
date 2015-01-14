@@ -18,11 +18,11 @@ package com.io7m.r1.kernel;
 
 import com.io7m.jtensors.parameterized.PMatrixDirectReadable3x3FType;
 import com.io7m.jtensors.parameterized.PMatrixDirectReadable4x4FType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceNormalEyeType;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceNormalEyeType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * The type of instance values.

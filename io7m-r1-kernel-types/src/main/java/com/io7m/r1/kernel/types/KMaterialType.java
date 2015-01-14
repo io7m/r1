@@ -17,8 +17,8 @@
 package com.io7m.r1.kernel.types;
 
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 /**
  * The type of materials applied to meshes.

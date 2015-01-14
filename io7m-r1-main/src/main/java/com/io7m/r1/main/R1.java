@@ -32,6 +32,8 @@ import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jvvfs.FilesystemError;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionFilesystem;
 import com.io7m.r1.kernel.KCopyParameters;
 import com.io7m.r1.kernel.KDepthRenderer;
 import com.io7m.r1.kernel.KDepthRendererType;
@@ -91,8 +93,6 @@ import com.io7m.r1.kernel.types.KUnitQuadCache;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitSphereCacheType;
 import com.io7m.r1.rmb.RBUnitSphereResourceCache;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionFilesystem;
 
 /**
  * The <tt>R1</tt> renderer.

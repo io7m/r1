@@ -21,8 +21,8 @@ import net.java.quickcheck.Generator;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
 
 public final class KProjectionGenerator implements Generator<KProjectionType>
 {

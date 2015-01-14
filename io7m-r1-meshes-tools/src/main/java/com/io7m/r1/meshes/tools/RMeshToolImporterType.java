@@ -21,8 +21,8 @@ import java.io.PrintWriter;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jlog.LogUsableType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.meshes.RMeshTangents;
-import com.io7m.r1.types.RException;
 
 /**
  * The type of importers.
