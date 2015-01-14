@@ -16,9 +16,9 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.types.RExceptionBuilderInvalid;
-import com.io7m.r1.types.RExceptionLightGroupLacksInstances;
-import com.io7m.r1.types.RExceptionLightGroupLacksLights;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RExceptionLightGroupLacksInstances;
+import com.io7m.r1.exceptions.RExceptionLightGroupLacksLights;
 
 /**
  * A {@link KVisibleSetLightGroupBuilderType} with a create function.

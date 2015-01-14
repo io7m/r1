@@ -26,9 +26,6 @@ import com.io7m.jintegers.Unsigned32;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RBException;
-import com.io7m.r1.types.RBExceptionShortRead;
-import com.io7m.r1.types.RBExceptionUnexpectedEOF;
 
 /**
  * Convenient parsing functions.

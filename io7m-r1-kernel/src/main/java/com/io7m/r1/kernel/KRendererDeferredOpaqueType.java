@@ -18,8 +18,8 @@ package com.io7m.r1.kernel;
 
 import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KVisibleSetOpaques;
-import com.io7m.r1.types.RException;
 
 /**
  * The type of opaque renderers that use deferred rendering.

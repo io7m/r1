@@ -25,12 +25,12 @@ import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionUserError;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionUserError;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * <p>

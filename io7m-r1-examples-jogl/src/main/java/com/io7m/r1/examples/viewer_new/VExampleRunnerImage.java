@@ -40,6 +40,8 @@ import com.io7m.r1.examples.ExampleRendererType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleTypeEnum;
 import com.io7m.r1.examples.tools.ETexture2DCache;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionIO;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KImageSinkBlitRGBA;
 import com.io7m.r1.kernel.KImageSinkRGBAType;
@@ -47,8 +49,6 @@ import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.kernel.types.KUnitQuadCache;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.main.R1Type;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionIO;
 import com.jogamp.newt.opengl.GLWindow;
 
 /**

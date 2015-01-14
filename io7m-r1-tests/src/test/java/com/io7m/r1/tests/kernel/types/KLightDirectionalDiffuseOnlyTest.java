@@ -28,10 +28,10 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.types.KLightDirectionalDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightDirectionalDiffuseOnlyBuilderType;
 import com.io7m.r1.kernel.types.KLightDirectionalType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 import com.io7m.r1.tests.types.PVectorI3FGenerator;
 import com.io7m.r1.tests.utilities.TestUtilities;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings("static-method") public final class KLightDirectionalDiffuseOnlyTest
 {

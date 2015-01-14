@@ -19,7 +19,7 @@ package com.io7m.r1.tests.types;
 import net.java.quickcheck.Generator;
 
 import com.io7m.jtensors.parameterized.PVectorI4F;
-import com.io7m.r1.types.RSpaceType;
+import com.io7m.r1.spaces.RSpaceType;
 
 public final class PVectorI4FGenerator<T extends RSpaceType> implements
   Generator<PVectorI4F<T>>

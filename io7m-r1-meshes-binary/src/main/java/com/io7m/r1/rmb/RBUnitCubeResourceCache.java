@@ -35,12 +35,12 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionIO;
 import com.io7m.r1.kernel.types.KUnitCube;
 import com.io7m.r1.kernel.types.KUnitCubeCacheType;
 import com.io7m.r1.kernel.types.KUnitCubeUsableType;
 import com.io7m.r1.meshes.RMeshParserEventsVBO;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionIO;
 
 /**
  * A cache that can load compressed and uncompressed binary meshes

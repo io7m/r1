@@ -28,8 +28,8 @@ import com.io7m.r1.kernel.KBilinear;
 import com.io7m.r1.kernel.KViewRays;
 import com.io7m.r1.kernel.types.KProjectionFOV;
 import com.io7m.r1.kernel.types.KProjectionOrthographic;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
 
 @SuppressWarnings("static-method") public final class KViewRaysTest
 {

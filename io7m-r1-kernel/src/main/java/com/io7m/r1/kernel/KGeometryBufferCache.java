@@ -19,8 +19,8 @@ package com.io7m.r1.kernel;
 import com.io7m.jcache.BLUCacheAbstract;
 import com.io7m.jcache.BLUCacheType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KGeometryBufferDescription;
-import com.io7m.r1.types.RException;
 
 /**
  * Geometry buffer caches.

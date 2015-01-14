@@ -41,9 +41,9 @@ import com.io7m.jlog.LogPolicyType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jproperties.JPropertyException;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionMeshTypeUnknown;
 import com.io7m.r1.meshes.RMeshTangents;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionMeshTypeUnknown;
 
 /**
  * Command line mesh conversion.

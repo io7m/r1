@@ -19,7 +19,7 @@ package com.io7m.r1.kernel.types;
 import java.util.List;
 import java.util.Set;
 
-import com.io7m.r1.types.RExceptionMaterialNonexistent;
+import com.io7m.r1.exceptions.RExceptionMaterialNonexistent;
 
 /**
  * A set of instances organized by their depth material codes.

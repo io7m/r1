@@ -36,8 +36,8 @@ import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.api.JCGLInterfaceGL2Type;
 import com.io7m.jcanephora.api.JCGLTextures2DStaticGL3ES3Type;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KFramebufferDepthDescription;
-import com.io7m.r1.types.RException;
 
 @EqualityReference abstract class KFramebufferDepthAbstract implements
   KFramebufferDepthType

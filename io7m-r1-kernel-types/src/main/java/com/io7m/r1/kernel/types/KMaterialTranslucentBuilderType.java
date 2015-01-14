@@ -16,9 +16,9 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionMaterialMissingAlbedoTexture;
-import com.io7m.r1.types.RExceptionMaterialMissingSpecularTexture;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionMaterialMissingAlbedoTexture;
+import com.io7m.r1.exceptions.RExceptionMaterialMissingSpecularTexture;
 
 /**
  * The type of mutable builders for translucent materials.

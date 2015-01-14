@@ -17,8 +17,8 @@
 package com.io7m.r1.kernel;
 
 import com.io7m.jcache.LUCacheType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RException;
 
 /**
  * The type of caches for view rays.

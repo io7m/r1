@@ -41,7 +41,7 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RXMLException;
+import com.io7m.r1.xml.RXMLException;
 
 /**
  * Functions to validate and load an XML mesh document.

@@ -16,7 +16,7 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * The type of sinks that source depth-variance data and write the result to

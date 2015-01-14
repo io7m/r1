@@ -35,15 +35,15 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
 import com.io7m.r1.kernel.types.KProjectionFOV;
 import com.io7m.r1.kernel.types.KProjectionType;
+import com.io7m.r1.spaces.RSpaceClipType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 import com.io7m.r1.tests.QuaternionI4FGenerator;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.RFakeTextures2DStaticGenerator;
 import com.io7m.r1.tests.types.PVectorI3FGenerator;
 import com.io7m.r1.tests.utilities.TestUtilities;
-import com.io7m.r1.types.RSpaceClipType;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
 
 @SuppressWarnings("static-method") public final class KLightProjectiveWithShadowBasicTest
 {

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -29,9 +29,9 @@ import com.io7m.jtensors.parameterized.PVectorI2F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshParserEventsType;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RXMLException;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceTextureType;
+import com.io7m.r1.xml.RXMLException;
 import com.io7m.r1.xml.RXMLUtilities;
 
 /**
@@ -108,7 +108,6 @@ import com.io7m.r1.xml.RXMLUtilities;
     final Element e,
     final RMeshParserEventsType<E> events)
     throws E,
-
       RXMLException
   {
     assert "triangles".equals(e.getLocalName());
@@ -179,7 +178,6 @@ import com.io7m.r1.xml.RXMLUtilities;
     final Element ev,
     final RMeshParserEventsType<E> events)
     throws E,
-
       RXMLException
   {
     assert "vertices".equals(ev.getLocalName());

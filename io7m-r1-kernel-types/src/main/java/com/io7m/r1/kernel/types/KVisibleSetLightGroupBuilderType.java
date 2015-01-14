@@ -16,10 +16,10 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.types.RExceptionBuilderInvalid;
-import com.io7m.r1.types.RExceptionInstanceAlreadyInGroup;
-import com.io7m.r1.types.RExceptionInstanceAlreadyUnlit;
-import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RExceptionInstanceAlreadyInGroup;
+import com.io7m.r1.exceptions.RExceptionInstanceAlreadyUnlit;
+import com.io7m.r1.exceptions.RExceptionInstanceAlreadyVisible;
 
 /**
  * The type of mutable builders for visible set light groups.

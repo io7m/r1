@@ -49,10 +49,10 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorReadable4FType;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionNotSupported;
 import com.io7m.r1.kernel.types.KFramebufferDeferredDescription;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionNotSupported;
 
 /**
  * Provides the base implementation for {@link KFramebufferDeferred}.

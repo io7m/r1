@@ -23,8 +23,8 @@ import com.io7m.jcache.LRUCacheTrivial;
 import com.io7m.jcache.LRUCacheType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KProjectionType;
-import com.io7m.r1.types.RException;
 
 /**
  * View rays caches.

@@ -20,9 +20,9 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PVectorI3F;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * <p>

@@ -77,7 +77,6 @@
       <artifactId>io7m-r1-kernel-types</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>io7m-r1-shaders-debug</artifactId>
@@ -121,7 +120,7 @@
 
     <dependency>
       <groupId>com.io7m.jparasol</groupId>
-      <artifactId>io7m-jparasol-xml</artifactId>
+      <artifactId>io7m-jparasol-metaserializer-protobuf</artifactId>
       <version>${com.io7m.jparasol.versionRange}</version>
     </dependency>
     <dependency>

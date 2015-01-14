@@ -19,14 +19,17 @@ package com.io7m.r1.examples;
 import java.io.IOException;
 import java.util.Set;
 
-import nu.xom.ParsingException;
-import nu.xom.ValidityException;
-
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureCubeStaticUsableType;
+import com.io7m.jproperties.JPropertyException;
 import com.io7m.r1.examples.tools.EMeshCache;
 import com.io7m.r1.examples.tools.ETexture2DCache;
 import com.io7m.r1.examples.tools.ETextureCubeCache;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RExceptionIO;
+import com.io7m.r1.exceptions.RExceptionInstanceAlreadyVisible;
+import com.io7m.r1.exceptions.RExceptionLightGroupAlreadyAdded;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.r1.kernel.types.KInstanceTranslucentUnlitType;
@@ -35,12 +38,6 @@ import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KVisibleSetBuilderWithCreateType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionBuilderInvalid;
-import com.io7m.r1.types.RExceptionIO;
-import com.io7m.r1.types.RExceptionInstanceAlreadyVisible;
-import com.io7m.r1.types.RExceptionLightGroupAlreadyAdded;
-import com.io7m.r1.types.RXMLException;
 
 /**
  * The default implementation of an example scene builder.
@@ -86,12 +83,10 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
       final ETextureCubeCache cc = this.cube_cache;
       assert cc != null;
       return cc.loadCubeClamped(name);
-    } catch (final ValidityException e) {
-      throw RXMLException.validityException(e);
     } catch (final IOException e) {
       throw RExceptionIO.fromIOException(e);
-    } catch (final ParsingException e) {
-      throw RXMLException.parsingException(e);
+    } catch (final JPropertyException e) {
+      throw RExceptionIO.fromIOException(new IOException(e));
     }
   }
 
@@ -103,12 +98,10 @@ public final class ExampleSceneBuilder implements ExampleSceneBuilderType
       final ETextureCubeCache cc = this.cube_cache;
       assert cc != null;
       return cc.loadCubeRepeat(name);
-    } catch (final ValidityException e) {
-      throw RXMLException.validityException(e);
     } catch (final IOException e) {
       throw RExceptionIO.fromIOException(e);
-    } catch (final ParsingException e) {
-      throw RXMLException.parsingException(e);
+    } catch (final JPropertyException e) {
+      throw RExceptionIO.fromIOException(new IOException(e));
     }
   }
 

@@ -22,7 +22,7 @@ import com.io7m.jtensors.VectorM3F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorReadable3FType;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.types.RSpaceType;
+import com.io7m.r1.spaces.RSpaceType;
 
 /**
  * <p>

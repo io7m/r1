@@ -31,12 +31,12 @@ import com.io7m.jtensors.parameterized.PVectorI2F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.meshes.RMeshParserEventsType;
+import com.io7m.r1.rmb.RBExceptionInvalidMagicNumber;
+import com.io7m.r1.rmb.RBExceptionUnsupportedVersion;
 import com.io7m.r1.rmb.RBImporter;
 import com.io7m.r1.rmb.RBInfo;
-import com.io7m.r1.types.RBExceptionInvalidMagicNumber;
-import com.io7m.r1.types.RBExceptionUnsupportedVersion;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceTextureType;
 
 @SuppressWarnings("static-method") public final class RBImporterTest
 {

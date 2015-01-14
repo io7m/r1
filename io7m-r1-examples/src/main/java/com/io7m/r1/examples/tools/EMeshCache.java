@@ -31,11 +31,11 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionIO;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.meshes.RMeshParserEventsVBO;
 import com.io7m.r1.rmb.RBImporter;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionIO;
 import com.io7m.r1.xml.rmx.RXMLMeshDocument;
 import com.io7m.r1.xml.rmx.RXMLMeshParser;
 

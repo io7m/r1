@@ -42,6 +42,8 @@ import com.io7m.jparasol.frontend.CompilerBatch;
 import com.io7m.jparasol.frontend.CopyZip;
 import com.io7m.jparasol.glsl.serialization.GSerializerType;
 import com.io7m.jparasol.glsl.serialization.GSerializerZip;
+import com.io7m.jparasol.metaserializer.JPMetaSerializerType;
+import com.io7m.jparasol.metaserializer.protobuf.JPProtobufMetaSerializer;
 
 @SuppressWarnings("resource") @EqualityReference public final class RShadersDebugMakeAll
 {
@@ -95,8 +97,10 @@ import com.io7m.jparasol.glsl.serialization.GSerializerZip;
 
       final ZipOutputStream archive_stream =
         CopyZip.copyZip(log, out_archive);
+      final JPMetaSerializerType meta_s =
+        JPProtobufMetaSerializer.newSerializer();
       final GSerializerType serializer =
-        GSerializerZip.newSerializer(archive_stream, log);
+        GSerializerZip.newSerializer(meta_s, archive_stream, log);
 
       final SortedSet<GVersionES> es_versions =
         new TreeSet<GVersionES>(GVersionES.ALL);

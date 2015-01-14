@@ -29,6 +29,7 @@ import com.io7m.jtensors.parameterized.PMatrixReadable3x3FType;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
@@ -44,11 +45,10 @@ import com.io7m.r1.kernel.types.KMaterialSpecularNone;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RSpaceRGBAType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceTextureType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceRGBAType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceTextureType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * Miscellaneous utilities for scenes.

@@ -25,9 +25,9 @@ import java.util.Set;
 
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
-import com.io7m.r1.types.RExceptionBuilderInvalid;
-import com.io7m.r1.types.RExceptionLightNonexistent;
-import com.io7m.r1.types.RExceptionMaterialNonexistent;
+import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
+import com.io7m.r1.exceptions.RExceptionLightNonexistent;
+import com.io7m.r1.exceptions.RExceptionMaterialNonexistent;
 
 /**
  * The set of shadow-casting instances.

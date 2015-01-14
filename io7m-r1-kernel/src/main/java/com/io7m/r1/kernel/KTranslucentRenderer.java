@@ -37,6 +37,9 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionCache;
+import com.io7m.r1.exceptions.RExceptionResource;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.r1.kernel.types.KInstanceTranslucentSpecularOnly;
@@ -57,9 +60,6 @@ import com.io7m.r1.kernel.types.KTranslucentSpecularOnlyLit;
 import com.io7m.r1.kernel.types.KTranslucentType;
 import com.io7m.r1.kernel.types.KTranslucentVisitorType;
 import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RExceptionResource;
 
 /**
  * The default implementation of the {@link KTranslucentRendererType}.

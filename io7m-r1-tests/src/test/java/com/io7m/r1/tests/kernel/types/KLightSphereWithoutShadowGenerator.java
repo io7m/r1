@@ -23,8 +23,8 @@ import net.java.quickcheck.Generator;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
-import com.io7m.r1.types.RSpaceRGBType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceRGBType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 public final class KLightSphereWithoutShadowGenerator implements
   Generator<KLightSphereWithoutShadow>

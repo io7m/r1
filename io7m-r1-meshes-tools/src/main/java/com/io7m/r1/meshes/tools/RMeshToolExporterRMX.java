@@ -25,9 +25,9 @@ import nu.xom.Element;
 import nu.xom.Serializer;
 
 import com.io7m.jlog.LogUsableType;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionIO;
 import com.io7m.r1.meshes.RMeshTangents;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionIO;
 import com.io7m.r1.xml.rmx.RXMLExporter;
 
 /**

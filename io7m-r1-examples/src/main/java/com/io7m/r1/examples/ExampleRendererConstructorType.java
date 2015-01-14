@@ -19,8 +19,8 @@ package com.io7m.r1.examples;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jlog.LogUsableType;
+import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.KShaderCacheSetType;
-import com.io7m.r1.types.RException;
 
 /**
  * A renderer constructor.

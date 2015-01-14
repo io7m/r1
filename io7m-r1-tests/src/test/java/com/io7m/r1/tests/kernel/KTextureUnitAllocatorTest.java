@@ -44,6 +44,10 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionResource;
+import com.io7m.r1.exceptions.RExceptionUnitAllocatorActive;
+import com.io7m.r1.exceptions.RExceptionUnitAllocatorMultipleChildren;
 import com.io7m.r1.kernel.KTextureUnitAllocator;
 import com.io7m.r1.kernel.KTextureUnitContextInitialType;
 import com.io7m.r1.kernel.KTextureUnitContextType;
@@ -52,10 +56,6 @@ import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
 import com.io7m.r1.tests.RFakeTextures2DStatic;
 import com.io7m.r1.tests.RFakeTexturesCubeStatic;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionResource;
-import com.io7m.r1.types.RExceptionUnitAllocatorActive;
-import com.io7m.r1.types.RExceptionUnitAllocatorMultipleChildren;
 
 @SuppressWarnings({ "null", "static-method" }) public final class KTextureUnitAllocatorTest
 {

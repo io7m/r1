@@ -34,6 +34,8 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PMatrixDirectReadable4x4FType;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionCache;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
@@ -52,11 +54,9 @@ import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.kernel.types.KVisibleSetShadows;
-import com.io7m.r1.types.RException;
-import com.io7m.r1.types.RExceptionCache;
-import com.io7m.r1.types.RSpaceEyeType;
-import com.io7m.r1.types.RSpaceLightEyeType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceEyeType;
+import com.io7m.r1.spaces.RSpaceLightEyeType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * The default shadow map renderer implementation.

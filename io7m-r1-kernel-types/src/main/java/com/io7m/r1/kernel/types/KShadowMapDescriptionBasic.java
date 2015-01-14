@@ -25,7 +25,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.jranges.RangeCheck;
 import com.io7m.jranges.RangeInclusiveL;
-import com.io7m.r1.types.RException;
+import com.io7m.r1.exceptions.RException;
 
 /**
  * The type of descriptions for directional basic shadow maps.

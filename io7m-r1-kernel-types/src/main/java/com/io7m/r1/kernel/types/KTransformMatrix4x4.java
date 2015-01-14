@@ -20,8 +20,8 @@ import com.io7m.jequality.annotations.EqualityStructural;
 import com.io7m.jnull.Nullable;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceWorldType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * An object-space to world-space transformation consisting of a 4x4 matrix.

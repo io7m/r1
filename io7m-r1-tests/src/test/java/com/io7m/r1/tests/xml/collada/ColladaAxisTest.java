@@ -28,8 +28,8 @@ import com.io7m.jequality.AlmostEqualFloat.ContextRelative;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
-import com.io7m.r1.types.RSpaceObjectType;
-import com.io7m.r1.types.RSpaceType;
+import com.io7m.r1.spaces.RSpaceObjectType;
+import com.io7m.r1.spaces.RSpaceType;
 import com.io7m.r1.xml.collada.RColladaAxis;
 
 @SuppressWarnings({ "null", "static-method" }) public final class ColladaAxisTest
