@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -203,6 +203,31 @@ public interface R1BuilderType
 
   void setFrustumCacheCount(
     int count);
+
+  /**
+   * <p>
+   * Set the size that will be used for the monochrome framebuffer cache,
+   * calculated from the given parameters.
+   * </p>
+   * <p>
+   * The cache will begin to evict the least-recently used framebuffers when
+   * the capacity is exceeded. The capacity in bytes is given by
+   * <code>framebuffer_count * framebuffer_width * framebuffer_height * 4</code>
+   * .
+   * </p>
+   *
+   * @param framebuffer_count
+   *          The number of framebuffers
+   * @param framebuffer_width
+   *          The width of the reference framebuffer
+   * @param framebuffer_height
+   *          The height of the reference framebuffer
+   */
+
+  void setMonochromeFramebufferCacheSize(
+    final int framebuffer_count,
+    final int framebuffer_width,
+    final int framebuffer_height);
 
   /**
    * Set the region copier.

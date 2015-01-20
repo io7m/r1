@@ -16,8 +16,6 @@
 
 package com.io7m.r1.kernel;
 
-import java.util.List;
-
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
@@ -26,7 +24,6 @@ import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
@@ -34,6 +31,7 @@ import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
@@ -44,6 +42,7 @@ import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 {
   static void evaluateBlurH(
     final JCGLImplementationType gi,
+    final KTextureBindingsControllerType in_units,
     final float blur_size,
     final KUnitQuadCacheType quad_cache,
     final KProgramType blur_h,
@@ -51,79 +50,86 @@ import com.io7m.r1.kernel.types.KUnitQuadUsableType;
     final AreaInclusive input_area,
     final FramebufferUsableType output,
     final AreaInclusive output_area)
-    throws JCGLException
+    throws RException
   {
-    final JCGLInterfaceCommonType gc = gi.getGLCommon();
-    final List<TextureUnitType> units = gc.textureGetUnits();
-
-    try {
-      gc.framebufferDrawBind(output);
-
-      gc.blendingDisable();
-      gc.colorBufferMask(true, true, true, true);
-      gc.cullingDisable();
-
-      if (gc.depthBufferGetBits() > 0) {
-        gc.depthBufferTestDisable();
-        gc.depthBufferWriteDisable();
-      }
-
-      gc.viewportSet(output_area);
-
-      final JCBExecutorType e = blur_h.getExecutable();
-      e.execRun(new JCBExecutorProcedureType<RException>() {
+    in_units
+      .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
         @Override public void call(
-          final JCBProgramType p)
-          throws JCGLException,
-            RException
+          final KTextureBindingsContextType c)
+          throws RException
         {
+          final JCGLInterfaceCommonType gc = gi.getGLCommon();
+
           try {
-            final KUnitQuadUsableType quad =
-              quad_cache.cacheGetLU(Unit.unit());
-            final ArrayBufferUsableType array = quad.getArray();
-            final IndexBufferUsableType indices = quad.getIndices();
+            gc.framebufferDrawBind(output);
 
-            gc.arrayBufferBind(array);
-            KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
-            KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
-            KShadingProgramCommon.putMatrixUVUnchecked(
-              p,
-              KMatrices.IDENTITY_UV);
+            gc.blendingDisable();
+            gc.colorBufferMask(true, true, true, true);
+            gc.cullingDisable();
 
-            final int width = (int) input_area.getRangeX().getInterval();
-            p.programUniformPutFloat("image_width", width / blur_size);
-
-            final TextureUnitType unit = units.get(0);
-            assert unit != null;
-            gc.texture2DStaticBind(unit, input_texture);
-
-            try {
-              p.programUniformPutTextureUnit("t_image", unit);
-              p.programExecute(new JCBProgramProcedureType<JCGLException>() {
-                @Override public void call()
-                  throws JCGLException
-                {
-                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                }
-              });
-            } finally {
-              gc.texture2DStaticUnbind(unit);
+            if (gc.depthBufferGetBits() > 0) {
+              gc.depthBufferTestDisable();
+              gc.depthBufferWriteDisable();
             }
 
-          } catch (final JCacheException x) {
-            throw new UnreachableCodeException(x);
+            gc.viewportSet(output_area);
+
+            final JCBExecutorType e = blur_h.getExecutable();
+            e.execRun(new JCBExecutorProcedureType<RException>() {
+              @Override public void call(
+                final JCBProgramType p)
+                throws JCGLException,
+                  RException
+              {
+                try {
+                  final KUnitQuadUsableType quad =
+                    quad_cache.cacheGetLU(Unit.unit());
+                  final ArrayBufferUsableType array = quad.getArray();
+                  final IndexBufferUsableType indices = quad.getIndices();
+
+                  gc.arrayBufferBind(array);
+                  KShadingProgramCommon.bindAttributePositionUnchecked(
+                    p,
+                    array);
+                  KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
+                  KShadingProgramCommon.putMatrixUVUnchecked(
+                    p,
+                    KMatrices.IDENTITY_UV);
+
+                  final int width =
+                    (int) input_area.getRangeX().getInterval();
+                  p.programUniformPutFloat("image_width", width / blur_size);
+                  p.programUniformPutTextureUnit(
+                    "t_image",
+                    c.withTexture2D(input_texture));
+                  p
+                    .programExecute(new JCBProgramProcedureType<JCGLException>() {
+                      @Override public void call()
+                        throws JCGLException
+                      {
+                        gc.drawElements(
+                          Primitives.PRIMITIVE_TRIANGLES,
+                          indices);
+                      }
+                    });
+
+                } catch (final JCacheException x) {
+                  throw new UnreachableCodeException(x);
+                } finally {
+                  gc.arrayBufferUnbind();
+                }
+              }
+            });
           } finally {
-            gc.arrayBufferUnbind();
+            gc.framebufferDrawUnbind();
           }
         }
       });
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
   }
 
   static void evaluateBlurV(
     final JCGLImplementationType gi,
+    final KTextureBindingsControllerType in_units,
     final KUnitQuadCacheType quad_cache,
     final float blur_size,
     final KProgramType blur_v,
@@ -131,75 +137,83 @@ import com.io7m.r1.kernel.types.KUnitQuadUsableType;
     final AreaInclusive input_area,
     final FramebufferUsableType output,
     final AreaInclusive output_area)
-    throws JCGLException
+    throws RException
   {
-    final JCGLInterfaceCommonType gc = gi.getGLCommon();
-    final List<TextureUnitType> units = gc.textureGetUnits();
-
-    try {
-      gc.framebufferDrawBind(output);
-
-      gc.blendingDisable();
-      gc.colorBufferMask(true, true, true, true);
-      gc.cullingDisable();
-
-      if (gc.depthBufferGetBits() > 0) {
-        gc.depthBufferTestDisable();
-        gc.depthBufferWriteDisable();
-      }
-
-      gc.viewportSet(output_area);
-
-      final JCBExecutorType e = blur_v.getExecutable();
-      e.execRun(new JCBExecutorProcedureType<RException>() {
+    in_units
+      .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
         @Override public void call(
-          final JCBProgramType p)
-          throws JCGLException,
-            RException
+          final KTextureBindingsContextType c)
+          throws RException
         {
+          final JCGLInterfaceCommonType gc = gi.getGLCommon();
+
           try {
-            final KUnitQuadUsableType quad =
-              quad_cache.cacheGetLU(Unit.unit());
-            final ArrayBufferUsableType array = quad.getArray();
-            final IndexBufferUsableType indices = quad.getIndices();
+            gc.framebufferDrawBind(output);
 
-            gc.arrayBufferBind(array);
-            KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
-            KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
-            KShadingProgramCommon.putMatrixUVUnchecked(
-              p,
-              KMatrices.IDENTITY_UV);
+            gc.blendingDisable();
+            gc.colorBufferMask(true, true, true, true);
+            gc.cullingDisable();
 
-            final int height = (int) input_area.getRangeY().getInterval();
-            p.programUniformPutFloat("image_height", height / blur_size);
-
-            final TextureUnitType unit = units.get(0);
-            assert unit != null;
-            gc.texture2DStaticBind(unit, input_texture);
-
-            try {
-              p.programUniformPutTextureUnit("t_image", unit);
-              p.programExecute(new JCBProgramProcedureType<JCGLException>() {
-                @Override public void call()
-                  throws JCGLException
-                {
-                  gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
-                }
-              });
-            } finally {
-              gc.texture2DStaticUnbind(unit);
+            if (gc.depthBufferGetBits() > 0) {
+              gc.depthBufferTestDisable();
+              gc.depthBufferWriteDisable();
             }
 
-          } catch (final JCacheException x) {
-            throw new UnreachableCodeException(x);
+            gc.viewportSet(output_area);
+
+            final JCBExecutorType e = blur_v.getExecutable();
+            e.execRun(new JCBExecutorProcedureType<RException>() {
+              @Override public void call(
+                final JCBProgramType p)
+                throws JCGLException,
+                  RException
+              {
+                try {
+                  final KUnitQuadUsableType quad =
+                    quad_cache.cacheGetLU(Unit.unit());
+                  final ArrayBufferUsableType array = quad.getArray();
+                  final IndexBufferUsableType indices = quad.getIndices();
+
+                  gc.arrayBufferBind(array);
+                  KShadingProgramCommon.bindAttributePositionUnchecked(
+                    p,
+                    array);
+                  KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
+                  KShadingProgramCommon.putMatrixUVUnchecked(
+                    p,
+                    KMatrices.IDENTITY_UV);
+
+                  final int height =
+                    (int) input_area.getRangeY().getInterval();
+                  p
+                    .programUniformPutFloat("image_height", height
+                      / blur_size);
+                  p.programUniformPutTextureUnit(
+                    "t_image",
+                    c.withTexture2D(input_texture));
+                  p
+                    .programExecute(new JCBProgramProcedureType<JCGLException>() {
+                      @Override public void call()
+                        throws JCGLException
+                      {
+                        gc.drawElements(
+                          Primitives.PRIMITIVE_TRIANGLES,
+                          indices);
+                      }
+                    });
+
+                } catch (final JCacheException x) {
+                  throw new UnreachableCodeException(x);
+                } finally {
+                  gc.arrayBufferUnbind();
+                }
+              }
+            });
           } finally {
-            gc.arrayBufferUnbind();
+            gc.framebufferDrawUnbind();
           }
         }
       });
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
   }
 
   private KImageFilterBlurCommon()

@@ -14,34 +14,36 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.exceptions;
+package com.io7m.r1.kernel;
 
-import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.r1.exceptions.RException;
 
 /**
- * An exception representing an attempt to create multiple children for a
- * texture unit allocator context.
+ * The type of functions that execute with compiled shadow maps.
+ *
+ * @param <A>
+ *          The type of returned values
+ * @param <E>
+ *          The type of raised exceptions
  */
 
-@EqualityReference public final class RExceptionUnitAllocatorMultipleChildren extends
-  RExceptionUserError
+public interface KScreenSpaceShadowDeferredWithType<A, E extends Throwable>
 {
-  private static final long serialVersionUID;
-
-  static {
-    serialVersionUID = -1247042439663984309L;
-  }
-
   /**
-   * Construct an exception with the given message.
+   * Execute with the given screen-space shadow.
    *
-   * @param message
-   *          The message.
+   * @param shadow
+   *          The rendered shadow image
+   * @return A value of type <code>A</code>
+   *
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
    */
 
-  public RExceptionUnitAllocatorMultipleChildren(
-    final String message)
-  {
-    super(message);
-  }
+  A withShadow(
+    final KFramebufferMonochromeUsableType shadow)
+    throws RException,
+      E;
 }

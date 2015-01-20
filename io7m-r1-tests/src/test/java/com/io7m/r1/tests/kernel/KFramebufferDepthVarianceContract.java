@@ -57,7 +57,7 @@ public abstract class KFramebufferDepthVarianceContract extends TestContract
 
     final KFramebufferDepthVarianceType f =
       KFramebufferDepthVariance.newDepthVarianceFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());
@@ -79,7 +79,7 @@ public abstract class KFramebufferDepthVarianceContract extends TestContract
 
     final KFramebufferDepthVarianceType f =
       KFramebufferDepthVariance.newDepthVarianceFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());
@@ -101,7 +101,7 @@ public abstract class KFramebufferDepthVarianceContract extends TestContract
 
     final KFramebufferDepthVarianceType f =
       KFramebufferDepthVariance.newDepthVarianceFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());
@@ -123,7 +123,7 @@ public abstract class KFramebufferDepthVarianceContract extends TestContract
 
     final KFramebufferDepthVarianceType f =
       KFramebufferDepthVariance.newDepthVarianceFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());
@@ -145,7 +145,7 @@ public abstract class KFramebufferDepthVarianceContract extends TestContract
 
     final KFramebufferDepthVarianceType f =
       KFramebufferDepthVariance.newDepthVarianceFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());
@@ -167,7 +167,7 @@ public abstract class KFramebufferDepthVarianceContract extends TestContract
 
     final KFramebufferDepthVarianceType f =
       KFramebufferDepthVariance.newDepthVarianceFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());

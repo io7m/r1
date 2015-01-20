@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -46,6 +46,8 @@ import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoft;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
@@ -68,6 +70,7 @@ import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KMeshAttributes;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedBasicSSSoft;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.spaces.RSpaceClipType;
 import com.io7m.r1.spaces.RSpaceEyeType;
@@ -85,67 +88,73 @@ import com.io7m.r1.spaces.RSpaceWorldType;
  * Functions for communicating with shading programs that expose the standard
  * interface.
  * </p>
- * <p>
- * Users of the package are not expected to have to use these functions; they
- * are provided to assist with the implementation of the sandbox program.
- * </p>
  */
+
+// CHECKSTYLE:OFF
 
 @EqualityReference public final class KShadingProgramCommon
 {
-  private static final String ATTRIBUTE_NAME_VERTEX_UV           = "v_uv";
+  private static final String ATTRIBUTE_NAME_VERTEX_UV             = "v_uv";
 
-  private static final String MATRIX_NAME_DEFERRED_PROJECTION    =
-                                                                   "m_deferred_projective";
-  private static final String MATRIX_NAME_LIGHT_SPHERICAL        =
-                                                                   "m_light_spherical";
-  private static final String MATRIX_NAME_MODEL                  = "m_model";
-  private static final String MATRIX_NAME_MODELVIEW              =
-                                                                   "m_modelview";
-  private static final String MATRIX_NAME_NORMAL                 = "m_normal";
-  private static final String MATRIX_NAME_PROJECTION             =
-                                                                   "m_projection";
-  private static final String MATRIX_NAME_PROJECTION_INVERSE     =
-                                                                   "m_projection_inv";
-  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW   =
-                                                                   "m_projective_modelview";
-  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION  =
-                                                                   "m_projective_projection";
-  private static final String MATRIX_NAME_UV                     = "m_uv";
-  private static final String MATRIX_NAME_VIEW_INVERSE           =
-                                                                   "m_view_inv";
-  private static final String TEXTURE_NAME_ALBEDO                = "t_albedo";
-  private static final String TEXTURE_NAME_DEFERRED_ALBEDO       =
-                                                                   "t_map_albedo";
-  private static final String TEXTURE_NAME_DEFERRED_DEPTH        =
-                                                                   "t_map_depth";
-  private static final String TEXTURE_NAME_DEFERRED_NORMAL       =
-                                                                   "t_map_normal";
-  private static final String TEXTURE_NAME_DEFERRED_SPECULAR     =
-                                                                   "t_map_specular";
-  private static final String TEXTURE_NAME_EMISSION              =
-                                                                   "t_emission";
-  private static final String TEXTURE_NAME_ENVIRONMENT           =
-                                                                   "t_environment";
-  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_2D    =
-                                                                   "t_light_spherical_2d";
-  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_CUBE  =
-                                                                   "t_light_spherical_cube";
-  private static final String TEXTURE_NAME_NORMAL                = "t_normal";
-  private static final String TEXTURE_NAME_PROJECTION            =
-                                                                   "t_projection";
-  private static final String TEXTURE_NAME_REFRACTION_DELTA      =
-                                                                   "t_refraction_delta";
-  private static final String TEXTURE_NAME_REFRACTION_SCENE      =
-                                                                   "t_refraction_scene";
-  private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK =
-                                                                   "t_refraction_scene_mask";
-  private static final String TEXTURE_NAME_SHADOW_BASIC          =
-                                                                   "t_shadow_basic";
-  private static final String TEXTURE_NAME_SHADOW_VARIANCE       =
-                                                                   "t_shadow_variance";
-  private static final String TEXTURE_NAME_SPECULAR              =
-                                                                   "t_specular";
+  private static final String MATRIX_NAME_DEFERRED_PROJECTION      =
+                                                                     "m_deferred_projective";
+  private static final String MATRIX_NAME_LIGHT_SPHERICAL          =
+                                                                     "m_light_spherical";
+  private static final String MATRIX_NAME_MODEL                    =
+                                                                     "m_model";
+  private static final String MATRIX_NAME_MODELVIEW                =
+                                                                     "m_modelview";
+  private static final String MATRIX_NAME_NORMAL                   =
+                                                                     "m_normal";
+  private static final String MATRIX_NAME_PROJECTION               =
+                                                                     "m_projection";
+  private static final String MATRIX_NAME_PROJECTION_INVERSE       =
+                                                                     "m_projection_inv";
+  private static final String MATRIX_NAME_PROJECTIVE_MODELVIEW     =
+                                                                     "m_projective_modelview";
+  private static final String MATRIX_NAME_PROJECTIVE_PROJECTION    =
+                                                                     "m_projective_projection";
+  private static final String MATRIX_NAME_UV                       = "m_uv";
+  private static final String MATRIX_NAME_VIEW_INVERSE             =
+                                                                     "m_view_inv";
+  private static final String TEXTURE_NAME_ALBEDO                  =
+                                                                     "t_albedo";
+  private static final String TEXTURE_NAME_DEFERRED_ALBEDO         =
+                                                                     "t_map_albedo";
+  private static final String TEXTURE_NAME_DEFERRED_DEPTH          =
+                                                                     "t_map_depth";
+  private static final String TEXTURE_NAME_DEFERRED_NORMAL         =
+                                                                     "t_map_normal";
+  private static final String TEXTURE_NAME_DEFERRED_SPECULAR       =
+                                                                     "t_map_specular";
+  private static final String TEXTURE_NAME_EMISSION                =
+                                                                     "t_emission";
+  private static final String TEXTURE_NAME_ENVIRONMENT             =
+                                                                     "t_environment";
+  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_2D      =
+                                                                     "t_light_spherical_2d";
+  private static final String TEXTURE_NAME_LIGHT_SPHERICAL_CUBE    =
+                                                                     "t_light_spherical_cube";
+  private static final String TEXTURE_NAME_NORMAL                  =
+                                                                     "t_normal";
+  private static final String TEXTURE_NAME_PROJECTION              =
+                                                                     "t_projection";
+  private static final String TEXTURE_NAME_REFRACTION_DELTA        =
+                                                                     "t_refraction_delta";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE        =
+                                                                     "t_refraction_scene";
+  private static final String TEXTURE_NAME_REFRACTION_SCENE_MASK   =
+                                                                     "t_refraction_scene_mask";
+  private static final String TEXTURE_NAME_SHADOW_BASIC            =
+                                                                     "t_shadow_basic";
+  private static final String TEXTURE_NAME_SHADOW_BASIC_SSSOFT     =
+                                                                     "t_shadow_basic_sssoft";
+  private static final String TEXTURE_NAME_SHADOW_SSSOFT_INTENSITY =
+                                                                     "t_shadow_sssoft_intensity";
+  private static final String TEXTURE_NAME_SHADOW_VARIANCE         =
+                                                                     "t_shadow_variance";
+  private static final String TEXTURE_NAME_SPECULAR                =
+                                                                     "t_specular";
 
   /**
    * Bind the vertex color attribute of the given array to the color attribute
@@ -900,6 +909,18 @@ import com.io7m.r1.spaces.RSpaceWorldType;
           return Unit.unit();
         }
 
+        @Override public Unit projectiveWithShadowBasicSSSoft(
+          final KLightProjectiveWithShadowBasicSSSoft lp)
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasicSSSoftDiffuseOnly(
+          final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lp)
+        {
+          return Unit.unit();
+        }
+
         @Override public Unit projectiveWithShadowVariance(
           final KLightProjectiveWithShadowVariance unused)
           throws RException,
@@ -1570,7 +1591,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
   }
 
   static void putShadowBasicFactorMinimum(
-
     final JCBProgramType program,
     final float min)
     throws JCGLException
@@ -1591,6 +1611,44 @@ import com.io7m.r1.spaces.RSpaceWorldType;
   {
     KShadingProgramCommon.putShadowBasicDepthBiasReuse(program);
     KShadingProgramCommon.putShadowBasicFactorMinimumReuse(program);
+  }
+
+  static void putShadowBasicSSSoft(
+    final JCBProgramType program,
+    final KShadowMappedBasicSSSoft s)
+  {
+    KShadingProgramCommon.putShadowBasicSSSoftDepthBias(
+      program,
+      s.getDepthBias());
+    KShadingProgramCommon.putShadowBasicSSSoftFactorMinimum(
+      program,
+      s.getFactorMinimum());
+  }
+
+  static void putShadowBasicSSSoftDepthBias(
+    final JCBProgramType program,
+    final float depth_bias)
+    throws JCGLException
+  {
+    program.programUniformPutFloat(
+      "shadow_basic_sssoft.depth_bias",
+      depth_bias);
+  }
+
+  static void putShadowBasicSSSoftDepthCoefficient(
+    final JCBProgramType program,
+    final float c)
+  {
+    program
+      .programUniformPutFloat("shadow_basic_sssoft.depth_coefficient", c);
+  }
+
+  static void putShadowBasicSSSoftFactorMinimum(
+    final JCBProgramType program,
+    final float min)
+    throws JCGLException
+  {
+    program.programUniformPutFloat("shadow_basic_sssoft.factor_min", min);
   }
 
   static void putShadowVariance(
@@ -1792,6 +1850,24 @@ import com.io7m.r1.spaces.RSpaceWorldType;
   {
     program
       .programUniformUseExisting(KShadingProgramCommon.TEXTURE_NAME_SHADOW_BASIC);
+  }
+
+  static void putTextureShadowMapBasicSSSoft(
+    final JCBProgramType program,
+    final TextureUnitType unit)
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_SHADOW_BASIC_SSSOFT,
+      unit);
+  }
+
+  static void putTextureShadowMapSSSoftIntensity(
+    final JCBProgramType program,
+    final TextureUnitType unit)
+  {
+    program.programUniformPutTextureUnit(
+      KShadingProgramCommon.TEXTURE_NAME_SHADOW_SSSOFT_INTENSITY,
+      unit);
   }
 
   static void putTextureShadowMapVariance(
