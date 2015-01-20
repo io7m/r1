@@ -16,6 +16,7 @@
 
 package com.io7m.r1.kernel;
 
+import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.JCGLException;
@@ -24,6 +25,7 @@ import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.MatrixM3x3F;
 import com.io7m.jtensors.MatrixReadable4x4FType;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -31,8 +33,12 @@ import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoft;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightWithScreenSpaceShadowType;
+import com.io7m.r1.kernel.types.KLightWithScreenSpaceShadowVisitorType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KLightWithShadowVisitorType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
@@ -114,8 +120,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
     final JCBProgramType program,
     final KMatricesInstanceValuesType mwi,
     final KMaterialRegularType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     KShadingProgramCommon.putMatrixModelViewUnchecked(
       program,
@@ -127,16 +132,14 @@ import com.io7m.r1.kernel.types.KProjectionType;
       new KMaterialEnvironmentVisitorType<Unit, JCGLException>() {
         @Override public Unit none(
           final KMaterialEnvironmentNone m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           return Unit.unit();
         }
 
         @Override public Unit reflection(
           final KMaterialEnvironmentReflection m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putMatrixInverseView(
             program,
@@ -146,8 +149,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit reflectionMapped(
           final KMaterialEnvironmentReflectionMapped m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putMatrixInverseView(
             program,
@@ -161,7 +163,6 @@ import com.io7m.r1.kernel.types.KProjectionType;
     final JCBProgramType program,
     final KMatricesInstanceValuesType mwi,
     final KMaterialTranslucentSpecularOnly material)
-    throws JCGLException
   {
     KShadingProgramCommon.putMatrixModelViewUnchecked(
       program,
@@ -171,29 +172,26 @@ import com.io7m.r1.kernel.types.KProjectionType;
   }
 
   static void putInstanceTexturesAlbedo(
-    final KTextureUnitContextType units,
+    final KTextureBindingsContextType texture_unit_context,
     final JCBProgramType program,
     final KMaterialAlbedoType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     material
       .albedoAccept(new KMaterialAlbedoVisitorType<Unit, JCGLException>() {
         @Override public Unit textured(
           final KMaterialAlbedoTextured m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putTextureAlbedoUnchecked(
             program,
-            units.withTexture2D(m.getTexture()));
+            texture_unit_context.withTexture2D(m.getTexture()));
           return Unit.unit();
         }
 
         @Override public Unit untextured(
           final KMaterialAlbedoUntextured m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           return Unit.unit();
         }
@@ -201,11 +199,10 @@ import com.io7m.r1.kernel.types.KProjectionType;
   }
 
   static void putInstanceTexturesEnvironment(
-    final KTextureUnitContextType units,
+    final KTextureBindingsContextType texture_unit_context,
     final JCBProgramType program,
     final KMaterialEnvironmentType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     material
       .environmentAccept(new KMaterialEnvironmentVisitorType<Unit, JCGLException>() {
@@ -219,52 +216,47 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit reflection(
           final KMaterialEnvironmentReflection m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putTextureEnvironment(
             program,
-            units.withTextureCube(m.getTexture()));
+            texture_unit_context.withTextureCube(m.getTexture()));
           return Unit.unit();
         }
 
         @Override public Unit reflectionMapped(
           final KMaterialEnvironmentReflectionMapped m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putTextureEnvironment(
             program,
-            units.withTextureCube(m.getTexture()));
+            texture_unit_context.withTextureCube(m.getTexture()));
           return Unit.unit();
         }
       });
   }
 
   static void putInstanceTexturesNormal(
-    final KTextureUnitContextType units,
+    final KTextureBindingsContextType texture_unit_context,
     final JCBProgramType program,
     final KMaterialNormalType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     material
       .normalAccept(new KMaterialNormalVisitorType<Unit, JCGLException>() {
         @Override public Unit mapped(
           final KMaterialNormalMapped m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putTextureNormal(
             program,
-            units.withTexture2D(m.getTexture()));
+            texture_unit_context.withTexture2D(m.getTexture()));
           return Unit.unit();
         }
 
         @Override public Unit vertex(
           final KMaterialNormalVertex m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           return Unit.unit();
         }
@@ -272,90 +264,87 @@ import com.io7m.r1.kernel.types.KProjectionType;
   }
 
   static void putInstanceTexturesRegularLit(
-    final KTextureUnitContextType units,
+    final KTextureBindingsContextType texture_unit_context,
     final JCBProgramType program,
     final KMaterialRegularType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     KRendererCommon.putInstanceTexturesAlbedo(
-      units,
+      texture_unit_context,
       program,
       material.materialRegularGetAlbedo());
     KRendererCommon.putInstanceTexturesNormal(
-      units,
+      texture_unit_context,
       program,
       material.materialGetNormal());
     KRendererCommon.putInstanceTexturesSpecular(
-      units,
+      texture_unit_context,
       program,
       material.materialRegularGetSpecular());
     KRendererCommon.putInstanceTexturesEnvironment(
-      units,
+      texture_unit_context,
       program,
       material.materialRegularGetEnvironment());
   }
 
   static void putInstanceTexturesRegularUnlit(
-    final KTextureUnitContextType units,
+    final KTextureBindingsContextType texture_unit_context,
     final JCBProgramType program,
     final KMaterialRegularType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     KRendererCommon.putInstanceTexturesAlbedo(
-      units,
+      texture_unit_context,
       program,
       material.materialRegularGetAlbedo());
     KRendererCommon.putInstanceTexturesNormal(
-      units,
+      texture_unit_context,
       program,
       material.materialGetNormal());
 
     final KMaterialEnvironmentType env =
       material.materialRegularGetEnvironment();
-    KRendererCommon.putInstanceTexturesEnvironment(units, program, env);
+    KRendererCommon.putInstanceTexturesEnvironment(
+      texture_unit_context,
+      program,
+      env);
 
     if (env instanceof KMaterialEnvironmentReflectionMapped) {
       KRendererCommon.putInstanceTexturesSpecular(
-        units,
+        texture_unit_context,
         program,
         material.materialRegularGetSpecular());
     }
   }
 
   static void putInstanceTexturesSpecular(
-    final KTextureUnitContextType units,
+    final KTextureBindingsContextType texture_unit_context,
     final JCBProgramType program,
     final KMaterialSpecularType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     material
       .specularAccept(new KMaterialSpecularVisitorType<Unit, JCGLException>() {
         @Override public Unit constant(
           final KMaterialSpecularConstant m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           return Unit.unit();
         }
 
         @Override public Unit mapped(
           final KMaterialSpecularMapped m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putTextureSpecular(
             program,
-            units.withTexture2D(m.getTexture()));
+            texture_unit_context.withTexture2D(m.getTexture()));
           return Unit.unit();
         }
 
         @Override public Unit none(
           final KMaterialSpecularNone m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           return Unit.unit();
         }
@@ -363,18 +352,17 @@ import com.io7m.r1.kernel.types.KProjectionType;
   }
 
   static void putInstanceTexturesSpecularOnly(
-    final KTextureUnitContextType units,
+    final KTextureBindingsContextType texture_unit_context,
     final JCBProgramType program,
     final KMaterialTranslucentSpecularOnly material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     KRendererCommon.putInstanceTexturesNormal(
-      units,
+      texture_unit_context,
       program,
       material.materialGetNormal());
     KRendererCommon.putInstanceTexturesSpecular(
-      units,
+      texture_unit_context,
       program,
       material.getSpecular());
   }
@@ -382,15 +370,13 @@ import com.io7m.r1.kernel.types.KProjectionType;
   static void putMaterialAlbedo(
     final JCBProgramType program,
     final KMaterialAlbedoType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     material
       .albedoAccept(new KMaterialAlbedoVisitorType<Unit, JCGLException>() {
         @Override public Unit textured(
           final KMaterialAlbedoTextured m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putMaterialAlbedoTextured(program, m);
           return Unit.unit();
@@ -398,8 +384,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit untextured(
           final KMaterialAlbedoUntextured m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putMaterialAlbedoUntextured(program, m);
           return Unit.unit();
@@ -410,23 +395,20 @@ import com.io7m.r1.kernel.types.KProjectionType;
   static void putMaterialEnvironment(
     final JCBProgramType program,
     final KMaterialEnvironmentType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     material
       .environmentAccept(new KMaterialEnvironmentVisitorType<Unit, JCGLException>() {
         @Override public Unit none(
           final KMaterialEnvironmentNone m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           return Unit.unit();
         }
 
         @Override public Unit reflection(
           final KMaterialEnvironmentReflection m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putMaterialEnvironmentReflection(program, m);
           return Unit.unit();
@@ -434,8 +416,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit reflectionMapped(
           final KMaterialEnvironmentReflectionMapped m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putMaterialEnvironmentReflectionMapped(
             program,
@@ -448,8 +429,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
   static void putMaterialRegularLit(
     final JCBProgramType program,
     final KMaterialRegularType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     KRendererCommon.putMaterialAlbedo(
       program,
@@ -465,8 +445,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
   static void putMaterialRegularUnlit(
     final JCBProgramType program,
     final KMaterialRegularType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     KRendererCommon.putMaterialAlbedo(
       program,
@@ -485,15 +464,13 @@ import com.io7m.r1.kernel.types.KProjectionType;
   static void putMaterialSpecular(
     final JCBProgramType program,
     final KMaterialSpecularType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     material
       .specularAccept(new KMaterialSpecularVisitorType<Unit, JCGLException>() {
         @Override public Unit constant(
           final KMaterialSpecularConstant m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putMaterialSpecularConstant(program, m);
           return Unit.unit();
@@ -501,8 +478,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit mapped(
           final KMaterialSpecularMapped m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putMaterialSpecularMapped(program, m);
           return Unit.unit();
@@ -510,8 +486,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit none(
           final KMaterialSpecularNone m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           return Unit.unit();
         }
@@ -521,15 +496,13 @@ import com.io7m.r1.kernel.types.KProjectionType;
   static void putMaterialTranslucentAlpha(
     final JCBProgramType program,
     final KMaterialAlphaType material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     material
       .alphaAccept(new KMaterialAlphaVisitorType<Unit, JCGLException>() {
         @Override public Unit constant(
           final KMaterialAlphaConstant m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putMaterialAlphaConstant(program, m);
           return Unit.unit();
@@ -537,8 +510,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit oneMinusDot(
           final KMaterialAlphaOneMinusDot m)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putMaterialAlphaOneMinusDot(program, m);
           return Unit.unit();
@@ -549,8 +521,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
   static void putMaterialTranslucentRegularLit(
     final JCBProgramType program,
     final KMaterialTranslucentRegular material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     KRendererCommon.putMaterialRegularLit(program, material);
     KRendererCommon.putMaterialTranslucentAlpha(
@@ -561,8 +532,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
   static void putMaterialTranslucentRegularUnlit(
     final JCBProgramType program,
     final KMaterialTranslucentRegular material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     KRendererCommon.putMaterialRegularUnlit(program, material);
     KRendererCommon.putMaterialTranslucentAlpha(
@@ -573,34 +543,83 @@ import com.io7m.r1.kernel.types.KProjectionType;
   static void putMaterialTranslucentSpecularOnly(
     final JCBProgramType program,
     final KMaterialTranslucentSpecularOnly material)
-    throws JCGLException,
-      RException
+    throws RException
   {
     KRendererCommon.putMaterialSpecular(program, material.getSpecular());
     KRendererCommon.putMaterialTranslucentAlpha(program, material.getAlpha());
   }
 
+  static void putShadowScreenSpacePrePass(
+    final KShadowMapContextType shadow_context,
+    final KTextureBindingsContextType texture_unit_context,
+    final JCBProgramType program,
+    final KLightWithScreenSpaceShadowType light)
+    throws RException
+  {
+    light
+      .withScreenSpaceShadowAccept(new KLightWithScreenSpaceShadowVisitorType<Unit, JCGLException>() {
+        @Override public Unit projectiveWithShadowBasicSSSoft(
+          final KLightProjectiveWithShadowBasicSSSoft lp)
+          throws RException
+        {
+          final KShadowMapBasicSSSoft map =
+            (KShadowMapBasicSSSoft) shadow_context.getShadowMap(lp);
+          final KFramebufferDepthType framebuffer = map.getFramebuffer();
+          final TextureUnitType unit =
+            texture_unit_context.withTexture2D(framebuffer.getDepthTexture());
+
+          KShadingProgramCommon.putShadowBasicSSSoftDepthCoefficient(
+            program,
+            KRendererCommon.depthCoefficient(lp
+              .lightProjectiveGetProjection()));
+          KShadingProgramCommon.putShadowBasicSSSoft(
+            program,
+            lp.lightGetShadowBasicSSSoft());
+          KShadingProgramCommon.putTextureShadowMapBasicSSSoft(program, unit);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasicSSSoftDiffuseOnly(
+          final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lp)
+          throws RException
+        {
+          final KShadowMapBasicSSSoft map =
+            (KShadowMapBasicSSSoft) shadow_context.getShadowMap(lp);
+          final KFramebufferDepthType framebuffer = map.getFramebuffer();
+          final TextureUnitType unit =
+            texture_unit_context.withTexture2D(framebuffer.getDepthTexture());
+
+          KShadingProgramCommon.putShadowBasicSSSoftDepthCoefficient(
+            program,
+            KRendererCommon.depthCoefficient(lp
+              .lightProjectiveGetProjection()));
+          KShadingProgramCommon.putShadowBasicSSSoft(
+            program,
+            lp.lightGetShadowBasicSSSoft());
+          KShadingProgramCommon.putTextureShadowMapBasicSSSoft(program, unit);
+          return Unit.unit();
+        }
+      });
+  }
+
   static void putShadow(
     final KShadowMapContextType shadow_context,
-    final KTextureUnitContextType unit_context,
+    final KTextureBindingsContextType texture_unit_context,
     final JCBProgramType program,
     final KLightWithShadowType light)
-    throws JCGLException,
-      RException
+    throws RException
   {
     light
       .withShadowAccept(new KLightWithShadowVisitorType<Unit, JCGLException>() {
         @Override public Unit projectiveWithShadowBasic(
           final KLightProjectiveWithShadowBasic lp)
-          throws RException,
-            JCGLException
+          throws RException
         {
           final KShadowMapBasic map =
             (KShadowMapBasic) shadow_context.getShadowMap(lp);
           final KFramebufferDepthType framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
-            unit_context.withTexture2D(framebuffer
-              .getDepthTexture());
+            texture_unit_context.withTexture2D(framebuffer.getDepthTexture());
 
           KShadingProgramCommon.putShadowBasicDepthCoefficient(
             program,
@@ -615,15 +634,13 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit projectiveWithShadowBasicDiffuseOnly(
           final KLightProjectiveWithShadowBasicDiffuseOnly lp)
-          throws RException,
-            JCGLException
+          throws RException
         {
           final KShadowMapBasic map =
             (KShadowMapBasic) shadow_context.getShadowMap(lp);
           final KFramebufferDepthType framebuffer = map.getFramebuffer();
           final TextureUnitType unit =
-            unit_context.withTexture2D(framebuffer
-              .getDepthTexture());
+            texture_unit_context.withTexture2D(framebuffer.getDepthTexture());
 
           KShadingProgramCommon.putShadowBasicDepthCoefficient(
             program,
@@ -638,15 +655,14 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit projectiveWithShadowVariance(
           final KLightProjectiveWithShadowVariance lp)
-          throws RException,
-            JCGLException
+          throws RException
         {
           final KShadowMapVariance map =
             (KShadowMapVariance) shadow_context.getShadowMap(lp);
           final KFramebufferDepthVarianceType framebuffer =
             map.getFramebuffer();
           final TextureUnitType unit =
-            unit_context.withTexture2D(framebuffer
+            texture_unit_context.withTexture2D(framebuffer
               .getDepthVarianceTexture());
 
           KShadingProgramCommon.putShadowVarianceDepthCoefficient(
@@ -662,15 +678,14 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit projectiveWithShadowVarianceDiffuseOnly(
           final KLightProjectiveWithShadowVarianceDiffuseOnly lp)
-          throws RException,
-            JCGLException
+          throws RException
         {
           final KShadowMapVariance map =
             (KShadowMapVariance) shadow_context.getShadowMap(lp);
           final KFramebufferDepthVarianceType framebuffer =
             map.getFramebuffer();
           final TextureUnitType unit =
-            unit_context.withTexture2D(framebuffer
+            texture_unit_context.withTexture2D(framebuffer
               .getDepthVarianceTexture());
 
           KShadingProgramCommon.putShadowVarianceDepthCoefficient(
@@ -683,21 +698,31 @@ import com.io7m.r1.kernel.types.KProjectionType;
           KShadingProgramCommon.putTextureShadowMapVariance(program, unit);
           return Unit.unit();
         }
+
+        @Override public Unit projectiveWithShadowBasicSSSoft(
+          final KLightProjectiveWithShadowBasicSSSoft lp)
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasicSSSoftDiffuseOnly(
+          final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lp)
+        {
+          return Unit.unit();
+        }
       });
   }
 
   static void putShadowReuse(
     final JCBProgramType program,
     final KLightWithShadowType light)
-    throws JCGLException,
-      RException
+    throws RException
   {
     light
       .withShadowAccept(new KLightWithShadowVisitorType<Unit, JCGLException>() {
         @Override public Unit projectiveWithShadowBasic(
           final KLightProjectiveWithShadowBasic _)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putShadowBasicReuse(program);
           KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
@@ -706,8 +731,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit projectiveWithShadowBasicDiffuseOnly(
           final KLightProjectiveWithShadowBasicDiffuseOnly _)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putShadowBasicReuse(program);
           KShadingProgramCommon.putTextureShadowMapBasicReuse(program);
@@ -716,8 +740,7 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit projectiveWithShadowVariance(
           final KLightProjectiveWithShadowVariance _)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putShadowVarianceReuse(program);
           KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
@@ -726,11 +749,22 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
         @Override public Unit projectiveWithShadowVarianceDiffuseOnly(
           final KLightProjectiveWithShadowVarianceDiffuseOnly _)
-          throws RException,
-            JCGLException
+          throws RException
         {
           KShadingProgramCommon.putShadowVarianceReuse(program);
           KShadingProgramCommon.putTextureShadowMapVarianceReuse(program);
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasicSSSoft(
+          final KLightProjectiveWithShadowBasicSSSoft lp)
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit projectiveWithShadowBasicSSSoftDiffuseOnly(
+          final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lp)
+        {
           return Unit.unit();
         }
       });
@@ -743,7 +777,6 @@ import com.io7m.r1.kernel.types.KProjectionType;
   static void renderConfigureFaceCulling(
     final JCGLInterfaceCommonType gc,
     final KFaceSelection faces)
-    throws JCGLException
   {
     switch (faces) {
       case FACE_RENDER_BACK:
@@ -778,5 +811,19 @@ import com.io7m.r1.kernel.types.KProjectionType;
   private KRendererCommon()
   {
     throw new UnreachableCodeException();
+  }
+
+  static void putFramebufferScreenSize(
+    final KFramebufferUsableType framebuffer,
+    final JCBProgramType program)
+  {
+    final AreaInclusive area = framebuffer.getArea();
+    final RangeInclusiveL range_x = area.getRangeX();
+    final RangeInclusiveL range_y = area.getRangeY();
+
+    KShadingProgramCommon.putViewport(
+      program,
+      1.0f / range_x.getInterval(),
+      1.0f / range_y.getInterval());
   }
 }

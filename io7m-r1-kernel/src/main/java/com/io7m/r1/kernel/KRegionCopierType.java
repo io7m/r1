@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,6 +25,37 @@ import com.io7m.r1.exceptions.RException;
 
 public interface KRegionCopierType
 {
+  /**
+   * <p>
+   * Copy the given <code>source_area</code> from the depth buffer of
+   * <code>source</code> to the given <code>target_area</code> of the depth
+   * buffer of <code>target</code>.
+   * </p>
+   * <p>
+   * If the sizes of the two areas differ, the region will be scaled to the
+   * correct size.
+   * </p>
+   *
+   * @param source
+   *          The source framebuffer
+   * @param source_area
+   *          The source area
+   * @param target
+   *          The target framebuffer
+   * @param target_area
+   *          The target area
+   *
+   * @throws RException
+   *           If an error occurs
+   */
+
+  void copierCopyDepthOnly(
+    final KFramebufferRGBAUsableType source,
+    final AreaInclusive source_area,
+    final KFramebufferRGBAUsableType target,
+    final AreaInclusive target_area)
+    throws RException;
+
   /**
    * <p>
    * Copy the given <code>source_area</code> from the color buffer of
@@ -84,6 +115,37 @@ public interface KRegionCopierType
    *           If an error occurs
    */
 
+  void copierCopyMonochromeOnly(
+    final KFramebufferMonochromeUsableType source,
+    final AreaInclusive source_area,
+    final KFramebufferMonochromeUsableType target,
+    final AreaInclusive target_area)
+    throws RException;
+
+  /**
+   * <p>
+   * Copy the given <code>source_area</code> from the color buffer of
+   * <code>source</code> to the given <code>target_area</code> of the color
+   * buffer of <code>target</code>.
+   * </p>
+   * <p>
+   * If the sizes of the two areas differ, the region will be scaled to the
+   * correct size.
+   * </p>
+   *
+   * @param source
+   *          The source framebuffer
+   * @param source_area
+   *          The source area
+   * @param target
+   *          The target framebuffer
+   * @param target_area
+   *          The target area
+   *
+   * @throws RException
+   *           If an error occurs
+   */
+
   void copierCopyRGBAOnly(
     final KFramebufferRGBAUsableType source,
     final AreaInclusive source_area,
@@ -116,37 +178,6 @@ public interface KRegionCopierType
    */
 
   void copierCopyRGBAWithDepth(
-    final KFramebufferRGBAUsableType source,
-    final AreaInclusive source_area,
-    final KFramebufferRGBAUsableType target,
-    final AreaInclusive target_area)
-    throws RException;
-
-  /**
-   * <p>
-   * Copy the given <code>source_area</code> from the depth buffer of
-   * <code>source</code> to the given <code>target_area</code> of the depth
-   * buffer of <code>target</code>.
-   * </p>
-   * <p>
-   * If the sizes of the two areas differ, the region will be scaled to the
-   * correct size.
-   * </p>
-   *
-   * @param source
-   *          The source framebuffer
-   * @param source_area
-   *          The source area
-   * @param target
-   *          The target framebuffer
-   * @param target_area
-   *          The target area
-   *
-   * @throws RException
-   *           If an error occurs
-   */
-
-  void copierCopyDepthOnly(
     final KFramebufferRGBAUsableType source,
     final AreaInclusive source_area,
     final KFramebufferRGBAUsableType target,

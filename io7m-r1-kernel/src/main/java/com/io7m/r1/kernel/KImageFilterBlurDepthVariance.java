@@ -78,6 +78,8 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
    *
    * @param gi
    *          The OpenGL implementation
+   * @param in_texture_bindings
+   *          A texture bindings controller
    * @param copier
    *          A region copier
    * @param depth_variance_cache
@@ -93,6 +95,7 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 
   public static KImageFilterDepthVarianceType<KBlurParameters> filterNew(
     final JCGLImplementationType gi,
+    final KTextureBindingsControllerType in_texture_bindings,
     final KRegionCopierType copier,
     final KFramebufferDepthVarianceCacheType depth_variance_cache,
     final KShaderCacheImageType shader_cache,
@@ -101,6 +104,7 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
   {
     return new KImageFilterBlurDepthVariance(
       gi,
+      in_texture_bindings,
       copier,
       depth_variance_cache,
       shader_cache,
@@ -114,9 +118,11 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
   private final LogUsableType                      log;
   private final KUnitQuadCacheType                 quad_cache;
   private final KShaderCacheImageType              shader_cache;
+  private final KTextureBindingsControllerType     texture_bindings;
 
   private KImageFilterBlurDepthVariance(
     final JCGLImplementationType in_gi,
+    final KTextureBindingsControllerType in_texture_bindings,
     final KRegionCopierType in_copier,
     final KFramebufferDepthVarianceCacheType in_depth_variance_cache,
     final KShaderCacheImageType in_shader_cache,
@@ -124,6 +130,8 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
     final LogUsableType in_log)
   {
     this.gi = NullCheck.notNull(in_gi, "GL implementation");
+    this.texture_bindings =
+      NullCheck.notNull(in_texture_bindings, "Texture bindings");
     this.log =
       NullCheck.notNull(in_log, "Log").with(
         KImageFilterBlurDepthVariance.NAME);
@@ -180,9 +188,9 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 
         this.copier.copierCopyDepthVarianceOnly(
           input,
-          input.kFramebufferGetArea(),
+          input.getArea(),
           temporary_a,
-          temporary_a.kFramebufferGetArea());
+          temporary_a.getArea());
 
         /**
          * If only one pass is required, blur TA → TB, then TB → TA, then copy
@@ -193,29 +201,31 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
         if (passes == 1) {
           KImageFilterBlurCommon.evaluateBlurH(
             this.gi,
+            this.texture_bindings,
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
             temporary_a.getDepthVarianceTexture(),
-            temporary_a.kFramebufferGetArea(),
+            temporary_a.getArea(),
             temporary_b.getDepthVariancePassFramebuffer(),
-            temporary_b.kFramebufferGetArea());
+            temporary_b.getArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
             this.gi,
+            this.texture_bindings,
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
             temporary_b.getDepthVarianceTexture(),
-            temporary_b.kFramebufferGetArea(),
+            temporary_b.getArea(),
             temporary_a.getDepthVariancePassFramebuffer(),
-            temporary_a.kFramebufferGetArea());
+            temporary_a.getArea());
 
           this.copier.copierCopyDepthVarianceOnly(
             temporary_a,
-            temporary_a.kFramebufferGetArea(),
+            temporary_a.getArea(),
             output,
-            output.kFramebufferGetArea());
+            output.getArea());
           return;
         }
 
@@ -229,30 +239,32 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
         for (int pass = 2; pass <= passes; ++pass) {
           KImageFilterBlurCommon.evaluateBlurH(
             this.gi,
+            this.texture_bindings,
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
             temporary_a.getDepthVarianceTexture(),
-            temporary_a.kFramebufferGetArea(),
+            temporary_a.getArea(),
             temporary_b.getDepthVariancePassFramebuffer(),
-            temporary_b.kFramebufferGetArea());
+            temporary_b.getArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
             this.gi,
+            this.texture_bindings,
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
             temporary_b.getDepthVarianceTexture(),
-            temporary_b.kFramebufferGetArea(),
+            temporary_b.getArea(),
             temporary_a.getDepthVariancePassFramebuffer(),
-            temporary_a.kFramebufferGetArea());
+            temporary_a.getArea());
         }
 
         this.copier.copierCopyDepthVarianceOnly(
           temporary_a,
-          temporary_a.kFramebufferGetArea(),
+          temporary_a.getArea(),
           output,
-          output.kFramebufferGetArea());
+          output.getArea());
 
       } finally {
         receipt_b.returnToCache();
@@ -293,23 +305,25 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 
         KImageFilterBlurCommon.evaluateBlurH(
           this.gi,
+          this.texture_bindings,
           parameters.getBlurSize(),
           this.quad_cache,
           this.getProgramBlurHorizontal(),
           input.getDepthVarianceTexture(),
-          input.kFramebufferGetArea(),
+          input.getArea(),
           temporary_a.getDepthVariancePassFramebuffer(),
-          temporary_a.kFramebufferGetArea());
+          temporary_a.getArea());
 
         KImageFilterBlurCommon.evaluateBlurV(
           this.gi,
+          this.texture_bindings,
           this.quad_cache,
           parameters.getBlurSize(),
           this.getProgramBlurVertical(),
           temporary_a.getDepthVarianceTexture(),
-          temporary_a.kFramebufferGetArea(),
+          temporary_a.getArea(),
           output.getDepthVariancePassFramebuffer(),
-          output.kFramebufferGetArea());
+          output.getArea());
 
         return;
       }
@@ -334,23 +348,25 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 
         KImageFilterBlurCommon.evaluateBlurH(
           this.gi,
+          this.texture_bindings,
           parameters.getBlurSize(),
           this.quad_cache,
           this.getProgramBlurHorizontal(),
           input.getDepthVarianceTexture(),
-          input.kFramebufferGetArea(),
+          input.getArea(),
           temporary_a.getDepthVariancePassFramebuffer(),
-          temporary_a.kFramebufferGetArea());
+          temporary_a.getArea());
 
         KImageFilterBlurCommon.evaluateBlurV(
           this.gi,
+          this.texture_bindings,
           this.quad_cache,
           parameters.getBlurSize(),
           this.getProgramBlurVertical(),
           temporary_a.getDepthVarianceTexture(),
-          temporary_a.kFramebufferGetArea(),
+          temporary_a.getArea(),
           temporary_b.getDepthVariancePassFramebuffer(),
-          temporary_b.kFramebufferGetArea());
+          temporary_b.getArea());
 
         /**
          * Then, for all passes except the last, blur TB → TA, and then TA →
@@ -360,30 +376,32 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
         for (int pass = 2; pass <= passes; ++pass) {
           KImageFilterBlurCommon.evaluateBlurH(
             this.gi,
+            this.texture_bindings,
             parameters.getBlurSize(),
             this.quad_cache,
             this.getProgramBlurHorizontal(),
             temporary_b.getDepthVarianceTexture(),
-            temporary_b.kFramebufferGetArea(),
+            temporary_b.getArea(),
             temporary_a.getDepthVariancePassFramebuffer(),
-            temporary_a.kFramebufferGetArea());
+            temporary_a.getArea());
 
           KImageFilterBlurCommon.evaluateBlurV(
             this.gi,
+            this.texture_bindings,
             this.quad_cache,
             parameters.getBlurSize(),
             this.getProgramBlurVertical(),
             temporary_a.getDepthVarianceTexture(),
-            temporary_a.kFramebufferGetArea(),
+            temporary_a.getArea(),
             temporary_b.getDepthVariancePassFramebuffer(),
-            temporary_b.kFramebufferGetArea());
+            temporary_b.getArea());
         }
 
         this.copier.copierCopyDepthVarianceOnly(
           temporary_b,
-          temporary_b.kFramebufferGetArea(),
+          temporary_b.getArea(),
           output,
-          output.kFramebufferGetArea());
+          output.getArea());
 
       } finally {
         receipt_b.returnToCache();
@@ -419,15 +437,15 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 
       this.copier.copierCopyDepthVarianceOnly(
         input,
-        input.kFramebufferGetArea(),
+        input.getArea(),
         temporary_a,
-        temporary_a.kFramebufferGetArea());
+        temporary_a.getArea());
 
       this.copier.copierCopyDepthVarianceOnly(
         temporary_a,
-        temporary_a.kFramebufferGetArea(),
+        temporary_a.getArea(),
         output,
-        output.kFramebufferGetArea());
+        output.getArea());
 
     } finally {
       receipt_a.returnToCache();
@@ -478,9 +496,9 @@ import com.io7m.r1.kernel.types.KUnitQuadCacheType;
         if (input != output) {
           this.copier.copierCopyDepthVarianceOnly(
             input,
-            input.kFramebufferGetArea(),
+            input.getArea(),
             output,
-            output.kFramebufferGetArea());
+            output.getArea());
         }
         return;
       }

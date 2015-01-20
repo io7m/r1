@@ -42,6 +42,9 @@ import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoft;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
@@ -49,9 +52,11 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KLightWithShadowVisitorType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasicSSSoft;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
+import com.io7m.r1.kernel.types.KShadowMappedBasicSSSoft;
 import com.io7m.r1.kernel.types.KShadowMappedVariance;
 import com.io7m.r1.kernel.types.KVisibleSetShadows;
 import com.io7m.r1.spaces.RSpaceEyeType;
@@ -151,6 +156,48 @@ import com.io7m.r1.spaces.RSpaceWorldType;
 
   private static
     Unit
+    projectiveWithShadowBasicSSSoft(
+      final KVisibleSetShadows shadows,
+      final Map<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts,
+      final KMatricesObserverType observer,
+      final KShadowMapCacheType sc,
+      final JCGLInterfaceCommonType gc,
+      final KDepthRendererType dr,
+      final KLightWithShadowType light,
+      final KLightProjectiveWithShadowBasicSSSoftType lp)
+      throws RException
+  {
+    final KShadowMappedBasicSSSoft shadow = lp.lightGetShadowBasicSSSoft();
+    final KShadowMapDescriptionBasicSSSoft desc = shadow.getMapDescription();
+    final BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType> r =
+      sc.bluCacheGet(desc);
+
+    assert receipts.containsKey(light) == false;
+    receipts.put(light, r);
+
+    final KShadowMapBasicSSSoft sm = (KShadowMapBasicSSSoft) r.getValue();
+
+    return observer.withProjectiveLight(
+      lp,
+      new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final KMatricesProjectiveLightType mwp)
+          throws RException
+        {
+          KShadowMapRenderer.renderProjectiveBasicSSSoft(
+            gc,
+            mwp,
+            shadows,
+            dr,
+            lp,
+            sm);
+          return Unit.unit();
+        }
+      });
+  }
+
+  private static
+    Unit
     projectiveWithShadowVariance(
       final KVisibleSetShadows shadows,
       final Map<KLightWithShadowType, BLUCacheReceiptType<KShadowMapDescriptionType, KShadowMapUsableType>> receipts,
@@ -236,7 +283,57 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         view,
         mwp.getProjectiveProjection(),
         shadows.getInstancesForLight(lp),
-        fb.kFramebufferGetArea(),
+        fb.getArea(),
+        Option.some(KFaceSelection.FACE_RENDER_BACK));
+
+    } finally {
+      gc.framebufferDrawUnbind();
+    }
+  }
+
+  private static void renderProjectiveBasicSSSoft(
+    final JCGLInterfaceCommonType gc,
+    final KMatricesProjectiveLightType mwp,
+    final KVisibleSetShadows shadows,
+    final KDepthRendererType dr,
+    final KLightProjectiveWithShadowBasicSSSoftType lp,
+    final KShadowMapBasicSSSoft sm)
+    throws JCGLException,
+      RException
+  {
+    final KFramebufferDepthType fb = sm.getFramebuffer();
+
+    gc.framebufferDrawBind(fb.getDepthPassFramebuffer());
+    try {
+      gc.colorBufferMask(true, true, true, true);
+      gc.colorBufferClear4f(1.0f, 1.0f, 1.0f, 1.0f);
+      gc.depthBufferWriteEnable();
+      gc.depthBufferClear(1.0f);
+
+      /**
+       * This spectacular casting is necessary to allow a (World -> LightEye)
+       * matrix to masquerade as a (World -> Eye) matrix. From the perspective
+       * of a depth renderer, the light is the observer, so the change in
+       * types is warranted.
+       */
+
+      final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceLightEyeType> p_view_original =
+        mwp.getMatrixProjectiveView();
+      @SuppressWarnings("unchecked") final PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType> p_view =
+        (PMatrixDirectReadable4x4FType<RSpaceWorldType, RSpaceEyeType>) (PMatrixDirectReadable4x4FType<RSpaceWorldType, ?>) p_view_original;
+      final PMatrixI4x4F<RSpaceWorldType, RSpaceEyeType> view =
+        PMatrixI4x4F.newFromReadable(p_view);
+
+      /**
+       * Basic shadow mapping produces fewer artifacts if only back faces are
+       * rendered.
+       */
+
+      dr.rendererEvaluateDepthWithBoundFramebuffer(
+        view,
+        mwp.getProjectiveProjection(),
+        shadows.getInstancesForLight(lp),
+        fb.getArea(),
         Option.some(KFaceSelection.FACE_RENDER_BACK));
 
     } finally {
@@ -288,7 +385,7 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         view,
         mwp.getProjectiveProjection(),
         shadows.getInstancesForLight(lp),
-        fb.kFramebufferGetArea(),
+        fb.getArea(),
         none);
 
     } finally {
@@ -312,8 +409,7 @@ import com.io7m.r1.spaces.RSpaceWorldType;
       case TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR:
       case TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST:
       {
-        gc.texture2DStaticRegenerateMipmaps(fb
-          .getDepthVarianceTexture());
+        gc.texture2DStaticRegenerateMipmaps(fb.getDepthVarianceTexture());
         break;
       }
     }
@@ -472,6 +568,38 @@ import com.io7m.r1.spaces.RSpaceWorldType;
               JCacheException
           {
             return KShadowMapRenderer.projectiveWithShadowBasic(
+              shadows,
+              receipts,
+              observer,
+              sc,
+              gc,
+              dr,
+              light,
+              lp);
+          }
+
+          @Override public Unit projectiveWithShadowBasicSSSoft(
+            final KLightProjectiveWithShadowBasicSSSoft lp)
+            throws RException,
+              JCacheException
+          {
+            return KShadowMapRenderer.projectiveWithShadowBasicSSSoft(
+              shadows,
+              receipts,
+              observer,
+              sc,
+              gc,
+              dr,
+              light,
+              lp);
+          }
+
+          @Override public Unit projectiveWithShadowBasicSSSoftDiffuseOnly(
+            final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lp)
+            throws RException,
+              JCacheException
+          {
+            return KShadowMapRenderer.projectiveWithShadowBasicSSSoft(
               shadows,
               receipts,
               observer,

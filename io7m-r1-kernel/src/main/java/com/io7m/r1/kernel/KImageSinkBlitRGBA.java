@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,15 +16,12 @@
 
 package com.io7m.r1.kernel;
 
-import java.util.List;
-
 import com.io7m.jcanephora.AreaInclusive;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
@@ -32,6 +29,7 @@ import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PMatrixM3x3F;
@@ -53,6 +51,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
    *
    * @param in_g
    *          An OpenGL implementation
+   * @param in_bindings
+   *          A texture bindings controller
    * @param in_shader_cache_image
    *          An image shader cache
    * @param in_quad_cache
@@ -62,19 +62,26 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
   public static KImageSinkRGBAType<AreaInclusive> newSink(
     final JCGLImplementationType in_g,
+    final KTextureBindingsControllerType in_bindings,
     final KShaderCacheImageType in_shader_cache_image,
     final KUnitQuadCacheType in_quad_cache)
   {
-    return new KImageSinkBlitRGBA(in_g, in_shader_cache_image, in_quad_cache);
+    return new KImageSinkBlitRGBA(
+      in_g,
+      in_bindings,
+      in_shader_cache_image,
+      in_quad_cache);
   }
 
   private final JCGLImplementationType                             g;
   private final KUnitQuadCacheType                                 quad_cache;
   private final KShaderCacheImageType                              shader_cache_image;
   private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv;
+  private final KTextureBindingsControllerType                     bindings;
 
   private KImageSinkBlitRGBA(
     final JCGLImplementationType in_g,
+    final KTextureBindingsControllerType in_bindings,
     final KShaderCacheImageType in_shader_cache_image,
     final KUnitQuadCacheType in_quad_cache)
   {
@@ -82,6 +89,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     this.shader_cache_image =
       NullCheck.notNull(in_shader_cache_image, "Shader cache");
     this.quad_cache = NullCheck.notNull(in_quad_cache, "Quad cache");
+    this.bindings = NullCheck.notNull(in_bindings, "Texture bindings");
     this.uv = new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
   }
 
@@ -131,40 +139,45 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final KProgramType kp = this.shader_cache_image.cacheGetLU("copy_rgba");
     gc.framebufferDrawUnbind();
 
-    gc.blendingDisable();
-    gc.colorBufferMask(true, true, true, true);
-    gc.cullingDisable();
+    this.bindings
+      .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+        @Override public void call(
+          final KTextureBindingsContextType c)
+          throws RException
+        {
+          gc.blendingDisable();
+          gc.colorBufferMask(true, true, true, true);
+          gc.cullingDisable();
 
-    if (gc.depthBufferGetBits() > 0) {
-      gc.depthBufferTestDisable();
-      gc.depthBufferWriteDisable();
-    }
+          if (gc.depthBufferGetBits() > 0) {
+            gc.depthBufferTestDisable();
+            gc.depthBufferWriteDisable();
+          }
 
-    if (gc.stencilBufferGetBits() > 0) {
-      gc.stencilBufferDisable();
-      gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0);
-    }
+          if (gc.stencilBufferGetBits() > 0) {
+            gc.stencilBufferDisable();
+            gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0);
+          }
 
-    gc.viewportSet(config);
+          gc.viewportSet(config);
 
-    final JCBExecutorType e = kp.getExecutable();
-    e.execRun(new JCBExecutorProcedureType<RException>() {
-      @SuppressWarnings("synthetic-access") @Override public void call(
-        final JCBProgramType p)
-        throws JCGLException,
-          RException
-      {
-        final List<TextureUnitType> units = gc.textureGetUnits();
-        final TextureUnitType unit = units.get(0);
-        assert unit != null;
-        gc.texture2DStaticBind(unit, input.getRGBATexture());
-        p.programUniformPutTextureUnit("t_image", unit);
-        final KUnitQuadUsableType q =
-          KImageSinkBlitRGBA.this.quad_cache.cacheGetLU(Unit.unit());
-        assert q != null;
-        KImageSinkBlitRGBA.this.drawQuad(gc, q, p);
-      }
-    });
+          final JCBExecutorType e = kp.getExecutable();
+          e.execRun(new JCBExecutorProcedureType<RException>() {
+            @SuppressWarnings("synthetic-access") @Override public void call(
+              final JCBProgramType p)
+              throws JCGLException,
+                RException
+            {
+              p.programUniformPutTextureUnit(
+                "t_image",
+                c.withTexture2D(input.getRGBATexture()));
+              final KUnitQuadUsableType q =
+                KImageSinkBlitRGBA.this.quad_cache.cacheGetLU(Unit.unit());
+              KImageSinkBlitRGBA.this.drawQuad(gc, q, p);
+            }
+          });
+        }
+      });
   }
 
   @Override public String sinkGetName()

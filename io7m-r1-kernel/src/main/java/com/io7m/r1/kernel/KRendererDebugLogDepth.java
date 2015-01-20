@@ -337,7 +337,7 @@ import com.io7m.r1.kernel.types.KVisibleSetOpaques;
     final @Nullable DebugGBuffer previous,
     final KFramebufferRGBAUsableType framebuffer)
   {
-    final AreaInclusive area = framebuffer.kFramebufferGetArea();
+    final AreaInclusive area = framebuffer.getArea();
     if (previous == null) {
       return DebugGBuffer.newGBuffer(gi, area);
     }

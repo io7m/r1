@@ -58,8 +58,12 @@ import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredUsableType;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCache;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
+import com.io7m.r1.kernel.KFramebufferMonochromeCache;
+import com.io7m.r1.kernel.KFramebufferMonochromeCacheType;
 import com.io7m.r1.kernel.KImageFilterBlurDepthVariance;
+import com.io7m.r1.kernel.KImageFilterBlurMonochrome;
 import com.io7m.r1.kernel.KImageFilterDepthVarianceType;
+import com.io7m.r1.kernel.KImageFilterMonochromeType;
 import com.io7m.r1.kernel.KMatricesObserverFunctionType;
 import com.io7m.r1.kernel.KMatricesObserverType;
 import com.io7m.r1.kernel.KMutableMatrices;
@@ -68,6 +72,8 @@ import com.io7m.r1.kernel.KRegionCopier;
 import com.io7m.r1.kernel.KRegionCopierType;
 import com.io7m.r1.kernel.KRendererDeferredOpaque;
 import com.io7m.r1.kernel.KRendererDeferredOpaqueType;
+import com.io7m.r1.kernel.KScreenSpaceShadowDeferredRenderer;
+import com.io7m.r1.kernel.KScreenSpaceShadowDeferredRendererType;
 import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.kernel.KShadowMapCache;
 import com.io7m.r1.kernel.KShadowMapCacheType;
@@ -75,6 +81,8 @@ import com.io7m.r1.kernel.KShadowMapContextType;
 import com.io7m.r1.kernel.KShadowMapRenderer;
 import com.io7m.r1.kernel.KShadowMapRendererType;
 import com.io7m.r1.kernel.KShadowMapWithType;
+import com.io7m.r1.kernel.KTextureBindingsController;
+import com.io7m.r1.kernel.KTextureBindingsControllerType;
 import com.io7m.r1.kernel.KViewRaysCache;
 import com.io7m.r1.kernel.KViewRaysCacheType;
 import com.io7m.r1.kernel.types.KBlurParameters;
@@ -156,6 +164,7 @@ import com.io7m.r1.tests.TestShaderCaches;
           KRefractionRendererType.class,
           BigInteger.ONE,
           in_log);
+
       final KFrustumMeshCacheType fc =
         KFrustumMeshCache.newCacheWithCapacity(
           g.getGLCommon(),
@@ -166,21 +175,62 @@ import com.io7m.r1.tests.TestShaderCaches;
 
       final LRUCacheConfig view_rays_cache_config =
         LRUCacheConfig.empty().withMaximumCapacity(BigInteger.valueOf(60));
+
       final KViewRaysCacheType vrc =
         KViewRaysCache.newCacheWithConfig(
           new PMatrixM4x4F.Context(),
           view_rays_cache_config);
 
+      final BLUCacheConfig cache_config =
+        BLUCacheConfig
+          .empty()
+          .withMaximumBorrowsPerKey(BigInteger.valueOf(64))
+          .withMaximumCapacity(BigInteger.valueOf(1024 * 768 * 4));
+
+      final KFramebufferMonochromeCacheType in_mono_cache =
+        KFramebufferMonochromeCache.newCacheWithConfig(
+          g,
+          cache_config,
+          in_log);
+
+      final KRegionCopierType copier = KRegionCopier.newCopier(g, in_log);
+
+      final KUnitQuadCacheType quad_cache =
+        KUnitQuadCache.newCache(g.getGLCommon(), in_log);
+
+      final KTextureBindingsControllerType bct =
+        KTextureBindingsController.newBindings(g.getGLCommon());
+
+      final KImageFilterMonochromeType<KBlurParameters> in_blur =
+        KImageFilterBlurMonochrome.filterNew(
+          g,
+          bct,
+          copier,
+          in_mono_cache,
+          tc.getShaderImageCache(),
+          quad_cache,
+          in_log);
+
+      final KScreenSpaceShadowDeferredRendererType in_ssshadow_renderer =
+        KScreenSpaceShadowDeferredRenderer.newRenderer(
+          bct,
+          fc,
+          tc.getShaderDeferredLightCache(),
+          in_mono_cache,
+          in_blur);
+
       final KRendererDeferredOpaqueType r =
         KRendererDeferredOpaque.newRenderer(
           g,
+          bct,
           qc,
           sc,
           fc,
           tc.getShaderDebugCache(),
           tc.getShaderDeferredGeoCache(),
           tc.getShaderDeferredLightCache(),
-          vrc);
+          vrc,
+          in_ssshadow_renderer);
 
       return r;
     } catch (final RException e) {
@@ -227,9 +277,14 @@ import com.io7m.r1.tests.TestShaderCaches;
       KDepthRenderer.newRenderer(g, tc.getShaderDepthCache(), in_log);
     final KDepthVarianceRendererType dvr =
       KDepthVarianceRenderer.newRenderer(g, tc.getShaderDepthVarianceCache());
+
+    final KTextureBindingsControllerType bct =
+      KTextureBindingsController.newBindings(g.getGLCommon());
+
     final KImageFilterDepthVarianceType<KBlurParameters> pbdv =
       KImageFilterBlurDepthVariance.filterNew(
         g,
+        bct,
         copier,
         depth_variance_cache,
         tc.getShaderImageCache(),

@@ -46,6 +46,8 @@ import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KImageSinkBlitRGBA;
 import com.io7m.r1.kernel.KImageSinkRGBAType;
 import com.io7m.r1.kernel.KShaderCacheSetType;
+import com.io7m.r1.kernel.KTextureBindingsController;
+import com.io7m.r1.kernel.KTextureBindingsControllerType;
 import com.io7m.r1.kernel.types.KUnitQuadCache;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.main.R1Type;
@@ -186,7 +188,7 @@ public final class VExampleRunnerImage implements VExampleRunnerImageType
   {
     final KFramebufferDeferredType fb = this.framebuffer;
     if (fb != null) {
-      final AreaInclusive area = fb.kFramebufferGetArea();
+      final AreaInclusive area = fb.getArea();
       final int width = (int) area.getRangeX().getInterval();
       final int height = (int) area.getRangeY().getInterval();
 
@@ -235,10 +237,13 @@ public final class VExampleRunnerImage implements VExampleRunnerImageType
         VShaderCaches.newCachesFromArchives(g, this.log);
       this.shader_cache = sc;
 
-      this.renderer =
-        this.renderer_cons.newRenderer(this.log, this.shader_cache, g);
+      final KTextureBindingsControllerType tc =
+        KTextureBindingsController.newBindings(g.getGLCommon());
 
-      this.sink = KImageSinkBlitRGBA.newSink(g, sc.getShaderImageCache(), cq);
+      this.renderer = this.renderer_cons.newRenderer(this.log, sc, g);
+
+      this.sink =
+        KImageSinkBlitRGBA.newSink(g, tc, sc.getShaderImageCache(), cq);
       this.screen_area =
         new AreaInclusive(
           new RangeInclusiveL(0, drawable.getWidth() - 1),

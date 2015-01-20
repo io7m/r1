@@ -370,7 +370,7 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         view,
         projection,
         instances,
-        framebuffer.kFramebufferGetArea(),
+        framebuffer.getArea(),
         faces);
     } finally {
       gc.framebufferDrawUnbind();

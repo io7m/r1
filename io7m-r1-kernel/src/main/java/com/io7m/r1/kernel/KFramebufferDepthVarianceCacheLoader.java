@@ -85,7 +85,7 @@ import com.io7m.r1.kernel.types.KFramebufferDepthVarianceDescription;
   @Override public BigInteger cacheValueSizeOf(
     final KFramebufferDepthVarianceType v)
   {
-    final BigInteger r = BigInteger.valueOf(v.kFramebufferGetSizeBytes());
+    final BigInteger r = BigInteger.valueOf(v.getSizeInBytes());
     assert r != null;
     return r;
   }
