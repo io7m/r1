@@ -47,6 +47,7 @@
   <xi:include href="dai-lighting-projective.xml"/>
   <xi:include href="dai-shadows.xml"/>
   <xi:include href="dai-shadow-mapping-basic.xml"/>
+  <xi:include href="dai-shadow-mapping-basic-sssoft.xml"/>
   <xi:include href="dai-shadow-mapping-variance.xml"/>
   <xi:include href="dai-generic-refraction.xml"/>
   <xi:include href="dai-filter-blur.xml"/>

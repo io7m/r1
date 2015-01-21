@@ -40,6 +40,23 @@
     </s:paragraph>
   </s:subsection>
 
+  <s:subsection xml:id="r1.dai.shadows.pros_cons">
+    <s:subsection-title>Advantages/Disadvantages</s:subsection-title>
+    <s:paragraph>
+      Unfortunately, because local illumination and shadowing is
+      essentially a cheap approximation, there are advantages and
+      disadvantages to each type of shadowing algorithm, with no
+      clear winners. Whether or not a given algorithm is appropriate 
+      to a particualr scene can only be determined through 
+      experimentation. The <s:term s:type="package">${project.parent.name}</s:term> 
+      package allows the selection of shadowing algorithms on a per-light
+      basis, so users are not tied to a single choice. The documentation 
+      attempts to describe the advantages and disadvantages of each 
+      algorithm, and to give some insight as to how particular algorithms 
+      will behave in specific situations.
+    </s:paragraph>
+  </s:subsection>
+
   <s:subsection xml:id="r1.dai.shadows.caching">
     <s:subsection-title>Caching</s:subsection-title>
     <s:paragraph>
