@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -261,7 +261,8 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
             in_shader_caches,
             in_frustum_cache,
             in_monochrome_cache,
-            in_blur_mono);
+            in_blur_mono,
+            in_copier);
 
         final KRendererDeferredOpaqueType in_renderer_deferred_opaque =
           this.makeDeferredOpaque(
@@ -820,7 +821,8 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         final KShaderCacheSetType in_shader_caches,
         final KFrustumMeshCacheType in_frustum_cache,
         final KFramebufferMonochromeCacheType in_mono_cache,
-        final KImageFilterMonochromeType<KBlurParameters> in_blur_mono)
+        final KImageFilterMonochromeType<KBlurParameters> in_blur_mono,
+        final KRegionCopierType in_copier)
     {
       KScreenSpaceShadowDeferredRendererType in_ssshadow_renderer;
       if (this.renderer_ssshadow != null) {
@@ -832,7 +834,8 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
             in_frustum_cache,
             in_shader_caches.getShaderDeferredLightCache(),
             in_mono_cache,
-            in_blur_mono);
+            in_blur_mono,
+            in_copier);
       }
       return in_ssshadow_renderer;
     }

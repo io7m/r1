@@ -36,6 +36,7 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.jtensors.parameterized.PVectorI2F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
@@ -67,10 +68,13 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   private final KFramebufferMonochromeCacheType             mono_cache;
   private final KShaderCacheDeferredLightType               shader_light_cache;
   private final KTextureBindingsControllerType              bindings;
+  private final KRegionCopierType                           copier;
 
   /**
    * Construct a new screen-space shadow renderer.
    *
+   * @param in_copier
+   *          A region copier
    * @param in_bindings
    *          A texture bindings controller.
    * @param in_frustum_cache
@@ -89,14 +93,16 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final KFrustumMeshCacheType in_frustum_cache,
     final KShaderCacheDeferredLightType in_shader_light_cache,
     final KFramebufferMonochromeCacheType in_mono_cache,
-    final KImageFilterMonochromeType<KBlurParameters> in_blur)
+    final KImageFilterMonochromeType<KBlurParameters> in_blur,
+    final KRegionCopierType in_copier)
   {
     return new KScreenSpaceShadowDeferredRenderer(
       in_bindings,
       in_frustum_cache,
       in_shader_light_cache,
       in_mono_cache,
-      in_blur);
+      in_blur,
+      in_copier);
   }
 
   private KScreenSpaceShadowDeferredRenderer(
@@ -104,13 +110,15 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final KFrustumMeshCacheType in_frustum_cache,
     final KShaderCacheDeferredLightType in_shader_light_cache,
     final KFramebufferMonochromeCacheType in_mono_cache,
-    final KImageFilterMonochromeType<KBlurParameters> in_blur)
+    final KImageFilterMonochromeType<KBlurParameters> in_blur,
+    final KRegionCopierType in_copier)
   {
     this.bindings = NullCheck.notNull(in_bindings);
     this.frustum_cache = NullCheck.notNull(in_frustum_cache);
     this.shader_light_cache = NullCheck.notNull(in_shader_light_cache);
     this.mono_cache = NullCheck.notNull(in_mono_cache);
     this.blur = NullCheck.notNull(in_blur);
+    this.copier = NullCheck.notNull(in_copier);
   }
 
   private void renderShadow(
@@ -274,6 +282,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   {
     final KFramebufferMonochromeCacheType mc = this.mono_cache;
     final KImageFilterMonochromeType<KBlurParameters> mb = this.blur;
+    final KRegionCopierType cp =
+      KScreenSpaceShadowDeferredRenderer.this.copier;
 
     lwsss
       .withScreenSpaceShadowAccept(new KLightWithScreenSpaceShadowVisitorType<A, E>() {
@@ -287,17 +297,17 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
           gc.viewportSet(area);
 
-          final KFramebufferMonochromeDescription mono_desc =
+          final KFramebufferMonochromeDescription mono_desc0 =
             KFramebufferMonochromeDescription.newDescription(
               area,
               TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
               TextureFilterMinification.TEXTURE_FILTER_LINEAR,
               shadow.getMonochromePrecision());
 
-          final BLUCacheReceiptType<KFramebufferMonochromeDescription, KFramebufferMonochromeUsableType> mono_receipt =
-            mc.bluCacheGet(mono_desc);
-          final KFramebufferMonochromeUsableType mono_fb =
-            mono_receipt.getValue();
+          final BLUCacheReceiptType<KFramebufferMonochromeDescription, KFramebufferMonochromeUsableType> mono_receipt0 =
+            mc.bluCacheGet(mono_desc0);
+          final KFramebufferMonochromeUsableType mono_fb0 =
+            mono_receipt0.getValue();
 
           try {
             KScreenSpaceShadowDeferredRenderer.this.renderShadow(
@@ -307,16 +317,48 @@ import com.io7m.r1.spaces.RSpaceTextureType;
               mdp,
               shadow_map_context,
               lp,
-              mono_fb);
+              mono_fb0);
+
+            {
+              final RangeInclusiveL rx = area.getRangeX();
+              final RangeInclusiveL ry = area.getRangeY();
+              final AreaInclusive sub_area =
+                new AreaInclusive(
+                  new RangeInclusiveL(4, rx.getUpper() - 4),
+                  new RangeInclusiveL(4, ry.getUpper() - 4));
+
+              final KFramebufferMonochromeDescription mono_desc1 =
+                KFramebufferMonochromeDescription.newDescription(
+                  sub_area,
+                  TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+                  TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+                  shadow.getMonochromePrecision());
+
+              final BLUCacheReceiptType<KFramebufferMonochromeDescription, KFramebufferMonochromeUsableType> mono_receipt1 =
+                mc.bluCacheGet(mono_desc1);
+
+              try {
+                final KFramebufferMonochromeUsableType mono_fb1 =
+                  mono_receipt1.getValue();
+                cp.copierCopyMonochromeOnly(mono_fb0, area, mono_fb1, area);
+                cp.copierCopyMonochromeOnly(
+                  mono_fb1,
+                  area,
+                  mono_fb0,
+                  sub_area);
+              } finally {
+                mono_receipt1.returnToCache();
+              }
+            }
 
             mb.filterEvaluateMonochrome(
               shadow.getBlurParameters(),
-              mono_fb,
-              mono_fb);
+              mono_fb0,
+              mono_fb0);
 
-            return f.withShadow(mono_fb);
+            return f.withShadow(mono_fb0);
           } finally {
-            mono_receipt.returnToCache();
+            mono_receipt0.returnToCache();
           }
         }
 
