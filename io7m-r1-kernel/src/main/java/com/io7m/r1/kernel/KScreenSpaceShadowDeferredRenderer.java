@@ -62,12 +62,6 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 @SuppressWarnings("synthetic-access") @EqualityReference public final class KScreenSpaceShadowDeferredRenderer implements
   KScreenSpaceShadowDeferredRendererType
 {
-  private final KImageFilterMonochromeType<KBlurParameters> blur;
-  private final KFrustumMeshCacheType                       frustum_cache;
-  private final KFramebufferMonochromeCacheType             mono_cache;
-  private final KShaderCacheDeferredLightType               shader_light_cache;
-  private final KTextureBindingsControllerType              bindings;
-
   /**
    * Construct a new screen-space shadow renderer.
    *
@@ -99,6 +93,12 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       in_blur);
   }
 
+  private final KTextureBindingsControllerType              bindings;
+  private final KImageFilterMonochromeType<KBlurParameters> blur;
+  private final KFrustumMeshCacheType                       frustum_cache;
+  private final KFramebufferMonochromeCacheType             mono_cache;
+  private final KShaderCacheDeferredLightType               shader_light_cache;
+
   private KScreenSpaceShadowDeferredRenderer(
     final KTextureBindingsControllerType in_bindings,
     final KFrustumMeshCacheType in_frustum_cache,
@@ -111,6 +111,55 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     this.shader_light_cache = NullCheck.notNull(in_shader_light_cache);
     this.mono_cache = NullCheck.notNull(in_mono_cache);
     this.blur = NullCheck.notNull(in_blur);
+  }
+
+  private <A, E extends Exception> A applyShadow(
+    final JCGLInterfaceCommonType gc,
+    final AreaInclusive area,
+    final TextureUnitType t_map_depth_stencil,
+    final KViewRays view_rays,
+    final KMatricesProjectiveLightType mdp,
+    final KShadowMapContextType shadow_map_context,
+    final KScreenSpaceShadowDeferredWithType<A, E> f,
+    final KFramebufferMonochromeCacheType mc,
+    final KImageFilterMonochromeType<KBlurParameters> mb,
+    final KLightProjectiveWithShadowBasicSSSoftType lp,
+    final KShadowMappedBasicSSSoft shadow)
+    throws RException,
+      E
+  {
+    gc.viewportSet(area);
+
+    final KFramebufferMonochromeDescription mono_desc =
+      KFramebufferMonochromeDescription.newDescription(
+        area,
+        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+        shadow.getMonochromePrecision());
+
+    final BLUCacheReceiptType<KFramebufferMonochromeDescription, KFramebufferMonochromeUsableType> mono_receipt =
+      mc.bluCacheGet(mono_desc);
+    final KFramebufferMonochromeUsableType mono_fb = mono_receipt.getValue();
+
+    try {
+      KScreenSpaceShadowDeferredRenderer.this.renderShadow(
+        gc,
+        t_map_depth_stencil,
+        view_rays,
+        mdp,
+        shadow_map_context,
+        lp,
+        mono_fb);
+
+      mb.filterEvaluateMonochrome(
+        shadow.getBlurParameters(),
+        mono_fb,
+        mono_fb);
+
+      return f.withShadow(mono_fb);
+    } finally {
+      mono_receipt.returnToCache();
+    }
   }
 
   private void renderShadow(
@@ -285,39 +334,18 @@ import com.io7m.r1.spaces.RSpaceTextureType;
           final KShadowMappedBasicSSSoft shadow =
             lp.lightGetShadowBasicSSSoft();
 
-          gc.viewportSet(area);
-
-          final KFramebufferMonochromeDescription mono_desc =
-            KFramebufferMonochromeDescription.newDescription(
-              area,
-              TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-              TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-              shadow.getMonochromePrecision());
-
-          final BLUCacheReceiptType<KFramebufferMonochromeDescription, KFramebufferMonochromeUsableType> mono_receipt =
-            mc.bluCacheGet(mono_desc);
-          final KFramebufferMonochromeUsableType mono_fb =
-            mono_receipt.getValue();
-
-          try {
-            KScreenSpaceShadowDeferredRenderer.this.renderShadow(
-              gc,
-              t_map_depth_stencil,
-              view_rays,
-              mdp,
-              shadow_map_context,
-              lp,
-              mono_fb);
-
-            mb.filterEvaluateMonochrome(
-              shadow.getBlurParameters(),
-              mono_fb,
-              mono_fb);
-
-            return f.withShadow(mono_fb);
-          } finally {
-            mono_receipt.returnToCache();
-          }
+          return KScreenSpaceShadowDeferredRenderer.this.applyShadow(
+            gc,
+            area,
+            t_map_depth_stencil,
+            view_rays,
+            mdp,
+            shadow_map_context,
+            f,
+            mc,
+            mb,
+            lp,
+            shadow);
         }
 
         @Override public A projectiveWithShadowBasicSSSoftDiffuseOnly(
@@ -327,37 +355,19 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         {
           final KShadowMappedBasicSSSoft shadow =
             lp.lightGetShadowBasicSSSoft();
-          final KFramebufferMonochromeDescription mono_desc =
-            KFramebufferMonochromeDescription.newDescription(
-              area,
-              TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-              TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-              shadow.getMonochromePrecision());
 
-          final BLUCacheReceiptType<KFramebufferMonochromeDescription, KFramebufferMonochromeUsableType> mono_receipt =
-            mc.bluCacheGet(mono_desc);
-          final KFramebufferMonochromeUsableType mono_fb =
-            mono_receipt.getValue();
-
-          try {
-            KScreenSpaceShadowDeferredRenderer.this.renderShadow(
-              gc,
-              t_map_depth_stencil,
-              view_rays,
-              mdp,
-              shadow_map_context,
-              lp,
-              mono_fb);
-
-            mb.filterEvaluateMonochrome(
-              shadow.getBlurParameters(),
-              mono_fb,
-              mono_fb);
-
-            return f.withShadow(mono_fb);
-          } finally {
-            mono_receipt.returnToCache();
-          }
+          return KScreenSpaceShadowDeferredRenderer.this.applyShadow(
+            gc,
+            area,
+            t_map_depth_stencil,
+            view_rays,
+            mdp,
+            shadow_map_context,
+            f,
+            mc,
+            mb,
+            lp,
+            shadow);
         }
       });
   }
