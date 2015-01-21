@@ -319,37 +319,12 @@ import com.io7m.r1.spaces.RSpaceTextureType;
               lp,
               mono_fb0);
 
-            {
-              final RangeInclusiveL rx = area.getRangeX();
-              final RangeInclusiveL ry = area.getRangeY();
-              final AreaInclusive sub_area =
-                new AreaInclusive(
-                  new RangeInclusiveL(4, rx.getUpper() - 4),
-                  new RangeInclusiveL(4, ry.getUpper() - 4));
-
-              final KFramebufferMonochromeDescription mono_desc1 =
-                KFramebufferMonochromeDescription.newDescription(
-                  sub_area,
-                  TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
-                  TextureFilterMinification.TEXTURE_FILTER_LINEAR,
-                  shadow.getMonochromePrecision());
-
-              final BLUCacheReceiptType<KFramebufferMonochromeDescription, KFramebufferMonochromeUsableType> mono_receipt1 =
-                mc.bluCacheGet(mono_desc1);
-
-              try {
-                final KFramebufferMonochromeUsableType mono_fb1 =
-                  mono_receipt1.getValue();
-                cp.copierCopyMonochromeOnly(mono_fb0, area, mono_fb1, area);
-                cp.copierCopyMonochromeOnly(
-                  mono_fb1,
-                  area,
-                  mono_fb0,
-                  sub_area);
-              } finally {
-                mono_receipt1.returnToCache();
-              }
-            }
+            KScreenSpaceShadowDeferredRenderer.applyHaloReduction(
+              area,
+              mc,
+              cp,
+              shadow,
+              mono_fb0);
 
             mb.filterEvaluateMonochrome(
               shadow.getBlurParameters(),
@@ -376,10 +351,10 @@ import com.io7m.r1.spaces.RSpaceTextureType;
               TextureFilterMinification.TEXTURE_FILTER_LINEAR,
               shadow.getMonochromePrecision());
 
-          final BLUCacheReceiptType<KFramebufferMonochromeDescription, KFramebufferMonochromeUsableType> mono_receipt =
+          final BLUCacheReceiptType<KFramebufferMonochromeDescription, KFramebufferMonochromeUsableType> mono_receipt0 =
             mc.bluCacheGet(mono_desc);
-          final KFramebufferMonochromeUsableType mono_fb =
-            mono_receipt.getValue();
+          final KFramebufferMonochromeUsableType mono_fb0 =
+            mono_receipt0.getValue();
 
           try {
             KScreenSpaceShadowDeferredRenderer.this.renderShadow(
@@ -389,18 +364,60 @@ import com.io7m.r1.spaces.RSpaceTextureType;
               mdp,
               shadow_map_context,
               lp,
-              mono_fb);
+              mono_fb0);
+
+            KScreenSpaceShadowDeferredRenderer.applyHaloReduction(
+              area,
+              mc,
+              cp,
+              shadow,
+              mono_fb0);
 
             mb.filterEvaluateMonochrome(
               shadow.getBlurParameters(),
-              mono_fb,
-              mono_fb);
+              mono_fb0,
+              mono_fb0);
 
-            return f.withShadow(mono_fb);
+            return f.withShadow(mono_fb0);
           } finally {
-            mono_receipt.returnToCache();
+            mono_receipt0.returnToCache();
           }
         }
       });
+  }
+
+  private static void applyHaloReduction(
+    final AreaInclusive area,
+    final KFramebufferMonochromeCacheType mc,
+    final KRegionCopierType cp,
+    final KShadowMappedBasicSSSoft shadow,
+    final KFramebufferMonochromeUsableType mono_fb0)
+    throws RException
+  {
+    final RangeInclusiveL rx = area.getRangeX();
+    final RangeInclusiveL ry = area.getRangeY();
+    final AreaInclusive sub_area =
+      new AreaInclusive(
+        new RangeInclusiveL(4, rx.getUpper() - 4),
+        new RangeInclusiveL(4, ry.getUpper() - 4));
+
+    final KFramebufferMonochromeDescription mono_desc1 =
+      KFramebufferMonochromeDescription.newDescription(
+        sub_area,
+        TextureFilterMagnification.TEXTURE_FILTER_LINEAR,
+        TextureFilterMinification.TEXTURE_FILTER_LINEAR,
+        shadow.getMonochromePrecision());
+
+    final BLUCacheReceiptType<KFramebufferMonochromeDescription, KFramebufferMonochromeUsableType> mono_receipt1 =
+      mc.bluCacheGet(mono_desc1);
+
+    try {
+      final KFramebufferMonochromeUsableType mono_fb1 =
+        mono_receipt1.getValue();
+      cp.copierCopyMonochromeOnly(mono_fb0, area, mono_fb1, area);
+      cp.copierCopyMonochromeOnly(mono_fb1, area, mono_fb0, sub_area);
+    } finally {
+      mono_receipt1.returnToCache();
+    }
   }
 }
