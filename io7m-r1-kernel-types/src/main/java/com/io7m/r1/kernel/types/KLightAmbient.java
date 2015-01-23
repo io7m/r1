@@ -22,43 +22,38 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.spaces.RSpaceRGBType;
-import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
  * <p>
- * A directional light, from a conceptually infinite distance away.
+ * An ambient light.
  * </p>
  */
 
-@EqualityReference public final class KLightDirectional implements
-  KLightTranslucentType,
-  KLightDirectionalType
+@EqualityReference public final class KLightAmbient implements
+  KLightAmbientType
 {
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
-    KLightDirectionalBuilderType
+    KLightAmbientBuilderType
   {
     private PVectorI3F<RSpaceRGBType>                           color;
-    private PVectorI3F<RSpaceWorldType>                         direction;
     private @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
 
     Builder()
     {
       this.color = KColors.RGB_WHITE;
-      this.direction = new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, -1.0f);
       this.intensity = 1.0f;
     }
 
-    @Override public KLightDirectional build()
+    @Override public KLightAmbient build()
     {
-      return new KLightDirectional(this.direction, this.color, this.intensity);
+      return new KLightAmbient(this.color, this.intensity);
     }
 
-    @Override public void copyFromDirectional(
-      final KLightDirectionalType d)
+    @Override public void copyFromAmbient(
+      final KLightAmbientType d)
     {
-      NullCheck.notNull(d, "Directional light");
+      NullCheck.notNull(d, "Ambient light");
       this.color = d.lightGetColor();
-      this.direction = d.lightGetDirection();
       this.intensity = d.lightGetIntensity();
     }
 
@@ -66,12 +61,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
       final PVectorI3F<RSpaceRGBType> in_color)
     {
       this.color = NullCheck.notNull(in_color, "Color");
-    }
-
-    @Override public void setDirection(
-      final PVectorI3F<RSpaceWorldType> in_direction)
-    {
-      this.direction = NullCheck.notNull(in_direction, "Direction");
     }
 
     @Override public void setIntensity(
@@ -83,13 +72,13 @@ import com.io7m.r1.spaces.RSpaceWorldType;
 
   /**
    * <p>
-   * Create a builder for creating new directional lights.
+   * Create a builder for creating new ambient lights.
    * </p>
    *
    * @return A new light builder.
    */
 
-  public static KLightDirectionalBuilderType newBuilder()
+  public static KLightAmbientBuilderType newBuilder()
   {
     return new Builder();
   }
@@ -97,43 +86,37 @@ import com.io7m.r1.spaces.RSpaceWorldType;
   /**
    * Construct a new light.
    *
-   * @param in_direction
-   *          The light direction.
    * @param in_color
    *          The light color.
    * @param in_intensity
    *          The light intensity.
-   * @return A new directional light.
+   * @return A new ambient light.
    */
 
-  public static KLightDirectional newLight(
-    final PVectorI3F<RSpaceWorldType> in_direction,
+  public static KLightAmbient newLight(
     final PVectorI3F<RSpaceRGBType> in_color,
     final float in_intensity)
   {
-    return new KLightDirectional(in_direction, in_color, in_intensity);
+    return new KLightAmbient(in_color, in_intensity);
   }
 
   private final PVectorI3F<RSpaceRGBType>                           color;
-  private final PVectorI3F<RSpaceWorldType>                         direction;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
 
-  private KLightDirectional(
-    final PVectorI3F<RSpaceWorldType> in_direction,
+  private KLightAmbient(
     final PVectorI3F<RSpaceRGBType> in_color,
     final float in_intensity)
   {
     this.color = NullCheck.notNull(in_color, "Color");
     this.intensity = in_intensity;
-    this.direction = NullCheck.notNull(in_direction, "Direction");
   }
 
-  @Override public <A, E extends Throwable> A directionalAccept(
-    final KLightDirectionalVisitorType<A, E> v)
+  @Override public <A, E extends Throwable> A ambientAccept(
+    final KLightAmbientVisitorType<A, E> v)
     throws RException,
       E
   {
-    return v.directional(this);
+    return v.ambient(this);
   }
 
   @Override public
@@ -145,12 +128,12 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         RException,
         JCGLException
   {
-    return v.lightDirectional(this);
+    return v.lightAmbient(this);
   }
 
   @Override public String lightGetCode()
   {
-    return "LDir";
+    return "LAmbient";
   }
 
   @Override public PVectorI3F<RSpaceRGBType> lightGetColor()
@@ -158,34 +141,9 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     return this.color;
   }
 
-  @Override public PVectorI3F<RSpaceWorldType> lightGetDirection()
-  {
-    return this.direction;
-  }
-
   @Override public float lightGetIntensity()
   {
     return this.intensity;
-  }
-
-  @Override public
-    <A, E extends Throwable, V extends KLightLocalVisitorType<A, E>>
-    A
-    lightLocalAccept(
-      final V v)
-      throws RException,
-        E,
-        JCGLException
-  {
-    return v.lightDirectional(this);
-  }
-
-  @Override public <A, E extends Throwable> A lightTranslucentAccept(
-    final KLightTranslucentVisitorType<A, E> v)
-    throws RException,
-      E
-  {
-    return v.lightTranslucentDirectional(this);
   }
 
   @Override public int texturesGetRequired()
@@ -196,10 +154,8 @@ import com.io7m.r1.spaces.RSpaceWorldType;
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[KLightDirectional color=");
+    b.append("[KLightAmbient color=");
     b.append(this.color);
-    b.append(" direction=");
-    b.append(this.direction);
     b.append(" intensity=");
     b.append(this.intensity);
     b.append("]");

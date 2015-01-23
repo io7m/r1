@@ -60,6 +60,19 @@ public interface KVisibleSetLightGroupBuilderType
    */
 
   void groupAddLight(
-    final KLightType light)
+    final KLightLocalType light)
+    throws RExceptionBuilderInvalid;
+
+  /**
+   * Set the ambient light for the group.
+   *
+   * @param light
+   *          The light.
+   * @throws RExceptionBuilderInvalid
+   *           If the builder has been invalidated.
+   */
+
+  void groupSetAmbientLight(
+    final KLightAmbientType light)
     throws RExceptionBuilderInvalid;
 }

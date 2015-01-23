@@ -42,6 +42,7 @@ import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
+import com.io7m.r1.kernel.types.KLightLocalType;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
@@ -181,7 +182,9 @@ import com.io7m.r1.tests.kernel.types.KMaterialOpaqueRegularGenerator;
         final KLightType l =
           lights_list
             .get((int) Math.floor(Math.random() * lights_list.size()));
-        g.groupAddLight(l);
+        if (l instanceof KLightLocalType) {
+          g.groupAddLight((KLightLocalType) l);
+        }
       }
 
       for (int index = 0; index < 100; ++index) {

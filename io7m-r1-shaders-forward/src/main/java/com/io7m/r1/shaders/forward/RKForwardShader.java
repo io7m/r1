@@ -23,20 +23,11 @@ import com.io7m.jfunctional.OptionPartialVisitorType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.kernel.types.KLightAmbientType;
 import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
-import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoft;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftDiffuseOnly;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
-import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
-import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
-import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightVisitorType;
@@ -258,120 +249,7 @@ import com.io7m.r1.kernel.types.KMaterialType;
         @Override public Unit lightProjective(
           final KLightProjectiveType lp)
         {
-          try {
-            return lp
-              .projectiveAccept(new KLightProjectiveVisitorType<Unit, UnreachableCodeException>() {
-                @Override public Unit projectiveWithoutShadow(
-                  final KLightProjectiveWithoutShadow lpws)
-                {
-                  b.append("  -- Projective light inputs\n");
-                  b.append("  in f_position_light_clip : vector_4f;\n");
-                  b.append("\n");
-                  b.append("  -- Projective light parameters\n");
-                  b.append("  parameter light_projective : Light.t;\n");
-                  b.append("  parameter t_projection     : sampler_2d;\n");
-                  b.append("\n");
-                  return Unit.unit();
-                }
-
-                @Override public Unit projectiveWithShadowBasic(
-                  final KLightProjectiveWithShadowBasic lpwsb)
-                {
-                  b.append("  -- Projective light (shadow mapped) inputs\n");
-                  b.append("  in f_position_light_eye  : vector_4f;\n");
-                  b.append("  in f_position_light_clip : vector_4f;\n");
-                  b.append("\n");
-                  b
-                    .append("  -- Projective light (shadow mapping) parameters\n");
-                  b.append("  parameter light_projective : Light.t;\n");
-                  b.append("  parameter t_projection     : sampler_2d;\n");
-                  b.append("  parameter t_shadow_basic   : sampler_2d;\n");
-                  b.append("  parameter shadow_basic     : ShadowBasic.t;\n");
-                  b.append("\n");
-                  return Unit.unit();
-                }
-
-                @Override public Unit projectiveWithShadowVariance(
-                  final KLightProjectiveWithShadowVariance lpwsv)
-                {
-                  b.append("  -- Projective light (shadow mapped) inputs\n");
-                  b.append("  in f_position_light_eye  : vector_4f;\n");
-                  b.append("  in f_position_light_clip : vector_4f;\n");
-                  b.append("\n");
-                  b
-                    .append("  -- Projective light (variance shadow mapping) parameters\n");
-                  b.append("  parameter light_projective  : Light.t;\n");
-                  b.append("  parameter t_projection      : sampler_2d;\n");
-                  b.append("  parameter t_shadow_variance : sampler_2d;\n");
-                  b
-                    .append("  parameter shadow_variance   : ShadowVariance.t;\n");
-                  b.append("\n");
-                  return Unit.unit();
-                }
-
-                @Override public Unit projectiveWithoutShadowDiffuseOnly(
-                  final KLightProjectiveWithoutShadowDiffuseOnly _)
-                {
-                  b.append("  -- Projective light inputs\n");
-                  b.append("  in f_position_light_clip : vector_4f;\n");
-                  b.append("\n");
-                  b.append("  -- Projective light parameters\n");
-                  b.append("  parameter light_projective : Light.t;\n");
-                  b.append("  parameter t_projection     : sampler_2d;\n");
-                  b.append("\n");
-                  return Unit.unit();
-                }
-
-                @Override public Unit projectiveWithShadowBasicDiffuseOnly(
-                  final KLightProjectiveWithShadowBasicDiffuseOnly _)
-                {
-                  b.append("  -- Projective light inputs\n");
-                  b.append("  in f_position_light_clip : vector_4f;\n");
-                  b.append("\n");
-                  b.append("  -- Projective light parameters\n");
-                  b.append("  parameter light_projective : Light.t;\n");
-                  b.append("  parameter t_projection     : sampler_2d;\n");
-                  b.append("\n");
-                  return Unit.unit();
-                }
-
-                @Override public
-                  Unit
-                  projectiveWithShadowVarianceDiffuseOnly(
-                    final KLightProjectiveWithShadowVarianceDiffuseOnly _)
-                {
-                  b.append("  -- Projective light (shadow mapped) inputs\n");
-                  b.append("  in f_position_light_eye  : vector_4f;\n");
-                  b.append("  in f_position_light_clip : vector_4f;\n");
-                  b.append("\n");
-                  b
-                    .append("  -- Projective light (variance shadow mapping) parameters\n");
-                  b.append("  parameter light_projective  : Light.t;\n");
-                  b.append("  parameter t_projection      : sampler_2d;\n");
-                  b.append("  parameter t_shadow_variance : sampler_2d;\n");
-                  b
-                    .append("  parameter shadow_variance   : ShadowVariance.t;\n");
-                  b.append("\n");
-                  return Unit.unit();
-                }
-
-                @Override public Unit projectiveWithShadowBasicSSSoft(
-                  final KLightProjectiveWithShadowBasicSSSoft lpwsb)
-                {
-                  throw new UnimplementedCodeException();
-                }
-
-                @Override public
-                  Unit
-                  projectiveWithShadowBasicSSSoftDiffuseOnly(
-                    final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lpwsb)
-                {
-                  throw new UnimplementedCodeException();
-                }
-              });
-          } catch (final RException e) {
-            throw new UnreachableCodeException(e);
-          }
+          throw new UnreachableCodeException();
         }
 
         @Override public Unit lightSpherical(
@@ -381,6 +259,14 @@ import com.io7m.r1.kernel.types.KMaterialType;
           b.append("  parameter light_spherical : Light.t;\n");
           b.append("\n");
           return Unit.unit();
+        }
+
+        @Override public Unit lightAmbient(
+          final KLightAmbientType la)
+          throws RException,
+            UnreachableCodeException
+        {
+          throw new UnreachableCodeException();
         }
       });
     } catch (final RException e) {
@@ -807,9 +693,7 @@ import com.io7m.r1.kernel.types.KMaterialType;
         @Override public Unit lightProjective(
           final KLightProjectiveType lp)
         {
-          RKForwardShader
-            .fragmentShaderValuesLightProjective(b, lp, specular);
-          return Unit.unit();
+          throw new UnreachableCodeException();
         }
 
         @Override public Unit lightSpherical(
@@ -817,6 +701,14 @@ import com.io7m.r1.kernel.types.KMaterialType;
         {
           RKForwardShader.fragmentShaderValuesLightSpherical(b, specular);
           return Unit.unit();
+        }
+
+        @Override public Unit lightAmbient(
+          final KLightAmbientType la)
+          throws RException,
+            UnreachableCodeException
+        {
+          throw new UnreachableCodeException();
         }
       });
     } catch (final RException e) {
@@ -946,385 +838,6 @@ import com.io7m.r1.kernel.types.KMaterialType;
     }
   }
 
-  public static void fragmentShaderValuesLightProjective(
-    final StringBuilder b,
-    final KLightProjectiveType lp,
-    final KMaterialSpecularType specular)
-  {
-    try {
-      b.append("  -- Projective light vectors/attenuation\n");
-      b.append("  value light_vectors =\n");
-      b.append("    Light.calculate (\n");
-      b.append("      light_projective,\n");
-      b.append("      f_position_eye [x y z],\n");
-      b.append("      n\n");
-      b.append("    );\n");
-      b.append("\n");
-      b.append("  value light_texel =\n");
-      b.append("    ProjectiveLight.light_texel (\n");
-      b.append("      t_projection,\n");
-      b.append("      f_position_light_clip\n");
-      b.append("    );\n");
-      b.append("\n");
-      b.append("  value light_color =\n");
-      b.append("    V3.multiply (\n");
-      b.append("      light_texel [x y z],\n");
-      b.append("      light_projective.color\n");
-      b.append("    );\n");
-      b.append("\n");
-
-      lp
-        .projectiveAccept(new KLightProjectiveVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit projectiveWithoutShadow(
-            final KLightProjectiveWithoutShadow _)
-          {
-            b
-              .append("  value light_attenuation = light_vectors.attenuation;\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithShadowBasic(
-            final KLightProjectiveWithShadowBasic lpwsb)
-          {
-            b.append("  -- Basic shadow mapping\n");
-            b.append("  value light_shadow =\n");
-            b.append("    ShadowBasic.factor (\n");
-            b.append("      shadow_basic,\n");
-            b.append("      t_shadow_basic,\n");
-            b.append("      f_position_light_clip\n");
-            b.append("    );\n");
-            b.append("  value light_attenuation =\n");
-            b.append("    F.multiply (\n");
-            b.append("      light_shadow,\n");
-            b.append("      light_vectors.attenuation\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithShadowVariance(
-            final KLightProjectiveWithShadowVariance lpwsv)
-          {
-            b.append("  -- Variance shadow mapping\n");
-            b.append("  value light_shadow =\n");
-            b.append("    ShadowVariance.factor (\n");
-            b.append("      shadow_variance,\n");
-            b.append("      t_shadow_variance,\n");
-            b.append("      f_position_light_clip\n");
-            b.append("    );\n");
-            b.append("  value light_attenuation =\n");
-            b.append("    F.multiply (\n");
-            b.append("      light_shadow,\n");
-            b.append("      light_vectors.attenuation\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithoutShadowDiffuseOnly(
-            final KLightProjectiveWithoutShadowDiffuseOnly _)
-            throws RException
-          {
-            b
-              .append("  value light_attenuation = light_vectors.attenuation;\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithShadowBasicDiffuseOnly(
-            final KLightProjectiveWithShadowBasicDiffuseOnly _)
-            throws RException,
-              UnreachableCodeException
-          {
-            b
-              .append("  value light_attenuation = light_vectors.attenuation;\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithShadowVarianceDiffuseOnly(
-            final KLightProjectiveWithShadowVarianceDiffuseOnly _)
-          {
-            b.append("  -- Variance shadow mapping\n");
-            b.append("  value light_shadow =\n");
-            b.append("    ShadowVariance.factor (\n");
-            b.append("      shadow_variance,\n");
-            b.append("      t_shadow_variance,\n");
-            b.append("      f_position_light_clip\n");
-            b.append("    );\n");
-            b.append("  value light_attenuation =\n");
-            b.append("    F.multiply (\n");
-            b.append("      light_shadow,\n");
-            b.append("      light_vectors.attenuation\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithShadowBasicSSSoft(
-            final KLightProjectiveWithShadowBasicSSSoft lpwsb)
-          {
-            // TODO Auto-generated method stub
-            throw new UnimplementedCodeException();
-          }
-
-          @Override public Unit projectiveWithShadowBasicSSSoftDiffuseOnly(
-            final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lpwsb)
-          {
-            // TODO Auto-generated method stub
-            throw new UnimplementedCodeException();
-          }
-        });
-
-      b.append("  -- Projective diffuse light term\n");
-      b.append("  value light_diffuse_unattenuated : vector_3f =\n");
-      b.append("    ProjectiveLight.diffuse_color (\n");
-      b.append("      light_projective,\n");
-      b.append("      light_vectors.vectors,\n");
-      b.append("      light_color\n");
-      b.append("    );\n");
-      b.append("\n");
-      b.append("  value light_diffuse : vector_3f =\n");
-      b.append("    V3.multiply_scalar (\n");
-      b.append("      light_diffuse_unattenuated,\n");
-      b.append("      light_attenuation\n");
-      b.append("    );\n");
-      b.append("\n");
-
-      specular
-        .specularAccept(new KMaterialSpecularVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit constant(
-            final KMaterialSpecularConstant m)
-          {
-            b.append("  -- Projective specular light term\n");
-            b.append("  value light_specular_unattenuated : vector_3f =\n");
-            b.append("    ProjectiveLight.specular_color (\n");
-            b.append("      light_projective,\n");
-            b.append("      light_vectors.vectors,\n");
-            b.append("      light_color,\n");
-            b.append("      p_specular\n");
-            b.append("    );\n");
-            b.append("  value light_specular : vector_3f =\n");
-            b.append("    V3.multiply_scalar (\n");
-            b.append("      light_specular_unattenuated,\n");
-            b.append("      light_attenuation\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit mapped(
-            final KMaterialSpecularMapped m)
-          {
-            b.append("  -- Projective specular light term\n");
-            b.append("  value light_specular_unattenuated : vector_3f =\n");
-            b.append("    ProjectiveLight.specular_color (\n");
-            b.append("      light_projective,\n");
-            b.append("      light_vectors.vectors,\n");
-            b.append("      light_color,\n");
-            b.append("      p_specular\n");
-            b.append("    );\n");
-            b.append("  value light_specular : vector_3f =\n");
-            b.append("    V3.multiply_scalar (\n");
-            b.append("      light_specular_unattenuated,\n");
-            b.append("      light_attenuation\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit none(
-            final KMaterialSpecularNone m)
-          {
-            b.append("  -- Projective (no) specular light term\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-        });
-
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
-  public static void fragmentShaderValuesLightProjectiveSpecularOnly(
-    final StringBuilder b,
-    final KLightProjectiveType lp,
-    final KMaterialSpecularType specular)
-  {
-    try {
-      b.append("  -- Projective light vectors/attenuation\n");
-      b.append("  value light_vectors =\n");
-      b.append("    Light.calculate (\n");
-      b.append("      light_projective,\n");
-      b.append("      f_position_eye [x y z],\n");
-      b.append("      n\n");
-      b.append("    );\n");
-      b.append("  value light_texel =\n");
-      b.append("    ProjectiveLight.light_texel (\n");
-      b.append("      t_projection,\n");
-      b.append("      f_position_light_clip\n");
-      b.append("    );\n");
-      b.append("  value light_color =\n");
-      b.append("    V3.multiply (\n");
-      b.append("      light_texel [x y z],\n");
-      b.append("      light_projective.color\n");
-      b.append("    );\n");
-      b.append("\n");
-
-      lp
-        .projectiveAccept(new KLightProjectiveVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit projectiveWithoutShadow(
-            final KLightProjectiveWithoutShadow _)
-          {
-            b
-              .append("  value light_attenuation = light_vectors.attenuation;\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithShadowBasic(
-            final KLightProjectiveWithShadowBasic _)
-          {
-            b.append("  value light_shadow =\n");
-            b.append("    ShadowBasic.factor (\n");
-            b.append("      shadow_basic,\n");
-            b.append("      t_shadow_basic,\n");
-            b.append("      f_position_light_clip\n");
-            b.append("    );\n");
-            b.append("  value light_attenuation =\n");
-            b.append("    F.multiply (\n");
-            b.append("      light_shadow,\n");
-            b.append("      light_vectors.attenuation\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithShadowVariance(
-            final KLightProjectiveWithShadowVariance _)
-          {
-            b.append("  value light_shadow =\n");
-            b.append("    ShadowVariance.factor (\n");
-            b.append("      shadow_variance,\n");
-            b.append("      t_shadow_variance,\n");
-            b.append("      f_position_light_clip\n");
-            b.append("    );\n");
-            b.append("  value light_attenuation =\n");
-            b.append("    F.multiply (\n");
-            b.append("      light_shadow,\n");
-            b.append("      light_vectors.attenuation\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithoutShadowDiffuseOnly(
-            final KLightProjectiveWithoutShadowDiffuseOnly _)
-          {
-            b
-              .append("  value light_attenuation = light_vectors.attenuation;\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithShadowBasicDiffuseOnly(
-            final KLightProjectiveWithShadowBasicDiffuseOnly _)
-          {
-            b
-              .append("  value light_attenuation = light_vectors.attenuation;\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithShadowVarianceDiffuseOnly(
-            final KLightProjectiveWithShadowVarianceDiffuseOnly _)
-          {
-            b.append("  value light_shadow =\n");
-            b.append("    ShadowVariance.factor (\n");
-            b.append("      shadow_variance,\n");
-            b.append("      t_shadow_variance,\n");
-            b.append("      f_position_light_clip\n");
-            b.append("    );\n");
-            b.append("  value light_attenuation =\n");
-            b.append("    F.multiply (\n");
-            b.append("      light_shadow,\n");
-            b.append("      light_vectors.attenuation\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit projectiveWithShadowBasicSSSoft(
-            final KLightProjectiveWithShadowBasicSSSoft lpwsb)
-          {
-            throw new UnimplementedCodeException();
-          }
-
-          @Override public Unit projectiveWithShadowBasicSSSoftDiffuseOnly(
-            final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lpwsb)
-          {
-            throw new UnimplementedCodeException();
-          }
-        });
-
-      specular
-        .specularAccept(new KMaterialSpecularVisitorType<Unit, UnreachableCodeException>() {
-          @Override public Unit constant(
-            final KMaterialSpecularConstant m)
-          {
-            b.append("  -- Projective specular light term\n");
-            b.append("  value light_specular_unattenuated : vector_3f =\n");
-            b.append("    ProjectiveLight.specular_color (\n");
-            b.append("      light_projective,\n");
-            b.append("      light_vectors.vectors,\n");
-            b.append("      light_color,\n");
-            b.append("      p_specular\n");
-            b.append("    );\n");
-            b.append("  value light_specular : vector_3f =\n");
-            b.append("    V3.multiply_scalar (\n");
-            b.append("      light_specular_unattenuated,\n");
-            b.append("      light_attenuation\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit mapped(
-            final KMaterialSpecularMapped m)
-          {
-            b.append("  -- Projective specular light term\n");
-            b.append("  value light_specular_unattenuated : vector_3f =\n");
-            b.append("    ProjectiveLight.specular_color (\n");
-            b.append("      light_projective,\n");
-            b.append("      light_vectors.vectors,\n");
-            b.append("      light_color,\n");
-            b.append("      p_specular\n");
-            b.append("    );\n");
-            b.append("  value light_specular : vector_3f =\n");
-            b.append("    V3.multiply_scalar (\n");
-            b.append("      light_specular_unattenuated,\n");
-            b.append("      light_attenuation\n");
-            b.append("    );\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-
-          @Override public Unit none(
-            final KMaterialSpecularNone m)
-          {
-            b.append("  -- Projective (no) specular light term\n");
-            b.append("\n");
-            return Unit.unit();
-          }
-        });
-
-    } catch (final RException e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
   public static void fragmentShaderValuesLightSpecularOnly(
     final StringBuilder b,
     final KLightType l,
@@ -1344,11 +857,7 @@ import com.io7m.r1.kernel.types.KMaterialType;
         @Override public Unit lightProjective(
           final KLightProjectiveType lp)
         {
-          RKForwardShader.fragmentShaderValuesLightProjectiveSpecularOnly(
-            b,
-            lp,
-            specular);
-          return Unit.unit();
+          throw new UnreachableCodeException();
         }
 
         @Override public Unit lightSpherical(
@@ -1358,6 +867,14 @@ import com.io7m.r1.kernel.types.KMaterialType;
             b,
             specular);
           return Unit.unit();
+        }
+
+        @Override public Unit lightAmbient(
+          final KLightAmbientType la)
+          throws RException,
+            UnreachableCodeException
+        {
+          throw new UnreachableCodeException();
         }
       });
     } catch (final RException e) {
@@ -2124,6 +1641,14 @@ import com.io7m.r1.kernel.types.KMaterialType;
                           return "VertexShaders.standard";
                         }
                       });
+                  }
+
+                  @Override public String lightAmbient(
+                    final KLightAmbientType l)
+                    throws RException,
+                      UnreachableCodeException
+                  {
+                    throw new UnreachableCodeException();
                   }
                 });
 

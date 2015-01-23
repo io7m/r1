@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,7 +19,7 @@ package com.io7m.r1.kernel.types;
 import com.io7m.r1.exceptions.RException;
 
 /**
- * A generic light visitor, returning values of type <code>A</code> and
+ * A generic local light visitor, returning values of type <code>A</code> and
  * raising exceptions of type <code>E</code>.
  *
  * @param <A>
@@ -28,26 +28,8 @@ import com.io7m.r1.exceptions.RException;
  *          The type of exceptions raised by the implementing visitor
  */
 
-public interface KLightVisitorType<A, E extends Throwable>
+public interface KLightLocalVisitorType<A, E extends Throwable>
 {
-  /**
-   * Visit an ambient light.
-   *
-   * @param l
-   *          The ambient light
-   * @return A value of type <code>A</code>
-   *
-   * @throws RException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A lightAmbient(
-    final KLightAmbientType l)
-    throws RException,
-      E;
-
   /**
    * Visit a directional light.
    *

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -80,6 +80,46 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         this.orientation);
     }
 
+    @Override public void copyFromSphere(
+      final KLightSphereType s)
+    {
+      try {
+        NullCheck.notNull(s, "Sphere");
+
+        this.color = s.lightGetColor();
+        this.intensity = s.lightGetIntensity();
+        this.exponent = s.lightGetFalloff();
+        this.radius = s.lightGetRadius();
+        this.position = s.lightGetPosition();
+
+        s
+          .sphereAccept(new KLightSphereVisitorType<Unit, UnreachableCodeException>() {
+            @Override public Unit sphereTexturedCubeWithoutShadow(
+              final KLightSphereTexturedCubeWithoutShadow ls)
+            {
+              Builder.this.position = ls.position;
+              Builder.this.texture = ls.texture;
+              Builder.this.orientation = ls.orientation;
+              return Unit.unit();
+            }
+
+            @Override public Unit sphereWithoutShadow(
+              final KLightSphereWithoutShadow ls)
+            {
+              return Unit.unit();
+            }
+
+            @Override public Unit sphereWithoutShadowDiffuseOnly(
+              final KLightSphereWithoutShadowDiffuseOnly ls)
+            {
+              return Unit.unit();
+            }
+          });
+      } catch (final RException e) {
+        throw new UnreachableCodeException(e);
+      }
+    }
+
     @Override public void setColor(
       final PVectorI3F<RSpaceRGBType> in_color)
     {
@@ -121,46 +161,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     {
       this.orientation =
         NullCheck.notNull(in_orientation, "Texture orientation");
-    }
-
-    @Override public void copyFromSphere(
-      final KLightSphereType s)
-    {
-      try {
-        NullCheck.notNull(s, "Sphere");
-
-        this.color = s.lightGetColor();
-        this.intensity = s.lightGetIntensity();
-        this.exponent = s.lightGetFalloff();
-        this.radius = s.lightGetRadius();
-        this.position = s.lightGetPosition();
-
-        s
-          .sphereAccept(new KLightSphereVisitorType<Unit, UnreachableCodeException>() {
-            @Override public Unit sphereTexturedCubeWithoutShadow(
-              final KLightSphereTexturedCubeWithoutShadow ls)
-            {
-              Builder.this.position = ls.position;
-              Builder.this.texture = ls.texture;
-              Builder.this.orientation = ls.orientation;
-              return Unit.unit();
-            }
-
-            @Override public Unit sphereWithoutShadow(
-              final KLightSphereWithoutShadow ls)
-            {
-              return Unit.unit();
-            }
-
-            @Override public Unit sphereWithoutShadowDiffuseOnly(
-              final KLightSphereWithoutShadowDiffuseOnly ls)
-            {
-              return Unit.unit();
-            }
-          });
-      } catch (final RException e) {
-        throw new UnreachableCodeException(e);
-      }
     }
   }
 
@@ -356,6 +356,18 @@ import com.io7m.r1.spaces.RSpaceWorldType;
   @Override public KTransformType lightGetTransform()
   {
     return this.transform;
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KLightLocalVisitorType<A, E>>
+    A
+    lightLocalAccept(
+      final V v)
+      throws RException,
+        E,
+        JCGLException
+  {
+    return v.lightSpherical(this);
   }
 
   @Override public <A, E extends Throwable> A sphereAccept(

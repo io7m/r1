@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -71,7 +71,12 @@ import com.io7m.r1.kernel.types.KFrustumMeshUsableType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueVisitorType;
+import com.io7m.r1.kernel.types.KLightAmbient;
+import com.io7m.r1.kernel.types.KLightAmbientType;
+import com.io7m.r1.kernel.types.KLightAmbientVisitorType;
 import com.io7m.r1.kernel.types.KLightDirectionalType;
+import com.io7m.r1.kernel.types.KLightLocalType;
+import com.io7m.r1.kernel.types.KLightLocalVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoft;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftDiffuseOnly;
@@ -81,8 +86,6 @@ import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightSphereVisitorType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnly;
-import com.io7m.r1.kernel.types.KLightType;
-import com.io7m.r1.kernel.types.KLightVisitorType;
 import com.io7m.r1.kernel.types.KLightWithScreenSpaceShadowType;
 import com.io7m.r1.kernel.types.KLightWithScreenSpaceShadowVisitorType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
@@ -573,7 +576,6 @@ import com.io7m.r1.spaces.RSpaceTextureType;
           program);
 
         KShadingProgramCommon.putViewRays(program, view_rays);
-
         KShadingProgramCommon.putLightSpherical(
           program,
           mwi.getMatrixContext(),
@@ -679,9 +681,9 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   private final KShaderCacheDeferredLightType                      shader_light_cache;
   private final KUnitSphereCacheType                               sphere_cache;
   private final KScreenSpaceShadowDeferredRendererType             ssshadow_renderer;
+  private final KTextureBindingsControllerType                     texture_bindings;
   private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv_light_spherical;
   private final KViewRaysCacheType                                 view_rays_cache;
-  private final KTextureBindingsControllerType                     texture_bindings;
 
   private KRendererDeferredOpaque(
     final JCGLImplementationType in_g,
@@ -988,14 +990,14 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
     final KShadowMapContextType shadow_map_context,
-    final KLightType light)
+    final KLightLocalType light)
     throws RException
   {
     final KRendererDeferredOpaque r = KRendererDeferredOpaque.this;
     final KTextureBindingsControllerType b =
       KRendererDeferredOpaque.this.texture_bindings;
 
-    light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
+    light.lightLocalAccept(new KLightLocalVisitorType<Unit, JCGLException>() {
       @Override public Unit lightDirectional(
         final KLightDirectionalType ld)
         throws RException
@@ -1089,6 +1091,114 @@ import com.io7m.r1.spaces.RSpaceTextureType;
             }
           });
         return Unit.unit();
+      }
+    });
+  }
+
+  private void renderGroupLightAmbient(
+    final KFramebufferDeferredUsableType framebuffer,
+    final TextureUnitType t_map_albedo,
+    final TextureUnitType t_map_depth_stencil,
+    final TextureUnitType t_map_normal,
+    final TextureUnitType t_map_specular,
+    final KViewRays view_rays,
+    final JCGLInterfaceCommonType gc,
+    final KMatricesObserverType mwo,
+    final KLightAmbientType light)
+    throws JCacheException,
+      RException
+  {
+    light
+      .ambientAccept(new KLightAmbientVisitorType<Unit, JCacheException>() {
+        @Override public Unit ambient(
+          final KLightAmbient la)
+          throws RException,
+            JCacheException
+        {
+          KRendererDeferredOpaque.this.renderGroupLightAmbientActual(
+            framebuffer,
+            t_map_albedo,
+            t_map_depth_stencil,
+            t_map_normal,
+            t_map_specular,
+            view_rays,
+            gc,
+            mwo,
+            la);
+          return Unit.unit();
+        }
+      });
+  }
+
+  private void renderGroupLightAmbientActual(
+    final KFramebufferDeferredUsableType framebuffer,
+    final TextureUnitType t_map_albedo,
+    final TextureUnitType t_map_depth_stencil,
+    final TextureUnitType t_map_normal,
+    final TextureUnitType t_map_specular,
+    final KViewRays view_rays,
+    final JCGLInterfaceCommonType gc,
+    final KMatricesObserverType mwo,
+    final KLightAmbient la)
+    throws RException
+  {
+    gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+    gc.colorBufferMask(true, true, true, true);
+    gc.cullingDisable();
+    gc.depthBufferWriteDisable();
+    gc.depthBufferTestDisable();
+    gc.viewportSet(framebuffer.getArea());
+
+    final KProgramType kp =
+      this.shader_light_cache.cacheGetLU(la.lightGetCode());
+    final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
+    final ArrayBufferUsableType array = q.getArray();
+    final IndexBufferUsableType index = q.getIndices();
+
+    final JCBExecutorType exec = kp.getExecutable();
+    exec.execRun(new JCBExecutorProcedureType<RException>() {
+      @Override public void call(
+        final JCBProgramType program)
+        throws RException
+      {
+        gc.arrayBufferBind(array);
+        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+        KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+
+        KRendererDeferredOpaque.putDeferredParameters(
+          framebuffer,
+          t_map_albedo,
+          t_map_depth_stencil,
+          t_map_normal,
+          t_map_specular,
+          program);
+
+        KShadingProgramCommon.putMatrixInverseProjection(
+          program,
+          mwo.getMatrixProjectionInverse());
+        KShadingProgramCommon.putMatrixInverseView(
+          program,
+          mwo.getMatrixViewInverse());
+        KShadingProgramCommon.putMatrixUVUnchecked(
+          program,
+          KMatrices.IDENTITY_UV);
+        KShadingProgramCommon.putMatrixProjectionUnchecked(
+          program,
+          mwo.getMatrixProjection());
+        KShadingProgramCommon.putDepthCoefficient(
+          program,
+          KRendererCommon.depthCoefficient(mwo.getProjection()));
+
+        KShadingProgramCommon.putViewRays(program, view_rays);
+        KShadingProgramCommon.putLightAmbient(program, la);
+
+        program.programExecute(new JCBProgramProcedureType<JCGLException>() {
+          @Override public void call()
+            throws JCGLException
+          {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
+          }
+        });
       }
     });
   }
@@ -1591,7 +1701,29 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
             KRendererDeferredOpaque.this.renderGroupClearToBlack(gc);
 
-            for (final KLightType light : group.getLights()) {
+            /**
+             * Render all light contributions.
+             */
+
+            final OptionType<KLightAmbientType> amb_opt =
+              group.getLightAmbient();
+            if (amb_opt.isSome()) {
+              final Some<KLightAmbientType> some =
+                (Some<KLightAmbientType>) amb_opt;
+
+              KRendererDeferredOpaque.this.renderGroupLightAmbient(
+                framebuffer,
+                t_map_albedo,
+                t_map_depth_stencil,
+                t_map_normal,
+                t_map_specular,
+                view_rays,
+                gc,
+                mwo,
+                some.get());
+            }
+
+            for (final KLightLocalType light : group.getLights()) {
               assert light != null;
 
               KRendererDeferredOpaque.this.renderGroupLight(

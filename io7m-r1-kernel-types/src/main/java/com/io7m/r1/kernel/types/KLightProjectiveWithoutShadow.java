@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -79,6 +79,20 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         this.projection);
     }
 
+    @Override public void copyFromProjective(
+      final KLightProjectiveType in_original)
+    {
+      NullCheck.notNull(in_original, "Light");
+      this.color = in_original.lightGetColor();
+      this.intensity = in_original.lightGetIntensity();
+      this.falloff = in_original.lightProjectiveGetFalloff();
+      this.position = in_original.lightProjectiveGetPosition();
+      this.orientation = in_original.lightProjectiveGetOrientation();
+      this.projection = in_original.lightProjectiveGetProjection();
+      this.range = in_original.lightProjectiveGetRange();
+      this.texture = in_original.lightProjectiveGetTexture();
+    }
+
     @Override public void setColor(
       final PVectorI3F<RSpaceRGBType> in_color)
     {
@@ -125,20 +139,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
       final Texture2DStaticUsableType in_texture)
     {
       this.texture = NullCheck.notNull(in_texture, "Texture");
-    }
-
-    @Override public void copyFromProjective(
-      final KLightProjectiveType in_original)
-    {
-      NullCheck.notNull(in_original, "Light");
-      this.color = in_original.lightGetColor();
-      this.intensity = in_original.lightGetIntensity();
-      this.falloff = in_original.lightProjectiveGetFalloff();
-      this.position = in_original.lightProjectiveGetPosition();
-      this.orientation = in_original.lightProjectiveGetOrientation();
-      this.projection = in_original.lightProjectiveGetProjection();
-      this.range = in_original.lightProjectiveGetRange();
-      this.texture = in_original.lightProjectiveGetTexture();
     }
   }
 
@@ -251,6 +251,18 @@ import com.io7m.r1.spaces.RSpaceWorldType;
   @Override public KTransformType lightGetTransform()
   {
     return this.transform;
+  }
+
+  @Override public
+    <A, E extends Throwable, V extends KLightLocalVisitorType<A, E>>
+    A
+    lightLocalAccept(
+      final V v)
+      throws RException,
+        E,
+        JCGLException
+  {
+    return v.lightProjective(this);
   }
 
   @Override public float lightProjectiveGetFalloff()

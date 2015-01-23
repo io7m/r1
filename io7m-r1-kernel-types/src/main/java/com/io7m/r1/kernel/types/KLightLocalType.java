@@ -16,13 +16,14 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.exceptions.RException;
 
 /**
- * The type of lights that can be applied to translucent instances.
+ * The type of lights.
  */
 
-public interface KLightTranslucentType extends KLightLocalType
+public interface KLightLocalType extends KLightType
 {
   /**
    * Be visited by the given generic visitor.
@@ -40,10 +41,17 @@ public interface KLightTranslucentType extends KLightLocalType
    *          The return type of the visitor
    * @param <E>
    *          The type of exceptions raised by the visitor
+   * @param <V>
+   *          A specific visitor subtype
+   * @throws JCGLException
+   *           Iff the visitor raises {@link JCGLException}.
    */
 
-  <A, E extends Throwable> A lightTranslucentAccept(
-    final KLightTranslucentVisitorType<A, E> v)
-    throws RException,
-      E;
+    <A, E extends Throwable, V extends KLightLocalVisitorType<A, E>>
+    A
+    lightLocalAccept(
+      final V v)
+      throws RException,
+        E,
+        JCGLException;
 }

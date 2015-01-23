@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -37,6 +37,7 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.kernel.types.KLightAmbient;
 import com.io7m.r1.kernel.types.KLightDirectional;
 import com.io7m.r1.kernel.types.KLightDirectionalDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
@@ -87,6 +88,11 @@ import com.io7m.r1.spaces.RSpaceWorldType;
           1.0f,
           1.0f,
           100.0f);
+
+      {
+        final KLightAmbient l = KLightAmbient.newLight(c, 1.0f);
+        cases.add(l);
+      }
 
       {
         final KLightType l = KLightDirectional.newLight(v, c, 1.0f);

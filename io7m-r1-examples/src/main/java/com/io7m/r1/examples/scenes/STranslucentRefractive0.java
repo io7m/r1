@@ -34,9 +34,10 @@ import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRefractive;
+import com.io7m.r1.kernel.types.KLightLocalType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
-import com.io7m.r1.kernel.types.KLightType;
+import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
@@ -195,7 +196,8 @@ public final class STranslucentRefractive0 implements ExampleSceneType
       l4 = b.build();
     }
 
-    final Set<KLightType> lights = new HashSet<KLightType>();
+    final Set<KLightTranslucentType> lights =
+      new HashSet<KLightTranslucentType>();
     lights.add(lb);
     lights.add(l0);
     lights.add(l1);
@@ -209,7 +211,7 @@ public final class STranslucentRefractive0 implements ExampleSceneType
       scene.visibleOpaqueNewLightGroup("g");
     g.groupAddInstance(floor);
 
-    for (final KLightType l : lights) {
+    for (final KLightLocalType l : lights) {
       assert l != null;
       g.groupAddLight(l);
     }

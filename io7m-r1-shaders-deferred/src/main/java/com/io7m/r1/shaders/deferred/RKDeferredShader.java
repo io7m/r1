@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,6 +21,7 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.kernel.types.KLightAmbientType;
 import com.io7m.r1.kernel.types.KLightDiffuseOnlyType;
 import com.io7m.r1.kernel.types.KLightDirectional;
 import com.io7m.r1.kernel.types.KLightDirectionalDiffuseOnly;
@@ -199,7 +200,6 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
   private static void fragmentShaderLight(
     final StringBuilder b,
     final KLightType l)
-    throws JCGLException
   {
     try {
       b.append("shader fragment f is\n");
@@ -233,7 +233,6 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
       l.lightAccept(new KLightVisitorType<Unit, UnreachableCodeException>() {
         @Override public Unit lightDirectional(
           final KLightDirectionalType ld)
-          throws RException
         {
           b.append("  -- Directional light parameters\n");
           b.append("  parameter light_directional : DirectionalLight.t;\n");
@@ -340,14 +339,12 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
 
         @Override public Unit lightSpherical(
           final KLightSphereType ls)
-          throws RException,
-            JCGLException
+          throws RException
         {
           return ls
             .sphereAccept(new KLightSphereVisitorType<Unit, RException>() {
               @Override public Unit sphereWithoutShadow(
                 final KLightSphereWithoutShadow _)
-                throws RException
               {
                 b
                   .append("  -- Spherical light parameters (without shadow)\n");
@@ -358,7 +355,6 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
 
               @Override public Unit sphereTexturedCubeWithoutShadow(
                 final KLightSphereTexturedCubeWithoutShadow _)
-                throws RException
               {
                 b
                   .append("  -- Spherical light parameters (textured cube without shadow)\n");
@@ -373,7 +369,6 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
 
               @Override public Unit sphereWithoutShadowDiffuseOnly(
                 final KLightSphereWithoutShadowDiffuseOnly _)
-                throws RException
               {
                 b
                   .append("  -- Spherical light parameters (without shadow)\n");
@@ -382,6 +377,15 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
                 return Unit.unit();
               }
             });
+        }
+
+        @Override public Unit lightAmbient(
+          final KLightAmbientType la)
+        {
+          b.append("  -- Ambient light parameters\n");
+          b.append("  parameter light_ambient : AmbientLight.t;\n");
+          b.append("\n");
+          return Unit.unit();
         }
       });
 
@@ -455,7 +459,6 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
             .directionalAccept(new KLightDirectionalVisitorType<Unit, RException>() {
               @Override public Unit directional(
                 final KLightDirectional ldd)
-                throws RException
               {
                 b.append("  -- Directional specular light term\n");
                 b.append("  value light_specular : vector_3f =\n");
@@ -469,7 +472,6 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
 
               @Override public Unit directionalDiffuseOnly(
                 final KLightDirectionalDiffuseOnly lddo)
-                throws RException
               {
                 return Unit.unit();
               }
@@ -694,8 +696,7 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
 
         @Override public Unit lightSpherical(
           final KLightSphereType ls)
-          throws RException,
-            JCGLException
+          throws RException
         {
           b.append("  -- Spherical light vectors\n");
           b.append("  value light_vectors =\n");
@@ -709,7 +710,6 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
             .sphereAccept(new KLightSphereVisitorType<Unit, UnreachableCodeException>() {
               @Override public Unit sphereWithoutShadow(
                 final KLightSphereWithoutShadow _)
-                throws RException
               {
                 b
                   .append("  value light_attenuation = light_vectors.attenuation;\n");
@@ -719,7 +719,6 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
 
               @Override public Unit sphereTexturedCubeWithoutShadow(
                 final KLightSphereTexturedCubeWithoutShadow lsmws)
-                throws RException
               {
                 b.append("  -- Sample spherical cube map\n");
                 b.append("  value light_sample_vector_raw : vector_4f =\n");
@@ -763,7 +762,6 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
 
               @Override public Unit sphereWithoutShadowDiffuseOnly(
                 final KLightSphereWithoutShadowDiffuseOnly _)
-                throws RException
               {
                 b
                   .append("  value light_attenuation = light_vectors.attenuation;\n");
@@ -800,6 +798,18 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
             b.append("    );\n");
             b.append("\n");
           }
+          return Unit.unit();
+        }
+
+        @Override public Unit lightAmbient(
+          final KLightAmbientType la)
+        {
+          b.append("  value light_diffuse : vector_3f =\n");
+          b.append("    V3.multiply_scalar (\n");
+          b.append("      light_ambient.color,\n");
+          b.append("      light_ambient.intensity\n");
+          b.append("    );\n");
+          b.append("\n");
           return Unit.unit();
         }
       });
@@ -1117,6 +1127,19 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
           b.append("\n");
           return Unit.unit();
         }
+
+        @Override public Unit lightAmbient(
+          final KLightAmbientType la)
+          throws RException,
+            UnreachableCodeException
+        {
+          b.append("shader program p is\n");
+          b.append("  vertex VertexShaders.standard_clip_eye;\n");
+          b.append("  fragment f;\n");
+          b.append("end;\n");
+          b.append("\n");
+          return Unit.unit();
+        }
       });
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
@@ -1145,6 +1168,7 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
     b.append("import com.io7m.parasol.Sampler2D  as S;\n");
     b.append("\n");
     b.append("import com.io7m.r1.core.Albedo;\n");
+    b.append("import com.io7m.r1.core.AmbientLight;\n");
     b.append("import com.io7m.r1.core.CubeMap;\n");
     b.append("import com.io7m.r1.core.DirectionalLight;\n");
     b.append("import com.io7m.r1.core.Emission;\n");
