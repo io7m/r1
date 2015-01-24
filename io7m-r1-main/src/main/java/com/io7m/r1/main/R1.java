@@ -77,6 +77,8 @@ import com.io7m.r1.kernel.KRendererDeferred;
 import com.io7m.r1.kernel.KRendererDeferredOpaque;
 import com.io7m.r1.kernel.KRendererDeferredOpaqueType;
 import com.io7m.r1.kernel.KRendererDeferredType;
+import com.io7m.r1.kernel.KScreenSpaceAmbientOcclusionDeferredRenderer;
+import com.io7m.r1.kernel.KScreenSpaceAmbientOcclusionDeferredRendererType;
 import com.io7m.r1.kernel.KScreenSpaceShadowDeferredRenderer;
 import com.io7m.r1.kernel.KScreenSpaceShadowDeferredRendererType;
 import com.io7m.r1.kernel.KShaderCacheImageType;
@@ -138,6 +140,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     private @Nullable KRendererDeferredType                                renderer_deferred;
     private @Nullable KRendererDeferredOpaqueType                          renderer_deferred_opaque;
     private @Nullable KRefractionRendererType                              renderer_refraction;
+    private @Nullable KScreenSpaceAmbientOcclusionDeferredRendererType     renderer_ssao;
     private @Nullable KScreenSpaceShadowDeferredRendererType               renderer_ssshadow;
     private @Nullable KTranslucentRendererType                             renderer_translucent;
     private @Nullable KImageFilterRGBAType<KBlurParameters>                rgba_blur;
@@ -263,6 +266,14 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
             in_monochrome_cache,
             in_blur_mono);
 
+        final KScreenSpaceAmbientOcclusionDeferredRendererType in_ssao_renderer =
+          this.makeScreenSpaceAmbientOcclusionDeferredRenderer(
+            in_texture_bindings,
+            in_shader_caches,
+            in_quad_cache,
+            in_monochrome_cache,
+            in_blur_mono);
+
         final KRendererDeferredOpaqueType in_renderer_deferred_opaque =
           this.makeDeferredOpaque(
             in_texture_bindings,
@@ -271,7 +282,8 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
             in_sphere_cache,
             in_frustum_cache,
             in_view_rays_cache,
-            in_deferred_shadow_renderer);
+            in_deferred_shadow_renderer,
+            in_ssao_renderer);
 
         final KFramebufferRGBAWithDepthCacheType in_rgba_with_depth_cache =
           this.makeRGBAWithDepthCache();
@@ -394,20 +406,18 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
       }
     }
 
-    private KTextureBindingsControllerType makeTextureBindingsController()
-    {
-      return KTextureBindingsController.newBindings(this.gl.getGLCommon());
-    }
-
-    private KRendererDeferredOpaqueType makeDeferredOpaque(
-      final KTextureBindingsControllerType in_texture_bindings,
-      final KShaderCacheSetType in_shader_caches,
-      final KUnitQuadCacheType in_quad_cache,
-      final KUnitSphereCacheType in_sphere_cache,
-      final KFrustumMeshCacheType in_frustum_cache,
-      final KViewRaysCacheType in_view_rays_cache,
-      final KScreenSpaceShadowDeferredRendererType in_shadow_renderer)
-      throws RException
+    private
+      KRendererDeferredOpaqueType
+      makeDeferredOpaque(
+        final KTextureBindingsControllerType in_texture_bindings,
+        final KShaderCacheSetType in_shader_caches,
+        final KUnitQuadCacheType in_quad_cache,
+        final KUnitSphereCacheType in_sphere_cache,
+        final KFrustumMeshCacheType in_frustum_cache,
+        final KViewRaysCacheType in_view_rays_cache,
+        final KScreenSpaceShadowDeferredRendererType in_shadow_renderer,
+        final KScreenSpaceAmbientOcclusionDeferredRendererType in_ssao_renderer)
+        throws RException
     {
       final KRendererDeferredOpaqueType in_renderer_deferred_opaque;
       if (this.renderer_deferred_opaque != null) {
@@ -424,7 +434,8 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
             in_shader_caches.getShaderDeferredGeoCache(),
             in_shader_caches.getShaderDeferredLightCache(),
             in_view_rays_cache,
-            in_shadow_renderer);
+            in_shadow_renderer,
+            in_ssao_renderer);
       }
       return in_renderer_deferred_opaque;
     }
@@ -814,6 +825,30 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     }
 
     private
+      KScreenSpaceAmbientOcclusionDeferredRendererType
+      makeScreenSpaceAmbientOcclusionDeferredRenderer(
+        final KTextureBindingsControllerType in_texture_bindings,
+        final KShaderCacheSetType in_shader_caches,
+        final KUnitQuadCacheType in_quad_cache,
+        final KFramebufferMonochromeCacheType in_monochrome_cache,
+        final KImageFilterMonochromeType<KBlurParameters> in_blur_mono)
+    {
+      KScreenSpaceAmbientOcclusionDeferredRendererType in_ssao_renderer;
+      if (this.renderer_ssao != null) {
+        in_ssao_renderer = this.renderer_ssao;
+      } else {
+        in_ssao_renderer =
+          KScreenSpaceAmbientOcclusionDeferredRenderer.newRenderer(
+            in_texture_bindings,
+            in_quad_cache,
+            in_shader_caches.getShaderDeferredLightCache(),
+            in_monochrome_cache,
+            in_blur_mono);
+      }
+      return in_ssao_renderer;
+    }
+
+    private
       KScreenSpaceShadowDeferredRendererType
       makeScreenSpaceShadowDeferredRenderer(
         final KTextureBindingsControllerType in_texture_bindings,
@@ -955,6 +990,11 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
             this.log);
       }
       return in_sphere_cache;
+    }
+
+    private KTextureBindingsControllerType makeTextureBindingsController()
+    {
+      return KTextureBindingsController.newBindings(this.gl.getGLCommon());
     }
 
     private KTranslucentRendererType makeTranslucentRenderer(

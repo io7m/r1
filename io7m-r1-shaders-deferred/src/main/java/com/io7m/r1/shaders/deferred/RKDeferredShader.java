@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,6 +22,9 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KLightAmbientType;
+import com.io7m.r1.kernel.types.KLightAmbientVisitorType;
+import com.io7m.r1.kernel.types.KLightAmbientWithSSAO;
+import com.io7m.r1.kernel.types.KLightAmbientWithoutSSAO;
 import com.io7m.r1.kernel.types.KLightDiffuseOnlyType;
 import com.io7m.r1.kernel.types.KLightDirectional;
 import com.io7m.r1.kernel.types.KLightDirectionalDiffuseOnly;
@@ -381,11 +384,29 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
 
         @Override public Unit lightAmbient(
           final KLightAmbientType la)
+          throws RException
         {
-          b.append("  -- Ambient light parameters\n");
-          b.append("  parameter light_ambient : AmbientLight.t;\n");
-          b.append("\n");
-          return Unit.unit();
+          return la
+            .ambientAccept(new KLightAmbientVisitorType<Unit, RException>() {
+              @Override public Unit ambientWithoutSSAO(
+                final KLightAmbientWithoutSSAO lawo)
+              {
+                b.append("  -- Ambient light parameters\n");
+                b.append("  parameter light_ambient : AmbientLight.t;\n");
+                b.append("\n");
+                return Unit.unit();
+              }
+
+              @Override public Unit ambientWithSSAO(
+                final KLightAmbientWithSSAO law)
+              {
+                b.append("  -- Ambient light parameters\n");
+                b.append("  parameter light_ambient : AmbientLight.t;\n");
+                b.append("  parameter t_ssao        : sampler_2d;\n");
+                b.append("\n");
+                return Unit.unit();
+              }
+            });
         }
       });
 
@@ -803,13 +824,44 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
 
         @Override public Unit lightAmbient(
           final KLightAmbientType la)
+          throws RException
         {
-          b.append("  value light_diffuse : vector_3f =\n");
-          b.append("    V3.multiply_scalar (\n");
-          b.append("      light_ambient.color,\n");
-          b.append("      light_ambient.intensity\n");
-          b.append("    );\n");
-          b.append("\n");
+          la.ambientAccept(new KLightAmbientVisitorType<Unit, RException>() {
+            @Override public Unit ambientWithoutSSAO(
+              final KLightAmbientWithoutSSAO lawos)
+              throws RException
+            {
+              b.append("  value light_diffuse : vector_3f =\n");
+              b.append("    V3.multiply_scalar (\n");
+              b.append("      light_ambient.color,\n");
+              b.append("      light_ambient.intensity\n");
+              b.append("    );\n");
+              b.append("\n");
+              return Unit.unit();
+            }
+
+            @Override public Unit ambientWithSSAO(
+              final KLightAmbientWithSSAO laws)
+              throws RException
+            {
+              b.append("  value occlusion_sample : float =\n");
+              b.append("    S.texture (t_ssao, position_uv) [x];\n");
+              b.append("\n");
+              b.append("  value light_intensity : float =\n");
+              b.append("    F.multiply (\n");
+              b.append("      light_ambient.intensity,\n");
+              b.append("      occlusion_sample\n");
+              b.append("    );\n");
+              b.append("\n");
+              b.append("  value light_diffuse : vector_3f =\n");
+              b.append("    V3.multiply_scalar (\n");
+              b.append("      light_ambient.color,\n");
+              b.append("      light_intensity\n");
+              b.append("    );\n");
+              b.append("\n");
+              return Unit.unit();
+            }
+          });
           return Unit.unit();
         }
       });

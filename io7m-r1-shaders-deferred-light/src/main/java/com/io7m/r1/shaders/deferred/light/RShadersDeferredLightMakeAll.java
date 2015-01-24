@@ -169,6 +169,13 @@ import com.io7m.r1.shaders.deferred.RKDeferredShader;
         batch.addShaderWithOutputName(
           TASTShaderNameFlat.parse("com.io7m.r1.core.Copy.copy_rgba", meta),
           "copy_rgba");
+
+        batch.addShaderWithOutputName(TASTShaderNameFlat.parse(
+          "com.io7m.r1.core.AmbientOcclusion.ssao_x16",
+          meta), "ssao_x16");
+        batch.addShaderWithOutputName(TASTShaderNameFlat.parse(
+          "com.io7m.r1.core.AmbientOcclusion.ssao_x8",
+          meta), "ssao_x8");
       }
 
       final List<File> sources =

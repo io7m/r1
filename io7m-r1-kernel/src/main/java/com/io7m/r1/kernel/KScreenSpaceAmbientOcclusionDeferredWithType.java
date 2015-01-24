@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -14,27 +14,26 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel.types;
+package com.io7m.r1.kernel;
 
 import com.io7m.r1.exceptions.RException;
 
 /**
- * A generic ambient light visitor, returning values of type <code>A</code>
- * and raising exceptions of type <code>E</code>.
+ * The type of functions that execute with rendered occlusion maps.
  *
  * @param <A>
- *          The return value type of the implementing visitor
+ *          The type of returned values
  * @param <E>
- *          The type of exceptions raised by the implementing visitor
+ *          The type of raised exceptions
  */
 
-public interface KLightAmbientVisitorType<A, E extends Throwable>
+public interface KScreenSpaceAmbientOcclusionDeferredWithType<A, E extends Throwable>
 {
   /**
-   * Visit a ambient light.
+   * Execute with the given screen-space occlusion map.
    *
-   * @param la
-   *          The ambient light
+   * @param occlusion
+   *          The rendered occlusion map
    * @return A value of type <code>A</code>
    *
    * @throws RException
@@ -43,26 +42,8 @@ public interface KLightAmbientVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A ambientWithoutSSAO(
-    final KLightAmbientWithoutSSAO la)
-    throws RException,
-      E;
-
-  /**
-   * Visit a ambient light.
-   *
-   * @param la
-   *          The ambient light
-   * @return A value of type <code>A</code>
-   *
-   * @throws RException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A ambientWithSSAO(
-    final KLightAmbientWithSSAO la)
+  A withAmbientOcclusion(
+    final KFramebufferMonochromeUsableType occlusion)
     throws RException,
       E;
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -71,9 +71,10 @@ import com.io7m.r1.kernel.types.KFrustumMeshUsableType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueVisitorType;
-import com.io7m.r1.kernel.types.KLightAmbient;
 import com.io7m.r1.kernel.types.KLightAmbientType;
 import com.io7m.r1.kernel.types.KLightAmbientVisitorType;
+import com.io7m.r1.kernel.types.KLightAmbientWithSSAO;
+import com.io7m.r1.kernel.types.KLightAmbientWithoutSSAO;
 import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightLocalType;
 import com.io7m.r1.kernel.types.KLightLocalVisitorType;
@@ -279,6 +280,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
    *          A cache for view rays.
    * @param in_ssshadow_renderer
    *          A screen-space soft shadow renderer.
+   * @param in_ssao_renderer
+   *          A SSAO renderer.
    *
    * @return A new renderer.
    * @throws RException
@@ -295,7 +298,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final KShaderCacheDeferredGeometryType in_shader_geo_cache,
     final KShaderCacheDeferredLightType in_shader_light_cache,
     final KViewRaysCacheType in_view_rays_cache,
-    final KScreenSpaceShadowDeferredRendererType in_ssshadow_renderer)
+    final KScreenSpaceShadowDeferredRendererType in_ssshadow_renderer,
+    final KScreenSpaceAmbientOcclusionDeferredRendererType in_ssao_renderer)
     throws RException
   {
     return new KRendererDeferredOpaque(
@@ -308,7 +312,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       in_shader_geo_cache,
       in_shader_light_cache,
       in_view_rays_cache,
-      in_ssshadow_renderer);
+      in_ssshadow_renderer,
+      in_ssao_renderer);
   }
 
   private static void putDeferredParameters(
@@ -680,6 +685,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   private final KShaderCacheDeferredGeometryType                   shader_geo_cache;
   private final KShaderCacheDeferredLightType                      shader_light_cache;
   private final KUnitSphereCacheType                               sphere_cache;
+  private final KScreenSpaceAmbientOcclusionDeferredRendererType   ssao_renderer;
   private final KScreenSpaceShadowDeferredRendererType             ssshadow_renderer;
   private final KTextureBindingsControllerType                     texture_bindings;
   private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv_light_spherical;
@@ -695,7 +701,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final KShaderCacheDeferredGeometryType in_shader_geo_cache,
     final KShaderCacheDeferredLightType in_shader_light_cache,
     final KViewRaysCacheType in_view_rays_cache,
-    final KScreenSpaceShadowDeferredRendererType in_ssshadow_renderer)
+    final KScreenSpaceShadowDeferredRendererType in_ssshadow_renderer,
+    final KScreenSpaceAmbientOcclusionDeferredRendererType in_ssao_renderer)
   {
     this.g = NullCheck.notNull(in_g, "GL");
     this.texture_bindings =
@@ -716,6 +723,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
     this.ssshadow_renderer =
       NullCheck.notNull(in_ssshadow_renderer, "Shadow renderer");
+    this.ssao_renderer = NullCheck.notNull(in_ssao_renderer, "SSAO renderer");
 
     this.uv_light_spherical =
       new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
@@ -1108,14 +1116,17 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     throws JCacheException,
       RException
   {
+    final KScreenSpaceAmbientOcclusionDeferredRendererType ssao_r =
+      this.ssao_renderer;
+
     light
       .ambientAccept(new KLightAmbientVisitorType<Unit, JCacheException>() {
-        @Override public Unit ambient(
-          final KLightAmbient la)
+        @Override public Unit ambientWithoutSSAO(
+          final KLightAmbientWithoutSSAO la)
           throws RException,
             JCacheException
         {
-          KRendererDeferredOpaque.this.renderGroupLightAmbientActual(
+          KRendererDeferredOpaque.this.renderGroupLightAmbientWithoutSSAO(
             framebuffer,
             t_map_albedo,
             t_map_depth_stencil,
@@ -1127,10 +1138,59 @@ import com.io7m.r1.spaces.RSpaceTextureType;
             la);
           return Unit.unit();
         }
+
+        @Override public Unit ambientWithSSAO(
+          final KLightAmbientWithSSAO la)
+          throws RException,
+            JCacheException
+        {
+          return ssao_r.withAmbientOcclusion(
+            gc,
+            la.getSSAOParameters(),
+            framebuffer.getArea(),
+            t_map_depth_stencil,
+            t_map_normal,
+            view_rays,
+            mwo,
+            new KScreenSpaceAmbientOcclusionDeferredWithType<Unit, JCacheException>() {
+              @Override public Unit withAmbientOcclusion(
+                final KFramebufferMonochromeUsableType occlusion)
+                throws RException,
+                  JCacheException
+              {
+                gc.framebufferDrawBind(framebuffer.getRGBAColorFramebuffer());
+                KRendererDeferredOpaque
+                  .configureRenderStateForLightVolume(gc);
+
+                KRendererDeferredOpaque.this.texture_bindings
+                  .withNewAppendingContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+                    @Override public void call(
+                      final KTextureBindingsContextType c)
+                      throws RException
+                    {
+                      KRendererDeferredOpaque.this
+                        .renderGroupLightAmbientWithSSAO(
+                          framebuffer,
+                          t_map_albedo,
+                          t_map_depth_stencil,
+                          t_map_normal,
+                          t_map_specular,
+                          view_rays,
+                          gc,
+                          mwo,
+                          la,
+                          c,
+                          occlusion);
+                    }
+                  });
+                return Unit.unit();
+              }
+            });
+        }
       });
   }
 
-  private void renderGroupLightAmbientActual(
+  private void renderGroupLightAmbientWithoutSSAO(
     final KFramebufferDeferredUsableType framebuffer,
     final TextureUnitType t_map_albedo,
     final TextureUnitType t_map_depth_stencil,
@@ -1139,8 +1199,9 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final KViewRays view_rays,
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
-    final KLightAmbient la)
-    throws RException
+    final KLightAmbientWithoutSSAO la)
+    throws JCacheException,
+      RException
   {
     gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
     gc.colorBufferMask(true, true, true, true);
@@ -1191,6 +1252,86 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
         KShadingProgramCommon.putViewRays(program, view_rays);
         KShadingProgramCommon.putLightAmbient(program, la);
+
+        program.programExecute(new JCBProgramProcedureType<JCGLException>() {
+          @Override public void call()
+            throws JCGLException
+          {
+            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
+          }
+        });
+      }
+    });
+  }
+
+  private void renderGroupLightAmbientWithSSAO(
+    final KFramebufferDeferredUsableType framebuffer,
+    final TextureUnitType t_map_albedo,
+    final TextureUnitType t_map_depth_stencil,
+    final TextureUnitType t_map_normal,
+    final TextureUnitType t_map_specular,
+    final KViewRays view_rays,
+    final JCGLInterfaceCommonType gc,
+    final KMatricesObserverType mwo,
+    final KLightAmbientWithSSAO la,
+    final KTextureBindingsContextType c,
+    final KFramebufferMonochromeUsableType occlusion)
+    throws JCacheException,
+      RException
+  {
+    gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
+    gc.colorBufferMask(true, true, true, true);
+    gc.cullingDisable();
+    gc.depthBufferWriteDisable();
+    gc.depthBufferTestDisable();
+    gc.viewportSet(framebuffer.getArea());
+
+    final KProgramType kp =
+      this.shader_light_cache.cacheGetLU(la.lightGetCode());
+    final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
+    final ArrayBufferUsableType array = q.getArray();
+    final IndexBufferUsableType index = q.getIndices();
+
+    final JCBExecutorType exec = kp.getExecutable();
+    exec.execRun(new JCBExecutorProcedureType<RException>() {
+      @Override public void call(
+        final JCBProgramType program)
+        throws RException
+      {
+        gc.arrayBufferBind(array);
+        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+        KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+
+        KRendererDeferredOpaque.putDeferredParameters(
+          framebuffer,
+          t_map_albedo,
+          t_map_depth_stencil,
+          t_map_normal,
+          t_map_specular,
+          program);
+
+        KShadingProgramCommon.putMatrixInverseProjection(
+          program,
+          mwo.getMatrixProjectionInverse());
+        KShadingProgramCommon.putMatrixInverseView(
+          program,
+          mwo.getMatrixViewInverse());
+        KShadingProgramCommon.putMatrixUVUnchecked(
+          program,
+          KMatrices.IDENTITY_UV);
+        KShadingProgramCommon.putMatrixProjectionUnchecked(
+          program,
+          mwo.getMatrixProjection());
+        KShadingProgramCommon.putDepthCoefficient(
+          program,
+          KRendererCommon.depthCoefficient(mwo.getProjection()));
+
+        KShadingProgramCommon.putViewRays(program, view_rays);
+        KShadingProgramCommon.putLightAmbient(program, la);
+
+        program.programUniformPutTextureUnit(
+          "t_ssao",
+          c.withTexture2D(occlusion.getMonochromeTexture()));
 
         program.programExecute(new JCBProgramProcedureType<JCGLException>() {
           @Override public void call()

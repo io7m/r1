@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -37,7 +37,8 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
-import com.io7m.r1.kernel.types.KLightAmbient;
+import com.io7m.r1.kernel.types.KLightAmbientWithSSAO;
+import com.io7m.r1.kernel.types.KLightAmbientWithoutSSAO;
 import com.io7m.r1.kernel.types.KLightDirectional;
 import com.io7m.r1.kernel.types.KLightDirectionalDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
@@ -61,6 +62,7 @@ import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
+import com.io7m.r1.kernel.types.KSSAOParameters;
 import com.io7m.r1.spaces.RSpaceClipType;
 import com.io7m.r1.spaces.RSpaceEyeType;
 import com.io7m.r1.spaces.RSpaceRGBType;
@@ -90,7 +92,15 @@ import com.io7m.r1.spaces.RSpaceWorldType;
           100.0f);
 
       {
-        final KLightAmbient l = KLightAmbient.newLight(c, 1.0f);
+        final KLightAmbientWithoutSSAO l =
+          KLightAmbientWithoutSSAO.newLight(c, 1.0f);
+        cases.add(l);
+      }
+
+      {
+        final KSSAOParameters p = KSSAOParameters.newBuilder(t).build();
+        final KLightAmbientWithSSAO l =
+          KLightAmbientWithSSAO.newLight(c, 1.0f, p);
         cases.add(l);
       }
 

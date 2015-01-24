@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -17,6 +17,7 @@
 package com.io7m.r1.kernel.types;
 
 import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PVectorI3F;
@@ -25,28 +26,34 @@ import com.io7m.r1.spaces.RSpaceRGBType;
 
 /**
  * <p>
- * An ambient light.
+ * An ambient light with screen-space ambient occlusion.
  * </p>
  */
 
-@EqualityReference public final class KLightAmbient implements
+@EqualityReference public final class KLightAmbientWithSSAO implements
   KLightAmbientType
 {
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
-    KLightAmbientBuilderType
+    KLightAmbientWithSSAOBuilderType
   {
     private PVectorI3F<RSpaceRGBType>                           color;
     private @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
+    private KSSAOParameters                                     parameters;
 
-    Builder()
+    Builder(
+      final Texture2DStaticUsableType in_noise)
     {
       this.color = KColors.RGB_WHITE;
       this.intensity = 1.0f;
+      this.parameters = KSSAOParameters.newBuilder(in_noise).build();
     }
 
-    @Override public KLightAmbient build()
+    @Override public KLightAmbientWithSSAO build()
     {
-      return new KLightAmbient(this.color, this.intensity);
+      return new KLightAmbientWithSSAO(
+        this.color,
+        this.intensity,
+        this.parameters);
     }
 
     @Override public void copyFromAmbient(
@@ -68,6 +75,12 @@ import com.io7m.r1.spaces.RSpaceRGBType;
     {
       this.intensity = in_intensity;
     }
+
+    @Override public void setSSAOParameters(
+      final KSSAOParameters p)
+    {
+      this.parameters = NullCheck.notNull(p, "Parameters");
+    }
   }
 
   /**
@@ -75,12 +88,15 @@ import com.io7m.r1.spaces.RSpaceRGBType;
    * Create a builder for creating new ambient lights.
    * </p>
    *
+   * @param in_noise
+   *          A noise texture used to peturb sampling during SSAO
    * @return A new light builder.
    */
 
-  public static KLightAmbientBuilderType newBuilder()
+  public static KLightAmbientWithSSAOBuilderType newBuilder(
+    final Texture2DStaticUsableType in_noise)
   {
-    return new Builder();
+    return new Builder(in_noise);
   }
 
   /**
@@ -90,25 +106,35 @@ import com.io7m.r1.spaces.RSpaceRGBType;
    *          The light color.
    * @param in_intensity
    *          The light intensity.
+   * @param in_ssao_parameters
+   *          The SSAO parameters.
    * @return A new ambient light.
    */
 
-  public static KLightAmbient newLight(
+  public static KLightAmbientWithSSAO newLight(
     final PVectorI3F<RSpaceRGBType> in_color,
-    final float in_intensity)
+    final float in_intensity,
+    final KSSAOParameters in_ssao_parameters)
   {
-    return new KLightAmbient(in_color, in_intensity);
+    return new KLightAmbientWithSSAO(
+      in_color,
+      in_intensity,
+      in_ssao_parameters);
   }
 
   private final PVectorI3F<RSpaceRGBType>                           color;
   private final @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity;
+  private final KSSAOParameters                                     ssao_parameters;
 
-  private KLightAmbient(
+  private KLightAmbientWithSSAO(
     final PVectorI3F<RSpaceRGBType> in_color,
-    final float in_intensity)
+    final float in_intensity,
+    final KSSAOParameters in_ssao_parameters)
   {
     this.color = NullCheck.notNull(in_color, "Color");
     this.intensity = in_intensity;
+    this.ssao_parameters =
+      NullCheck.notNull(in_ssao_parameters, "SSAO parameters");
   }
 
   @Override public <A, E extends Throwable> A ambientAccept(
@@ -116,7 +142,16 @@ import com.io7m.r1.spaces.RSpaceRGBType;
     throws RException,
       E
   {
-    return v.ambient(this);
+    return v.ambientWithSSAO(this);
+  }
+
+  /**
+   * @return The SSAO parameters for the light
+   */
+
+  public KSSAOParameters getSSAOParameters()
+  {
+    return this.ssao_parameters;
   }
 
   @Override public
@@ -133,7 +168,7 @@ import com.io7m.r1.spaces.RSpaceRGBType;
 
   @Override public String lightGetCode()
   {
-    return "LAmbient";
+    return "LAmbientSSAO";
   }
 
   @Override public PVectorI3F<RSpaceRGBType> lightGetColor()
@@ -148,13 +183,13 @@ import com.io7m.r1.spaces.RSpaceRGBType;
 
   @Override public int texturesGetRequired()
   {
-    return 0;
+    return 1;
   }
 
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[KLightAmbient color=");
+    b.append("[KLightAmbientSSAO color=");
     b.append(this.color);
     b.append(" intensity=");
     b.append(this.intensity);

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -72,6 +72,8 @@ import com.io7m.r1.kernel.KRegionCopier;
 import com.io7m.r1.kernel.KRegionCopierType;
 import com.io7m.r1.kernel.KRendererDeferredOpaque;
 import com.io7m.r1.kernel.KRendererDeferredOpaqueType;
+import com.io7m.r1.kernel.KScreenSpaceAmbientOcclusionDeferredRenderer;
+import com.io7m.r1.kernel.KScreenSpaceAmbientOcclusionDeferredRendererType;
 import com.io7m.r1.kernel.KScreenSpaceShadowDeferredRenderer;
 import com.io7m.r1.kernel.KScreenSpaceShadowDeferredRendererType;
 import com.io7m.r1.kernel.KShaderCacheSetType;
@@ -220,6 +222,14 @@ import com.io7m.r1.tests.TestShaderCaches;
           in_mono_cache,
           in_blur);
 
+      final KScreenSpaceAmbientOcclusionDeferredRendererType in_ssao_renderer =
+        KScreenSpaceAmbientOcclusionDeferredRenderer.newRenderer(
+          bct,
+          qc,
+          tc.getShaderDeferredLightCache(),
+          in_mono_cache,
+          in_blur);
+
       final KRendererDeferredOpaqueType r =
         KRendererDeferredOpaque.newRenderer(
           g,
@@ -231,7 +241,8 @@ import com.io7m.r1.tests.TestShaderCaches;
           tc.getShaderDeferredGeoCache(),
           tc.getShaderDeferredLightCache(),
           vrc,
-          in_ssshadow_renderer);
+          in_ssshadow_renderer,
+          in_ssao_renderer);
 
       return r;
     } catch (final RException e) {

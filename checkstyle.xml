@@ -63,7 +63,7 @@
     </module>
 
     <module name="ClassFanOutComplexity">
-      <property name="max" value="95"/>
+      <property name="max" value="100"/>
     </module>
 
     <module name="ClassTypeParameterName"/>
@@ -234,7 +234,7 @@
     <module name="WhitespaceAround"/>
   </module>
 
-  <module name="FileLength"/>
+  <!-- <module name="FileLength"/> -->
   <module name="FileTabCharacter"/>
 
   <!-- Check license headers of all Java files -->

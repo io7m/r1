@@ -16,54 +16,24 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.jtensors.parameterized.PVectorI3F;
-import com.io7m.r1.spaces.RSpaceRGBType;
-
 /**
- * The type of mutable builders for ambient lights.
+ * The type of mutable builders for ambient lights without SSAO.
  */
 
-public interface KLightAmbientBuilderType
+public interface KLightAmbientWithoutSSAOBuilderType extends
+  KLightAmbientBuilderType
 {
   /**
    * <p>
-   * Set all values in the builder to those in the given existing light.
+   * Construct a light.
+   * </p>
+   * <p>
+   * This function can be called as many times as required, yielding new
+   * lights each time it is called.
    * </p>
    *
-   * @param d
-   *          The light
+   * @return A new light based on all of the parameters given so far.
    */
 
-  void copyFromAmbient(
-    final KLightAmbientType d);
-
-  /**
-   * <p>
-   * Set the color of the light.
-   * </p>
-   * <p>
-   * The default color is full-intensity white.
-   * </p>
-   *
-   * @param color
-   *          The color.
-   */
-
-  void setColor(
-    final PVectorI3F<RSpaceRGBType> color);
-
-  /**
-   * <p>
-   * Set the intensity of the light.
-   * </p>
-   * <p>
-   * The default intensity is <code>1.0</code>.
-   * </p>
-   *
-   * @param intensity
-   *          The intensity.
-   */
-
-  void setIntensity(
-    @KSuggestedRangeF(lower = 0.0f, upper = 1.0f) float intensity);
+  KLightAmbientWithoutSSAO build();
 }

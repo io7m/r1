@@ -29,13 +29,19 @@ import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.kernel.types.KBlurParameters;
+import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
-import com.io7m.r1.kernel.types.KLightAmbient;
-import com.io7m.r1.kernel.types.KLightAmbientBuilderType;
+import com.io7m.r1.kernel.types.KLightAmbientWithSSAO;
+import com.io7m.r1.kernel.types.KLightAmbientWithSSAOBuilderType;
+import com.io7m.r1.kernel.types.KLightDirectional;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
+import com.io7m.r1.kernel.types.KSSAOParameters;
+import com.io7m.r1.kernel.types.KSSAOParametersBuilderType;
+import com.io7m.r1.kernel.types.KSSAOQuality;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
@@ -105,8 +111,27 @@ public final class ALSimple0 implements ExampleSceneType
         KFaceSelection.FACE_RENDER_FRONT);
 
     {
-      final KLightAmbientBuilderType b = KLightAmbient.newBuilder();
-      b.setColor(new PVectorI3F<RSpaceRGBType>(1.0f, 0.0f, 0.0f));
+      final Texture2DStaticUsableType noise = scene.texture("rgb_noise.png");
+
+      final KBlurParametersBuilderType bpb = KBlurParameters.newBuilder();
+      bpb.setBlurSize(1.0f);
+      bpb.setPasses(0);
+      bpb.setScale(1.0f);
+
+      final KSSAOParametersBuilderType sb = KSSAOParameters.newBuilder(noise);
+      sb.setBias(0.0f);
+      sb.setIntensity(2.0f);
+      sb.setSampleRadius(0.025f);
+      sb.setOccluderScale(10.0f);
+      sb.setResolution(1.0f);
+      sb.setQuality(KSSAOQuality.SSAO_X8);
+      sb.setBlurParameters(bpb.build());
+
+      final KLightAmbientWithSSAOBuilderType b =
+        KLightAmbientWithSSAO.newBuilder(noise);
+
+      b.setSSAOParameters(sb.build());
+      b.setColor(new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f));
       b.setIntensity(0.5f);
 
       {
@@ -115,6 +140,14 @@ public final class ALSimple0 implements ExampleSceneType
         gb.groupSetAmbientLight(b.build());
         gb.groupAddInstance(i);
         gb.groupAddInstance(m);
+
+        gb.groupAddLight(KLightDirectional.newLight(
+          PVectorI3F.normalize(new PVectorI3F<RSpaceWorldType>(
+            -1.0f,
+            -1.0f,
+            -1.0f)),
+          new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f),
+          0.0f));
       }
     }
   }
