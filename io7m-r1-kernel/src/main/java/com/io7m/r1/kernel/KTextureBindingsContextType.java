@@ -56,4 +56,20 @@ public interface KTextureBindingsContextType
   TextureUnitType withTextureCube(
     final TextureCubeStaticUsableType t)
     throws RException;
+
+  /**
+   * If <code>t</code> is not already bound to a texture unit, allocate a new
+   * texture unit and bind <code>t</code> to it, returning the new unit.
+   * Otherwise, return the unit to which <code>t</code> is bound.
+   *
+   * @param t
+   *          The texture
+   * @return A texture unit
+   * @throws RException
+   *           If another error occurs.
+   */
+
+  TextureUnitType withTexture2DReuse(
+    Texture2DStaticUsableType t)
+    throws RException;
 }

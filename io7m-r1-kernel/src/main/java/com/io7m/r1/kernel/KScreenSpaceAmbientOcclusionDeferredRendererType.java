@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,8 +16,6 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.jcanephora.AreaInclusive;
-import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KSSAOParameters;
@@ -36,12 +34,8 @@ public interface KScreenSpaceAmbientOcclusionDeferredRendererType
    *          An OpenGL interface
    * @param p
    *          The SSAO parameters
-   * @param area
-   *          The inclusive area of the screen
-   * @param t_map_depth_stencil
-   *          The texture unit to which is bound the current depth buffer
-   * @param t_map_normal
-   *          The texture unit to which is bound the current normal buffer
+   * @param gbuffer
+   *          The current g-buffer
    * @param view_rays
    *          The current view rays
    * @param mwo
@@ -63,9 +57,7 @@ public interface KScreenSpaceAmbientOcclusionDeferredRendererType
   <A, E extends Exception> A withAmbientOcclusion(
     final JCGLInterfaceCommonType gc,
     final KSSAOParameters p,
-    final AreaInclusive area,
-    final TextureUnitType t_map_depth_stencil,
-    final TextureUnitType t_map_normal,
+    final KGeometryBufferUsableType gbuffer,
     final KViewRays view_rays,
     final KMatricesObserverType mwo,
     final KScreenSpaceAmbientOcclusionDeferredWithType<A, E> f)

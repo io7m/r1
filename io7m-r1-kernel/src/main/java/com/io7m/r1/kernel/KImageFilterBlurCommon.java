@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -33,13 +33,255 @@ import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Unit;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.kernel.types.KBilateralBlurParameters;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
 import com.io7m.r1.kernel.types.KUnitQuadUsableType;
 
 @EqualityReference final class KImageFilterBlurCommon
 {
+  static void evaluateBilateralBlurV(
+    final JCGLImplementationType g,
+    final KGeometryBufferUsableType gbuffer,
+    final KBilateralBlurParameters params,
+    final KTextureBindingsControllerType bindings,
+    final KUnitQuadCacheType qc,
+    final KProgramType blur_h,
+    final KMatricesObserverValuesType m_observer,
+    final Texture2DStaticUsableType input_texture,
+    final AreaInclusive input_area,
+    final FramebufferUsableType output,
+    final AreaInclusive output_area)
+    throws RException
+  {
+    bindings
+      .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+        @Override public void call(
+          final KTextureBindingsContextType c)
+          throws RException
+        {
+          final JCGLInterfaceCommonType gc = g.getGLCommon();
+
+          try {
+            gc.framebufferDrawBind(output);
+
+            gc.blendingDisable();
+            gc.colorBufferMask(true, true, true, true);
+            gc.cullingDisable();
+
+            if (gc.depthBufferGetBits() > 0) {
+              gc.depthBufferTestDisable();
+              gc.depthBufferWriteDisable();
+            }
+
+            gc.viewportSet(output_area);
+
+            final JCBExecutorType e = blur_h.getExecutable();
+            e.execRun(new JCBExecutorProcedureType<RException>() {
+              @Override public void call(
+                final JCBProgramType p)
+                throws JCGLException,
+                  RException
+              {
+                try {
+                  final KUnitQuadUsableType quad = qc.cacheGetLU(Unit.unit());
+                  final ArrayBufferUsableType array = quad.getArray();
+                  final IndexBufferUsableType indices = quad.getIndices();
+
+                  gc.arrayBufferBind(array);
+                  KShadingProgramCommon.bindAttributePositionUnchecked(
+                    p,
+                    array);
+                  KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
+                  KShadingProgramCommon.putMatrixUVUnchecked(
+                    p,
+                    KMatrices.IDENTITY_UV);
+                  KShadingProgramCommon.putMatrixInverseProjection(
+                    p,
+                    m_observer.getMatrixProjectionInverse());
+
+                  final AreaInclusive gb_area = gbuffer.geomGetArea();
+                  final RangeInclusiveL gb_rx = gb_area.getRangeX();
+                  final RangeInclusiveL gb_ry = gb_area.getRangeY();
+                  p.programUniformPutFloat(
+                    "gbuffer_viewport.inverse_width",
+                    1.0f / gb_rx.getInterval());
+                  p.programUniformPutFloat(
+                    "gbuffer_viewport.inverse_height",
+                    1.0f / gb_ry.getInterval());
+
+                  final AreaInclusive i_area = input_texture.textureGetArea();
+                  final RangeInclusiveL i_rx = i_area.getRangeX();
+                  final RangeInclusiveL i_ry = i_area.getRangeY();
+                  p.programUniformPutFloat(
+                    "image_viewport.inverse_width",
+                    1.0f / i_rx.getInterval());
+                  p.programUniformPutFloat(
+                    "image_viewport.inverse_height",
+                    1.0f / i_ry.getInterval());
+
+                  KShadingProgramCommon.putDepthCoefficient(
+                    p,
+                    KRendererCommon.depthCoefficient(m_observer
+                      .getProjection()));
+
+                  KShadingProgramCommon.putDeferredMapDepth(
+                    p,
+                    c.withTexture2D(gbuffer.geomGetTextureDepthStencil()));
+                  KShadingProgramCommon.putDeferredMapNormal(
+                    p,
+                    c.withTexture2D(gbuffer.geomGetTextureNormal()));
+                  p.programUniformPutTextureUnit(
+                    "t_image",
+                    c.withTexture2D(input_texture));
+
+                  p
+                    .programExecute(new JCBProgramProcedureType<JCGLException>() {
+                      @Override public void call()
+                        throws JCGLException
+                      {
+                        gc.drawElements(
+                          Primitives.PRIMITIVE_TRIANGLES,
+                          indices);
+                      }
+                    });
+
+                } catch (final JCacheException x) {
+                  throw new UnreachableCodeException(x);
+                } finally {
+                  gc.arrayBufferUnbind();
+                }
+              }
+            });
+          } finally {
+            gc.framebufferDrawUnbind();
+          }
+        }
+      });
+  }
+
+  static void evaluateBilateralBlurH(
+    final JCGLImplementationType g,
+    final KGeometryBufferUsableType gbuffer,
+    final KBilateralBlurParameters params,
+    final KTextureBindingsControllerType bindings,
+    final KUnitQuadCacheType qc,
+    final KProgramType blur_h,
+    final KMatricesObserverValuesType m_observer,
+    final Texture2DStaticUsableType input_texture,
+    final AreaInclusive input_area,
+    final FramebufferUsableType output,
+    final AreaInclusive output_area)
+    throws RException
+  {
+    bindings
+      .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+        @Override public void call(
+          final KTextureBindingsContextType c)
+          throws RException
+        {
+          final JCGLInterfaceCommonType gc = g.getGLCommon();
+
+          try {
+            gc.framebufferDrawBind(output);
+
+            gc.blendingDisable();
+            gc.colorBufferMask(true, true, true, true);
+            gc.cullingDisable();
+
+            if (gc.depthBufferGetBits() > 0) {
+              gc.depthBufferTestDisable();
+              gc.depthBufferWriteDisable();
+            }
+
+            gc.viewportSet(output_area);
+
+            final JCBExecutorType e = blur_h.getExecutable();
+            e.execRun(new JCBExecutorProcedureType<RException>() {
+              @Override public void call(
+                final JCBProgramType p)
+                throws JCGLException,
+                  RException
+              {
+                try {
+                  final KUnitQuadUsableType quad = qc.cacheGetLU(Unit.unit());
+                  final ArrayBufferUsableType array = quad.getArray();
+                  final IndexBufferUsableType indices = quad.getIndices();
+
+                  gc.arrayBufferBind(array);
+                  KShadingProgramCommon.bindAttributePositionUnchecked(
+                    p,
+                    array);
+                  KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
+                  KShadingProgramCommon.putMatrixUVUnchecked(
+                    p,
+                    KMatrices.IDENTITY_UV);
+                  KShadingProgramCommon.putMatrixInverseProjection(
+                    p,
+                    m_observer.getMatrixProjectionInverse());
+
+                  final AreaInclusive gb_area = gbuffer.geomGetArea();
+                  final RangeInclusiveL gb_rx = gb_area.getRangeX();
+                  final RangeInclusiveL gb_ry = gb_area.getRangeY();
+                  p.programUniformPutFloat(
+                    "gbuffer_viewport.inverse_width",
+                    1.0f / gb_rx.getInterval());
+                  p.programUniformPutFloat(
+                    "gbuffer_viewport.inverse_height",
+                    1.0f / gb_ry.getInterval());
+
+                  final AreaInclusive i_area = input_texture.textureGetArea();
+                  final RangeInclusiveL i_rx = i_area.getRangeX();
+                  final RangeInclusiveL i_ry = i_area.getRangeY();
+                  p.programUniformPutFloat(
+                    "image_viewport.inverse_width",
+                    1.0f / i_rx.getInterval());
+                  p.programUniformPutFloat(
+                    "image_viewport.inverse_height",
+                    1.0f / i_ry.getInterval());
+
+                  KShadingProgramCommon.putDepthCoefficient(
+                    p,
+                    KRendererCommon.depthCoefficient(m_observer
+                      .getProjection()));
+
+                  KShadingProgramCommon.putDeferredMapDepth(
+                    p,
+                    c.withTexture2D(gbuffer.geomGetTextureDepthStencil()));
+                  KShadingProgramCommon.putDeferredMapNormal(
+                    p,
+                    c.withTexture2D(gbuffer.geomGetTextureNormal()));
+                  p.programUniformPutTextureUnit(
+                    "t_image",
+                    c.withTexture2D(input_texture));
+
+                  p
+                    .programExecute(new JCBProgramProcedureType<JCGLException>() {
+                      @Override public void call()
+                        throws JCGLException
+                      {
+                        gc.drawElements(
+                          Primitives.PRIMITIVE_TRIANGLES,
+                          indices);
+                      }
+                    });
+
+                } catch (final JCacheException x) {
+                  throw new UnreachableCodeException(x);
+                } finally {
+                  gc.arrayBufferUnbind();
+                }
+              }
+            });
+          } finally {
+            gc.framebufferDrawUnbind();
+          }
+        }
+      });
+  }
+
   static void evaluateBlurH(
     final JCGLImplementationType gi,
     final KTextureBindingsControllerType in_units,

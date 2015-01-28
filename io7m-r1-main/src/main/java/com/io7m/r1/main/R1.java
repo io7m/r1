@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -50,6 +50,7 @@ import com.io7m.r1.kernel.KFramebufferRGBACache;
 import com.io7m.r1.kernel.KFramebufferRGBACacheType;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCache;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCacheType;
+import com.io7m.r1.kernel.KImageFilterBilateralBlurMonochrome;
 import com.io7m.r1.kernel.KImageFilterBlurDepthVariance;
 import com.io7m.r1.kernel.KImageFilterBlurMonochrome;
 import com.io7m.r1.kernel.KImageFilterBlurRGBA;
@@ -61,6 +62,7 @@ import com.io7m.r1.kernel.KImageFilterEmissionGlow;
 import com.io7m.r1.kernel.KImageFilterFXAA;
 import com.io7m.r1.kernel.KImageFilterFogY;
 import com.io7m.r1.kernel.KImageFilterFogZ;
+import com.io7m.r1.kernel.KImageFilterMonochromeDeferredType;
 import com.io7m.r1.kernel.KImageFilterMonochromeType;
 import com.io7m.r1.kernel.KImageFilterRGBAType;
 import com.io7m.r1.kernel.KImageSinkBlitRGBA;
@@ -95,6 +97,7 @@ import com.io7m.r1.kernel.KTranslucentRenderer;
 import com.io7m.r1.kernel.KTranslucentRendererType;
 import com.io7m.r1.kernel.KViewRaysCache;
 import com.io7m.r1.kernel.KViewRaysCacheType;
+import com.io7m.r1.kernel.types.KBilateralBlurParameters;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KFrustumMeshCache;
 import com.io7m.r1.kernel.types.KFrustumMeshCacheType;
@@ -113,55 +116,56 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
   @EqualityReference private static final class Builder implements
     R1BuilderType
   {
-    private @Nullable KRegionCopierType                                    copier;
-    private @Nullable KDepthRendererType                                   depth_renderer;
-    private @Nullable KImageFilterDepthVarianceType<KBlurParameters>       depth_variance_blur;
-    private @Nullable KFramebufferDepthVarianceCacheType                   depth_variance_cache;
-    private long                                                           depth_variance_framebuffer_count;
-    private long                                                           depth_variance_framebuffer_height;
-    private long                                                           depth_variance_framebuffer_width;
-    private @Nullable KDepthVarianceRendererType                           depth_variance_renderer;
-    private @Nullable KImageFilterDeferredType<KFogYParameters>            filter_fog_y;
-    private @Nullable KImageFilterDeferredType<KFogZParameters>            filter_fog_z;
-    private @Nullable KImageFilterCopyRGBA                                 filter_rgba_copy;
-    private @Nullable KFrustumMeshCacheType                                frustum_cache;
-    private long                                                           frustum_cache_count;
-    private final JCGLImplementationType                                   gl;
-    private final LogUsableType                                            log;
-    private @Nullable KImageFilterMonochromeType<KBlurParameters>          mono_blur;
-    private @Nullable KFramebufferMonochromeCacheType                      monochrome_cache;
-    private long                                                           monochrome_framebuffer_count;
-    private long                                                           monochrome_framebuffer_height;
-    private long                                                           monochrome_framebuffer_width;
-    private @Nullable KImageFilterDeferredType<Unit>                       post_emission;
-    private @Nullable KImageFilterDeferredType<KGlowParameters>            post_emission_glow;
-    private @Nullable KImageFilterRGBAType<KFXAAParameters>                post_fxaa;
-    private @Nullable KUnitQuadCacheType                                   quad_cache;
-    private @Nullable KRendererDeferredType                                renderer_deferred;
-    private @Nullable KRendererDeferredOpaqueType                          renderer_deferred_opaque;
-    private @Nullable KRefractionRendererType                              renderer_refraction;
-    private @Nullable KScreenSpaceAmbientOcclusionDeferredRendererType     renderer_ssao;
-    private @Nullable KScreenSpaceShadowDeferredRendererType               renderer_ssshadow;
-    private @Nullable KTranslucentRendererType                             renderer_translucent;
-    private @Nullable KImageFilterRGBAType<KBlurParameters>                rgba_blur;
-    private @Nullable KFramebufferRGBACacheType                            rgba_cache;
-    private long                                                           rgba_framebuffer_count;
-    private long                                                           rgba_framebuffer_height;
-    private long                                                           rgba_framebuffer_width;
-    private @Nullable KFramebufferRGBAWithDepthCacheType                   rgba_with_depth_cache;
-    private long                                                           rgba_with_depth_framebuffer_count;
-    private long                                                           rgba_with_depth_framebuffer_height;
-    private long                                                           rgba_with_depth_framebuffer_width;
-    private @Nullable KShaderCacheSetType                                  shader_caches;
-    private @Nullable KShadowMapCacheType                                  shadow_cache;
-    private long                                                           shadow_map_cache_size;
-    private @Nullable KShadowMapRendererType                               shadow_renderer;
-    private @Nullable KImageSinkRGBAType<AreaInclusive>                    sink_rgba;
-    private @Nullable KImageSourceDepthVarianceType<KTextureMixParameters> source_depth_variance_mix;
-    private @Nullable KImageSourceRGBAType<KTextureMixParameters>          source_rgba_mix;
-    private @Nullable KUnitSphereCacheType                                 sphere_cache;
-    private long                                                           view_ray_cache_count;
-    private @Nullable KViewRaysCacheType                                   view_rays_cache;
+    private @Nullable KRegionCopierType                                            copier;
+    private @Nullable KDepthRendererType                                           depth_renderer;
+    private @Nullable KImageFilterDepthVarianceType<KBlurParameters>               depth_variance_blur;
+    private @Nullable KFramebufferDepthVarianceCacheType                           depth_variance_cache;
+    private long                                                                   depth_variance_framebuffer_count;
+    private long                                                                   depth_variance_framebuffer_height;
+    private long                                                                   depth_variance_framebuffer_width;
+    private @Nullable KDepthVarianceRendererType                                   depth_variance_renderer;
+    private @Nullable KImageFilterDeferredType<KFogYParameters>                    filter_fog_y;
+    private @Nullable KImageFilterDeferredType<KFogZParameters>                    filter_fog_z;
+    private @Nullable KImageFilterCopyRGBA                                         filter_rgba_copy;
+    private @Nullable KFrustumMeshCacheType                                        frustum_cache;
+    private long                                                                   frustum_cache_count;
+    private final JCGLImplementationType                                           gl;
+    private final LogUsableType                                                    log;
+    private @Nullable KImageFilterMonochromeType<KBlurParameters>                  mono_blur;
+    private @Nullable KFramebufferMonochromeCacheType                              monochrome_cache;
+    private long                                                                   monochrome_framebuffer_count;
+    private long                                                                   monochrome_framebuffer_height;
+    private long                                                                   monochrome_framebuffer_width;
+    private @Nullable KImageFilterDeferredType<Unit>                               post_emission;
+    private @Nullable KImageFilterDeferredType<KGlowParameters>                    post_emission_glow;
+    private @Nullable KImageFilterRGBAType<KFXAAParameters>                        post_fxaa;
+    private @Nullable KUnitQuadCacheType                                           quad_cache;
+    private @Nullable KRendererDeferredType                                        renderer_deferred;
+    private @Nullable KRendererDeferredOpaqueType                                  renderer_deferred_opaque;
+    private @Nullable KRefractionRendererType                                      renderer_refraction;
+    private @Nullable KScreenSpaceAmbientOcclusionDeferredRendererType             renderer_ssao;
+    private @Nullable KScreenSpaceShadowDeferredRendererType                       renderer_ssshadow;
+    private @Nullable KTranslucentRendererType                                     renderer_translucent;
+    private @Nullable KImageFilterRGBAType<KBlurParameters>                        rgba_blur;
+    private @Nullable KFramebufferRGBACacheType                                    rgba_cache;
+    private long                                                                   rgba_framebuffer_count;
+    private long                                                                   rgba_framebuffer_height;
+    private long                                                                   rgba_framebuffer_width;
+    private @Nullable KFramebufferRGBAWithDepthCacheType                           rgba_with_depth_cache;
+    private long                                                                   rgba_with_depth_framebuffer_count;
+    private long                                                                   rgba_with_depth_framebuffer_height;
+    private long                                                                   rgba_with_depth_framebuffer_width;
+    private @Nullable KShaderCacheSetType                                          shader_caches;
+    private @Nullable KShadowMapCacheType                                          shadow_cache;
+    private long                                                                   shadow_map_cache_size;
+    private @Nullable KShadowMapRendererType                                       shadow_renderer;
+    private @Nullable KImageSinkRGBAType<AreaInclusive>                            sink_rgba;
+    private @Nullable KImageSourceDepthVarianceType<KTextureMixParameters>         source_depth_variance_mix;
+    private @Nullable KImageSourceRGBAType<KTextureMixParameters>                  source_rgba_mix;
+    private @Nullable KUnitSphereCacheType                                         sphere_cache;
+    private long                                                                   view_ray_cache_count;
+    private @Nullable KViewRaysCacheType                                           view_rays_cache;
+    private @Nullable KImageFilterMonochromeDeferredType<KBilateralBlurParameters> mono_bilateral_blur;
 
     Builder(
       final JCGLImplementationType in_gl,
@@ -266,13 +270,21 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
             in_monochrome_cache,
             in_blur_mono);
 
+        final KImageFilterMonochromeDeferredType<KBilateralBlurParameters> in_bilateral_blur_mono =
+          this.makeMonochromeBilateralBlur(
+            in_texture_bindings,
+            in_shader_caches,
+            in_copier,
+            in_quad_cache,
+            in_monochrome_cache);
+
         final KScreenSpaceAmbientOcclusionDeferredRendererType in_ssao_renderer =
           this.makeScreenSpaceAmbientOcclusionDeferredRenderer(
             in_texture_bindings,
             in_shader_caches,
             in_quad_cache,
             in_monochrome_cache,
-            in_blur_mono);
+            in_bilateral_blur_mono);
 
         final KRendererDeferredOpaqueType in_renderer_deferred_opaque =
           this.makeDeferredOpaque(
@@ -404,6 +416,32 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
       } catch (final FilesystemError e) {
         throw RExceptionFilesystem.fromFilesystemException(e);
       }
+    }
+
+    private
+      KImageFilterMonochromeDeferredType<KBilateralBlurParameters>
+      makeMonochromeBilateralBlur(
+        final KTextureBindingsControllerType in_texture_bindings,
+        final KShaderCacheSetType in_shader_caches,
+        final KRegionCopierType in_copier,
+        final KUnitQuadCacheType in_quad_cache,
+        final KFramebufferMonochromeCacheType in_mono_cache)
+    {
+      final KImageFilterMonochromeDeferredType<KBilateralBlurParameters> in_mono_blur;
+      if (this.mono_bilateral_blur != null) {
+        in_mono_blur = this.mono_bilateral_blur;
+      } else {
+        in_mono_blur =
+          KImageFilterBilateralBlurMonochrome.filterNew(
+            this.gl,
+            in_texture_bindings,
+            in_copier,
+            in_mono_cache,
+            in_shader_caches.getShaderImageCache(),
+            in_quad_cache,
+            this.log);
+      }
+      return in_mono_blur;
     }
 
     private
@@ -831,7 +869,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         final KShaderCacheSetType in_shader_caches,
         final KUnitQuadCacheType in_quad_cache,
         final KFramebufferMonochromeCacheType in_monochrome_cache,
-        final KImageFilterMonochromeType<KBlurParameters> in_blur_mono)
+        final KImageFilterMonochromeDeferredType<KBilateralBlurParameters> in_blur_mono)
     {
       KScreenSpaceAmbientOcclusionDeferredRendererType in_ssao_renderer;
       if (this.renderer_ssao != null) {

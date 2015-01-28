@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -29,8 +29,8 @@ import com.io7m.r1.examples.ExampleSceneUtilities;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.exceptions.RException;
-import com.io7m.r1.kernel.types.KBlurParameters;
-import com.io7m.r1.kernel.types.KBlurParametersBuilderType;
+import com.io7m.r1.kernel.types.KBilateralBlurParameters;
+import com.io7m.r1.kernel.types.KBilateralBlurParametersBuilderType;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KLightAmbientWithSSAO;
@@ -113,16 +113,17 @@ public final class ALSimple0 implements ExampleSceneType
     {
       final Texture2DStaticUsableType noise = scene.texture("rgb_noise.png");
 
-      final KBlurParametersBuilderType bpb = KBlurParameters.newBuilder();
+      final KBilateralBlurParametersBuilderType bpb =
+        KBilateralBlurParameters.newBuilder();
       bpb.setBlurSize(1.0f);
-      bpb.setPasses(0);
+      bpb.setPasses(1);
       bpb.setScale(1.0f);
 
       final KSSAOParametersBuilderType sb = KSSAOParameters.newBuilder(noise);
       sb.setBias(0.0f);
-      sb.setIntensity(2.0f);
+      sb.setIntensity(1.0f);
       sb.setSampleRadius(0.025f);
-      sb.setOccluderScale(10.0f);
+      sb.setOccluderScale(1.0f);
       sb.setResolution(1.0f);
       sb.setQuality(KSSAOQuality.SSAO_X8);
       sb.setBlurParameters(bpb.build());

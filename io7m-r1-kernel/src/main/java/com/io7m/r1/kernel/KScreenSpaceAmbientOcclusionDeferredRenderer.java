@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -25,7 +25,6 @@ import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
-import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBExecutorType;
@@ -38,7 +37,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.parameterized.PVectorI2F;
 import com.io7m.r1.exceptions.RException;
-import com.io7m.r1.kernel.types.KBlurParameters;
+import com.io7m.r1.kernel.types.KBilateralBlurParameters;
 import com.io7m.r1.kernel.types.KFramebufferMonochromeDescription;
 import com.io7m.r1.kernel.types.KMonochromePrecision;
 import com.io7m.r1.kernel.types.KSSAOParameters;
@@ -70,12 +69,14 @@ import com.io7m.r1.spaces.RSpaceTextureType;
    * @return A new renderer
    */
 
-  public static KScreenSpaceAmbientOcclusionDeferredRendererType newRenderer(
-    final KTextureBindingsControllerType in_bindings,
-    final KUnitQuadCacheType in_quad_cache,
-    final KShaderCacheDeferredLightType in_shader_light_cache,
-    final KFramebufferMonochromeCacheType in_mono_cache,
-    final KImageFilterMonochromeType<KBlurParameters> in_blur)
+  public static
+    KScreenSpaceAmbientOcclusionDeferredRendererType
+    newRenderer(
+      final KTextureBindingsControllerType in_bindings,
+      final KUnitQuadCacheType in_quad_cache,
+      final KShaderCacheDeferredLightType in_shader_light_cache,
+      final KFramebufferMonochromeCacheType in_mono_cache,
+      final KImageFilterMonochromeDeferredType<KBilateralBlurParameters> in_blur)
   {
     return new KScreenSpaceAmbientOcclusionDeferredRenderer(
       in_bindings,
@@ -85,18 +86,18 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       in_blur);
   }
 
-  private final KTextureBindingsControllerType              bindings;
-  private final KImageFilterMonochromeType<KBlurParameters> blur;
-  private final KFramebufferMonochromeCacheType             mono_cache;
-  private final KUnitQuadCacheType                          quad_cache;
-  private final KShaderCacheDeferredLightType               shader_light_cache;
+  private final KTextureBindingsControllerType                               bindings;
+  private final KImageFilterMonochromeDeferredType<KBilateralBlurParameters> blur;
+  private final KFramebufferMonochromeCacheType                              mono_cache;
+  private final KUnitQuadCacheType                                           quad_cache;
+  private final KShaderCacheDeferredLightType                                shader_light_cache;
 
   private KScreenSpaceAmbientOcclusionDeferredRenderer(
     final KTextureBindingsControllerType in_bindings,
     final KUnitQuadCacheType in_quad_cache,
     final KShaderCacheDeferredLightType in_shader_light_cache,
     final KFramebufferMonochromeCacheType in_mono_cache,
-    final KImageFilterMonochromeType<KBlurParameters> in_blur)
+    final KImageFilterMonochromeDeferredType<KBilateralBlurParameters> in_blur)
   {
     this.bindings = NullCheck.notNull(in_bindings);
     this.quad_cache = NullCheck.notNull(in_quad_cache);
@@ -108,9 +109,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   @Override public <A, E extends Exception> A withAmbientOcclusion(
     final JCGLInterfaceCommonType gc,
     final KSSAOParameters p,
-    final AreaInclusive area,
-    final TextureUnitType t_map_depth_stencil,
-    final TextureUnitType t_map_normal,
+    final KGeometryBufferUsableType gbuffer,
     final KViewRays view_rays,
     final KMatricesObserverType mwo,
     final KScreenSpaceAmbientOcclusionDeferredWithType<A, E> f)
@@ -119,7 +118,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   {
     final AreaInclusive scaled_area =
       KScreenSpaceAmbientOcclusionDeferredRenderer.getScaledArea(
-        area,
+        gbuffer.geomGetArea(),
         p.getResolution());
     gc.viewportSet(scaled_area);
 
@@ -135,17 +134,12 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final KFramebufferMonochromeUsableType mono_fb = mono_receipt.getValue();
 
     try {
-      this.renderOcclusion(
-        gc,
-        p,
-        t_map_depth_stencil,
-        t_map_normal,
-        view_rays,
-        mwo,
-        mono_fb);
+      this.renderOcclusion(gc, p, gbuffer, view_rays, mwo, mono_fb);
 
-      this.blur.filterEvaluateMonochrome(
+      this.blur.filterEvaluateMonochromeDeferred(
         p.getBlurParameters(),
+        gbuffer,
+        mwo,
         mono_fb,
         mono_fb);
 
@@ -176,8 +170,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   private void renderOcclusion(
     final JCGLInterfaceCommonType gc,
     final KSSAOParameters p,
-    final TextureUnitType t_map_depth_stencil,
-    final TextureUnitType t_map_normal,
+    final KGeometryBufferUsableType gbuffer,
     final KViewRays view_rays,
     final KMatricesObserverType mwo,
     final KFramebufferMonochromeUsableType mono_fb)
@@ -229,10 +222,10 @@ import com.io7m.r1.spaces.RSpaceTextureType;
                 KRendererCommon.putFramebufferScreenSize(mono_fb, program);
                 KShadingProgramCommon.putDeferredMapDepth(
                   program,
-                  t_map_depth_stencil);
+                  c.withTexture2DReuse(gbuffer.geomGetTextureDepthStencil()));
                 KShadingProgramCommon.putDeferredMapNormal(
                   program,
-                  t_map_normal);
+                  c.withTexture2DReuse(gbuffer.geomGetTextureNormal()));
 
                 KShadingProgramCommon.putMatrixInverseProjection(
                   program,

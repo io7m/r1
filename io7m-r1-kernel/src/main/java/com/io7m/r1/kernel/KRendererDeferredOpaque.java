@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -1104,6 +1104,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private void renderGroupLightAmbient(
+    final KGeometryBufferUsableType gbuffer,
     final KFramebufferDeferredUsableType framebuffer,
     final TextureUnitType t_map_albedo,
     final TextureUnitType t_map_depth_stencil,
@@ -1147,9 +1148,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
           return ssao_r.withAmbientOcclusion(
             gc,
             la.getSSAOParameters(),
-            framebuffer.getArea(),
-            t_map_depth_stencil,
-            t_map_normal,
+            gbuffer,
             view_rays,
             mwo,
             new KScreenSpaceAmbientOcclusionDeferredWithType<Unit, JCacheException>() {
@@ -1853,6 +1852,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
                 (Some<KLightAmbientType>) amb_opt;
 
               KRendererDeferredOpaque.this.renderGroupLightAmbient(
+                gbuffer,
                 framebuffer,
                 t_map_albedo,
                 t_map_depth_stencil,

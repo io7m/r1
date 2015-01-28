@@ -74,6 +74,7 @@ import com.io7m.r1.exceptions.RExceptionUnitAllocatorOutOfUnits;
       throws RException
     {
       this.checkCurrent();
+      NullCheck.notNull(t);
 
       final List<TextureUnitType> us = KTextureBindingsController.this.units;
       if (this.bindings_next < us.size()) {
@@ -89,11 +90,29 @@ import com.io7m.r1.exceptions.RExceptionUnitAllocatorOutOfUnits;
       throw new RExceptionUnitAllocatorOutOfUnits("Out of texture units");
     }
 
+    @Override public TextureUnitType withTexture2DReuse(
+      final Texture2DStaticUsableType t)
+      throws RException
+    {
+      this.checkCurrent();
+      NullCheck.notNull(t);
+
+      final List<TextureUnitType> us = KTextureBindingsController.this.units;
+      for (int index = 0; index < this.bindings.length; ++index) {
+        if (this.bindings[index] == t) {
+          return NullCheck.notNull(us.get(index));
+        }
+      }
+
+      return this.withTexture2D(t);
+    }
+
     @Override public TextureUnitType withTextureCube(
       final TextureCubeStaticUsableType t)
       throws RException
     {
       this.checkCurrent();
+      NullCheck.notNull(t);
 
       final List<TextureUnitType> us = KTextureBindingsController.this.units;
       if (this.bindings_next < us.size()) {

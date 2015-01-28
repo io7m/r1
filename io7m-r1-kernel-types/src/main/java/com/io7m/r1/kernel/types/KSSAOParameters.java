@@ -32,7 +32,7 @@ import com.io7m.jnull.Nullable;
     KSSAOParametersBuilderType
   {
     private float                           bias;
-    private KBlurParameters                 blur;
+    private KBilateralBlurParameters        blur;
     private float                           intensity;
     private float                           occluder_scale;
     private KSSAOQuality                    quality;
@@ -48,7 +48,7 @@ import com.io7m.jnull.Nullable;
       this.sample_radius = 0.05f;
       this.occluder_scale = 1.0f;
       this.resolution = 1.0f;
-      this.blur = KBlurParameters.getDefault();
+      this.blur = KBilateralBlurParameters.getDefault();
       this.quality = KSSAOQuality.SSAO_X16;
     }
 
@@ -72,7 +72,7 @@ import com.io7m.jnull.Nullable;
     }
 
     @Override public void setBlurParameters(
-      final KBlurParameters b)
+      final KBilateralBlurParameters b)
     {
       this.blur = NullCheck.notNull(b, "Blur");
     }
@@ -123,7 +123,7 @@ import com.io7m.jnull.Nullable;
   }
 
   private final float                     bias;
-  private final KBlurParameters           blur;
+  private final KBilateralBlurParameters  blur;
   private final float                     intensity;
   private final float                     occluder_scale;
   private final KSSAOQuality              quality;
@@ -138,7 +138,7 @@ import com.io7m.jnull.Nullable;
     final float in_sample_radius,
     final Texture2DStaticUsableType in_sample_noise,
     final float in_resolution,
-    final KBlurParameters in_blur,
+    final KBilateralBlurParameters in_blur,
     final KSSAOQuality in_quality)
   {
     this.occluder_scale = in_scale;
@@ -164,7 +164,7 @@ import com.io7m.jnull.Nullable;
    * @return The blur parameters.
    */
 
-  public KBlurParameters getBlurParameters()
+  public KBilateralBlurParameters getBlurParameters()
   {
     return this.blur;
   }

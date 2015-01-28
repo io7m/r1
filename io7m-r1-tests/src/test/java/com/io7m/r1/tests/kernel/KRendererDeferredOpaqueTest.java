@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -60,9 +60,11 @@ import com.io7m.r1.kernel.KFramebufferDepthVarianceCache;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
 import com.io7m.r1.kernel.KFramebufferMonochromeCache;
 import com.io7m.r1.kernel.KFramebufferMonochromeCacheType;
+import com.io7m.r1.kernel.KImageFilterBilateralBlurMonochrome;
 import com.io7m.r1.kernel.KImageFilterBlurDepthVariance;
 import com.io7m.r1.kernel.KImageFilterBlurMonochrome;
 import com.io7m.r1.kernel.KImageFilterDepthVarianceType;
+import com.io7m.r1.kernel.KImageFilterMonochromeDeferredType;
 import com.io7m.r1.kernel.KImageFilterMonochromeType;
 import com.io7m.r1.kernel.KMatricesObserverFunctionType;
 import com.io7m.r1.kernel.KMatricesObserverType;
@@ -87,6 +89,7 @@ import com.io7m.r1.kernel.KTextureBindingsController;
 import com.io7m.r1.kernel.KTextureBindingsControllerType;
 import com.io7m.r1.kernel.KViewRaysCache;
 import com.io7m.r1.kernel.KViewRaysCacheType;
+import com.io7m.r1.kernel.types.KBilateralBlurParameters;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
@@ -222,13 +225,23 @@ import com.io7m.r1.tests.TestShaderCaches;
           in_mono_cache,
           in_blur);
 
+      final KImageFilterMonochromeDeferredType<KBilateralBlurParameters> in_bilateral_blur =
+        KImageFilterBilateralBlurMonochrome.filterNew(
+          g,
+          bct,
+          copier,
+          in_mono_cache,
+          tc.getShaderImageCache(),
+          qc,
+          in_log);
+
       final KScreenSpaceAmbientOcclusionDeferredRendererType in_ssao_renderer =
         KScreenSpaceAmbientOcclusionDeferredRenderer.newRenderer(
           bct,
           qc,
           tc.getShaderDeferredLightCache(),
           in_mono_cache,
-          in_blur);
+          in_bilateral_blur);
 
       final KRendererDeferredOpaqueType r =
         KRendererDeferredOpaque.newRenderer(
