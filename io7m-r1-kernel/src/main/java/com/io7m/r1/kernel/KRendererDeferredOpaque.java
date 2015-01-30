@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -53,10 +53,10 @@ import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.OptionPartialVisitorType;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.jtensors.parameterized.PMatrixM3x3F;
@@ -73,6 +73,9 @@ import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueVisitorType;
 import com.io7m.r1.kernel.types.KLightDirectionalType;
 import com.io7m.r1.kernel.types.KLightProjectiveType;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoft;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftType;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereType;
 import com.io7m.r1.kernel.types.KLightSphereVisitorType;
@@ -80,6 +83,8 @@ import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightVisitorType;
+import com.io7m.r1.kernel.types.KLightWithScreenSpaceShadowType;
+import com.io7m.r1.kernel.types.KLightWithScreenSpaceShadowVisitorType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
 import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
 import com.io7m.r1.kernel.types.KMaterialDepthConstant;
@@ -251,6 +256,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   /**
    * Construct a new opaque renderer.
    *
+   * @param in_texture_bindings
+   *          A texture bindings controller.
    * @param in_quad_cache
    *          A unit quad cache.
    * @param in_sphere_cache
@@ -267,6 +274,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
    *          The light-pass shader cache.
    * @param in_view_rays_cache
    *          A cache for view rays.
+   * @param in_ssshadow_renderer
+   *          A screen-space soft shadow renderer.
    *
    * @return A new renderer.
    * @throws RException
@@ -275,24 +284,28 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
   public static KRendererDeferredOpaqueType newRenderer(
     final JCGLImplementationType in_g,
+    final KTextureBindingsControllerType in_texture_bindings,
     final KUnitQuadCacheType in_quad_cache,
     final KUnitSphereCacheType in_sphere_cache,
     final KFrustumMeshCacheType in_frustum_cache,
     final KShaderCacheDebugType in_shader_debug_cache,
     final KShaderCacheDeferredGeometryType in_shader_geo_cache,
     final KShaderCacheDeferredLightType in_shader_light_cache,
-    final KViewRaysCacheType in_view_rays_cache)
+    final KViewRaysCacheType in_view_rays_cache,
+    final KScreenSpaceShadowDeferredRendererType in_ssshadow_renderer)
     throws RException
   {
     return new KRendererDeferredOpaque(
       in_g,
+      in_texture_bindings,
       in_quad_cache,
       in_sphere_cache,
       in_frustum_cache,
       in_shader_debug_cache,
       in_shader_geo_cache,
       in_shader_light_cache,
-      in_view_rays_cache);
+      in_view_rays_cache,
+      in_ssshadow_renderer);
   }
 
   private static void putDeferredParameters(
@@ -303,25 +316,11 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final TextureUnitType t_map_specular,
     final JCBProgramType program)
   {
-    KRendererDeferredOpaque.putFramebufferScreenSize(framebuffer, program);
+    KRendererCommon.putFramebufferScreenSize(framebuffer, program);
     KShadingProgramCommon.putDeferredMapAlbedo(program, t_map_albedo);
     KShadingProgramCommon.putDeferredMapDepth(program, t_map_depth_stencil);
     KShadingProgramCommon.putDeferredMapNormal(program, t_map_normal);
     KShadingProgramCommon.putDeferredMapSpecular(program, t_map_specular);
-  }
-
-  private static void putFramebufferScreenSize(
-    final KFramebufferDeferredUsableType framebuffer,
-    final JCBProgramType program)
-  {
-    final AreaInclusive area = framebuffer.kFramebufferGetArea();
-    final RangeInclusiveL range_x = area.getRangeX();
-    final RangeInclusiveL range_y = area.getRangeY();
-
-    KShadingProgramCommon.putViewport(
-      program,
-      1.0f / range_x.getInterval(),
-      1.0f / range_y.getInterval());
   }
 
   /**
@@ -338,7 +337,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
     final KGeometryBufferUsableType gbuffer =
       framebuffer.deferredGetGeometryBuffer();
-    final AreaInclusive area = framebuffer.kFramebufferGetArea();
+    final AreaInclusive area = framebuffer.getArea();
 
     try {
       gf3.framebufferReadBind(gbuffer.geomGetFramebuffer());
@@ -354,7 +353,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
   private static void renderGroupGeometryBatchInstances(
     final JCGLInterfaceCommonType gc,
-    final KTextureUnitAllocator units,
+    final KTextureBindingsControllerType texture_bindings,
     final KMatricesObserverType mwo,
     final List<KInstanceOpaqueType> instances,
     final JCBProgramType program)
@@ -372,19 +371,20 @@ import com.io7m.r1.spaces.RSpaceTextureType;
             final KMatricesInstanceType mwi)
             throws RException
           {
-            units.withContext(new KTextureUnitWithType() {
-              @Override public void run(
-                final KTextureUnitContextType context)
-                throws RException
-              {
-                KRendererDeferredOpaque.renderGroupGeometryInstance(
-                  gc,
-                  context,
-                  mwi,
-                  program,
-                  i);
-              }
-            });
+            texture_bindings
+              .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+                @Override public void call(
+                  final KTextureBindingsContextType c)
+                  throws RException
+                {
+                  KRendererDeferredOpaque.renderGroupGeometryInstance(
+                    gc,
+                    c,
+                    mwi,
+                    program,
+                    i);
+                }
+              });
             return Unit.unit();
           }
         });
@@ -393,7 +393,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
   private static void renderGroupGeometryInstance(
     final JCGLInterfaceCommonType gc,
-    final KTextureUnitContextType texture_unit_context,
+    final KTextureBindingsContextType units,
     final KMatricesInstanceValuesType mwi,
     final JCBProgramType program,
     final KInstanceOpaqueType i)
@@ -419,10 +419,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     KShadingProgramCommon.putMatrixProjectionReuse(program);
     KShadingProgramCommon.putDepthCoefficientReuse(program);
     KRendererCommon.putInstanceMatricesRegular(program, mwi, material);
-    KRendererCommon.putInstanceTexturesRegularLit(
-      texture_unit_context,
-      program,
-      material);
+    KRendererCommon.putInstanceTexturesRegularLit(units, program, material);
     KRendererCommon.putMaterialRegularLit(program, material);
 
     material.materialGetEmissive().emissiveAccept(
@@ -442,7 +439,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
           KShadingProgramCommon.putMaterialEmissiveMapped(program, m);
           KShadingProgramCommon.putTextureEmissive(
             program,
-            texture_unit_context.withTexture2D(m.getTexture()));
+            units.withTexture2D(m.getTexture()));
           return Unit.unit();
         }
 
@@ -524,7 +521,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       final TextureUnitType t_map_depth_stencil,
       final TextureUnitType t_map_normal,
       final TextureUnitType t_map_specular,
-      final KTextureUnitContextType texture_unit_context,
+      final KTextureBindingsContextType units,
       final KViewRays view_rays,
       final JCGLInterfaceCommonType gc,
       final KMatricesInstanceValuesType mwi,
@@ -535,6 +532,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   {
     final ArrayBufferUsableType array = s.getArray();
     final IndexBufferUsableType index = s.getIndices();
+
+    gc.viewportSet(framebuffer.getArea());
 
     final JCBExecutorType exec = kp.getExecutable();
     exec.execRun(new JCBExecutorProcedureType<RException>() {
@@ -563,7 +562,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
           mwi.getMatrixViewInverse());
         KShadingProgramCommon.putTextureLightSphericalCube(
           program,
-          texture_unit_context.withTextureCube(texture));
+          units.withTextureCube(texture));
 
         KRendererDeferredOpaque.putDeferredParameters(
           framebuffer,
@@ -618,6 +617,9 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final ArrayBufferUsableType array = s.getArray();
     final IndexBufferUsableType index = s.getIndices();
     final JCBExecutorType exec = kp.getExecutable();
+
+    gc.viewportSet(framebuffer.getArea());
+
     exec.execRun(new JCBExecutorProcedureType<RException>() {
       @Override public void call(
         final JCBProgramType program)
@@ -676,23 +678,26 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   private final KShaderCacheDeferredGeometryType                   shader_geo_cache;
   private final KShaderCacheDeferredLightType                      shader_light_cache;
   private final KUnitSphereCacheType                               sphere_cache;
-  private final KTextureUnitAllocator                              texture_units;
+  private final KScreenSpaceShadowDeferredRendererType             ssshadow_renderer;
   private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv_light_spherical;
   private final KViewRaysCacheType                                 view_rays_cache;
+  private final KTextureBindingsControllerType                     texture_bindings;
 
   private KRendererDeferredOpaque(
     final JCGLImplementationType in_g,
+    final KTextureBindingsControllerType in_texture_bindings,
     final KUnitQuadCacheType in_quad_cache,
     final KUnitSphereCacheType in_sphere_cache,
     final KFrustumMeshCacheType in_frustum_cache,
     @SuppressWarnings("unused") final KShaderCacheDebugType in_shader_debug_cache,
     final KShaderCacheDeferredGeometryType in_shader_geo_cache,
     final KShaderCacheDeferredLightType in_shader_light_cache,
-    final KViewRaysCacheType in_view_rays_cache)
+    final KViewRaysCacheType in_view_rays_cache,
+    final KScreenSpaceShadowDeferredRendererType in_ssshadow_renderer)
   {
     this.g = NullCheck.notNull(in_g, "GL");
-    this.texture_units =
-      KTextureUnitAllocator.newAllocator(this.g.getGLCommon());
+    this.texture_bindings =
+      NullCheck.notNull(in_texture_bindings, "Texture bindings");
 
     this.shader_geo_cache =
       NullCheck.notNull(in_shader_geo_cache, "Geometry-pass shader cache");
@@ -706,6 +711,9 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       NullCheck.notNull(in_frustum_cache, "Frustum mesh cache");
     this.view_rays_cache =
       NullCheck.notNull(in_view_rays_cache, "View rays cache");
+
+    this.ssshadow_renderer =
+      NullCheck.notNull(in_ssshadow_renderer, "Shadow renderer");
 
     this.uv_light_spherical =
       new PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType>();
@@ -724,7 +732,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         this.view_rays_cache.cacheGetLU(mwo.getProjection());
 
       final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-      gc.viewportSet(framebuffer.kFramebufferGetArea());
+      gc.viewportSet(framebuffer.getArea());
 
       final Set<String> group_names = opaques.getGroupNames();
       for (final String group_name : group_names) {
@@ -762,33 +770,18 @@ import com.io7m.r1.spaces.RSpaceTextureType;
           this.g
             .implementationAccept(KRendererDeferredOpaque.GET_FRAMEBUFFERS_GL3);
 
-        gc.viewportSet(framebuffer.kFramebufferGetArea());
+        gc.viewportSet(framebuffer.getArea());
         this.renderUnlitGeometry(framebuffer, depth_function, mwo, opaques);
 
-        try {
-          final FramebufferUsableType render_fb =
-            framebuffer.getRGBAColorFramebuffer();
-          gc.framebufferDrawBind(render_fb);
+        final FramebufferUsableType render_fb =
+          framebuffer.getRGBAColorFramebuffer();
+        gc.framebufferDrawBind(render_fb);
 
+        try {
           KRendererDeferredOpaque.renderCopyGBufferDepthStencil(
             gf3,
             framebuffer);
-
-          this.texture_units.withContext(new KTextureUnitWithType() {
-            @Override public void run(
-              final KTextureUnitContextType texture_context)
-              throws RException
-            {
-              try {
-                KRendererDeferredOpaque.this.renderUnlitCopy(
-                  framebuffer,
-                  texture_context);
-              } catch (final JCacheException e) {
-                throw new UnreachableCodeException(e);
-              }
-            }
-          });
-
+          KRendererDeferredOpaque.this.renderUnlitCopy(framebuffer);
         } finally {
           gc.framebufferDrawUnbind();
         }
@@ -937,6 +930,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
     try {
       gc.framebufferDrawBind(geom_fb);
+      gc.viewportSet(framebuffer.getArea());
 
       this.renderGroupClearNonzeroStencilToOne(gc);
       KRendererDeferredOpaque.configureRenderStateForGeometry(
@@ -954,6 +948,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         final KProgramType kprogram =
           this.shader_geo_cache.cacheGetLU(shader_code);
 
+        final KTextureBindingsControllerType bindings = this.texture_bindings;
         kprogram.getExecutable().execRun(
           new JCBExecutorProcedureType<RException>() {
             @Override public void call(
@@ -970,7 +965,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
               KRendererDeferredOpaque.renderGroupGeometryBatchInstances(
                 gc,
-                KRendererDeferredOpaque.this.texture_units,
+                bindings,
                 mwo,
                 instances,
                 program);
@@ -993,11 +988,12 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
     final KShadowMapContextType shadow_map_context,
-    final KTextureUnitContextType texture_unit_context,
     final KLightType light)
     throws RException
   {
     final KRendererDeferredOpaque r = KRendererDeferredOpaque.this;
+    final KTextureBindingsControllerType b =
+      KRendererDeferredOpaque.this.texture_bindings;
 
     light.lightAccept(new KLightVisitorType<Unit, JCGLException>() {
       @Override public Unit lightDirectional(
@@ -1026,45 +1022,41 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         final KLightProjectiveType lp)
         throws RException
       {
-        /**
-         * Create a new texture unit context for projective light and shadow
-         * textures.
-         */
-
-        texture_unit_context.withContext(new KTextureUnitWithType() {
-          @Override public void run(
-            final KTextureUnitContextType texture_unit_context_light)
-            throws RException
-          {
-            mwo
-              .withProjectiveLight(
-                lp,
-                new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
-                  @Override public Unit run(
-                    final KMatricesProjectiveLightType mdp)
-                    throws RException
-                  {
-                    try {
-                      r.renderGroupLightProjective(
-                        framebuffer,
-                        t_map_albedo,
-                        t_map_depth_stencil,
-                        t_map_normal,
-                        t_map_specular,
-                        view_rays,
-                        gc,
-                        mdp,
-                        shadow_map_context,
-                        texture_unit_context_light,
-                        lp);
-                      return Unit.unit();
-                    } catch (final JCacheException e) {
-                      throw new UnreachableCodeException(e);
+        b
+          .withNewAppendingContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+            @Override public void call(
+              final KTextureBindingsContextType c)
+              throws RException
+            {
+              mwo
+                .withProjectiveLight(
+                  lp,
+                  new KMatricesProjectiveLightFunctionType<Unit, JCGLException>() {
+                    @Override public Unit run(
+                      final KMatricesProjectiveLightType mdp)
+                      throws RException
+                    {
+                      try {
+                        r.renderGroupLightProjective(
+                          framebuffer,
+                          t_map_albedo,
+                          t_map_depth_stencil,
+                          t_map_normal,
+                          t_map_specular,
+                          view_rays,
+                          gc,
+                          mdp,
+                          shadow_map_context,
+                          c,
+                          lp);
+                        return Unit.unit();
+                      } catch (final JCacheException e) {
+                        throw new UnreachableCodeException(e);
+                      }
                     }
-                  }
-                });
-          }
-        });
+                  });
+            }
+          });
 
         return Unit.unit();
       }
@@ -1073,29 +1065,29 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         final KLightSphereType ls)
         throws RException
       {
-        texture_unit_context.withContext(new KTextureUnitWithType() {
-          @Override public void run(
-            final KTextureUnitContextType texture_unit_context_light)
-            throws RException
-          {
-            try {
-              r.renderGroupLightSpherical(
-                framebuffer,
-                t_map_albedo,
-                t_map_depth_stencil,
-                t_map_normal,
-                t_map_specular,
-                texture_unit_context_light,
-                view_rays,
-                gc,
-                mwo,
-                ls);
-            } catch (final JCacheException e) {
-              throw RExceptionCache.fromJCacheException(e);
+        b
+          .withNewAppendingContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+            @Override public void call(
+              final KTextureBindingsContextType c)
+              throws RException
+            {
+              try {
+                r.renderGroupLightSpherical(
+                  framebuffer,
+                  t_map_albedo,
+                  t_map_depth_stencil,
+                  t_map_normal,
+                  t_map_specular,
+                  c,
+                  view_rays,
+                  gc,
+                  mwo,
+                  ls);
+              } catch (final JCacheException e) {
+                throw RExceptionCache.fromJCacheException(e);
+              }
             }
-          }
-        });
-
+          });
         return Unit.unit();
       }
     });
@@ -1119,6 +1111,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     gc.cullingDisable();
     gc.depthBufferWriteDisable();
     gc.depthBufferTestDisable();
+    gc.viewportSet(framebuffer.getArea());
 
     final KProgramType kp =
       this.shader_light_cache.cacheGetLU(ld.lightGetCode());
@@ -1189,25 +1182,94 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
-    final KTextureUnitContextType texture_unit_context,
+    final KTextureBindingsContextType texture_unit_context,
     final KLightProjectiveType lp)
     throws RException,
       JCacheException
   {
-    KRendererDeferredOpaque.configureRenderStateForLightVolume(gc);
+    if (lp instanceof KLightWithScreenSpaceShadowType) {
+      final KLightWithScreenSpaceShadowType lpss =
+        (KLightWithScreenSpaceShadowType) lp;
 
-    this.renderGroupLightProjectiveLightPass(
-      framebuffer,
-      t_map_albedo,
-      t_map_depth_stencil,
-      t_map_normal,
-      t_map_specular,
-      view_rays,
-      gc,
-      mdp,
-      shadow_map_context,
-      texture_unit_context,
-      lp);
+      this.ssshadow_renderer.withScreenSpaceShadow(
+        gc,
+        framebuffer.getArea(),
+        t_map_depth_stencil,
+        view_rays,
+        mdp,
+        shadow_map_context,
+        lpss,
+        new KScreenSpaceShadowDeferredWithType<Unit, RException>() {
+          @Override public Unit withShadow(
+            final KFramebufferMonochromeUsableType shadow)
+            throws RException
+          {
+            gc.framebufferDrawBind(framebuffer.getRGBAColorFramebuffer());
+            KRendererDeferredOpaque.configureRenderStateForLightVolume(gc);
+
+            return lpss
+              .withScreenSpaceShadowAccept(new KLightWithScreenSpaceShadowVisitorType<Unit, RException>() {
+                @Override public Unit projectiveWithShadowBasicSSSoft(
+                  final KLightProjectiveWithShadowBasicSSSoft lpwsbs)
+                  throws RException
+                {
+                  KRendererDeferredOpaque.this
+                    .renderGroupLightProjectiveLightPassWithScreenSpaceShadow(
+                      framebuffer,
+                      t_map_albedo,
+                      t_map_depth_stencil,
+                      t_map_normal,
+                      t_map_specular,
+                      view_rays,
+                      gc,
+                      mdp,
+                      shadow,
+                      texture_unit_context,
+                      lpwsbs);
+                  return Unit.unit();
+                }
+
+                @Override public
+                  Unit
+                  projectiveWithShadowBasicSSSoftDiffuseOnly(
+                    final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lpwsbs)
+                    throws RException
+                {
+                  KRendererDeferredOpaque.this
+                    .renderGroupLightProjectiveLightPassWithScreenSpaceShadow(
+                      framebuffer,
+                      t_map_albedo,
+                      t_map_depth_stencil,
+                      t_map_normal,
+                      t_map_specular,
+                      view_rays,
+                      gc,
+                      mdp,
+                      shadow,
+                      texture_unit_context,
+                      lpwsbs);
+                  return Unit.unit();
+                }
+              });
+          }
+        });
+
+    } else {
+      gc.framebufferDrawBind(framebuffer.getRGBAColorFramebuffer());
+      KRendererDeferredOpaque.configureRenderStateForLightVolume(gc);
+      this.renderGroupLightProjectiveLightPass(
+        framebuffer,
+        t_map_albedo,
+        t_map_depth_stencil,
+        t_map_normal,
+        t_map_specular,
+        view_rays,
+        gc,
+        mdp,
+        shadow_map_context,
+        texture_unit_context,
+        lp);
+    }
   }
 
   private void renderGroupLightProjectiveLightPass(
@@ -1220,7 +1282,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final JCGLInterfaceCommonType gc,
     final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
-    final KTextureUnitContextType texture_unit_context,
+    final KTextureBindingsContextType texture_unit_context,
     final KLightProjectiveType lp)
     throws RException,
       JCacheException
@@ -1236,6 +1298,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
     final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> id =
       PMatrixI3x3F.identity();
+
+    gc.viewportSet(framebuffer.getArea());
 
     mdp.withGenericTransform(
       lp.lightGetTransform(),
@@ -1339,6 +1403,134 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       });
   }
 
+  private void renderGroupLightProjectiveLightPassWithScreenSpaceShadow(
+    final KFramebufferDeferredUsableType framebuffer,
+    final TextureUnitType t_map_albedo,
+    final TextureUnitType t_map_depth_stencil,
+    final TextureUnitType t_map_normal,
+    final TextureUnitType t_map_specular,
+    final KViewRays view_rays,
+    final JCGLInterfaceCommonType gc,
+    final KMatricesProjectiveLightType mdp,
+    final KFramebufferMonochromeUsableType shadow,
+    final KTextureBindingsContextType texture_unit_context,
+    final KLightProjectiveWithShadowBasicSSSoftType lp)
+    throws JCacheException,
+      RException
+  {
+    final KProgramType kp =
+      this.shader_light_cache.cacheGetLU(lp.lightGetCode());
+    final JCBExecutorType exec = kp.getExecutable();
+
+    final KFrustumMeshUsableType s =
+      this.frustum_cache.cacheGetLU(lp.lightProjectiveGetProjection());
+    final ArrayBufferUsableType array = s.getArray();
+    final IndexBufferUsableType index = s.getIndices();
+
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> id =
+      PMatrixI3x3F.identity();
+
+    gc.viewportSet(framebuffer.getArea());
+
+    mdp.withGenericTransform(
+      lp.lightGetTransform(),
+      id,
+      new KMatricesInstanceValuesFunctionType<Unit, JCGLException>() {
+        @Override public Unit run(
+          final KMatricesInstanceValuesType mi)
+          throws RException
+        {
+          exec.execRun(new JCBExecutorProcedureType<RException>() {
+            @Override public void call(
+              final JCBProgramType program)
+              throws RException
+            {
+              gc.arrayBufferBind(array);
+              KShadingProgramCommon.bindAttributePositionUnchecked(
+                program,
+                array);
+
+              /**
+               * Frustum meshes do not have UV coordinates, but the shader
+               * demands some (even though they're actually not used).
+               */
+
+              KShadingProgramCommon.putAttributeUV(
+                program,
+                KRendererDeferredOpaque.UV_ZERO);
+              KShadingProgramCommon.putAttributeNormal(
+                program,
+                KRendererDeferredOpaque.NORMAL_ZERO);
+
+              KRendererDeferredOpaque.putDeferredParameters(
+                framebuffer,
+                t_map_albedo,
+                t_map_depth_stencil,
+                t_map_normal,
+                t_map_specular,
+                program);
+
+              KShadingProgramCommon.putMatrixProjection(
+                program,
+                mdp.getMatrixProjection());
+              KShadingProgramCommon.putMatrixModelView(
+                program,
+                mi.getMatrixModelView());
+              KShadingProgramCommon.putMatrixInverseView(
+                program,
+                mi.getMatrixViewInverse());
+              KShadingProgramCommon.putMatrixNormal(
+                program,
+                mi.getMatrixNormal());
+              KShadingProgramCommon.putMatrixEyeToLightEye(
+                program,
+                mdp.getMatrixProjectiveEyeToLightEye());
+              KShadingProgramCommon.putMatrixLightProjection(
+                program,
+                mdp.getMatrixProjectiveProjection());
+
+              KShadingProgramCommon.putMatrixUVUnchecked(
+                program,
+                KMatrices.IDENTITY_UV);
+              KShadingProgramCommon.putDepthCoefficient(
+                program,
+                KRendererCommon.depthCoefficient(mi.getProjection()));
+
+              KShadingProgramCommon.putViewRays(program, view_rays);
+
+              KShadingProgramCommon.putTextureShadowMapSSSoftIntensity(
+                program,
+                texture_unit_context.withTexture2D(shadow
+                  .getMonochromeTexture()));
+
+              KShadingProgramCommon.putTextureProjection(
+                program,
+                texture_unit_context.withTexture2D(lp
+                  .lightProjectiveGetTexture()));
+
+              KShadingProgramCommon
+                .putLightProjectiveWithoutTextureProjection(
+                  program,
+                  mdp.getMatrixContext(),
+                  mdp.getMatrixView(),
+                  lp);
+
+              program
+                .programExecute(new JCBProgramProcedureType<JCGLException>() {
+                  @Override public void call()
+                    throws JCGLException
+                  {
+                    gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
+                  }
+                });
+            }
+          });
+
+          return Unit.unit();
+        }
+      });
+  }
+
   private void renderGroupLights(
     final KFramebufferDeferredUsableType framebuffer,
     final KShadowMapContextType shadow_map_context,
@@ -1352,28 +1544,14 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       this.g
         .implementationAccept(KRendererDeferredOpaque.GET_FRAMEBUFFERS_GL3);
 
-    final FramebufferUsableType render_fb =
-      framebuffer.getRGBAColorFramebuffer();
+    /**
+     * Create a new texture unit context for binding g-buffer textures.
+     */
 
-    try {
-      gc.framebufferDrawBind(render_fb);
-
-      KRendererDeferredOpaque.renderCopyGBufferDepthStencil(gf3, framebuffer);
-      KRendererDeferredOpaque.configureStencilForLightRendering(gc);
-
-      /**
-       * Clear all geometry in the current group to black.
-       */
-
-      this.renderGroupClearToBlack(gc);
-
-      /**
-       * Create a new texture unit context for binding g-buffer textures.
-       */
-
-      this.texture_units.withContext(new KTextureUnitWithType() {
-        @Override public void run(
-          final KTextureUnitContextType texture_context)
+    this.texture_bindings
+      .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+        @Override public void call(
+          final KTextureBindingsContextType c)
           throws RException
         {
           /**
@@ -1384,39 +1562,56 @@ import com.io7m.r1.spaces.RSpaceTextureType;
             framebuffer.deferredGetGeometryBuffer();
 
           final TextureUnitType t_map_albedo =
-            texture_context.withTexture2D(gbuffer.geomGetTextureAlbedo());
+            c.withTexture2D(gbuffer.geomGetTextureAlbedo());
           final TextureUnitType t_map_depth_stencil =
-            texture_context.withTexture2D(gbuffer
-              .geomGetTextureDepthStencil());
+            c.withTexture2D(gbuffer.geomGetTextureDepthStencil());
           final TextureUnitType t_map_normal =
-            texture_context.withTexture2D(gbuffer.geomGetTextureNormal());
+            c.withTexture2D(gbuffer.geomGetTextureNormal());
           final TextureUnitType t_map_specular =
-            texture_context.withTexture2D(gbuffer.geomGetTextureSpecular());
+            c.withTexture2D(gbuffer.geomGetTextureSpecular());
 
-          for (final KLightType light : group.getLights()) {
-            assert light != null;
+          final FramebufferUsableType render_fb =
+            framebuffer.getRGBAColorFramebuffer();
 
-            KRendererDeferredOpaque.this.renderGroupLight(
-              framebuffer,
-              t_map_albedo,
-              t_map_depth_stencil,
-              t_map_normal,
-              t_map_specular,
-              view_rays,
-              gc,
-              mwo,
-              shadow_map_context,
-              texture_context,
-              light);
+          /**
+           * Bind the rendering framebuffer and start rendering.
+           */
+
+          gc.framebufferDrawBind(render_fb);
+
+          try {
+            KRendererDeferredOpaque.renderCopyGBufferDepthStencil(
+              gf3,
+              framebuffer);
+            KRendererDeferredOpaque.configureStencilForLightRendering(gc);
+
+            /**
+             * Clear all geometry in the current group to black.
+             */
+
+            KRendererDeferredOpaque.this.renderGroupClearToBlack(gc);
+
+            for (final KLightType light : group.getLights()) {
+              assert light != null;
+
+              KRendererDeferredOpaque.this.renderGroupLight(
+                framebuffer,
+                t_map_albedo,
+                t_map_depth_stencil,
+                t_map_normal,
+                t_map_specular,
+                view_rays,
+                gc,
+                mwo,
+                shadow_map_context,
+                light);
+            }
+
+          } finally {
+            gc.framebufferDrawUnbind();
           }
         }
       });
-
-    } catch (final JCacheException e) {
-      throw new UnreachableCodeException(e);
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
   }
 
   private void renderGroupLightSpherical(
@@ -1425,7 +1620,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final TextureUnitType t_map_depth_stencil,
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
-    final KTextureUnitContextType texture_unit_context,
+    final KTextureBindingsContextType texture_unit_context,
     final KViewRays view_rays,
     final JCGLInterfaceCommonType gc,
     final KMatricesObserverType mwo,
@@ -1446,7 +1641,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv =
       PMatrixI3x3F.identity();
 
-    ls.sphereAccept(new KLightSphereVisitorType<Unit, JCGLException>() {
+    ls.sphereAccept(new KLightSphereVisitorType<Unit, RException>() {
       @Override public Unit sphereTexturedCubeWithoutShadow(
         final KLightSphereTexturedCubeWithoutShadow lsws)
         throws RException
@@ -1541,65 +1736,77 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private void renderUnlitCopy(
-    final KFramebufferDeferredUsableType framebuffer,
-    final KTextureUnitContextType texture_context)
+    final KFramebufferDeferredUsableType framebuffer)
     throws RException,
       JCacheException
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
     final KGeometryBufferUsableType gbuffer =
       framebuffer.deferredGetGeometryBuffer();
-
-    gc.blendingDisable();
-    gc.cullingDisable();
-    gc.depthBufferWriteDisable();
-    gc.depthBufferTestDisable();
-
-    /**
-     * Configure the stencil buffer such that it is read-only, and only pixels
-     * with a corresponding 2 value in the stencil buffer will be written.
-     */
-
-    gc.stencilBufferEnable();
-    gc.stencilBufferFunction(
-      FaceSelection.FACE_FRONT_AND_BACK,
-      StencilFunction.STENCIL_EQUAL,
-      2,
-      0xffffffff);
-    gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0);
-
     final KProgramType kp = this.shader_light_cache.cacheGetLU("copy_rgba");
     final KUnitQuadUsableType q = this.quad_cache.cacheGetLU(Unit.unit());
-    final ArrayBufferUsableType array = q.getArray();
-    final IndexBufferUsableType index = q.getIndices();
 
-    final JCBExecutorType exec = kp.getExecutable();
-    exec.execRun(new JCBExecutorProcedureType<RException>() {
-      @Override public void call(
-        final JCBProgramType program)
-        throws RException
-      {
-        gc.arrayBufferBind(array);
-        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
-        KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+    this.texture_bindings
+      .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+        @Override public void call(
+          final KTextureBindingsContextType units)
+          throws RException
+        {
+          gc.blendingDisable();
+          gc.cullingDisable();
+          gc.depthBufferWriteDisable();
+          gc.depthBufferTestDisable();
 
-        KShadingProgramCommon.putMatrixUVUnchecked(
-          program,
-          KMatrices.IDENTITY_UV);
+          /**
+           * Configure the stencil buffer such that it is read-only, and only
+           * pixels with a corresponding 2 value in the stencil buffer will be
+           * written.
+           */
 
-        program.programUniformPutTextureUnit(
-          "t_image",
-          texture_context.withTexture2D(gbuffer.geomGetTextureAlbedo()));
+          gc.stencilBufferEnable();
+          gc.stencilBufferFunction(
+            FaceSelection.FACE_FRONT_AND_BACK,
+            StencilFunction.STENCIL_EQUAL,
+            2,
+            0xffffffff);
+          gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0);
 
-        program.programExecute(new JCBProgramProcedureType<JCGLException>() {
-          @Override public void call()
-            throws JCGLException
-          {
-            gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
-          }
-        });
-      }
-    });
+          final ArrayBufferUsableType array = q.getArray();
+          final IndexBufferUsableType index = q.getIndices();
+
+          final JCBExecutorType exec = kp.getExecutable();
+          exec.execRun(new JCBExecutorProcedureType<RException>() {
+            @Override public void call(
+              final JCBProgramType program)
+              throws RException
+            {
+              gc.arrayBufferBind(array);
+              KShadingProgramCommon.bindAttributePositionUnchecked(
+                program,
+                array);
+              KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+
+              KShadingProgramCommon.putMatrixUVUnchecked(
+                program,
+                KMatrices.IDENTITY_UV);
+
+              program.programUniformPutTextureUnit(
+                "t_image",
+                units.withTexture2D(gbuffer.geomGetTextureAlbedo()));
+
+              program
+                .programExecute(new JCBProgramProcedureType<JCGLException>() {
+                  @Override public void call()
+                    throws JCGLException
+                  {
+                    gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, index);
+                  }
+                });
+            }
+          });
+        }
+      });
+
   }
 
   private void renderUnlitGeometry(
@@ -1611,6 +1818,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       JCacheException
   {
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+    final KTextureBindingsControllerType b = this.texture_bindings;
 
     final KGeometryBufferUsableType geom =
       framebuffer.deferredGetGeometryBuffer();
@@ -1640,14 +1848,12 @@ import com.io7m.r1.spaces.RSpaceTextureType;
               KShadingProgramCommon.putMatrixProjection(
                 program,
                 mwo.getMatrixProjection());
-
               KShadingProgramCommon.putDepthCoefficient(
                 program,
                 KRendererCommon.depthCoefficient(mwo.getProjection()));
-
               KRendererDeferredOpaque.renderGroupGeometryBatchInstances(
                 gc,
-                KRendererDeferredOpaque.this.texture_units,
+                b,
                 mwo,
                 batch,
                 program);

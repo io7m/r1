@@ -116,18 +116,14 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
     }
   }
 
-  @Override public
+  private
     void
-    rendererDeferredEvaluate(
+    evaluateActual(
       final KFramebufferDeferredUsableType framebuffer,
       final KVisibleSet visible,
       final PartialProcedureType<KRendererDeferredControlType, RException> procedure)
       throws RException
   {
-    NullCheck.notNull(framebuffer, "Framebuffer");
-    NullCheck.notNull(visible, "Visible set");
-    NullCheck.notNull(procedure, "Procedure");
-
     final KShadowMapRendererType smr = this.shadow_renderer;
     final KCamera camera = visible.getCamera();
     final KVisibleSetTranslucents translucents = visible.getTranslucents();
@@ -146,8 +142,7 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
       new KMatricesObserverFunctionType<Unit, JCGLException>() {
         @Override public Unit run(
           final KMatricesObserverType mwo)
-          throws JCGLException,
-            RException
+          throws RException
         {
           try {
             /**
@@ -160,8 +155,7 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
               new KShadowMapWithType<Unit, JCacheException>() {
                 @Override public Unit withMaps(
                   final KShadowMapContextType shadow_context)
-                  throws JCGLException,
-                    RException
+                  throws RException
                 {
                   procedure.call(new KRendererDeferredControlType() {
                     @Override public void rendererEvaluateOpaques()
@@ -213,6 +207,20 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
           }
         }
       });
+  }
+
+  @Override public
+    void
+    rendererDeferredEvaluate(
+      final KFramebufferDeferredUsableType framebuffer,
+      final KVisibleSet visible,
+      final PartialProcedureType<KRendererDeferredControlType, RException> procedure)
+      throws RException
+  {
+    NullCheck.notNull(framebuffer, "Framebuffer");
+    NullCheck.notNull(visible, "Visible set");
+    NullCheck.notNull(procedure, "Procedure");
+    this.evaluateActual(framebuffer, visible, procedure);
   }
 
   @Override public void rendererDeferredEvaluateFull(

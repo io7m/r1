@@ -10,8 +10,10 @@ fog_linear_y_floor          : com.io7m.r1.image.ImageFilterFogY.fog_linear_y_flo
 fog_linear_z                : com.io7m.r1.image.ImageFilterFogZ.fog_linear_z
 fog_logarithmic_y_floor     : com.io7m.r1.image.ImageFilterFogY.fog_logarithmic_y_floor
 fog_logarithmic_z           : com.io7m.r1.image.ImageFilterFogZ.fog_logarithmic_z
+gaussian_blur_horizontal_1f : com.io7m.r1.image.ImageFilterBlur.blur_horizontal_1f
 gaussian_blur_horizontal_2f : com.io7m.r1.image.ImageFilterBlur.blur_horizontal_2f
 gaussian_blur_horizontal_4f : com.io7m.r1.image.ImageFilterBlur.blur_horizontal_4f
+gaussian_blur_vertical_1f   : com.io7m.r1.image.ImageFilterBlur.blur_vertical_1f
 gaussian_blur_vertical_2f   : com.io7m.r1.image.ImageFilterBlur.blur_vertical_2f
 gaussian_blur_vertical_4f   : com.io7m.r1.image.ImageFilterBlur.blur_vertical_4f
 mix                         : com.io7m.r1.image.ImageSourceMix.mix

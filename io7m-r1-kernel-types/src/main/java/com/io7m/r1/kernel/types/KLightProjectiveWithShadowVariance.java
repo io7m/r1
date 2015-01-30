@@ -200,6 +200,22 @@ import com.io7m.r1.spaces.RSpaceWorldType;
               {
                 return lp.lightGetShadowVariance();
               }
+
+              @Override public
+                KShadowMappedVariance
+                projectiveWithShadowBasicSSSoft(
+                  final KLightProjectiveWithShadowBasicSSSoft lp)
+              {
+                return KShadowMappedVariance.getDefault();
+              }
+
+              @Override public
+                KShadowMappedVariance
+                projectiveWithShadowBasicSSSoftDiffuseOnly(
+                  final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lp)
+              {
+                return KShadowMappedVariance.getDefault();
+              }
             });
       } catch (final RException e) {
         throw new UnreachableCodeException(e);

@@ -21,8 +21,10 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
@@ -50,6 +52,7 @@ import com.io7m.jparasol.metaserializer.protobuf.JPProtobufMetaSerializer;
 import com.io7m.jparasol.typed.ast.TASTShaderNameFlat;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KLightType;
+import com.io7m.r1.kernel.types.KLightWithScreenSpaceShadowType;
 import com.io7m.r1.shaders.deferred.RKDLightCases;
 import com.io7m.r1.shaders.deferred.RKDeferredShader;
 
@@ -115,6 +118,8 @@ import com.io7m.r1.shaders.deferred.RKDeferredShader;
         final Pair<File, Position> meta =
           Pair.pair(new File("<stdin>"), Position.ZERO);
 
+        final Set<String> existing_prepass = new HashSet<String>();
+
         for (final KLightType c : cases) {
           assert c != null;
           final String code = c.lightGetCode();
@@ -128,6 +133,31 @@ import com.io7m.r1.shaders.deferred.RKDeferredShader;
           batch.addShaderWithOutputName(
             TASTShaderNameFlat.parse(name, meta),
             code);
+
+          /**
+           * Lights with screen-space shadows have extra shader passes.
+           */
+
+          if (c instanceof KLightWithScreenSpaceShadowType) {
+            final String p_code =
+              ((KLightWithScreenSpaceShadowType) c)
+                .lightGetScreenSpacePassCode();
+            final String p_name =
+              String.format(
+                "%s.%s.p",
+                RKDeferredShader.PACKAGE_DEFERRED_LIGHT,
+                p_code);
+            assert p_name != null;
+
+            if (existing_prepass.contains(p_name)) {
+              continue;
+            }
+
+            batch.addShaderWithOutputName(
+              TASTShaderNameFlat.parse(p_name, meta),
+              p_code);
+            existing_prepass.add(p_name);
+          }
         }
 
         batch.addShaderWithOutputName(

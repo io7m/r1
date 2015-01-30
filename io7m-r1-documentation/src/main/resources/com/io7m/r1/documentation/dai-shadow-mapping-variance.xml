@@ -159,6 +159,34 @@
     </s:formal-item>
   </s:subsection>
 
+  <s:subsection xml:id="r1.dai.shadow-mapping-variance.advantages">
+    <s:subsection-title>Advantages</s:subsection-title>
+    <s:paragraph>
+      The main advantage of <s:term s:type="term">variance shadow mapping</s:term>
+      is that they can essentially be thought of as much better behaved
+      <s:link s:target="r1.dai.shadow-mapping-basic">basic shadows</s:link> that
+      just happen to have built-in softening and filtering. Variance shadows
+      typically require far less in the way of scene-specific tuning to get
+      good results.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-variance.disadvantages">
+    <s:subsection-title>Disadvantages</s:subsection-title>
+    <s:paragraph>
+      One disadvantage of variance shadows is that for large shadow maps, filtering
+      quickly becomes a major bottleneck. On reasonably old hardware such as the
+      <s:link-external s:target="https://en.wikipedia.org/wiki/Radeon_HD_4670">Radeon 4670</s:link-external>,
+      one <s:term s:type="constant">8192x8192</s:term> shadow map with
+      two 16-bit components takes too long to filter to give a reliable
+      <s:term s:type="constant">60</s:term> frames per second rendering rate.
+      Shadow maps of this size are usually used to simulate the influence of
+      the sun over large outdoor scenes. In this case, basic shadow mapping with
+      <s:link s:target="r1.dai.shadow-mapping-basic-sssoft">screen-space softening</s:link>
+      will generally always outperform variance shadows.
+    </s:paragraph>
+  </s:subsection>
+
   <s:subsection xml:id="r1.dai.shadow-mapping-variance.types">
     <s:subsection-title>Types</s:subsection-title>
     <s:paragraph>
@@ -168,7 +196,7 @@
       <s:link s:target="r1.dai.lighting-projective">projective lights</s:link>.
     </s:paragraph>
     <s:paragraph>
-      Rendering of depth-variance images is handled by the
+      Rendering of depth-variance images is handled by implementations of the
       <s:link-external s:target="apidocs/com/io7m/r1/kernel/KDepthVarianceRendererType.html">KDepthVarianceRendererType</s:link-external>
       type.
     </s:paragraph>

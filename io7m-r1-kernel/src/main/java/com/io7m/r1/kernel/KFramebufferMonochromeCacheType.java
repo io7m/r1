@@ -14,34 +14,18 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.exceptions;
+package com.io7m.r1.kernel;
 
-import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jcache.BLUCacheType;
+import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.kernel.types.KFramebufferMonochromeDescription;
 
 /**
- * An exception representing an attempt to create multiple children for a
- * texture unit allocator context.
+ * The type of monochrome framebuffer caches.
  */
 
-@EqualityReference public final class RExceptionUnitAllocatorActive extends
-  RExceptionUserError
+public interface KFramebufferMonochromeCacheType extends
+  BLUCacheType<KFramebufferMonochromeDescription, KFramebufferMonochromeUsableType, KFramebufferMonochromeType, RException>
 {
-  private static final long serialVersionUID;
-
-  static {
-    serialVersionUID = -1247042439663984309L;
-  }
-
-  /**
-   * Construct an exception with the given message.
-   *
-   * @param message
-   *          The message.
-   */
-
-  public RExceptionUnitAllocatorActive(
-    final String message)
-  {
-    super(message);
-  }
+  // No extra functions
 }
