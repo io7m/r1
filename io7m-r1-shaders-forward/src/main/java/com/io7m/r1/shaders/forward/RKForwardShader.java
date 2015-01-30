@@ -23,6 +23,7 @@ import com.io7m.jfunctional.OptionPartialVisitorType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KLightDirectionalType;
@@ -30,6 +31,8 @@ import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoft;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
@@ -350,6 +353,20 @@ import com.io7m.r1.kernel.types.KMaterialType;
                     .append("  parameter shadow_variance   : ShadowVariance.t;\n");
                   b.append("\n");
                   return Unit.unit();
+                }
+
+                @Override public Unit projectiveWithShadowBasicSSSoft(
+                  final KLightProjectiveWithShadowBasicSSSoft lpwsb)
+                {
+                  throw new UnimplementedCodeException();
+                }
+
+                @Override public
+                  Unit
+                  projectiveWithShadowBasicSSSoftDiffuseOnly(
+                    final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lpwsb)
+                {
+                  throw new UnimplementedCodeException();
                 }
               });
           } catch (final RException e) {
@@ -1044,6 +1061,20 @@ import com.io7m.r1.kernel.types.KMaterialType;
             b.append("\n");
             return Unit.unit();
           }
+
+          @Override public Unit projectiveWithShadowBasicSSSoft(
+            final KLightProjectiveWithShadowBasicSSSoft lpwsb)
+          {
+            // TODO Auto-generated method stub
+            throw new UnimplementedCodeException();
+          }
+
+          @Override public Unit projectiveWithShadowBasicSSSoftDiffuseOnly(
+            final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lpwsb)
+          {
+            // TODO Auto-generated method stub
+            throw new UnimplementedCodeException();
+          }
         });
 
       b.append("  -- Projective diffuse light term\n");
@@ -1223,6 +1254,18 @@ import com.io7m.r1.kernel.types.KMaterialType;
             b.append("    );\n");
             b.append("\n");
             return Unit.unit();
+          }
+
+          @Override public Unit projectiveWithShadowBasicSSSoft(
+            final KLightProjectiveWithShadowBasicSSSoft lpwsb)
+          {
+            throw new UnimplementedCodeException();
+          }
+
+          @Override public Unit projectiveWithShadowBasicSSSoftDiffuseOnly(
+            final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lpwsb)
+          {
+            throw new UnimplementedCodeException();
           }
         });
 

@@ -8,6 +8,7 @@ import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureFormat;
+import com.io7m.jcanephora.TextureUsableVisitorType;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
 import com.io7m.jranges.RangeInclusiveL;
@@ -126,6 +127,13 @@ public final class RFakeTextures2DStaticGenerator implements
       @Override public TextureWrapT textureGetWrapT()
       {
         return wrap_t;
+      }
+
+      @Override public <A, E extends Exception> A textureUsableAccept(
+        final TextureUsableVisitorType<A, E> v)
+        throws E
+      {
+        return v.texture2D(this);
       }
     };
   }

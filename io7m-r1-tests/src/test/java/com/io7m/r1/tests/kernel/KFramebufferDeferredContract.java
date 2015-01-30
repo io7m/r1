@@ -55,7 +55,7 @@ public abstract class KFramebufferDeferredContract extends TestContract
 
     final KFramebufferDeferredType f =
       KFramebufferDeferred.newFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());
@@ -76,7 +76,7 @@ public abstract class KFramebufferDeferredContract extends TestContract
 
     final KFramebufferDeferredType f =
       KFramebufferDeferred.newFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());
@@ -97,7 +97,7 @@ public abstract class KFramebufferDeferredContract extends TestContract
 
     final KFramebufferDeferredType f =
       KFramebufferDeferred.newFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());
@@ -118,7 +118,7 @@ public abstract class KFramebufferDeferredContract extends TestContract
 
     final KFramebufferDeferredType f =
       KFramebufferDeferred.newFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());
@@ -139,7 +139,7 @@ public abstract class KFramebufferDeferredContract extends TestContract
 
     final KFramebufferDeferredType f =
       KFramebufferDeferred.newFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());
@@ -160,7 +160,7 @@ public abstract class KFramebufferDeferredContract extends TestContract
 
     final KFramebufferDeferredType f =
       KFramebufferDeferred.newFramebuffer(gi, description);
-    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.kFramebufferGetArea());
+    Assert.assertEquals(RFakeGL.SCREEN_AREA, f.getArea());
 
     f.delete(gi);
     Assert.assertTrue(f.resourceIsDeleted());

@@ -16,8 +16,6 @@
 
 package com.io7m.r1.kernel;
 
-import java.util.List;
-
 import com.io7m.jcache.BLUCacheReceiptType;
 import com.io7m.jcache.JCacheException;
 import com.io7m.jcanephora.ArrayBufferUsableType;
@@ -26,7 +24,6 @@ import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
-import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
@@ -34,6 +31,7 @@ import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
@@ -51,7 +49,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
  * The default implementation of an emission and glow filter.
  */
 
-@EqualityReference public final class KImageFilterEmissionGlow implements
+@SuppressWarnings("synthetic-access") @EqualityReference public final class KImageFilterEmissionGlow implements
   KImageFilterDeferredType<KGlowParameters>
 {
   private static final String NAME;
@@ -65,6 +63,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
    *
    * @param gi
    *          An OpenGL interface.
+   * @param in_texture_bindings
+   *          A texture bindings controller.
    * @param rgba_cache
    *          An RGBA framebuffer cache.
    * @param quad_cache
@@ -81,6 +81,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
   public static KImageFilterDeferredType<KGlowParameters> filterNew(
     final JCGLImplementationType gi,
+    final KTextureBindingsControllerType in_texture_bindings,
     final KUnitQuadCacheType quad_cache,
     final KFramebufferRGBACacheType rgba_cache,
     final KShaderCacheImageType shader_cache,
@@ -89,6 +90,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   {
     return new KImageFilterEmissionGlow(
       gi,
+      in_texture_bindings,
       quad_cache,
       rgba_cache,
       shader_cache,
@@ -102,15 +104,19 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   private final KFramebufferRGBACacheType                          rgba_cache;
   private final KShaderCacheImageType                              shader_cache;
   private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv;
+  private final KTextureBindingsControllerType                     texture_bindings;
 
   private KImageFilterEmissionGlow(
     final JCGLImplementationType in_gi,
+    final KTextureBindingsControllerType in_texture_bindings,
     final KUnitQuadCacheType in_quad_cache,
     final KFramebufferRGBACacheType in_rgba_cache,
     final KShaderCacheImageType in_shader_cache,
     final KImageFilterRGBAType<KBlurParameters> in_blur_rgba)
   {
     this.gi = NullCheck.notNull(in_gi, "GL implementation");
+    this.texture_bindings =
+      NullCheck.notNull(in_texture_bindings, "Texture bindings");
     this.rgba_cache = NullCheck.notNull(in_rgba_cache, "RGBA cache");
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
     this.quad_cache = NullCheck.notNull(in_quad_cache, "Quad cache");
@@ -120,139 +126,158 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private void emissionPass(
-    final KGeometryBufferUsableType gbuffer,
     final JCGLInterfaceCommonType gc,
-    final List<TextureUnitType> units,
+    final KGeometryBufferUsableType gbuffer,
     final KFramebufferRGBAUsableType output)
     throws JCGLException,
       RException,
       JCacheException
   {
-    try {
-      final KProgramType emission = this.shader_cache.cacheGetLU("emission");
+    final KProgramType emission = this.shader_cache.cacheGetLU("emission");
 
-      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
-      gc.blendingDisable();
-      gc.colorBufferMask(true, true, true, true);
-      gc.cullingDisable();
-      gc.viewportSet(output.kFramebufferGetArea());
-
-      final JCBExecutorType e = emission.getExecutable();
-      e.execRun(new JCBExecutorProcedureType<RException>() {
-        @SuppressWarnings("synthetic-access") @Override public void call(
-          final JCBProgramType p)
-          throws JCGLException,
-            RException
+    this.texture_bindings
+      .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+        @Override public void call(
+          final KTextureBindingsContextType units)
+          throws RException
         {
+          gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
           try {
-            final KUnitQuadUsableType quad =
-              KImageFilterEmissionGlow.this.quad_cache.cacheGetLU(Unit.unit());
+            gc.blendingDisable();
+            gc.colorBufferMask(true, true, true, true);
+            gc.cullingDisable();
+            gc.viewportSet(output.getArea());
 
-            final ArrayBufferUsableType array = quad.getArray();
-            final IndexBufferUsableType indices = quad.getIndices();
-
-            gc.arrayBufferBind(array);
-            KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
-            KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
-
-            final TextureUnitType albedo_unit = units.get(0);
-            assert albedo_unit != null;
-
-            gc.texture2DStaticBind(
-              albedo_unit,
-              gbuffer.geomGetTextureAlbedo());
-
-            KShadingProgramCommon.putMatrixUVUnchecked(
-              p,
-              KImageFilterEmissionGlow.this.uv);
-            p.programUniformPutTextureUnit("t_map_albedo", albedo_unit);
-            p.programExecute(new JCBProgramProcedureType<JCGLException>() {
-              @Override public void call()
-                throws JCGLException
+            final JCBExecutorType e = emission.getExecutable();
+            e.execRun(new JCBExecutorProcedureType<RException>() {
+              @Override public void call(
+                final JCBProgramType p)
+                throws JCGLException,
+                  RException
               {
-                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+                try {
+                  final KUnitQuadUsableType quad =
+                    KImageFilterEmissionGlow.this.quad_cache.cacheGetLU(Unit
+                      .unit());
+
+                  final ArrayBufferUsableType array = quad.getArray();
+                  final IndexBufferUsableType indices = quad.getIndices();
+
+                  gc.arrayBufferBind(array);
+                  KShadingProgramCommon.bindAttributePositionUnchecked(
+                    p,
+                    array);
+                  KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
+                  KShadingProgramCommon.putMatrixUVUnchecked(
+                    p,
+                    KImageFilterEmissionGlow.this.uv);
+
+                  p.programUniformPutTextureUnit(
+                    "t_map_albedo",
+                    units.withTexture2D(gbuffer.geomGetTextureAlbedo()));
+                  p
+                    .programExecute(new JCBProgramProcedureType<JCGLException>() {
+                      @Override public void call()
+                        throws JCGLException
+                      {
+                        gc.drawElements(
+                          Primitives.PRIMITIVE_TRIANGLES,
+                          indices);
+                      }
+                    });
+                } finally {
+                  gc.arrayBufferUnbind();
+                }
               }
             });
           } finally {
-            gc.arrayBufferUnbind();
+            gc.framebufferDrawUnbind();
           }
         }
       });
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
   }
 
   private void emissionPlusGlowPass(
+    final JCGLInterfaceCommonType gc,
     final KGeometryBufferUsableType gbuffer,
     final KGlowParameters params,
-    final JCGLInterfaceCommonType gc,
-    final List<TextureUnitType> units,
     final Texture2DStaticUsableType glow,
     final KFramebufferDeferredUsableType output)
     throws JCGLException,
       RException,
       JCacheException
   {
-    try {
-      final KProgramType emission =
-        this.shader_cache.cacheGetLU("emission_glow");
+    final KProgramType emission =
+      this.shader_cache.cacheGetLU("emission_glow");
 
-      gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
-      gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
-      gc.colorBufferMask(true, true, true, true);
-      gc.cullingDisable();
-      gc.viewportSet(output.kFramebufferGetArea());
-
-      final JCBExecutorType e = emission.getExecutable();
-      e.execRun(new JCBExecutorProcedureType<RException>() {
-        @SuppressWarnings("synthetic-access") @Override public void call(
-          final JCBProgramType p)
-          throws JCGLException,
-            RException
+    this.texture_bindings
+      .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+        @Override public void call(
+          final KTextureBindingsContextType units)
+          throws RException
         {
+          gc.framebufferDrawBind(output.getRGBAColorFramebuffer());
+
           try {
-            final KUnitQuadUsableType quad =
-              KImageFilterEmissionGlow.this.quad_cache.cacheGetLU(Unit.unit());
+            gc.blendingEnable(
+              BlendFunction.BLEND_ONE,
+              BlendFunction.BLEND_ONE);
+            gc.colorBufferMask(true, true, true, true);
+            gc.cullingDisable();
+            gc.viewportSet(output.getArea());
 
-            final ArrayBufferUsableType array = quad.getArray();
-            final IndexBufferUsableType indices = quad.getIndices();
-
-            gc.arrayBufferBind(array);
-            KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
-            KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
-
-            final TextureUnitType albedo_unit = units.get(0);
-            assert albedo_unit != null;
-            final TextureUnitType glow_unit = units.get(1);
-            assert glow_unit != null;
-
-            gc.texture2DStaticBind(
-              albedo_unit,
-              gbuffer.geomGetTextureAlbedo());
-            gc.texture2DStaticBind(glow_unit, glow);
-
-            KShadingProgramCommon.putMatrixUVUnchecked(
-              p,
-              KImageFilterEmissionGlow.this.uv);
-            p.programUniformPutTextureUnit("t_map_albedo", albedo_unit);
-            p.programUniformPutTextureUnit("t_map_glow", glow_unit);
-            p.programUniformPutFloat("factor_glow", params.getFactor());
-            p.programExecute(new JCBProgramProcedureType<JCGLException>() {
-              @Override public void call()
-                throws JCGLException
+            final JCBExecutorType e = emission.getExecutable();
+            e.execRun(new JCBExecutorProcedureType<RException>() {
+              @Override public void call(
+                final JCBProgramType p)
+                throws JCGLException,
+                  RException
               {
-                gc.drawElements(Primitives.PRIMITIVE_TRIANGLES, indices);
+                try {
+                  final KUnitQuadUsableType quad =
+                    KImageFilterEmissionGlow.this.quad_cache.cacheGetLU(Unit
+                      .unit());
+
+                  final ArrayBufferUsableType array = quad.getArray();
+                  final IndexBufferUsableType indices = quad.getIndices();
+
+                  gc.arrayBufferBind(array);
+                  KShadingProgramCommon.bindAttributePositionUnchecked(
+                    p,
+                    array);
+                  KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
+                  KShadingProgramCommon.putMatrixUVUnchecked(
+                    p,
+                    KImageFilterEmissionGlow.this.uv);
+
+                  p.programUniformPutTextureUnit(
+                    "t_map_albedo",
+                    units.withTexture2D(gbuffer.geomGetTextureAlbedo()));
+                  p.programUniformPutTextureUnit(
+                    "t_map_glow",
+                    units.withTexture2D(glow));
+                  p.programUniformPutFloat("factor_glow", params.getFactor());
+
+                  p
+                    .programExecute(new JCBProgramProcedureType<JCGLException>() {
+                      @Override public void call()
+                        throws JCGLException
+                      {
+                        gc.drawElements(
+                          Primitives.PRIMITIVE_TRIANGLES,
+                          indices);
+                      }
+                    });
+                } finally {
+                  gc.arrayBufferUnbind();
+                }
               }
             });
           } finally {
-            gc.arrayBufferUnbind();
+            gc.framebufferDrawUnbind();
           }
         }
       });
-    } finally {
-      gc.framebufferDrawUnbind();
-    }
   }
 
   @Override public void filterEvaluateDeferred(
@@ -266,17 +291,12 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     NullCheck.notNull(output, "Output");
 
     final JCGLInterfaceCommonType gc = this.gi.getGLCommon();
-    final List<TextureUnitType> units = gc.textureGetUnits();
     final BLUCacheReceiptType<KFramebufferRGBADescription, KFramebufferRGBAUsableType> receipt =
       this.rgba_cache.bluCacheGet(output.getRGBADescription());
 
     try {
       final KFramebufferRGBAUsableType emission_fb = receipt.getValue();
-      this.emissionPass(
-        input.deferredGetGeometryBuffer(),
-        gc,
-        units,
-        emission_fb);
+      this.emissionPass(gc, input.deferredGetGeometryBuffer(), emission_fb);
 
       this.blur_param_b.setBlurSize(config.getBlurSize());
       this.blur_param_b.setPasses(config.getPasses());
@@ -287,10 +307,9 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         emission_fb);
 
       this.emissionPlusGlowPass(
+        gc,
         input.deferredGetGeometryBuffer(),
         config,
-        gc,
-        units,
         emission_fb.getRGBATexture(),
         output);
 

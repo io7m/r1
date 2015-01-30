@@ -112,7 +112,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
       gc.colorBufferMask(true, true, true, true);
       gc.cullingDisable();
-      gc.viewportSet(output.kFramebufferGetArea());
+      gc.viewportSet(output.getArea());
 
       final JCBExecutorType e = emission.getExecutable();
       e.execRun(new JCBExecutorProcedureType<RException>() {

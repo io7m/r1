@@ -52,7 +52,7 @@ import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
-import com.io7m.r1.exceptions.RExceptionResource;
+import com.io7m.r1.exceptions.RExceptionUnitAllocatorOutOfUnits;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepth;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCache;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCacheType;
@@ -65,6 +65,8 @@ import com.io7m.r1.kernel.KRefractionRendererType;
 import com.io7m.r1.kernel.KRegionCopier;
 import com.io7m.r1.kernel.KRegionCopierType;
 import com.io7m.r1.kernel.KShaderCacheSetType;
+import com.io7m.r1.kernel.KTextureBindingsController;
+import com.io7m.r1.kernel.KTextureBindingsControllerType;
 import com.io7m.r1.kernel.KTranslucentRenderer;
 import com.io7m.r1.kernel.KTranslucentRendererType;
 import com.io7m.r1.kernel.types.KCamera;
@@ -149,9 +151,13 @@ import com.io7m.r1.tests.TestShaderCaches;
       final KFramebufferRGBAWithDepthCacheType rgba_cache =
         KFramebufferRGBAWithDepthCache.newCacheWithConfig(g, config, in_log);
 
+      final KTextureBindingsControllerType bct =
+        KTextureBindingsController.newBindings(g.getGLCommon());
+
       final KRefractionRendererType in_refraction_renderer =
         KRefractionRenderer.newRenderer(
           g,
+          bct,
           copier,
           tc.getShaderForwardTranslucentUnlitCache(),
           rgba_cache);
@@ -159,6 +165,7 @@ import com.io7m.r1.tests.TestShaderCaches;
       final KTranslucentRendererType r =
         KTranslucentRenderer.newRenderer(
           g,
+          bct,
           tc.getShaderForwardTranslucentUnlitCache(),
           tc.getShaderForwardTranslucentLitCache(),
           in_refraction_renderer,
@@ -384,8 +391,10 @@ import com.io7m.r1.tests.TestShaderCaches;
       });
   }
 
-  @Test(expected = RExceptionResource.class) public void testOutOfUnits_1()
-    throws Exception
+  @Test(expected = RExceptionUnitAllocatorOutOfUnits.class) public
+    void
+    testOutOfUnits_1()
+      throws Exception
   {
     try {
       final JCGLSoftRestrictionsType restrictor =
@@ -483,13 +492,16 @@ import com.io7m.r1.tests.TestShaderCaches;
           }
         });
     } catch (final JCGLExceptionExecution ee) {
-      Assert.assertTrue(ee.getCause() instanceof RExceptionResource);
-      throw (RExceptionResource) ee.getCause();
+      Assert
+        .assertTrue(ee.getCause() instanceof RExceptionUnitAllocatorOutOfUnits);
+      throw (RExceptionUnitAllocatorOutOfUnits) ee.getCause();
     }
   }
 
-  @Test(expected = RExceptionResource.class) public void testOutOfUnits_0()
-    throws Exception
+  @Test(expected = RExceptionUnitAllocatorOutOfUnits.class) public
+    void
+    testOutOfUnits_0()
+      throws Exception
   {
     try {
       final JCGLSoftRestrictionsType restrictor =
@@ -587,8 +599,9 @@ import com.io7m.r1.tests.TestShaderCaches;
           }
         });
     } catch (final JCGLExceptionExecution ee) {
-      Assert.assertTrue(ee.getCause() instanceof RExceptionResource);
-      throw (RExceptionResource) ee.getCause();
+      Assert
+        .assertTrue(ee.getCause() instanceof RExceptionUnitAllocatorOutOfUnits);
+      throw (RExceptionUnitAllocatorOutOfUnits) ee.getCause();
     }
   }
 }

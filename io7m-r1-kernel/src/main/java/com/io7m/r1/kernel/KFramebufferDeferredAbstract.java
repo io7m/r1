@@ -307,12 +307,12 @@ import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
     this.size = in_size;
   }
 
-  @Override public final AreaInclusive kFramebufferGetArea()
+  @Override public final AreaInclusive getArea()
   {
     return this.area;
   }
 
-  @Override public final long kFramebufferGetSizeBytes()
+  @Override public final long getSizeInBytes()
   {
     return this.size;
   }

@@ -141,7 +141,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       gc.blendingDisable();
       gc.colorBufferMask(true, true, true, true);
       gc.cullingDisable();
-      gc.viewportSet(output.kFramebufferGetArea());
+      gc.viewportSet(output.getArea());
 
       if (gc.depthBufferGetBits() > 0) {
         gc.depthBufferTestDisable();
@@ -250,9 +250,9 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         final KFramebufferRGBAUsableType temp = receipt.getValue();
         this.copier.copierCopyRGBAOnly(
           input,
-          input.kFramebufferGetArea(),
+          input.getArea(),
           temp,
-          temp.kFramebufferGetArea());
+          temp.getArea());
         this.evaluateFog(
           config,
           input.deferredGetGeometryBuffer(),
