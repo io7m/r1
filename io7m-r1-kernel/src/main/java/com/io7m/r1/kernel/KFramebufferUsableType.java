@@ -29,12 +29,12 @@ public interface KFramebufferUsableType extends JCGLResourceUsableType
    * @return The size of the area to which rendering will occur
    */
 
-  AreaInclusive kFramebufferGetArea();
+  AreaInclusive getArea();
 
   /**
    * @return The size in bytes of all the resources that make up the
    *         framebuffer
    */
 
-  long kFramebufferGetSizeBytes();
+  long getSizeInBytes();
 }

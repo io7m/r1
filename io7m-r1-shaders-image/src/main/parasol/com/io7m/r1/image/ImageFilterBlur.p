@@ -26,6 +26,10 @@ module ImageFilterBlur is
   import com.io7m.r1.core.Gaussian;
   import com.io7m.r1.core.VertexShaders;
 
+  --
+  -- Four component
+  --
+
   shader fragment blur_horizontal_4f_f is
     parameter t_image     : sampler_2d;
     parameter image_width : float;
@@ -60,6 +64,10 @@ module ImageFilterBlur is
     fragment blur_vertical_4f_f;
   end;
 
+  --
+  -- Two component
+  --
+
   shader fragment blur_horizontal_2f_f is
     parameter t_image     : sampler_2d;
     parameter image_width : float;
@@ -92,6 +100,44 @@ module ImageFilterBlur is
   shader program blur_vertical_2f is
     vertex   VertexShaders.standard_clip_without_log;
     fragment blur_vertical_2f_f;
+  end;
+
+  --
+  -- One component
+  --
+
+  shader fragment blur_horizontal_1f_f is
+    parameter t_image     : sampler_2d;
+    parameter image_width : float;
+    in        f_uv        : vector_2f;
+    out       out_0       : vector_4f as 0;
+  with
+    value rgba =
+      new vector_4f (Gaussian.blur_horizontal_1f (t_image, f_uv, image_width), 0.0, 0.0, 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader fragment blur_vertical_1f_f is
+    parameter t_image      : sampler_2d;
+    parameter image_height : float;
+    in        f_uv         : vector_2f;
+    out       out_0        : vector_4f as 0;
+  with
+    value rgba =
+      new vector_4f (Gaussian.blur_vertical_1f (t_image, f_uv, image_height), 0.0, 0.0, 1.0);
+  as
+    out out_0 = rgba;
+  end;
+
+  shader program blur_horizontal_1f is
+    vertex   VertexShaders.standard_clip_without_log;
+    fragment blur_horizontal_1f_f;
+  end;
+
+  shader program blur_vertical_1f is
+    vertex   VertexShaders.standard_clip_without_log;
+    fragment blur_vertical_1f_f;
   end;
 
 end;

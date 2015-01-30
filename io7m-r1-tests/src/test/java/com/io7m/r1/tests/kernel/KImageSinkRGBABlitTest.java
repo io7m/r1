@@ -62,6 +62,6 @@ import com.io7m.r1.tests.TestShaderCaches;
 
     final KImageSinkRGBAType<AreaInclusive> f = r1.getSinkBlitRGBA();
 
-    f.sinkEvaluateRGBA(fb.kFramebufferGetArea(), fb);
+    f.sinkEvaluateRGBA(fb.getArea(), fb);
   }
 }

@@ -87,6 +87,10 @@ import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
     final KFramebufferRGBAUsableType output)
     throws RException
   {
+    NullCheck.notNull(parameters, "Parameters");
+    NullCheck.notNull(input, "Input");
+    NullCheck.notNull(output, "Output");
+
     try {
       final AreaInclusive source_select = parameters.getSourceSelect();
       final AreaInclusive target_select = parameters.getTargetSelect();

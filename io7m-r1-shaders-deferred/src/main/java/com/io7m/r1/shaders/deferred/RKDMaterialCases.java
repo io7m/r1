@@ -25,6 +25,7 @@ import com.io7m.jcanephora.TextureCubeStaticType;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureFormat;
+import com.io7m.jcanephora.TextureUsableVisitorType;
 import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
@@ -320,6 +321,14 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
+
+      @Override public <A, E extends Exception> A textureUsableAccept(
+        final TextureUsableVisitorType<A, E> v)
+        throws E
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
     }, new TextureCubeStaticType() {
 
       @Override public boolean resourceIsDeleted()
@@ -411,6 +420,14 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       }
 
       @Override public AreaInclusive textureGetArea()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public <A, E extends Exception> A textureUsableAccept(
+        final TextureUsableVisitorType<A, E> v)
+        throws E
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();

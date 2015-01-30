@@ -14,31 +14,42 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.kernel;
+package com.io7m.r1.kernel.types;
 
-import com.io7m.jcanephora.JCGLException;
 import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.exceptions.RExceptionUserError;
 
 /**
- * A function that can be evaluated with a given texture unit context.
+ * The type of mutable builders for projective lights that have mapped basic
+ * shadows.
  */
 
-public interface KTextureUnitWithType
+public interface KLightProjectiveWithShadowBasicSSSoftDiffuseOnlyBuilderType extends
+  KLightProjectiveBuilderType
 {
   /**
-   * Evaluate the function.
-   * 
-   * @param context
-   *          The current texture unit context
-   * 
-   * @throws JCGLException
-   *           If required
+   * <p>
+   * Construct a light.
+   * </p>
+   *
+   * @return A new light based on all of the parameters given so far.
+   * @throws RExceptionUserError
+   *           If no texture was specified.
    * @throws RException
-   *           If required
+   *           If any other error occurs.
    */
 
-  void run(
-    final KTextureUnitContextType context)
-    throws JCGLException,
+  KLightProjectiveWithShadowBasicSSSoftDiffuseOnly build()
+    throws RExceptionUserError,
       RException;
+
+  /**
+   * Set the shadow.
+   *
+   * @param s
+   *          A shadow.
+   */
+
+  void setShadow(
+    KShadowMappedBasicSSSoft s);
 }

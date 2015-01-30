@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.shadow-mapping-basic-sssoft"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Shadow mapping - Basic (Screen-space softening)</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-basic-sssoft.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Screen-space softening</s:term> is a
+      technique that uses an existing shadow technique
+      to render the <s:term s:type="term">light contribution</s:term> of
+      a given light to a <s:term s:type="term">light contribution texture</s:term>, 
+      blurs that texture, and then applies lighting to the scene, modulating
+      the attenuation of the light by the
+      <s:term s:type="term">light contribution texture</s:term>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-basic-sssoft.algorithm">
+    <s:subsection-title>Algorithm</s:subsection-title>
+    <s:paragraph>
+      As indicated above, the algorithm essentially saves the result
+      of an existing shadow mapping algorithm
+      <s:footnote>
+        Currently, only <s:link s:target="r1.dai.shadow-mapping-basic">basic shadow mapping</s:link>
+        is supported for screen-space softening.
+      </s:footnote>
+      to a texture so that it
+      can be filtered and then applied to the scene in screen-space.
+      This screen-sized texture is populated just prior to the application
+      of the light, using the depth values of the scene's
+      <s:link s:target="r1.dai.deferred.g-buffer">g-buffer</s:link>
+      to calculate shadows. Normally, with
+      <s:term s:type="term">basic shadow mapping</s:term>, the test
+      that determines whether a given point is in shadow or not is
+      evaluated when the shadow-projecting light is actually being
+      applied to the scene. If the shadow is to be softened in screen-space,
+      however, the result of the shadow test is written to a screen-sized
+      texture 
+      <s:footnote>
+        A simple 8-bit single-component red texture is usually enough 
+        precision and is the default.
+      </s:footnote>
+      in a separate pass prior to actually applying the light. As
+      an example, the following texture contains the results of the
+      shadow test for a light with basic shadow mapping, with
+      red pixels indicating the <s:term s:type="term">light contribution</s:term> 
+      for the light:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Shadow test</s:formal-item-title>
+      <s:image s:source="images/shadow_sssoft_light_con.png">Shadow test</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Then, a <s:term s:type="term">box blur</s:term> is applied to
+      the image:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Shadow test (blur)</s:formal-item-title>
+      <s:image s:source="images/shadow_sssoft_light_con_blur.png">Shadow test</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Then, the light is applied to the scene as normal, but with the
+      light amount at each pixel being multiplied by the corresponding
+      pixel in the <s:term s:type="term">light contribution texture</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Screen-space Softening Result</s:formal-item-title>
+      <s:image s:source="images/shadow_sssoft_result.png">Screen-space Softening Result</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-basic-sssoft.advantages">
+    <s:subsection-title>Advantages</s:subsection-title>
+    <s:paragraph>
+      One major advantage of <s:term s:type="term">screen-space softening</s:term>
+      is that the performance of the softening step is bounded by screen-space.
+      One of the disadvantages of 
+      <s:link s:target="r1.dai.shadow-mapping-variance.disadvantages">variance shadow mapping</s:link>
+      is that filtering larger shadow maps takes longer. With the blur step
+      happening in screen-space, performance is the same regardless of the
+      size of the shadow.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-basic-sssoft.disadvantages">
+    <s:subsection-title>Disadvantages</s:subsection-title>
+    <s:paragraph>
+      One annoying disadvantage of <s:term s:type="term">screen-space softening</s:term>
+      is that blurring the <s:term s:type="term">light contribution texture</s:term>
+      can cause lit surfaces to bleed into areas that should be shadowed. This usually
+      manifests as a small halo around parts of a lit object that overlap with their
+      own shadow. This issue may or may not be noticeable depending on the contents
+      and lighting of the visible set. The pathological example is a single light
+      source in an otherwise unlit scene, with a very dark shadow, with the object
+      close to and directly overlapping the shadow. The following image shows exactly
+      this:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Screen-space Softening Result (Halo)</s:formal-item-title>
+      <s:image s:source="images/shadow_sssoft_result_halo.png">Screen-space Softening Result (Halo)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Another disadvantage of <s:term s:type="term">screen-space softening</s:term>
+      is that when the observer gets closer to the shadow, the fixed-size blur applied
+      to the shadow becomes less effective. Conversely, when the observer gets further
+      away from the shadow, the fixed-size blur applied becomes more effective. In
+      effect, the shadow gets sharper when the observer is closer, and softer when
+      the observer moves further away.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Screen-space Softening Result (Close)</s:formal-item-title>
+      <s:image s:source="images/shadow_sssoft_distance_close.png">Screen-space Softening Result (Close)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Screen-space Softening Result (Far)</s:formal-item-title>
+      <s:image s:source="images/shadow_sssoft_distance_far.png">Screen-space Softening Result (Far)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The impact of this issue can be somewhat reduced by using larger shadow maps.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-basic-sssoft.types">
+    <s:subsection-title>Types</s:subsection-title>
+    <s:paragraph>
+      Basic mapped shadows are represented by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KShadowMappedBasicSSSoft.html">KShadowMappedBasicSSSoft</s:link-external>
+      type, and can be associated with
+      <s:link s:target="r1.dai.lighting-projective">projective lights</s:link>.
+    </s:paragraph>
+    <s:paragraph>
+      Rendering of screen-space shadow images is handled by implementations of the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KScreenSpaceShadowDeferredRendererType.html">KScreenSpaceShadowDeferredRendererType</s:link-external>
+      type.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>

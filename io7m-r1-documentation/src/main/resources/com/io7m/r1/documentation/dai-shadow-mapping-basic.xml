@@ -91,9 +91,22 @@
       is not in shadow with respect to the light.
     </s:paragraph>
   </s:subsection>
-  
-  <s:subsection xml:id="r1.dai.shadow-mapping-basic.issues">
-    <s:subsection-title>Issues</s:subsection-title>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-basic.advantages">
+    <s:subsection-title>Advantages</s:subsection-title>
+    <s:paragraph>
+      The main advantage of the algorithm is that it is extremely
+      cheap in terms of rendering time and memory. A single 16-bit
+      depth texture is sufficient for even very large scenes
+      <s:footnote>
+        Thanks to the <s:link s:target="r1.dai.log_depth">logarithmic depth encoding</s:link>
+        used by the <s:term s:type="package">${project.parent.name}</s:term> package.
+      </s:footnote>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-basic.disadvantages">
+    <s:subsection-title>Disadvantages</s:subsection-title>
     <s:paragraph>
       Unfortunately, the basic shadow mapping algorithm is subject
       to a number of issues related to numerical imprecision, and
@@ -160,7 +173,7 @@
       <s:link s:target="r1.dai.lighting-projective">projective lights</s:link>.
     </s:paragraph>
     <s:paragraph>
-      Rendering of depth-only images is handled by the
+      Rendering of depth-only images is handled by implementations of the
       <s:link-external s:target="apidocs/com/io7m/r1/kernel/KDepthRendererType.html">KDepthRendererType</s:link-external>
       type.
     </s:paragraph>

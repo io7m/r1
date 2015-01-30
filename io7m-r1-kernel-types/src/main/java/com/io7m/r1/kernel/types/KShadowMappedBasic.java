@@ -32,8 +32,8 @@ import com.io7m.r1.exceptions.RException;
   @EqualityReference private static final class Builder implements
     KShadowMappedBasicBuilderType
   {
-    private float                                 depth_bias;
-    private float                                 factor_min;
+    private float                      depth_bias;
+    private float                      factor_min;
     private KShadowMapDescriptionBasic map_desc;
 
     Builder()
@@ -110,14 +110,14 @@ import com.io7m.r1.exceptions.RException;
    *         the given shadow.
    */
 
-  public static KShadowBuilderType newBuilderFrom(
+  public static KShadowMappedBasicBuilderType newBuilderFrom(
     final KShadowMappedBasic s)
   {
     return new Builder(s);
   }
 
-  private final float                                 depth_bias;
-  private final float                                 factor_min;
+  private final float                      depth_bias;
+  private final float                      factor_min;
   private final KShadowMapDescriptionBasic map_description;
 
   private KShadowMappedBasic(
@@ -199,7 +199,7 @@ import com.io7m.r1.exceptions.RException;
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[KNewShadowDirectionalMappedBasic map_description=");
+    b.append("[KShadowMappedBasic map_description=");
     b.append(this.map_description);
     b.append(" depth_bias=");
     b.append(this.depth_bias);

@@ -83,7 +83,7 @@ import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
   @Override public BigInteger cacheValueSizeOf(
     final KFramebufferRGBAType v)
   {
-    final BigInteger r = BigInteger.valueOf(v.kFramebufferGetSizeBytes());
+    final BigInteger r = BigInteger.valueOf(v.getSizeInBytes());
     assert r != null;
     return r;
   }

@@ -16,42 +16,44 @@
 
 package com.io7m.r1.kernel;
 
-import com.io7m.jcanephora.JCGLException;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jcanephora.TextureCubeStaticUsableType;
+import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.r1.exceptions.RException;
 
 /**
- * Access to the initial texture context.
+ * The type of texture bindings contexts.
  */
 
-public interface KTextureUnitContextInitialType
+public interface KTextureBindingsContextType
 {
   /**
-   * @return The number of textures allocated for the current context
-   */
-
-  int getTextureCountForContext();
-
-  /**
-   * @return The number of textures allocated for all contexts
-   */
-
-  int getTextureCountTotal();
-
-  /**
-   * Create a new context and execute <code>f</code> with the new context. Any
-   * texture units allocated by <code>f</code> will be released when
-   * <code>f</code> returns.
-   * 
-   * @param f
-   *          A function
-   * @throws JCGLException
-   *           Iff an OpenGL error occurs.
+   * Allocate a new texture unit and bind <code>t</code> to it, returning the
+   * new unit.
+   *
+   * @return A texture unit with the given texture bound
+   * @param t
+   *          The texture
    * @throws RException
-   *           Iff <code>f</code> throws <code>RException</code>.
+   *           If another error occurs.
    */
 
-  void withContext(
-    final KTextureUnitWithType f)
-    throws JCGLException,
-      RException;
+  TextureUnitType withTexture2D(
+    final Texture2DStaticUsableType t)
+    throws RException;
+
+  /**
+   * Allocate a new texture unit and bind <code>t</code> to it, returning the
+   * new unit.
+   *
+   * @return A texture unit with the given texture bound
+   * @param t
+   *          The texture
+   * @throws RException
+   *           If another error occurs.
+   */
+
+  TextureUnitType withTextureCube(
+    final TextureCubeStaticUsableType t)
+    throws RException;
 }
