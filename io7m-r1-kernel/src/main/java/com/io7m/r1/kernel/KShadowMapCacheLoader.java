@@ -27,6 +27,7 @@ import com.io7m.jlog.LogUsableType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
+import com.io7m.r1.kernel.types.KShadowMapDescriptionBasicSSSoft;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionVisitorType;
@@ -105,6 +106,26 @@ import com.io7m.r1.kernel.types.KShadowMapDescriptionVisitorType;
             lg.debug(mss);
           }
           return KShadowMapBasic.newMap(g, m);
+        }
+
+        @Override public KShadowMapType basicSSSoft(
+          final KShadowMapDescriptionBasicSSSoft m)
+          throws RException,
+            JCGLException
+        {
+          if (lg.wouldLog(LogLevel.LOG_DEBUG)) {
+            final int size = (int) Math.pow(2, m.getSizeExponent());
+            ms.setLength(0);
+            ms.append("Allocating basic (sssoft) map (");
+            ms.append(size);
+            ms.append("x");
+            ms.append(size);
+            ms.append(")");
+            final String mss = ms.toString();
+            assert mss != null;
+            lg.debug(mss);
+          }
+          return KShadowMapBasicSSSoft.newMap(g, m);
         }
 
         @Override public KShadowMapType variance(

@@ -107,6 +107,6 @@ import com.io7m.r1.kernel.types.KShadowMapDescriptionBasic;
 
   @Override public long shadowMapGetSizeBytes()
   {
-    return this.framebuffer.kFramebufferGetSizeBytes();
+    return this.framebuffer.getSizeInBytes();
   }
 }

@@ -25,6 +25,7 @@ import com.io7m.jcanephora.TextureCubeStaticType;
 import com.io7m.jcanephora.TextureFilterMagnification;
 import com.io7m.jcanephora.TextureFilterMinification;
 import com.io7m.jcanephora.TextureFormat;
+import com.io7m.jcanephora.TextureUsableVisitorType;
 import com.io7m.jcanephora.TextureWrapR;
 import com.io7m.jcanephora.TextureWrapS;
 import com.io7m.jcanephora.TextureWrapT;
@@ -42,6 +43,10 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnlyBuilderType;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoft;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftBuilderType;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftDiffuseOnlyBuilderType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceBuilderType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
@@ -146,6 +151,20 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         final KLightProjectiveWithShadowBasicDiffuseOnlyBuilderType b =
           KLightProjectiveWithShadowBasicDiffuseOnly
             .newBuilder(t, projection);
+        cases.add(b.build());
+      }
+
+      {
+        final KLightProjectiveWithShadowBasicSSSoftBuilderType b =
+          KLightProjectiveWithShadowBasicSSSoft.newBuilder(t, projection);
+        cases.add(b.build());
+      }
+
+      {
+        final KLightProjectiveWithShadowBasicSSSoftDiffuseOnlyBuilderType b =
+          KLightProjectiveWithShadowBasicSSSoftDiffuseOnly.newBuilder(
+            t,
+            projection);
         cases.add(b.build());
       }
 
@@ -261,6 +280,14 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();
       }
+
+      @Override public <A, E extends Exception> A textureUsableAccept(
+        final TextureUsableVisitorType<A, E> v)
+        throws E
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
     }, new TextureCubeStaticType() {
 
       @Override public boolean resourceIsDeleted()
@@ -352,6 +379,14 @@ import com.io7m.r1.spaces.RSpaceWorldType;
       }
 
       @Override public AreaInclusive textureGetArea()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public <A, E extends Exception> A textureUsableAccept(
+        final TextureUsableVisitorType<A, E> v)
+        throws E
       {
         // TODO Auto-generated method stub
         throw new UnimplementedCodeException();

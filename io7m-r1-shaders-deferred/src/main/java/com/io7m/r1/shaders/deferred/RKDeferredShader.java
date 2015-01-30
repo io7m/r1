@@ -30,6 +30,8 @@ import com.io7m.r1.kernel.types.KLightProjectiveType;
 import com.io7m.r1.kernel.types.KLightProjectiveVisitorType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicDiffuseOnly;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoft;
+import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicSSSoftDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
@@ -309,6 +311,30 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
                 b.append("\n");
                 return Unit.unit();
               }
+
+              @Override public Unit projectiveWithShadowBasicSSSoft(
+                final KLightProjectiveWithShadowBasicSSSoft lpwsbs)
+              {
+                b
+                  .append("  -- Projective light (screen-space soft shadow mapping) parameters\n");
+                b
+                  .append("  parameter t_shadow_sssoft_intensity : sampler_2d;\n");
+                b.append("\n");
+                return Unit.unit();
+              }
+
+              @Override public
+                Unit
+                projectiveWithShadowBasicSSSoftDiffuseOnly(
+                  final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lpwsbs)
+              {
+                b
+                  .append("  -- Projective light (screen-space soft shadow mapping) parameters\n");
+                b
+                  .append("  parameter t_shadow_sssoft_intensity : sampler_2d;\n");
+                b.append("\n");
+                return Unit.unit();
+              }
             });
         }
 
@@ -583,6 +609,42 @@ import com.io7m.r1.shaders.forward.RKForwardShader;
                 b.append("      position_light_eye,\n");
                 b.append("      position_light_clip\n");
                 b.append("    );\n");
+                b.append("\n");
+                b.append("  value light_attenuation =\n");
+                b.append("    F.multiply (\n");
+                b.append("      light_shadow,\n");
+                b.append("      light_vectors.attenuation\n");
+                b.append("    );\n");
+                b.append("\n");
+                return Unit.unit();
+              }
+
+              @Override public Unit projectiveWithShadowBasicSSSoft(
+                final KLightProjectiveWithShadowBasicSSSoft lpwsbs)
+              {
+                b.append("  -- Basic (screen-space soft) shadow mapping\n");
+                b.append("  value light_shadow =\n");
+                b
+                  .append("    S.texture (t_shadow_sssoft_intensity, position_uv) [x];\n");
+                b.append("\n");
+                b.append("  value light_attenuation =\n");
+                b.append("    F.multiply (\n");
+                b.append("      light_shadow,\n");
+                b.append("      light_vectors.attenuation\n");
+                b.append("    );\n");
+                b.append("\n");
+                return Unit.unit();
+              }
+
+              @Override public
+                Unit
+                projectiveWithShadowBasicSSSoftDiffuseOnly(
+                  final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lpwsbs)
+              {
+                b.append("  -- Basic (screen-space soft) shadow mapping\n");
+                b.append("  value light_shadow =\n");
+                b
+                  .append("    S.texture (t_shadow_sssoft_intensity, position_uv) [x];\n");
                 b.append("\n");
                 b.append("  value light_attenuation =\n");
                 b.append("    F.multiply (\n");

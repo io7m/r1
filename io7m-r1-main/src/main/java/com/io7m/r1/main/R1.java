@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -44,11 +44,14 @@ import com.io7m.r1.kernel.KFogYParameters;
 import com.io7m.r1.kernel.KFogZParameters;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCache;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceCacheType;
+import com.io7m.r1.kernel.KFramebufferMonochromeCache;
+import com.io7m.r1.kernel.KFramebufferMonochromeCacheType;
 import com.io7m.r1.kernel.KFramebufferRGBACache;
 import com.io7m.r1.kernel.KFramebufferRGBACacheType;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCache;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCacheType;
 import com.io7m.r1.kernel.KImageFilterBlurDepthVariance;
+import com.io7m.r1.kernel.KImageFilterBlurMonochrome;
 import com.io7m.r1.kernel.KImageFilterBlurRGBA;
 import com.io7m.r1.kernel.KImageFilterCopyRGBA;
 import com.io7m.r1.kernel.KImageFilterDeferredType;
@@ -58,6 +61,7 @@ import com.io7m.r1.kernel.KImageFilterEmissionGlow;
 import com.io7m.r1.kernel.KImageFilterFXAA;
 import com.io7m.r1.kernel.KImageFilterFogY;
 import com.io7m.r1.kernel.KImageFilterFogZ;
+import com.io7m.r1.kernel.KImageFilterMonochromeType;
 import com.io7m.r1.kernel.KImageFilterRGBAType;
 import com.io7m.r1.kernel.KImageSinkBlitRGBA;
 import com.io7m.r1.kernel.KImageSinkRGBAType;
@@ -73,6 +77,8 @@ import com.io7m.r1.kernel.KRendererDeferred;
 import com.io7m.r1.kernel.KRendererDeferredOpaque;
 import com.io7m.r1.kernel.KRendererDeferredOpaqueType;
 import com.io7m.r1.kernel.KRendererDeferredType;
+import com.io7m.r1.kernel.KScreenSpaceShadowDeferredRenderer;
+import com.io7m.r1.kernel.KScreenSpaceShadowDeferredRendererType;
 import com.io7m.r1.kernel.KShaderCacheImageType;
 import com.io7m.r1.kernel.KShaderCacheSetClasspath;
 import com.io7m.r1.kernel.KShaderCacheSetType;
@@ -80,6 +86,8 @@ import com.io7m.r1.kernel.KShadowMapCache;
 import com.io7m.r1.kernel.KShadowMapCacheType;
 import com.io7m.r1.kernel.KShadowMapRenderer;
 import com.io7m.r1.kernel.KShadowMapRendererType;
+import com.io7m.r1.kernel.KTextureBindingsController;
+import com.io7m.r1.kernel.KTextureBindingsControllerType;
 import com.io7m.r1.kernel.KTextureMixParameters;
 import com.io7m.r1.kernel.KTranslucentRenderer;
 import com.io7m.r1.kernel.KTranslucentRendererType;
@@ -118,6 +126,11 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     private long                                                           frustum_cache_count;
     private final JCGLImplementationType                                   gl;
     private final LogUsableType                                            log;
+    private @Nullable KImageFilterMonochromeType<KBlurParameters>          mono_blur;
+    private @Nullable KFramebufferMonochromeCacheType                      monochrome_cache;
+    private long                                                           monochrome_framebuffer_count;
+    private long                                                           monochrome_framebuffer_height;
+    private long                                                           monochrome_framebuffer_width;
     private @Nullable KImageFilterDeferredType<Unit>                       post_emission;
     private @Nullable KImageFilterDeferredType<KGlowParameters>            post_emission_glow;
     private @Nullable KImageFilterRGBAType<KFXAAParameters>                post_fxaa;
@@ -125,6 +138,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     private @Nullable KRendererDeferredType                                renderer_deferred;
     private @Nullable KRendererDeferredOpaqueType                          renderer_deferred_opaque;
     private @Nullable KRefractionRendererType                              renderer_refraction;
+    private @Nullable KScreenSpaceShadowDeferredRendererType               renderer_ssshadow;
     private @Nullable KTranslucentRendererType                             renderer_translucent;
     private @Nullable KImageFilterRGBAType<KBlurParameters>                rgba_blur;
     private @Nullable KFramebufferRGBACacheType                            rgba_cache;
@@ -154,24 +168,33 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
       this.log = NullCheck.notNull(in_log, "Log");
       this.view_ray_cache_count = R1.DEFAULT_VIEW_RAY_CACHE_SIZE;
       this.shadow_map_cache_size = R1.DEFAULT_SHADOW_MAP_CACHE_SIZE;
+
+      this.frustum_cache_count = R1.DEFAULT_FRUSTUM_CACHE_COUNT;
+
       this.depth_variance_framebuffer_count =
         R1.DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_COUNT;
       this.depth_variance_framebuffer_width =
         R1.DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_WIDTH;
       this.depth_variance_framebuffer_height =
         R1.DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_HEIGHT;
-      this.frustum_cache_count = R1.DEFAULT_FRUSTUM_CACHE_COUNT;
+
       this.rgba_framebuffer_count = R1.DEFAULT_RGBA_FRAMEBUFFER_COUNT;
-      this.rgba_framebuffer_height =
-        R1.DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_HEIGHT;
-      this.rgba_framebuffer_width =
-        R1.DEFAULT_DEPTH_VARIANCE_FRAMEBUFFER_WIDTH;
+      this.rgba_framebuffer_height = R1.DEFAULT_RGBA_FRAMEBUFFER_HEIGHT;
+      this.rgba_framebuffer_width = R1.DEFAULT_RGBA_FRAMEBUFFER_WIDTH;
+
       this.rgba_with_depth_framebuffer_count =
         R1.DEFAULT_RGBA_WITH_DEPTH_FRAMEBUFFER_COUNT;
       this.rgba_with_depth_framebuffer_width =
         R1.DEFAULT_RGBA_WITH_DEPTH_FRAMEBUFFER_WIDTH;
       this.rgba_with_depth_framebuffer_height =
         R1.DEFAULT_RGBA_WITH_DEPTH_FRAMEBUFFER_HEIGHT;
+
+      this.monochrome_framebuffer_count =
+        R1.DEFAULT_MONOCHROME_FRAMEBUFFER_COUNT;
+      this.monochrome_framebuffer_height =
+        R1.DEFAULT_MONOCHROME_FRAMEBUFFER_HEIGHT;
+      this.monochrome_framebuffer_width =
+        R1.DEFAULT_MONOCHROME_FRAMEBUFFER_WIDTH;
     }
 
     @SuppressWarnings("synthetic-access") @Override public R1Type build()
@@ -193,8 +216,12 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         final KFramebufferDepthVarianceCacheType in_depth_variance_cache =
           this.makeDepthVarianceCache();
 
+        final KTextureBindingsControllerType in_texture_bindings =
+          this.makeTextureBindingsController();
+
         final KImageFilterDepthVarianceType<KBlurParameters> in_depth_variance_blur =
           this.makeDepthVarianceBlur(
+            in_texture_bindings,
             in_shader_caches,
             in_copier,
             in_quad_cache,
@@ -217,13 +244,34 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         final KViewRaysCacheType in_view_rays_cache =
           this.makeViewRaysCache();
 
+        final KFramebufferMonochromeCacheType in_monochrome_cache =
+          this.makeMonochromeCache();
+
+        final KImageFilterMonochromeType<KBlurParameters> in_blur_mono =
+          this.makeMonochromeBlur(
+            in_texture_bindings,
+            in_shader_caches,
+            in_copier,
+            in_quad_cache,
+            in_monochrome_cache);
+
+        final KScreenSpaceShadowDeferredRendererType in_deferred_shadow_renderer =
+          this.makeScreenSpaceShadowDeferredRenderer(
+            in_texture_bindings,
+            in_shader_caches,
+            in_frustum_cache,
+            in_monochrome_cache,
+            in_blur_mono);
+
         final KRendererDeferredOpaqueType in_renderer_deferred_opaque =
           this.makeDeferredOpaque(
+            in_texture_bindings,
             in_shader_caches,
             in_quad_cache,
             in_sphere_cache,
             in_frustum_cache,
-            in_view_rays_cache);
+            in_view_rays_cache,
+            in_deferred_shadow_renderer);
 
         final KFramebufferRGBAWithDepthCacheType in_rgba_with_depth_cache =
           this.makeRGBAWithDepthCache();
@@ -232,12 +280,14 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
 
         final KRefractionRendererType in_refraction_renderer =
           this.makeRefractionRenderer(
+            in_texture_bindings,
             in_shader_caches,
             in_copier,
             in_rgba_with_depth_cache);
 
         final KTranslucentRendererType in_renderer_translucent =
           this.makeTranslucentRenderer(
+            in_texture_bindings,
             in_shader_caches,
             in_refraction_renderer);
 
@@ -249,6 +299,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
 
         final KImageFilterRGBAType<KBlurParameters> in_blur_rgba =
           this.makeRGBABlur(
+            in_texture_bindings,
             in_shader_caches,
             in_copier,
             in_quad_cache,
@@ -259,6 +310,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
 
         final KImageFilterDeferredType<KGlowParameters> in_post_emission_glow =
           this.makePostEmissionGlow(
+            in_texture_bindings,
             in_shader_caches,
             in_blur_rgba,
             in_quad_cache,
@@ -266,6 +318,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
 
         final KImageFilterRGBAType<KFXAAParameters> in_post_fxaa =
           this.makePostFXAA(
+            in_texture_bindings,
             in_shader_caches,
             in_copier,
             in_quad_cache,
@@ -300,6 +353,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
 
         final KImageSinkRGBAType<AreaInclusive> in_sink_rgba =
           this.makeSinkRGBA(
+            in_texture_bindings,
             in_quad_cache,
             in_shader_caches.getShaderImageCache());
 
@@ -310,6 +364,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
           in_depth_variance_cache,
           in_depth_variance_renderer,
           in_frustum_cache,
+          in_monochrome_cache,
           in_post_emission,
           in_post_emission_glow,
           in_post_fxaa,
@@ -339,12 +394,19 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
       }
     }
 
+    private KTextureBindingsControllerType makeTextureBindingsController()
+    {
+      return KTextureBindingsController.newBindings(this.gl.getGLCommon());
+    }
+
     private KRendererDeferredOpaqueType makeDeferredOpaque(
+      final KTextureBindingsControllerType in_texture_bindings,
       final KShaderCacheSetType in_shader_caches,
       final KUnitQuadCacheType in_quad_cache,
       final KUnitSphereCacheType in_sphere_cache,
       final KFrustumMeshCacheType in_frustum_cache,
-      final KViewRaysCacheType in_view_rays_cache)
+      final KViewRaysCacheType in_view_rays_cache,
+      final KScreenSpaceShadowDeferredRendererType in_shadow_renderer)
       throws RException
     {
       final KRendererDeferredOpaqueType in_renderer_deferred_opaque;
@@ -354,13 +416,15 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         in_renderer_deferred_opaque =
           KRendererDeferredOpaque.newRenderer(
             this.gl,
+            in_texture_bindings,
             in_quad_cache,
             in_sphere_cache,
             in_frustum_cache,
             in_shader_caches.getShaderDebugCache(),
             in_shader_caches.getShaderDeferredGeoCache(),
             in_shader_caches.getShaderDeferredLightCache(),
-            in_view_rays_cache);
+            in_view_rays_cache,
+            in_shadow_renderer);
       }
       return in_renderer_deferred_opaque;
     }
@@ -385,6 +449,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     private
       KImageFilterDepthVarianceType<KBlurParameters>
       makeDepthVarianceBlur(
+        final KTextureBindingsControllerType in_texture_bindings,
         final KShaderCacheSetType in_shader_caches,
         final KRegionCopierType in_copier,
         final KUnitQuadCacheType in_quad_cache,
@@ -397,6 +462,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         in_depth_variance_blur =
           KImageFilterBlurDepthVariance.filterNew(
             this.gl,
+            in_texture_bindings,
             in_copier,
             in_depth_variance_cache,
             in_shader_caches.getShaderImageCache(),
@@ -501,6 +567,50 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
       return in_frustum_cache;
     }
 
+    private KImageFilterMonochromeType<KBlurParameters> makeMonochromeBlur(
+      final KTextureBindingsControllerType in_texture_bindings,
+      final KShaderCacheSetType in_shader_caches,
+      final KRegionCopierType in_copier,
+      final KUnitQuadCacheType in_quad_cache,
+      final KFramebufferMonochromeCacheType in_mono_cache)
+    {
+      final KImageFilterMonochromeType<KBlurParameters> in_mono_blur;
+      if (this.mono_blur != null) {
+        in_mono_blur = this.mono_blur;
+      } else {
+        in_mono_blur =
+          KImageFilterBlurMonochrome.filterNew(
+            this.gl,
+            in_texture_bindings,
+            in_copier,
+            in_mono_cache,
+            in_shader_caches.getShaderImageCache(),
+            in_quad_cache,
+            this.log);
+      }
+      return in_mono_blur;
+    }
+
+    private KFramebufferMonochromeCacheType makeMonochromeCache()
+    {
+      KFramebufferMonochromeCacheType in_mono_cache;
+      if (this.monochrome_cache != null) {
+        in_mono_cache = this.monochrome_cache;
+      } else {
+        final BLUCacheConfig config =
+          KFramebufferMonochromeCache.getCacheConfigFor(
+            this.monochrome_framebuffer_count,
+            this.monochrome_framebuffer_width,
+            this.monochrome_framebuffer_height);
+        in_mono_cache =
+          KFramebufferMonochromeCache.newCacheWithConfig(
+            this.gl,
+            config,
+            this.log);
+      }
+      return in_mono_cache;
+    }
+
     private KImageFilterDeferredType<Unit> makePostEmission(
       final KShaderCacheSetType in_shader_caches,
       final KUnitQuadCacheType in_quad_cache)
@@ -519,6 +629,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     }
 
     private KImageFilterDeferredType<KGlowParameters> makePostEmissionGlow(
+      final KTextureBindingsControllerType in_texture_bindings,
       final KShaderCacheSetType in_shader_caches,
       final KImageFilterRGBAType<KBlurParameters> in_blur_rgba,
       final KUnitQuadCacheType in_quad_cache,
@@ -531,6 +642,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         in_post_emission_glow =
           KImageFilterEmissionGlow.filterNew(
             this.gl,
+            in_texture_bindings,
             in_quad_cache,
             in_rgba_cache,
             in_shader_caches.getShaderImageCache(),
@@ -541,6 +653,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     }
 
     private KImageFilterRGBAType<KFXAAParameters> makePostFXAA(
+      final KTextureBindingsControllerType in_texture_bindings,
       final KShaderCacheSetType in_shader_caches,
       final KRegionCopierType in_copier,
       final KUnitQuadCacheType in_quad_cache,
@@ -553,6 +666,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         in_post_fxaa =
           KImageFilterFXAA.filterNew(
             this.gl,
+            in_texture_bindings,
             in_copier,
             in_quad_cache,
             in_rgba_cache,
@@ -574,6 +688,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     }
 
     private KRefractionRendererType makeRefractionRenderer(
+      final KTextureBindingsControllerType in_texture_bindings,
       final KShaderCacheSetType in_shader_caches,
       final KRegionCopierType in_copier,
       final KFramebufferRGBAWithDepthCacheType in_rgba_cache)
@@ -586,6 +701,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         in_refraction_renderer =
           KRefractionRenderer.newRenderer(
             this.gl,
+            in_texture_bindings,
             in_copier,
             in_shader_caches.getShaderForwardTranslucentUnlitCache(),
             in_rgba_cache);
@@ -626,6 +742,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     }
 
     private KImageFilterRGBAType<KBlurParameters> makeRGBABlur(
+      final KTextureBindingsControllerType in_texture_bindings,
       final KShaderCacheSetType in_shader_caches,
       final KRegionCopierType in_copier,
       final KUnitQuadCacheType in_quad_cache,
@@ -638,6 +755,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         in_rgba_blur =
           KImageFilterBlurRGBA.filterNew(
             this.gl,
+            in_texture_bindings,
             in_copier,
             in_rgba_cache,
             in_shader_caches.getShaderImageCache(),
@@ -695,6 +813,30 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
       return in_rgba_cache;
     }
 
+    private
+      KScreenSpaceShadowDeferredRendererType
+      makeScreenSpaceShadowDeferredRenderer(
+        final KTextureBindingsControllerType in_texture_bindings,
+        final KShaderCacheSetType in_shader_caches,
+        final KFrustumMeshCacheType in_frustum_cache,
+        final KFramebufferMonochromeCacheType in_mono_cache,
+        final KImageFilterMonochromeType<KBlurParameters> in_blur_mono)
+    {
+      KScreenSpaceShadowDeferredRendererType in_ssshadow_renderer;
+      if (this.renderer_ssshadow != null) {
+        in_ssshadow_renderer = this.renderer_ssshadow;
+      } else {
+        in_ssshadow_renderer =
+          KScreenSpaceShadowDeferredRenderer.newRenderer(
+            in_texture_bindings,
+            in_frustum_cache,
+            in_shader_caches.getShaderDeferredLightCache(),
+            in_mono_cache,
+            in_blur_mono);
+      }
+      return in_ssshadow_renderer;
+    }
+
     private KShaderCacheSetType makeShaderCaches()
       throws FilesystemError
     {
@@ -750,6 +892,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     }
 
     private KImageSinkRGBAType<AreaInclusive> makeSinkRGBA(
+      final KTextureBindingsControllerType in_texture_bindings,
       final KUnitQuadCacheType in_quad_cache,
       final KShaderCacheImageType in_shader_cache_image)
     {
@@ -759,6 +902,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
 
       return KImageSinkBlitRGBA.newSink(
         this.gl,
+        in_texture_bindings,
         in_shader_cache_image,
         in_quad_cache);
     }
@@ -814,6 +958,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     }
 
     private KTranslucentRendererType makeTranslucentRenderer(
+      final KTextureBindingsControllerType in_texture_bindings,
       final KShaderCacheSetType in_shader_caches,
       final KRefractionRendererType in_refraction_renderer)
       throws RException
@@ -825,6 +970,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         in_renderer_translucent =
           KTranslucentRenderer.newRenderer(
             this.gl,
+            in_texture_bindings,
             in_shader_caches.getShaderForwardTranslucentUnlitCache(),
             in_shader_caches.getShaderForwardTranslucentLitCache(),
             in_refraction_renderer,
@@ -941,6 +1087,31 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
           "Frustum count",
           0,
           "Frustum minimum count");
+    }
+
+    @Override public void setMonochromeFramebufferCacheSize(
+      final int framebuffer_count,
+      final int framebuffer_width,
+      final int framebuffer_height)
+    {
+      this.monochrome_framebuffer_count =
+        RangeCheck.checkGreater(
+          framebuffer_count,
+          "Framebuffer count",
+          0,
+          "Framebuffer map count");
+      this.monochrome_framebuffer_width =
+        RangeCheck.checkGreater(
+          framebuffer_width,
+          "Framebuffer width",
+          0,
+          "Minimum framebuffer width");
+      this.monochrome_framebuffer_height =
+        RangeCheck.checkGreater(
+          framebuffer_height,
+          "Framebuffer height",
+          0,
+          "Minimum framebuffer height");
     }
 
     @Override public void setRegionCopier(
@@ -1073,6 +1244,24 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
   public static final long DEFAULT_FRUSTUM_CACHE_COUNT;
 
   /**
+   * The default number of temporary monochrome framebuffers.
+   */
+
+  public static final long DEFAULT_MONOCHROME_FRAMEBUFFER_COUNT;
+
+  /**
+   * The assumed height of temporary monochrome framebuffers.
+   */
+
+  public static final long DEFAULT_MONOCHROME_FRAMEBUFFER_HEIGHT;
+
+  /**
+   * The assumed width of temporary monochrome framebuffers.
+   */
+
+  public static final long DEFAULT_MONOCHROME_FRAMEBUFFER_WIDTH;
+
+  /**
    * The default number of temporary RGBA framebuffers.
    */
 
@@ -1133,6 +1322,9 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     DEFAULT_RGBA_WITH_DEPTH_FRAMEBUFFER_COUNT = 2;
     DEFAULT_RGBA_WITH_DEPTH_FRAMEBUFFER_HEIGHT = 1024;
     DEFAULT_RGBA_WITH_DEPTH_FRAMEBUFFER_WIDTH = 1280;
+    DEFAULT_MONOCHROME_FRAMEBUFFER_COUNT = 2;
+    DEFAULT_MONOCHROME_FRAMEBUFFER_HEIGHT = 1024;
+    DEFAULT_MONOCHROME_FRAMEBUFFER_WIDTH = 1280;
   }
 
   /**
@@ -1167,6 +1359,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
   private final KImageFilterRGBAType<KCopyParameters>                filter_rgba_copy;
   private final KFrustumMeshCacheType                                frustum_cache;
   private final JCGLImplementationType                               gl;
+  private final KFramebufferMonochromeCacheType                      monochrome_cache;
   private final KUnitQuadCacheType                                   quad_cache;
   private final KRefractionRendererType                              refraction_renderer;
   private final KRendererDeferredType                                renderer;
@@ -1190,6 +1383,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     final KFramebufferDepthVarianceCacheType in_depth_variance_cache,
     final KDepthVarianceRendererType in_depth_variance_renderer,
     final KFrustumMeshCacheType in_frustum_cache,
+    final KFramebufferMonochromeCacheType in_monochrome_cache,
     final KImageFilterDeferredType<Unit> in_post_emission,
     final KImageFilterDeferredType<KGlowParameters> in_post_emission_glow,
     final KImageFilterRGBAType<KFXAAParameters> in_post_fxaa,
@@ -1225,6 +1419,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     this.filter_emission_glow = NullCheck.notNull(in_post_emission_glow);
     this.filter_fxaa = NullCheck.notNull(in_post_fxaa);
     this.filter_blur_rgba = NullCheck.notNull(in_filter_blur_rgba);
+    this.monochrome_cache = NullCheck.notNull(in_monochrome_cache);
     this.quad_cache = NullCheck.notNull(in_quad_cache);
     this.refraction_renderer = NullCheck.notNull(in_refraction_renderer);
     this.renderer = NullCheck.notNull(in_renderer);

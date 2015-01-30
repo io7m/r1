@@ -85,6 +85,87 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         this.shadow);
     }
 
+    @Override public void copyFromProjective(
+      final KLightProjectiveType in_original)
+    {
+      NullCheck.notNull(in_original, "Light");
+      try {
+        this.color = in_original.lightGetColor();
+        this.intensity = in_original.lightGetIntensity();
+        this.falloff = in_original.lightProjectiveGetFalloff();
+        this.position = in_original.lightProjectiveGetPosition();
+        this.orientation = in_original.lightProjectiveGetOrientation();
+        this.projection = in_original.lightProjectiveGetProjection();
+        this.range = in_original.lightProjectiveGetRange();
+        this.texture = in_original.lightProjectiveGetTexture();
+        this.shadow =
+          in_original
+            .projectiveAccept(new KLightProjectiveVisitorType<KShadowMappedBasic, UnreachableCodeException>() {
+              @Override public KShadowMappedBasic projectiveWithoutShadow(
+                final KLightProjectiveWithoutShadow unused)
+              {
+                return KShadowMappedBasic.getDefault();
+              }
+
+              @Override public
+                KShadowMappedBasic
+                projectiveWithoutShadowDiffuseOnly(
+                  final KLightProjectiveWithoutShadowDiffuseOnly unused)
+              {
+                return KShadowMappedBasic.getDefault();
+              }
+
+              @Override public KShadowMappedBasic projectiveWithShadowBasic(
+                final KLightProjectiveWithShadowBasic lp)
+              {
+                return lp.shadow;
+              }
+
+              @Override public
+                KShadowMappedBasic
+                projectiveWithShadowBasicDiffuseOnly(
+                  final KLightProjectiveWithShadowBasicDiffuseOnly lp)
+              {
+                return lp.lightGetShadowBasic();
+              }
+
+              @Override public
+                KShadowMappedBasic
+                projectiveWithShadowBasicSSSoft(
+                  final KLightProjectiveWithShadowBasicSSSoft lp)
+              {
+                return KShadowMappedBasic.getDefault();
+              }
+
+              @Override public
+                KShadowMappedBasic
+                projectiveWithShadowVariance(
+                  final KLightProjectiveWithShadowVariance unused)
+              {
+                return KShadowMappedBasic.getDefault();
+              }
+
+              @Override public
+                KShadowMappedBasic
+                projectiveWithShadowVarianceDiffuseOnly(
+                  final KLightProjectiveWithShadowVarianceDiffuseOnly unused)
+              {
+                return KShadowMappedBasic.getDefault();
+              }
+
+              @Override public
+                KShadowMappedBasic
+                projectiveWithShadowBasicSSSoftDiffuseOnly(
+                  final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lp)
+              {
+                return KShadowMappedBasic.getDefault();
+              }
+            });
+      } catch (final RException e) {
+        throw new UnreachableCodeException(e);
+      }
+    }
+
     @Override public void setColor(
       final PVectorI3F<RSpaceRGBType> in_color)
     {
@@ -137,71 +218,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
       final Texture2DStaticUsableType in_texture)
     {
       this.texture = NullCheck.notNull(in_texture, "Texture");
-    }
-
-    @Override public void copyFromProjective(
-      final KLightProjectiveType in_original)
-    {
-      NullCheck.notNull(in_original, "Light");
-      try {
-        this.color = in_original.lightGetColor();
-        this.intensity = in_original.lightGetIntensity();
-        this.falloff = in_original.lightProjectiveGetFalloff();
-        this.position = in_original.lightProjectiveGetPosition();
-        this.orientation = in_original.lightProjectiveGetOrientation();
-        this.projection = in_original.lightProjectiveGetProjection();
-        this.range = in_original.lightProjectiveGetRange();
-        this.texture = in_original.lightProjectiveGetTexture();
-        this.shadow =
-          in_original
-            .projectiveAccept(new KLightProjectiveVisitorType<KShadowMappedBasic, UnreachableCodeException>() {
-              @Override public KShadowMappedBasic projectiveWithoutShadow(
-                final KLightProjectiveWithoutShadow unused)
-              {
-                return KShadowMappedBasic.getDefault();
-              }
-
-              @Override public
-                KShadowMappedBasic
-                projectiveWithoutShadowDiffuseOnly(
-                  final KLightProjectiveWithoutShadowDiffuseOnly unused)
-              {
-                return KShadowMappedBasic.getDefault();
-              }
-
-              @Override public KShadowMappedBasic projectiveWithShadowBasic(
-                final KLightProjectiveWithShadowBasic lp)
-              {
-                return lp.shadow;
-              }
-
-              @Override public
-                KShadowMappedBasic
-                projectiveWithShadowBasicDiffuseOnly(
-                  final KLightProjectiveWithShadowBasicDiffuseOnly lp)
-              {
-                return lp.lightGetShadowBasic();
-              }
-
-              @Override public
-                KShadowMappedBasic
-                projectiveWithShadowVariance(
-                  final KLightProjectiveWithShadowVariance unused)
-              {
-                return KShadowMappedBasic.getDefault();
-              }
-
-              @Override public
-                KShadowMappedBasic
-                projectiveWithShadowVarianceDiffuseOnly(
-                  final KLightProjectiveWithShadowVarianceDiffuseOnly unused)
-              {
-                return KShadowMappedBasic.getDefault();
-              }
-            });
-      } catch (final RException e) {
-        throw new UnreachableCodeException(e);
-      }
     }
   }
 

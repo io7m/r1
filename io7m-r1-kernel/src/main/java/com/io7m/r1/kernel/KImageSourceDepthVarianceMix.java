@@ -173,7 +173,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         gc.blendingDisable();
         gc.colorBufferMask(true, true, true, true);
         gc.cullingDisable();
-        gc.viewportSet(output.kFramebufferGetArea());
+        gc.viewportSet(output.getArea());
 
         if (gc.depthBufferGetBits() > 0) {
           gc.depthBufferTestDisable();

@@ -53,8 +53,10 @@ public interface KRendererDeferredType extends KRendererType
       throws RException;
 
   /**
+   * <p>
    * Evaluate the renderer for the given scene, writing the results to the
    * given framebuffer.
+   * </p>
    *
    * @param framebuffer
    *          The framebuffer.
