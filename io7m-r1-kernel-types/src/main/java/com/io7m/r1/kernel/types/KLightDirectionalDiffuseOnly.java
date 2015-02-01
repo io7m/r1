@@ -57,6 +57,15 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         this.intensity);
     }
 
+    @Override public void copyFromDirectional(
+      final KLightDirectionalType d)
+    {
+      NullCheck.notNull(d, "Light");
+      this.color = d.lightGetColor();
+      this.direction = d.lightGetDirection();
+      this.intensity = d.lightGetIntensity();
+    }
+
     @Override public void setColor(
       final PVectorI3F<RSpaceRGBType> in_color)
     {
@@ -73,15 +82,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
       final float in_intensity)
     {
       this.intensity = in_intensity;
-    }
-
-    @Override public void copyFromDirectional(
-      final KLightDirectionalType d)
-    {
-      NullCheck.notNull(d, "Light");
-      this.color = d.lightGetColor();
-      this.direction = d.lightGetDirection();
-      this.intensity = d.lightGetIntensity();
     }
   }
 

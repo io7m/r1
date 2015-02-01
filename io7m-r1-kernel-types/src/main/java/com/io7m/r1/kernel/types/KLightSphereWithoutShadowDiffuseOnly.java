@@ -68,6 +68,17 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         this.exponent);
     }
 
+    @Override public void copyFromSphere(
+      final KLightSphereType s)
+    {
+      NullCheck.notNull(s, "Sphere");
+      this.color = s.lightGetColor();
+      this.intensity = s.lightGetIntensity();
+      this.exponent = s.lightGetFalloff();
+      this.radius = s.lightGetRadius();
+      this.position = s.lightGetPosition();
+    }
+
     @Override public void setColor(
       final PVectorI3F<RSpaceRGBType> in_color)
     {
@@ -96,17 +107,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
       final float in_radius)
     {
       this.radius = in_radius;
-    }
-
-    @Override public void copyFromSphere(
-      final KLightSphereType s)
-    {
-      NullCheck.notNull(s, "Sphere");
-      this.color = s.lightGetColor();
-      this.intensity = s.lightGetIntensity();
-      this.exponent = s.lightGetFalloff();
-      this.radius = s.lightGetRadius();
-      this.position = s.lightGetPosition();
     }
   }
 

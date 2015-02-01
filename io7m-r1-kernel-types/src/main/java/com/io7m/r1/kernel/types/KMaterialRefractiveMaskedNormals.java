@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -46,8 +46,8 @@ import com.io7m.r1.exceptions.RException;
     return new KMaterialRefractiveMaskedNormals(in_scale, in_color);
   }
 
-  private final float                scale;
   private final VectorReadable4FType color;
+  private final float                scale;
 
   private KMaterialRefractiveMaskedNormals(
     final float in_scale,
@@ -63,15 +63,6 @@ import com.io7m.r1.exceptions.RException;
   }
 
   /**
-   * @return The refraction scale.
-   */
-
-  public float getScale()
-  {
-    return this.scale;
-  }
-
-  /**
    * @return The multiplication color.
    */
 
@@ -80,9 +71,13 @@ import com.io7m.r1.exceptions.RException;
     return this.color;
   }
 
-  @Override public boolean materialRequiresUVCoordinates()
+  /**
+   * @return The refraction scale.
+   */
+
+  public float getScale()
   {
-    return false;
+    return this.scale;
   }
 
   @Override public

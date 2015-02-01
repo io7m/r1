@@ -24,6 +24,12 @@ public interface KShadowMapDescriptionVarianceBuilderType extends
   KShadowMapDescriptionBuilderType
 {
   /**
+   * @return A description based on the most recently given parameters.
+   */
+
+  KShadowMapDescriptionVariance build();
+
+  /**
    * Set the depth variance precision for the map
    *
    * @param p
@@ -32,10 +38,4 @@ public interface KShadowMapDescriptionVarianceBuilderType extends
 
   void setDepthVariancePrecision(
     KDepthVariancePrecision p);
-
-  /**
-   * @return A description based on the most recently given parameters.
-   */
-
-  KShadowMapDescriptionVariance build();
 }

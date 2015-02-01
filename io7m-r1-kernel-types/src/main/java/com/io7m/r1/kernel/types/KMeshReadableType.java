@@ -16,25 +16,11 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.jcanephora.ArrayBufferUsableType;
-import com.io7m.jcanephora.IndexBufferUsableType;
-
 /**
  * Readable interface to allocated meshes.
  */
 
-public interface KMeshReadableType
+public interface KMeshReadableType extends KMeshReducedReadableType
 {
-  /**
-   * @return The array buffer that holds the mesh data
-   */
-
-  ArrayBufferUsableType meshGetArrayBuffer();
-
-  /**
-   * @return The index buffer describing primitives in the mesh data
-   */
-
-  IndexBufferUsableType meshGetIndexBuffer();
-
+  // No extra functions
 }

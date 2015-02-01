@@ -16,41 +16,36 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.exceptions.RException;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 
 /**
- * The type of surface specular properties.
+ * Default resources for materials.
  */
 
-public interface KMaterialSpecularType extends
-  KTexturesRequiredType,
-  KMaterialCodeType,
-  KMaterialRequiresUVType
+public interface KMaterialDefaultsUsableType
 {
   /**
-   * Be visited by the given generic visitor.
-   *
-   * @param v
-   *          The visitor
-   * @return The value returned by the visitor
-   *
-   * @throws RException
-   *           Iff the visitor raises {@link RException}
-   * @throws E
-   *           Iff the visitor raises <code>E</code>
-   *
-   * @param <A>
-   *          The return type of the visitor
-   * @param <E>
-   *          The type of exceptions raised by the visitor
-   * @param <V>
-   *          A specific visitor subtype
+   * @return A default texture that represents a plain white albedo.
    */
 
-    <A, E extends Throwable, V extends KMaterialSpecularVisitorType<A, E>>
-    A
-    specularAccept(
-      final V v)
-      throws E,
-        RException;
+  Texture2DStaticUsableType getEmptyAlbedoTexture();
+
+  /**
+   * @return A default texture that represents a non-emissive surface.
+   */
+
+  Texture2DStaticUsableType getEmptyEmissiveTexture();
+
+  /**
+   * @return A default texture that represents a maximally shiny specular map.
+   */
+
+  Texture2DStaticUsableType getEmptySpecularTexture();
+
+  /**
+   * @return A default normal texture that represents a perfectly smooth
+   *         surface.
+   */
+
+  Texture2DStaticUsableType getFlatNormalTexture();
 }

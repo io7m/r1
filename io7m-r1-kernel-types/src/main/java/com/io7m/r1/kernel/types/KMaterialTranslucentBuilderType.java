@@ -16,13 +16,9 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.exceptions.RException;
-import com.io7m.r1.exceptions.RExceptionMaterialMissingAlbedoTexture;
-import com.io7m.r1.exceptions.RExceptionMaterialMissingSpecularTexture;
-
 /**
  * The type of mutable builders for translucent materials.
- * 
+ *
  * @param <M>
  *          The precise type of translucent materials.
  */
@@ -31,21 +27,9 @@ public interface KMaterialTranslucentBuilderType<M extends KMaterialTranslucentT
 {
   /**
    * Construct a material based on all of the parameters given so far.
-   * 
+   *
    * @return The material.
-   * 
-   * @throws RExceptionMaterialMissingAlbedoTexture
-   *           If one or more material properties require an albedo texture,
-   *           but one was not provided.
-   * @throws RExceptionMaterialMissingSpecularTexture
-   *           If one or more material properties require a specular texture,
-   *           but one was not provided.
-   * @throws RException
-   *           If an error occurs.
    */
 
-  M build()
-    throws RExceptionMaterialMissingAlbedoTexture,
-      RExceptionMaterialMissingSpecularTexture,
-      RException;
+  M build();
 }

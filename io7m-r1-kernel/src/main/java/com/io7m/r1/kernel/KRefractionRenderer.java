@@ -42,9 +42,6 @@ import com.io7m.r1.exceptions.RExceptionCache;
 import com.io7m.r1.exceptions.RExceptionFramebufferNotBound;
 import com.io7m.r1.kernel.types.KFramebufferRGBADescription;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRefractive;
-import com.io7m.r1.kernel.types.KMaterialNormalMapped;
-import com.io7m.r1.kernel.types.KMaterialNormalVertex;
-import com.io7m.r1.kernel.types.KMaterialNormalVisitorType;
 import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedDeltaTextured;
 import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedNormals;
 import com.io7m.r1.kernel.types.KMaterialRefractiveType;
@@ -105,33 +102,12 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
   }
 
   private static void putInstanceAttributes(
-    final KMaterialTranslucentRefractive material,
     final ArrayBufferUsableType array,
     final JCBProgramType program)
-    throws RException
   {
     KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
-
-    material.materialGetNormal().normalAccept(
-      new KMaterialNormalVisitorType<Unit, JCGLException>() {
-        @Override public Unit mapped(
-          final KMaterialNormalMapped m)
-          throws RException
-        {
-          KShadingProgramCommon.bindAttributeTangent4(program, array);
-          KShadingProgramCommon.bindAttributeNormal(program, array);
-          return Unit.unit();
-        }
-
-        @Override public Unit vertex(
-          final KMaterialNormalVertex m)
-          throws RException
-        {
-          KShadingProgramCommon.bindAttributeNormal(program, array);
-          return Unit.unit();
-        }
-      });
-
+    KShadingProgramCommon.bindAttributeTangent4(program, array);
+    KShadingProgramCommon.bindAttributeNormal(program, array);
     KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
   }
 
@@ -204,26 +180,9 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
       final KTextureBindingsContextType texture_unit_context)
       throws RException
   {
-    material.materialGetNormal().normalAccept(
-      new KMaterialNormalVisitorType<Unit, JCGLException>() {
-        @Override public Unit mapped(
-          final KMaterialNormalMapped m)
-          throws RException
-        {
-          KShadingProgramCommon.putTextureNormal(
-            program,
-            texture_unit_context.withTexture2D(m.getTexture()));
-          return Unit.unit();
-        }
-
-        @Override public Unit vertex(
-          final KMaterialNormalVertex m)
-          throws RException
-        {
-          return Unit.unit();
-        }
-      });
-
+    KShadingProgramCommon.putTextureNormal(
+      program,
+      texture_unit_context.withTexture2D(material.getNormalTexture()));
     KShadingProgramCommon.putRefractionTextureScene(
       program,
       texture_unit_context.withTexture2D(scene.getRGBATexture()));
@@ -488,7 +447,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
       JCacheException
   {
     final KMaterialTranslucentRefractive material = r.getMaterial();
-    final String shader_code = material.materialGetUnlitCode();
+    final String shader_code = material.getCode();
     final KProgramType kprogram = shader_cache.cacheGetLU(shader_code);
 
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
@@ -540,7 +499,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
           KRefractionRenderer.putMaterial(material, p);
 
           gc.arrayBufferBind(array);
-          KRefractionRenderer.putInstanceAttributes(material, array, p);
+          KRefractionRenderer.putInstanceAttributes(array, p);
 
           p.programExecute(new JCBProgramProcedureType<JCGLException>() {
             @Override public void call()
@@ -567,7 +526,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
       JCacheException
   {
     final KMaterialTranslucentRefractive material = r.getMaterial();
-    final String shader_code = material.materialGetUnlitCode();
+    final String shader_code = material.getCode();
     final KProgramType kprogram = shader_cache.cacheGetLU(shader_code);
 
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
@@ -615,7 +574,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
           KRefractionRenderer.putMaterial(material, p);
 
           gc.arrayBufferBind(array);
-          KRefractionRenderer.putInstanceAttributes(material, array, p);
+          KRefractionRenderer.putInstanceAttributes(array, p);
 
           p.programExecute(new JCBProgramProcedureType<JCGLException>() {
             @Override public void call()
@@ -642,7 +601,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
       JCacheException
   {
     final KMaterialTranslucentRefractive material = r.getMaterial();
-    final String shader_code = material.materialGetUnlitCode();
+    final String shader_code = material.getCode();
     final KProgramType kprogram = shader_cache.cacheGetLU(shader_code);
 
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
@@ -690,7 +649,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
           KRefractionRenderer.putMaterial(material, p);
 
           gc.arrayBufferBind(array);
-          KRefractionRenderer.putInstanceAttributes(material, array, p);
+          KRefractionRenderer.putInstanceAttributes(array, p);
 
           p.programExecute(new JCBProgramProcedureType<JCGLException>() {
             @Override public void call()
@@ -716,7 +675,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
       JCacheException
   {
     final KMaterialTranslucentRefractive material = r.getMaterial();
-    final String shader_code = material.materialGetUnlitCode();
+    final String shader_code = material.getCode();
 
     final KProgramType kprogram = shader_cache.cacheGetLU(shader_code);
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
@@ -760,7 +719,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
           KRefractionRenderer.putMaterial(material, p);
 
           gc.arrayBufferBind(array);
-          KRefractionRenderer.putInstanceAttributes(material, array, p);
+          KRefractionRenderer.putInstanceAttributes(array, p);
 
           p.programExecute(new JCBProgramProcedureType<JCGLException>() {
             @Override public void call()

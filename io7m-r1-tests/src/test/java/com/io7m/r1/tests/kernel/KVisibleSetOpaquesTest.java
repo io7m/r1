@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,6 +28,7 @@ import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.ArrayDescriptorBuilderType;
 import com.io7m.jcanephora.IndexBufferType;
 import com.io7m.jcanephora.JCGLUnsignedType;
+import com.io7m.jcanephora.TextureCubeStaticType;
 import com.io7m.jcanephora.UsageHint;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
@@ -42,12 +43,14 @@ import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
 import com.io7m.r1.exceptions.RExceptionInstanceAlreadyVisible;
 import com.io7m.r1.exceptions.RExceptionLightGroupAlreadyAdded;
 import com.io7m.r1.exceptions.RExceptionMaterialNonexistent;
+import com.io7m.r1.kernel.KMaterialDefaults;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
-import com.io7m.r1.kernel.types.KMaterialEmissiveConstant;
+import com.io7m.r1.kernel.types.KMaterialDefaultsType;
+import com.io7m.r1.kernel.types.KMaterialEnvironmentReflection;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.kernel.types.KMesh;
@@ -68,6 +71,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 import com.io7m.r1.spaces.RSpaceWorldType;
 import com.io7m.r1.tests.RFakeGL;
 import com.io7m.r1.tests.RFakeShaderControllers;
+import com.io7m.r1.tests.RFakeTexturesCubeStatic;
 
 @SuppressWarnings({ "null", "static-method" }) public final class KVisibleSetOpaquesTest
 {
@@ -147,6 +151,7 @@ import com.io7m.r1.tests.RFakeShaderControllers;
     final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+    final KMaterialDefaultsType defaults = KMaterialDefaults.newResources(g);
 
     final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
       PMatrixI4x4F.identity();
@@ -160,9 +165,9 @@ import com.io7m.r1.tests.RFakeShaderControllers;
       KLightSphereWithoutShadow.newBuilder().build();
 
     final KMaterialOpaqueRegularBuilderType mb =
-      KMaterialOpaqueRegular.newBuilder();
+      KMaterialOpaqueRegular.newBuilder(defaults);
     final KMaterialOpaqueRegular mat_0 = mb.build();
-    mb.setEmissive(KMaterialEmissiveConstant.constant(0.5f));
+    mb.setEmission(0.5f);
     final KMaterialOpaqueRegular mat_1 = mb.build();
     final KInstanceOpaqueRegular i0 =
       KInstanceOpaqueRegular.newInstance(
@@ -227,6 +232,8 @@ import com.io7m.r1.tests.RFakeShaderControllers;
     final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+    final TextureCubeStaticType cg = RFakeTexturesCubeStatic.newAnything(g);
+    final KMaterialDefaultsType defaults = KMaterialDefaults.newResources(g);
 
     final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
       PMatrixI4x4F.identity();
@@ -238,9 +245,9 @@ import com.io7m.r1.tests.RFakeShaderControllers;
       KVisibleSetOpaquesTest.newMesh(g.getGLCommon());
 
     final KMaterialOpaqueRegularBuilderType mb =
-      KMaterialOpaqueRegular.newBuilder();
+      KMaterialOpaqueRegular.newBuilder(defaults);
     final KMaterialOpaqueRegular mat_0 = mb.build();
-    mb.setEmissive(KMaterialEmissiveConstant.constant(0.5f));
+    mb.setEnvironment(KMaterialEnvironmentReflection.reflection(0.5f, cg));
     final KMaterialOpaqueRegular mat_1 = mb.build();
     final KInstanceOpaqueRegular i0 =
       KInstanceOpaqueRegular.newInstance(
@@ -283,6 +290,7 @@ import com.io7m.r1.tests.RFakeShaderControllers;
     final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+    final KMaterialDefaultsType defaults = KMaterialDefaults.newResources(g);
 
     final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
       PMatrixI4x4F.identity();
@@ -294,7 +302,7 @@ import com.io7m.r1.tests.RFakeShaderControllers;
       KVisibleSetOpaquesTest.newMesh(g.getGLCommon());
 
     final KMaterialOpaqueRegularBuilderType mb =
-      KMaterialOpaqueRegular.newBuilder();
+      KMaterialOpaqueRegular.newBuilder(defaults);
     final KMaterialOpaqueRegular mat_0 = mb.build();
 
     final KInstanceOpaqueRegular i0 =
@@ -338,6 +346,7 @@ import com.io7m.r1.tests.RFakeShaderControllers;
     final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+    final KMaterialDefaultsType defaults = KMaterialDefaults.newResources(g);
 
     final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
       PMatrixI4x4F.identity();
@@ -349,7 +358,7 @@ import com.io7m.r1.tests.RFakeShaderControllers;
       KVisibleSetOpaquesTest.newMesh(g.getGLCommon());
 
     final KMaterialOpaqueRegularBuilderType mb =
-      KMaterialOpaqueRegular.newBuilder();
+      KMaterialOpaqueRegular.newBuilder(defaults);
     final KMaterialOpaqueRegular mat_0 = mb.build();
 
     final KInstanceOpaqueRegular i0 =

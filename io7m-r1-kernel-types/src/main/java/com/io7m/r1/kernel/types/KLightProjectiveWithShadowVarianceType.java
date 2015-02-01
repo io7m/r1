@@ -27,6 +27,12 @@ public interface KLightProjectiveWithShadowVarianceType extends
   KLightWithShadowType
 {
   /**
+   * @return The variance shadow associated with the light.
+   */
+
+  KShadowMappedVariance lightGetShadowVariance();
+
+  /**
    * Be visited by the given generic visitor.
    *
    * @param v
@@ -52,10 +58,4 @@ public interface KLightProjectiveWithShadowVarianceType extends
       final V v)
       throws RException,
         E;
-
-  /**
-   * @return The variance shadow associated with the light.
-   */
-
-  KShadowMappedVariance lightGetShadowVariance();
 }

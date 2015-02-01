@@ -30,19 +30,6 @@ public interface KShadowMappedBasicBuilderType extends KShadowBuilderType
 
   /**
    * <p>
-   * Set the shadow map description. This controls the physical aspects of the
-   * shadow map such as the size, precision, and filter settings.
-   * </p>
-   *
-   * @param m
-   *          The description.
-   */
-
-  void setMapDescription(
-    final KShadowMapDescriptionBasic m);
-
-  /**
-   * <p>
    * Set the depth bias value. This is a small value added to the depth of all
    * shadow casting objects to alleviate "shadow acne" caused by objects
    * shadowing themselves. A value of <tt>0.001f</tt> tends to work well for
@@ -55,4 +42,17 @@ public interface KShadowMappedBasicBuilderType extends KShadowBuilderType
 
   void setDepthBias(
     float b);
+
+  /**
+   * <p>
+   * Set the shadow map description. This controls the physical aspects of the
+   * shadow map such as the size, precision, and filter settings.
+   * </p>
+   *
+   * @param m
+   *          The description.
+   */
+
+  void setMapDescription(
+    final KShadowMapDescriptionBasic m);
 }

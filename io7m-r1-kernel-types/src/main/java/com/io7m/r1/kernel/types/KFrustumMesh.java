@@ -25,6 +25,7 @@ import com.io7m.jcanephora.ArrayBufferUpdateUnmappedType;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.ArrayDescriptor;
 import com.io7m.jcanephora.ArrayDescriptorBuilderType;
+import com.io7m.jcanephora.CursorWritable2fType;
 import com.io7m.jcanephora.CursorWritable3fType;
 import com.io7m.jcanephora.CursorWritableIndexType;
 import com.io7m.jcanephora.IndexBufferType;
@@ -51,18 +52,19 @@ import com.io7m.r1.exceptions.RException;
 @EqualityReference public final class KFrustumMesh implements
   KFrustumMeshUsableType
 {
-  private static final JCGLUnsignedType INDICES_TYPE;
   private static final long             ARRAY_SIZE_BYTES;
   private static final ArrayDescriptor  ARRAY_TYPE;
   private static final int              ARRAY_VERTEX_COUNT;
   private static final int              INDICES_COUNT;
   private static final int              INDICES_SIZE_BYTES;
   private static final int              INDICES_TRIANGLE_COUNT;
+  private static final JCGLUnsignedType INDICES_TYPE;
 
   static {
     try {
       final ArrayDescriptorBuilderType b = ArrayDescriptor.newBuilder();
       b.addAttribute(KMeshAttributes.ATTRIBUTE_POSITION);
+      b.addAttribute(KMeshAttributes.ATTRIBUTE_UV);
       ARRAY_TYPE = b.build();
 
       ARRAY_VERTEX_COUNT = 8;
@@ -408,17 +410,28 @@ import com.io7m.r1.exceptions.RException;
         KFrustumMesh.ARRAY_TYPE,
         UsageHint.USAGE_STATIC_DRAW);
     final ArrayBufferUpdateUnmappedType am = au_cons.newUpdateReplacingAll(a);
+
     final CursorWritable3fType pc =
       am.getCursor3f(KMeshAttributes.ATTRIBUTE_POSITION.getName());
+    final CursorWritable2fType uc =
+      am.getCursor2f(KMeshAttributes.ATTRIBUTE_UV.getName());
 
+    uc.put2f(0.0f, 0.0f);
     pc.put3f(near_x_min, near_y_min, near_z);
+    uc.put2f(0.0f, 1.0f);
     pc.put3f(near_x_min, near_y_max, near_z);
+    uc.put2f(1.0f, 1.0f);
     pc.put3f(near_x_max, near_y_max, near_z);
+    uc.put2f(1.0f, 0.0f);
     pc.put3f(near_x_max, near_y_min, near_z);
 
+    uc.put2f(0.0f, 0.0f);
     pc.put3f(far_x_min, far_y_min, far_z);
+    uc.put2f(0.0f, 1.0f);
     pc.put3f(far_x_min, far_y_max, far_z);
+    uc.put2f(1.0f, 1.0f);
     pc.put3f(far_x_max, far_y_max, far_z);
+    uc.put2f(1.0f, 0.0f);
     pc.put3f(far_x_max, far_y_min, far_z);
 
     final IndexBufferType i =

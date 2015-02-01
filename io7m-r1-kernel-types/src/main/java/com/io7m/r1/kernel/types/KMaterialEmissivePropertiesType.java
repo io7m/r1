@@ -14,34 +14,26 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.exceptions;
+package com.io7m.r1.kernel.types;
 
-import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 
 /**
- * An exception representing an attempt to construct a material that has a
- * required but missing albedo texture.
+ * The properties relevant to surface emission.
  */
 
-@EqualityReference public final class RExceptionMaterialMissingAlbedoTexture extends
-  RExceptionUserError
+public interface KMaterialEmissivePropertiesType
 {
-  private static final long serialVersionUID;
-
-  static {
-    serialVersionUID = 7675833124562004784L;
-  }
-
   /**
-   * Construct an exception with the given message.
-   *
-   * @param message
-   *          The message.
+   * @return The emission level
    */
 
-  public RExceptionMaterialMissingAlbedoTexture(
-    final String message)
-  {
-    super(message);
-  }
+  float getEmission();
+
+  /**
+   * @return The emission map
+   */
+
+  Texture2DStaticUsableType getEmissionTexture();
+
 }

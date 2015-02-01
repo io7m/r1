@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -30,6 +30,7 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
+import com.io7m.r1.examples.ExampleSceneUtilitiesType;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.exceptions.RException;
@@ -45,7 +46,6 @@ import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowVariance;
 import com.io7m.r1.kernel.types.KLightSpherePseudoWithShadowVarianceBuilderType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
-import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.kernel.types.KShadowMapDescriptionVariance;
@@ -114,6 +114,7 @@ public final class SPSShadowVariance0 implements ExampleSceneType
   }
 
   @Override public void exampleScene(
+    final ExampleSceneUtilitiesType utilities,
     final ExampleSceneBuilderType scene)
     throws RException
   {
@@ -160,24 +161,27 @@ public final class SPSShadowVariance0 implements ExampleSceneType
           floor_scale,
           new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 8.0f));
 
+    final KMaterialOpaqueRegularBuilderType plane_mb =
+      KMaterialOpaqueRegular.newBuilder(utilities.getMaterialDefaults());
+
     final KInstanceOpaqueRegular plane_pos_x =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        plane_mb.build(),
         plane_trans_pos_x,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_pos_y =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        plane_mb.build(),
         plane_trans_pos_y,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_pos_z =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        plane_mb.build(),
         plane_trans_pos_z,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -185,21 +189,21 @@ public final class SPSShadowVariance0 implements ExampleSceneType
     final KInstanceOpaqueRegular plane_neg_x =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        plane_mb.build(),
         plane_trans_neg_x,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_neg_y =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        plane_mb.build(),
         plane_trans_neg_y,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_neg_z =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        plane_mb.build(),
         plane_trans_neg_z,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -241,12 +245,10 @@ public final class SPSShadowVariance0 implements ExampleSceneType
     final Texture2DStaticUsableType t = scene.texture("monkey_albedo.png");
 
     final KMaterialOpaqueRegularBuilderType mmb =
-      KMaterialOpaqueRegular
-        .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
-    mmb.setAlbedo(KMaterialAlbedoTextured.textured(
-      ExampleSceneUtilities.RGBA_WHITE,
-      1.0f,
-      t));
+      KMaterialOpaqueRegular.newBuilder(utilities.getMaterialDefaults());
+    mmb.setAlbedoColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    mmb.setAlbedoTextureMix(1.0f);
+    mmb.setAlbedoTexture(t);
     final KMaterialOpaqueRegular monkey_mat = mmb.build();
 
     final KInstanceOpaqueRegular monkey_neg_x =

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -26,10 +26,10 @@ import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.jtensors.parameterized.PMatrixM3x3F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
-import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
+import com.io7m.r1.examples.ExampleSceneUtilitiesType;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.exceptions.RException;
@@ -40,20 +40,16 @@ import com.io7m.r1.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
-import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
-import com.io7m.r1.kernel.types.KMaterialNormalVertex;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedDeltaTextured;
-import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
+import com.io7m.r1.kernel.types.KMaterialTranslucentRefractiveBuilderType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegularBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
-import com.io7m.r1.spaces.RSpaceRGBAType;
-import com.io7m.r1.spaces.RSpaceRGBType;
 import com.io7m.r1.spaces.RSpaceTextureType;
 import com.io7m.r1.spaces.RSpaceWorldType;
 
@@ -88,6 +84,7 @@ public final class STranslucentRefractiveMaskedDeltaQuad0 implements
   }
 
   @Override public void exampleScene(
+    final ExampleSceneUtilitiesType utilities,
     final ExampleSceneBuilderType scene)
     throws RException
   {
@@ -105,27 +102,24 @@ public final class STranslucentRefractiveMaskedDeltaQuad0 implements
       PMatrixI3x3F.newFromReadable(muv_t);
 
     final KMaterialTranslucentRegularBuilderType m_tb =
-      KMaterialTranslucentRegular
-        .newBuilder(ExampleSceneUtilities.TRANSLUCENT_MATTE_WHITE);
-    m_tb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.5f)));
-    m_tb.setSpecular(KMaterialSpecularConstant.constant(
-      new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f),
-      16.0f));
+      KMaterialTranslucentRegular.newBuilder(utilities.getMaterialDefaults());
+    m_tb.setAlbedoColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+    m_tb.setSpecularColor3f(1.0f, 1.0f, 1.0f);
+    m_tb.setSpecularExponent(16.0f);
 
-    final KMaterialTranslucentRefractive m_trb =
-      KMaterialTranslucentRefractive.newMaterial(
-        muv,
-        KMaterialNormalVertex.vertex(),
-        KMaterialRefractiveMaskedDeltaTextured.create(
-          0.05f,
-          scene.texture("dudv_clouds.png"),
-          ExampleSceneUtilities.RGBA_WHITE));
+    final KMaterialTranslucentRefractiveBuilderType m_trbb =
+      KMaterialTranslucentRefractive.newBuilder(utilities
+        .getMaterialDefaults());
+    m_trbb.setUVMatrix(muv);
+    m_trbb.setRefractive(KMaterialRefractiveMaskedDeltaTextured.create(
+      0.05f,
+      scene.texture("dudv_clouds.png"),
+      ExampleSceneUtilities.RGBA_WHITE));
 
     final KInstanceTranslucentRefractive m_tr =
       KInstanceTranslucentRefractive.newInstance(
         scene.mesh("plane2x2.rmx"),
-        m_trb,
+        m_trbb.build(),
         mt,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -191,12 +185,9 @@ public final class STranslucentRefractiveMaskedDeltaQuad0 implements
           new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 8.0f));
 
     final KMaterialOpaqueRegularBuilderType morb =
-      KMaterialOpaqueRegular
-        .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_BLUE);
+      KMaterialOpaqueRegular.newBuilder(utilities.getMaterialDefaults());
 
-    morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 0.5f, 0.5f, 1.0f)));
-
+    morb.setAlbedoColor4f(1.0f, 0.5f, 0.5f, 1.0f);
     final KInstanceOpaqueRegular plane_pos_x =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
@@ -205,9 +196,7 @@ public final class STranslucentRefractiveMaskedDeltaQuad0 implements
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(0.5f, 1.0f, 0.5f, 1.0f)));
-
+    morb.setAlbedoColor4f(0.5f, 1.0f, 0.5f, 1.0f);
     final KInstanceOpaqueRegular plane_pos_y =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
@@ -216,9 +205,7 @@ public final class STranslucentRefractiveMaskedDeltaQuad0 implements
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(0.5f, 1.0f, 1.0f, 1.0f)));
-
+    morb.setAlbedoColor4f(0.5f, 1.0f, 1.0f, 1.0f);
     final KInstanceOpaqueRegular plane_pos_z =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
@@ -227,9 +214,7 @@ public final class STranslucentRefractiveMaskedDeltaQuad0 implements
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 0.5f, 1.0f)));
-
+    morb.setAlbedoColor4f(1.0f, 1.0f, 0.5f, 1.0f);
     final KInstanceOpaqueRegular plane_neg_x =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
@@ -238,9 +223,7 @@ public final class STranslucentRefractiveMaskedDeltaQuad0 implements
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 0.5f, 1.0f, 1.0f)));
-
+    morb.setAlbedoColor4f(1.0f, 0.5f, 1.0f, 1.0f);
     final KInstanceOpaqueRegular plane_neg_y =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
@@ -249,9 +232,7 @@ public final class STranslucentRefractiveMaskedDeltaQuad0 implements
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    morb.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f)));
-
+    morb.setAlbedoColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     final KInstanceOpaqueRegular plane_neg_z =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
@@ -275,10 +256,8 @@ public final class STranslucentRefractiveMaskedDeltaQuad0 implements
           1.0f), new PVectorI3F<RSpaceWorldType>(0.0f, 1.5f, -3.0f));
 
       final KMaterialOpaqueRegularBuilderType mmb =
-        KMaterialOpaqueRegular
-          .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
-      mmb.setAlbedo(KMaterialAlbedoUntextured
-        .untextured(ExampleSceneUtilities.RGBA_RED));
+        KMaterialOpaqueRegular.newBuilder(utilities.getMaterialDefaults());
+      mmb.setAlbedoColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 
       final KInstanceOpaqueRegular m =
         KInstanceOpaqueRegular.newInstance(

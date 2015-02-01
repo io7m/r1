@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,9 +16,11 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.spaces.RSpaceTextureType;
 
@@ -26,73 +28,118 @@ import com.io7m.r1.spaces.RSpaceTextureType;
  * The type of translucent, refractive materials.
  */
 
-@EqualityReference public final class KMaterialTranslucentRefractive implements
+@EqualityReference @SuppressWarnings("synthetic-access") public final class KMaterialTranslucentRefractive implements
   KMaterialTranslucentType,
   KMaterialUnlitType
 {
+  @EqualityReference private static final class Builder implements
+    KMaterialTranslucentRefractiveBuilderType
+  {
+    private Texture2DStaticUsableType                          normal_texture;
+    private KMaterialRefractiveType                            refractive;
+    private final StringBuilder                                sb;
+    private PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv;
+
+    private Builder(
+      final KMaterialDefaultsUsableType defaults)
+    {
+      NullCheck.notNull(defaults, "Defaults");
+      this.normal_texture = defaults.getFlatNormalTexture();
+      this.refractive =
+        KMaterialRefractiveMaskedNormals.create(1.0f, KColors.RGBA_WHITE);
+      this.uv = PMatrixI3x3F.identity();
+      this.sb = new StringBuilder();
+    }
+
+    @Override public KMaterialTranslucentRefractive build()
+    {
+      this.sb.setLength(0);
+      this.sb.append("Refractive_");
+      this.sb.append(this.refractive.codeGet());
+      final String c = NullCheck.notNull(this.sb.toString());
+
+      return new KMaterialTranslucentRefractive(
+        c,
+        this.uv,
+        this.normal_texture,
+        this.refractive);
+    }
+
+    @Override public void copyFromTranslucentRefractive(
+      final KMaterialTranslucentRefractive m)
+    {
+      NullCheck.notNull(m, "Material");
+      this.normal_texture = m.normal_texture;
+      this.refractive = m.refractive;
+      this.uv = m.uv_matrix;
+    }
+
+    @Override public void setNormalTexture(
+      final Texture2DStaticUsableType t)
+    {
+      this.normal_texture = NullCheck.notNull(t, "Texture");
+    }
+
+    @Override public void setRefractive(
+      final KMaterialRefractiveType m)
+    {
+      this.refractive = NullCheck.notNull(m, "Refractive");
+    }
+
+    @Override public void setUVMatrix(
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix)
+    {
+      this.uv = NullCheck.notNull(uv_matrix, "UV matrix");
+    }
+  }
+
   /**
-   * Construct a new regular translucent material.
+   * Construct a new builder for refractive materials.
    *
-   * @param in_uv_matrix
-   *          The material-specific UV matrix
-   * @param in_normal
-   *          The normal mapping parameters
-   * @param in_refractive
-   *          The refractive parameters
-   * @return A new material
+   * @param defaults
+   *          Access to default resources for materials
+   * @return A new builder
    */
 
-  public static KMaterialTranslucentRefractive newMaterial(
-    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
-    final KMaterialNormalType in_normal,
-    final KMaterialRefractiveType in_refractive)
+  public static KMaterialTranslucentRefractiveBuilderType newBuilder(
+    final KMaterialDefaultsUsableType defaults)
   {
-    KMaterialVerification.materialVerifyTranslucentRefractive(
-      in_normal,
-      in_refractive);
-
-    final String code_unlit =
-      KMaterialCodes.makeCodeTranslucentRefractiveUnlit(
-        in_normal,
-        in_refractive);
-
-    return new KMaterialTranslucentRefractive(
-      code_unlit,
-      in_uv_matrix,
-      in_normal,
-      in_refractive);
+    return new Builder(defaults);
   }
 
   private final String                                             code;
-  private final KMaterialNormalType                                normal;
+  private final Texture2DStaticUsableType                          normal_texture;
   private final KMaterialRefractiveType                            refractive;
-  private boolean                                                  required_uv;
-  private final int                                                textures_required;
   private final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix;
 
   private KMaterialTranslucentRefractive(
     final String in_code,
     final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
-    final KMaterialNormalType in_normal,
+    final Texture2DStaticUsableType in_normal,
     final KMaterialRefractiveType in_refractive)
   {
     this.code = NullCheck.notNull(in_code, "Code");
     this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
-    this.normal = NullCheck.notNull(in_normal, "Normal");
+    this.normal_texture = NullCheck.notNull(in_normal, "Normal");
     this.refractive = NullCheck.notNull(in_refractive, "Refractive");
+  }
 
-    {
-      int req = 0;
-      req += in_normal.texturesGetRequired();
-      this.textures_required = req;
-    }
+  /**
+   * @return The material code
+   */
 
-    {
-      boolean req = false;
-      req |= in_normal.materialRequiresUVCoordinates();
-      req |= in_refractive.materialRequiresUVCoordinates();
-      this.required_uv = req;
-    }
+  @Override public String getCode()
+  {
+    return this.code;
+  }
+
+  /**
+   * @return The normal texture for the material
+   */
+
+  public Texture2DStaticUsableType getNormalTexture()
+  {
+    return this.normal_texture;
   }
 
   /**
@@ -115,26 +162,11 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     return v.materialTranslucent(this);
   }
 
-  @Override public KMaterialNormalType materialGetNormal()
-  {
-    return this.normal;
-  }
-
-  @Override public String materialGetUnlitCode()
-  {
-    return this.code;
-  }
-
   @Override public
     PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>
     materialGetUVMatrix()
   {
     return this.uv_matrix;
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return this.required_uv;
   }
 
   @Override public
@@ -150,25 +182,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
   @Override public int texturesGetRequired()
   {
-    return this.textures_required;
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder b = new StringBuilder();
-    b.append("[KMaterialTranslucentRefractive code=");
-    b.append(this.code);
-    b.append(" normal=");
-    b.append(this.normal);
-    b.append(" refractive=");
-    b.append(this.refractive);
-    b.append(" textures_required=");
-    b.append(this.textures_required);
-    b.append(" uv_matrix=");
-    b.append(this.uv_matrix);
-    b.append("]");
-    final String r = b.toString();
-    assert r != null;
-    return r;
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
   }
 }

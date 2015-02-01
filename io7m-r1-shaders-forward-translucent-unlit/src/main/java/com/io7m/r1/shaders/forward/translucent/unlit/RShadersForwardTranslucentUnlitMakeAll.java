@@ -56,7 +56,6 @@ import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.shaders.forward.RKFUnlitTranslucentRefractiveCases;
 import com.io7m.r1.shaders.forward.RKFUnlitTranslucentRegularCases;
 import com.io7m.r1.shaders.forward.RKForwardShader;
-import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
 
 /**
  * Generate all opaque+unlit shaders.
@@ -79,7 +78,7 @@ import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
 
     for (final KMaterialTranslucentRegular l : translucent_regular) {
       assert l != null;
-      final String code = RKForwardShaderCodes.fromUnlitTranslucentRegular(l);
+      final String code = l.getCode();
       final String name =
         String.format(
           "%s.%s.p",
@@ -94,8 +93,7 @@ import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
 
     for (final KMaterialTranslucentRefractive l : translucent_refractive) {
       assert l != null;
-      final String code =
-        RKForwardShaderCodes.fromUnlitTranslucentRefractive(l);
+      final String code = l.getCode();
       final String name =
         String.format(
           "%s.%s.p",
@@ -257,8 +255,7 @@ import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
     for (final KMaterialTranslucentRefractive m : translucent_refractive) {
       assert m != null;
 
-      final String code =
-        RKForwardShaderCodes.fromUnlitTranslucentRefractive(m);
+      final String code = m.getCode();
       final File file = new File(dir, code + ".p");
       log.info("Generating " + file);
 
@@ -285,7 +282,7 @@ import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
     for (final KMaterialTranslucentRegular m : opaque_unlit) {
       assert m != null;
 
-      final String code = RKForwardShaderCodes.fromUnlitTranslucentRegular(m);
+      final String code = m.getCode();
       final File file = new File(dir, code + ".p");
       log.info("Generating " + file);
 

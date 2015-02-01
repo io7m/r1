@@ -85,16 +85,6 @@ import com.io7m.r1.exceptions.RExceptionMaterialNonexistent;
       this.casters_by_light_material.put(light, by_material);
     }
 
-    @SuppressWarnings("synthetic-access") @Override public
-      KVisibleSetShadows
-      visibleShadowsCreate()
-        throws RExceptionBuilderInvalid
-    {
-      this.checkValid();
-      this.done = true;
-      return new KVisibleSetShadows(this.casters_by_light_material);
-    }
-
     @Override public void visibleShadowsAddLight(
       final KLightWithShadowType light)
       throws RExceptionBuilderInvalid
@@ -110,6 +100,16 @@ import com.io7m.r1.exceptions.RExceptionMaterialNonexistent;
       }
 
       this.casters_by_light_material.put(light, by_material);
+    }
+
+    @SuppressWarnings("synthetic-access") @Override public
+      KVisibleSetShadows
+      visibleShadowsCreate()
+        throws RExceptionBuilderInvalid
+    {
+      this.checkValid();
+      this.done = true;
+      return new KVisibleSetShadows(this.casters_by_light_material);
     }
   }
 

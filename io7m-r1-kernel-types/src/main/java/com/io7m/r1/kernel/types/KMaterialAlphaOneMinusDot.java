@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,7 +28,7 @@ import com.io7m.r1.exceptions.RException;
 {
   /**
    * Construct new alpha properties.
-   * 
+   *
    * @param in_opacity
    *          The global surface opacity.
    * @return New material properties.
@@ -71,11 +71,6 @@ import com.io7m.r1.exceptions.RException;
   public float getOpacity()
   {
     return this.opacity;
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return false;
   }
 
   @Override public int texturesGetRequired()

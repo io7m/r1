@@ -16,12 +16,18 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
+import com.io7m.jtensors.parameterized.PVectorI3F;
+import com.io7m.jtensors.parameterized.PVectorI4F;
+import com.io7m.jtensors.parameterized.PVectorM3F;
+import com.io7m.jtensors.parameterized.PVectorM4F;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.r1.exceptions.RException;
-import com.io7m.r1.exceptions.RExceptionMaterialMissingAlbedoTexture;
-import com.io7m.r1.exceptions.RExceptionMaterialMissingSpecularTexture;
+import com.io7m.r1.spaces.RSpaceRGBAType;
+import com.io7m.r1.spaces.RSpaceRGBType;
 import com.io7m.r1.spaces.RSpaceTextureType;
 
 /**
@@ -35,222 +41,248 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   @SuppressWarnings("synthetic-access") @EqualityReference private static final class Builder implements
     KMaterialTranslucentRegularBuilderType
   {
-    private KMaterialAlbedoType                                albedo;
+    private final PVectorM4F<RSpaceRGBAType>                   albedo_color;
+    private float                                              albedo_mix;
+    private Texture2DStaticUsableType                          albedo_texture;
     private KMaterialAlphaType                                 alpha;
     private KMaterialEnvironmentType                           environment;
-    private KMaterialNormalType                                normal;
-    private KMaterialSpecularType                              specular;
-    private PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix;
+    private Texture2DStaticUsableType                          normal_texture;
+    private final StringBuilder                                sb;
+    private final PVectorM3F<RSpaceRGBType>                    specular_color;
+    private float                                              specular_exponent;
+    private Texture2DStaticUsableType                          specular_texture;
+    private PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv;
 
-    public Builder()
+    private Builder(
+      final KMaterialDefaultsUsableType defaults)
     {
-      this.uv_matrix = PMatrixI3x3F.identity();
-      this.albedo = KMaterialAlbedoUntextured.white();
-      this.alpha = KMaterialAlphaConstant.constant(1.0f);
+      NullCheck.notNull(defaults, "Defaults");
+
+      this.albedo_color =
+        new PVectorM4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f);
+      this.albedo_mix = 0.0f;
+      this.albedo_texture = defaults.getEmptyAlbedoTexture();
+      this.normal_texture = defaults.getFlatNormalTexture();
+      this.alpha = KMaterialAlphaConstant.opaque();
       this.environment = KMaterialEnvironmentNone.none();
-      this.normal = KMaterialNormalVertex.vertex();
-      this.specular = KMaterialSpecularNone.none();
-    }
-
-    public Builder(
-      final KMaterialTranslucentRegular in_previous)
-    {
-      NullCheck.notNull(in_previous, "Previous");
-      this.uv_matrix = in_previous.uv_matrix;
-      this.alpha = in_previous.alpha;
-      this.albedo = in_previous.albedo;
-      this.environment = in_previous.environment;
-      this.normal = in_previous.normal;
-      this.specular = in_previous.specular;
+      this.specular_color = new PVectorM3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
+      this.specular_exponent = 256.0f;
+      this.specular_texture = defaults.getEmptySpecularTexture();
+      this.uv = PMatrixI3x3F.identity();
+      this.sb = new StringBuilder();
     }
 
     @Override public KMaterialTranslucentRegular build()
-      throws RExceptionMaterialMissingAlbedoTexture,
-        RExceptionMaterialMissingSpecularTexture,
-        RException
     {
-      return KMaterialTranslucentRegular.newMaterial(
-        this.uv_matrix,
-        this.albedo,
+      this.sb.setLength(0);
+      this.sb.append(this.alpha.codeGet());
+      if (this.environment.codeGet().isEmpty() == false) {
+        this.sb.append("_");
+        this.sb.append(this.environment.codeGet());
+      }
+      final String c = NullCheck.notNull(this.sb.toString());
+
+      return new KMaterialTranslucentRegular(
+        c,
+        new PVectorI4F<RSpaceRGBAType>(this.albedo_color),
+        this.albedo_mix,
+        this.albedo_texture,
         this.alpha,
         this.environment,
-        this.normal,
-        this.specular);
+        this.normal_texture,
+        new PVectorI3F<RSpaceRGBType>(this.specular_color),
+        this.specular_exponent,
+        this.specular_texture,
+        this.uv);
     }
 
-    @Override public void setAlbedo(
-      final KMaterialAlbedoType in_albedo)
+    @Override public void copyFromTranslucentRegular(
+      final KMaterialTranslucentRegular m)
     {
-      this.albedo = NullCheck.notNull(in_albedo, "Albedo");
+      this.albedo_color.copyFromTyped4F(m.albedo_color);
+      this.albedo_mix = m.albedo_mix;
+      this.albedo_texture = m.albedo_texture;
+      this.alpha = m.alpha;
+      this.environment = m.environment;
+      this.normal_texture = m.normal_texture;
+      this.specular_color.copyFromTyped3F(m.specular_color);
+      this.specular_exponent = m.specular_exponent;
+      this.specular_texture = m.specular_texture;
+      this.uv = m.uv;
+    }
+
+    @Override public void setAlbedoColor4f(
+      final float r,
+      final float g,
+      final float b,
+      final float a)
+    {
+      this.albedo_color.set4F(r, g, b, a);
+    }
+
+    @Override public void setAlbedoTexture(
+      final Texture2DStaticUsableType t)
+    {
+      this.albedo_texture = NullCheck.notNull(t, "Texture");
+    }
+
+    @Override public void setAlbedoTextureMix(
+      final float m)
+    {
+      this.albedo_mix = m;
     }
 
     @Override public void setAlpha(
-      final KMaterialAlphaType in_alpha)
+      final KMaterialAlphaType a)
     {
-      this.alpha = NullCheck.notNull(in_alpha, "Alpha");
+      this.alpha = NullCheck.notNull(a, "Alpha");
     }
 
     @Override public void setEnvironment(
-      final KMaterialEnvironmentType in_environment)
+      final KMaterialEnvironmentType e)
     {
-      this.environment = NullCheck.notNull(in_environment, "Environment");
+      this.environment = NullCheck.notNull(e, "Environment");
     }
 
-    @Override public void setNormal(
-      final KMaterialNormalType in_normal)
+    @Override public void setNormalTexture(
+      final Texture2DStaticUsableType t)
     {
-      this.normal = NullCheck.notNull(in_normal, "Normal");
+      this.normal_texture = NullCheck.notNull(t, "Texture");
     }
 
-    @Override public void setSpecular(
-      final KMaterialSpecularType in_specular)
+    @Override public void setSpecularColor3f(
+      final float r,
+      final float g,
+      final float b)
     {
-      this.specular = NullCheck.notNull(in_specular, "Specular");
+      this.specular_color.set3F(r, g, b);
+    }
+
+    @Override public void setSpecularExponent(
+      final float e)
+    {
+      this.specular_exponent = e;
+    }
+
+    @Override public void setSpecularTexture(
+      final Texture2DStaticUsableType t)
+    {
+      this.specular_texture = NullCheck.notNull(t, "Texture");
     }
 
     @Override public void setUVMatrix(
-      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix)
+      final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix)
     {
-      this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
+      this.uv = NullCheck.notNull(uv_matrix, "Matrix");
     }
   }
 
   /**
+   * @param defaults
+   *          Access to the default resources for materials
    * @return A new material builder.
    */
 
-  public static KMaterialTranslucentRegularBuilderType newBuilder()
-  {
-    return new Builder();
-  }
-
-  /**
-   * @param o
-   *          The base material.
-   * @return A new material builder based on the given material.
-   */
-
   public static KMaterialTranslucentRegularBuilderType newBuilder(
-    final KMaterialTranslucentRegular o)
+    final KMaterialDefaultsUsableType defaults)
   {
-    return new Builder(o);
+    return new Builder(defaults);
   }
 
-  /**
-   * Construct a new regular translucent material.
-   *
-   * @param in_uv_matrix
-   *          The material-specific UV matrix
-   * @param in_normal
-   *          The normal mapping parameters
-   * @param in_albedo
-   *          The albedo parameters
-   * @param in_environment
-   *          The environment mapping parameters
-   * @param in_specular
-   *          The specular parameters
-   * @param in_alpha
-   *          The alpha parameters
-   * @return A new material
-   *
-   * @throws RExceptionMaterialMissingSpecularTexture
-   *           If one or more material properties require a specular texture,
-   *           but one was not provided.
-   * @throws RException
-   *           If an error occurs.
-   */
-
-  public static KMaterialTranslucentRegular newMaterial(
-    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
-    final KMaterialAlbedoType in_albedo,
-    final KMaterialAlphaType in_alpha,
-    final KMaterialEnvironmentType in_environment,
-    final KMaterialNormalType in_normal,
-    final KMaterialSpecularType in_specular)
-    throws RExceptionMaterialMissingSpecularTexture,
-      RException
-  {
-    KMaterialVerification.materialVerifyTranslucentRegular(
-      in_albedo,
-      in_alpha,
-      in_environment,
-      in_normal,
-      in_specular);
-
-    final String code_lit =
-      KMaterialCodes.makeCodeTranslucentRegularLit(
-        in_albedo,
-        in_alpha,
-        in_environment,
-        in_normal,
-        in_specular);
-
-    final String code_unlit =
-      KMaterialCodes.makeCodeTranslucentRegularUnlit(
-        in_albedo,
-        in_alpha,
-        in_environment,
-        in_normal);
-
-    return new KMaterialTranslucentRegular(
-      code_lit,
-      code_unlit,
-      in_uv_matrix,
-      in_albedo,
-      in_alpha,
-      in_environment,
-      in_normal,
-      in_specular);
-  }
-
-  private final KMaterialAlbedoType                                albedo;
+  private final PVectorI4F<RSpaceRGBAType>                         albedo_color;
+  private final float                                              albedo_mix;
+  private final Texture2DStaticUsableType                          albedo_texture;
   private final KMaterialAlphaType                                 alpha;
-  private final String                                             code_lit;
-  private final String                                             code_unlit;
+  private final String                                             code;
   private final KMaterialEnvironmentType                           environment;
-  private final KMaterialNormalType                                normal;
-  private boolean                                                  required_uv;
-  private final KMaterialSpecularType                              specular;
-  private final int                                                textures_required;
-  private final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix;
+  private final Texture2DStaticUsableType                          normal_texture;
+  private final PVectorI3F<RSpaceRGBType>                          specular_color;
+  private final float                                              specular_exponent;
+  private final Texture2DStaticUsableType                          specular_texture;
+  private final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv;
 
   private KMaterialTranslucentRegular(
-    final String in_code_lit,
-    final String in_code_unlit,
-    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv_matrix,
-    final KMaterialAlbedoType in_albedo,
+    final String in_code,
+    final PVectorI4F<RSpaceRGBAType> in_albedo_color,
+    final float in_albedo_mix,
+    final Texture2DStaticUsableType in_albedo_texture,
     final KMaterialAlphaType in_alpha,
     final KMaterialEnvironmentType in_environment,
-    final KMaterialNormalType in_normal,
-    final KMaterialSpecularType in_specular)
+    final Texture2DStaticUsableType in_normal_texture,
+    final PVectorI3F<RSpaceRGBType> in_specular_color,
+    final float in_specular_exponent,
+    final Texture2DStaticUsableType in_specular_texture,
+    final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> in_uv)
   {
-    this.code_lit = NullCheck.notNull(in_code_lit, "Code (lit)");
-    this.code_unlit = NullCheck.notNull(in_code_unlit, "Code (unlit)");
-    this.normal = NullCheck.notNull(in_normal, "Normal");
-    this.uv_matrix = NullCheck.notNull(in_uv_matrix, "UV matrix");
-    this.albedo = NullCheck.notNull(in_albedo, "Albedo");
-    this.environment = NullCheck.notNull(in_environment, "Environment");
-    this.specular = NullCheck.notNull(in_specular, "Specular");
-    this.alpha = NullCheck.notNull(in_alpha, "Alpha");
+    this.albedo_color = NullCheck.notNull(in_albedo_color);
+    this.albedo_mix = in_albedo_mix;
+    this.albedo_texture = NullCheck.notNull(in_albedo_texture);
+    this.alpha = NullCheck.notNull(in_alpha);
+    this.code = NullCheck.notNull(in_code);
+    this.environment = NullCheck.notNull(in_environment);
+    this.normal_texture = NullCheck.notNull(in_normal_texture);
+    this.specular_color = NullCheck.notNull(in_specular_color);
+    this.specular_exponent = in_specular_exponent;
+    this.specular_texture = NullCheck.notNull(in_specular_texture);
+    this.uv = NullCheck.notNull(in_uv);
+  }
 
-    {
-      int req = 0;
-      req += in_albedo.texturesGetRequired();
-      req += in_environment.texturesGetRequired();
-      req += in_normal.texturesGetRequired();
-      req += in_specular.texturesGetRequired();
-      this.textures_required = req;
-    }
+  @Override public PVectorI4F<RSpaceRGBAType> getAlbedoColor()
+  {
+    return this.albedo_color;
+  }
 
-    {
-      boolean req = false;
-      req |= in_albedo.materialRequiresUVCoordinates();
-      req |= in_alpha.materialRequiresUVCoordinates();
-      req |= in_environment.materialRequiresUVCoordinates();
-      req |= in_normal.materialRequiresUVCoordinates();
-      req |= in_specular.materialRequiresUVCoordinates();
-      this.required_uv = req;
-    }
+  @Override public float getAlbedoMix()
+  {
+    return this.albedo_mix;
+  }
+
+  @Override public Texture2DStaticUsableType getAlbedoTexture()
+  {
+    return this.albedo_texture;
+  }
+
+  /**
+   * @return The alpha parameters
+   */
+
+  public KMaterialAlphaType getAlpha()
+  {
+    return this.alpha;
+  }
+
+  /**
+   * @return The material code
+   */
+
+  @Override public String getCode()
+  {
+    return this.code;
+  }
+
+  @Override public KMaterialEnvironmentType getEnvironment()
+  {
+    return this.environment;
+  }
+
+  @Override public Texture2DStaticUsableType getNormalTexture()
+  {
+    return this.normal_texture;
+  }
+
+  @Override public PVectorI3F<RSpaceRGBType> getSpecularColor()
+  {
+    return this.specular_color;
+  }
+
+  @Override public float getSpecularExponent()
+  {
+    return this.specular_exponent;
+  }
+
+  @Override public Texture2DStaticUsableType getSpecularTexture()
+  {
+    return this.specular_texture;
   }
 
   @Override public
@@ -264,55 +296,11 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     return v.materialTranslucent(this);
   }
 
-  /**
-   * @return The alpha parameters
-   */
-
-  public KMaterialAlphaType materialGetAlpha()
-  {
-    return this.alpha;
-  }
-
-  @Override public String materialGetLitCode()
-  {
-    return this.code_lit;
-  }
-
-  @Override public KMaterialNormalType materialGetNormal()
-  {
-    return this.normal;
-  }
-
-  @Override public String materialGetUnlitCode()
-  {
-    return this.code_unlit;
-  }
-
   @Override public
     PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>
     materialGetUVMatrix()
   {
-    return this.uv_matrix;
-  }
-
-  @Override public KMaterialAlbedoType materialRegularGetAlbedo()
-  {
-    return this.albedo;
-  }
-
-  @Override public KMaterialEnvironmentType materialRegularGetEnvironment()
-  {
-    return this.environment;
-  }
-
-  @Override public KMaterialSpecularType materialRegularGetSpecular()
-  {
-    return this.specular;
-  }
-
-  @Override public boolean materialRequiresUVCoordinates()
-  {
-    return this.required_uv;
+    return this.uv;
   }
 
   @Override public
@@ -328,31 +316,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
   @Override public int texturesGetRequired()
   {
-    return this.textures_required;
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder b = new StringBuilder();
-    b.append("[KMaterialTranslucentRegular albedo=");
-    b.append(this.albedo);
-    b.append(" alpha=");
-    b.append(this.alpha);
-    b.append(" code=");
-    b.append(this.code_lit);
-    b.append(" environment=");
-    b.append(this.environment);
-    b.append(" normal=");
-    b.append(this.normal);
-    b.append(" specular=");
-    b.append(this.specular);
-    b.append(" textures_required=");
-    b.append(this.textures_required);
-    b.append(" uv_matrix=");
-    b.append(this.uv_matrix);
-    b.append("]");
-    final String r = b.toString();
-    assert r != null;
-    return r;
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
   }
 }

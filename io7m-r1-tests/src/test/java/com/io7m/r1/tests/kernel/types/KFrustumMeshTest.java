@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -89,8 +89,40 @@ import com.io7m.r1.tests.RFakeShaderControllers;
               throws JCGLExceptionAttributeMissing,
                 JCGLExceptionTypeError
             {
-              // TODO Auto-generated method stub
-              throw new UnimplementedCodeException();
+              return new CursorWritable2fType() {
+
+                long current = 0;
+                long max     = array.bufferGetRange().getUpper();
+
+                @Override public boolean hasNext()
+                {
+                  return this.current < this.max;
+                }
+
+                @Override public boolean isValid()
+                {
+                  return this.current <= this.max;
+                }
+
+                @Override public void next()
+                {
+                  this.current = this.current + 1;
+                }
+
+                @Override public void put2f(
+                  final float x,
+                  final float y)
+                {
+                  System.out.printf("v %f %f\n", x, y);
+                  this.next();
+                }
+
+                @Override public void seekTo(
+                  final long index)
+                {
+                  this.current = index;
+                }
+              };
             }
 
             @Override public CursorWritable3fType getCursor3f(

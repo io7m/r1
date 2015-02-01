@@ -29,6 +29,8 @@ public interface ExampleSceneType extends ExampleType
   /**
    * Initialize the given scene.
    *
+   * @param utilities
+   *          The scene utilities
    * @param scene
    *          The scene
    *
@@ -37,6 +39,7 @@ public interface ExampleSceneType extends ExampleType
    */
 
   void exampleScene(
+    final ExampleSceneUtilitiesType utilities,
     final ExampleSceneBuilderType scene)
     throws RException;
 

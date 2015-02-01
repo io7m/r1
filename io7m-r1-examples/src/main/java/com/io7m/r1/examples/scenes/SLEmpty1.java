@@ -24,11 +24,14 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
+import com.io7m.r1.examples.ExampleSceneUtilitiesType;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
+import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
@@ -61,6 +64,7 @@ public final class SLEmpty1 implements ExampleSceneType
   }
 
   @Override public void exampleScene(
+    final ExampleSceneUtilitiesType utilities,
     final ExampleSceneBuilderType scene)
     throws RException
   {
@@ -76,26 +80,32 @@ public final class SLEmpty1 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_SCALE,
         new PVectorI3F<RSpaceWorldType>(5.0f, 0.0f, 0.0f));
 
+    final KMaterialOpaqueRegularBuilderType mb =
+      KMaterialOpaqueRegular.newBuilder(utilities.getMaterialDefaults());
+
+    mb.setAlbedoColor4f(0.0f, 0.0f, 1.0f, 1.0f);
     final KInstanceOpaqueRegular i0 =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_BLUE,
+        mb.build(),
         left,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
+    mb.setAlbedoColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     final KInstanceOpaqueRegular i1 =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        mb.build(),
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
+    mb.setAlbedoColor4f(1.0f, 0.0f, 0.0f, 1.0f);
     final KInstanceOpaqueRegular i2 =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_RED,
+        mb.build(),
         right,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);

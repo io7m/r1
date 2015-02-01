@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -24,10 +24,10 @@ import com.io7m.jtensors.QuaternionI4F;
 import com.io7m.jtensors.VectorI3F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
-import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
+import com.io7m.r1.examples.ExampleSceneUtilitiesType;
 import com.io7m.r1.examples.ExampleViewLookAt;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
@@ -38,9 +38,7 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
-import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflection;
-import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
@@ -49,7 +47,6 @@ import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
 import com.io7m.r1.spaces.RSpaceClipType;
 import com.io7m.r1.spaces.RSpaceEyeType;
-import com.io7m.r1.spaces.RSpaceRGBAType;
 import com.io7m.r1.spaces.RSpaceWorldType;
 
 /**
@@ -79,17 +76,16 @@ public final class DemoTowers0 implements ExampleSceneType
   }
 
   @Override public void exampleScene(
+    final ExampleSceneUtilitiesType utilities,
     final ExampleSceneBuilderType scene)
     throws RException
   {
     final KMaterialOpaqueRegularBuilderType towers_mat_b =
-      KMaterialOpaqueRegular
-        .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
+      KMaterialOpaqueRegular.newBuilder(utilities.getMaterialDefaults());
+    towers_mat_b.setNormalTexture(scene.texture("towers_normal.png"));
     towers_mat_b.setEnvironment(KMaterialEnvironmentReflection.reflection(
       0.3f,
-      scene.cubeTextureClamped("toronto/cube.rxc")));
-    towers_mat_b.setNormal(KMaterialNormalMapped.mapped(scene
-      .texture("towers_normal.png")));
+      scene.cubeTextureClamped("toronto/cube.rpc")));
 
     final VectorI3F one = new VectorI3F(1.0f, 1.0f, 1.0f);
 
@@ -103,8 +99,7 @@ public final class DemoTowers0 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    towers_mat_b.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(0.5f, 1.0f, 0.0f, 1.0f)));
+    towers_mat_b.setAlbedoColor4f(0.5f, 1.0f, 0.0f, 1.0f);
     final KTransformType towers_n_tr =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
@@ -118,8 +113,7 @@ public final class DemoTowers0 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    towers_mat_b.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(0.0f, 1.0f, 0.5f, 1.0f)));
+    towers_mat_b.setAlbedoColor4f(0.0f, 1.0f, 0.5f, 1.0f);
     final KTransformType towers_nw_tr =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
@@ -133,8 +127,7 @@ public final class DemoTowers0 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    towers_mat_b.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(0.0f, 1.0f, 1.0f, 1.0f)));
+    towers_mat_b.setAlbedoColor4f(0.0f, 1.0f, 1.0f, 1.0f);
     final KTransformType towers_w_tr =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
@@ -148,8 +141,7 @@ public final class DemoTowers0 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    towers_mat_b.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 1.0f, 1.0f)));
+    towers_mat_b.setAlbedoColor4f(0.0f, 0.0f, 1.0f, 1.0f);
     final KTransformType towers_sw_tr =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
@@ -163,8 +155,7 @@ public final class DemoTowers0 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    towers_mat_b.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(0.5f, 0.0f, 1.0f, 1.0f)));
+    towers_mat_b.setAlbedoColor4f(0.5f, 0.0f, 1.0f, 1.0f);
     final KTransformType towers_s_tr =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
@@ -178,8 +169,7 @@ public final class DemoTowers0 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    towers_mat_b.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 0.0f, 0.5f, 1.0f)));
+    towers_mat_b.setAlbedoColor4f(1.0f, 0.0f, 0.5f, 1.0f);
     final KTransformType towers_se_tr =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
@@ -193,8 +183,7 @@ public final class DemoTowers0 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    towers_mat_b.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 0.0f, 0.0f, 1.0f)));
+    towers_mat_b.setAlbedoColor4f(1.0f, 0.0f, 0.0f, 1.0f);
     final KTransformType towers_e_tr =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,
@@ -208,8 +197,7 @@ public final class DemoTowers0 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
-    towers_mat_b.setAlbedo(KMaterialAlbedoUntextured
-      .untextured(new PVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 0.0f, 1.0f)));
+    towers_mat_b.setAlbedoColor4f(1.0f, 1.0f, 0.0f, 1.0f);
     final KTransformType towers_ne_tr =
       KTransformOST.newTransform(
         QuaternionI4F.IDENTITY,

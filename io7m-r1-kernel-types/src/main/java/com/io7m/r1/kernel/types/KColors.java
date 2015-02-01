@@ -30,10 +30,16 @@ import com.io7m.r1.spaces.RSpaceRGBType;
 @EqualityReference public final class KColors
 {
   /**
-   * Opaque RGBA white.
+   * Black.
    */
 
-  public static final PVectorI4F<RSpaceRGBAType> RGBA_WHITE;
+  public static final PVectorI3F<RSpaceRGBType>  RGB_BLACK;
+
+  /**
+   * Normal map purple.
+   */
+
+  public static final PVectorI3F<RSpaceRGBType>  RGB_NORMAL_PURPLE;
 
   /**
    * White.
@@ -41,9 +47,17 @@ import com.io7m.r1.spaces.RSpaceRGBType;
 
   public static final PVectorI3F<RSpaceRGBType>  RGB_WHITE;
 
+  /**
+   * Opaque RGBA white.
+   */
+
+  public static final PVectorI4F<RSpaceRGBAType> RGBA_WHITE;
+
   static {
     RGBA_WHITE = new PVectorI4F<RSpaceRGBAType>(1.0f, 1.0f, 1.0f, 1.0f);
     RGB_WHITE = new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f);
+    RGB_BLACK = new PVectorI3F<RSpaceRGBType>(0.0f, 0.0f, 0.0f);
+    RGB_NORMAL_PURPLE = new PVectorI3F<RSpaceRGBType>(0.5f, 0.5f, 1.0f);
   }
 
   private KColors()

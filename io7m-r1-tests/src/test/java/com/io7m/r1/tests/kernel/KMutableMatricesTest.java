@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -33,6 +33,7 @@ import com.io7m.jcanephora.JCGLExceptionAttributeDuplicate;
 import com.io7m.jcanephora.JCGLUnsignedType;
 import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.UsageHint;
+import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.api.JCGLSoftRestrictionsType;
 import com.io7m.jequality.AlmostEqualFloat;
@@ -55,14 +56,13 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
-import com.io7m.r1.exceptions.RExceptionMaterialMissingAlbedoTexture;
-import com.io7m.r1.exceptions.RExceptionMaterialMissingSpecularTexture;
 import com.io7m.r1.exceptions.RExceptionMatricesInstanceActive;
 import com.io7m.r1.exceptions.RExceptionMatricesObserverActive;
 import com.io7m.r1.exceptions.RExceptionMatricesObserverInactive;
 import com.io7m.r1.exceptions.RExceptionMatricesProjectiveActive;
 import com.io7m.r1.exceptions.RExceptionMatricesProjectiveInactive;
 import com.io7m.r1.exceptions.RExceptionUserError;
+import com.io7m.r1.kernel.KMaterialDefaults;
 import com.io7m.r1.kernel.KMatricesInstanceFunctionType;
 import com.io7m.r1.kernel.KMatricesInstanceType;
 import com.io7m.r1.kernel.KMatricesInstanceWithProjectiveFunctionType;
@@ -77,13 +77,9 @@ import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowBuilderType;
-import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
-import com.io7m.r1.kernel.types.KMaterialDepthConstant;
-import com.io7m.r1.kernel.types.KMaterialEmissiveNone;
-import com.io7m.r1.kernel.types.KMaterialEnvironmentNone;
-import com.io7m.r1.kernel.types.KMaterialNormalVertex;
+import com.io7m.r1.kernel.types.KMaterialDefaultsUsableType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.r1.kernel.types.KMaterialSpecularNone;
+import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KMeshAttributes;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
@@ -163,10 +159,9 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
   {
     try {
       final OptionType<JCGLSoftRestrictionsType> none = Option.none();
-      final JCGLInterfaceCommonType gc =
-        RFakeGL
-          .newFakeGL30(RFakeShaderControllers.newNull(), none)
-          .getGLCommon();
+      final JCGLImplementationType g =
+        RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+      final JCGLInterfaceCommonType gc = g.getGLCommon();
 
       final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix =
         PMatrixI3x3F.identity();
@@ -191,24 +186,12 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
 
       final PVectorI4F<RSpaceRGBAType> colour =
         new PVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.0f);
-      final KMaterialAlbedoUntextured albedo =
-        KMaterialAlbedoUntextured.untextured(colour);
-      final KMaterialEmissiveNone emissive = KMaterialEmissiveNone.none();
-      final KMaterialEnvironmentNone environment =
-        KMaterialEnvironmentNone.none();
-      final KMaterialNormalVertex normal = KMaterialNormalVertex.vertex();
 
-      final KMaterialSpecularNone specular = KMaterialSpecularNone.none();
-
-      final KMaterialOpaqueRegular material =
-        KMaterialOpaqueRegular.newMaterial(
-          uv_matrix,
-          albedo,
-          KMaterialDepthConstant.constant(),
-          emissive,
-          environment,
-          normal,
-          specular);
+      final KMaterialDefaultsUsableType defaults =
+        KMaterialDefaults.newResources(g);
+      final KMaterialOpaqueRegularBuilderType morb =
+        KMaterialOpaqueRegular.newBuilder(defaults);
+      final KMaterialOpaqueRegular material = morb.build();
 
       final QuaternionI4F orientation = new QuaternionI4F();
       final VectorI3F scale = new VectorI3F(0, 0, 0);
@@ -228,10 +211,6 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
       return kmit;
     } catch (final JCGLExceptionAttributeDuplicate x) {
       throw new UnreachableCodeException(x);
-    } catch (final RExceptionMaterialMissingAlbedoTexture e) {
-      throw new UnreachableCodeException(e);
-    } catch (final RExceptionMaterialMissingSpecularTexture e) {
-      throw new UnreachableCodeException(e);
     } catch (final RException e) {
       throw new UnreachableCodeException(e);
     } catch (final JCGLException e) {
