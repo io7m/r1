@@ -29,6 +29,12 @@ public interface KLightProjectiveWithShadowBasicSSSoftType extends
   KLightWithScreenSpaceShadowType
 {
   /**
+   * @return The shadow associated with the light.
+   */
+
+  KShadowMappedBasicSSSoft lightGetShadowBasicSSSoft();
+
+  /**
    * Be visited by the given generic visitor.
    *
    * @param v
@@ -54,10 +60,4 @@ public interface KLightProjectiveWithShadowBasicSSSoftType extends
       final V v)
       throws RException,
         E;
-
-  /**
-   * @return The shadow associated with the light.
-   */
-
-  KShadowMappedBasicSSSoft lightGetShadowBasicSSSoft();
 }

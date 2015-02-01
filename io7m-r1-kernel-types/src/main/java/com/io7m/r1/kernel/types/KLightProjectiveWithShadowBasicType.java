@@ -27,6 +27,12 @@ public interface KLightProjectiveWithShadowBasicType extends
   KLightWithShadowType
 {
   /**
+   * @return The basic shadow associated with the light.
+   */
+
+  KShadowMappedBasic lightGetShadowBasic();
+
+  /**
    * Be visited by the given generic visitor.
    *
    * @param v
@@ -52,10 +58,4 @@ public interface KLightProjectiveWithShadowBasicType extends
       final V v)
       throws RException,
         E;
-
-  /**
-   * @return The basic shadow associated with the light.
-   */
-
-  KShadowMappedBasic lightGetShadowBasic();
 }

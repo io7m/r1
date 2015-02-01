@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,7 +28,6 @@ import com.io7m.jcanephora.FramebufferUsableType;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
-import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
@@ -37,6 +36,7 @@ import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
@@ -52,16 +52,11 @@ import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KInstanceOpaqueVisitorType;
-import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
-import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
-import com.io7m.r1.kernel.types.KMaterialAlbedoVisitorType;
 import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
 import com.io7m.r1.kernel.types.KMaterialDepthConstant;
 import com.io7m.r1.kernel.types.KMaterialDepthType;
 import com.io7m.r1.kernel.types.KMaterialDepthVisitorType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.r1.kernel.types.KMaterialOpaqueType;
-import com.io7m.r1.kernel.types.KMaterialOpaqueVisitorType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KProjectionType;
 import com.io7m.r1.spaces.RSpaceEyeType;
@@ -101,6 +96,8 @@ import com.io7m.r1.spaces.RSpaceWorldType;
    *
    * @param g
    *          The OpenGL implementation
+   * @param bindings
+   *          A texture binding controller
    * @param shader_cache
    *          The shader cache
    * @param log
@@ -113,15 +110,17 @@ import com.io7m.r1.spaces.RSpaceWorldType;
 
   public static KDepthRendererType newRenderer(
     final JCGLImplementationType g,
+    final KTextureBindingsControllerType bindings,
     final KShaderCacheDepthType shader_cache,
     final LogUsableType log)
     throws RException
   {
-    return new KDepthRenderer(g, shader_cache, log);
+    return new KDepthRenderer(g, shader_cache, bindings, log);
   }
 
   private static void renderDepthPassBatch(
     final JCGLInterfaceCommonType gc,
+    final KTextureBindingsControllerType bindings,
     final KMatricesObserverType mwo,
     final JCBProgramType jp,
     final List<KInstanceOpaqueType> batch,
@@ -137,10 +136,23 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         new KMatricesInstanceFunctionType<Unit, JCGLException>() {
           @Override public Unit run(
             final KMatricesInstanceType mwi)
-            throws JCGLException,
-              RException
+            throws RException
           {
-            KDepthRenderer.renderDepthPassInstance(gc, mwi, jp, i, faces);
+            bindings
+              .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
+                @Override public void call(
+                  final KTextureBindingsContextType c)
+                  throws RException
+                {
+                  KDepthRenderer.renderDepthPassInstance(
+                    gc,
+                    c,
+                    mwi,
+                    jp,
+                    i,
+                    faces);
+                }
+              });
             return Unit.unit();
           }
         });
@@ -149,6 +161,7 @@ import com.io7m.r1.spaces.RSpaceWorldType;
 
   private static void renderDepthPassInstance(
     final JCGLInterfaceCommonType gc,
+    final KTextureBindingsContextType units,
     final KMatricesInstanceValuesType mwi,
     final JCBProgramType jp,
     final KInstanceOpaqueType i,
@@ -156,19 +169,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     throws JCGLException,
       RException
   {
-    final KMaterialOpaqueType material =
-      i
-        .opaqueAccept(new KInstanceOpaqueVisitorType<KMaterialOpaqueType, RException>() {
-          @Override public KMaterialOpaqueType regular(
-            final KInstanceOpaqueRegular o)
-            throws RException
-          {
-            return o.getMaterial();
-          }
-        });
-
-    final List<TextureUnitType> units = gc.textureGetUnits();
-
     /**
      * Associate array attributes with program attributes, and draw mesh.
      */
@@ -181,6 +181,7 @@ import com.io7m.r1.spaces.RSpaceWorldType;
       gc.arrayBufferBind(array);
       KShadingProgramCommon.bindAttributePositionUnchecked(jp, array);
       KShadingProgramCommon.putAttributeNormalUnchecked(jp, VectorI3F.ZERO);
+      KShadingProgramCommon.bindAttributeUVUnchecked(jp, array);
 
       /**
        * Upload matrices.
@@ -194,71 +195,45 @@ import com.io7m.r1.spaces.RSpaceWorldType;
       KShadingProgramCommon.putMatrixNormal(jp, mwi.getMatrixNormal());
       KShadingProgramCommon.putMatrixUVUnchecked(jp, mwi.getMatrixUV());
 
-      final KMaterialDepthType depth = material.materialOpaqueGetDepth();
-      depth.depthAccept(new KMaterialDepthVisitorType<Unit, JCGLException>() {
-        @Override public Unit alpha(
-          final KMaterialDepthAlpha mda)
+      i.opaqueAccept(new KInstanceOpaqueVisitorType<Unit, RException>() {
+        @Override public Unit regular(
+          final KInstanceOpaqueRegular o)
           throws RException
         {
-          /**
-           * Material is alpha-to-depth; must upload albedo texture, matrices,
-           * and threshold value.
-           */
-
-          return material
-            .opaqueAccept(new KMaterialOpaqueVisitorType<Unit, JCGLException>() {
-              @Override public Unit materialOpaqueRegular(
-                final KMaterialOpaqueRegular mor)
+          final KMaterialOpaqueRegular material = o.getMaterial();
+          final KMaterialDepthType depth = material.getDepth();
+          depth
+            .depthAccept(new KMaterialDepthVisitorType<Unit, JCGLException>() {
+              @Override public Unit alpha(
+                final KMaterialDepthAlpha mda)
                 throws RException
               {
-                return mor.materialRegularGetAlbedo().albedoAccept(
-                  new KMaterialAlbedoVisitorType<Unit, JCGLException>() {
-                    @Override public Unit textured(
-                      final KMaterialAlbedoTextured mat)
-                      throws RException
-                    {
-                      KShadingProgramCommon.putMaterialAlphaDepthThreshold(
-                        jp,
-                        mda.getAlphaThreshold());
+                /**
+                 * Material is alpha-to-depth; must upload albedo texture,
+                 * matrices, and threshold value.
+                 */
 
-                      KShadingProgramCommon
-                        .putMaterialAlbedoTextured(jp, mat);
+                KShadingProgramCommon.putMaterialAlphaDepthThreshold(
+                  jp,
+                  mda.getAlphaThreshold());
+                KShadingProgramCommon.putMaterialAlbedoTypeWithTextures(
+                  jp,
+                  units,
+                  material);
+                return Unit.unit();
+              }
 
-                      final TextureUnitType u = units.get(0);
-                      assert u != null;
-                      KShadingProgramCommon.bindPutTextureAlbedo(
-                        jp,
-                        gc,
-                        mat,
-                        u);
-
-                      KShadingProgramCommon.bindAttributeUVUnchecked(
-                        jp,
-                        array);
-                      return Unit.unit();
-                    }
-
-                    @Override public Unit untextured(
-                      final KMaterialAlbedoUntextured mau)
-                    {
-                      /**
-                       * Unreachable because material verification does not
-                       * allow untextured albedo with alpha-to-depth.
-                       */
-
-                      throw new UnreachableCodeException();
-                    }
-                  });
+              @Override public Unit constant(
+                final KMaterialDepthConstant m)
+                throws RException
+              {
+                KShadingProgramCommon.putAttributeUVUnchecked(
+                  jp,
+                  VectorI2F.ZERO);
+                return Unit.unit();
               }
             });
-        }
 
-        @Override public Unit constant(
-          final KMaterialDepthConstant m)
-          throws RException,
-            JCGLException
-        {
-          KShadingProgramCommon.putAttributeUVUnchecked(jp, VectorI2F.ZERO);
           return Unit.unit();
         }
       });
@@ -290,19 +265,22 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     }
   }
 
-  private final Map<String, String>    code_map;
-  private final JCGLImplementationType g;
-  private final LogUsableType          log;
-  private final KMutableMatrices       matrices;
-  private final KShaderCacheDepthType  shader_cache;
+  private final KTextureBindingsControllerType bindings;
+  private final Map<String, String>            code_map;
+  private final JCGLImplementationType         g;
+  private final LogUsableType                  log;
+  private final KMutableMatrices               matrices;
+  private final KShaderCacheDepthType          shader_cache;
 
   private KDepthRenderer(
     final JCGLImplementationType gl,
     final KShaderCacheDepthType in_shader_cache,
+    final KTextureBindingsControllerType in_bindings,
     final LogUsableType in_log)
   {
     this.log = NullCheck.notNull(in_log, "log").with("depth-renderer");
     this.g = NullCheck.notNull(gl, "OpenGL implementation");
+    this.bindings = NullCheck.notNull(in_bindings, "Texture bindings");
     this.shader_cache = NullCheck.notNull(in_shader_cache, "Shader cache");
     this.matrices = KMutableMatrices.newMatrices();
     this.code_map = KDepthRenderer.makeCodeMap();
@@ -345,8 +323,13 @@ import com.io7m.r1.spaces.RSpaceWorldType;
           KShadingProgramCommon.putDepthCoefficient(
             jp,
             KRendererCommon.depthCoefficient(mwo.getProjection()));
-
-          KDepthRenderer.renderDepthPassBatch(gc, mwo, jp, batch, faces);
+          KDepthRenderer.renderDepthPassBatch(
+            gc,
+            KDepthRenderer.this.bindings,
+            mwo,
+            jp,
+            batch,
+            faces);
         }
       });
     }
@@ -367,8 +350,7 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     NullCheck.notNull(faces, "Faces");
 
     final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-    final FramebufferUsableType fb =
-      framebuffer.getDepthPassFramebuffer();
+    final FramebufferUsableType fb = framebuffer.getDepthPassFramebuffer();
 
     gc.framebufferDrawBind(fb);
     try {
@@ -381,11 +363,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     } finally {
       gc.framebufferDrawUnbind();
     }
-  }
-
-  @Override public String rendererGetName()
-  {
-    return KDepthRenderer.NAME;
   }
 
   @Override public void rendererEvaluateDepthWithBoundFramebuffer(
@@ -426,6 +403,11 @@ import com.io7m.r1.spaces.RSpaceWorldType;
           }
         }
       });
+  }
+
+  @Override public String rendererGetName()
+  {
+    return KDepthRenderer.NAME;
   }
 
   private void renderScene(

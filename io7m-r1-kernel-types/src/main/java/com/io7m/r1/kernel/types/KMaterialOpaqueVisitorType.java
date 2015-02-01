@@ -21,7 +21,7 @@ import com.io7m.r1.exceptions.RException;
 /**
  * A generic opaque material visitor, returning values of type <code>A</code>
  * and raising exceptions of type <code>E</code>.
- * 
+ *
  * @param <A>
  *          The return value type of the implementing visitor
  * @param <E>
@@ -32,11 +32,11 @@ public interface KMaterialOpaqueVisitorType<A, E extends Throwable>
 {
   /**
    * Visit a regular opaque material.
-   * 
+   *
    * @param m
    *          The material
    * @return A value of type <code>A</code>
-   * 
+   *
    * @throws RException
    *           If required
    * @throws E
@@ -44,7 +44,7 @@ public interface KMaterialOpaqueVisitorType<A, E extends Throwable>
    */
 
   A materialOpaqueRegular(
-    final KMaterialOpaqueRegular m)
+    final KMaterialEmissivePropertiesType m)
     throws RException,
       E;
 }

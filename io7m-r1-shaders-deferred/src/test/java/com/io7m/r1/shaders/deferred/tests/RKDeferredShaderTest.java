@@ -18,45 +18,160 @@ package com.io7m.r1.shaders.deferred.tests;
 
 import org.junit.Test;
 
+import com.io7m.jcanephora.AreaInclusive;
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jcanephora.TextureFilterMagnification;
+import com.io7m.jcanephora.TextureFilterMinification;
+import com.io7m.jcanephora.TextureFormat;
+import com.io7m.jcanephora.TextureUsableVisitorType;
+import com.io7m.jcanephora.TextureWrapS;
+import com.io7m.jcanephora.TextureWrapT;
+import com.io7m.jranges.RangeInclusiveL;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
-import com.io7m.r1.exceptions.RException;
-import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
-import com.io7m.r1.kernel.types.KMaterialDepthConstant;
-import com.io7m.r1.kernel.types.KMaterialEmissiveNone;
-import com.io7m.r1.kernel.types.KMaterialEnvironmentNone;
-import com.io7m.r1.kernel.types.KMaterialNormalVertex;
+import com.io7m.junreachable.UnimplementedCodeException;
+import com.io7m.r1.kernel.types.KMaterialDefaultsUsableType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.r1.kernel.types.KMaterialSpecularNone;
+import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.shaders.deferred.RKDeferredShader;
 import com.io7m.r1.spaces.RSpaceTextureType;
 
 @SuppressWarnings("static-method") public final class RKDeferredShaderTest
 {
   @Test public void testShader()
-    throws RException
   {
+    final Texture2DStaticUsableType t = new Texture2DStaticUsableType() {
+      @Override public long resourceGetSizeBytes()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public boolean resourceIsDeleted()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int getGLName()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapT textureGetWrapT()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureWrapS textureGetWrapS()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetWidth()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeY()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public RangeInclusiveL textureGetRangeX()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public String textureGetName()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public
+        TextureFilterMinification
+        textureGetMinificationFilter()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public
+        TextureFilterMagnification
+        textureGetMagnificationFilter()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public int textureGetHeight()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public TextureFormat textureGetFormat()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public AreaInclusive textureGetArea()
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+
+      @Override public <A, E extends Exception> A textureUsableAccept(
+        final TextureUsableVisitorType<A, E> v)
+        throws E
+      {
+        // TODO Auto-generated method stub
+        throw new UnimplementedCodeException();
+      }
+    };
+
     final StringBuilder b = new StringBuilder();
     final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> id =
       PMatrixI3x3F.identity();
-    final KMaterialOpaqueRegular m =
-      KMaterialOpaqueRegular.newMaterial(
-        id,
-        KMaterialAlbedoUntextured.white(),
-        KMaterialDepthConstant.constant(),
-        KMaterialEmissiveNone.none(),
-        KMaterialEnvironmentNone.none(),
-        KMaterialNormalVertex.vertex(),
-        KMaterialSpecularNone.none());
+
+    final KMaterialDefaultsUsableType defaults =
+      new KMaterialDefaultsUsableType() {
+        @Override public Texture2DStaticUsableType getEmptyAlbedoTexture()
+        {
+          return t;
+        }
+
+        @Override public Texture2DStaticUsableType getEmptyEmissiveTexture()
+        {
+          return t;
+        }
+
+        @Override public Texture2DStaticUsableType getEmptySpecularTexture()
+        {
+          return t;
+        }
+
+        @Override public Texture2DStaticUsableType getFlatNormalTexture()
+        {
+          return t;
+        }
+      };
+
+    final KMaterialOpaqueRegularBuilderType mb =
+      KMaterialOpaqueRegular.newBuilder(defaults);
+    final KMaterialOpaqueRegular m = mb.build();
 
     RKDeferredShader.fragmentShaderGeometryRegular(
       b,
-      m.materialRegularGetAlbedo(),
-      m.materialOpaqueGetDepth(),
-      m.materialGetEmissive(),
-      m.materialRegularGetEnvironment(),
-      m.materialGetNormal(),
-      m.materialRegularGetSpecular(),
-      m.materialRequiresUVCoordinates());
+      m.getDepth(),
+      m.getEnvironment());
 
     System.out.println(b.toString());
   }

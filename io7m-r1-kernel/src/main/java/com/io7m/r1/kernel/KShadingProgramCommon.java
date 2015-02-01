@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -19,14 +19,10 @@ package com.io7m.r1.kernel;
 import com.io7m.jcanephora.ArrayAttributeType;
 import com.io7m.jcanephora.ArrayBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
-import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jcanephora.TextureUnitType;
-import com.io7m.jcanephora.api.JCGLTextures2DStaticCommonType;
-import com.io7m.jcanephora.api.JCGLTexturesCubeStaticCommonType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
 import com.io7m.jtensors.VectorReadable2FType;
 import com.io7m.jtensors.VectorReadable3FType;
 import com.io7m.jtensors.VectorReadable4FType;
@@ -53,21 +49,26 @@ import com.io7m.r1.kernel.types.KLightProjectiveWithShadowVarianceDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadow;
 import com.io7m.r1.kernel.types.KLightProjectiveWithoutShadowDiffuseOnly;
 import com.io7m.r1.kernel.types.KLightSphereType;
-import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
-import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
+import com.io7m.r1.kernel.types.KMaterialAlbedoPropertiesType;
 import com.io7m.r1.kernel.types.KMaterialAlphaConstant;
 import com.io7m.r1.kernel.types.KMaterialAlphaOneMinusDot;
-import com.io7m.r1.kernel.types.KMaterialEmissiveConstant;
-import com.io7m.r1.kernel.types.KMaterialEmissiveMapped;
+import com.io7m.r1.kernel.types.KMaterialAlphaType;
+import com.io7m.r1.kernel.types.KMaterialAlphaVisitorType;
+import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
+import com.io7m.r1.kernel.types.KMaterialDepthConstant;
+import com.io7m.r1.kernel.types.KMaterialDepthType;
+import com.io7m.r1.kernel.types.KMaterialDepthVisitorType;
+import com.io7m.r1.kernel.types.KMaterialEmissivePropertiesType;
+import com.io7m.r1.kernel.types.KMaterialEnvironmentNone;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflection;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflectionMapped;
-import com.io7m.r1.kernel.types.KMaterialNormalMapped;
+import com.io7m.r1.kernel.types.KMaterialEnvironmentType;
+import com.io7m.r1.kernel.types.KMaterialEnvironmentVisitorType;
 import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedDeltaTextured;
 import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedNormals;
 import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedDeltaTextured;
 import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedNormals;
-import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
-import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
+import com.io7m.r1.kernel.types.KMaterialSpecularPropertiesType;
 import com.io7m.r1.kernel.types.KMeshAttributes;
 import com.io7m.r1.kernel.types.KShadowMappedBasic;
 import com.io7m.r1.kernel.types.KShadowMappedBasicSSSoft;
@@ -156,28 +157,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
   private static final String TEXTURE_NAME_SPECULAR                =
                                                                      "t_specular";
 
-  /**
-   * Bind the vertex color attribute of the given array to the color attribute
-   * of the given program.
-   *
-   * @param program
-   *          The program
-   * @param array
-   *          The array
-   * @throws JCGLException
-   *           If an OpenGL error occurs
-   */
-
-  public static void bindAttributeColor(
-    final JCBProgramType program,
-    final ArrayBufferUsableType array)
-    throws JCGLException
-  {
-    KShadingProgramCommon.bindAttributeColorUnchecked(
-      NullCheck.notNull(program, "Program"),
-      NullCheck.notNull(array, "Array"));
-  }
-
   static void bindAttributeColorUnchecked(
     final JCBProgramType program,
     final ArrayBufferUsableType array)
@@ -198,28 +177,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     program.programAttributeBind("v_normal", a);
   }
 
-  /**
-   * Bind the position attribute of the given array to the position attribute
-   * of the given program.
-   *
-   * @param program
-   *          The program
-   * @param array
-   *          The array
-   * @throws JCGLException
-   *           If an OpenGL error occurs
-   */
-
-  public static void bindAttributePosition(
-    final JCBProgramType program,
-    final ArrayBufferUsableType array)
-    throws JCGLException
-  {
-    KShadingProgramCommon.bindAttributePositionUnchecked(
-      NullCheck.notNull(program, "Program"),
-      NullCheck.notNull(array, "Array"));
-  }
-
   static void bindAttributePositionUnchecked(
     final JCBProgramType program,
     final ArrayBufferUsableType array)
@@ -228,6 +185,24 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     final ArrayAttributeType a =
       array.arrayGetAttribute(KMeshAttributes.ATTRIBUTE_POSITION.getName());
     program.programAttributeBind("v_position", a);
+  }
+
+  static void bindAttributesForMesh(
+    final JCBProgramType program,
+    final ArrayBufferUsableType array)
+  {
+    KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+    KShadingProgramCommon.bindAttributeNormal(program, array);
+    KShadingProgramCommon.bindAttributeTangent4(program, array);
+    KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+  }
+
+  static void bindAttributesForMeshReduced(
+    final JCBProgramType program,
+    final ArrayBufferUsableType array)
+  {
+    KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+    KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
   }
 
   static void bindAttributeTangent4(
@@ -240,28 +215,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     program.programAttributeBind("v_tangent4", a);
   }
 
-  /**
-   * Bind the UV attribute of the given array to the UV attribute of the given
-   * program.
-   *
-   * @param program
-   *          The program
-   * @param array
-   *          The array
-   * @throws JCGLException
-   *           If an OpenGL error occurs
-   */
-
-  public static void bindAttributeUV(
-    final JCBProgramType program,
-    final ArrayBufferUsableType array)
-    throws JCGLException
-  {
-    KShadingProgramCommon.bindAttributeUVUnchecked(
-      NullCheck.notNull(program, "Program"),
-      NullCheck.notNull(array, "Array"));
-  }
-
   static void bindAttributeUVUnchecked(
     final JCBProgramType program,
     final ArrayBufferUsableType array)
@@ -272,293 +225,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     program.programAttributeBind(
       KShadingProgramCommon.ATTRIBUTE_NAME_VERTEX_UV,
       a);
-  }
-
-  static void bindPutTextureAlbedo(
-    final JCBProgramType program,
-    final JCGLTextures2DStaticCommonType gt,
-    final KMaterialAlbedoTextured mat,
-    final TextureUnitType texture_unit)
-    throws JCGLException
-  {
-    final Texture2DStaticUsableType t = mat.getTexture();
-    gt.texture2DStaticBind(texture_unit, t);
-    KShadingProgramCommon.putTextureAlbedoUnchecked(program, texture_unit);
-  }
-
-  static void bindPutTextureEmissive(
-    final JCBProgramType program,
-    final JCGLTextures2DStaticCommonType gt,
-    final KMaterialEmissiveMapped m,
-    final TextureUnitType texture_unit)
-    throws JCGLException
-  {
-    gt.texture2DStaticBind(texture_unit, m.getTexture());
-    KShadingProgramCommon.putTextureEmissive(program, texture_unit);
-  }
-
-  static void bindPutTextureEnvironmentReflection(
-    final JCBProgramType program,
-    final JCGLTexturesCubeStaticCommonType gt,
-    final KMaterialEnvironmentReflection m,
-    final TextureUnitType texture_unit)
-    throws JCGLException
-  {
-    gt.textureCubeStaticBind(texture_unit, m.getTexture());
-    KShadingProgramCommon.putTextureEnvironment(program, texture_unit);
-  }
-
-  static void bindPutTextureEnvironmentReflectionMapped(
-    final JCBProgramType program,
-    final JCGLTexturesCubeStaticCommonType gt,
-    final KMaterialEnvironmentReflectionMapped m,
-    final TextureUnitType texture_unit)
-    throws JCGLException
-  {
-    gt.textureCubeStaticBind(texture_unit, m.getTexture());
-    KShadingProgramCommon.putTextureEnvironment(program, texture_unit);
-  }
-
-  static void bindPutTextureNormal(
-    final JCBProgramType program,
-    final JCGLTextures2DStaticCommonType gt,
-    final KMaterialNormalMapped m,
-    final TextureUnitType texture_unit)
-    throws JCGLException
-  {
-    gt.texture2DStaticBind(texture_unit, m.getTexture());
-    KShadingProgramCommon.putTextureNormal(program, texture_unit);
-  }
-
-  static void bindPutTextureProjection(
-    final JCBProgramType program,
-    final JCGLTextures2DStaticCommonType gt,
-    final KLightProjectiveType light,
-    final TextureUnitType texture_unit)
-    throws JCGLException
-  {
-    gt.texture2DStaticBind(texture_unit, light.lightProjectiveGetTexture());
-    KShadingProgramCommon.putTextureProjection(program, texture_unit);
-  }
-
-  static void bindPutTextureShadowMapBasic(
-    final JCBProgramType program,
-    final JCGLTextures2DStaticCommonType gt,
-    final Texture2DStaticUsableType texture,
-    final TextureUnitType texture_unit)
-    throws JCGLException
-  {
-    gt.texture2DStaticBind(texture_unit, texture);
-    KShadingProgramCommon.putTextureShadowMapBasic(program, texture_unit);
-  }
-
-  static void bindPutTextureSpecular(
-    final JCBProgramType program,
-    final JCGLTextures2DStaticCommonType gt,
-    final KMaterialSpecularMapped m,
-    final TextureUnitType texture_unit)
-    throws JCGLException
-  {
-    gt.texture2DStaticBind(texture_unit, m.getTexture());
-    KShadingProgramCommon.putTextureSpecular(program, texture_unit);
-  }
-
-  static boolean existsAttributeNormal(
-    final JCBProgramType e)
-  {
-    return e.programGet().programGetAttributes().containsKey("v_normal");
-  }
-
-  static boolean existsAttributePosition(
-    final JCBProgramType e)
-  {
-    return e.programGet().programGetAttributes().containsKey("v_position");
-  }
-
-  static boolean existsAttributeTangent4(
-    final JCBProgramType e)
-  {
-    return e.programGet().programGetAttributes().containsKey("v_tangent4");
-  }
-
-  static boolean existsAttributeUV(
-    final JCBProgramType e)
-  {
-    return e
-      .programGet()
-      .programGetAttributes()
-      .containsKey(KShadingProgramCommon.ATTRIBUTE_NAME_VERTEX_UV);
-  }
-
-  static boolean existsLightDirectional(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey("light_directional.direction");
-  }
-
-  static boolean existsLightProjective(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey("light_projective.position");
-  }
-
-  static boolean existsLightSpherical(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey("light_spherical.position");
-  }
-
-  static boolean existsMaterialAlbedoColor(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey("material.albedo.color");
-  }
-
-  static boolean existsMaterialAlbedoMix(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey("material.albedo.mix");
-  }
-
-  static boolean existsMaterialAlphaOpacity(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey("material.alpha.opacity");
-  }
-
-  static boolean existsMaterialEmissiveLevel(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey("p_emission.amount");
-  }
-
-  static boolean existsMaterialEnvironmentMix(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey("p_environment.mix");
-  }
-
-  static boolean existsMaterialSpecularExponent(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey("p_specular.exponent");
-  }
-
-  static boolean existsMaterialSpecularIntensity(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey("p_specular.intensity");
-  }
-
-  static boolean existsMatrixInverseView(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey(KShadingProgramCommon.MATRIX_NAME_VIEW_INVERSE);
-  }
-
-  static boolean existsMatrixNormal(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey(KShadingProgramCommon.MATRIX_NAME_NORMAL);
-  }
-
-  static boolean existsMatrixTextureProjection(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey("m_texture_projection");
-  }
-
-  static boolean existsMatrixUV(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey(KShadingProgramCommon.MATRIX_NAME_UV);
-  }
-
-  static boolean existsTextureAlbedo(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey(KShadingProgramCommon.TEXTURE_NAME_ALBEDO);
-  }
-
-  static boolean existsTextureEmissive(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey(KShadingProgramCommon.TEXTURE_NAME_EMISSION);
-  }
-
-  static boolean existsTextureEnvironment(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey(KShadingProgramCommon.TEXTURE_NAME_ENVIRONMENT);
-  }
-
-  static boolean existsTextureNormal(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey(KShadingProgramCommon.TEXTURE_NAME_NORMAL);
-  }
-
-  static boolean existsTextureSpecular(
-    final JCBProgramType program)
-  {
-    return program
-      .programGet()
-      .programGetUniforms()
-      .containsKey(KShadingProgramCommon.TEXTURE_NAME_SPECULAR);
   }
 
   static void putAttributeNormal(
@@ -1099,30 +765,30 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     program.programUniformPutFloat("p_albedo.mix", mix);
   }
 
-  static void putMaterialAlbedoTextured(
+  static void putMaterialAlbedoTypeWithoutTextures(
     final JCBProgramType program,
-    final KMaterialAlbedoTextured albedo)
+    final KMaterialAlbedoPropertiesType albedo)
     throws JCGLException
   {
-    KShadingProgramCommon.putMaterialAlbedoMix(program, albedo.getMix());
-    KShadingProgramCommon.putMaterialAlbedoColor(program, albedo.getColor());
+    KShadingProgramCommon
+      .putMaterialAlbedoMix(program, albedo.getAlbedoMix());
+    KShadingProgramCommon.putMaterialAlbedoColor(
+      program,
+      albedo.getAlbedoColor());
   }
 
-  static void putMaterialAlbedoUntextured(
+  static void putMaterialAlbedoTypeWithTextures(
     final JCBProgramType program,
-    final KMaterialAlbedoUntextured albedo)
-    throws JCGLException
+    final KTextureBindingsContextType units,
+    final KMaterialAlbedoPropertiesType albedo)
+    throws RException
   {
-    KShadingProgramCommon.putMaterialAlbedoColor(program, albedo.getColor());
-    KShadingProgramCommon.putMaterialAlbedoMix(program, 0.0f);
-  }
-
-  static void putMaterialAlphaConstant(
-    final JCBProgramType program,
-    final KMaterialAlphaConstant m)
-    throws JCGLException
-  {
-    KShadingProgramCommon.putMaterialAlphaOpacity(program, m.getOpacity());
+    KShadingProgramCommon.putMaterialAlbedoTypeWithoutTextures(
+      program,
+      albedo);
+    KShadingProgramCommon.putTextureAlbedoUnchecked(
+      program,
+      units.withTexture2D(albedo.getAlbedoTexture()));
   }
 
   static void putMaterialAlphaDepthThreshold(
@@ -1133,14 +799,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     program.programUniformPutFloat("p_alpha_depth", threshold);
   }
 
-  static void putMaterialAlphaOneMinusDot(
-    final JCBProgramType program,
-    final KMaterialAlphaOneMinusDot m)
-    throws JCGLException
-  {
-    KShadingProgramCommon.putMaterialAlphaOpacity(program, m.getOpacity());
-  }
-
   static void putMaterialAlphaOpacity(
     final JCBProgramType program,
     final float opacity)
@@ -1149,14 +807,53 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     program.programUniformPutFloat("p_opacity", opacity);
   }
 
-  static void putMaterialEmissiveConstant(
+  static void putMaterialAlphaType(
     final JCBProgramType program,
-    final KMaterialEmissiveConstant emissive)
-    throws JCGLException
+    final KMaterialAlphaType m)
+    throws RException
   {
-    KShadingProgramCommon.putMaterialEmissiveLevel(
-      program,
-      emissive.getEmission());
+    m.alphaAccept(new KMaterialAlphaVisitorType<Unit, RException>() {
+      @Override public Unit constant(
+        final KMaterialAlphaConstant mc)
+      {
+        KShadingProgramCommon.putMaterialAlphaOpacity(
+          program,
+          mc.getOpacity());
+        return Unit.unit();
+      }
+
+      @Override public Unit oneMinusDot(
+        final KMaterialAlphaOneMinusDot md)
+      {
+        KShadingProgramCommon.putMaterialAlphaOpacity(
+          program,
+          md.getOpacity());
+        return Unit.unit();
+      }
+    });
+  }
+
+  static void putMaterialDepthType(
+    final JCBProgramType program,
+    final KMaterialDepthType material)
+    throws RException
+  {
+    material.depthAccept(new KMaterialDepthVisitorType<Unit, RException>() {
+      @Override public Unit alpha(
+        final KMaterialDepthAlpha m)
+      {
+        KShadingProgramCommon.putMaterialAlphaDepthThreshold(
+          program,
+          m.getAlphaThreshold());
+        return Unit.unit();
+      }
+
+      @Override public Unit constant(
+        final KMaterialDepthConstant m)
+      {
+        return Unit.unit();
+      }
+    });
   }
 
   static void putMaterialEmissiveLevel(
@@ -1167,14 +864,27 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     program.programUniformPutFloat("p_emission.amount", emission);
   }
 
-  static void putMaterialEmissiveMapped(
+  static void putMaterialEmissiveTypeWithoutTextures(
     final JCBProgramType program,
-    final KMaterialEmissiveMapped emissive)
-    throws JCGLException
+    final KMaterialEmissivePropertiesType material)
   {
     KShadingProgramCommon.putMaterialEmissiveLevel(
       program,
-      emissive.getEmission());
+      material.getEmission());
+  }
+
+  static void putMaterialEmissiveTypeWithTextures(
+    final JCBProgramType program,
+    final KTextureBindingsContextType units,
+    final KMaterialEmissivePropertiesType material)
+    throws RException
+  {
+    KShadingProgramCommon.putMaterialEmissiveTypeWithoutTextures(
+      program,
+      material);
+    KShadingProgramCommon.putTextureEmissive(
+      program,
+      units.withTexture2D(material.getEmissionTexture()));
   }
 
   static void putMaterialEnvironmentMix(
@@ -1199,6 +909,77 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     throws JCGLException
   {
     KShadingProgramCommon.putMaterialEnvironmentMix(program, envi.getMix());
+  }
+
+  static void putMaterialEnvironmentTypeWithoutTextures(
+    final JCBProgramType program,
+    final KMaterialEnvironmentType environment)
+    throws RException
+  {
+    environment
+      .environmentAccept(new KMaterialEnvironmentVisitorType<Unit, RException>() {
+        @Override public Unit none(
+          final KMaterialEnvironmentNone m)
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit reflection(
+          final KMaterialEnvironmentReflection m)
+          throws RException
+        {
+          KShadingProgramCommon.putMaterialEnvironmentMix(program, m.getMix());
+          return Unit.unit();
+        }
+
+        @Override public Unit reflectionMapped(
+          final KMaterialEnvironmentReflectionMapped m)
+          throws RException
+        {
+          KShadingProgramCommon.putMaterialEnvironmentMix(program, m.getMix());
+          return Unit.unit();
+        }
+      });
+  }
+
+  static void putMaterialEnvironmentTypeWithTextures(
+    final JCBProgramType program,
+    final KTextureBindingsContextType units,
+    final KMaterialEnvironmentType environment)
+    throws RException
+  {
+    KShadingProgramCommon.putMaterialEnvironmentTypeWithoutTextures(
+      program,
+      environment);
+
+    environment
+      .environmentAccept(new KMaterialEnvironmentVisitorType<Unit, RException>() {
+        @Override public Unit none(
+          final KMaterialEnvironmentNone m)
+        {
+          return Unit.unit();
+        }
+
+        @Override public Unit reflection(
+          final KMaterialEnvironmentReflection m)
+          throws RException
+        {
+          KShadingProgramCommon.putTextureEnvironment(
+            program,
+            units.withTextureCube(m.getTexture()));
+          return Unit.unit();
+        }
+
+        @Override public Unit reflectionMapped(
+          final KMaterialEnvironmentReflectionMapped m)
+          throws RException
+        {
+          KShadingProgramCommon.putTextureEnvironment(
+            program,
+            units.withTextureCube(m.getTexture()));
+          return Unit.unit();
+        }
+      });
   }
 
   static void putMaterialRefractiveColor(
@@ -1266,17 +1047,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     program.programUniformPutVector3f("p_specular.color", color);
   }
 
-  static void putMaterialSpecularConstant(
-    final JCBProgramType program,
-    final KMaterialSpecularConstant m)
-    throws JCGLException
-  {
-    KShadingProgramCommon.putMaterialSpecularExponent(
-      program,
-      m.getExponent());
-    KShadingProgramCommon.putMaterialSpecularColor(program, m.getColor());
-  }
-
   static void putMaterialSpecularExponent(
     final JCBProgramType program,
     final float e)
@@ -1285,15 +1055,30 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     program.programUniformPutFloat("p_specular.exponent", e);
   }
 
-  static void putMaterialSpecularMapped(
+  static void putMaterialSpecularTypeWithoutTextures(
     final JCBProgramType program,
-    final KMaterialSpecularMapped m)
-    throws JCGLException
+    final KMaterialSpecularPropertiesType material)
   {
+    KShadingProgramCommon.putMaterialSpecularColor(
+      program,
+      material.getSpecularColor());
     KShadingProgramCommon.putMaterialSpecularExponent(
       program,
-      m.getExponent());
-    KShadingProgramCommon.putMaterialSpecularColor(program, m.getColor());
+      material.getSpecularExponent());
+  }
+
+  static void putMaterialSpecularTypeWithTextures(
+    final JCBProgramType program,
+    final KTextureBindingsContextType units,
+    final KMaterialSpecularPropertiesType material)
+    throws RException
+  {
+    KShadingProgramCommon.putMaterialSpecularTypeWithoutTextures(
+      program,
+      material);
+    KShadingProgramCommon.putTextureSpecular(
+      program,
+      units.withTexture2D(material.getSpecularTexture()));
   }
 
   static
@@ -1366,27 +1151,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
       m);
   }
 
-  /**
-   * Set the model-view matrix for the given program.
-   *
-   * @param program
-   *          The program
-   * @param m
-   *          The matrix
-   * @throws JCGLException
-   *           If an OpenGL error occurs
-   */
-
-  public static void putMatrixModelView(
-    final JCBProgramType program,
-    final PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceEyeType> m)
-    throws JCGLException
-  {
-    KShadingProgramCommon.putMatrixModelViewUnchecked(
-      NullCheck.notNull(program, "Program"),
-      NullCheck.notNull(m, "Matrix"));
-  }
-
   static void putMatrixModelViewUnchecked(
     final JCBProgramType program,
     final PMatrixDirectReadable4x4FType<RSpaceObjectType, RSpaceEyeType> m)
@@ -1407,27 +1171,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     program.programUniformPutMatrix3x3f(
       KShadingProgramCommon.MATRIX_NAME_NORMAL,
       mn);
-  }
-
-  /**
-   * Set the projection matrix for the given program.
-   *
-   * @param p
-   *          The program
-   * @param m
-   *          The matrix
-   * @throws JCGLException
-   *           If an OpenGL error occurs
-   */
-
-  public static void putMatrixProjection(
-    final JCBProgramType p,
-    final PMatrixDirectReadable4x4FType<RSpaceEyeType, RSpaceClipType> m)
-    throws JCGLException
-  {
-    KShadingProgramCommon.putMatrixProjectionUnchecked(
-      NullCheck.notNull(p, "Program"),
-      NullCheck.notNull(m, "Matrix"));
   }
 
   static void putMatrixProjectionReuse(
@@ -1485,29 +1228,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
   {
     program
       .programUniformUseExisting(KShadingProgramCommon.MATRIX_NAME_PROJECTIVE_PROJECTION);
-  }
-
-  /**
-   * Assign the given UV matrix to the program's UV matrix parameter.
-   *
-   * @param program
-   *          The program
-   * @param m
-   *          The matrix
-   * @throws JCGLException
-   *           If an OpenGL error occurs
-   */
-
-  public static
-    void
-    putMatrixUV(
-      final JCBProgramType program,
-      final PMatrixDirectReadable3x3FType<RSpaceTextureType, RSpaceTextureType> m)
-      throws JCGLException
-  {
-    KShadingProgramCommon.putMatrixUVUnchecked(
-      NullCheck.notNull(program, "Program"),
-      NullCheck.notNull(m, "Matrix"));
   }
 
   static
@@ -1732,28 +1452,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
     KShadingProgramCommon.putShadowVarianceMinimumVarianceReuse(program);
     KShadingProgramCommon.putShadowVarianceFactorMinimumReuse(program);
     KShadingProgramCommon.putShadowVarianceLightBleedReductionReuse(program);
-  }
-
-  /**
-   * Associate the given texture unit with the albedo texture parameter of the
-   * given program.
-   *
-   * @param program
-   *          The program
-   * @param unit
-   *          The texture unit
-   * @throws JCGLException
-   *           If an OpenGL error occurs
-   */
-
-  public static void putTextureAlbedo(
-    final JCBProgramType program,
-    final TextureUnitType unit)
-    throws JCGLException
-  {
-    KShadingProgramCommon.putTextureAlbedoUnchecked(
-      NullCheck.notNull(program, "Program"),
-      NullCheck.notNull(unit, "Unit"));
   }
 
   static void putTextureAlbedoUnchecked(

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,18 +16,31 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.Texture2DStaticUsableType;
+import com.io7m.jtensors.parameterized.PVectorI4F;
+import com.io7m.r1.spaces.RSpaceRGBAType;
+
 /**
- * The type of regular instances. That is, instances that have materials
- * applied that are regular (@link {@link KMaterialRegularType}).
- * 
- * @see KMaterialRegularType
+ * The albedo properties of a material.
  */
 
-public interface KInstanceRegularType extends KInstanceType
+public interface KMaterialAlbedoPropertiesType
 {
   /**
-   * @return The regular material of this instance
+   * @return The base albedo color
    */
 
-  KMaterialRegularType instanceGetMaterial();
+  PVectorI4F<RSpaceRGBAType> getAlbedoColor();
+
+  /**
+   * @return The mix factor between albedo color and texture
+   */
+
+  float getAlbedoMix();
+
+  /**
+   * @return The albedo texture for the material
+   */
+
+  Texture2DStaticUsableType getAlbedoTexture();
 }

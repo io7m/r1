@@ -43,6 +43,24 @@ public interface KMaterialRefractiveVisitorType<A, E extends Throwable>
    *           If required
    */
 
+  A maskedDeltaTextured(
+    final KMaterialRefractiveMaskedDeltaTextured m)
+    throws RException,
+      E;
+
+  /**
+   * Visit masked refractive properties.
+   *
+   * @param m
+   *          The material
+   * @return A value of type <code>A</code>
+   *
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
   A maskedNormals(
     final KMaterialRefractiveMaskedNormals m)
     throws RException,
@@ -61,26 +79,8 @@ public interface KMaterialRefractiveVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A unmaskedNormals(
-    final KMaterialRefractiveUnmaskedNormals m)
-    throws RException,
-      E;
-
-  /**
-   * Visit masked refractive properties.
-   *
-   * @param m
-   *          The material
-   * @return A value of type <code>A</code>
-   *
-   * @throws RException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A maskedDeltaTextured(
-    final KMaterialRefractiveMaskedDeltaTextured m)
+  A unmaskedDeltaTextured(
+    final KMaterialRefractiveUnmaskedDeltaTextured m)
     throws RException,
       E;
 
@@ -97,8 +97,8 @@ public interface KMaterialRefractiveVisitorType<A, E extends Throwable>
    *           If required
    */
 
-  A unmaskedDeltaTextured(
-    final KMaterialRefractiveUnmaskedDeltaTextured m)
+  A unmaskedNormals(
+    final KMaterialRefractiveUnmaskedNormals m)
     throws RException,
       E;
 }

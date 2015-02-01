@@ -16,41 +16,15 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.exceptions.RException;
-
 /**
- * The type of surface normal properties.
+ * Material properties related to environment mapping.
  */
 
-public interface KMaterialNormalType extends
-  KTexturesRequiredType,
-  KMaterialCodeType,
-  KMaterialRequiresUVType
+public interface KMaterialEnvironmentPropertiesType
 {
   /**
-   * Be visited by the given generic visitor.
-   *
-   * @param v
-   *          The visitor
-   * @return The value returned by the visitor
-   *
-   * @throws RException
-   *           Iff the visitor raises {@link RException}
-   * @throws E
-   *           Iff the visitor raises <code>E</code>
-   *
-   * @param <A>
-   *          The return type of the visitor
-   * @param <E>
-   *          The type of exceptions raised by the visitor
-   * @param <V>
-   *          A specific visitor subtype
+   * @return The material environment properties
    */
 
-    <A, E extends Throwable, V extends KMaterialNormalVisitorType<A, E>>
-    A
-    normalAccept(
-      final V v)
-      throws E,
-        RException;
+  KMaterialEnvironmentType getEnvironment();
 }

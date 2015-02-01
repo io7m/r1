@@ -28,30 +28,6 @@ import com.io7m.r1.spaces.RSpaceEyeType;
 public interface KProjectionType
 {
   /**
-   * @return The rightmost edge of the frustum's near plane.
-   */
-
-  float projectionGetXMaximum();
-
-  /**
-   * @return The leftmost edge of the frustum's near plane.
-   */
-
-  float projectionGetXMinimum();
-
-  /**
-   * @return The topmost edge of the frustum's near plane.
-   */
-
-  float projectionGetYMaximum();
-
-  /**
-   * @return The bottommost edge of the frustum's near plane.
-   */
-
-  float projectionGetYMinimum();
-
-  /**
    * Accept a generic visitor.
    *
    * @param <T>
@@ -78,6 +54,30 @@ public interface KProjectionType
    */
 
   PMatrixI4x4F<RSpaceEyeType, RSpaceClipType> projectionGetMatrix();
+
+  /**
+   * @return The rightmost edge of the frustum's near plane.
+   */
+
+  float projectionGetXMaximum();
+
+  /**
+   * @return The leftmost edge of the frustum's near plane.
+   */
+
+  float projectionGetXMinimum();
+
+  /**
+   * @return The topmost edge of the frustum's near plane.
+   */
+
+  float projectionGetYMaximum();
+
+  /**
+   * @return The bottommost edge of the frustum's near plane.
+   */
+
+  float projectionGetYMinimum();
 
   /**
    * @return The value of the projection's far plane.

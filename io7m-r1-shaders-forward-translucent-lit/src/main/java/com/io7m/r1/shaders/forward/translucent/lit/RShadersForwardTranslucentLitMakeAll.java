@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -56,7 +56,6 @@ import com.io7m.r1.shaders.forward.RKFLitCase;
 import com.io7m.r1.shaders.forward.RKFLitTranslucentRegularCases;
 import com.io7m.r1.shaders.forward.RKFLitTranslucentSpecularOnlyCases;
 import com.io7m.r1.shaders.forward.RKForwardShader;
-import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
 
 /**
  * Generate all translucent+lit shaders.
@@ -81,8 +80,7 @@ import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
 
     for (final RKFLitCase<KMaterialTranslucentRegular> c : translucent_lit_regular) {
       assert c != null;
-      final String code =
-        RKForwardShaderCodes.fromLitTranslucentRegularCase(c);
+      final String code = c.getCode();
       final String name =
         String.format(
           "%s.%s.p",
@@ -97,8 +95,7 @@ import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
 
     for (final RKFLitCase<KMaterialTranslucentSpecularOnly> c : translucent_lit_specular) {
       assert c != null;
-      final String code =
-        RKForwardShaderCodes.fromLitTranslucentSpecularOnlyCase(c);
+      final String code = c.getCode();
       final String name =
         String.format(
           "%s.%s.p",
@@ -241,10 +238,7 @@ import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
     for (final RKFLitCase<KMaterialTranslucentRegular> c : cases) {
       assert c != null;
 
-      final String code =
-        RKForwardShaderCodes.fromLitTranslucentRegular(
-          c.getLight(),
-          c.getMaterial());
+      final String code = c.getCode();
       final File file = new File(dir, code + ".p");
       log.info("Generating " + file);
 
@@ -274,9 +268,7 @@ import com.io7m.r1.shaders.forward.RKForwardShaderCodes;
       assert c != null;
 
       final String code =
-        RKForwardShaderCodes.fromLitTranslucentSpecularOnly(
-          c.getLight(),
-          c.getMaterial());
+        c.getLight().lightGetCode() + "_" + c.getMaterial().getCode();
       final File file = new File(dir, code + ".p");
       log.info("Generating " + file);
 

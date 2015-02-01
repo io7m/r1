@@ -16,6 +16,7 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.spaces.RSpaceTextureType;
 
@@ -37,24 +38,50 @@ public interface KMaterialTranslucentSpecularOnlyBuilderType extends
     final KMaterialAlphaType alpha);
 
   /**
-   * Set the normal properties of the material.
+   * Set the normal texture.
    *
-   * @param normal
-   *          The normal properties.
+   * @param t
+   *          The normal texture
    */
 
-  void setNormal(
-    final KMaterialNormalType normal);
+  void setNormalTexture(
+    Texture2DStaticUsableType t);
 
   /**
-   * Set the specular properties of the material.
+   * Set the specular color.
    *
-   * @param specular
-   *          The specular properties.
+   * @param r
+   *          The red component
+   * @param g
+   *          The green component
+   * @param b
+   *          The blue component
    */
 
-  void setSpecular(
-    final KMaterialSpecularNotNoneType specular);
+  void setSpecularColor3f(
+    float r,
+    float g,
+    float b);
+
+  /**
+   * Set the specular exponent.
+   *
+   * @param e
+   *          The specular exponent
+   */
+
+  void setSpecularExponent(
+    float e);
+
+  /**
+   * Set the specular texture.
+   *
+   * @param t
+   *          The specular texture
+   */
+
+  void setSpecularTexture(
+    Texture2DStaticUsableType t);
 
   /**
    * Set the UV matrix of the material.

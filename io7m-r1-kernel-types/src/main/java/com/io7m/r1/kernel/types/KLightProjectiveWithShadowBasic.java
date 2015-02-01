@@ -139,6 +139,14 @@ import com.io7m.r1.spaces.RSpaceWorldType;
 
               @Override public
                 KShadowMappedBasic
+                projectiveWithShadowBasicSSSoftDiffuseOnly(
+                  final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lp)
+              {
+                return KShadowMappedBasic.getDefault();
+              }
+
+              @Override public
+                KShadowMappedBasic
                 projectiveWithShadowVariance(
                   final KLightProjectiveWithShadowVariance unused)
               {
@@ -149,14 +157,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
                 KShadowMappedBasic
                 projectiveWithShadowVarianceDiffuseOnly(
                   final KLightProjectiveWithShadowVarianceDiffuseOnly unused)
-              {
-                return KShadowMappedBasic.getDefault();
-              }
-
-              @Override public
-                KShadowMappedBasic
-                projectiveWithShadowBasicSSSoftDiffuseOnly(
-                  final KLightProjectiveWithShadowBasicSSSoftDiffuseOnly lp)
               {
                 return KShadowMappedBasic.getDefault();
               }

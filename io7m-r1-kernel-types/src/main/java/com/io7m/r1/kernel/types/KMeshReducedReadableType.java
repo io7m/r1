@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,38 +16,25 @@
 
 package com.io7m.r1.kernel.types;
 
-import com.io7m.r1.exceptions.RException;
+import com.io7m.jcanephora.ArrayBufferUsableType;
+import com.io7m.jcanephora.IndexBufferUsableType;
 
 /**
- * The type of surface specular properties.
+ * Readable interface to (reduced) allocated meshes.
  */
 
-public interface KMaterialSpecularNotNoneType extends KMaterialSpecularType
+public interface KMeshReducedReadableType
 {
   /**
-   * Be visited by the given generic visitor.
-   *
-   * @param v
-   *          The visitor
-   * @return The value returned by the visitor
-   *
-   * @throws RException
-   *           Iff the visitor raises {@link RException}
-   * @throws E
-   *           Iff the visitor raises <code>E</code>
-   *
-   * @param <A>
-   *          The return type of the visitor
-   * @param <E>
-   *          The type of exceptions raised by the visitor
-   * @param <V>
-   *          A specific visitor subtype
+   * @return The array buffer that holds the mesh data
    */
 
-    <A, E extends Throwable, V extends KMaterialSpecularNotNoneVisitorType<A, E>>
-    A
-    specularNotNoneAccept(
-      final V v)
-      throws E,
-        RException;
+  ArrayBufferUsableType meshGetArrayBuffer();
+
+  /**
+   * @return The index buffer describing primitives in the mesh data
+   */
+
+  IndexBufferUsableType meshGetIndexBuffer();
+
 }

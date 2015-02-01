@@ -28,18 +28,6 @@ public interface KLightDirectionalDiffuseOnlyBuilderType
 {
   /**
    * <p>
-   * Set all values in the builder to those in the given existing light.
-   * </p>
-   *
-   * @param d
-   *          The light
-   */
-
-  void copyFromDirectional(
-    final KLightDirectionalType d);
-
-  /**
-   * <p>
    * Construct a light.
    * </p>
    * <p>
@@ -51,6 +39,18 @@ public interface KLightDirectionalDiffuseOnlyBuilderType
    */
 
   KLightDirectionalDiffuseOnly build();
+
+  /**
+   * <p>
+   * Set all values in the builder to those in the given existing light.
+   * </p>
+   *
+   * @param d
+   *          The light
+   */
+
+  void copyFromDirectional(
+    final KLightDirectionalType d);
 
   /**
    * <p>

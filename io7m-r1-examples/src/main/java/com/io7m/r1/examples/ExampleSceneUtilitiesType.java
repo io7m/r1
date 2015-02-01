@@ -14,34 +14,19 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-package com.io7m.r1.exceptions;
+package com.io7m.r1.examples;
 
-import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.r1.kernel.types.KMaterialDefaultsType;
 
 /**
- * An exception representing an attempt to construct a material that has a
- * required but missing specular texture.
+ * Misc scene utilities.
  */
 
-@EqualityReference public final class RExceptionMaterialMissingSpecularTexture extends
-  RExceptionUserError
+public interface ExampleSceneUtilitiesType
 {
-  private static final long serialVersionUID;
-
-  static {
-    serialVersionUID = -5806818803631890854L;
-  }
-
   /**
-   * Construct an exception with the given message.
-   *
-   * @param message
-   *          The message.
+   * @return Access to default resources for materials
    */
 
-  public RExceptionMaterialMissingSpecularTexture(
-    final String message)
-  {
-    super(message);
-  }
+  KMaterialDefaultsType getMaterialDefaults();
 }

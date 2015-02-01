@@ -35,6 +35,18 @@ public interface KLightSpherePseudoWithShadowBuilderType
     final KLightSpherePseudoType s);
 
   /**
+   * <p>
+   * Set whether or not the resulting lights will be diffuse-only.
+   * </p>
+   *
+   * @param d
+   *          <code>true</code> if the lights should be diffuse-only.
+   */
+
+  void setDiffuseOnly(
+    boolean d);
+
+  /**
    * Enable/disable the negative X sub-light.
    *
    * @param enabled
@@ -125,16 +137,4 @@ public interface KLightSpherePseudoWithShadowBuilderType
 
   void setNearClip(
     final float d);
-
-  /**
-   * <p>
-   * Set whether or not the resulting lights will be diffuse-only.
-   * </p>
-   *
-   * @param d
-   *          <code>true</code> if the lights should be diffuse-only.
-   */
-
-  void setDiffuseOnly(
-    boolean d);
 }

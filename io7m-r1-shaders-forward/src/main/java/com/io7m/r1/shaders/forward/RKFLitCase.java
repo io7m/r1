@@ -34,6 +34,11 @@ import com.io7m.r1.kernel.types.KMaterialType;
     this.material = in_material;
   }
 
+  public String getCode()
+  {
+    return this.light.lightGetCode() + "_" + this.material.getCode();
+  }
+
   public KLightType getLight()
   {
     return this.light;

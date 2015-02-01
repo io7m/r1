@@ -19,35 +19,35 @@ package com.io7m.r1.tests.kernel.types;
 import net.java.quickcheck.Generator;
 
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
-import com.io7m.r1.kernel.types.KMaterialNormalType;
+import com.io7m.r1.kernel.types.KMaterialDefaultsUsableType;
 import com.io7m.r1.kernel.types.KMaterialRefractiveType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
+import com.io7m.r1.kernel.types.KMaterialTranslucentRefractiveBuilderType;
 import com.io7m.r1.spaces.RSpaceTextureType;
 
 public final class KMaterialTranslucentRefractiveGenerator implements
   Generator<KMaterialTranslucentRefractive>
 {
   private final Generator<PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>> matrix_gen;
-  private final Generator<KMaterialNormalType>                                normal_gen;
   private final Generator<KMaterialRefractiveType>                            refr_gen;
+  private final KMaterialTranslucentRefractiveBuilderType                     builder;
 
   public KMaterialTranslucentRefractiveGenerator(
     final Generator<PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>> in_matrix_gen,
-    final Generator<KMaterialNormalType> in_normal_gen,
-    final Generator<KMaterialRefractiveType> in_refr_gen)
+    final Generator<KMaterialRefractiveType> in_refr_gen,
+    final KMaterialDefaultsUsableType defaults)
   {
     this.matrix_gen = in_matrix_gen;
-    this.normal_gen = in_normal_gen;
     this.refr_gen = in_refr_gen;
+    this.builder = KMaterialTranslucentRefractive.newBuilder(defaults);
   }
 
   @SuppressWarnings("null") @Override public
     KMaterialTranslucentRefractive
     next()
   {
-    return KMaterialTranslucentRefractive.newMaterial(
-      this.matrix_gen.next(),
-      this.normal_gen.next(),
-      this.refr_gen.next());
+    this.builder.setUVMatrix(this.matrix_gen.next());
+    this.builder.setRefractive(this.refr_gen.next());
+    return this.builder.build();
   }
 }

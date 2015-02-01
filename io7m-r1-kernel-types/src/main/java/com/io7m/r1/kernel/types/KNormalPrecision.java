@@ -24,14 +24,14 @@ package com.io7m.r1.kernel.types;
 public enum KNormalPrecision
 {
   /**
-   * 8-bit components.
-   */
-
-  NORMAL_PRECISION_8,
-
-  /**
    * 16-bit half-precision floating point components.
    */
 
   NORMAL_PRECISION_16F,
+
+  /**
+   * 8-bit components.
+   */
+
+  NORMAL_PRECISION_8,
 }

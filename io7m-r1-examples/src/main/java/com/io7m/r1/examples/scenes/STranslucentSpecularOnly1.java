@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,6 +28,7 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
+import com.io7m.r1.examples.ExampleSceneUtilitiesType;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.exceptions.RException;
@@ -39,14 +40,12 @@ import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KLightType;
-import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialAlphaConstant;
-import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedNormals;
-import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
+import com.io7m.r1.kernel.types.KMaterialTranslucentRefractiveBuilderType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnlyBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
@@ -83,6 +82,7 @@ public final class STranslucentSpecularOnly1 implements ExampleSceneType
   }
 
   @Override public void exampleScene(
+    final ExampleSceneUtilitiesType utilities,
     final ExampleSceneBuilderType scene)
     throws RException
   {
@@ -99,14 +99,11 @@ public final class STranslucentSpecularOnly1 implements ExampleSceneType
     final KMaterialOpaqueRegular floor_mat;
     {
       final KMaterialOpaqueRegularBuilderType b =
-        KMaterialOpaqueRegular
-          .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
-      b.setAlbedo(KMaterialAlbedoTextured.textured(
-        ExampleSceneUtilities.RGBA_WHITE,
-        1.0f,
-        scene.texture("tiles_albedo.png")));
-      b.setNormal(KMaterialNormalMapped.mapped(scene
-        .texture("tiles_normal_soft.png")));
+        KMaterialOpaqueRegular.newBuilder(utilities.getMaterialDefaults());
+      b.setAlbedoColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+      b.setAlbedoTexture(scene.texture("tiles_albedo.png"));
+      b.setAlbedoTextureMix(1.0f);
+      b.setNormalTexture(scene.texture("tiles_normal_soft.png"));
       floor_mat = b.build();
     }
 
@@ -131,13 +128,12 @@ public final class STranslucentSpecularOnly1 implements ExampleSceneType
     final KMaterialTranslucentSpecularOnly glass_mat;
     {
       final KMaterialTranslucentSpecularOnlyBuilderType b =
-        KMaterialTranslucentSpecularOnly.newBuilder();
+        KMaterialTranslucentSpecularOnly.newBuilder(utilities
+          .getMaterialDefaults());
       b.setAlpha(KMaterialAlphaConstant.constant(1.0f));
-      b.setNormal(KMaterialNormalMapped.mapped(scene
-        .texture("sea_tile_normal.png")));
-      b.setSpecular(KMaterialSpecularConstant.constant(
-        ExampleSceneUtilities.RGB_WHITE,
-        64.0f));
+      b.setNormalTexture(scene.texture("sea_tile_normal.png"));
+      b.setSpecularColor3f(1.0f, 1.0f, 1.0f);
+      b.setSpecularExponent(64.0f);
       glass_mat = b.build();
     }
 
@@ -155,13 +151,16 @@ public final class STranslucentSpecularOnly1 implements ExampleSceneType
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
+    final KMaterialTranslucentRefractiveBuilderType glass_refr_mat_b =
+      KMaterialTranslucentRefractive.newBuilder(utilities
+        .getMaterialDefaults());
+    glass_refr_mat_b.setNormalTexture(scene.texture("sea_tile_normal.png"));
+    glass_refr_mat_b.setRefractive(KMaterialRefractiveMaskedNormals.create(
+      1.0f,
+      ExampleSceneUtilities.RGBA_WHITE));
+
     final KMaterialTranslucentRefractive glass_refr_mat =
-      KMaterialTranslucentRefractive.newMaterial(
-        ExampleSceneUtilities.IDENTITY_UV,
-        KMaterialNormalMapped.mapped(scene.texture("sea_tile_normal.png")),
-        KMaterialRefractiveMaskedNormals.create(
-          1.0f,
-          ExampleSceneUtilities.RGBA_WHITE));
+      glass_refr_mat_b.build();
 
     final KInstanceTranslucentRefractive glass_refr =
       KInstanceTranslucentRefractive.newInstance(

@@ -39,6 +39,7 @@ import com.io7m.r1.kernel.KFramebufferDeferred;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KImageFilterDeferredType;
 import com.io7m.r1.kernel.KImageFilterRGBAType;
+import com.io7m.r1.kernel.KMaterialDefaults;
 import com.io7m.r1.kernel.KRendererDeferredType;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
@@ -54,6 +55,7 @@ import com.io7m.r1.kernel.types.KLightPropertiesType;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
+import com.io7m.r1.kernel.types.KMaterialDefaultsType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
@@ -298,6 +300,7 @@ import com.io7m.r1.tests.TestShaderCaches;
     final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType gi =
       RFakeGL.newFakeGL30WithLog(log, RFakeShaderControllers.newNull(), none);
+    final KMaterialDefaultsType defaults = KMaterialDefaults.newResources(gi);
 
     final R1BuilderType r1b = R1.newBuilder(gi, log);
     r1b.setShaderCacheSet(TestShaderCaches.newCachesFromArchives(gi, log));
@@ -349,7 +352,7 @@ import com.io7m.r1.tests.TestShaderCaches;
       }
 
       final KMaterialOpaqueRegular mat =
-        KMaterialOpaqueRegular.newBuilder().build();
+        KMaterialOpaqueRegular.newBuilder(defaults).build();
       final KInstanceOpaqueRegular o =
         KInstanceOpaqueRegular.newInstance(
           mesh,

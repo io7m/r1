@@ -43,6 +43,16 @@ public interface KFramebufferDeferredDescriptionBuilderType
     AreaInclusive a);
 
   /**
+   * Set the precision for the g-buffer's normal vectors.
+   *
+   * @param p
+   *          The precision
+   */
+
+  void setGBufferNormalPrecision(
+    KNormalPrecision p);
+
+  /**
    * Set the magnification filter for the renderable RGBA part of the
    * framebuffer.
    *
@@ -73,14 +83,4 @@ public interface KFramebufferDeferredDescriptionBuilderType
 
   void setRGBAPrecision(
     KRGBAPrecision p);
-
-  /**
-   * Set the precision for the g-buffer's normal vectors.
-   *
-   * @param p
-   *          The precision
-   */
-
-  void setGBufferNormalPrecision(
-    KNormalPrecision p);
 }

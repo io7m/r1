@@ -93,14 +93,6 @@ import com.io7m.r1.exceptions.RExceptionLightGroupLacksLights;
         this.translucent_builder.visibleTranslucentsCreate());
     }
 
-    @Override public void visibleShadowsAddCaster(
-      final KLightWithShadowType light,
-      final KInstanceOpaqueType instance)
-      throws RExceptionBuilderInvalid
-    {
-      this.shadow_builder.visibleShadowsAddCaster(light, instance);
-    }
-
     @Override public void visibleOpaqueAddUnlit(
       final KInstanceOpaqueType instance)
       throws RExceptionBuilderInvalid,
@@ -119,6 +111,21 @@ import com.io7m.r1.exceptions.RExceptionLightGroupLacksLights;
       return this.opaque_builder.visibleOpaqueNewLightGroup(name);
     }
 
+    @Override public void visibleShadowsAddCaster(
+      final KLightWithShadowType light,
+      final KInstanceOpaqueType instance)
+      throws RExceptionBuilderInvalid
+    {
+      this.shadow_builder.visibleShadowsAddCaster(light, instance);
+    }
+
+    @Override public void visibleShadowsAddLight(
+      final KLightWithShadowType light)
+      throws RExceptionBuilderInvalid
+    {
+      this.shadow_builder.visibleShadowsAddLight(light);
+    }
+
     @Override public void visibleTranslucentsAddLit(
       final KInstanceTranslucentLitType instance,
       final Set<KLightTranslucentType> lights)
@@ -133,16 +140,9 @@ import com.io7m.r1.exceptions.RExceptionLightGroupLacksLights;
     {
       this.translucent_builder.visibleTranslucentsAddUnlit(instance);
     }
-
-    @Override public void visibleShadowsAddLight(
-      final KLightWithShadowType light)
-      throws RExceptionBuilderInvalid
-    {
-      this.shadow_builder.visibleShadowsAddLight(light);
-    }
   }
 
-  static String getOpaqueMaterialUnlitCode(
+  static String getOpaqueMaterialDepthCode(
     final KInstanceOpaqueType instance)
   {
     try {
@@ -151,7 +151,7 @@ import com.io7m.r1.exceptions.RExceptionLightGroupLacksLights;
           @Override public String regular(
             final KInstanceOpaqueRegular o)
           {
-            return o.getMaterial().materialGetUnlitCode();
+            return o.getMaterial().getDepth().codeGet();
           }
         });
     } catch (final RException e) {
@@ -168,7 +168,7 @@ import com.io7m.r1.exceptions.RExceptionLightGroupLacksLights;
           @Override public String regular(
             final KInstanceOpaqueRegular o)
           {
-            return o.getMaterial().materialGetLitCode();
+            return o.getMaterial().getCode();
           }
         });
     } catch (final RException e) {
@@ -176,7 +176,7 @@ import com.io7m.r1.exceptions.RExceptionLightGroupLacksLights;
     }
   }
 
-  static String getOpaqueMaterialDepthCode(
+  static String getOpaqueMaterialUnlitCode(
     final KInstanceOpaqueType instance)
   {
     try {
@@ -185,7 +185,7 @@ import com.io7m.r1.exceptions.RExceptionLightGroupLacksLights;
           @Override public String regular(
             final KInstanceOpaqueRegular o)
           {
-            return o.getMaterial().materialOpaqueGetDepth().codeGet();
+            return o.getMaterial().getCode();
           }
         });
     } catch (final RException e) {

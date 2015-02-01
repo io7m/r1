@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -28,6 +28,7 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
+import com.io7m.r1.examples.ExampleSceneUtilitiesType;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.exceptions.RException;
@@ -36,12 +37,9 @@ import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
-import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentReflection;
-import com.io7m.r1.kernel.types.KMaterialNormalMapped;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
-import com.io7m.r1.kernel.types.KMaterialSpecularMapped;
 import com.io7m.r1.kernel.types.KProjectionOrthographic;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
@@ -77,6 +75,7 @@ public final class DemoRoom0Ortho implements ExampleSceneType
   }
 
   @Override public void exampleScene(
+    final ExampleSceneUtilitiesType utilities,
     final ExampleSceneBuilderType scene)
     throws RException
   {
@@ -90,20 +89,17 @@ public final class DemoRoom0Ortho implements ExampleSceneType
       scene.texture("room_spec.png");
 
     final KMaterialOpaqueRegularBuilderType room_mat_b =
-      KMaterialOpaqueRegular
-        .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
-    room_mat_b.setAlbedo(KMaterialAlbedoTextured.textured(
-      ExampleSceneUtilities.RGBA_WHITE,
-      1.0f,
-      room_albedo));
-    room_mat_b.setNormal(KMaterialNormalMapped.mapped(room_normal));
-    room_mat_b.setSpecular(KMaterialSpecularMapped.mapped(
-      ExampleSceneUtilities.RGB_WHITE,
-      128.0f,
-      room_specular));
+      KMaterialOpaqueRegular.newBuilder(utilities.getMaterialDefaults());
+    room_mat_b.setAlbedoColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    room_mat_b.setAlbedoTexture(room_albedo);
+    room_mat_b.setAlbedoTextureMix(1.0f);
+    room_mat_b.setNormalTexture(room_normal);
+    room_mat_b.setSpecularTexture(room_specular);
+    room_mat_b.setSpecularExponent(128.0f);
+    room_mat_b.setSpecularColor3f(1.0f, 1.0f, 1.0f);
     room_mat_b.setEnvironment(KMaterialEnvironmentReflection.reflection(
       0.15f,
-      scene.cubeTextureClamped("toronto/cube.rxc")));
+      scene.cubeTextureClamped("toronto/cube.rpc")));
 
     final KMaterialOpaqueRegular room_mat = room_mat_b.build();
 
@@ -148,13 +144,11 @@ public final class DemoRoom0Ortho implements ExampleSceneType
       scene.texture("sofa_normal.png");
 
     final KMaterialOpaqueRegularBuilderType sofa_mat_b =
-      KMaterialOpaqueRegular
-        .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
-    sofa_mat_b.setAlbedo(KMaterialAlbedoTextured.textured(
-      ExampleSceneUtilities.RGBA_WHITE,
-      1.0f,
-      sofa_albedo));
-    sofa_mat_b.setNormal(KMaterialNormalMapped.mapped(sofa_normal));
+      KMaterialOpaqueRegular.newBuilder(utilities.getMaterialDefaults());
+    sofa_mat_b.setAlbedoColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    sofa_mat_b.setAlbedoTextureMix(1.0f);
+    sofa_mat_b.setAlbedoTexture(sofa_albedo);
+    sofa_mat_b.setNormalTexture(sofa_normal);
 
     final KTransformType sofa_trans =
       KTransformOST.newTransform(
