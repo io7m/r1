@@ -27,12 +27,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
 public interface KLightDirectionalType extends KLightType
 {
   /**
-   * @return The direction in world space that the emitted light is traveling.
-   */
-
-  PVectorI3F<RSpaceWorldType> lightGetDirection();
-
-  /**
    * Be visited by the given generic visitor.
    *
    * @param v
@@ -54,4 +48,10 @@ public interface KLightDirectionalType extends KLightType
     final KLightDirectionalVisitorType<A, E> v)
     throws RException,
       E;
+
+  /**
+   * @return The direction in world space that the emitted light is traveling.
+   */
+
+  PVectorI3F<RSpaceWorldType> lightGetDirection();
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,16 +16,24 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.JCGLResourceUsableType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+
 /**
- * The type of materials that may or may not require UV coordinates.
+ * The type of access to default resources for materials.
  */
 
-public interface KMaterialRequiresUVType
+public interface KMaterialDefaultsType extends
+  KMaterialDefaultsUsableType,
+  JCGLResourceUsableType
 {
   /**
-   * @return <code>true</code> if the material requires UV coordinates for
-   *         rendering.
+   * Close the resources.
+   * 
+   * @param g
+   *          An OpenGL implementation
    */
 
-  boolean materialRequiresUVCoordinates();
+  void close(
+    final JCGLImplementationType g);
 }

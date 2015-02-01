@@ -86,16 +86,6 @@ import com.io7m.r1.kernel.types.KLightVisitorType;
 import com.io7m.r1.kernel.types.KLightWithScreenSpaceShadowType;
 import com.io7m.r1.kernel.types.KLightWithScreenSpaceShadowVisitorType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
-import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
-import com.io7m.r1.kernel.types.KMaterialDepthConstant;
-import com.io7m.r1.kernel.types.KMaterialDepthVisitorType;
-import com.io7m.r1.kernel.types.KMaterialEmissiveConstant;
-import com.io7m.r1.kernel.types.KMaterialEmissiveMapped;
-import com.io7m.r1.kernel.types.KMaterialEmissiveNone;
-import com.io7m.r1.kernel.types.KMaterialEmissiveVisitorType;
-import com.io7m.r1.kernel.types.KMaterialNormalMapped;
-import com.io7m.r1.kernel.types.KMaterialNormalVertex;
-import com.io7m.r1.kernel.types.KMaterialNormalVisitorType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KTransformType;
@@ -418,84 +408,12 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
     KShadingProgramCommon.putMatrixProjectionReuse(program);
     KShadingProgramCommon.putDepthCoefficientReuse(program);
+    KRendererCommon.putMaterialOpaqueRegular(program, units, material);
     KRendererCommon.putInstanceMatricesRegular(program, mwi, material);
-    KRendererCommon.putInstanceTexturesRegularLit(units, program, material);
-    KRendererCommon.putMaterialRegularLit(program, material);
-
-    material.materialGetEmissive().emissiveAccept(
-      new KMaterialEmissiveVisitorType<Unit, JCGLException>() {
-        @Override public Unit constant(
-          final KMaterialEmissiveConstant m)
-          throws RException
-        {
-          KShadingProgramCommon.putMaterialEmissiveConstant(program, m);
-          return Unit.unit();
-        }
-
-        @Override public Unit mapped(
-          final KMaterialEmissiveMapped m)
-          throws RException
-        {
-          KShadingProgramCommon.putMaterialEmissiveMapped(program, m);
-          KShadingProgramCommon.putTextureEmissive(
-            program,
-            units.withTexture2D(m.getTexture()));
-          return Unit.unit();
-        }
-
-        @Override public Unit none(
-          final KMaterialEmissiveNone m)
-          throws RException
-        {
-          return Unit.unit();
-        }
-      });
-
-    material.materialOpaqueGetDepth().depthAccept(
-      new KMaterialDepthVisitorType<Unit, JCGLException>() {
-        @Override public Unit alpha(
-          final KMaterialDepthAlpha m)
-          throws RException
-        {
-          KShadingProgramCommon.putMaterialAlphaDepthThreshold(
-            program,
-            m.getAlphaThreshold());
-          return Unit.unit();
-        }
-
-        @Override public Unit constant(
-          final KMaterialDepthConstant m)
-          throws RException
-        {
-          return Unit.unit();
-        }
-      });
 
     try {
       gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
-      KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
-
-      material.materialGetNormal().normalAccept(
-        new KMaterialNormalVisitorType<Unit, JCGLException>() {
-          @Override public Unit mapped(
-            final KMaterialNormalMapped m)
-            throws RException
-          {
-            KShadingProgramCommon.bindAttributeTangent4(program, array);
-            KShadingProgramCommon.bindAttributeNormal(program, array);
-            return Unit.unit();
-          }
-
-          @Override public Unit vertex(
-            final KMaterialNormalVertex m)
-            throws RException,
-              JCGLException
-          {
-            KShadingProgramCommon.bindAttributeNormal(program, array);
-            return Unit.unit();
-          }
-        });
+      KShadingProgramCommon.bindAttributesForMesh(program, array);
 
       KRendererCommon.renderConfigureFaceCulling(
         gc,
@@ -542,9 +460,10 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         throws RException
       {
         gc.arrayBufferBind(array);
-        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
-        KShadingProgramCommon.bindAttributeNormal(program, array);
-        KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+        KShadingProgramCommon.bindAttributesForMeshReduced(program, array);
+        KShadingProgramCommon.putAttributeNormalUnchecked(
+          program,
+          KRendererDeferredOpaque.NORMAL_ZERO);
 
         final TextureCubeStaticUsableType texture = ls.lightGetTexture();
 
@@ -580,10 +499,10 @@ import com.io7m.r1.spaces.RSpaceTextureType;
           mwi.getMatrixView(),
           ls);
 
-        KShadingProgramCommon.putMatrixProjection(
+        KShadingProgramCommon.putMatrixProjectionUnchecked(
           program,
           mwi.getMatrixProjection());
-        KShadingProgramCommon.putMatrixModelView(
+        KShadingProgramCommon.putMatrixModelViewUnchecked(
           program,
           mwi.getMatrixModelView());
         KShadingProgramCommon.putDepthCoefficient(
@@ -626,9 +545,10 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         throws RException
       {
         gc.arrayBufferBind(array);
-        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
-        KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
-        KShadingProgramCommon.bindAttributeNormal(program, array);
+        KShadingProgramCommon.bindAttributesForMeshReduced(program, array);
+        KShadingProgramCommon.putAttributeNormalUnchecked(
+          program,
+          KRendererDeferredOpaque.NORMAL_ZERO);
 
         KRendererDeferredOpaque.putDeferredParameters(
           framebuffer,
@@ -646,10 +566,10 @@ import com.io7m.r1.spaces.RSpaceTextureType;
           mwi.getMatrixView(),
           ls);
 
-        KShadingProgramCommon.putMatrixProjection(
+        KShadingProgramCommon.putMatrixProjectionUnchecked(
           program,
           mwi.getMatrixProjection());
-        KShadingProgramCommon.putMatrixModelView(
+        KShadingProgramCommon.putMatrixModelViewUnchecked(
           program,
           mwi.getMatrixModelView());
         KShadingProgramCommon.putMatrixInverseView(
@@ -847,13 +767,11 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         throws RException
       {
         gc.arrayBufferBind(array);
-        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
-        KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+        KShadingProgramCommon.bindAttributesForMeshReduced(program, array);
+        KShadingProgramCommon.putDepthCoefficient(program, 1.0f);
         KShadingProgramCommon.putMatrixUVUnchecked(
           program,
           KMatrices.IDENTITY_UV);
-
-        KShadingProgramCommon.putDepthCoefficient(program, 1.0f);
 
         program.programUniformPutVector4f(
           "f_ccolor",
@@ -892,13 +810,11 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         throws RException
       {
         gc.arrayBufferBind(array);
-        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
-        KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+        KShadingProgramCommon.bindAttributesForMeshReduced(program, array);
+        KShadingProgramCommon.putDepthCoefficient(program, 1.0f);
         KShadingProgramCommon.putMatrixUVUnchecked(
           program,
           KMatrices.IDENTITY_UV);
-
-        KShadingProgramCommon.putDepthCoefficient(program, 1.0f);
 
         program.programUniformPutVector4f(
           "f_ccolor",
@@ -955,7 +871,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
               final JCBProgramType program)
               throws RException
             {
-              KShadingProgramCommon.putMatrixProjection(
+              KShadingProgramCommon.putMatrixProjectionUnchecked(
                 program,
                 mwo.getMatrixProjection());
 
@@ -1126,8 +1042,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         throws RException
       {
         gc.arrayBufferBind(array);
-        KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
-        KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
+        KShadingProgramCommon.bindAttributesForMeshReduced(program, array);
 
         KRendererDeferredOpaque.putDeferredParameters(
           framebuffer,
@@ -1315,7 +1230,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
               throws RException
             {
               gc.arrayBufferBind(array);
-              KShadingProgramCommon.bindAttributePositionUnchecked(
+              KShadingProgramCommon.bindAttributesForMeshReduced(
                 program,
                 array);
 
@@ -1339,10 +1254,10 @@ import com.io7m.r1.spaces.RSpaceTextureType;
                 t_map_specular,
                 program);
 
-              KShadingProgramCommon.putMatrixProjection(
+              KShadingProgramCommon.putMatrixProjectionUnchecked(
                 program,
                 mdp.getMatrixProjection());
-              KShadingProgramCommon.putMatrixModelView(
+              KShadingProgramCommon.putMatrixModelViewUnchecked(
                 program,
                 mi.getMatrixModelView());
               KShadingProgramCommon.putMatrixInverseView(
@@ -1446,7 +1361,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
               throws RException
             {
               gc.arrayBufferBind(array);
-              KShadingProgramCommon.bindAttributePositionUnchecked(
+              KShadingProgramCommon.bindAttributesForMeshReduced(
                 program,
                 array);
 
@@ -1470,10 +1385,10 @@ import com.io7m.r1.spaces.RSpaceTextureType;
                 t_map_specular,
                 program);
 
-              KShadingProgramCommon.putMatrixProjection(
+              KShadingProgramCommon.putMatrixProjectionUnchecked(
                 program,
                 mdp.getMatrixProjection());
-              KShadingProgramCommon.putMatrixModelView(
+              KShadingProgramCommon.putMatrixModelViewUnchecked(
                 program,
                 mi.getMatrixModelView());
               KShadingProgramCommon.putMatrixInverseView(
@@ -1781,11 +1696,9 @@ import com.io7m.r1.spaces.RSpaceTextureType;
               throws RException
             {
               gc.arrayBufferBind(array);
-              KShadingProgramCommon.bindAttributePositionUnchecked(
+              KShadingProgramCommon.bindAttributesForMeshReduced(
                 program,
                 array);
-              KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
-
               KShadingProgramCommon.putMatrixUVUnchecked(
                 program,
                 KMatrices.IDENTITY_UV);
@@ -1845,7 +1758,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
               final JCBProgramType program)
               throws RException
             {
-              KShadingProgramCommon.putMatrixProjection(
+              KShadingProgramCommon.putMatrixProjectionUnchecked(
                 program,
                 mwo.getMatrixProjection());
               KShadingProgramCommon.putDepthCoefficient(

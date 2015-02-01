@@ -49,7 +49,6 @@ import com.io7m.jnull.NonNull;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
-import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.exceptions.RExceptionUnitAllocatorOutOfUnits;
@@ -57,6 +56,7 @@ import com.io7m.r1.kernel.KFramebufferRGBAWithDepth;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCache;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthCacheType;
 import com.io7m.r1.kernel.KFramebufferRGBAWithDepthUsableType;
+import com.io7m.r1.kernel.KMaterialDefaults;
 import com.io7m.r1.kernel.KMatricesObserverFunctionType;
 import com.io7m.r1.kernel.KMatricesObserverType;
 import com.io7m.r1.kernel.KMutableMatrices;
@@ -76,7 +76,7 @@ import com.io7m.r1.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.r1.kernel.types.KInstanceTranslucentSpecularOnly;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
-import com.io7m.r1.kernel.types.KMaterialSpecularConstant;
+import com.io7m.r1.kernel.types.KMaterialDefaultsType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegularBuilderType;
@@ -96,7 +96,6 @@ import com.io7m.r1.shaders.forward.RKFMaterialCases;
 import com.io7m.r1.spaces.RSpaceClipType;
 import com.io7m.r1.spaces.RSpaceEyeType;
 import com.io7m.r1.spaces.RSpaceObjectType;
-import com.io7m.r1.spaces.RSpaceRGBType;
 import com.io7m.r1.spaces.RSpaceTextureType;
 import com.io7m.r1.spaces.RSpaceWorldType;
 import com.io7m.r1.tests.RFakeGL;
@@ -323,6 +322,9 @@ import com.io7m.r1.tests.TestShaderCaches;
     final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+
+    final KMaterialDefaultsType md = KMaterialDefaults.newResources(g);
+
     final KTranslucentRendererType r =
       KTranslucentRendererTest.makeRenderer(g);
 
@@ -346,10 +348,9 @@ import com.io7m.r1.tests.TestShaderCaches;
         100.0f);
 
     final KMaterialTranslucentRegularBuilderType mat_b =
-      KMaterialTranslucentRegular.newBuilder();
-    mat_b.setSpecular(KMaterialSpecularConstant.constant(
-      new PVectorI3F<RSpaceRGBType>(1.0f, 1.0f, 1.0f),
-      64.0f));
+      KMaterialTranslucentRegular.newBuilder(md);
+    mat_b.setSpecularColor3f(1.0f, 1.0f, 1.0f);
+    mat_b.setSpecularExponent(64.0f);
     final KMaterialTranslucentRegular mat = mat_b.build();
 
     final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =

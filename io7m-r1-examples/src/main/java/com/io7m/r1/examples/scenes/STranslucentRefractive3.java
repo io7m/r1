@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,6 +27,7 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
+import com.io7m.r1.examples.ExampleSceneUtilitiesType;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.exceptions.RException;
@@ -36,9 +37,10 @@ import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRefractive;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
-import com.io7m.r1.kernel.types.KMaterialNormalMapped;
-import com.io7m.r1.kernel.types.KMaterialRefractiveMaskedNormals;
+import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.r1.kernel.types.KMaterialRefractiveUnmaskedNormals;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRefractive;
+import com.io7m.r1.kernel.types.KMaterialTranslucentRefractiveBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
@@ -72,6 +74,7 @@ public final class STranslucentRefractive3 implements ExampleSceneType
   }
 
   @Override public void exampleScene(
+    final ExampleSceneUtilitiesType utilities,
     final ExampleSceneBuilderType scene)
     throws RException
   {
@@ -88,18 +91,22 @@ public final class STranslucentRefractive3 implements ExampleSceneType
     final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> muv =
       PMatrixI3x3F.newFromReadable(muv_t);
 
-    final KMaterialTranslucentRefractive mmb =
-      KMaterialTranslucentRefractive.newMaterial(
-        muv,
-        KMaterialNormalMapped.mapped(scene.texture("sea_tile_normal.png")),
-        KMaterialRefractiveMaskedNormals.create(
-          1.0f,
-          ExampleSceneUtilities.RGBA_WHITE));
+    final KMaterialTranslucentRefractiveBuilderType glass_refr_mat_b =
+      KMaterialTranslucentRefractive.newBuilder(utilities
+        .getMaterialDefaults());
+    glass_refr_mat_b.setUVMatrix(muv);
+    glass_refr_mat_b.setNormalTexture(scene.texture("sea_tile_normal.png"));
+    glass_refr_mat_b.setRefractive(KMaterialRefractiveUnmaskedNormals.create(
+      1.0f,
+      ExampleSceneUtilities.RGBA_WHITE));
+
+    final KMaterialTranslucentRefractive glass_refr_mat =
+      glass_refr_mat_b.build();
 
     final KInstanceTranslucentRefractive m =
       KInstanceTranslucentRefractive.newInstance(
         scene.mesh("monkey-low.rmxz"),
-        mmb,
+        glass_refr_mat,
         mt,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -157,24 +164,29 @@ public final class STranslucentRefractive3 implements ExampleSceneType
           floor_scale,
           new PVectorI3F<RSpaceWorldType>(0.0f, 0.0f, 8.0f));
 
+    final KMaterialOpaqueRegular mo =
+      KMaterialOpaqueRegular
+        .newBuilder(utilities.getMaterialDefaults())
+        .build();
+
     final KInstanceOpaqueRegular plane_pos_x =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        mo,
         plane_trans_pos_x,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_pos_y =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        mo,
         plane_trans_pos_y,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_pos_z =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        mo,
         plane_trans_pos_z,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -182,21 +194,21 @@ public final class STranslucentRefractive3 implements ExampleSceneType
     final KInstanceOpaqueRegular plane_neg_x =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        mo,
         plane_trans_neg_x,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_neg_y =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        mo,
         plane_trans_neg_y,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
     final KInstanceOpaqueRegular plane_neg_z =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        mo,
         plane_trans_neg_z,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);

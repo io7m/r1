@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -38,6 +38,7 @@ import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.r1.exceptions.RException;
+import com.io7m.r1.kernel.KMaterialDefaults;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
@@ -45,6 +46,7 @@ import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KLightType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
+import com.io7m.r1.kernel.types.KMaterialDefaultsType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KProjectionFrustum;
@@ -108,8 +110,9 @@ import com.io7m.r1.tests.kernel.types.KMaterialOpaqueRegularGenerator;
     final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType gi =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+    final KMaterialDefaultsType defaults = KMaterialDefaults.newResources(gi);
     final KMaterialOpaqueRegularGenerator mo_gen =
-      new KMaterialOpaqueRegularGenerator(gi);
+      new KMaterialOpaqueRegularGenerator(gi, defaults);
     final KLightGenerator li_gen = new KLightGenerator(gi);
     final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
       PMatrixI4x4F.identity();

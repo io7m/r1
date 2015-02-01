@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -60,6 +60,7 @@ import com.io7m.r1.examples.ExampleRendererVisitorType;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
+import com.io7m.r1.examples.ExampleSceneUtilitiesType;
 import com.io7m.r1.examples.ExampleTypeEnum;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.tools.EMeshCache;
@@ -72,6 +73,7 @@ import com.io7m.r1.exceptions.RExceptionLightGroupAlreadyAdded;
 import com.io7m.r1.kernel.KFramebufferDeferredType;
 import com.io7m.r1.kernel.KImageSinkBlitRGBA;
 import com.io7m.r1.kernel.KImageSinkRGBAType;
+import com.io7m.r1.kernel.KMaterialDefaults;
 import com.io7m.r1.kernel.KShaderCacheSetType;
 import com.io7m.r1.kernel.KTextureBindingsController;
 import com.io7m.r1.kernel.KTextureBindingsControllerType;
@@ -81,6 +83,7 @@ import com.io7m.r1.kernel.types.KInstanceTranslucentLitType;
 import com.io7m.r1.kernel.types.KInstanceTranslucentUnlitType;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
+import com.io7m.r1.kernel.types.KMaterialDefaultsType;
 import com.io7m.r1.kernel.types.KMeshReadableType;
 import com.io7m.r1.kernel.types.KUnitQuadCache;
 import com.io7m.r1.kernel.types.KUnitQuadCacheType;
@@ -127,6 +130,8 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
   private final AtomicInteger                         view_index;
   private final AtomicBoolean                         want_save;
   private final @Nullable GLWindow                    window;
+  private @Nullable KMaterialDefaultsType             defaults;
+  private @Nullable ExampleSceneUtilitiesType         utilities;
 
   /**
    * Construct an example runner.
@@ -325,7 +330,9 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
       };
 
     try {
-      this.example.exampleScene(example_builder);
+      this.example.exampleScene(
+        NullCheck.notNull(this.utilities),
+        example_builder);
       final KVisibleSet visible = builder.visibleCreate();
       final KFramebufferDeferredType fb =
         VExampleRunnerScene.this.framebuffer;
@@ -515,6 +522,13 @@ public final class VExampleRunnerScene implements VExampleRunnerSceneType
 
       final KTextureBindingsControllerType tc =
         KTextureBindingsController.newBindings(g.getGLCommon());
+      this.defaults = KMaterialDefaults.newResources(g);
+      this.utilities = new ExampleSceneUtilitiesType() {
+        @Override public KMaterialDefaultsType getMaterialDefaults()
+        {
+          return NullCheck.notNull(VExampleRunnerScene.this.defaults);
+        }
+      };
 
       this.renderer = this.renderer_cons.newRenderer(this.log, sc, g);
       this.sink =

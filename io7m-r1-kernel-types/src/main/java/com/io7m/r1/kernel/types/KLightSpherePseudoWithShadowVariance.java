@@ -200,6 +200,64 @@ import com.io7m.r1.spaces.RSpaceWorldType;
         light_positive_z);
     }
 
+    @Override public void copyFromPseudo(
+      final KLightSpherePseudoType s)
+    {
+      NullCheck.notNull(s, "Light");
+
+      try {
+        this.color = s.lightGetColor();
+        this.intensity = s.lightGetIntensity();
+        this.exponent = s.lightGetFalloff();
+        this.radius = s.lightGetRadius();
+        this.position = s.lightGetPosition();
+        this.shadow =
+          s
+            .spherePseudoAccept(new KLightSpherePseudoVisitorType<KShadowMappedVariance, UnreachableCodeException>() {
+              @Override public
+                KShadowMappedVariance
+                spherePseudoWithShadowBasic(
+                  final KLightSpherePseudoWithShadowBasic sb)
+              {
+                Builder.this.negative_x = sb.getNegativeX().isSome();
+                Builder.this.negative_y = sb.getNegativeY().isSome();
+                Builder.this.negative_z = sb.getNegativeZ().isSome();
+                Builder.this.positive_x = sb.getPositiveX().isSome();
+                Builder.this.positive_y = sb.getPositiveY().isSome();
+                Builder.this.positive_z = sb.getPositiveZ().isSome();
+                return Builder.this.shadow;
+              }
+
+              @Override public
+                KShadowMappedVariance
+                spherePseudoWithShadowVariance(
+                  final KLightSpherePseudoWithShadowVariance sv)
+              {
+                Builder.this.negative_x = sv.negative_x.isSome();
+                Builder.this.negative_y = sv.negative_y.isSome();
+                Builder.this.negative_z = sv.negative_z.isSome();
+                Builder.this.positive_x = sv.positive_x.isSome();
+                Builder.this.positive_y = sv.positive_y.isSome();
+                Builder.this.positive_z = sv.positive_z.isSome();
+                return sv.getShadow();
+              }
+            });
+      } catch (final RException e) {
+        throw new UnreachableCodeException(e);
+      }
+    }
+
+    @Override public void copyFromSphere(
+      final KLightSphereType s)
+    {
+      NullCheck.notNull(s, "Sphere");
+      this.color = s.lightGetColor();
+      this.intensity = s.lightGetIntensity();
+      this.exponent = s.lightGetFalloff();
+      this.radius = s.lightGetRadius();
+      this.position = s.lightGetPosition();
+    }
+
     private KLightProjectiveWithShadowVarianceType makeProjective(
       final Texture2DStaticUsableType texture,
       final KProjectionFOV p,
@@ -323,64 +381,6 @@ import com.io7m.r1.spaces.RSpaceWorldType;
       final KShadowMappedVariance s)
     {
       this.shadow = NullCheck.notNull(s, "Shadow");
-    }
-
-    @Override public void copyFromSphere(
-      final KLightSphereType s)
-    {
-      NullCheck.notNull(s, "Sphere");
-      this.color = s.lightGetColor();
-      this.intensity = s.lightGetIntensity();
-      this.exponent = s.lightGetFalloff();
-      this.radius = s.lightGetRadius();
-      this.position = s.lightGetPosition();
-    }
-
-    @Override public void copyFromPseudo(
-      final KLightSpherePseudoType s)
-    {
-      NullCheck.notNull(s, "Light");
-
-      try {
-        this.color = s.lightGetColor();
-        this.intensity = s.lightGetIntensity();
-        this.exponent = s.lightGetFalloff();
-        this.radius = s.lightGetRadius();
-        this.position = s.lightGetPosition();
-        this.shadow =
-          s
-            .spherePseudoAccept(new KLightSpherePseudoVisitorType<KShadowMappedVariance, UnreachableCodeException>() {
-              @Override public
-                KShadowMappedVariance
-                spherePseudoWithShadowBasic(
-                  final KLightSpherePseudoWithShadowBasic sb)
-              {
-                Builder.this.negative_x = sb.getNegativeX().isSome();
-                Builder.this.negative_y = sb.getNegativeY().isSome();
-                Builder.this.negative_z = sb.getNegativeZ().isSome();
-                Builder.this.positive_x = sb.getPositiveX().isSome();
-                Builder.this.positive_y = sb.getPositiveY().isSome();
-                Builder.this.positive_z = sb.getPositiveZ().isSome();
-                return Builder.this.shadow;
-              }
-
-              @Override public
-                KShadowMappedVariance
-                spherePseudoWithShadowVariance(
-                  final KLightSpherePseudoWithShadowVariance sv)
-              {
-                Builder.this.negative_x = sv.negative_x.isSome();
-                Builder.this.negative_y = sv.negative_y.isSome();
-                Builder.this.negative_z = sv.negative_z.isSome();
-                Builder.this.positive_x = sv.positive_x.isSome();
-                Builder.this.positive_y = sv.positive_y.isSome();
-                Builder.this.positive_z = sv.positive_z.isSome();
-                return sv.getShadow();
-              }
-            });
-      } catch (final RException e) {
-        throw new UnreachableCodeException(e);
-      }
     }
   }
 

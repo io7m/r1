@@ -30,23 +30,6 @@ import com.io7m.r1.exceptions.RException;
 public interface KShadowVisitorType<A, E extends Throwable>
 {
   /**
-   * Visit a mapped basic (with screen-space softening) shadow.
-   *
-   * @param s
-   *          The shadow
-   * @return A value of <code>A</code>
-   * @throws RException
-   *           If required
-   * @throws E
-   *           If required
-   */
-
-  A mappedBasicSSSoft(
-    KShadowMappedBasicSSSoft s)
-    throws RException,
-      E;
-
-  /**
    * Visit a mapped basic shadow.
    *
    * @param s
@@ -60,6 +43,23 @@ public interface KShadowVisitorType<A, E extends Throwable>
 
   A mappedBasic(
     KShadowMappedBasic s)
+    throws RException,
+      E;
+
+  /**
+   * Visit a mapped basic (with screen-space softening) shadow.
+   *
+   * @param s
+   *          The shadow
+   * @return A value of <code>A</code>
+   * @throws RException
+   *           If required
+   * @throws E
+   *           If required
+   */
+
+  A mappedBasicSSSoft(
+    KShadowMappedBasicSSSoft s)
     throws RException,
       E;
 

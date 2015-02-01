@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -27,12 +27,16 @@ import com.io7m.jcanephora.DepthFunction;
 import com.io7m.jcanephora.IndexBufferUsableType;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.Primitives;
+import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jlog.LogLevel;
@@ -49,9 +53,10 @@ import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
 import com.io7m.r1.kernel.types.KLightTranslucentVisitorType;
 import com.io7m.r1.kernel.types.KLightType;
-import com.io7m.r1.kernel.types.KMaterialNormalMapped;
-import com.io7m.r1.kernel.types.KMaterialNormalVertex;
-import com.io7m.r1.kernel.types.KMaterialNormalVisitorType;
+import com.io7m.r1.kernel.types.KMaterialEnvironmentNone;
+import com.io7m.r1.kernel.types.KMaterialEnvironmentReflection;
+import com.io7m.r1.kernel.types.KMaterialEnvironmentReflectionMapped;
+import com.io7m.r1.kernel.types.KMaterialEnvironmentVisitorType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.kernel.types.KMaterialTranslucentSpecularOnly;
 import com.io7m.r1.kernel.types.KMeshReadableType;
@@ -120,48 +125,23 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
   private static void renderInstanceTranslucentRegular(
     final JCGLInterfaceCommonType gc,
     final KMatricesInstanceValuesType mwi,
-    final JCBProgramType program,
+    final JCBProgramType p,
     final KInstanceTranslucentRegular instance)
-    throws JCGLException,
-      RException
   {
     final KMeshReadableType mesh = instance.instanceGetMesh();
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
     final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
-    final KMaterialTranslucentRegular material = instance.getMaterial();
+    KRendererCommon
+      .putInstanceMatricesRegular(p, mwi, instance.getMaterial());
 
-    KRendererCommon.putInstanceMatricesRegular(program, mwi, material);
-
+    gc.arrayBufferBind(array);
     try {
-      gc.arrayBufferBind(array);
+      KShadingProgramCommon.bindAttributePositionUnchecked(p, array);
+      KShadingProgramCommon.bindAttributeTangent4(p, array);
+      KShadingProgramCommon.bindAttributeNormal(p, array);
+      KShadingProgramCommon.bindAttributeUVUnchecked(p, array);
 
-      KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
-
-      material.materialGetNormal().normalAccept(
-        new KMaterialNormalVisitorType<Unit, JCGLException>() {
-          @Override public Unit mapped(
-            final KMaterialNormalMapped m)
-            throws RException,
-              JCGLException
-          {
-            KShadingProgramCommon.bindAttributeTangent4(program, array);
-            KShadingProgramCommon.bindAttributeNormal(program, array);
-            return Unit.unit();
-          }
-
-          @Override public Unit vertex(
-            final KMaterialNormalVertex m)
-            throws RException,
-              JCGLException
-          {
-            KShadingProgramCommon.bindAttributeNormal(program, array);
-            return Unit.unit();
-          }
-        });
-
-      KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
-
-      program.programExecute(new JCBProgramProcedureType<JCGLException>() {
+      p.programExecute(new JCBProgramProcedureType<JCGLException>() {
         @Override public void call()
           throws JCGLException
         {
@@ -189,9 +169,6 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
     KShadingProgramCommon.putDepthCoefficient(
       program,
       KRendererCommon.depthCoefficient(mwo.getProjection()));
-    KRendererCommon.putMaterialTranslucentRegularLit(
-      program,
-      instance.getMaterial());
 
     light
       .lightTranslucentAccept(new KLightTranslucentVisitorType<Unit, JCGLException>() {
@@ -294,54 +271,23 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 
   private static void renderInstanceTranslucentSpecularOnly(
     final JCGLInterfaceCommonType gc,
-    final KTextureBindingsContextType texture_unit_context,
     final KMatricesInstanceValuesType mwi,
-    final JCBProgramType program,
+    final JCBProgramType p,
     final KInstanceTranslucentSpecularOnly instance)
-    throws JCGLException,
-      RException
+    throws JCGLException
   {
     final KMeshReadableType mesh = instance.instanceGetMesh();
     final ArrayBufferUsableType array = mesh.meshGetArrayBuffer();
     final IndexBufferUsableType indices = mesh.meshGetIndexBuffer();
     final KMaterialTranslucentSpecularOnly material = instance.getMaterial();
 
-    KRendererCommon.putInstanceMatricesSpecularOnly(program, mwi, material);
-    KRendererCommon.putInstanceTexturesSpecularOnly(
-      texture_unit_context,
-      program,
-      material);
-    KRendererCommon.putMaterialTranslucentSpecularOnly(program, material);
+    KRendererCommon.putInstanceMatricesSpecularOnly(p, mwi, material);
 
     try {
       gc.arrayBufferBind(array);
-      KShadingProgramCommon.bindAttributePositionUnchecked(program, array);
+      KShadingProgramCommon.bindAttributesForMesh(p, array);
 
-      material.materialGetNormal().normalAccept(
-        new KMaterialNormalVisitorType<Unit, JCGLException>() {
-          @Override public Unit mapped(
-            final KMaterialNormalMapped m)
-            throws RException,
-              JCGLException
-          {
-            KShadingProgramCommon.bindAttributeTangent4(program, array);
-            KShadingProgramCommon.bindAttributeNormal(program, array);
-            return Unit.unit();
-          }
-
-          @Override public Unit vertex(
-            final KMaterialNormalVertex m)
-            throws RException,
-              JCGLException
-          {
-            KShadingProgramCommon.bindAttributeNormal(program, array);
-            return Unit.unit();
-          }
-        });
-
-      KShadingProgramCommon.bindAttributeUVUnchecked(program, array);
-
-      program.programExecute(new JCBProgramProcedureType<JCGLException>() {
+      p.programExecute(new JCBProgramProcedureType<JCGLException>() {
         @Override public void call()
           throws JCGLException
         {
@@ -433,7 +379,6 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
         {
           KTranslucentRenderer.renderInstanceTranslucentSpecularOnly(
             gc,
-            texture_unit_context,
             mwi,
             program,
             instance);
@@ -468,7 +413,6 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
         {
           KTranslucentRenderer.renderInstanceTranslucentSpecularOnly(
             gc,
-            texture_unit_context,
             mwi,
             program,
             instance);
@@ -482,7 +426,7 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
     final KMaterialTranslucentRegular material)
   {
     final String lcode = light.lightGetCode();
-    final String mcode = material.materialGetLitCode();
+    final String mcode = material.getCode();
 
     final StringBuilder s = new StringBuilder();
     s.append(lcode);
@@ -499,7 +443,7 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
     final KMaterialTranslucentSpecularOnly material)
   {
     final String lcode = light.lightGetCode();
-    final String mcode = material.materialGetLitCode();
+    final String mcode = material.getCode();
 
     final StringBuilder s = new StringBuilder();
     s.append(lcode);
@@ -607,8 +551,7 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 
             @Override public Unit regularLit(
               final KTranslucentRegularLit t)
-              throws RException,
-                JCacheException
+              throws RException
             {
               bindings
                 .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
@@ -634,8 +577,7 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 
             @Override public Unit regularUnlit(
               final KInstanceTranslucentRegular t)
-              throws RException,
-                JCacheException
+              throws RException
             {
               bindings
                 .withNewEmptyContext(new PartialProcedureType<KTextureBindingsContextType, RException>() {
@@ -690,14 +632,52 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 
   private void renderTranslucentRegularLit(
     final JCGLInterfaceCommonType gc,
-    final KTextureBindingsContextType texture_unit_context,
+    final KTextureBindingsContextType units,
     final KTranslucentRegularLit t,
     final KMatricesObserverType mwo)
     throws RException,
-      JCGLException,
       JCacheException
   {
     final Set<KLightTranslucentType> lights = t.translucentGetLights();
+    final KInstanceTranslucentRegular instance = t.translucentGetInstance();
+    final KMaterialTranslucentRegular material = instance.getMaterial();
+
+    /**
+     * Bind material textures. The texture bindings are fixed for all light
+     * contributions.
+     */
+
+    final TextureUnitType unit_albedo =
+      units.withTexture2D(material.getAlbedoTexture());
+    final TextureUnitType unit_normal =
+      units.withTexture2D(material.getNormalTexture());
+    final TextureUnitType unit_specular =
+      units.withTexture2D(material.getSpecularTexture());
+    final OptionType<TextureUnitType> unit_env_opt =
+      material
+        .getEnvironment()
+        .environmentAccept(
+          new KMaterialEnvironmentVisitorType<OptionType<TextureUnitType>, RException>() {
+            @Override public OptionType<TextureUnitType> none(
+              final KMaterialEnvironmentNone m)
+            {
+              return Option.none();
+            }
+
+            @Override public OptionType<TextureUnitType> reflection(
+              final KMaterialEnvironmentReflection m)
+              throws RException
+            {
+              return Option.some(units.withTextureCube(m.getTexture()));
+            }
+
+            @Override public OptionType<TextureUnitType> reflectionMapped(
+              final KMaterialEnvironmentReflectionMapped m)
+              throws RException
+            {
+              return Option.some(units.withTextureCube(m.getTexture()));
+            }
+          });
 
     boolean first = true;
     final Iterator<KLightTranslucentType> iter = lights.iterator();
@@ -705,8 +685,6 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
       final KLightTranslucentType light = iter.next();
       assert light != null;
 
-      final KInstanceTranslucentRegular instance = t.translucentGetInstance();
-      final KMaterialTranslucentRegular material = instance.getMaterial();
       final String shader_code =
         KTranslucentRenderer.shaderCodeFromRegular(light, material);
 
@@ -733,8 +711,24 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
             final JCBProgramType program)
             throws RException
           {
-            KRendererCommon.putInstanceTexturesRegularLit(
-              texture_unit_context,
+            KShadingProgramCommon.putTextureAlbedoUnchecked(
+              program,
+              unit_albedo);
+            KShadingProgramCommon.putTextureNormal(program, unit_normal);
+            KShadingProgramCommon.putTextureSpecular(program, unit_specular);
+
+            unit_env_opt
+              .mapPartial(new PartialFunctionType<TextureUnitType, Unit, RException>() {
+                @Override public Unit call(
+                  final TextureUnitType u)
+                  throws RException
+                {
+                  KShadingProgramCommon.putTextureEnvironment(program, u);
+                  return Unit.unit();
+                }
+              });
+
+            KRendererCommon.putMaterialTranslucentRegularWithoutTextures(
               program,
               material);
 
@@ -753,21 +747,31 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 
   private void renderTranslucentRegularUnlit(
     final JCGLInterfaceCommonType gc,
-    final KTextureBindingsContextType texture_unit_context,
+    final KTextureBindingsContextType units,
     final KMatricesObserverType mwo,
     final KInstanceTranslucentRegular t)
-    throws JCGLException,
-      RException,
+    throws RException,
       JCacheException
   {
     final KMaterialTranslucentRegular material = t.getMaterial();
-    final String shader_code = material.materialGetUnlitCode();
+    final String shader_code = material.getCode();
     final KProgramType kprogram =
       this.shader_unlit_cache.cacheGetLU(shader_code);
 
     gc.blendingEnable(
       BlendFunction.BLEND_ONE,
       BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA);
+
+    /**
+     * Bind material textures.
+     */
+
+    final TextureUnitType unit_albedo =
+      units.withTexture2D(material.getAlbedoTexture());
+    final TextureUnitType unit_normal =
+      units.withTexture2D(material.getNormalTexture());
+    final TextureUnitType unit_specular =
+      units.withTexture2D(material.getSpecularTexture());
 
     kprogram.getExecutable().execRun(
       new JCBExecutorProcedureType<RException>() {
@@ -776,9 +780,38 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
           throws JCGLException,
             RException
         {
-          KRendererCommon.putMaterialTranslucentRegularUnlit(
+          KRendererCommon.putMaterialTranslucentRegularUnlitWithTextures(
             program,
             material);
+
+          material.getEnvironment().environmentAccept(
+            new KMaterialEnvironmentVisitorType<Unit, RException>() {
+              @Override public Unit none(
+                final KMaterialEnvironmentNone m)
+              {
+                return Unit.unit();
+              }
+
+              @Override public Unit reflection(
+                final KMaterialEnvironmentReflection m)
+                throws RException
+              {
+                KShadingProgramCommon.putTextureEnvironment(
+                  program,
+                  units.withTextureCube(m.getTexture()));
+                return Unit.unit();
+              }
+
+              @Override public Unit reflectionMapped(
+                final KMaterialEnvironmentReflectionMapped m)
+                throws RException
+              {
+                KShadingProgramCommon.putTextureEnvironment(
+                  program,
+                  units.withTextureCube(m.getTexture()));
+                return Unit.unit();
+              }
+            });
 
           mwo.withInstance(
             t,
@@ -788,18 +821,20 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
                 throws JCGLException,
                   RException
               {
+                KShadingProgramCommon.putTextureAlbedoUnchecked(
+                  program,
+                  unit_albedo);
+                KShadingProgramCommon.putTextureNormal(program, unit_normal);
+                KShadingProgramCommon.putTextureSpecular(
+                  program,
+                  unit_specular);
+
                 KShadingProgramCommon.putMatrixProjectionUnchecked(
                   program,
                   mwi.getMatrixProjection());
-
                 KShadingProgramCommon.putDepthCoefficient(
                   program,
                   KRendererCommon.depthCoefficient(mwi.getProjection()));
-
-                KRendererCommon.putInstanceTexturesRegularUnlit(
-                  texture_unit_context,
-                  program,
-                  material);
 
                 KTranslucentRenderer.renderInstanceTranslucentRegular(
                   gc,
@@ -819,7 +854,6 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
     final KTranslucentSpecularOnlyLit t,
     final KMatricesObserverType mwo)
     throws RException,
-      JCGLException,
       JCacheException
   {
     final Set<KLightTranslucentType> lights = t.translucentGetLights();
@@ -830,16 +864,24 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
 
     gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
 
-    final KMaterialTranslucentSpecularOnly material =
-      t.translucentGetInstance().getMaterial();
+    final KInstanceTranslucentSpecularOnly instance =
+      t.translucentGetInstance();
+    final KMaterialTranslucentSpecularOnly material = instance.getMaterial();
+
+    /**
+     * Bind material textures. The texture bindings are fixed for all light
+     * contributions.
+     */
+
+    final TextureUnitType unit_normal =
+      texture_unit_context.withTexture2D(material.getNormalTexture());
+    final TextureUnitType unit_spec =
+      texture_unit_context.withTexture2D(material.getSpecularTexture());
 
     final Iterator<KLightTranslucentType> iter = lights.iterator();
     while (iter.hasNext()) {
       final KLightTranslucentType light = iter.next();
       assert light != null;
-
-      final KInstanceTranslucentSpecularOnly instance =
-        t.translucentGetInstance();
 
       final String shader_code =
         KTranslucentRenderer.shaderCodeSpecularOnly(light, material);
@@ -852,6 +894,13 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
             final JCBProgramType program)
             throws RException
           {
+            KShadingProgramCommon.putTextureNormal(program, unit_normal);
+            KShadingProgramCommon.putTextureSpecular(program, unit_spec);
+            KRendererCommon
+              .putMaterialTranslucentSpecularOnlyWithoutTextures(
+                program,
+                material);
+
             KTranslucentRenderer.renderInstanceTranslucentSpecularOnlyLit(
               gc,
               texture_unit_context,

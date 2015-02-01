@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -203,11 +203,16 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
       try {
         final KShaderCacheSetType in_shader_caches = this.makeShaderCaches();
 
+        final KTextureBindingsControllerType in_texture_bindings =
+          this.makeTextureBindingsController();
+
         final KDepthVarianceRendererType in_depth_variance_renderer =
-          this.makeDepthVarianceRenderer(in_shader_caches);
+          this.makeDepthVarianceRenderer(
+            in_shader_caches,
+            in_texture_bindings);
 
         final KDepthRendererType in_depth_renderer =
-          this.makeDepthRenderer(in_shader_caches);
+          this.makeDepthRenderer(in_shader_caches, in_texture_bindings);
 
         final KRegionCopierType in_copier = this.makeRegionCopier();
 
@@ -215,9 +220,6 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
 
         final KFramebufferDepthVarianceCacheType in_depth_variance_cache =
           this.makeDepthVarianceCache();
-
-        final KTextureBindingsControllerType in_texture_bindings =
-          this.makeTextureBindingsController();
 
         final KImageFilterDepthVarianceType<KBlurParameters> in_depth_variance_blur =
           this.makeDepthVarianceBlur(
@@ -430,7 +432,8 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     }
 
     private KDepthRendererType makeDepthRenderer(
-      final KShaderCacheSetType in_shader_caches)
+      final KShaderCacheSetType in_shader_caches,
+      final KTextureBindingsControllerType in_bindings)
       throws RException
     {
       final KDepthRendererType in_depth_renderer;
@@ -440,6 +443,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         in_depth_renderer =
           KDepthRenderer.newRenderer(
             this.gl,
+            in_bindings,
             in_shader_caches.getShaderDepthCache(),
             this.log);
       }
@@ -494,7 +498,8 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
     }
 
     private KDepthVarianceRendererType makeDepthVarianceRenderer(
-      final KShaderCacheSetType in_shader_caches)
+      final KShaderCacheSetType in_shader_caches,
+      final KTextureBindingsControllerType in_bindings)
       throws RException
     {
       final KDepthVarianceRendererType in_depth_variance_renderer;
@@ -504,6 +509,7 @@ import com.io7m.r1.rmb.RBUnitSphereResourceCache;
         in_depth_variance_renderer =
           KDepthVarianceRenderer.newRenderer(
             this.gl,
+            in_bindings,
             in_shader_caches.getShaderDepthVarianceCache());
       }
       return in_depth_variance_renderer;

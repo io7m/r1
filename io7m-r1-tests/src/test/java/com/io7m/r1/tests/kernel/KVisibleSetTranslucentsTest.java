@@ -39,11 +39,13 @@ import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
+import com.io7m.r1.kernel.KMaterialDefaults;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceTranslucentRegular;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightTranslucentType;
+import com.io7m.r1.kernel.types.KMaterialDefaultsType;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegular;
 import com.io7m.r1.kernel.types.KMaterialTranslucentRegularBuilderType;
 import com.io7m.r1.kernel.types.KMesh;
@@ -111,6 +113,7 @@ import com.io7m.r1.tests.RFakeShaderControllers;
     final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+    final KMaterialDefaultsType defaults = KMaterialDefaults.newResources(g);
 
     final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
       PMatrixI4x4F.identity();
@@ -122,7 +125,7 @@ import com.io7m.r1.tests.RFakeShaderControllers;
       KVisibleSetTranslucentsTest.newMesh(g.getGLCommon());
 
     final KMaterialTranslucentRegularBuilderType mb =
-      KMaterialTranslucentRegular.newBuilder();
+      KMaterialTranslucentRegular.newBuilder(defaults);
     final KMaterialTranslucentRegular mat_0 = mb.build();
     final KInstanceTranslucentRegular i0 =
       KInstanceTranslucentRegular.newInstance(
@@ -148,6 +151,7 @@ import com.io7m.r1.tests.RFakeShaderControllers;
     final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+    final KMaterialDefaultsType defaults = KMaterialDefaults.newResources(g);
 
     final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
       PMatrixI4x4F.identity();
@@ -164,7 +168,7 @@ import com.io7m.r1.tests.RFakeShaderControllers;
       KVisibleSetTranslucentsTest.newMesh(g.getGLCommon());
 
     final KMaterialTranslucentRegularBuilderType mb =
-      KMaterialTranslucentRegular.newBuilder();
+      KMaterialTranslucentRegular.newBuilder(defaults);
     final KMaterialTranslucentRegular mat_0 = mb.build();
     final KInstanceTranslucentRegular i0 =
       KInstanceTranslucentRegular.newInstance(

@@ -36,15 +36,15 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.jtensors.parameterized.PMatrixI4x4F;
 import com.io7m.jtensors.parameterized.PMatrixM4x4F;
-import com.io7m.jtensors.parameterized.PVectorI4F;
 import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.exceptions.RExceptionBuilderInvalid;
 import com.io7m.r1.exceptions.RExceptionLightNonexistent;
+import com.io7m.r1.kernel.KMaterialDefaults;
 import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightWithShadowType;
-import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
+import com.io7m.r1.kernel.types.KMaterialDefaultsType;
 import com.io7m.r1.kernel.types.KMaterialDepthAlpha;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
@@ -60,7 +60,6 @@ import com.io7m.r1.kernel.types.KVisibleSetShadowsBuilderWithCreateType;
 import com.io7m.r1.spaces.RSpaceClipType;
 import com.io7m.r1.spaces.RSpaceEyeType;
 import com.io7m.r1.spaces.RSpaceObjectType;
-import com.io7m.r1.spaces.RSpaceRGBAType;
 import com.io7m.r1.spaces.RSpaceTextureType;
 import com.io7m.r1.spaces.RSpaceWorldType;
 import com.io7m.r1.tests.RFakeGL;
@@ -134,6 +133,7 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
     final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+    final KMaterialDefaultsType defaults = KMaterialDefaults.newResources(g);
 
     final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
       PMatrixI4x4F.identity();
@@ -157,13 +157,9 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
       KLightProjectiveWithShadowBasic.newBuilder(tex, proj).build();
 
     final KMaterialOpaqueRegularBuilderType mb =
-      KMaterialOpaqueRegular.newBuilder();
+      KMaterialOpaqueRegular.newBuilder(defaults);
     final KMaterialOpaqueRegular mat_0 = mb.build();
-    mb.setAlbedo(KMaterialAlbedoTextured.textured(
-      new PVectorI4F<RSpaceRGBAType>(0.0f, 0.0f, 0.0f, 0.0f),
-      0.0f,
-      tex));
-    mb.setDepth(KMaterialDepthAlpha.alpha(0.5f));
+    mb.setDepthType(KMaterialDepthAlpha.alpha(0.5f));
     final KMaterialOpaqueRegular mat_1 = mb.build();
     final KInstanceOpaqueRegular i0 =
       KInstanceOpaqueRegular.newInstance(
@@ -200,6 +196,7 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
     final OptionType<JCGLSoftRestrictionsType> none = Option.none();
     final JCGLImplementationType g =
       RFakeGL.newFakeGL30(RFakeShaderControllers.newNull(), none);
+    final KMaterialDefaultsType defaults = KMaterialDefaults.newResources(g);
 
     final PMatrixI4x4F<RSpaceObjectType, RSpaceWorldType> model =
       PMatrixI4x4F.identity();
@@ -223,7 +220,7 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
       KLightProjectiveWithShadowBasic.newBuilder(tex, proj).build();
 
     final KMaterialOpaqueRegularBuilderType mb =
-      KMaterialOpaqueRegular.newBuilder();
+      KMaterialOpaqueRegular.newBuilder(defaults);
     final KMaterialOpaqueRegular mat_0 = mb.build();
     final KInstanceOpaqueRegular i0 =
       KInstanceOpaqueRegular.newInstance(

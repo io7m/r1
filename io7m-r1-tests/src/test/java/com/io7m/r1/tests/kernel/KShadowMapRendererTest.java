@@ -69,8 +69,6 @@ import com.io7m.jtensors.parameterized.PMatrixM4x4F;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.exceptions.RException;
-import com.io7m.r1.exceptions.RExceptionMaterialMissingAlbedoTexture;
-import com.io7m.r1.exceptions.RExceptionMaterialMissingSpecularTexture;
 import com.io7m.r1.exceptions.RExceptionMeshMissingNormals;
 import com.io7m.r1.exceptions.RExceptionMeshMissingPositions;
 import com.io7m.r1.exceptions.RExceptionMeshMissingTangents;
@@ -82,6 +80,7 @@ import com.io7m.r1.kernel.KDepthVarianceRendererType;
 import com.io7m.r1.kernel.KFramebufferDepthVarianceUsableType;
 import com.io7m.r1.kernel.KImageFilterDepthVarianceType;
 import com.io7m.r1.kernel.KImageFilterVisitorType;
+import com.io7m.r1.kernel.KMaterialDefaults;
 import com.io7m.r1.kernel.KProgramType;
 import com.io7m.r1.kernel.KShaderCache;
 import com.io7m.r1.kernel.KShaderCacheDepthType;
@@ -94,6 +93,8 @@ import com.io7m.r1.kernel.KShadowMapRendererType;
 import com.io7m.r1.kernel.KShadowMapType;
 import com.io7m.r1.kernel.KShadowMapUsableType;
 import com.io7m.r1.kernel.KShadowMapWithType;
+import com.io7m.r1.kernel.KTextureBindingsController;
+import com.io7m.r1.kernel.KTextureBindingsControllerType;
 import com.io7m.r1.kernel.types.KBlurParameters;
 import com.io7m.r1.kernel.types.KCamera;
 import com.io7m.r1.kernel.types.KFaceSelection;
@@ -101,6 +102,7 @@ import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KInstanceOpaqueType;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasic;
 import com.io7m.r1.kernel.types.KLightProjectiveWithShadowBasicBuilderType;
+import com.io7m.r1.kernel.types.KMaterialDefaultsType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMesh;
 import com.io7m.r1.kernel.types.KMeshReadableType;
@@ -274,10 +276,15 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
       final KShaderCacheDepthVarianceType depth_variance_shader_cache =
         KShaderCache.wrapDepthVariance(dvc);
 
+      final KTextureBindingsControllerType bindings =
+        KTextureBindingsController.newBindings(gc);
       final KDepthRendererType depth_renderer =
-        KDepthRenderer.newRenderer(g, depth_shader_cache, log);
+        KDepthRenderer.newRenderer(g, bindings, depth_shader_cache, log);
       final KDepthVarianceRendererType depth_variance_renderer =
-        KDepthVarianceRenderer.newRenderer(g, depth_variance_shader_cache);
+        KDepthVarianceRenderer.newRenderer(
+          g,
+          bindings,
+          depth_variance_shader_cache);
 
       final KImageFilterDepthVarianceType<KBlurParameters> blur =
         new KImageFilterDepthVarianceType<KBlurParameters>() {
@@ -380,6 +387,8 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
   {
     try {
       final JCGLInterfaceCommonType gc = g.getGLCommon();
+      final KMaterialDefaultsType defaults =
+        KMaterialDefaults.newResources(g);
 
       final PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv =
         PMatrixI3x3F.identity();
@@ -387,7 +396,7 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
         PMatrixI4x4F.identity();
       final KTransformType trans = KTransformMatrix4x4.newTransform(model);
       final KMaterialOpaqueRegular in_material =
-        KMaterialOpaqueRegular.newBuilder().build();
+        KMaterialOpaqueRegular.newBuilder(defaults).build();
 
       final ArrayDescriptor type = KMesh.getStandardDescriptor();
 
@@ -403,10 +412,7 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
         trans,
         uv,
         KFaceSelection.FACE_RENDER_FRONT);
-    } catch (final RExceptionMaterialMissingAlbedoTexture e) {
-      throw new UnreachableCodeException(e);
-    } catch (final RExceptionMaterialMissingSpecularTexture e) {
-      throw new UnreachableCodeException(e);
+
     } catch (final RExceptionMeshMissingUVs e) {
       throw new UnreachableCodeException(e);
     } catch (final RExceptionMeshMissingNormals e) {
@@ -414,8 +420,6 @@ import com.io7m.r1.tests.RFakeTextures2DStatic;
     } catch (final RExceptionMeshMissingTangents e) {
       throw new UnreachableCodeException(e);
     } catch (final RExceptionMeshMissingPositions e) {
-      throw new UnreachableCodeException(e);
-    } catch (final RException e) {
       throw new UnreachableCodeException(e);
     } catch (final JCGLException e) {
       throw new UnreachableCodeException(e);

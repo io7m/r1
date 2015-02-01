@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,52 +16,54 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
-import com.io7m.r1.exceptions.RException;
 import com.io7m.r1.spaces.RSpaceTextureType;
 
 /**
- * The type of materials applied to meshes.
+ * The type of mutable builders for {@link KMaterialTranslucentRefractive}.
  */
 
-public interface KMaterialType extends KTexturesRequiredType
+public interface KMaterialTranslucentRefractiveBuilderType extends
+  KMaterialTranslucentBuilderType<KMaterialTranslucentRefractive>
 {
   /**
-   * @return The material code
+   * Copy material values from the given material.
+   *
+   * @param m
+   *          The material
    */
 
-  String getCode();
+  void copyFromTranslucentRefractive(
+    KMaterialTranslucentRefractive m);
 
   /**
-   * Be visited by the given generic visitor.
-   *
-   * @param v
-   *          The visitor
-   * @return The value returned by the visitor
-   *
-   * @throws RException
-   *           Iff the visitor raises {@link RException}
-   * @throws E
-   *           Iff the visitor raises <code>E</code>
-   *
-   * @param <A>
-   *          The return type of the visitor
-   * @param <E>
-   *          The type of exceptions raised by the visitor
-   * @param <V>
-   *          A specific visitor subtype
+   * Set the normal texture for the material.
+   * 
+   * @param t
+   *          The normal texture
    */
 
-    <A, E extends Throwable, V extends KMaterialVisitorType<A, E>>
-    A
-    materialAccept(
-      final V v)
-      throws E,
-        RException;
+  void setNormalTexture(
+    Texture2DStaticUsableType t);
 
   /**
-   * @return The material's UV texture matrix.
+   * Set the refractive properties of the material.
+   *
+   * @param m
+   *          The refractive properties
    */
 
-  PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> materialGetUVMatrix();
+  void setRefractive(
+    KMaterialRefractiveType m);
+
+  /**
+   * Set the UV matrix of the material.
+   *
+   * @param uv_matrix
+   *          The UV matrix
+   */
+
+  void setUVMatrix(
+    PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType> uv_matrix);
 }

@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -22,13 +22,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.reflections.Reflections;
 
-import com.io7m.r1.kernel.types.KMaterialAlbedoType;
 import com.io7m.r1.kernel.types.KMaterialDepthType;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentType;
-import com.io7m.r1.kernel.types.KMaterialNormalType;
 import com.io7m.r1.kernel.types.KMaterialRefractiveType;
-import com.io7m.r1.kernel.types.KMaterialSpecularNotNoneType;
-import com.io7m.r1.kernel.types.KMaterialSpecularType;
 import com.io7m.r1.shaders.forward.RKFMaterialCases;
 
 @SuppressWarnings("static-method") public final class RKMaterialCasesTest
@@ -36,16 +32,6 @@ import com.io7m.r1.shaders.forward.RKFMaterialCases;
   private static Reflections getReflections()
   {
     return new Reflections("com.io7m.r1.kernel.types");
-  }
-
-  @Test public void testAlbedoCases()
-  {
-    final Reflections r = RKMaterialCasesTest.getReflections();
-    final Set<Class<? extends KMaterialAlbedoType>> st =
-      r.getSubTypesOf(KMaterialAlbedoType.class);
-
-    final RKFMaterialCases c = new RKFMaterialCases();
-    Assert.assertEquals(st.size(), c.getCasesAlbedo().size());
   }
 
   @Test public void testDepthCases()
@@ -56,16 +42,6 @@ import com.io7m.r1.shaders.forward.RKFMaterialCases;
 
     final RKFMaterialCases c = new RKFMaterialCases();
     Assert.assertEquals(st.size(), c.getCasesDepth().size());
-  }
-
-  @Test public void testNormalCases()
-  {
-    final Reflections r = RKMaterialCasesTest.getReflections();
-    final Set<Class<? extends KMaterialNormalType>> st =
-      r.getSubTypesOf(KMaterialNormalType.class);
-
-    final RKFMaterialCases c = new RKFMaterialCases();
-    Assert.assertEquals(st.size(), c.getCasesNormal().size());
   }
 
   @Test public void testEnvironmentCases()
@@ -86,16 +62,5 @@ import com.io7m.r1.shaders.forward.RKFMaterialCases;
 
     final RKFMaterialCases c = new RKFMaterialCases();
     Assert.assertEquals(st.size(), c.getCasesRefractive().size());
-  }
-
-  @Test public void testSpecularCases()
-  {
-    final Reflections r = RKMaterialCasesTest.getReflections();
-    final Set<Class<? extends KMaterialSpecularType>> st =
-      r.getSubTypesOf(KMaterialSpecularType.class);
-    st.remove(KMaterialSpecularNotNoneType.class);
-
-    final RKFMaterialCases c = new RKFMaterialCases();
-    Assert.assertEquals(st.size(), c.getCasesSpecular().size());
   }
 }

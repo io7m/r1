@@ -19,7 +19,7 @@ package com.io7m.r1.documentation.examples;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
-import com.io7m.r1.kernel.types.KMaterialAlbedoType;
+import com.io7m.r1.kernel.types.KMaterialAlbedoPropertiesType;
 import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
 import com.io7m.r1.kernel.types.KMaterialAlbedoVisitorType;
 import com.io7m.r1.types.RException;

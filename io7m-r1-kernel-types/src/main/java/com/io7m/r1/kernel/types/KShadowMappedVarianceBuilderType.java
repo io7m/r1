@@ -30,19 +30,6 @@ public interface KShadowMappedVarianceBuilderType extends KShadowBuilderType
 
   /**
    * <p>
-   * Set the shadow map description. This controls the physical aspects of the
-   * shadow map such as the size, precision, and filter settings.
-   * </p>
-   *
-   * @param m
-   *          The description.
-   */
-
-  void setMapDescription(
-    final KShadowMapDescriptionVariance m);
-
-  /**
-   * <p>
    * Set the blur parameters for the shadow map. These define the parameters
    * of an (optional) box blur applied to the shadow, to provide soft shadow
    * edges.
@@ -72,6 +59,19 @@ public interface KShadowMappedVarianceBuilderType extends KShadowBuilderType
 
   void setLightBleedReduction(
     float r);
+
+  /**
+   * <p>
+   * Set the shadow map description. This controls the physical aspects of the
+   * shadow map such as the size, precision, and filter settings.
+   * </p>
+   *
+   * @param m
+   *          The description.
+   */
+
+  void setMapDescription(
+    final KShadowMapDescriptionVariance m);
 
   /**
    * <p>

@@ -26,6 +26,7 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
+import com.io7m.r1.examples.ExampleSceneUtilitiesType;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.exceptions.RException;
@@ -33,7 +34,6 @@ import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereWithoutShadowBuilderType;
-import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
@@ -68,6 +68,7 @@ public final class SLComplex0 implements ExampleSceneType
   }
 
   @Override public void exampleScene(
+    final ExampleSceneUtilitiesType utilities,
     final ExampleSceneBuilderType scene)
     throws RException
   {
@@ -78,22 +79,22 @@ public final class SLComplex0 implements ExampleSceneType
         1.0f,
         4.0f), z);
 
+    final KMaterialOpaqueRegularBuilderType mmb =
+      KMaterialOpaqueRegular.newBuilder(utilities.getMaterialDefaults());
+
     final KInstanceOpaqueRegular floor =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        mmb.build(),
         floor_t,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
 
     final Texture2DStaticUsableType t = scene.texture("monkey_albedo.png");
-    final KMaterialOpaqueRegularBuilderType mmb =
-      KMaterialOpaqueRegular
-        .newBuilder(ExampleSceneUtilities.OPAQUE_MATTE_WHITE);
-    mmb.setAlbedo(KMaterialAlbedoTextured.textured(
-      ExampleSceneUtilities.RGBA_WHITE,
-      1.0f,
-      t));
+    mmb.setAlbedoColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    mmb.setAlbedoTextureMix(1.0f);
+    mmb.setAlbedoTexture(t);
+    final KMaterialOpaqueRegular mr = mmb.build();
 
     final KLightSphereWithoutShadow ks;
     {
@@ -127,7 +128,7 @@ public final class SLComplex0 implements ExampleSceneType
         final KInstanceOpaqueRegular m =
           KInstanceOpaqueRegular.newInstance(
             scene.mesh("monkey-low.rmxz"),
-            mmb.build(),
+            mr,
             mt,
             ExampleSceneUtilities.IDENTITY_UV,
             KFaceSelection.FACE_RENDER_FRONT);

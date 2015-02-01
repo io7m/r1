@@ -25,15 +25,11 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.jtensors.parameterized.PVectorI4F;
-import com.io7m.junreachable.UnreachableCodeException;
-import com.io7m.r1.exceptions.RException;
-import com.io7m.r1.kernel.types.KMaterialAlbedoType;
+import com.io7m.r1.kernel.types.KMaterialDefaultsUsableType;
 import com.io7m.r1.kernel.types.KMaterialDepthType;
-import com.io7m.r1.kernel.types.KMaterialEmissiveType;
 import com.io7m.r1.kernel.types.KMaterialEnvironmentType;
-import com.io7m.r1.kernel.types.KMaterialNormalType;
 import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
-import com.io7m.r1.kernel.types.KMaterialSpecularType;
+import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.spaces.RSpaceRGBAType;
 import com.io7m.r1.spaces.RSpaceRGBType;
 import com.io7m.r1.spaces.RSpaceTextureType;
@@ -46,34 +42,24 @@ import com.io7m.r1.tests.types.PVectorI4FGenerator;
 public final class KMaterialOpaqueRegularGenerator implements
   Generator<KMaterialOpaqueRegular>
 {
-  private final Generator<KMaterialAlbedoType>                                albedo_gen;
   private final Generator<KMaterialDepthType>                                 depth_gen;
-  private final Generator<KMaterialEmissiveType>                              emissive_gen;
   private final Generator<KMaterialEnvironmentType>                           environment_gen;
   private final Generator<PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>> matrix_gen;
-  private final Generator<KMaterialNormalType>                                normal_gen;
-  private final Generator<KMaterialSpecularType>                              specular_gen;
+  private KMaterialOpaqueRegularBuilderType                                   builder;
 
   public KMaterialOpaqueRegularGenerator(
     final Generator<PMatrixI3x3F<RSpaceTextureType, RSpaceTextureType>> in_matrix_gen,
-    final Generator<KMaterialNormalType> in_normal_gen,
-    final Generator<KMaterialAlbedoType> in_albedo_gen,
     final Generator<KMaterialDepthType> in_depth_gen,
-    final Generator<KMaterialEmissiveType> in_emissive_gen,
-    final Generator<KMaterialEnvironmentType> in_environment_gen,
-    final Generator<KMaterialSpecularType> in_specular_gen)
+    final Generator<KMaterialEnvironmentType> in_environment_gen)
   {
     this.matrix_gen = in_matrix_gen;
     this.depth_gen = in_depth_gen;
-    this.normal_gen = in_normal_gen;
-    this.albedo_gen = in_albedo_gen;
-    this.emissive_gen = in_emissive_gen;
     this.environment_gen = in_environment_gen;
-    this.specular_gen = in_specular_gen;
   }
 
   public KMaterialOpaqueRegularGenerator(
-    final JCGLImplementationType g)
+    final JCGLImplementationType g,
+    final KMaterialDefaultsUsableType defaults)
   {
     final Generator<Texture2DStaticUsableType> in_tex_gen =
       RFakeTextures2DStatic.generator(g, new StringGenerator());
@@ -87,32 +73,15 @@ public final class KMaterialOpaqueRegularGenerator implements
     this.matrix_gen =
       new PMatrixI3x3FGenerator<RSpaceTextureType, RSpaceTextureType>();
     this.depth_gen = new KMaterialDepthGenerator();
-    this.normal_gen = new KMaterialNormalGenerator(in_tex_gen);
-    this.albedo_gen = new KMaterialAlbedoGenerator(in_vec_gen, in_tex_gen);
-    this.emissive_gen = new KMaterialEmissiveGenerator(in_tex_gen);
     this.environment_gen = new KMaterialEnvironmentGenerator(in_tex_cube_gen);
-    this.specular_gen =
-      new KMaterialSpecularGenerator(in_vec3_gen, in_tex_gen);
+    this.builder = KMaterialOpaqueRegular.newBuilder(defaults);
   }
 
   @SuppressWarnings("null") @Override public KMaterialOpaqueRegular next()
   {
-    for (int i = 0; i < 1000; ++i) {
-      try {
-        return KMaterialOpaqueRegular.newMaterial(
-          this.matrix_gen.next(),
-          this.albedo_gen.next(),
-          this.depth_gen.next(),
-          this.emissive_gen.next(),
-          this.environment_gen.next(),
-          this.normal_gen.next(),
-          this.specular_gen.next());
-      } catch (final RException e) {
-        System.err.println("Ignoring bad material: ");
-        e.printStackTrace();
-      }
-    }
-
-    throw new UnreachableCodeException();
+    this.builder.setDepthType(this.depth_gen.next());
+    this.builder.setEnvironment(this.environment_gen.next());
+    this.builder.setUVMatrix(this.matrix_gen.next());
+    return this.builder.build();
   }
 }

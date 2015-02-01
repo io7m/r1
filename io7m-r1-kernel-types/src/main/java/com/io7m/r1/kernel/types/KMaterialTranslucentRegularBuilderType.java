@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -16,6 +16,7 @@
 
 package com.io7m.r1.kernel.types;
 
+import com.io7m.jcanephora.Texture2DStaticUsableType;
 import com.io7m.jtensors.parameterized.PMatrixI3x3F;
 import com.io7m.r1.spaces.RSpaceTextureType;
 
@@ -27,60 +28,125 @@ public interface KMaterialTranslucentRegularBuilderType extends
   KMaterialTranslucentBuilderType<KMaterialTranslucentRegular>
 {
   /**
-   * Set the albedo of the material.
+   * Copy material values from the given material.
    *
-   * @param albedo
-   *          The albedo properties.
+   * @param m
+   *          The material
    */
 
-  void setAlbedo(
-    final KMaterialAlbedoType albedo);
+  void copyFromTranslucentRegular(
+    KMaterialTranslucentRegular m);
+
+  /**
+   * Set the albedo color of the material.
+   *
+   * @param r
+   *          The red component
+   * @param g
+   *          The green component
+   * @param b
+   *          The blue component
+   * @param a
+   *          The alpha component
+   */
+
+  void setAlbedoColor4f(
+    float r,
+    float g,
+    float b,
+    float a);
+
+  /**
+   * Set the albedo texture.
+   *
+   * @param t
+   *          The albedo texture
+   */
+
+  void setAlbedoTexture(
+    Texture2DStaticUsableType t);
+
+  /**
+   * Set the albedo color/texture mix factor.
+   *
+   * @param m
+   *          The mix factor
+   */
+
+  void setAlbedoTextureMix(
+    float m);
 
   /**
    * Set the alpha properties of the material.
    *
-   * @param alpha
-   *          The alpha properties.
+   * @param a
+   *          The alpha properties
    */
 
   void setAlpha(
-    final KMaterialAlphaType alpha);
+    KMaterialAlphaType a);
 
   /**
-   * Set the environment properties of the material.
+   * Set the environment mapping type.
    *
-   * @param environment
-   *          The environment properties.
+   * @param e
+   *          The environment mapping type
    */
 
   void setEnvironment(
-    final KMaterialEnvironmentType environment);
+    KMaterialEnvironmentType e);
 
   /**
-   * Set the normal properties of the material.
+   * Set the normal texture.
    *
-   * @param normal
-   *          The normal properties.
+   * @param t
+   *          The normal texture
    */
 
-  void setNormal(
-    final KMaterialNormalType normal);
+  void setNormalTexture(
+    Texture2DStaticUsableType t);
 
   /**
-   * Set the specular properties of the material.
+   * Set the specular color.
    *
-   * @param specular
-   *          The specular properties.
+   * @param r
+   *          The red component
+   * @param g
+   *          The green component
+   * @param b
+   *          The blue component
    */
 
-  void setSpecular(
-    final KMaterialSpecularType specular);
+  void setSpecularColor3f(
+    float r,
+    float g,
+    float b);
+
+  /**
+   * Set the specular exponent.
+   *
+   * @param e
+   *          The specular exponent
+   */
+
+  void setSpecularExponent(
+    float e);
+
+  /**
+   * Set the specular texture.
+   *
+   * @param t
+   *          The specular texture
+   */
+
+  void setSpecularTexture(
+    Texture2DStaticUsableType t);
 
   /**
    * Set the UV matrix of the material.
    *
    * @param uv_matrix
-   *          The UV matrix.
+   *          The UV matrix
    */
 
   void setUVMatrix(

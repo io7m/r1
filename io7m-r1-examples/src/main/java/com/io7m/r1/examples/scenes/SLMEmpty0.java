@@ -24,6 +24,7 @@ import com.io7m.jtensors.parameterized.PVectorI3F;
 import com.io7m.r1.examples.ExampleSceneBuilderType;
 import com.io7m.r1.examples.ExampleSceneType;
 import com.io7m.r1.examples.ExampleSceneUtilities;
+import com.io7m.r1.examples.ExampleSceneUtilitiesType;
 import com.io7m.r1.examples.ExampleViewType;
 import com.io7m.r1.examples.ExampleVisitorType;
 import com.io7m.r1.exceptions.RException;
@@ -31,6 +32,8 @@ import com.io7m.r1.kernel.types.KFaceSelection;
 import com.io7m.r1.kernel.types.KInstanceOpaqueRegular;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadow;
 import com.io7m.r1.kernel.types.KLightSphereTexturedCubeWithoutShadowBuilderType;
+import com.io7m.r1.kernel.types.KMaterialOpaqueRegular;
+import com.io7m.r1.kernel.types.KMaterialOpaqueRegularBuilderType;
 import com.io7m.r1.kernel.types.KTransformOST;
 import com.io7m.r1.kernel.types.KTransformType;
 import com.io7m.r1.kernel.types.KVisibleSetLightGroupBuilderType;
@@ -63,13 +66,18 @@ public final class SLMEmpty0 implements ExampleSceneType
   }
 
   @Override public void exampleScene(
+    final ExampleSceneUtilitiesType utilities,
     final ExampleSceneBuilderType scene)
     throws RException
   {
+    final KMaterialOpaqueRegularBuilderType mb =
+      KMaterialOpaqueRegular.newBuilder(utilities.getMaterialDefaults());
+    final KMaterialOpaqueRegular m = mb.build();
+
     final KInstanceOpaqueRegular i_floor =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        m,
         ExampleSceneUtilities.IDENTITY_TRANSFORM,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -88,7 +96,7 @@ public final class SLMEmpty0 implements ExampleSceneType
     final KInstanceOpaqueRegular i_north =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        m,
         north_t,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -107,7 +115,7 @@ public final class SLMEmpty0 implements ExampleSceneType
     final KInstanceOpaqueRegular i_east =
       KInstanceOpaqueRegular.newInstance(
         scene.mesh("plane2x2.rmx"),
-        ExampleSceneUtilities.OPAQUE_MATTE_WHITE,
+        m,
         east_t,
         ExampleSceneUtilities.IDENTITY_UV,
         KFaceSelection.FACE_RENDER_FRONT);
@@ -115,7 +123,7 @@ public final class SLMEmpty0 implements ExampleSceneType
     {
       final KLightSphereTexturedCubeWithoutShadowBuilderType b =
         KLightSphereTexturedCubeWithoutShadow.newBuilder(scene
-          .cubeTextureClamped("toronto/cube.rxc"));
+          .cubeTextureClamped("toronto/cube.rpc"));
       b.copyFromSphere(ExampleSceneUtilities.LIGHT_SPHERICAL_LARGE_WHITE);
       b.setPosition(ExampleSceneUtilities.CENTER);
 
