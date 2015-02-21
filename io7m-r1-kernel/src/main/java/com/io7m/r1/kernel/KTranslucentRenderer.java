@@ -30,6 +30,7 @@ import com.io7m.jcanephora.Primitives;
 import com.io7m.jcanephora.TextureUnitType;
 import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLInterfaceGL3ES3Type;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
@@ -516,7 +517,8 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
       JCacheException,
       RException
   {
-    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+    final JCGLInterfaceGL3ES3Type gc =
+      this.g.implementationAccept(KRendererCommon.getGL3ES3Get());
     final KRefractionRendererType rr = this.refraction_renderer;
     final KTextureBindingsControllerType bindings = this.texture_bindings;
 
@@ -528,6 +530,8 @@ import com.io7m.r1.kernel.types.KVisibleSetTranslucents;
       gc.colorBufferMask(true, true, true, true);
       gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
       gc.depthBufferWriteDisable();
+
+      KRendererCommon.enableDepthClampingIfSupported(this.g);
 
       if (gc.stencilBufferGetBits() > 0) {
         gc.stencilBufferDisable();

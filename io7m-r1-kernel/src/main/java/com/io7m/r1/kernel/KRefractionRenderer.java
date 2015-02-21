@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -385,6 +385,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
             gc.colorBufferClear4f(0.0f, 0.0f, 0.0f, 1.0f);
             gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
             gc.depthBufferWriteDisable();
+            KRendererCommon.enableDepthClampingIfSupported(g);
 
             KShadingProgramCommon.putMatrixProjectionUnchecked(
               program,
@@ -471,6 +472,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
           gc.colorBufferMask(true, true, true, true);
           gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
           gc.depthBufferWriteDisable();
+          KRendererCommon.enableDepthClampingIfSupported(g);
 
           KShadingProgramCommon.putMatrixProjectionUnchecked(
             p,
@@ -550,6 +552,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
           gc.colorBufferMask(true, true, true, true);
           gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
           gc.depthBufferWriteDisable();
+          KRendererCommon.enableDepthClampingIfSupported(g);
 
           KShadingProgramCommon.putMatrixProjectionUnchecked(
             p,
@@ -625,6 +628,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
           gc.colorBufferMask(true, true, true, true);
           gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
           gc.depthBufferWriteDisable();
+          KRendererCommon.enableDepthClampingIfSupported(g);
 
           KShadingProgramCommon.putMatrixProjectionUnchecked(
             p,
@@ -699,6 +703,7 @@ import com.io7m.r1.kernel.types.KMeshReadableType;
           gc.colorBufferMask(true, true, true, true);
           gc.depthBufferTestEnable(DepthFunction.DEPTH_LESS_THAN_OR_EQUAL);
           gc.depthBufferWriteDisable();
+          KRendererCommon.enableDepthClampingIfSupported(g);
 
           KShadingProgramCommon.putMatrixProjectionUnchecked(
             p,

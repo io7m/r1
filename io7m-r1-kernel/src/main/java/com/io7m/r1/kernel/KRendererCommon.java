@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -21,7 +21,14 @@ import com.io7m.jcanephora.FaceSelection;
 import com.io7m.jcanephora.FaceWindingOrder;
 import com.io7m.jcanephora.JCGLException;
 import com.io7m.jcanephora.TextureUnitType;
+import com.io7m.jcanephora.api.JCGLImplementationType;
+import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
+import com.io7m.jcanephora.api.JCGLInterfaceGL2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGL3ES3Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
 import com.io7m.jcanephora.batchexec.JCBProgramType;
 import com.io7m.jequality.annotations.EqualityReference;
 import com.io7m.jfunctional.Unit;
@@ -57,11 +64,55 @@ import com.io7m.r1.kernel.types.KProjectionType;
 
 @EqualityReference final class KRendererCommon
 {
+  @EqualityReference static final class GetGL3ES3 implements
+    JCGLImplementationVisitorType<JCGLInterfaceGL3ES3Type, UnreachableCodeException>
+  {
+    GetGL3ES3()
+    {
+      // Nothing
+    }
+
+    @Override public JCGLInterfaceGL3ES3Type implementationIsGL2(
+      final JCGLInterfaceGL2Type gl)
+    {
+      throw new UnreachableCodeException();
+    }
+
+    @Override public JCGLInterfaceGL3ES3Type implementationIsGL3(
+      final JCGLInterfaceGL3Type gl)
+    {
+      return gl;
+    }
+
+    @Override public JCGLInterfaceGL3ES3Type implementationIsGLES2(
+      final JCGLInterfaceGLES2Type gl)
+    {
+      throw new UnreachableCodeException();
+    }
+
+    @Override public JCGLInterfaceGL3ES3Type implementationIsGLES3(
+      final JCGLInterfaceGLES3Type gl)
+    {
+      return gl;
+    }
+  }
+
+  private static final GetGL3ES3 GET_GL3ES3;
+
+  static {
+    GET_GL3ES3 = new GetGL3ES3();
+  }
+
   static float depthCoefficient(
     final KProjectionType projection)
   {
     final float far = projection.projectionGetZFar();
     return 2.0f / KRendererCommon.log2(far + 1.0f);
+  }
+
+  static GetGL3ES3 getGL3ES3Get()
+  {
+    return KRendererCommon.GET_GL3ES3;
   }
 
   private static float log2(
@@ -503,5 +554,37 @@ import com.io7m.r1.kernel.types.KProjectionType;
   private KRendererCommon()
   {
     throw new UnreachableCodeException();
+  }
+
+  static void enableDepthClampingIfSupported(
+    final JCGLImplementationType gi)
+  {
+    gi
+      .implementationAccept(new JCGLImplementationVisitorType<Unit, UnreachableCodeException>() {
+        @Override public Unit implementationIsGL2(
+          final JCGLInterfaceGL2Type gl)
+        {
+          throw new UnreachableCodeException();
+        }
+
+        @Override public Unit implementationIsGL3(
+          final JCGLInterfaceGL3Type gl)
+        {
+          gl.depthClampingEnable();
+          return Unit.unit();
+        }
+
+        @Override public Unit implementationIsGLES2(
+          final JCGLInterfaceGLES2Type gl)
+        {
+          throw new UnreachableCodeException();
+        }
+
+        @Override public Unit implementationIsGLES3(
+          final JCGLInterfaceGLES3Type gl)
+        {
+          return Unit.unit();
+        }
+      });
   }
 }

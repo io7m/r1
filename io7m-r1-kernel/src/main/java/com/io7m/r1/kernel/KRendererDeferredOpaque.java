@@ -1,10 +1,10 @@
 /*
  * Copyright © 2014 <code@io7m.com> http://io7m.com
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
@@ -42,9 +42,11 @@ import com.io7m.jcanephora.api.JCGLImplementationType;
 import com.io7m.jcanephora.api.JCGLImplementationVisitorType;
 import com.io7m.jcanephora.api.JCGLInterfaceCommonType;
 import com.io7m.jcanephora.api.JCGLInterfaceGL2Type;
+import com.io7m.jcanephora.api.JCGLInterfaceGL3ES3Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGL3Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES2Type;
 import com.io7m.jcanephora.api.JCGLInterfaceGLES3Type;
+import com.io7m.jcanephora.api.JCGLStencilBufferType;
 import com.io7m.jcanephora.batchexec.JCBExecutorProcedureType;
 import com.io7m.jcanephora.batchexec.JCBExecutorType;
 import com.io7m.jcanephora.batchexec.JCBProgramProcedureType;
@@ -107,42 +109,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 @SuppressWarnings({ "synthetic-access" }) @EqualityReference public final class KRendererDeferredOpaque implements
   KRendererDeferredOpaqueType
 {
-  @EqualityReference private static final class GetFramebuffersGL3 implements
-    JCGLImplementationVisitorType<JCGLFramebuffersGL3Type, UnreachableCodeException>
-  {
-    public GetFramebuffersGL3()
-    {
-      // Nothing.
-    }
-
-    @Override public JCGLFramebuffersGL3Type implementationIsGL2(
-      final JCGLInterfaceGL2Type gl)
-    {
-      return gl;
-    }
-
-    @Override public JCGLFramebuffersGL3Type implementationIsGL3(
-      final JCGLInterfaceGL3Type gl)
-    {
-      return gl;
-    }
-
-    @Override public JCGLFramebuffersGL3Type implementationIsGLES2(
-      final JCGLInterfaceGLES2Type gl)
-    {
-      throw new UnreachableCodeException();
-    }
-
-    @Override public JCGLFramebuffersGL3Type implementationIsGLES3(
-      final JCGLInterfaceGLES3Type gl)
-    {
-      return gl;
-    }
-  }
-
   private static final PVectorI4F<RSpaceRGBType>     BLACK;
   private static final Set<FramebufferBlitBuffer>    BLIT_DEPTH_STENCIL;
-  private static final GetFramebuffersGL3            GET_FRAMEBUFFERS_GL3;
   private static final PVectorI3F<RSpaceObjectType>  NORMAL_ZERO;
   private static final PVectorI2F<RSpaceTextureType> UV_ZERO;
 
@@ -150,7 +118,6 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     BLACK = new PVectorI4F<RSpaceRGBType>(0.0f, 0.0f, 0.0f, 1.0f);
     UV_ZERO = new PVectorI2F<RSpaceTextureType>(0.0f, 0.0f);
     NORMAL_ZERO = new PVectorI3F<RSpaceObjectType>(0.0f, 0.0f, 0.0f);
-    GET_FRAMEBUFFERS_GL3 = new GetFramebuffersGL3();
     BLIT_DEPTH_STENCIL =
       NullCheck.notNull(EnumSet.of(
         FramebufferBlitBuffer.FRAMEBUFFER_BLIT_BUFFER_DEPTH,
@@ -169,8 +136,10 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
   private static void configureRenderStateForGeometry(
     final OptionType<DepthFunction> depth_function,
-    final JCGLInterfaceCommonType gc)
+    final JCGLImplementationType gi)
   {
+    final JCGLInterfaceCommonType gc = gi.getGLCommon();
+
     gc.blendingDisable();
     gc.colorBufferMask(true, true, true, true);
     gc.cullingEnable(
@@ -195,6 +164,34 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         }
       });
 
+    gi
+      .implementationAccept(new JCGLImplementationVisitorType<Unit, UnreachableCodeException>() {
+        @Override public Unit implementationIsGL2(
+          final JCGLInterfaceGL2Type gl)
+        {
+          throw new UnreachableCodeException();
+        }
+
+        @Override public Unit implementationIsGL3(
+          final JCGLInterfaceGL3Type gl)
+        {
+          gl.depthClampingEnable();
+          return Unit.unit();
+        }
+
+        @Override public Unit implementationIsGLES2(
+          final JCGLInterfaceGLES2Type gl)
+        {
+          throw new UnreachableCodeException();
+        }
+
+        @Override public Unit implementationIsGLES3(
+          final JCGLInterfaceGLES3Type gl)
+        {
+          return Unit.unit();
+        }
+      });
+
     gc.stencilBufferEnable();
     gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0xffffffff);
     gc.stencilBufferOperation(
@@ -210,8 +207,10 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private static void configureRenderStateForLightVolume(
-    final JCGLInterfaceCommonType gc)
+    final JCGLImplementationType gi)
   {
+    final JCGLInterfaceCommonType gc = gi.getGLCommon();
+
     gc.blendingEnable(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE);
     gc.colorBufferMask(true, true, true, true);
     gc.cullingEnable(
@@ -219,6 +218,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       FaceWindingOrder.FRONT_FACE_COUNTER_CLOCKWISE);
     gc.depthBufferWriteDisable();
     gc.depthBufferTestEnable(DepthFunction.DEPTH_GREATER_THAN_OR_EQUAL);
+
+    KRendererCommon.enableDepthClampingIfSupported(gi);
   }
 
   /**
@@ -227,7 +228,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
    */
 
   private static void configureStencilForLightRendering(
-    final JCGLInterfaceCommonType gc)
+    final JCGLStencilBufferType gc)
   {
     gc.stencilBufferEnable();
     gc.stencilBufferMask(FaceSelection.FACE_FRONT_AND_BACK, 0x0);
@@ -342,7 +343,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private static void renderGroupGeometryBatchInstances(
-    final JCGLInterfaceCommonType gc,
+    final JCGLInterfaceGL3ES3Type gc,
     final KTextureBindingsControllerType texture_bindings,
     final KMatricesObserverType mwo,
     final List<KInstanceOpaqueType> instances,
@@ -382,7 +383,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private static void renderGroupGeometryInstance(
-    final JCGLInterfaceCommonType gc,
+    final JCGLInterfaceGL3ES3Type gc,
     final KTextureBindingsContextType units,
     final KMatricesInstanceValuesType mwi,
     final JCBProgramType program,
@@ -441,7 +442,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       final TextureUnitType t_map_specular,
       final KTextureBindingsContextType units,
       final KViewRays view_rays,
-      final JCGLInterfaceCommonType gc,
+      final JCGLInterfaceGL3ES3Type gc,
       final KMatricesInstanceValuesType mwi,
       final KLightSphereTexturedCubeWithoutShadow ls,
       final KUnitSphereUsableType s,
@@ -527,7 +528,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
     final KViewRays view_rays,
-    final JCGLInterfaceCommonType gc,
+    final JCGLInterfaceGL3ES3Type gc,
     final KMatricesInstanceValuesType mwi,
     final KLightSphereType ls,
     final KUnitSphereUsableType s,
@@ -599,9 +600,9 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   private final KShaderCacheDeferredLightType                      shader_light_cache;
   private final KUnitSphereCacheType                               sphere_cache;
   private final KScreenSpaceShadowDeferredRendererType             ssshadow_renderer;
+  private final KTextureBindingsControllerType                     texture_bindings;
   private final PMatrixM3x3F<RSpaceTextureType, RSpaceTextureType> uv_light_spherical;
   private final KViewRaysCacheType                                 view_rays_cache;
-  private final KTextureBindingsControllerType                     texture_bindings;
 
   private KRendererDeferredOpaque(
     final JCGLImplementationType in_g,
@@ -651,7 +652,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       final KViewRays view_rays =
         this.view_rays_cache.cacheGetLU(mwo.getProjection());
 
-      final JCGLInterfaceCommonType gc = this.g.getGLCommon();
+      final JCGLInterfaceGL3ES3Type gc =
+        this.g.implementationAccept(KRendererCommon.getGL3ES3Get());
       gc.viewportSet(framebuffer.getArea());
 
       final Set<String> group_names = opaques.getGroupNames();
@@ -661,6 +663,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
         assert group != null;
 
         this.renderGroup(
+          gc,
           framebuffer,
           shadow_context,
           depth_function,
@@ -685,13 +688,16 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       final Set<String> unlit_codes = opaques.getUnlitMaterialCodes();
       if (unlit_codes.size() > 0) {
 
-        final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-        final JCGLFramebuffersGL3Type gf3 =
-          this.g
-            .implementationAccept(KRendererDeferredOpaque.GET_FRAMEBUFFERS_GL3);
+        final JCGLInterfaceGL3ES3Type gc =
+          this.g.implementationAccept(KRendererCommon.getGL3ES3Get());
 
         gc.viewportSet(framebuffer.getArea());
-        this.renderUnlitGeometry(framebuffer, depth_function, mwo, opaques);
+        this.renderUnlitGeometry(
+          gc,
+          framebuffer,
+          depth_function,
+          mwo,
+          opaques);
 
         final FramebufferUsableType render_fb =
           framebuffer.getRGBAColorFramebuffer();
@@ -699,9 +705,9 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
         try {
           KRendererDeferredOpaque.renderCopyGBufferDepthStencil(
-            gf3,
+            gc,
             framebuffer);
-          KRendererDeferredOpaque.this.renderUnlitCopy(framebuffer);
+          KRendererDeferredOpaque.this.renderUnlitCopy(gc, framebuffer);
         } finally {
           gc.framebufferDrawUnbind();
         }
@@ -713,6 +719,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private void renderGroup(
+    final JCGLInterfaceGL3ES3Type gc,
     final KFramebufferDeferredUsableType framebuffer,
     final KShadowMapContextType shadow_context,
     final OptionType<DepthFunction> depth_function,
@@ -722,9 +729,14 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     throws RException,
       JCacheException
   {
-    this.renderGroupGeometry(framebuffer, depth_function, mwo, group);
-    this
-      .renderGroupLights(framebuffer, shadow_context, view_rays, mwo, group);
+    this.renderGroupGeometry(gc, framebuffer, depth_function, mwo, group);
+    this.renderGroupLights(
+      gc,
+      framebuffer,
+      shadow_context,
+      view_rays,
+      mwo,
+      group);
   }
 
   /**
@@ -732,7 +744,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
    */
 
   private void renderGroupClearNonzeroStencilToOne(
-    final JCGLInterfaceCommonType gc)
+    final JCGLInterfaceGL3ES3Type gc)
     throws RException,
       JCacheException
   {
@@ -789,7 +801,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private void renderGroupClearToBlack(
-    final JCGLInterfaceCommonType gc)
+    final JCGLInterfaceGL3ES3Type gc)
     throws RException,
       JCacheException
   {
@@ -832,6 +844,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private void renderGroupGeometry(
+    final JCGLInterfaceGL3ES3Type gc,
     final KFramebufferDeferredUsableType framebuffer,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
@@ -839,7 +852,6 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     throws RException,
       JCacheException
   {
-    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
     final KGeometryBufferUsableType geom =
       framebuffer.deferredGetGeometryBuffer();
     final FramebufferUsableType geom_fb = geom.geomGetFramebuffer();
@@ -851,7 +863,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
       this.renderGroupClearNonzeroStencilToOne(gc);
       KRendererDeferredOpaque.configureRenderStateForGeometry(
         depth_function,
-        gc);
+        this.g);
 
       final Set<String> material_codes = group.getMaterialCodes();
       for (final String shader_code : material_codes) {
@@ -901,7 +913,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
     final KViewRays view_rays,
-    final JCGLInterfaceCommonType gc,
+    final JCGLInterfaceGL3ES3Type gc,
     final KMatricesObserverType mwo,
     final KShadowMapContextType shadow_map_context,
     final KLightType light)
@@ -1016,7 +1028,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
     final KViewRays view_rays,
-    final JCGLInterfaceCommonType gc,
+    final JCGLInterfaceGL3ES3Type gc,
     final KMatricesObserverType mwo,
     final KLightDirectionalType ld)
     throws RException,
@@ -1094,7 +1106,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
     final KViewRays view_rays,
-    final JCGLInterfaceCommonType gc,
+    final JCGLInterfaceGL3ES3Type gc,
     final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
     final KTextureBindingsContextType texture_unit_context,
@@ -1120,7 +1132,8 @@ import com.io7m.r1.spaces.RSpaceTextureType;
             throws RException
           {
             gc.framebufferDrawBind(framebuffer.getRGBAColorFramebuffer());
-            KRendererDeferredOpaque.configureRenderStateForLightVolume(gc);
+            KRendererDeferredOpaque
+              .configureRenderStateForLightVolume(KRendererDeferredOpaque.this.g);
 
             return lpss
               .withScreenSpaceShadowAccept(new KLightWithScreenSpaceShadowVisitorType<Unit, RException>() {
@@ -1171,7 +1184,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
     } else {
       gc.framebufferDrawBind(framebuffer.getRGBAColorFramebuffer());
-      KRendererDeferredOpaque.configureRenderStateForLightVolume(gc);
+      KRendererDeferredOpaque.configureRenderStateForLightVolume(this.g);
       this.renderGroupLightProjectiveLightPass(
         framebuffer,
         t_map_albedo,
@@ -1194,7 +1207,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
     final KViewRays view_rays,
-    final JCGLInterfaceCommonType gc,
+    final JCGLInterfaceGL3ES3Type gc,
     final KMatricesProjectiveLightType mdp,
     final KShadowMapContextType shadow_map_context,
     final KTextureBindingsContextType texture_unit_context,
@@ -1325,7 +1338,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final TextureUnitType t_map_normal,
     final TextureUnitType t_map_specular,
     final KViewRays view_rays,
-    final JCGLInterfaceCommonType gc,
+    final JCGLInterfaceGL3ES3Type gc,
     final KMatricesProjectiveLightType mdp,
     final KFramebufferMonochromeUsableType shadow,
     final KTextureBindingsContextType texture_unit_context,
@@ -1447,6 +1460,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private void renderGroupLights(
+    final JCGLInterfaceGL3ES3Type gc,
     final KFramebufferDeferredUsableType framebuffer,
     final KShadowMapContextType shadow_map_context,
     final KViewRays view_rays,
@@ -1454,11 +1468,6 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final KVisibleSetLightGroup group)
     throws RException
   {
-    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
-    final JCGLFramebuffersGL3Type gf3 =
-      this.g
-        .implementationAccept(KRendererDeferredOpaque.GET_FRAMEBUFFERS_GL3);
-
     /**
      * Create a new texture unit context for binding g-buffer textures.
      */
@@ -1496,7 +1505,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
           try {
             KRendererDeferredOpaque.renderCopyGBufferDepthStencil(
-              gf3,
+              gc,
               framebuffer);
             KRendererDeferredOpaque.configureStencilForLightRendering(gc);
 
@@ -1537,13 +1546,13 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     final TextureUnitType t_map_specular,
     final KTextureBindingsContextType texture_unit_context,
     final KViewRays view_rays,
-    final JCGLInterfaceCommonType gc,
+    final JCGLInterfaceGL3ES3Type gc,
     final KMatricesObserverType mwo,
     final KLightSphereType ls)
     throws RException,
       JCacheException
   {
-    KRendererDeferredOpaque.configureRenderStateForLightVolume(gc);
+    KRendererDeferredOpaque.configureRenderStateForLightVolume(this.g);
 
     final KUnitSphereUsableType s =
       this.sphere_cache.cacheGetLU(KUnitSpherePrecision.KUNIT_SPHERE_16);
@@ -1651,11 +1660,11 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private void renderUnlitCopy(
+    final JCGLInterfaceGL3ES3Type gc,
     final KFramebufferDeferredUsableType framebuffer)
     throws RException,
       JCacheException
   {
-    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
     final KGeometryBufferUsableType gbuffer =
       framebuffer.deferredGetGeometryBuffer();
     final KProgramType kp = this.shader_light_cache.cacheGetLU("copy_rgba");
@@ -1723,6 +1732,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
   }
 
   private void renderUnlitGeometry(
+    final JCGLInterfaceGL3ES3Type gc,
     final KFramebufferDeferredUsableType framebuffer,
     final OptionType<DepthFunction> depth_function,
     final KMatricesObserverType mwo,
@@ -1730,7 +1740,6 @@ import com.io7m.r1.spaces.RSpaceTextureType;
     throws RException,
       JCacheException
   {
-    final JCGLInterfaceCommonType gc = this.g.getGLCommon();
     final KTextureBindingsControllerType b = this.texture_bindings;
 
     final KGeometryBufferUsableType geom =
@@ -1742,7 +1751,7 @@ import com.io7m.r1.spaces.RSpaceTextureType;
 
       KRendererDeferredOpaque.configureRenderStateForGeometry(
         depth_function,
-        gc);
+        this.g);
 
       final Set<String> unlit_codes = opaques.getUnlitMaterialCodes();
       for (final String code : unlit_codes) {
