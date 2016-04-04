@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.log_depth"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Logarithmic Depth</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.log_depth.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package
+      exclusively utilizes a so-called 
+      <s:term s:type="term">logarithmic depth buffer</s:term> for all
+      rendering operations.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.log_depth.issues_existing">
+    <s:subsection-title>OpenGL Depth Issues</s:subsection-title>
+    <s:paragraph>
+      By default, OpenGL (effectively) stores a depth value
+      proportional to the reciprocal of the
+      <s:term s:type="variable">z</s:term> component of the 
+      <s:link s:target="r1.dai.coords.clip-space">clip-space</s:link>
+      coordinates of each vertex projected onto the screen
+      <s:footnote>
+        See <s:link-external s:target="http://www.sjbaker.org/steve/omniv/love_your_z_buffer.html">Learning To Love Your Depth Buffer</s:link-external>.
+      </s:footnote>. Informally,
+      the <s:term s:type="term">perspective projection</s:term> matrix 
+      used to transform
+      <s:link s:target="r1.dai.coords.eye-space">eye-space</s:link>
+      coordinates to clip-space will place the negated 
+      <s:term s:type="variable">z</s:term> component of the original
+      eye-space coordinates into the 
+      <s:term s:type="variable">w</s:term> component of the resulting
+      clip-space coordinates. When the hardware performs the
+      <s:link s:target="r1.dai.coords.normalized-device-space">division by w</s:link>
+      to produce normalized-device-space coordinates, the resulting
+      <s:term s:type="variable">z</s:term> component falls within
+      the range <s:term s:type="expression">[-1.0, 1.0]</s:term>
+      (although any point with a <s:term s:type="variable">z</s:term> component
+      less than <s:term s:type="constant">0</s:term> will be clipped
+      away by the clipping hardware). This final value is linearly
+      mapped to a configurable range (typically 
+      <s:term s:type="expression">[0.0, 1.0]</s:term>) to produce a 
+      <s:link s:target="r1.dai.coords.screen-space">screen-space</s:link>
+      depth value.
+    </s:paragraph>
+    <s:paragraph>
+      Unfortunately, the encoding scheme above means that most of
+      the depth buffer is essentially wasted. The above scheme will
+      give excessive precision for objects close to the viewing plane,
+      and almost none for objects further away. Fortunately, a better
+      encoding scheme known as <s:term s:type="term">logarithmic depth</s:term>
+      <s:footnote>
+        Apparently first discovered by <s:link-external s:target="http://outerra.blogspot.co.uk/2012/11/maximizing-depth-buffer-range-and.html">Brano Kemen</s:link-external>.
+      </s:footnote> can be implemented that provides 
+      <s:term s:type="emphasis">vastly</s:term> greater precision
+      and coexists happily with the standard projection matrices
+      used in OpenGL-based renderers.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.log_depth.encoding">
+    <s:subsection-title>Logarithmic Encoding</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">logarithmic depth value</s:term> is
+      produced by encoding a negated (and therefore <s:term s:type="term">positive</s:term>)
+      eye-space <s:term s:type="variable">z</s:term> value in the
+      manner specified by <s:term s:type="function">encode</s:term>
+      [<s:link-external s:target="haskell/LogDepth.hs">LogDepth.hs</s:link-external>]:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Logarithmic Depth (Encoding)</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/LogDepth.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      The function is parameterized by a so-called
+      <s:term s:type="term">depth coefficient</s:term> that is
+      derived from the <s:term s:type="term">far plane distance</s:term>
+      as shown by <s:term s:type="expression">depth_coefficient</s:term>.
+    </s:paragraph>
+    <s:paragraph>
+      The inverse of <s:term s:type="function">encode</s:term> is
+      <s:term s:type="function">decode</s:term>, such that 
+      for a given negated eye-space <s:term s:type="variable">z</s:term>,
+      <s:term s:type="expression">z = decode d (encode d z)</s:term>.
+    </s:paragraph>
+    <s:paragraph>
+      A graph of the functions is as follows:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Logarithmic Depth (Graph)</s:formal-item-title>
+      <s:image s:source="images/log_depth.png">Logarithmic Depth (Graph)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      An interactive <s:link-external s:target="http://geogebra.org">GeoGebra</s:link-external>
+      construction is provided in
+      [<s:link-external s:target="log_depth.ggb">log_depth.ggb</s:link-external>]
+    </s:paragraph>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package
+      uses a slightly modified version of the encoding function that clamps
+      the original <s:term s:type="variable">z</s:term> value to the range
+      <s:term s:type="expression">[0.000001, ∞]</s:term>. The reason for this
+      is that <s:term s:type="expression">log2 (0)</s:term> is undefined, and
+      so attempting to derive a depth value in this manner tends to cause
+      issues with triangle clipping. The encoding function is also separated
+      into two parts as a simple optimization: The encoding function contains
+      a term <s:term s:type="expression">z + 1.0</s:term>, and this term can
+      be calculated by a <s:term s:type="term">vertex shader</s:term> and
+      interpolated. The actual functions as implemented are given by
+      [<s:link-external s:target="parasol/LogDepth.p">LogDepth.p</s:link-external>]:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Logarithmic Depth (Parasol)</s:formal-item-title>
+      <s:verbatim><xi:include href="parasol/LogDepth.p" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      A fragment shader can use <s:term s:type="function">encode_full</s:term>
+      to compute a logarithmic depth value from a given positive eye-space 
+      <s:term s:type="variable">z</s:term> value. Alternatively, a vertex
+      shader can compute the <s:term s:type="expression">z + 1.0</s:term>
+      term <s:term s:type="variable">r</s:term> from a non-negated eye-space 
+      <s:term s:type="variable">z</s:term>
+      value, and pass <s:term s:type="variable">r</s:term> to a cooperating
+      fragment shader which then finishes the computation by applying
+      <s:term s:type="function">encode_partial</s:term> to
+      <s:term s:type="variable">r</s:term>. When performing 
+      <s:link s:target="r1.dai.deferred-position-recon">position reconstruction</s:link>
+      during <s:term s:type="term">deferred rendering</s:term>, the original
+      eye-space <s:term s:type="variable">z</s:term> value of a fragment is
+      retrieved by negating the result of <s:term s:type="function">decode</s:term>
+      applied to a given logarithmic depth sample.
+    </s:paragraph>
+    <s:paragraph>
+      The original derivation of the encoding and decoding functions as
+      described by Brano Kemen used the <s:term s:type="variable">w</s:term> component
+      of the resulting clip-space coordinates. Unfortunately, this does not
+      work correctly with orthographic projections, as the typical orthographic
+      projection matrix will produce clip-space coordinates with a
+      <s:term s:type="variable">w</s:term> component always equal to
+      <s:term s:type="constant">1</s:term>. Aside from the effects that this will
+      have on depth testing (essentially mapping the depth of all fragments to the
+      far plane), it also makes position reconstruction impossible as the original eye-space
+      <s:term s:type="variable">z</s:term> value cannot be recovered.
+      Instead, the <s:term s:type="package">io7m-r1</s:term> package uses
+      the negated eye-space <s:term s:type="variable">z</s:term> value directly
+      in all cases.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>

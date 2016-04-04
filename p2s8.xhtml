@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.8. Meshes</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.7. Depth Materials</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.9. Transforms</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s7.xhtml#st200_p2s7">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s9.xhtml#st200_p2s9">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s8" href="#st200_p2s8">2.8</a></div><div class="st200_section_title">Meshes</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s8.xhtml#st200_p2s8ss1">2.8.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s8.xhtml#st200_p2s8ss2">2.8.2. Attributes</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s8.xhtml#st200_p2s8ss3">2.8.3. Types</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s8ss1" href="#st200_p2s8ss1">2.8.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s8ss1pg1" href="#st200_p2s8ss1pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">mesh</span> is a collection of vertices
+      and triangles that define a polyhedral object, allocated on the
+      GPU upon which the renderer is executing. In practical terms, a
+      mesh is a pair
+      <span class="st200_term expression">(a, i)</span>, where
+      <span class="st200_term expression">a</span> is an OpenGL
+      <span class="st200_term term">vertex buffer object</span> consisting
+      of vertices of a
+      <a class="st200_link" href="p2s8.xhtml#st200_p2s8ss2">standard type</a>,
+      <span class="st200_term expression">i</span> is an OpenGL
+      <span class="st200_term term">element buffer object</span> consisting
+      of indices that describe how to draw the mesh as a series of triangles.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s8ss1pg2" href="#st200_p2s8ss1pg2">2</a></div><div class="st200_paragraph">
+      The contents of <span class="st200_term expression">a</span> are mutable, but
+      mesh references are considered to be immutable as with all other objects 
+      in the renderer.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s8ss2" href="#st200_p2s8ss2">2.8.2</a></div><div class="st200_subsection_title">Attributes</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s8ss2pg1" href="#st200_p2s8ss2pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">mesh</span> consists of 
+      <span class="st200_term term">vertices</span>.
+      A vertex can be considered to be a value of a
+      <span class="st200_term term">record type</span>, with the fields of
+      the record referred to as the <span class="st200_term term">attributes</span>
+      of the vertex. In the <span class="st200_term package">io7m-r1</span> package,
+      an array buffer containing vertex data is specified using the
+      array buffer types from
+      <a class="st200_link_external" href="http://mvn.io7m.com/io7m-jcanephora">jcanephora</a>.
+      The <span class="st200_term package">jcanephora</span> package 
+      allows programmers to specify the exact types of array buffers, 
+      allows for the full inspection of type information at runtime, including 
+      the ability to reference attributes by name, and allows for type-safe modification
+      of the contents of array buffers using an efficient cursor interface. 
+      In the <span class="st200_term package">io7m-r1</span> package,
+      meshes must have at least the following attributes, in any order:
+    </div></div><div class="st200_formal_item mesh_types"><div class="st200_formal_item_title mesh_types"><a id="st200_p2s8ss2fo1" href="#st200_p2s8ss2fo1">2.8.2.1. Required mesh attributes</a></div><table class="st200_table" summary="Required mesh attributes"><thead class="st200_table_head"><tr><th class="st200_table_column_name">Name</th><th class="st200_table_column_name">Type</th><th class="st200_table_column_name">Description</th></tr></thead><tbody class="st200_table_body"><tr class="st200_table_row"><td class="st200_table_cell"><span class="st200_term constant">v_position</span></td><td class="st200_table_cell"><span class="st200_term constant">vector_3f</span></td><td class="st200_table_cell">The object-space position of the vertex</td></tr><tr class="st200_table_row"><td class="st200_table_cell"><span class="st200_term constant">v_normal</span></td><td class="st200_table_cell"><span class="st200_term constant">vector_3f</span></td><td class="st200_table_cell">The object-space normal vector of the vertex</td></tr><tr class="st200_table_row"><td class="st200_table_cell"><span class="st200_term constant">v_uv</span></td><td class="st200_table_cell"><span class="st200_term constant">vector_2f</span></td><td class="st200_table_cell">The UV coordinates of the vertex</td></tr><tr class="st200_table_row"><td class="st200_table_cell"><span class="st200_term constant">v_tangent</span></td><td class="st200_table_cell"><span class="st200_term constant">vector_4f</span></td><td class="st200_table_cell">The tangent vector of the vertex</td></tr></tbody></table></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s8ss2pg2" href="#st200_p2s8ss2pg2">2</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package ignores
+      any other attributes that happen to be present
+      <span class="st200_footnote_reference"><a id="st200_fn_21_ref" href="#st200_fn_21">[21]</a></span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s8ss2pg3" href="#st200_p2s8ss2pg3">3</a></div><div class="st200_paragraph">
+      Meshes explicitly store per-vertex <span class="st200_term term">tangent</span>
+      vectors. The purpose and format of these vectors is given in the section
+      on <a class="st200_link" href="p2s16.xhtml#st200_p2s16ss2">normal mapping</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s8ss3" href="#st200_p2s8ss3">2.8.3</a></div><div class="st200_subsection_title">Types</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s8ss3pg1" href="#st200_p2s8ss3pg1">1</a></div><div class="st200_paragraph">
+      Meshes are represented in the <span class="st200_term package">io7m-r1</span> package
+      by the <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMesh.html">KMesh</a>
+      type.
+    </div></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_21" href="#st200_fn_21_ref">21</a>]</div><div class="st200_footnote_body">
+        The reason for this is that, for example, many skeletal animation systems
+        store extra information in each vertex about the bones that influence said vertex.
+        If the package did not ignore this extra data, then programmers would be forced
+        to allocate whole new meshes and copy out only the attributes given above.
+      </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s7.xhtml#st200_p2s7">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s9.xhtml#st200_p2s9">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.7. Depth Materials</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.9. Transforms</td></tr></table></div></div></body></html>

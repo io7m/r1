@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.21. Projective Lighting</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.20. Spherical Lighting</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.22. Shadows</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s20.xhtml#st200_p2s20">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s22.xhtml#st200_p2s22">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s21" href="#st200_p2s21">2.21</a></div><div class="st200_section_title">Projective Lighting</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s21.xhtml#st200_p2s21ss1">2.21.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s21.xhtml#st200_p2s21ss2">2.21.2. Algorithm</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s21.xhtml#st200_p2s21ss3">2.21.3. Back projection</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s21.xhtml#st200_p2s21ss4">2.21.4. Clamping</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s21.xhtml#st200_p2s21ss5">2.21.5. Types</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s21.xhtml#st200_p2s21ss6">2.21.6. Attenuation</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s21.xhtml#st200_p2s21ss7">2.21.7. Application</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s21.xhtml#st200_p2s21ss8">2.21.8. Pseudo-Spherical Lights</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s21ss1" href="#st200_p2s21ss1">2.21.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss1pg1" href="#st200_p2s21ss1pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">projective light</span> in the 
+      <span class="st200_term package">io7m-r1</span> package
+      is a light that <span class="st200_term term">projects</span> a texture
+      onto the visible set from a given <span class="st200_term term">origin</span> 
+      specified in <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5">eye space</a>
+      up to a given maximum <span class="st200_term term">radius</span>. Projective
+      lights are the only types of lights in the 
+      <span class="st200_term package">io7m-r1</span> package that
+      are able to project <span class="st200_term term">shadows</span>.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s21ss1fo1" href="#st200_p2s21ss1fo1">2.21.1.1. Projective lighting</a></div><img class="st200_image" alt="Projective lighting" src="images/projective.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s21ss1fo2" href="#st200_p2s21ss1fo2">2.21.1.2. Projective lighting (Texture)</a></div><img class="st200_image" alt="Projective lighting (Texture)" src="images/sunflower.png"/></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s21ss2" href="#st200_p2s21ss2">2.21.2</a></div><div class="st200_subsection_title">Algorithm</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss2pg1" href="#st200_p2s21ss2pg1">1</a></div><div class="st200_paragraph">
+      At a basic level, a projective light performs the same operations that
+      occur when an ordinary 3D position is projected onto the screen during
+      rendering. During normal rendering, a point <span class="st200_term expression">p</span>
+      given in <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss4">world space</a>
+      is transformed to <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5">eye space</a>
+      given the current camera's <span class="st200_term term">view matrix</span>, and
+      is then transformed to <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss6">clip space</a>
+      using the current camera's <span class="st200_term term">projection matrix</span>.
+      During rendering of a scene lit by a projective light, a given point
+      <span class="st200_term expression">q</span> in the scene is transformed back to
+      <span class="st200_term term">world space</span> given the current camera's
+      <span class="st200_term term">inverse view matrix</span>, and is then transformed
+      to <span class="st200_term term">eye space from the point of view of the light</span>
+      (subsequently referred to as <span class="st200_term term">light-eye space</span>)
+      using the light's <span class="st200_term term">view matrix</span>. Finally,
+      <span class="st200_term expression">q</span> is transformed to
+      <span class="st200_term term">clip space from the point of view of the light</span>
+      (subsequently referred to as <span class="st200_term term">light-clip space</span>)
+      using the light's <span class="st200_term term">projection matrix</span>. It should
+      be noted (in order to indicate that there is nothing unusual about the light's
+      view or projection matrices) that if the camera and light have the same position,
+      orientation, scale, and projection, then the resulting transformed values of
+      <span class="st200_term expression">q</span> and <span class="st200_term expression">p</span>
+      are identical. The resulting transformed value of <span class="st200_term expression">q</span>
+      is mapped from the range <span class="st200_term expression">[(-1, -1, -1), (1, 1, 1)]</span>
+      to <span class="st200_term expression">[(0, 0, 0), (1, 1, 1)]</span>, and the resulting
+      coordinates are used to retrieve a texel from the 2D texture associated with
+      the light.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss2pg2" href="#st200_p2s21ss2pg2">2</a></div><div class="st200_paragraph">
+      Intuitively, an ordinary <span class="st200_term term">perspective projection</span> will cause
+      the light to appear to take the shape of a <span class="st200_term term">frustum</span>:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s21ss2fo1" href="#st200_p2s21ss2fo1">2.21.2.1. Projective lighting (Frustum)</a></div><img class="st200_image" alt="Projective lighting (Frustum)" src="images/projective_frustum.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss2pg3" href="#st200_p2s21ss2pg3">3</a></div><div class="st200_paragraph">
+      There are two issues with the projective lighting algorithm that also have to be solved: 
+      <a class="st200_link" href="p2s21.xhtml#st200_p2s21ss3">back projection</a>
+      and
+      <a class="st200_link" href="p2s21.xhtml#st200_p2s21ss4">clamping</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s21ss3" href="#st200_p2s21ss3">2.21.3</a></div><div class="st200_subsection_title">Back projection</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss3pg1" href="#st200_p2s21ss3pg1">1</a></div><div class="st200_paragraph">
+      The <a class="st200_link" href="p2s21.xhtml#st200_p2s21ss2">algorithm</a>
+      described above will produce a so-called 
+      <span class="st200_term term">dual</span> or <span class="st200_term term">back projection</span>.
+      In other words, the texture will be projected along the view direction of the
+      camera, but will also be projected along the <span class="st200_term term">negative</span>
+      view direction
+      <span class="st200_footnote_reference"><a id="st200_fn_34_ref" href="#st200_fn_34">[34]</a></span>. The visual result is that it appears that there are two projective
+      lights in the scene, oriented in opposite directions. 
+      As <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss6">mentioned previously</a>,
+      given the typical projection matrix, the <span class="st200_term expression">w</span>
+      component of a given clip-space position is the negation of the eye-space
+      <span class="st200_term expression">z</span> component. 
+      Because it is assumed that the observer is looking towards the negative 
+      <span class="st200_term expression">z</span> direction, all positions that are in front
+      of the observer must have positive <span class="st200_term expression">w</span> components. 
+      Therefore, if <span class="st200_term expression">w</span> is negative, then the position 
+      is behind the observer. The standard fix for this
+      problem is to check to see if the <span class="st200_term expression">w</span> component
+      of the <span class="st200_term term">light-clip space</span> coordinate is negative, and
+      simply return a pure black color (indicating no light contribution) rather than
+      sampling from the projected texture.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss3pg2" href="#st200_p2s21ss3pg2">2</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package takes an
+      arguably simpler approach to the problem. Because projective lights are only applied
+      by the <a class="st200_link" href="p2s12.xhtml#st200_p2s12">deferred renderer</a>, and because
+      the deferred renderer uses accurate light volumes, pixels that fall outside of the
+      light volume are simply not shaded (meaning that back-projection is free to occur, but
+      pixels that would receive light contributions due to it are simply outside of the
+      light volume). The package essentially depends on the rasterization process and
+      depth testing to ensure that no pixels that would have received a back-projection
+      will be shaded during rendering of the light.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s21ss4" href="#st200_p2s21ss4">2.21.4</a></div><div class="st200_subsection_title">Clamping</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss4pg1" href="#st200_p2s21ss4pg1">1</a></div><div class="st200_paragraph">
+      The <a class="st200_link" href="p2s21.xhtml#st200_p2s21ss2">algorithm</a>
+      described above takes an arbitrary point in the scene and projects it from the
+      point of view of the light. There is no guarantee that the point actually falls
+      within the light's view frustum (although this is mitigated slightly by the
+      <span class="st200_term package">io7m-r1</span> package's use of
+      <a class="st200_link" href="p2s21.xhtml#st200_p2s21ss3pg2">light volumes</a>
+      for deferred rendering), and therefore the calculated texture coordinates used
+      to sample from the projected texture are not guaranteed to be in the range
+      <span class="st200_term expression">[(0, 0), (1, 1)]</span>. In order to get the
+      intended visual effect, the texture used must be set to
+      <span class="st200_term term">clamp-to-edge</span> and have black pixels on
+      all of the edges of the texture image, or <span class="st200_term term">clamp-to-border</span>
+      with a black border color. Failing to do this can result in strange visual
+      anomalies, as the texture will be unexpectedly repeated or smeared across
+      the area outside of the intersection between the light volume and the
+      receiving surface:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s21ss4fo1" href="#st200_p2s21ss4fo1">2.21.4.1. Projective lighting (Correct, clamped)</a></div><img class="st200_image" alt="Projective lighting (Correct, clamped)" src="images/projective_clamped.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s21ss4fo2" href="#st200_p2s21ss4fo2">2.21.4.2. Projective lighting (Incorrect, not clamped)</a></div><img class="st200_image" alt="Projective lighting (Incorrect, not clamped)" src="images/projective_not_clamped.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss4pg2" href="#st200_p2s21ss4pg2">2</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package will
+      raise an exception if a non-clamped texture is assigned to a projective light.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s21ss5" href="#st200_p2s21ss5">2.21.5</a></div><div class="st200_subsection_title">Types</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss5pg1" href="#st200_p2s21ss5pg1">1</a></div><div class="st200_paragraph">
+      Projective lights are represented in the <span class="st200_term package">io7m-r1</span> 
+      package by the following types:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s21ss5fo1" href="#st200_p2s21ss5fo1">2.21.5.1. Types</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithoutShadow.html">KLightProjectiveWithoutShadow</a> -
+          a projective light that does not project shadows.
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithoutShadowDiffuseOnly.html">KLightProjectiveWithoutShadowDiffuseOnly</a> -
+          a projective light that does not project shadows, and does not cause specular highlights.
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowBasic.html">KLightProjectiveWithShadowBasic</a> -
+          a projective light that projects <a class="st200_link" href="p2s23.xhtml#st200_p2s23">basic shadows</a>.
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowBasicDiffuseOnly.html">KLightProjectiveWithShadowBasicDiffuseOnly</a> -
+          a projective light that projects <a class="st200_link" href="p2s23.xhtml#st200_p2s23">basic shadows</a>, and does not cause specular highlights.
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowVariance.html">KLightProjectiveWithShadowVariance</a> -
+          a projective light that projects <a class="st200_link" href="p2s24.xhtml#st200_p2s24">variance shadows</a>.
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowVarianceDiffuseOnly.html">KLightProjectiveWithShadowVarianceDiffuseOnly</a> -
+          a projective light that projects <a class="st200_link" href="p2s24.xhtml#st200_p2s24">variance shadows</a>, and does not cause specular highlights.
+        </li></ul></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s21ss6" href="#st200_p2s21ss6">2.21.6</a></div><div class="st200_subsection_title">Attenuation</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss6pg1" href="#st200_p2s21ss6pg1">1</a></div><div class="st200_paragraph">
+      The light supports <a class="st200_link" href="p2s18.xhtml#st200_p2s18ss4">attenuation</a> 
+      using the maximum range taken from the projection.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s21ss7" href="#st200_p2s21ss7">2.21.7</a></div><div class="st200_subsection_title">Application</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss7pg1" href="#st200_p2s21ss7pg1">1</a></div><div class="st200_paragraph">
+      The final light applied to the surface is given by <span class="st200_term function">projective</span>
+      [<a class="st200_link_external" href="haskell/Projective.hs">Projective.hs</a>], where
+      <span class="st200_term variable">sr</span>, <span class="st200_term variable">sg</span>,
+      <span class="st200_term variable">sb</span> are the red, green, and blue channels,
+      respectively, of the surface being lit. The surface-to-light vector 
+      <span class="st200_term variable">stl</span> is calculated by normalizing the
+      negation of the difference between the the current eye space
+      <span class="st200_term variable">surface_position</span> and the eye space
+      origin of the light.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s21ss7fo1" href="#st200_p2s21ss7fo1">2.21.7.1. Projective lighting (Application)</a></div><pre class="st200_verbatim">module Projective where
+
+import qualified Attenuation
+import qualified Color3
+import qualified Color4
+import qualified Direction
+import qualified LightDiffuse
+import qualified LightSpecular
+import qualified LightProjective
+import qualified Normal
+import qualified Position3
+import qualified Specular
+import qualified Spaces
+import qualified Vector3f
+import qualified Vector4f
+
+projective :: Direction.T Spaces.Eye -&gt; Normal.T -&gt; Position3.T Spaces.Eye -&gt; LightProjective.T -&gt; Specular.T -&gt; Float -&gt; Color3.T -&gt; Color4.T -&gt; Vector3f.T
+projective view n surface_position light specular shadow texture (Vector4f.V4 sr sg sb _) =
+  let
+    position_diff   = Position3.sub3 surface_position (LightProjective.origin light)
+    stl             = Vector3f.normalize (Vector3f.negation position_diff)
+    distance        = Vector3f.magnitude (position_diff)
+    attenuation_raw = Attenuation.attenuation (LightProjective.radius light) (LightProjective.falloff light) distance
+    attenuation     = attenuation_raw * shadow
+    light_color     = Vector3f.mult3 (LightProjective.color light) texture
+    light_intensity = LightProjective.intensity light
+    light_d         = LightDiffuse.diffuse stl n light_color light_intensity
+    light_s         = LightSpecular.specular stl view n light_color light_intensity specular
+    light_da        = Vector3f.scale light_d attenuation
+    light_sa        = Vector3f.scale light_s attenuation
+    lit_d           = Vector3f.mult3 (Vector3f.V3 sr sg sb) light_da
+    lit_s           = Vector3f.add3 lit_d light_sa
+  in 
+    lit_s
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss7pg2" href="#st200_p2s21ss7pg2">2</a></div><div class="st200_paragraph">
+      The given <span class="st200_term variable">shadow</span> factor is a value in the
+      range <span class="st200_term expression">[0, 1]</span>, where 
+      <span class="st200_term expression">0</span> indicates that the lit point is fully
+      in shadow for the current light, and <span class="st200_term expression">1</span>
+      indicates that the lit point is not in shadow. This is calculated for
+      <a class="st200_link" href="p2s23.xhtml#st200_p2s23">basic</a> and 
+      <a class="st200_link" href="p2s24.xhtml#st200_p2s24">variance</a> shadows
+      and is assumed to be <span class="st200_term expression">1</span> for
+      lights without shadows. As can be seen, a value of <span class="st200_term expression">0</span>
+      has the effect of fully attenuating the light.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss7pg3" href="#st200_p2s21ss7pg3">3</a></div><div class="st200_paragraph">
+      The color denoted by <span class="st200_term variable">texture</span> is assumed
+      to have been sampled from the projected texture. Assuming the eye-space
+      position being shaded <span class="st200_term expression">p</span>, the matrix
+      to get from eye-space to light-clip space is given by 
+      The final light applied to the surface is given by <span class="st200_term function">projective_matrix</span>
+      [<a class="st200_link_external" href="haskell/ProjectiveMatrix.hs">ProjectiveMatrix.hs</a>]:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s21ss7fo2" href="#st200_p2s21ss7fo2">2.21.7.2. Projective matrix</a></div><pre class="st200_verbatim">module ProjectiveMatrix where
+
+import qualified Matrix4f
+
+projective_matrix :: Matrix4f.T -&gt; Matrix4f.T -&gt; Matrix4f.T -&gt; Matrix4f.T
+projective_matrix camera_view light_view light_projection =
+  case Matrix4f.inverse camera_view of
+    Just cv -&gt; Matrix4f.mult (Matrix4f.mult light_projection light_view) cv
+    Nothing -&gt; undefined -- A view matrix is always invertible
+
+</pre></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s21ss8" href="#st200_p2s21ss8">2.21.8</a></div><div class="st200_subsection_title">Pseudo-Spherical Lights</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss8pg1" href="#st200_p2s21ss8pg1">1</a></div><div class="st200_paragraph">
+      As mentioned, the <span class="st200_term package">io7m-r1</span> package
+      does not support shadow projection for
+      <a class="st200_link" href="p2s20.xhtml#st200_p2s20">spherical</a> lights. However,
+      spherical lights can be emulated with six projective lights, each of which
+      can be configured to project shadows.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss8pg2" href="#st200_p2s21ss8pg2">2</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">pseudo-spherical</span> light is six projective 
+      <span class="st200_term term">sub-lights</span>,
+      each of which are oriented along the major axis directions with projections that
+      have a <span class="st200_term expression">90°</span> field of view.
+      <a class="st200_link" href="p2s11.xhtml#st200_p2s11ss3">Shadow casters</a> are assigned
+      to each sub-light as with any ordinary projective light.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s21ss8fo1" href="#st200_p2s21ss8fo1">2.21.8.1. Pseudo-spherical Lighting</a></div><img class="st200_image" alt="Pseudo-spherical Lighting" src="images/projective_pseudosphere.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s21ss8pg3" href="#st200_p2s21ss8pg3">3</a></div><div class="st200_paragraph">
+      Pseudo-spherical lights are provided by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithShadowBasic.html">KLightSpherePseudoWithShadowBasic</a>,
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithShadowVariance.html">KLightSpherePseudoWithShadowVariance</a>,
+      and
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithoutShadow.html">KLightSpherePseudoWithoutShadow</a>
+      types.
+    </div></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_34" href="#st200_fn_34_ref">34</a>]</div><div class="st200_footnote_body">
+        The same issue occurs when performing ordinary rendering of points in a scene. The
+        issue is solved there by clipping primitives based on their
+        <span class="st200_term expression">w</span> component so that primitives that are
+        "behind" the observer are not rendered.
+      </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s20.xhtml#st200_p2s20">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s22.xhtml#st200_p2s22">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.20. Spherical Lighting</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.22. Shadows</td></tr></table></div></div></body></html>

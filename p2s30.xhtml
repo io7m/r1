@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.30. Filter: Y Fog</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.29. Filter: Z Fog</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">3. API Reference</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s29.xhtml#st200_p2s29">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p3.xhtml#st200_p3">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s30" href="#st200_p2s30">2.30</a></div><div class="st200_section_title">Filter: Y Fog</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s30.xhtml#st200_p2s30ss1">2.30.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s30.xhtml#st200_p2s30ss2">2.30.2. Algorithm</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s30ss1" href="#st200_p2s30ss1">2.30.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s30ss1pg1" href="#st200_p2s30ss1pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> offers
+      a filter that provides simple <span class="st200_term term">vertical fog</span>
+      effects for simulating various atmospheric effects such as ground fog
+      and "house fire" smoke.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s30ss1fo1" href="#st200_p2s30ss1fo1">2.30.1.1. Fog</a></div><img class="st200_image" alt="Fog" src="images/fog_y.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s30ss1pg2" href="#st200_p2s30ss1pg2">2</a></div><div class="st200_paragraph">
+      The fog filter applies a configurable fog color to all pixels in the
+      scene, based on given upper and lower planes for the fog.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s30ss2" href="#st200_p2s30ss2">2.30.2</a></div><div class="st200_subsection_title">Algorithm</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s30ss2pg1" href="#st200_p2s30ss2pg1">1</a></div><div class="st200_paragraph">
+      The implemented algorithm takes a color <span class="st200_term expression">c</span>,
+      a world-space upper Y value <span class="st200_term expression">upper_y</span>, and a
+      world-space lower Y value <span class="st200_term expression">lower_y</span>. It samples
+      the depth of each pixel in the current scene, and
+      <a class="st200_link" href="p2s13.xhtml#st200_p2s13">reconstructs</a>
+      the full eye-space position of the surface that produced the pixel in question. It
+      then transforms this position back to world-space using the scene's inverse
+      view matrix, yielding a Y component <span class="st200_term expression">y</span>. 
+      Then, a <span class="st200_term term">fog factor</span> <span class="st200_term expression">r</span>
+      is calculated by <span class="st200_term expression">fog_factor</span>
+      [<a class="st200_link_external" href="haskell/FogFactorY.hs">FogFactorY.hs</a>]:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s30ss2fo1" href="#st200_p2s30ss2fo1">2.30.2.1. Fog factor</a></div><pre class="st200_verbatim">module FogFactorY where
+
+clamp :: Float -&gt; (Float, Float) -&gt; Float
+clamp x (lower, upper) = max (min x upper) lower
+
+fog_factor :: Float -&gt; (Float, Float) -&gt; Float
+fog_factor y (lower, upper) =
+  let r = (y - lower) / (upper - lower) in
+    clamp r (0.0, 1.0)
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s30ss2pg2" href="#st200_p2s30ss2pg2">2</a></div><div class="st200_paragraph">
+      The value of <span class="st200_term expression">r</span> is then used to interpolate
+      between the original color of the pixel and <span class="st200_term expression">c</span>.
+      Surfaces with <span class="st200_term expression">y</span> less than <span class="st200_term expression">lower_y</span>
+      are unaffected by fog. Surfaces with <span class="st200_term expression">y</span> greater than or equal to
+      <span class="st200_term expression">upper_y</span> are maximally affected by fog and will actually
+      have their color values completely replaced by <span class="st200_term expression">c</span>.
+      Surfaces with <span class="st200_term expression">y</span> values that fall between 
+      <span class="st200_term expression">lower_y</span>
+      and <span class="st200_term expression">upper_y</span> will have differing amounts of fog applied
+      based on the type of <span class="st200_term term">fog progression</span> selected.
+      The filter offers <span class="st200_term term">linear</span>,
+      <span class="st200_term term">exponential</span>, and <span class="st200_term term">logarithmic</span>
+      fog progressions. With <span class="st200_term term">linear</span> fog, the
+      <span class="st200_term expression">r</span> value linearly interpolates between the
+      original surface color and <span class="st200_term expression">c</span>. With
+      <span class="st200_term term">exponential</span> fog, the value of 
+      <span class="st200_term expression">r * r</span> is used to linearly interpolate
+      between the original surface color and <span class="st200_term expression">c</span>.
+      Finally, with <span class="st200_term term">logarithmic</span> fog, the value of
+      <span class="st200_term expression">sqrt(r)</span> is used to linearly interpolate
+      between the original surface color and <span class="st200_term expression">c</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s30ss2pg3" href="#st200_p2s30ss2pg3">3</a></div><div class="st200_paragraph">
+      If the <span class="st200_term expression">upper_y</span> value is greater than
+      the <span class="st200_term expression">lower_y</span> value, the fog will appear
+      to get thicker as the Y position decreases. This can be used to give the effect
+      of fog on the ground. Unfortunately, the illusion is somewhat ruined if the
+      viewer goes below the fog plane:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s30ss2fo2" href="#st200_p2s30ss2fo2">2.30.2.2. Fog (Floor illusion broken)</a></div><img class="st200_image" alt="Fog (Floor illusion broken)" src="images/fog_y_floor_bad.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s30ss2pg4" href="#st200_p2s30ss2pg4">4</a></div><div class="st200_paragraph">
+      If the <span class="st200_term expression">lower_y</span> value
+      is greater than the <span class="st200_term expression">upper_y</span> value, the
+      fog will appear to get thicker as the Y position increases. This can be used
+      to give the effect of smoke accumulating at the top of an enclosed space. 
+      Unfortunately, the illusion of both types of fog is ruined if the viewer 
+      travels above the fog plane:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s30ss2fo3" href="#st200_p2s30ss2fo3">2.30.2.3. Fog (Ceiling illusion OK)</a></div><img class="st200_image" alt="Fog (Ceiling illusion OK)" src="images/fog_y_ceil_ok.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s30ss2fo4" href="#st200_p2s30ss2fo4">2.30.2.4. Fog (Ceiling illusion broken)</a></div><img class="st200_image" alt="Fog (Ceiling illusion broken)" src="images/fog_y_ceil_bad.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s30ss2pg5" href="#st200_p2s30ss2pg5">5</a></div><div class="st200_paragraph">
+      The simple-minded nature of the effect means that it should be used to 
+      supplement some other simulation of fog. Rendering a simple opaque flat 
+      plane the same color as the fog and then applying the fog effect would 
+      be sufficient.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s30ss2pg6" href="#st200_p2s30ss2pg6">6</a></div><div class="st200_paragraph">
+      The fog effect is provided by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/meshes/KImageFilterFogY.html">KImageFilterFogY</a>
+      filter.
+    </div></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s29.xhtml#st200_p2s29">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p3.xhtml#st200_p3">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.29. Filter: Z Fog</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">3. API Reference</td></tr></table></div></div></body></html>

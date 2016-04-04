@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.2. Concepts</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.1. Conventions</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.3. Coordinate systems</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s1.xhtml#st200_p2s1">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s3.xhtml#st200_p2s3">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s2" href="#st200_p2s2">2.2</a></div><div class="st200_section_title">Concepts</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss1">2.2.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss2">2.2.2. Renderers</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss3">2.2.3. Visible Sets</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss4">2.2.4. Framebuffers</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss5">2.2.5. Meshes</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss6">2.2.6. Transforms</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss7">2.2.7. Camera</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss8">2.2.8. Materials</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss9">2.2.9. Instances</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss10">2.2.10. Lights</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss11">2.2.11. Light groups</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss12">2.2.12. Image Filters</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s2.xhtml#st200_p2s2ss13">2.2.13. Image Sources</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss1" href="#st200_p2s2ss1">2.2.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss1pg1" href="#st200_p2s2ss1pg1">1</a></div><div class="st200_paragraph">
+      This section attempts to provide a rough overview of the concepts
+      present in the <span class="st200_term package">io7m-r1</span> package.
+      Specific implementation details, mathematics, and other technical information
+      is given in later sections that focus on each concept in detail.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss2" href="#st200_p2s2ss2">2.2.2</a></div><div class="st200_subsection_title">Renderers</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss2pg1" href="#st200_p2s2ss2pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      consists of a set of <span class="st200_term term">renderers</span>. A
+      <span class="st200_term term">renderer</span> consumes an immutable
+      <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss3">visible set</a>
+      and produces an image, writing the image to a given
+      <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss4">framebuffer</a>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss2pg2" href="#st200_p2s2ss2pg2">2</a></div><div class="st200_paragraph">
+      The renderers expose
+      an interface of <span class="st200_term term">conceptually</span> pure 
+      functions from visible sets to images. That is, the renderers should be
+      considered to simply take visible sets as input and return images as output.
+      In reality, because the Java language is not pure and because the code
+      is required to perform I/O in order to speak to the GPU, the renderer
+      functions are not <span class="st200_term term">really</span> pure. Nevertheless,
+      for the sake of ease of use, lack of surprising results, and correctness,
+      the renderers at least attempt to adhere to the idea of pure functional
+      rendering! This means that the renderers are very easy to integrate into
+      any existing system: They are simply functions that are evaluated whenever
+      the programmer wants an image. The renderers do not have their own "main loop",
+      they do not have any concept of time, do not remember any images that they
+      have produced previously, do not maintain any state of their own,
+      and simply write their results to a programmer-provided 
+      <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss4">framebuffer</a>.
+      Passing the same immutable visible set to a renderer multiple times should 
+      result in the same image each time.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss3" href="#st200_p2s2ss3">2.2.3</a></div><div class="st200_subsection_title">Visible Sets</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss3pg1" href="#st200_p2s2ss3pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">visible set</span> is an immutable snapshot
+      of all <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss9">instances</a>
+      and <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss10">lights</a>
+      that contribute to an image. The name implies that a renderer expects to 
+      receive only those instances and lights that are actually visible from the 
+      perspective of the observer. This is a conscious design decision that frees 
+      the renderer from the complicated task of trying to decide which objects are visible and
+      which are not. A programmer using the renderer is expected to be using
+      some sort of spatial partitioning data structure
+        <span class="st200_footnote_reference"><a id="st200_fn_5_ref" href="#st200_fn_5">[5]</a></span>
+      to efficiently decide
+      which objects are visible for the current rendering call. This is essentially
+      the same approach taken by the OpenGL API: The API draws what it is told to draw,
+      and does not try (beyond clipping primitives based on the viewing frustum), to
+      intelligently decide what should and should not be drawn.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss4" href="#st200_p2s2ss4">2.2.4</a></div><div class="st200_subsection_title">Framebuffers</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss4pg1" href="#st200_p2s2ss4pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">framebuffer</span> is a
+      rectangular region of memory allocated on the GPU that can accept 
+      the results of rendering.
+      The programmer typically allocates one framebuffer, passes it to
+      a <span class="st200_term term">renderer</span> along with a
+      <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss3">visible set</a>,
+      and the renderer populates the given framebuffer with an image
+      of the rendered visible set. The programmer can then copy the contents of
+      this framebuffer to the screen for viewing, pass it on to a separate
+      <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss12">filter</a>
+      for extra visual effects, use it as a texture to be applied to objects
+      in further rendered visible sets, etc.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss5" href="#st200_p2s2ss5">2.2.5</a></div><div class="st200_subsection_title">Meshes</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss5pg1" href="#st200_p2s2ss5pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">mesh</span> is a collection of vertices 
+      that define a polyhedral object, along with a list of indices
+      that describe how to make triangles out of the given vertices.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss5pg2" href="#st200_p2s2ss5pg2">2</a></div><div class="st200_paragraph">
+      Meshes are allocated on the GPU and can be shared between any number
+      of <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss9">instances</a> (meaning
+      that rendering 100 identical objects does not require storing 100 copies
+      of the mesh data).
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss6" href="#st200_p2s2ss6">2.2.6</a></div><div class="st200_subsection_title">Transforms</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss6pg1" href="#st200_p2s2ss6pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">transform</span> moves coordinates in
+      one <a class="st200_link" href="p2s3.xhtml#st200_p2s3">coordinate space</a>
+      to another. Essentially, a transform is used to position and orient a
+      <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss5">mesh</a> inside
+      a <span class="st200_term term">visible set</span>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss7" href="#st200_p2s2ss7">2.2.7</a></div><div class="st200_subsection_title">Camera</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss7pg1" href="#st200_p2s2ss7pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">camera</span> defines both the
+      <span class="st200_term term">viewing position</span> and
+      <span class="st200_term term">viewing projection</span> for the
+      visible set. The <span class="st200_term term">viewing projection</span>
+      describes the <span class="st200_term term">orthographic</span>
+      or <span class="st200_term term">perspective</span> projection used to
+      render the visible set, and the <span class="st200_term term">viewing position</span>
+      is used to <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss6">transform</a>
+      all instances and lights in the visible set to
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5">eye-space</a>
+      during rendering. The camera is represented by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KCamera.html">KCamera</a>
+      type.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss7pg2" href="#st200_p2s2ss7pg2">2</a></div><div class="st200_paragraph">
+      A visible set always contains a single <span class="st200_term term">camera</span>,
+      because, as mentioned earlier, a visible set is supposed to represent the
+      instances and lights that are visible from the observation point that
+      the camera describes.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss8" href="#st200_p2s2ss8">2.2.8</a></div><div class="st200_subsection_title">Materials</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss8pg1" href="#st200_p2s2ss8pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">material</span> describes the surface properties
+      of an object. A <span class="st200_term term">material</span> may either be
+      <span class="st200_term term">opaque</span> or
+      <span class="st200_term term">translucent</span>. An object with a 
+      <span class="st200_term term">opaque</span>
+      material completely occludes the pixels of all other objects that appear
+      behind it. An object with a <span class="st200_term term">translucent</span>
+      material is blended with the objects that appear behind it.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss8pg2" href="#st200_p2s2ss8pg2">2</a></div><div class="st200_paragraph">  
+      Materials consist of a multitude
+      of different properties describing different aspects of the surface. For example,
+      most opaque materials have data describing all of the following:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s2ss8fo1" href="#st200_p2s2ss8fo1">2.2.8.1. Opaque material data</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+          The surface <span class="st200_term term">albedo</span>;  
+          the basic color of the surface prior to any lighting.
+        </li><li class="st200_list_item">
+          The surface <span class="st200_term term">depth</span> properties;  
+          to give per-pixel control over "transparency" without requiring
+          the overhead of making the material translucent.
+        </li><li class="st200_list_item">
+          The surface <span class="st200_term term">emissive</span> properties;  
+          to present the illusion of surfaces emitting light.
+        </li><li class="st200_list_item">
+          The surface <span class="st200_term term">environment</span> properties;  
+          to provide environment-mapped reflections and other effects.
+        </li><li class="st200_list_item">
+          The surface <span class="st200_term term">normal</span> properties;  
+          to provide per-pixel control of surface normal vectors ("normal mapping").
+        </li><li class="st200_list_item">
+          The surface <span class="st200_term term">specular</span> properties;  
+          to provide per-pixel control of surface specularity.
+        </li></ul></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss8pg3" href="#st200_p2s2ss8pg3">3</a></div><div class="st200_paragraph">
+      An extremely trivial material (with a simple red albedo and no other properties) 
+      applied to a square, lit by a directional light:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s2ss8fo2" href="#st200_p2s2ss8fo2">2.2.8.2. Material with plain red albedo</a></div><img class="st200_image" alt="Plain red albedo" src="images/albedo_red.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss8pg4" href="#st200_p2s2ss8pg4">4</a></div><div class="st200_paragraph">
+      A complex material (with mapped normals, specular highlights, an environment map, and a textured albedo) 
+      applied to the same square, lit by a spherical light:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s2ss8fo3" href="#st200_p2s2ss8fo3">2.2.8.3. Complex material</a></div><img class="st200_image" alt="Complex material" src="images/material_complex.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss8pg5" href="#st200_p2s2ss8pg5">5</a></div><div class="st200_paragraph">
+      Materials are immutable once created, but are created through the use
+      of mutable builder types. This allows renderers to effectively support
+      "animated" materials without actually needing to know anything about them; 
+      the renderers see ordinary immutable materials, but the programmer is supplying
+      new materials each time the renderer is called, giving the illusion that one 
+      material is changing over time. As an example, the type of builders for 
+      opaque materials is
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialOpaqueBuilderType.html">KMaterialOpaqueBuilderType</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss9" href="#st200_p2s2ss9">2.2.9</a></div><div class="st200_subsection_title">Instances</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss9pg1" href="#st200_p2s2ss9pg1">1</a></div><div class="st200_paragraph">
+      An <span class="st200_term term">instance</span> is essentially
+      a reference to a <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss5">mesh</a>,
+      a <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss6">transform</a> (to
+      position that mesh in the visible set), and a
+      <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss8">material</a> to define
+      the appearance of the mesh surface.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss10" href="#st200_p2s2ss10">2.2.10</a></div><div class="st200_subsection_title">Lights</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss10pg1" href="#st200_p2s2ss10pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">light</span> describes a light source
+      within a visible set. There are many different types of lights, each
+      with different behaviours. Lights may or may not cast shadows,
+      depending on their type. All lighting in the 
+      <span class="st200_term package">io7m-r1</span> package
+      is completely dynamic; there is no support for static lighting
+      in any form. Shadows are exclusively provided via
+      <span class="st200_term term">shadow-mapping</span>, resulting in
+      efficient per-pixel shadows.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss10pg2" href="#st200_p2s2ss10pg2">2</a></div><div class="st200_paragraph">  
+      Types of lights include:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s2ss10fo1" href="#st200_p2s2ss10fo1">2.2.10.1. Light types</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightDirectional.html">KLightDirectional</a>
+          - a <span class="st200_term term">directional</span> light that 
+          simulates parallel light rays without any origin.
+          Directional lights cannot cast shadows (because directional lights do not have origins).
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightSphereWithoutShadow.html">KLightSphereWithoutShadow</a>
+          - a <span class="st200_term term">spherical</span> light. A spherical
+          light casts light in all directions from a  given position in 
+          world-space, up to a given 
+          <span class="st200_term term">radius</span>. The emitted light is
+          attenuated over distance based on a configurable 
+          <span class="st200_term term">falloff</span> value. This type of light
+          is often referred to as a <span class="st200_term term">point</span> light
+          in other renderers.
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithoutShadow.html">KLightProjectiveWithoutShadow</a>
+          - a <span class="st200_term term">projective</span> light. 
+          A projective light effectively projects a given image onto the
+          visible set from a given position in world-space, up to a given 
+          <span class="st200_term term">radius</span>. The emitted light is
+          attenuated over distance based on a configurable 
+          <span class="st200_term term">falloff</span> value.
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowBasic.html">KLightProjectiveWithShadowBasic</a>
+          - a <span class="st200_term term">projective</span> light that can
+          also cast <span class="st200_term term">basic shadows</span>.
+          Basic shadows are very cheap to compute, but can suffer from
+          aliasing issues (resulting in sharp edges to shadows).
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowVariance.html">KLightProjectiveWithShadowVariance</a>
+          - a <span class="st200_term term">projective</span> light that can
+          also cast <span class="st200_term term">variance shadows</span>.
+          Variance shadows are slightly more expensive to compute than
+          <span class="st200_term term">basic shadows</span>, but can be filtered
+          by hardware, resulting in attractive soft shadows.
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithShadowBasic.html">KLightSpherePseudoWithShadowBasic</a>
+          - a <span class="st200_term term">pseudo-spherical</span> light. A 
+          pseudo-spherical light behaves like a 
+          <span class="st200_term term">spherical</span> light but is emulated via 
+          at most six <span class="st200_term term">projective</span> lights 
+          arranged such that each light provides a section of the sphere. 
+          Individual lights can be enabled and disabled, and the lights can 
+          project <span class="st200_term term">basic shadows</span>.
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithShadowVariance.html">KLightSpherePseudoWithShadowVariance</a>
+          - is to <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithShadowBasic.html">KLightSpherePseudoWithShadowBasic</a>
+          as
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowVariance.html">KLightProjectiveWithShadowVariance</a>
+          is to
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowBasic.html">KLightProjectiveWithShadowBasic</a>.
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightSphereTexturedCubeWithoutShadow.html">KLightSphereTexturedCubeWithoutShadow</a>
+          - a <span class="st200_term term">spherical</span> light that projects
+          a <span class="st200_term term">cube map</span> in all directions.
+        </li></ul></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss10pg3" href="#st200_p2s2ss10pg3">3</a></div><div class="st200_paragraph">
+      As with <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss8">materials</a> 
+      (and indeed, all other objects in the <span class="st200_term package">io7m-r1</span> package),
+      all lights are immutable once created, but are created through the use
+      of mutable builder types. This allows renderers to effectively support
+      "animated" lights without actually needing to know anything about them; 
+      the renderers see ordinary immutable lights, but the programmer is supplying
+      new lights each time the renderer is called, giving the illusion that lights are changing
+      over time. As an example, the type of builders for spherical lights
+      without shadows is
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightSphereWithoutShadowBuilderType.html">KLightSphereWithoutShadowBuilderType</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss11" href="#st200_p2s2ss11">2.2.11</a></div><div class="st200_subsection_title">Light groups</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss11pg1" href="#st200_p2s2ss11pg1">1</a></div><div class="st200_paragraph">
+      <span class="st200_term term">Light groups</span> are a means to partition
+      a visible set into separate lighting environments. An 
+      <span class="st200_term term">instance</span> belongs to exactly one
+      <span class="st200_term term">light group</span>, but a given 
+      <span class="st200_term term">light</span> can be placed into any number
+      of light groups.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss11pg2" href="#st200_p2s2ss11pg2">2</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package,
+      due to the current state of graphics hardware, implements purely
+      <span class="st200_term term">local illumination</span>
+      <span class="st200_footnote_reference"><a id="st200_fn_6_ref" href="#st200_fn_6">[6]</a></span>. Because of this,
+      when using lights that do not project shadows, it is possible for
+      lights to "bleed" through objects that would normally occlude their 
+      radiance had the renderer implemented physically correct lighting. As
+      an example:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s2ss11fo1" href="#st200_p2s2ss11fo1">2.2.11.1. Room without groups</a></div><img class="st200_image" alt="Room without groups" src="images/room_no_groups.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss11pg3" href="#st200_p2s2ss11pg3">3</a></div><div class="st200_paragraph">
+      The visible set contains three lights: A red spherical light 
+      <span class="st200_term expression">s0</span> in the left room,
+      a white spherical light 
+      <span class="st200_term expression">s1</span> in the middle room, 
+      and a blue spherical light <span class="st200_term expression">s2</span>
+      in the right room. The visible set contains four instances: The left room 
+      <span class="st200_term expression">i0</span>,
+      the middle room  <span class="st200_term expression">i1</span>, 
+      a piece of furniture <span class="st200_term expression">i2</span>
+      in the middle room, and the right room <span class="st200_term expression">i3</span>. 
+      None of the lights are configured to cast shadows. Note
+      that the red and blue lights bleed into the center room as if the two
+      dividing walls were not even there! Light groups can help to
+      solve this issue (without requiring shadow mapping).
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss11pg4" href="#st200_p2s2ss11pg4">4</a></div><div class="st200_paragraph">
+      First, three light groups are created:
+      <span class="st200_term expression">g0</span>, 
+      <span class="st200_term expression">g1</span>, and
+      <span class="st200_term expression">g2</span>. The light
+      <span class="st200_term expression">s0</span> and instance
+      <span class="st200_term expression">i0</span>, are added to
+      <span class="st200_term expression">g0</span>. The light
+      <span class="st200_term expression">s1</span> and instances
+      <span class="st200_term expression">i1</span> and
+      <span class="st200_term expression">i2</span>, are added to
+      <span class="st200_term expression">g1</span>. Finally,
+      light <span class="st200_term expression">s2</span> and
+      instance <span class="st200_term expression">i3</span> are
+      added to <span class="st200_term expression">g2</span>. With these
+      groups configured, the renderer produces the following image:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s2ss11fo2" href="#st200_p2s2ss11fo2">2.2.11.2. Room with groups</a></div><img class="st200_image" alt="Room with groups" src="images/room_groups.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss11pg5" href="#st200_p2s2ss11pg5">5</a></div><div class="st200_paragraph">
+      Instances <span class="st200_term expression">i1</span> and
+      <span class="st200_term expression">i2</span> are no longer affected
+      by lights <span class="st200_term expression">s0</span> and
+      <span class="st200_term expression">s2</span>, and so on. The image
+      looks more physically correct, at the expense of having somewhat
+      hard transitions between the rooms, without actually having to 
+      calculate any shadows
+      <span class="st200_footnote_reference"><a id="st200_fn_7_ref" href="#st200_fn_7">[7]</a></span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss11pg6" href="#st200_p2s2ss11pg6">6</a></div><div class="st200_paragraph">
+      Light groups can also be used for other miscellaneous visual effects.
+      For example, an object in a visible set could be highlighted by placing it
+      in its own light group, and adding a strong red directional light
+      to that group. No other objects in the visible set would be affected by the
+      light and the object would, as a result, be displayed very conspicuously!
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss11pg7" href="#st200_p2s2ss11pg7">7</a></div><div class="st200_paragraph">
+      The majority of visible sets will contain only a single light group. They
+      are intended to assist with working around the lack of 
+      <span class="st200_term term">global illumination</span>, and with 
+      implementing specific visual effects.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss12" href="#st200_p2s2ss12">2.2.12</a></div><div class="st200_subsection_title">Image Filters</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss12pg1" href="#st200_p2s2ss12pg1">1</a></div><div class="st200_paragraph">
+      An <span class="st200_term term">image filter</span> is similar to a
+      <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss2">renderer</a>
+      except that it accepts
+      a <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss4">framebuffer</a>
+      as input
+      (as opposed to a <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss3">visible set</a>),
+      processes the image in the framebuffer in some manner, and
+      then writes the results to an output framebuffer (possibly the same
+      as the input framebuffer). It is used to provide visual effects such
+      as full-screen <span class="st200_term term">blurring</span>,
+      <span class="st200_term term">color-correction</span>, 
+      <span class="st200_term term">emission</span>, and
+      others.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss12pg2" href="#st200_p2s2ss12pg2">2</a></div><div class="st200_paragraph">
+      Typically, an <span class="st200_term term">image filter</span> accepts
+      a framebuffer that was populated by a 
+      <span class="st200_term term">deferred renderer</span>, and therefore has
+      access to much more per-pixel data than a typical image processor. For
+      example, for each pixel in the image, a framebuffer from a deferred
+      renderer will contain at least the linear
+       <span class="st200_term term">depth</span>
+      value of that pixel, and the <span class="st200_term term">normal vector</span>
+      of the surface at that pixel. If the filter also has access to the
+      <span class="st200_term term">viewing projection</span> that was used to produce
+      the image, then it can actually efficiently 
+      <a class="st200_link" href="p2s13.xhtml#st200_p2s13">reconstruct</a>
+      the original <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5">eye-space</a>
+      position of the pixel! This allows for interesting effects
+      such as <span class="st200_term term">fog</span> and
+      <span class="st200_term term">depth-of-field</span> simulation, that rely on
+      knowing the original positions of objects within the visible set - information
+      that would not usually be available to a simple image-based filter.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s2ss13" href="#st200_p2s2ss13">2.2.13</a></div><div class="st200_subsection_title">Image Sources</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s2ss13pg1" href="#st200_p2s2ss13pg1">1</a></div><div class="st200_paragraph">
+      An <span class="st200_term term">image source</span> is analogous
+      to an <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss12">image filter</a>
+      that does not take a
+      <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss4">framebuffer</a> as
+      input. They are usually provided as a convenience (such as conveniently
+      populating a framebuffer with a fixed image prior to rendering).
+    </div></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_5" href="#st200_fn_5_ref">5</a>]</div><div class="st200_footnote_body">
+          The <a class="st200_link_external" href="http://mvn.io7m.com/io7m-jspatial">jspatial</a>
+          package is intended to provide exactly these sorts of data structures.
+        </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_6" href="#st200_fn_6_ref">6</a>]</div><div class="st200_footnote_body">
+        That is, each surface is rendered as if it was the only surface
+        in the visible set. There are no light bounces between surfaces, and
+        shadows are created by explicit shadow mapping, rather than occuring
+        naturally as part of a physically accurate 
+        <span class="st200_term term">global illumination</span> algorithm.
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_7" href="#st200_fn_7_ref">7</a>]</div><div class="st200_footnote_body">
+        The believability of this effect is obviously
+        very scene-specific. Shadow mapping gives results that look
+        much more physically accurate, at the cost of being much more
+        computationally expensive.
+      </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s1.xhtml#st200_p2s1">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s3.xhtml#st200_p2s3">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.1. Conventions</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.3. Coordinate systems</td></tr></table></div></div></body></html>

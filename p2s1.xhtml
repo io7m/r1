@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.1. Conventions</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2. Design and Implementation</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.2. Concepts</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2.xhtml#st200_p2">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s2.xhtml#st200_p2s2">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s1" href="#st200_p2s1">2.1</a></div><div class="st200_section_title">Conventions</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s1.xhtml#st200_p2s1ss1">2.1.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s1.xhtml#st200_p2s1ss2">2.1.2. Mathematics</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s1ss1" href="#st200_p2s1ss1">2.1.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s1ss1pg1" href="#st200_p2s1ss1pg1">1</a></div><div class="st200_paragraph">
+      This section attempts to document the mathematical and typographical
+      conventions used in the rest of the documentation.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s1ss2" href="#st200_p2s1ss2">2.1.2</a></div><div class="st200_subsection_title">Mathematics</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s1ss2pg1" href="#st200_p2s1ss2pg1">1</a></div><div class="st200_paragraph">
+      Rather than rely on untyped and ambiguous mathematical notation, this
+      documentation expresses all mathematics in strict
+      <a class="st200_link_external" href="http://www.haskell.org/onlinereport/haskell2010/">Haskell 2010</a>
+      with no extensions. All Haskell sources are included along with
+      the documentation and can therefore be executed from the command
+      line <a class="st200_link_external" href="http://www.haskell.org/haskellwiki/GHC/GHCi">GHCi</a>
+      tool in order to interactively check results and experiment with
+      functions.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s1ss2pg2" href="#st200_p2s1ss2pg2">2</a></div><div class="st200_paragraph">
+      When used within prose, functions are referred to using fully qualified 
+      notation, such as 
+      <span class="st200_term expression">(Vector3f.cross n t)</span>. This
+      is the application of the <span class="st200_term function">cross</span> function
+      defined in the <a class="st200_link_external" href="haskell/Vector3f.hs">Vector3f</a>
+      module, to the arguments <span class="st200_term variable">n</span> and
+      <span class="st200_term variable">t</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s1ss2pg3" href="#st200_p2s1ss2pg3">3</a></div><div class="st200_paragraph">
+      Formal examples and definitions, however, will typically be defined
+      within their own modules, possibly with import statements used to allow 
+      for shorter names. As an example
+      [<a class="st200_link_external" href="haskell/LightDiffuse.hs">LightDiffuse.hs</a>]:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s1ss2fo1" href="#st200_p2s1ss2fo1">2.1.2.1. Diffuse light</a></div><pre class="st200_verbatim">module LightDiffuse where
+
+import qualified Color3
+import qualified Direction
+import qualified Normal
+import qualified Spaces
+import qualified Vector3f
+
+diffuse ::  Direction.T Spaces.Eye -&gt; Normal.T -&gt; Color3.T -&gt; Float -&gt; Vector3f.T
+diffuse stl n light_color light_intensity =
+  let 
+    factor       = max 0.0 (Vector3f.dot3 stl n)
+    light_scaled = Vector3f.scale light_color light_intensity
+  in 
+    Vector3f.scale light_scaled factor</pre></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2.xhtml#st200_p2">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s2.xhtml#st200_p2s2">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2. Design and Implementation</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.2. Concepts</td></tr></table></div></div></body></html>

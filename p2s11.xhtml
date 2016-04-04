@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.11. Visible Sets</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.10. Instances</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.12. Deferred Rendering</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s10.xhtml#st200_p2s10">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s12.xhtml#st200_p2s12">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s11" href="#st200_p2s11">2.11</a></div><div class="st200_section_title">Visible Sets</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s11.xhtml#st200_p2s11ss1">2.11.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s11.xhtml#st200_p2s11ss2">2.11.2. Batching</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s11.xhtml#st200_p2s11ss3">2.11.3. Shadow Geometry</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s11ss1" href="#st200_p2s11ss1">2.11.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s11ss1pg1" href="#st200_p2s11ss1pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">visible set</span> is the collection of
+      <a class="st200_link" href="p2s10.xhtml#st200_p2s10">instances</a> and
+      <a class="st200_link" href="p2s18.xhtml#st200_p2s18">lights</a> that contribute
+      to the scene from the perspective of a given 
+      <span class="st200_term term">observer</span>. As stated previously
+      the <span class="st200_term package">io7m-r1</span> package
+      assumes that the programmer is using some sort of spatial data structure
+      to intelligently decide what is and is not visible at any given time:
+      The <span class="st200_term package">io7m-r1</span> package
+      draws exactly what it is told to draw, and does not attempt to work out
+      if a given object is visible or not.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s11ss2" href="#st200_p2s11ss2">2.11.2</a></div><div class="st200_subsection_title">Batching</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s11ss2pg1" href="#st200_p2s11ss2pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">visible set</span> is <span class="st200_term term">batched</span>
+      in order that the renderer can draw the scene with as few internal state
+      changes as possible. Instances and lights are submitted to a mutable
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KVisibleSetBuilderType.html">builder</a>
+      which produces an immutable
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KVisibleSet.html">visible set</a>
+      as a result. Opaque instances are associated with lights in
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KVisibleSetLightGroup.html">light groups</a>,
+      and translucent instances are submitted with groups of
+      lights in draw order. The <span class="st200_term package">io7m-r1</span> package
+      renders translucent instances in the order that they are given to the builder.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s11ss2pg2" href="#st200_p2s11ss2pg2">2</a></div><div class="st200_paragraph">
+      Because opaque instances can be drawn in any order due to depth buffering,
+      the <span class="st200_term package">io7m-r1</span> package
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KVisibleSetOpaques.html">groups opaque instances</a>
+      by material type in order to come up with a draw order that will result in the 
+      fewest internal state changes during rendering. It applies this same grouping methodology 
+      to produce sets of
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KVisibleSetShadows.html">shadow casters</a>
+      for producing shadow maps for any shadow-projecting lights in the scene.
+      Visible instances are batched by their <a class="st200_link" href="p2s5.xhtml#st200_p2s5ss3">material code</a>,
+      so if the materials differ only by, for example, their albedo color, then
+      they will both have the same material code and will be in the same batch
+      during rendering. The same batching logic is applied to shadow casting
+      instances.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s11ss3" href="#st200_p2s11ss3">2.11.3</a></div><div class="st200_subsection_title">Shadow Geometry</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s11ss3pg1" href="#st200_p2s11ss3pg1">1</a></div><div class="st200_paragraph">
+      Because the system requires the programmer to explicitly and separately state 
+      that an opaque instance is visible in the scene, and that an opaque instance
+      is casting a shadow, it becomes possible to effectively specify different 
+      <span class="st200_term term">shadow geometry</span> for a given instance. As an example,
+      a very complex and high resolution mesh may still have the silhouette of a simple
+      sphere, and therefore the user can separately add the high resolution mesh to
+      a scene as a visible instance, but add a low resolution version of the mesh
+      as an invisible shadow-casting instance with the same
+      <a class="st200_link" href="p2s9.xhtml#st200_p2s9">transform</a>. As a rather extreme
+      example, assuming a high resolution mesh <span class="st200_term variable">m0</span>
+      added to the scene as both a visible instance and a shadow caster:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s11ss3fo1" href="#st200_p2s11ss3fo1">2.11.3.1. Visible and shadow casting (High)</a></div><img class="st200_image" alt="Visible and shadow casting (High)" src="images/shadow_geo_0.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s11ss3pg2" href="#st200_p2s11ss3pg2">2</a></div><div class="st200_paragraph">
+      A low resolution mesh <span class="st200_term variable">m1</span> added to the
+      scene as both a visible instance and shadow caster:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s11ss3fo2" href="#st200_p2s11ss3fo2">2.11.3.2. Visible and shadow casting (Low)</a></div><img class="st200_image" alt="Visible and shadow casting (Low)" src="images/shadow_geo_1.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s11ss3pg3" href="#st200_p2s11ss3pg3">3</a></div><div class="st200_paragraph">
+      Now, with <span class="st200_term variable">m1</span> added as only a shadow
+      caster, and <span class="st200_term variable">m0</span> added as only a visible
+      instance:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s11ss3fo3" href="#st200_p2s11ss3fo3">2.11.3.3. Visible and shadow casting (Low shadow, high visible)</a></div><img class="st200_image" alt="Visible and shadow casting (Low shadow, high visible)" src="images/shadow_geo_2.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s11ss3pg4" href="#st200_p2s11ss3pg4">4</a></div><div class="st200_paragraph">
+      Using lower resolution geometry for shadow casters can lead to efficiency gains
+      on systems where vertex processing is expensive.
+    </div></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s10.xhtml#st200_p2s10">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s12.xhtml#st200_p2s12">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.10. Instances</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.12. Deferred Rendering</td></tr></table></div></div></body></html>

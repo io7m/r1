@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.lighting-directional"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Directional Lighting</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.lighting-directional.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">directional light</s:term> in the 
+      <s:term s:type="package">io7m-r1</s:term> package
+      is a light that emits parallel rays of light in a given 
+      eye space <s:term s:type="term">direction</s:term>.
+      It has a <s:term s:type="term">color</s:term> and an
+      <s:term s:type="term">intensity</s:term>, but does not have
+      an <s:term s:type="term">origin</s:term> and therefore is not attenuated
+      over distance. It does not cause objects to cast shadows.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Directional lighting</s:formal-item-title>
+      <s:image s:source="images/directional_diagram.png">Directional lighting</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-directional.types">
+    <s:subsection-title>Types</s:subsection-title>
+    <s:paragraph>
+      Directional lights are represented in the 
+      <s:term s:type="package">io7m-r1</s:term> 
+      package by the following types:
+    </s:paragraph>
+    <s:formal-item s:kind="listing">
+      <s:formal-item-title>Types</s:formal-item-title>
+      <s:list-unordered>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightDirectional.html">KLightDirectional</s:link-external> -
+          a directional light.
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightDirectionalDiffuseOnly.html">KLightDirectionalDiffuseOnly</s:link-external> -
+          a <s:link s:target="r1.dai.lighting.diffuse-only">diffuse-only</s:link>
+          variant of the standard directional light.
+        </s:list-item>
+      </s:list-unordered>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-directional.attenuation">
+    <s:subsection-title>Attenuation</s:subsection-title>
+    <s:paragraph>
+      Directional lights do not have origins and cannot therefore be attenuated
+      over distance.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-directional.application">
+    <s:subsection-title>Application</s:subsection-title>
+    <s:paragraph>
+      The final light applied to the surface is given by <s:term s:type="function">directional</s:term>
+      [<s:link-external s:target="haskell/Directional.hs">Directional.hs</s:link-external>], where
+      <s:term s:type="variable">sr</s:term>, <s:term s:type="variable">sg</s:term>,
+      <s:term s:type="variable">sb</s:term> are the red, green, and blue channels,
+      respectively, of the surface being lit. Note that the surface-to-light vector
+      <s:term s:type="variable">stl</s:term> is simply the negation of the light
+      direction.
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Directional lighting (Application)</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/Directional.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+  </s:subsection>
+
+</s:section>

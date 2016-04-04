@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.lighting"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Lighting</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.lighting.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The following sections of documentation attempt to describe the theory and
+      implementation of <s:term s:type="term">lighting</s:term> in the
+      <s:term s:type="package">io7m-r1</s:term> package. All lighting
+      in the package is <s:term s:type="term">dynamic</s:term> - there is no support
+      for precomputed lighting and all contributions from lights are recalculated every
+      time a scene is rendered. Lighting is configured by adding instances of
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightType.html">KLightType</s:link-external>
+      to a scene.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting.diffuse-specular">
+    <s:subsection-title>Diffuse/Specular Terms</s:subsection-title>
+    <s:paragraph>
+      The light applied to a surface by a given light is divided
+      into <s:term s:type="term">diffuse</s:term> and
+      <s:term s:type="term">specular</s:term> terms
+      <s:footnote>
+        The <s:term s:type="package">io7m-r1</s:term> package
+        does not use ambient terms.
+      </s:footnote>. The actual light applied to a surface is dependent upon
+      the properties of the surface. Conceptually, the diffuse and specular 
+      terms are multiplied by the final color of the surface and summed. In
+      practice, the materials applied to surfaces have control over how
+      light is actually applied to the surface. For example, materials may
+      include a 
+      <s:link s:target="r1.dai.materials-regular.specular-properties">specular map</s:link>
+      which is used to manipulate the specular term as it is applied to the surface.
+      Additionally, if a light supports <s:term s:type="term">attenuation</s:term>,
+      then the diffuse and specular terms are scaled by the attenuation factor
+      prior to being applied.
+    </s:paragraph>
+    <s:paragraph xml:id="r1.dai.lighting.diffuse-specular.diffuse">
+      The <s:term s:type="term">diffuse</s:term> term is modelled by
+      <s:link-external s:target="http://en.wikipedia.org/wiki/Lambertian_reflectance">Lambertian reflectance</s:link-external>.
+      Specifically, the amount of diffuse light reflected from a surface
+      is given by <s:term s:type="function">diffuse</s:term>
+      [<s:link-external s:target="haskell/LightDiffuse.hs">LightDiffuse.hs</s:link-external>]:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Diffuse term</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/LightDiffuse.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      Where <s:term s:type="variable">stl</s:term> is a unit length direction vector
+      from the surface to the light source, <s:term s:type="variable">n</s:term> is the surface
+      normal vector, <s:term s:type="variable">light_color</s:term> is the 
+      light color, and <s:term s:type="variable">light_intensity</s:term> 
+      is the light intensity. Informally, the algorithm determines how much diffuse light
+      should be reflected from a surface based on how directly that surface
+      points towards the light. When <s:term s:type="expression">stl == n</s:term>,
+      <s:term s:type="expression">Vector3f.dot3 stl n == 1.0</s:term>, and
+      therefore the light is reflected exactly as received. When 
+      <s:term s:type="expression">stl</s:term> is perpendicular to 
+      <s:term s:type="expression">n</s:term> (such that 
+      <s:term s:type="expression">Vector3f.dot3 stl n == 0.0</s:term>), no
+      light is reflected at all. If the two directions are greater than 
+      <s:term s:type="constant">90°</s:term> perpendicular, the dot product 
+      is negative, but the algorithm clamps negative values to 
+      <s:term s:type="constant">0.0</s:term> so the effect is the same.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Diffuse light</s:formal-item-title>
+      <s:image s:source="images/directional_diffuse.png">Diffuse light</s:image>
+    </s:formal-item>
+    <s:paragraph xml:id="r1.dai.lighting.diffuse-specular.specular">
+      The specular term is modelled by 
+      <s:link-external s:target="http://en.wikipedia.org/wiki/Phong_reflection_model">Phong reflection</s:link-external>
+      <s:footnote>
+        Note: Specifically <s:term s:type="term">Phong reflection</s:term> 
+        and not the more commonly used 
+        <s:link-external s:target="http://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model">Blinn-Phong reflection</s:link-external>.
+      </s:footnote>.
+      Specifically, the amount of specular light reflected from a surface is given by 
+      <s:term s:type="function">specular</s:term>
+      [<s:link-external s:target="haskell/LightSpecular.hs">LightSpecular.hs</s:link-external>]:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Specular Term</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/LightSpecular.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      Where <s:term s:type="variable">stl</s:term> is a unit length direction vector
+      from the surface to the light source, 
+      <s:term s:type="variable">view</s:term> is a unit length 
+      direction vector from the observer to the surface, 
+      <s:term s:type="variable">n</s:term> is the surface
+      normal vector, <s:term s:type="variable">light_color</s:term> is the 
+      light color, <s:term s:type="variable">light_intensity</s:term> 
+      is the light intensity, <s:term s:type="variable">surface_exponent</s:term> is the
+      <s:term s:type="term">specular exponent</s:term> defined by the surface,
+      and <s:term s:type="variable">surface_spec</s:term> is the surface
+      specularity factor.
+    </s:paragraph>
+    <s:paragraph xml:id="r1.dai.lighting.diffuse-specular.specular-exponent">
+      The specular exponent is a value, ordinarily in the range 
+      <s:term s:type="expression">[0, 255]</s:term>, that
+      controls how sharp the <s:term s:type="term">specular highlights</s:term>
+      appear on the surface. The exponent is a property of the surface, as opposed
+      to being a property of the light. Low specular exponents result in soft and widely
+      dispersed specular highlights (giving the appearance of a rough surface), while 
+      high specular exponents result in hard and focused highlights (giving the appearance of a polished 
+      surface). As an example, three models lit with 
+      progressively lower specular exponents from left to right (<s:term s:type="constant">128</s:term>,
+      <s:term s:type="constant">32</s:term>, and <s:term s:type="constant">8</s:term>,
+      respectively):
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Specular exponents</s:formal-item-title>
+      <s:image s:source="images/directional_specular_exponents.png">Specular exponents</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting.diffuse-only">
+    <s:subsection-title>Diffuse-Only Lights</s:subsection-title>
+    <s:paragraph>
+      Some lights have <s:term s:type="term">diffuse-only</s:term> variants.
+      Little explanation is required: The 
+      <s:link s:target="r1.dai.lighting.diffuse-specular.specular">specular</s:link>
+      term is simply not calculated and only the <s:term s:type="term">diffuse</s:term>
+      term is used.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting.attenuation">
+    <s:subsection-title>Attenuation</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Attenuation</s:term> is the property of the influence
+      of a given light on a surface in inverse proportion to the distance from the
+      light to the surface. In other words, for lights that support attenuation,
+      the further a surface is from a light source, the less that surface will
+      appear to be lit by the light. For light types that support attenuation,
+      an <s:term s:type="term">attenuation factor</s:term> is calculated based
+      on a given <s:term s:type="variable">inverse_maximum_range</s:term> 
+      (where the <s:term s:type="variable">maximum_range</s:term> is a
+      light-type specific positive value that represents the maximum possible
+      range of influence for the light), a configurable 
+      <s:term s:type="term">inverse falloff</s:term> value, and the current
+      <s:term s:type="variable">distance</s:term> between the surface being 
+      lit and the light source. The  attenuation factor is a value in the range 
+      <s:term s:type="expression">[0.0, 1.0]</s:term>, with
+      <s:term s:type="expression">1.0</s:term> meaning "no attenuation" and
+      <s:term s:type="expression">0.0</s:term> meaning "maximum attenuation".
+      The resulting attenuation factor is multiplied by the raw unattenuated
+      light values produced for the light in order to produce the illusion of
+      distance attenuation. Specifically:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Attenuation</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/Attenuation.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      Given the above definitions, a number of observations can be made.
+    </s:paragraph>
+    <s:paragraph>
+      If <s:term s:type="expression">falloff == 1</s:term>, then the
+      attenuation is linear over distance <s:footnote>
+        The attenuation function development is available for experimentation
+        in the included <s:link-external s:target="http://geogebra.org">GeoGebra</s:link-external>
+        file [<s:link-external s:target="attenuation.ggb">attenuation.ggb</s:link-external>].
+      </s:footnote>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram" xml:id="r1.dai.lighting.mathematics.attenuation-linear">
+      <s:formal-item-title>Linear attenuation</s:formal-item-title>
+      <s:image s:source="images/attenuation_linear.png">Linear attenuation</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      If <s:term s:type="expression">maximum_range == 0</s:term>, then the
+      inverse range is undefined, and therefore the results of lighting are 
+      undefined. The <s:term s:type="package">io7m-r1</s:term> package
+      handles this case by raising an exception when the light is created.
+    </s:paragraph>
+    <s:paragraph>
+      If <s:term s:type="expression">falloff == 0</s:term>, then the
+      inverse falloff is undefined, and therefore the results of lighting are 
+      undefined. The <s:term s:type="package">io7m-r1</s:term> package
+      handles this case by raising an exception when the light is created.
+    </s:paragraph>
+    <s:paragraph>
+      As <s:term s:type="expression">falloff</s:term> decreases towards
+      <s:term s:type="expression">0.0</s:term>, then the attenuation curve 
+      remains at <s:term s:type="expression">1.0</s:term> for increasingly
+      higher distance values before falling sharply to 
+      <s:term s:type="expression">0.0</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Low falloff attenuation</s:formal-item-title>
+      <s:image s:source="images/attenuation_low_falloff.png">Low falloff attenuation</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      As <s:term s:type="expression">falloff</s:term> increases away from
+      <s:term s:type="expression">0.0</s:term>, then the attenuation curve 
+      decreases more for lower distance values:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>High falloff attenuation</s:formal-item-title>
+      <s:image s:source="images/attenuation_high_falloff.png">High falloff attenuation</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+</s:section>

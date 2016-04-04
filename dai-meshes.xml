@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.meshes"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Meshes</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.meshes.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">mesh</s:term> is a collection of vertices
+      and triangles that define a polyhedral object, allocated on the
+      GPU upon which the renderer is executing. In practical terms, a
+      mesh is a pair
+      <s:term s:type="expression">(a, i)</s:term>, where
+      <s:term s:type="expression">a</s:term> is an OpenGL
+      <s:term s:type="term">vertex buffer object</s:term> consisting
+      of vertices of a
+      <s:link s:target="r1.dai.meshes.attributes">standard type</s:link>,
+      <s:term s:type="expression">i</s:term> is an OpenGL
+      <s:term s:type="term">element buffer object</s:term> consisting
+      of indices that describe how to draw the mesh as a series of triangles.
+    </s:paragraph>
+    <s:paragraph>
+      The contents of <s:term s:type="expression">a</s:term> are mutable, but
+      mesh references are considered to be immutable as with all other objects 
+      in the renderer.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.meshes.attributes">
+    <s:subsection-title>Attributes</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">mesh</s:term> consists of 
+      <s:term s:type="term">vertices</s:term>.
+      A vertex can be considered to be a value of a
+      <s:term s:type="term">record type</s:term>, with the fields of
+      the record referred to as the <s:term s:type="term">attributes</s:term>
+      of the vertex. In the <s:term s:type="package">io7m-r1</s:term> package,
+      an array buffer containing vertex data is specified using the
+      array buffer types from
+      <s:link-external s:target="http://mvn.io7m.com/io7m-jcanephora">jcanephora</s:link-external>.
+      The <s:term s:type="package">jcanephora</s:term> package 
+      allows programmers to specify the exact types of array buffers, 
+      allows for the full inspection of type information at runtime, including 
+      the ability to reference attributes by name, and allows for type-safe modification
+      of the contents of array buffers using an efficient cursor interface. 
+      In the <s:term s:type="package">io7m-r1</s:term> package,
+      meshes must have at least the following attributes, in any order:
+    </s:paragraph>
+    <s:formal-item s:kind="spec" s:type="mesh_types">
+      <s:formal-item-title>Required mesh attributes</s:formal-item-title>
+      <s:table>
+        <s:table-summary>Required mesh attributes</s:table-summary>
+        <s:table-head>
+          <s:table-column-name>Name</s:table-column-name>
+          <s:table-column-name>Type</s:table-column-name>
+          <s:table-column-name>Description</s:table-column-name>
+        </s:table-head>
+        <s:table-body>
+          <s:table-row>
+            <s:table-cell><s:term s:type="constant">v_position</s:term></s:table-cell>
+            <s:table-cell><s:term s:type="constant">vector_3f</s:term></s:table-cell>
+            <s:table-cell>The object-space position of the vertex</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:term s:type="constant">v_normal</s:term></s:table-cell>
+            <s:table-cell><s:term s:type="constant">vector_3f</s:term></s:table-cell>
+            <s:table-cell>The object-space normal vector of the vertex</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:term s:type="constant">v_uv</s:term></s:table-cell>
+            <s:table-cell><s:term s:type="constant">vector_2f</s:term></s:table-cell>
+            <s:table-cell>The UV coordinates of the vertex</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:term s:type="constant">v_tangent</s:term></s:table-cell>
+            <s:table-cell><s:term s:type="constant">vector_4f</s:term></s:table-cell>
+            <s:table-cell>The tangent vector of the vertex</s:table-cell>
+          </s:table-row>
+        </s:table-body>
+      </s:table>
+    </s:formal-item>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package ignores
+      any other attributes that happen to be present
+      <s:footnote>
+        The reason for this is that, for example, many skeletal animation systems
+        store extra information in each vertex about the bones that influence said vertex.
+        If the package did not ignore this extra data, then programmers would be forced
+        to allocate whole new meshes and copy out only the attributes given above.
+      </s:footnote>.
+    </s:paragraph>
+    <s:paragraph>
+      Meshes explicitly store per-vertex <s:term s:type="term">tangent</s:term>
+      vectors. The purpose and format of these vectors is given in the section
+      on <s:link s:target="r1.dai.normal-mapping.tangent-space">normal mapping</s:link>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.meshes.types">
+    <s:subsection-title>Types</s:subsection-title>
+    <s:paragraph>
+      Meshes are represented in the <s:term s:type="package">io7m-r1</s:term> package
+      by the <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KMesh.html">KMesh</s:link-external>
+      type.
+    </s:paragraph>
+  </s:subsection>
+</s:section>

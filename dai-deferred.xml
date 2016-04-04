@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.deferred"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Deferred Rendering</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.deferred.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Deferred rendering</s:term> is a rendering
+      technique where all of the opaque objects in a given scene are
+      rendered into a series of buffers, and then lighting is applied
+      to those buffers in
+      <s:link s:target="r1.dai.coords.screen-space">screen-space</s:link>.
+      This is in contrast to <s:term s:type="term">forward rendering</s:term>,
+      where all lighting is applied to objects as they are rendered.
+    </s:paragraph>
+    <s:paragraph xml:id="r1.dai.deferred.overview.shaders">
+      One major advantage of deferred rendering is a massive reduction in the number of
+      shaders required (traditional forward rendering requires <s:term s:type="expression">s * l</s:term>
+      shaders, where <s:term s:type="expression">s</s:term> is the number of
+      different object surface types in the scene, and 
+      <s:term s:type="expression">l</s:term> is the number of different light
+      types). In contrast, deferred rendering requires
+      <s:term s:type="expression">s + l</s:term> shaders, because surface
+      and lighting shaders are applied separately.
+    </s:paragraph>
+    <s:paragraph>
+      Traditional forward rendering also suffers severe performance
+      problems as the number of lights in the scene increases, because it
+      is necessary to recompute all of the surface attributes of an
+      object each time a light is applied. In contrast, deferred rendering
+      calculates all surface attributes of all objects once, and then reuses
+      them when lighting is applied.
+    </s:paragraph>
+    <s:paragraph>
+      However, deferred renderers are usually incapable of rendering
+      translucent objects. The deferred renderer in the 
+      <s:term s:type="package">io7m-r1</s:term> package
+      is no exception, and a severely restricted
+      <s:link s:target="r1.dai.forward-translucents">forward renderer</s:link>
+      is provided to render translucent objects.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred.algorithm">
+    <s:subsection-title>Algorithm</s:subsection-title>
+    <s:paragraph>
+      An informal description of the <s:term s:type="term">deferred rendering</s:term> algorithm as 
+      implemented in the <s:term s:type="package">io7m-r1</s:term> package
+      is as follows:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Deferred Rendering</s:formal-item-title>
+      <s:list-ordered>
+        <s:list-item>
+          Clear the current <s:link s:target="r1.dai.deferred.g-buffer">g-buffer</s:link>,
+          depth buffer, stencil buffer, and optionally the color buffer. The stencil
+          buffer is cleared to <s:term s:type="expression">0</s:term> and the depth
+          buffer is cleared to <s:term s:type="expression">1</s:term>.
+        </s:list-item>
+        <s:list-item>
+          For each <s:term s:type="term">light group</s:term> 
+          <s:term s:type="expression">g</s:term> in the scene:
+          <s:list-ordered>
+            <s:list-item>
+              Enable writing to the depth and stencil buffers, and disable stencil testing.
+            </s:list-item>
+            <s:list-item>
+              Set all non-zero values in the current stencil buffer to
+              <s:term s:type="expression">1</s:term>. See
+              the section on <s:link s:target="r1.dai.deferred.light-group-stencil">light group stencils</s:link>
+              for the meaning behind these values.
+            </s:list-item>
+            <s:list-item>
+              For each <s:term s:type="term">instance</s:term> <s:term s:type="expression">o</s:term> in
+              <s:term s:type="expression">g</s:term>:
+              <s:list-ordered>
+                <s:list-item>
+                  Render the surface <s:term s:type="term">albedo</s:term>,
+                  <s:term s:type="term">eye-space normals</s:term>, 
+                  <s:term s:type="term">specular color</s:term>, and
+                  <s:term s:type="term">emission level</s:term> 
+                  of <s:term s:type="expression">o</s:term> into the
+                  <s:link s:target="r1.dai.deferred.g-buffer">g-buffer</s:link>.
+                  <s:link s:target="r1.dai.normal-mapping">Normal mapping</s:link>
+                  is performed during rendering, and if
+                  <s:term s:type="expression">o</s:term> does not have
+                  specular highlights, then a pure black (zero intensity) 
+                  specular color is written. Effects such as 
+                  <s:link s:target="r1.dai.environment-mapping">environment mapping</s:link>
+                  are considered to be part of the surface albedo and so are performed
+                  in this step. Depth testing is enabled, and a depth function that
+                  only results in pixels being drawn if the depth of the current pixel is
+                  <s:term s:type="term">less than or equal</s:term> to the current depth
+                  buffer value is used. The corresponding 
+                  stencil buffer value is set to <s:term s:type="expression">2</s:term>.
+                </s:list-item>
+              </s:list-ordered>
+            </s:list-item>
+            <s:list-item>
+              Disable depth buffer and stencil buffer writing. Keep depth testing enabled
+              and set the depth function to <s:term s:type="term">greater than or equal</s:term>.
+              Enable the stencil test, and configure it such that only pixels with
+              a corresponding value of <s:term s:type="expression">2</s:term> in the
+              stencil buffer will be affected.
+            </s:list-item>
+            <s:list-item>
+              For each <s:term s:type="term">light</s:term> <s:term s:type="expression">k</s:term> in
+              <s:term s:type="expression">g</s:term>:
+              <s:list-ordered>
+                <s:list-item>
+                  Render a <s:link s:target="r1.dai.deferred.light-volumes">light</s:link> volume
+                  representing <s:term s:type="expression">k</s:term>. All pixels that are
+                  overlapped by <s:term s:type="expression">k</s:term> and that satisfy the
+                  depth test have lighting applied. Lighting is applied in
+                  <s:link s:target="r1.dai.coords.eye-space">eye-space</s:link>, and the
+                  original eye-space position of the current surface is reconstructed
+                  using a <s:link s:target="r1.dai.deferred-position-recon">position reconstruction</s:link>
+                  algorithm.
+                </s:list-item>
+              </s:list-ordered>
+            </s:list-item>
+          </s:list-ordered>
+        </s:list-item>
+      </s:list-ordered>
+    </s:formal-item>
+    <s:paragraph>
+      In the <s:term s:type="package">io7m-r1</s:term> package, deferred
+      renderers have the type
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KRendererDeferredOpaqueType.html">KRendererDeferredOpaqueType</s:link-external>,
+      and the primary implementation is given by
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KRendererDeferredOpaque.html">KRendererDeferredOpaque</s:link-external>.
+      Deferred renderers are usually paired with simple
+      <s:link s:target="r1.dai.forward-translucents">forward renderers</s:link> in order
+      to render any translucent instances in the scene. The type of paired deferred/forward
+      renderers is
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KRendererDeferredType.html">KRendererDeferredType</s:link-external>
+      with the primary implementation given by
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KRendererDeferred.html">KRendererDeferred</s:link-external>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred.g-buffer">
+    <s:subsection-title>G-Buffer</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="term">g-buffer</s:term> (the abbreviated form of
+      <s:term s:type="term">geometry buffer</s:term>) is the buffer in which
+      the surface attributes of objects are stored prior to having lighting
+      applied to produce a final rendered image.
+    </s:paragraph>
+    <s:paragraph>
+      One of the main implementation issues in any deferred renderer is
+      deciding which surface attributes (such as position, albedo, normals, etc)
+      to store and which to reconstruct. The more attributes that are stored,
+      the less work is required during rendering to reconstruct those values.
+      However, storing more attributes requires a larger 
+      <s:term s:type="term">g-buffer</s:term> and more memory bandwidth to
+      actually populate that <s:term s:type="term">g-buffer</s:term> during
+      rendering. The <s:term s:type="package">io7m-r1</s:term> package
+      leans towards having a more compact <s:term s:type="term">g-buffer</s:term>
+      and doing slightly more reconstruction work during rendering.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>G-Buffer</s:formal-item-title>
+      <s:image s:source="images/gbuffer.png">G-Buffer</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package
+      explicitly stores the albedo, normals, emission level, and specular
+      color of surfaces. Additionally, the depth buffer is sampled to recover
+      the depth of surfaces. The eye-space positions of surfaces are recovered
+      via an efficient <s:link s:target="r1.dai.deferred-position-recon">position reconstruction</s:link>
+      algorithm which uses the current viewing projection and 
+      <s:term s:type="term">screen-space</s:term> depth value as input. In
+      order to reduce the amount of storage required, three-dimensional
+      eye-space normal vectors are stored compressed as two 
+      <s:term s:type="expression">16</s:term> half-precision floating point components 
+      via a simple <s:link s:target="r1.dai.deferred.normal-compression">mapping</s:link>.
+      This means that only <s:term s:type="expression">32</s:term> bits
+      are required to store the vectors, and very little precision is lost.
+      There is support for optionally storing the vectors as two 
+      <s:term s:type="expression">8</s:term> bit components for systems that
+      are memory-starved, with a noticeable loss in the visual quality of
+      specular highlights.
+    </s:paragraph>
+    <s:paragraph>
+      The precise format of the g-buffer when using <s:term s:type="expression">16</s:term>
+      bit normals is as follows:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>G-Buffer Format 0</s:formal-item-title>
+      <s:image s:source="images/gbuffer_format_0.png">G-Buffer Format 0</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The vertical lines indicate byte boundaries. Not including the depth/stencil
+      buffer, the amount of storage required per pixel is <s:term s:type="expression">3 * 4 = 12 bytes = 96 bits</s:term>.
+      When <s:term s:type="expression">8</s:term> bit normals are used, the layout
+      format is:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>G-Buffer Format 1</s:formal-item-title>
+      <s:image s:source="images/gbuffer_format_1.png">G-Buffer Format 1</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The <s:term s:type="variable">albedo_r</s:term>, <s:term s:type="variable">albedo_g</s:term>,
+      and <s:term s:type="variable">albedo_b</s:term> components correspond to the
+      red, green, and blue components of the surface, respectively. The
+      <s:term s:type="variable">emission</s:term> component refers to the surface
+      <s:link s:target="r1.dai.filter.emission">emission</s:link> level. The
+      <s:term s:type="variable">normal_x</s:term> and
+      <s:term s:type="variable">normal_y</s:term> components correspond to the
+      two components of the <s:link s:target="r1.dai.deferred.normal-compression">compressed surface normal</s:link>
+      vector. The <s:term s:type="variable">specular_r</s:term>, 
+      <s:term s:type="variable">specular_g</s:term>, and 
+      <s:term s:type="variable">specular_b</s:term> components correspond to the
+      red, green, and blue components of the surface specularity. Surfaces that will
+      not receive specular highlights simply have
+      <s:term s:type="expression">0</s:term> for each component. The
+      <s:term s:type="variable">specular_e</s:term> component holds the
+      surface <s:term s:type="term">specular exponent</s:term> divided by
+      <s:term s:type="expression">256</s:term>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred.light-group-stencil">
+    <s:subsection-title>Light Group Stencil</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Light groups</s:term> partition the scene into
+      separate lighting environments. A given light <s:term s:type="expression">k</s:term>
+      can be in any number of groups, and will be applied to all instances that are
+      in the same group. To implement this, the
+      <s:term s:type="package">io7m-r1</s:term> package uses
+      the stencil buffer to control which pixels will receive lighting during
+      rendering of each group. Essentially:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Deferred Rendering</s:formal-item-title>
+      <s:list-unordered>
+        <s:list-item>
+          A value of <s:term s:type="expression">0</s:term> in the stencil buffer
+          indicates that the current pixel has never been affected by any light
+          group. This is the initial state of all pixels.
+        </s:list-item>
+        <s:list-item>
+          A value of <s:term s:type="expression">1</s:term> in the stencil buffer
+          indicates that the current pixel was previously affected by a light
+          group.
+        </s:list-item>
+        <s:list-item>
+          A value of <s:term s:type="expression">2</s:term> in the stencil buffer
+          indicates that the current pixel is in the current light group and will
+          have lighting applied.
+        </s:list-item>
+      </s:list-unordered>
+    </s:formal-item>
+    <s:paragraph>
+      As noted by the <s:link s:target="r1.dai.deferred.algorithm">algorithm</s:link>
+      given above, pixels belonging to the current light group are marked with
+      a value of <s:term s:type="expression">2</s:term> in the stencil buffer
+      when all of the surfaces in the light group are rendered into the 
+      <s:term s:type="term">g-buffer</s:term>. Only pixels with a corresponding
+      value of <s:term s:type="expression">2</s:term> in the stencil buffer have
+      lighting applied. This is the step that prevents lights in one group from
+      affecting surfaces in another group. When a light group has completed
+      rendering, all pixels with a non-zero value in the stencil buffer have
+      their stencil values set to <s:term s:type="expression">1</s:term>. When
+      all light groups have been rendered, the stencil buffer will contain a
+      non-zero value for all pixels that were touched during rendering - this
+      fact can then be used in further postprocessing stages if desired.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred.normal-compression">
+    <s:subsection-title>Normal Compression</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package
+      uses a
+      <s:link-external s:target="http://en.wikipedia.org/wiki/Lambert_azimuthal_equal-area_projection">Lambert azimuthal equal-area projection</s:link-external>
+      to store surface normal vectors in two components instead of three. This
+      makes use of the fact that normalized vectors represent points on the
+      unit sphere. The mapping from normal vectors to two-dimensional spheremap coordinates
+      is given by <s:term s:type="function">compress</s:term> 
+      [<s:link-external s:target="haskell/NormalCompress.hs">NormalCompress.hs</s:link-external>]:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Normal Compression</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/NormalCompress.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      The mapping from two-dimensional spheremap coordinates to normal vectors is given by
+      <s:term s:type="function">decompress</s:term> 
+      [<s:link-external s:target="haskell/NormalDecompress.hs">NormalDecompress.hs</s:link-external>]:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Normal Decompression</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/NormalDecompress.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred.light-volumes">
+    <s:subsection-title>Light Volumes</s:subsection-title>
+    <s:paragraph>
+      In order to apply lighting during deferred rendering, it is necessary
+      to render <s:term s:type="term">light volumes</s:term> representing the
+      shape and size of the current light. All pixels that fall within this
+      light volume have lighting applied. Specifically:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Light Volumes</s:formal-item-title>
+      <s:list-unordered>
+        <s:list-item>
+          <s:link s:target="r1.dai.lighting-spherical">Spherical</s:link> lights
+          with radius <s:term s:type="expression">r</s:term> are represented by
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KUnitSphere.html">unit spheres</s:link-external>
+          with a transform that scales them during rendering to spheres with a resulting radius of
+          <s:term s:type="expression">r</s:term>.
+        </s:list-item>
+        <s:list-item>
+          <s:link s:target="r1.dai.lighting-directional">Directional</s:link> lights
+          are represented by full-screen
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KUnitQuad.html">quads</s:link-external>.
+        </s:list-item>
+        <s:list-item>
+          <s:link s:target="r1.dai.lighting-projective">Projective</s:link> lights
+          are represented by
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KFrustumMesh.html">frustums</s:link-external>
+          that are created and cached on demand to match the size and shape of the light's projection.
+        </s:list-item>
+      </s:list-unordered>
+    </s:formal-item>
+  </s:subsection>
+
+</s:section>

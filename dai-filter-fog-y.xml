@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.filter.fog-y"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Filter: Y Fog</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.filter.fog-y.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> offers
+      a filter that provides simple <s:term s:type="term">vertical fog</s:term>
+      effects for simulating various atmospheric effects such as ground fog
+      and "house fire" smoke.
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Fog</s:formal-item-title>
+      <s:image s:source="images/fog_y.png">Fog</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The fog filter applies a configurable fog color to all pixels in the
+      scene, based on given upper and lower planes for the fog.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.filter.fog-y.algorithm">
+    <s:subsection-title>Algorithm</s:subsection-title>
+    <s:paragraph>
+      The implemented algorithm takes a color <s:term s:type="expression">c</s:term>,
+      a world-space upper Y value <s:term s:type="expression">upper_y</s:term>, and a
+      world-space lower Y value <s:term s:type="expression">lower_y</s:term>. It samples
+      the depth of each pixel in the current scene, and
+      <s:link s:target="r1.dai.deferred-position-recon">reconstructs</s:link>
+      the full eye-space position of the surface that produced the pixel in question. It
+      then transforms this position back to world-space using the scene's inverse
+      view matrix, yielding a Y component <s:term s:type="expression">y</s:term>. 
+      Then, a <s:term s:type="term">fog factor</s:term> <s:term s:type="expression">r</s:term>
+      is calculated by <s:term s:type="expression">fog_factor</s:term>
+      [<s:link-external s:target="haskell/FogFactorY.hs">FogFactorY.hs</s:link-external>]:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Fog factor</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/FogFactorY.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      The value of <s:term s:type="expression">r</s:term> is then used to interpolate
+      between the original color of the pixel and <s:term s:type="expression">c</s:term>.
+      Surfaces with <s:term s:type="expression">y</s:term> less than <s:term s:type="expression">lower_y</s:term>
+      are unaffected by fog. Surfaces with <s:term s:type="expression">y</s:term> greater than or equal to
+      <s:term s:type="expression">upper_y</s:term> are maximally affected by fog and will actually
+      have their color values completely replaced by <s:term s:type="expression">c</s:term>.
+      Surfaces with <s:term s:type="expression">y</s:term> values that fall between 
+      <s:term s:type="expression">lower_y</s:term>
+      and <s:term s:type="expression">upper_y</s:term> will have differing amounts of fog applied
+      based on the type of <s:term s:type="term">fog progression</s:term> selected.
+      The filter offers <s:term s:type="term">linear</s:term>,
+      <s:term s:type="term">exponential</s:term>, and <s:term s:type="term">logarithmic</s:term>
+      fog progressions. With <s:term s:type="term">linear</s:term> fog, the
+      <s:term s:type="expression">r</s:term> value linearly interpolates between the
+      original surface color and <s:term s:type="expression">c</s:term>. With
+      <s:term s:type="term">exponential</s:term> fog, the value of 
+      <s:term s:type="expression">r * r</s:term> is used to linearly interpolate
+      between the original surface color and <s:term s:type="expression">c</s:term>.
+      Finally, with <s:term s:type="term">logarithmic</s:term> fog, the value of
+      <s:term s:type="expression">sqrt(r)</s:term> is used to linearly interpolate
+      between the original surface color and <s:term s:type="expression">c</s:term>.
+    </s:paragraph>
+    <s:paragraph>
+      If the <s:term s:type="expression">upper_y</s:term> value is greater than
+      the <s:term s:type="expression">lower_y</s:term> value, the fog will appear
+      to get thicker as the Y position decreases. This can be used to give the effect
+      of fog on the ground. Unfortunately, the illusion is somewhat ruined if the
+      viewer goes below the fog plane:
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Fog (Floor illusion broken)</s:formal-item-title>
+      <s:image s:source="images/fog_y_floor_bad.png">Fog (Floor illusion broken)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      If the <s:term s:type="expression">lower_y</s:term> value
+      is greater than the <s:term s:type="expression">upper_y</s:term> value, the
+      fog will appear to get thicker as the Y position increases. This can be used
+      to give the effect of smoke accumulating at the top of an enclosed space. 
+      Unfortunately, the illusion of both types of fog is ruined if the viewer 
+      travels above the fog plane:
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Fog (Ceiling illusion OK)</s:formal-item-title>
+      <s:image s:source="images/fog_y_ceil_ok.png">Fog (Ceiling illusion OK)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Fog (Ceiling illusion broken)</s:formal-item-title>
+      <s:image s:source="images/fog_y_ceil_bad.png">Fog (Ceiling illusion broken)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The simple-minded nature of the effect means that it should be used to 
+      supplement some other simulation of fog. Rendering a simple opaque flat 
+      plane the same color as the fog and then applying the fog effect would 
+      be sufficient.
+    </s:paragraph>
+    <s:paragraph>
+      The fog effect is provided by the
+      <s:link-external s:target="apidocs/com/io7m/r1/meshes/KImageFilterFogY.html">KImageFilterFogY</s:link-external>
+      filter.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.23. Shadow mapping - Basic</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.22. Shadows</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.24. Shadow mapping - Variance</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s22.xhtml#st200_p2s22">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s24.xhtml#st200_p2s24">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s23" href="#st200_p2s23">2.23</a></div><div class="st200_section_title">Shadow mapping - Basic</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s23.xhtml#st200_p2s23ss1">2.23.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s23.xhtml#st200_p2s23ss2">2.23.2. Algorithm</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s23.xhtml#st200_p2s23ss3">2.23.3. Issues</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s23.xhtml#st200_p2s23ss4">2.23.4. Types</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s23ss1" href="#st200_p2s23ss1">2.23.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s23ss1pg1" href="#st200_p2s23ss1pg1">1</a></div><div class="st200_paragraph">
+      <span class="st200_term term">Basic shadow mapping</span> is a technique
+      that results in simple per-pixel hard-edged shadows. Using the same
+      view and projection matrices used to apply
+      <a class="st200_link" href="p2s21.xhtml#st200_p2s21">projective lights</a>,
+      a <span class="st200_term term">depth-only</span> image of the current
+      scene is rendered, and those stored depth values
+      are compared with those in the rendered scene to determine if a given
+      point is in shadow with respect to the current light.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s23ss2" href="#st200_p2s23ss2">2.23.2</a></div><div class="st200_subsection_title">Algorithm</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s23ss2pg1" href="#st200_p2s23ss2pg1">1</a></div><div class="st200_paragraph">
+      Prior to actually <a class="st200_link" href="p2s12.xhtml#st200_p2s12">rendering</a> 
+      a visible set, <span class="st200_term term">shadow maps</span> are generated
+      for all <span class="st200_term term">shadow-projecting</span> lights in
+      the set. A <span class="st200_term term">shadow map</span> for basic shadow
+      mapping for a light <span class="st200_term expression">k</span> is an image of all of the 
+      <a class="st200_link" href="p2s11.xhtml#st200_p2s11ss3">shadow casters</a>
+      associated with <span class="st200_term expression">k</span>
+      in the visible set, rendered from the point of
+      view of <span class="st200_term expression">k</span>. Each pixel in the image
+      represents the <a class="st200_link" href="p2s14.xhtml#st200_p2s14">logarithmic depth</a>
+      of the closest surface at that pixel. For example:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s23ss2fo1" href="#st200_p2s23ss2fo1">2.23.2.1. Depth-only image</a></div><img class="st200_image" alt="Depth-only image" src="images/d_depth.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s23ss2pg2" href="#st200_p2s23ss2pg2">2</a></div><div class="st200_paragraph">
+      Darker pixels indicate a lower depth value than light pixels, 
+      which indicate that the surface was closer to the observer than
+      in the lighter case.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s23ss2pg3" href="#st200_p2s23ss2pg3">3</a></div><div class="st200_paragraph">
+      Then, when actually applying lighting during rendering of the
+      scene, a given <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5">eye space</a>
+      position <span class="st200_term expression">p</span> is transformed to
+      <a class="st200_link" href="p2s21.xhtml#st200_p2s21ss2">light-clip space</a>
+      and mapped to the range
+      <span class="st200_term expression">[(0, 0, 0), (1, 1, 1)]</span>, producing
+      a position <span class="st200_term variable">pos_light_clip</span>. The
+      same <span class="st200_term expression">p</span> is also transformed to
+      light-eye space, producing a position 
+      <span class="st200_term variable">pos_light_eye</span>.
+      The <span class="st200_term variable">pos_light_clip</span> position is used
+      directly in order to sample a value <span class="st200_term expression">d</span>
+      from the shadow map (as with sampling from a projected texture with projective 
+      lighting). The negated <span class="st200_term expression">z</span> component of 
+      <span class="st200_term expression">pos_light_eye</span> is encoded as a logarithmic
+      depth value using the same <span class="st200_term term">depth coefficient</span>
+      as was used when populating the shadow map, producing a value
+      <span class="st200_term expression">k</span>. Then,
+      <span class="st200_term expression">k</span> is compared against
+      <span class="st200_term expression">d</span>. If the 
+      <span class="st200_term expression">k</span>
+      is less than <span class="st200_term expression">d</span>, then this
+      means that <span class="st200_term expression">p</span> is closer to
+      the light than whatever surface resulted in 
+      <span class="st200_term expression">d</span> during the population
+      of the shadow map, and therefore <span class="st200_term expression">p</span>
+      is not in shadow with respect to the light.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s23ss3" href="#st200_p2s23ss3">2.23.3</a></div><div class="st200_subsection_title">Issues</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s23ss3pg1" href="#st200_p2s23ss3pg1">1</a></div><div class="st200_paragraph">
+      Unfortunately, the basic shadow mapping algorithm is subject
+      to a number of issues related to numerical imprecision, and
+      the <span class="st200_term package">io7m-r1</span> package
+      applies a number of user-adjustable workarounds for the problems.
+      Firstly, the algorithm is prone to a problem known as
+      <span class="st200_term term">shadow acne</span>, which
+      generally manifests as strange moiré patterns and dots on
+      surfaces. This is caused by <span class="st200_term term">self-shadowing</span>
+      which is caused by, amongst other things, <span class="st200_term term">quantization</span> 
+      in the storage of depth values:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s23ss3fo1" href="#st200_p2s23ss3fo1">2.23.3.1. Depth quantization</a></div><img class="st200_image" alt="Depth quantization" src="images/basic_shadow_depth_quant.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s23ss3pg2" href="#st200_p2s23ss3pg2">2</a></div><div class="st200_paragraph">
+      One widely used workaround to prevent <span class="st200_term term">self-shadowing</span>
+      is to <span class="st200_term term">bias</span> stored depth values by
+      a user-configurable amount, effectively increasing the likelihood
+      that a given point will not be considered to be in shadow. Unfortunately,
+      adding a <span class="st200_term term">bias</span> value that is too large
+      tends to result in a visual effect where shadows appear to 
+      become "detached" from their casting objects, because the the bias
+      value is causing the depth test to pass at positions where the shadow
+      touches the caster.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s23ss3pg3" href="#st200_p2s23ss3pg3">3</a></div><div class="st200_paragraph">
+      Another workaround to help prevent <span class="st200_term term">self-shadowing</span>
+      is to only render the <span class="st200_term term">back-faces</span> of
+      geometry into the shadow map. Unfortunately, this can result in very
+      thin geometry failing to cast shadows.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s23ss3pg4" href="#st200_p2s23ss3pg4">4</a></div><div class="st200_paragraph">
+      Finally, it is generally beneficial to increase the precision of
+      stored values in the shadow map by using a 
+      <span class="st200_term term">projection</span> for the light that has
+      the <span class="st200_term term">near</span> and
+      <span class="st200_term term">far</span> planes as close together as the
+      light will allow. In other words, if the light has a radius of
+      <span class="st200_term expression">10</span> units, then it is beneficial
+      to use a far plane at <span class="st200_term expression">10</span> units,
+      in order to allow for the best distribution of depth values in
+      that range.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s23ss3pg5" href="#st200_p2s23ss3pg5">5</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      implements both <span class="st200_term term">back-face</span>-only rendering,
+      and a configurable per-shadow <span class="st200_term term">bias</span> value.
+      Unfortunately, neither of these workarounds can ever fully solve the
+      problems, so the package also provides
+      <a class="st200_link" href="p2s24.xhtml#st200_p2s24">variance shadows</a>
+      which have far fewer artifacts and better visual quality at a slightly
+      higher computational cost.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s23ss4" href="#st200_p2s23ss4">2.23.4</a></div><div class="st200_subsection_title">Types</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s23ss4pg1" href="#st200_p2s23ss4pg1">1</a></div><div class="st200_paragraph">
+      Basic mapped shadows are represented by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KShadowMappedBasic.html">KShadowMappedBasic</a>
+      type, and can be associated with
+      <a class="st200_link" href="p2s21.xhtml#st200_p2s21">projective lights</a>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s23ss4pg2" href="#st200_p2s23ss4pg2">2</a></div><div class="st200_paragraph">
+      Rendering of depth-only images is handled by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/KDepthRendererType.html">KDepthRendererType</a>
+      type.
+    </div></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s22.xhtml#st200_p2s22">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s24.xhtml#st200_p2s24">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.22. Shadows</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.24. Shadow mapping - Variance</td></tr></table></div></div></body></html>

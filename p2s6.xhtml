@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.6. Regular Materials</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.5. Materials</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.7. Depth Materials</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s5.xhtml#st200_p2s5">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s7.xhtml#st200_p2s7">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s6" href="#st200_p2s6">2.6</a></div><div class="st200_section_title">Regular Materials</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s6.xhtml#st200_p2s6ss1">2.6.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s6.xhtml#st200_p2s6ss2">2.6.2. Albedo Properties</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s6.xhtml#st200_p2s6ss3">2.6.3. Emission Properties</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s6.xhtml#st200_p2s6ss4">2.6.4. Normal Properties</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s6.xhtml#st200_p2s6ss5">2.6.5. Specular Properties</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s6.xhtml#st200_p2s6ss6">2.6.6. Environment Properties</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s6ss1" href="#st200_p2s6ss1">2.6.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss1pg1" href="#st200_p2s6ss1pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package uses
+      a loose categorization for certain materials, based on observations taken
+      whilst studying the range of surface types used in the average commercial
+      3D game circa 2014. Basically, a material is 
+      <span class="st200_term term">regular</span> if it allows for control over
+      the surface <a class="st200_link" href="p2s6.xhtml#st200_p2s6ss2">albedo</a>,
+      <a class="st200_link" href="p2s6.xhtml#st200_p2s6ss3">emission</a>,
+      <a class="st200_link" href="p2s6.xhtml#st200_p2s6ss4">normal</a>,
+      <a class="st200_link" href="p2s6.xhtml#st200_p2s6ss5">specular</a>,
+      and <a class="st200_link" href="p2s6.xhtml#st200_p2s6ss6">environment</a>
+      properties. This combination of five properties is sufficient for expressing the
+      vast majority of surface materials implemented in most computer games. 
+      The type of <span class="st200_term term">regular</span> materials is
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialRegularType.html">KMaterialRegularType</a>.
+      The type of <span class="st200_term term">opaque</span> <span class="st200_term term">regular</span>
+      materials is
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialOpaqueRegular.html">KMaterialOpaqueRegular</a>.
+      The type of <span class="st200_term term">translucent</span> <span class="st200_term term">regular</span>
+      materials is
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRegular.html">KMaterialTranslucentRegular</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s6ss2" href="#st200_p2s6ss2">2.6.2</a></div><div class="st200_subsection_title">Albedo Properties</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss2pg1" href="#st200_p2s6ss2pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term term">albedo</span> of a surface is defined
+      as the coefficient of <span class="st200_term term">diffuse reflectivity</span>
+      of a surface. In practical terms, it can be thought of as the
+      color that a given surface will appear when lit with a pure white
+      light, prior to the application of any other surface-modifying
+      effects such as <a class="st200_link" href="p2s6.xhtml#st200_p2s6ss6">environment mapping</a>.
+      As an example, an object with a pure red albedo will appear to be
+      red when lit with a white light; conceptually, all other parts
+      of the light are absorbed by the surface.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss2pg2" href="#st200_p2s6ss2pg2">2</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package,
+      the albedo for a surface can be defined as a simple <span class="st200_term term">base color</span>
+      (<a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoUntextured.html">KMaterialAlbedoUntextured</a>),
+      or as a configurable mix (linear interpolation) between a 
+      <span class="st200_term term">base color</span> and a 
+      <span class="st200_term term">texture</span>
+      (<a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoTextured.html">KMaterialAlbedoTextured</a>).
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss2pg3" href="#st200_p2s6ss2pg3">3</a></div><div class="st200_paragraph">
+      An example square lit by a white light, with an untextured
+      albedo with a red base color and no other surface properties:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss2fo1" href="#st200_p2s6ss2fo1">2.6.2.1. Red albedo (Result)</a></div><img class="st200_image" alt="Red albedo (Result)" src="images/albedo_plain_red_0.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss2pg4" href="#st200_p2s6ss2pg4">4</a></div><div class="st200_paragraph">
+      The same square and light, but with a textured albedo mixing in 
+      <span class="st200_term constant">100%</span>
+      of the texture, effectively replacing the base color:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss2fo2" href="#st200_p2s6ss2fo2">2.6.2.2. Albedo texture</a></div><img class="st200_image" alt="Albedo texture" src="images/specular_tiles_albedo.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss2fo3" href="#st200_p2s6ss2fo3">2.6.2.3. Textured albedo (Result)</a></div><img class="st200_image" alt="Textured albedo (Result)" src="images/albedo_plain_tiles.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss2pg5" href="#st200_p2s6ss2pg5">5</a></div><div class="st200_paragraph">
+      The same sphere and light with a textured albedo mixing in <span class="st200_term constant">100%</span>
+      of the texture, but using a texture that has an alpha channel so that transparent parts of
+      the texture can show the underlying base color:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss2fo4" href="#st200_p2s6ss2fo4">2.6.2.4. Albedo texture</a></div><img class="st200_image" alt="Albedo texture" src="images/albedo_plain_red_mix_0_texture.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss2fo5" href="#st200_p2s6ss2fo5">2.6.2.5. Textured albedo (Result)</a></div><img class="st200_image" alt="Textured albedo (Result)" src="images/albedo_plain_red_mix_0.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss2pg6" href="#st200_p2s6ss2pg6">6</a></div><div class="st200_paragraph">
+      The same sphere and light with a textured albedo mixing in <span class="st200_term constant">50%</span>
+      of the texture (indicating a simple linear interpolation between the texture and base color):
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss2fo6" href="#st200_p2s6ss2fo6">2.6.2.6. Albedo texture</a></div><img class="st200_image" alt="Albedo texture" src="images/specular_tiles_albedo.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss2fo7" href="#st200_p2s6ss2fo7">2.6.2.7. Textured albedo (Result)</a></div><img class="st200_image" alt="Textured albedo (Result)" src="images/albedo_plain_tiles_mix.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss2pg7" href="#st200_p2s6ss2pg7">7</a></div><div class="st200_paragraph">
+      Specifically, the albedo of a given surface is given by <span class="st200_term function">albedo</span>
+      [<a class="st200_link_external" href="haskell/Albedo.hs">Albedo.hs</a>]:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss2fo8" href="#st200_p2s6ss2fo8">2.6.2.8. Albedo</a></div><pre class="st200_verbatim">module Albedo where
+
+import qualified Color4
+import qualified Vector4f
+
+albedo :: Color4.T -&gt; Float -&gt; Color4.T -&gt; Color4.T
+albedo base mix t =
+  Vector4f.interpolate base ((Vector4f.w t) * mix) t</pre></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s6ss3" href="#st200_p2s6ss3">2.6.3</a></div><div class="st200_subsection_title">Emission Properties</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss3pg1" href="#st200_p2s6ss3pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term term">emission</span> properties of a surface
+      specify to what degree the surface appears to emit light. The color
+      of the light is equal to the final surface color. Emission is implemented as a 
+      <a class="st200_link" href="p2s27.xhtml#st200_p2s27">filter</a> and
+      therefore emissive surfaces do not represent true
+      <a class="st200_link" href="p2s18.xhtml#st200_p2s18">light sources</a>. Additionally,
+      emission is not supported for translucent objects.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s6ss4" href="#st200_p2s6ss4">2.6.4</a></div><div class="st200_subsection_title">Normal Properties</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss4pg1" href="#st200_p2s6ss4pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term term">normal</span> properties of a surface
+      define whether the surface normal vectors will be taken directly
+      from the vertex data of the associated mesh
+      (<a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialNormalVertex.html">KMaterialNormalVertex</a>),
+      or sampled from
+      a texture to perform <a class="st200_link" href="p2s16.xhtml#st200_p2s16">normal mapping</a>
+      (<a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialNormalMapped.html">KMaterialNormalMapped</a>).
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s6ss5" href="#st200_p2s6ss5">2.6.5</a></div><div class="st200_subsection_title">Specular Properties</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss5pg1" href="#st200_p2s6ss5pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term term">specular</span> properties of a surface
+      define how that surface reflects the 
+      <a class="st200_link" href="p2s18.xhtml#st200_p2s18ss2pg4">specular term</a>
+      of any given light source. Surfaces can absorb the specular term and
+      not reflect it at all
+      (<a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialSpecularNone.html">KMaterialSpecularNone</a>),
+      or can multiply the incoming light with a constant color
+      (<a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialSpecularConstant.html">KMaterialSpecularConstant</a>),
+      or can multiply the incoming light with a color sampled from a provided texture
+      (<a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialSpecularMapped.html">KMaterialSpecularMapped</a>).
+      Each of the constant or mapped options also require the specification of
+      a <a class="st200_link" href="p2s18.xhtml#st200_p2s18ss2pg6">specular exponent</a>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss5pg2" href="#st200_p2s6ss5pg2">2</a></div><div class="st200_paragraph">
+      The purpose of the specular color coefficients serve two purposes: A pure
+      black coefficient means that the surface does not reflect any specular light
+      (simulating a rough surface). A pure white coefficient means that the surface 
+      reflects specular light exactly as received (simulating a shiny surface). 
+      When these values are sampled from a texture, it becomes possible
+      to control the "shininess" of a texture on a per-pixel basis. A good
+      example would be that of a bathroom tile texture: The faces of the tiles themselves
+      should be shiny, but the cement between the tiles should appear to be rough. A
+      simple greyscale specular map achieves this effect:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss5fo1" href="#st200_p2s6ss5fo1">2.6.5.1. Tiles (Albedo)</a></div><img class="st200_image" alt="Tiles (Albedo)" src="images/specular_tiles_albedo.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss5fo2" href="#st200_p2s6ss5fo2">2.6.5.2. Tiles (Normal map)</a></div><img class="st200_image" alt="Tiles (Normal map)" src="images/specular_tiles_normal.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss5fo3" href="#st200_p2s6ss5fo3">2.6.5.3. Tiles (Specular map)</a></div><img class="st200_image" alt="Tiles (Specular map)" src="images/specular_tiles_specular.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss5fo4" href="#st200_p2s6ss5fo4">2.6.5.4. Tiles (Result)</a></div><img class="st200_image" alt="Tiles (Result)" src="images/specular_tiles.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss5pg3" href="#st200_p2s6ss5pg3">3</a></div><div class="st200_paragraph">
+      Note how the black pixels in the specular map effectively prevent the areas
+      between the tiles from receiving specular highlights, whereas the faces of tiles
+      receive full highlights.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss5pg4" href="#st200_p2s6ss5pg4">4</a></div><div class="st200_paragraph">
+      Using a specular map that contains colors other than shades of grey is often
+      useful for modelling metals. Materials such as plastic and paint consist of
+      layers, the topmost of which will ordinarily reflect light as it is received.
+      This usually means that an orange plastic will reflect a white specular highlight
+      when lit with a pure white light. Metals, however, often have specular 
+      reflections similar in color to their diffuse reflection; An orange or gold
+      metal will have orange/gold specular highlights when lit with a pure white
+      light. Specular maps containing bizarre combinations of colors can be used
+      to create materials that are supernatural and alien in appearance:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss5fo5" href="#st200_p2s6ss5fo5">2.6.5.5. Tiles (Strange specular map)</a></div><img class="st200_image" alt="Tiles (Strange specular map)" src="images/specular_tiles_alien_specular.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s6ss5fo6" href="#st200_p2s6ss5fo6">2.6.5.6. Tiles (Strange result)</a></div><img class="st200_image" alt="Tiles (Strange result)" src="images/specular_tiles_strange.png"/></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s6ss6" href="#st200_p2s6ss6">2.6.6</a></div><div class="st200_subsection_title">Environment Properties</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s6ss6pg1" href="#st200_p2s6ss6pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term term">environment</span> properties of a surface
+      specify a <a class="st200_link" href="p2s17.xhtml#st200_p2s17ss2">cube map</a>
+      and some properties controlling how the resulting
+      <a class="st200_link" href="p2s17.xhtml#st200_p2s17ss3">environment-mapped reflection</a>
+      is combined with the surface color defined by all of the previously
+      specified material parameters.
+    </div></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s5.xhtml#st200_p2s5">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s7.xhtml#st200_p2s7">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.5. Materials</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.7. Depth Materials</td></tr></table></div></div></body></html>

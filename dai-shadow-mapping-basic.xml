@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.shadow-mapping-basic"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Shadow mapping - Basic</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-basic.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Basic shadow mapping</s:term> is a technique
+      that results in simple per-pixel hard-edged shadows. Using the same
+      view and projection matrices used to apply
+      <s:link s:target="r1.dai.lighting-projective">projective lights</s:link>,
+      a <s:term s:type="term">depth-only</s:term> image of the current
+      scene is rendered, and those stored depth values
+      are compared with those in the rendered scene to determine if a given
+      point is in shadow with respect to the current light.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-basic.algorithm">
+    <s:subsection-title>Algorithm</s:subsection-title>
+    <s:paragraph>
+      Prior to actually <s:link s:target="r1.dai.deferred">rendering</s:link> 
+      a visible set, <s:term s:type="term">shadow maps</s:term> are generated
+      for all <s:term s:type="term">shadow-projecting</s:term> lights in
+      the set. A <s:term s:type="term">shadow map</s:term> for basic shadow
+      mapping for a light <s:term s:type="expression">k</s:term> is an image of all of the 
+      <s:link s:target="r1.dai.visible-sets.shadow-geometry">shadow casters</s:link>
+      associated with <s:term s:type="expression">k</s:term>
+      in the visible set, rendered from the point of
+      view of <s:term s:type="expression">k</s:term>. Each pixel in the image
+      represents the <s:link s:target="r1.dai.log_depth">logarithmic depth</s:link>
+      of the closest surface at that pixel. For example:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Depth-only image</s:formal-item-title>
+      <s:image s:source="images/d_depth.png">Depth-only image</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Darker pixels indicate a lower depth value than light pixels, 
+      which indicate that the surface was closer to the observer than
+      in the lighter case.
+    </s:paragraph>
+    <s:paragraph>
+      Then, when actually applying lighting during rendering of the
+      scene, a given <s:link s:target="r1.dai.coords.eye-space">eye space</s:link>
+      position <s:term s:type="expression">p</s:term> is transformed to
+      <s:link s:target="r1.dai.lighting-projective.algorithm">light-clip space</s:link>
+      and mapped to the range
+      <s:term s:type="expression">[(0, 0, 0), (1, 1, 1)]</s:term>, producing
+      a position <s:term s:type="variable">pos_light_clip</s:term>. The
+      same <s:term s:type="expression">p</s:term> is also transformed to
+      light-eye space, producing a position 
+      <s:term s:type="variable">pos_light_eye</s:term>.
+      The <s:term s:type="variable">pos_light_clip</s:term> position is used
+      directly in order to sample a value <s:term s:type="expression">d</s:term>
+      from the shadow map (as with sampling from a projected texture with projective 
+      lighting). The negated <s:term s:type="expression">z</s:term> component of 
+      <s:term s:type="expression">pos_light_eye</s:term> is encoded as a logarithmic
+      depth value using the same <s:term s:type="term">depth coefficient</s:term>
+      as was used when populating the shadow map, producing a value
+      <s:term s:type="expression">k</s:term>. Then,
+      <s:term s:type="expression">k</s:term> is compared against
+      <s:term s:type="expression">d</s:term>. If the 
+      <s:term s:type="expression">k</s:term>
+      is less than <s:term s:type="expression">d</s:term>, then this
+      means that <s:term s:type="expression">p</s:term> is closer to
+      the light than whatever surface resulted in 
+      <s:term s:type="expression">d</s:term> during the population
+      of the shadow map, and therefore <s:term s:type="expression">p</s:term>
+      is not in shadow with respect to the light.
+    </s:paragraph>
+  </s:subsection>
+  
+  <s:subsection xml:id="r1.dai.shadow-mapping-basic.issues">
+    <s:subsection-title>Issues</s:subsection-title>
+    <s:paragraph>
+      Unfortunately, the basic shadow mapping algorithm is subject
+      to a number of issues related to numerical imprecision, and
+      the <s:term s:type="package">io7m-r1</s:term> package
+      applies a number of user-adjustable workarounds for the problems.
+      Firstly, the algorithm is prone to a problem known as
+      <s:term s:type="term">shadow acne</s:term>, which
+      generally manifests as strange moiré patterns and dots on
+      surfaces. This is caused by <s:term s:type="term">self-shadowing</s:term>
+      which is caused by, amongst other things, <s:term s:type="term">quantization</s:term> 
+      in the storage of depth values:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Depth quantization</s:formal-item-title>
+      <s:image s:source="images/basic_shadow_depth_quant.png">Depth quantization</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      One widely used workaround to prevent <s:term s:type="term">self-shadowing</s:term>
+      is to <s:term s:type="term">bias</s:term> stored depth values by
+      a user-configurable amount, effectively increasing the likelihood
+      that a given point will not be considered to be in shadow. Unfortunately,
+      adding a <s:term s:type="term">bias</s:term> value that is too large
+      tends to result in a visual effect where shadows appear to 
+      become "detached" from their casting objects, because the the bias
+      value is causing the depth test to pass at positions where the shadow
+      touches the caster.
+    </s:paragraph>
+    <s:paragraph>
+      Another workaround to help prevent <s:term s:type="term">self-shadowing</s:term>
+      is to only render the <s:term s:type="term">back-faces</s:term> of
+      geometry into the shadow map. Unfortunately, this can result in very
+      thin geometry failing to cast shadows.
+    </s:paragraph>
+    <s:paragraph>
+      Finally, it is generally beneficial to increase the precision of
+      stored values in the shadow map by using a 
+      <s:term s:type="term">projection</s:term> for the light that has
+      the <s:term s:type="term">near</s:term> and
+      <s:term s:type="term">far</s:term> planes as close together as the
+      light will allow. In other words, if the light has a radius of
+      <s:term s:type="expression">10</s:term> units, then it is beneficial
+      to use a far plane at <s:term s:type="expression">10</s:term> units,
+      in order to allow for the best distribution of depth values in
+      that range.
+    </s:paragraph>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package
+      implements both <s:term s:type="term">back-face</s:term>-only rendering,
+      and a configurable per-shadow <s:term s:type="term">bias</s:term> value.
+      Unfortunately, neither of these workarounds can ever fully solve the
+      problems, so the package also provides
+      <s:link s:target="r1.dai.shadow-mapping-variance">variance shadows</s:link>
+      which have far fewer artifacts and better visual quality at a slightly
+      higher computational cost.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.shadow-mapping-basic.types">
+    <s:subsection-title>Types</s:subsection-title>
+    <s:paragraph>
+      Basic mapped shadows are represented by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KShadowMappedBasic.html">KShadowMappedBasic</s:link-external>
+      type, and can be associated with
+      <s:link s:target="r1.dai.lighting-projective">projective lights</s:link>.
+    </s:paragraph>
+    <s:paragraph>
+      Rendering of depth-only images is handled by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KDepthRendererType.html">KDepthRendererType</s:link-external>
+      type.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>

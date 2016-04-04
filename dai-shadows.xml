@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.shadows"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Shadows</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.shadows.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      Because the <s:term s:type="package">io7m-r1</s:term> package
+      implements <s:term s:type="term">local illumination</s:term>, it is necessary
+      to associate <s:term s:type="term">shadows</s:term> with those light sources
+      capable of projecting them (currently only 
+      <s:link s:target="r1.dai.lighting-projective">projective</s:link> lights).
+      The <s:term s:type="package">io7m-r1</s:term> package currently
+      supports <s:link s:target="r1.dai.shadow-mapping-basic">basic</s:link> and
+      <s:link s:target="r1.dai.shadow-mapping-variance">variance</s:link> 
+      <s:term s:type="term">shadow mapping</s:term>. So-called
+      <s:term s:type="term">mapped</s:term> shadows allow efficient per-pixel
+      shadows to be calculated with varying degrees of visual quality.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.shadows.caching">
+    <s:subsection-title>Caching</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package
+      creates new shadow maps on demand during rendering, and the maps are
+      returned to a soft-bounded <s:footnote>
+        In other words, the cache tries to keep itself to a given
+        maximum size, but is permitted to overstep these bounds if asked: A
+        scene that has <s:term s:type="expression">100</s:term> shadow
+        casting lights requires <s:term s:type="expression">100</s:term>
+        pre-populated shadow maps, regardless of whether or not this would
+        exceed the stated maximum cache size.
+      </s:footnote>
+      cache after use. This implies that in a visible
+      set with <s:term s:type="expression">n</s:term> shadow-projecting lights,
+      there will be at least <s:term s:type="expression">n</s:term> shadow maps 
+      allocated and in use at any one time. Shadow maps are requested from the cache
+      based on their
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KShadowMapDescriptionType.html">map description</s:link-external>,
+      and unused maps are discarded from the cache after a configurable time
+      period. The intention is to avoid having to frequently allocate new
+      shadow maps without requiring that all maps be allocated up-front, and
+      without exhausting all available memory on shadow maps.
+    </s:paragraph>
+    <s:paragraph>
+      The functions responsible for creating a new shadow map based on a
+      map description are given in
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KShadowMapCacheLoader.html">KShadowMapCacheLoader</s:link-external>,
+      with the actual map implementation for basic shadow mapping given in
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KShadowMapBasic.html">KShadowMapBasic</s:link-external>.
+    </s:paragraph>
+    <s:paragraph>
+      The actual production of all shadow maps is managed by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/KShadowMapRenderer.html">KShadowMapRenderer</s:link-external>
+      type.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>

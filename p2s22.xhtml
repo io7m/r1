@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.22. Shadows</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.21. Projective Lighting</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.23. Shadow mapping - Basic</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s21.xhtml#st200_p2s21">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s23.xhtml#st200_p2s23">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s22" href="#st200_p2s22">2.22</a></div><div class="st200_section_title">Shadows</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s22.xhtml#st200_p2s22ss1">2.22.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s22.xhtml#st200_p2s22ss2">2.22.2. Caching</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s22ss1" href="#st200_p2s22ss1">2.22.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s22ss1pg1" href="#st200_p2s22ss1pg1">1</a></div><div class="st200_paragraph">
+      Because the <span class="st200_term package">io7m-r1</span> package
+      implements <span class="st200_term term">local illumination</span>, it is necessary
+      to associate <span class="st200_term term">shadows</span> with those light sources
+      capable of projecting them (currently only 
+      <a class="st200_link" href="p2s21.xhtml#st200_p2s21">projective</a> lights).
+      The <span class="st200_term package">io7m-r1</span> package currently
+      supports <a class="st200_link" href="p2s23.xhtml#st200_p2s23">basic</a> and
+      <a class="st200_link" href="p2s24.xhtml#st200_p2s24">variance</a> 
+      <span class="st200_term term">shadow mapping</span>. So-called
+      <span class="st200_term term">mapped</span> shadows allow efficient per-pixel
+      shadows to be calculated with varying degrees of visual quality.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s22ss2" href="#st200_p2s22ss2">2.22.2</a></div><div class="st200_subsection_title">Caching</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s22ss2pg1" href="#st200_p2s22ss2pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      creates new shadow maps on demand during rendering, and the maps are
+      returned to a soft-bounded <span class="st200_footnote_reference"><a id="st200_fn_35_ref" href="#st200_fn_35">[35]</a></span>
+      cache after use. This implies that in a visible
+      set with <span class="st200_term expression">n</span> shadow-projecting lights,
+      there will be at least <span class="st200_term expression">n</span> shadow maps 
+      allocated and in use at any one time. Shadow maps are requested from the cache
+      based on their
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KShadowMapDescriptionType.html">map description</a>,
+      and unused maps are discarded from the cache after a configurable time
+      period. The intention is to avoid having to frequently allocate new
+      shadow maps without requiring that all maps be allocated up-front, and
+      without exhausting all available memory on shadow maps.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s22ss2pg2" href="#st200_p2s22ss2pg2">2</a></div><div class="st200_paragraph">
+      The functions responsible for creating a new shadow map based on a
+      map description are given in
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/KShadowMapCacheLoader.html">KShadowMapCacheLoader</a>,
+      with the actual map implementation for basic shadow mapping given in
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/KShadowMapBasic.html">KShadowMapBasic</a>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s22ss2pg3" href="#st200_p2s22ss2pg3">3</a></div><div class="st200_paragraph">
+      The actual production of all shadow maps is managed by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/KShadowMapRenderer.html">KShadowMapRenderer</a>
+      type.
+    </div></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_35" href="#st200_fn_35_ref">35</a>]</div><div class="st200_footnote_body">
+        In other words, the cache tries to keep itself to a given
+        maximum size, but is permitted to overstep these bounds if asked: A
+        scene that has <span class="st200_term expression">100</span> shadow
+        casting lights requires <span class="st200_term expression">100</span>
+        pre-populated shadow maps, regardless of whether or not this would
+        exceed the stated maximum cache size.
+      </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s21.xhtml#st200_p2s21">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s23.xhtml#st200_p2s23">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.21. Projective Lighting</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.23. Shadow mapping - Basic</td></tr></table></div></div></body></html>

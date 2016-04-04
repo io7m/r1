@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.5. Materials</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.4. Rendering Process</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.6. Regular Materials</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s4.xhtml#st200_p2s4">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s6.xhtml#st200_p2s6">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s5" href="#st200_p2s5">2.5</a></div><div class="st200_section_title">Materials</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s5.xhtml#st200_p2s5ss1">2.5.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s5.xhtml#st200_p2s5ss2">2.5.2. Types</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s5.xhtml#st200_p2s5ss3">2.5.3. Shaders</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s5ss1" href="#st200_p2s5ss1">2.5.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss1pg1" href="#st200_p2s5ss1pg1">1</a></div><div class="st200_paragraph">
+      This section attempts to provide information on the
+      <span class="st200_term term">material</span> system used in the
+      <span class="st200_term package">io7m-r1</span> package
+      as well as the rationale for its existence.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss1pg2" href="#st200_p2s5ss1pg2">2</a></div><div class="st200_paragraph">
+      In contrast to most other rendering systems, the
+      <span class="st200_term package">io7m-r1</span> package
+      uses a typed <span class="st200_term term">material</span> system configured
+      directly from code, rather than having programmers and artists write 
+      <span class="st200_term term">shaders</span> in a shading language directly. It was a
+      conscious design decision to reduce <span class="st200_term term">flexibility</span>
+      in order to increase <span class="st200_term term">ease of use</span> and
+      <span class="st200_term term">correctness</span>. The material system
+      has the following disadvantages:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s5ss1fo1" href="#st200_p2s5ss1fo1">2.5.1.1. Material system disadvantages</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+          The material system was designed to accomodate the majority
+          of rendering techniques seen in computer games circa 2014 (such as
+          normal mapping, environment mapped reflections, etc). If the
+          <span class="st200_term package">io7m-r1</span> package
+          doesn't provide direct support for a technique, then the programmer
+          is required to modify the <span class="st200_term package">io7m-r1</span> 
+          package to use it.
+        </li></ul></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss1pg3" href="#st200_p2s5ss1pg3">3</a></div><div class="st200_paragraph">
+      However, the design also allows for the following advantages:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s5ss1fo2" href="#st200_p2s5ss1fo2">2.5.1.2. Material system advantages</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+          The material system was designed to accomodate the majority
+          of rendering techniques seen in computer games circa 2014 (such as
+          normal mapping, environment mapped reflections, etc). Rather than
+          having to tediously re-implement error-prone techniques such as 
+          normal mapping over and over, the programmer simply enables
+          normal mapping for a material.
+        </li><li class="st200_list_item">
+          The material system provides enough <span class="st200_term term">metadata</span>
+          about a given surface for all renderers in the
+          <span class="st200_term package">io7m-r1</span> package to
+          give consistently correct results regardless of the lighting in a scene. 
+          For example, other rendering
+          systems that utilize <span class="st200_term term">shadow mapping</span>
+          often give incorrect results when a user-written shader conditionally
+          <span class="st200_term term">discards</span> pixels. Shadow mapping is implemented
+          by rendering a depth-only image of an object from a different perspective,
+          and so the same pixels have to be discarded when rendering the depth-only 
+          image as when rendering the actual color image. In systems where the
+          user is required to write shaders, the system has no way of knowing that
+          some pixels need to be discarded and often has to fall back to running
+          the full material shader with writes to the color buffer masked.
+          The material system
+          in the <span class="st200_term package">io7m-r1</span> package
+          indicates <span class="st200_term term">statically</span> when this can occur,
+          and so the system simply uses a very efficient depth-only shader to
+          render accurate shadow maps.
+        </li><li class="st200_list_item">
+          In other rendering systems (particularly those that use 
+          <span class="st200_term term">forward rendering</span>), the programmer is
+          required to write one shader per combination of <span class="st200_term term">material</span>
+          and <span class="st200_term term">light</span>. That is, the programmer
+          is expected to re-implement each of the different lighting techniques
+          for every single material so that each can be used in any possible lighting environment. 
+          Many systems use a shader generation system
+          to work around these sorts of problems, requiring the development of
+          (and the programmer to learn) even more complex tools and development environments.
+          This issue is simply not present with a static material system.
+        </li><li class="st200_list_item">
+          Because the set of possible material and light types in the
+          <span class="st200_term package">io7m-r1</span> package is
+          fixed, the system knows exactly how to correctly send data to all
+          of the possible <span class="st200_term term">shaders</span>. The programmer
+          is not required to laboriously configure all of the connections between
+          shader parameters and the data that must be supplied to shaders. All of
+          the usual classes of bugs involving forgetting to set parameters, sending
+          parameters of the wrong type, etc, are simply not possible.
+        </li><li class="st200_list_item">
+          The material system allows for extremely rapid development and
+          previewing of materials. Because the components of the material
+          systems are exposed as simple pseudo-algebraic Java types, it is
+          extremely easy to put together a graphical user interface for
+          configuring materials. Rendering systems that require programmers
+          to write shaders typically end up implementing their own complete
+          integrated development environments!
+        </li><li class="st200_list_item">
+          Because the GLSL language is fundamentally poorly designed and entirely
+          anti-modular, any rendering system requiring the programmer to write
+          shaders must implement its own custom shading language to give good
+          type errors and to work identically across all of the different possible
+          versions of OpenGL
+          <span class="st200_footnote_reference"><a id="st200_fn_17_ref" href="#st200_fn_17">[17]</a></span>. It is simply not possible, in the <span class="st200_term package">io7m-r1</span> package,
+          for the programmer to create a material that will work on some of the
+          supported OpenGL versions and not others.
+        </li><li class="st200_list_item">
+          The material system has predictable performance characteristics. In
+          systems that require programmers to write their own shaders, it is
+          standard practice for programmers to repeatedly re-visit and do
+          tedious optimization work to get their materials to run faster. The
+          <span class="st200_term package">io7m-r1</span> package
+          tries to expose a very minimalist material system and delegates the
+          work of, for example, procedural texture generation to external systems
+          <span class="st200_footnote_reference"><a id="st200_fn_18_ref" href="#st200_fn_18">[18]</a></span>.
+        </li></ul></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss1pg4" href="#st200_p2s5ss1pg4">4</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package is
+      generally developed under the assumption that if a programmer is competent
+      enough to write all of their own shading and lighting algorithms, then they
+      might as well have written their own rendering system in the first place
+      <span class="st200_footnote_reference"><a id="st200_fn_19_ref" href="#st200_fn_19">[19]</a></span>!
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s5ss2" href="#st200_p2s5ss2">2.5.2</a></div><div class="st200_subsection_title">Types</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss2pg1" href="#st200_p2s5ss2pg1">1</a></div><div class="st200_paragraph">
+      All materials implement
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialType.html">KMaterialType</a>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss2pg2" href="#st200_p2s5ss2pg2">2</a></div><div class="st200_paragraph">
+      All materials have a 3x3 texture matrix which is concatenated with
+      a per-instance 3x3 texture matrix during rendering. The texture
+      matrix affects all textures (such as the <span class="st200_term term">albedo map</span>,
+      <span class="st200_term term">normal map</span>, <span class="st200_term term">specular map</span>, etc)
+      in the material simultaneously. This allows for the orientation, scale
+      and position of a texture to be set on a per-material basis, and then
+      adjusted on a per-instance basis later.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss2pg3" href="#st200_p2s5ss2pg3">3</a></div><div class="st200_paragraph">
+      All materials have a unique <span class="st200_term term">material code</span>
+      (a simple string) that allows the rendering system to select a 
+      <span class="st200_term term">shader</span> in 
+      <span class="st200_term expression">O(1)</span> time to render the material.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss2pg4" href="#st200_p2s5ss2pg4">4</a></div><div class="st200_paragraph">
+      All materials take the form <span class="st200_term term">pseudo-algebraic</span>
+      data types, with each <span class="st200_term term">case</span> (or 
+      <span class="st200_term term">constructor</span> in typed functional languages - not used here
+      because the term already exists in Java and means something else) being
+      represented by a single type. For example, the type of
+      <span class="st200_term term">albedo</span> material properties is represented
+      by the <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoType.html">KMaterialAlbedoType</a>
+      type, with specific cases represented by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoTextured.html">KMaterialAlbedoTextured</a>
+      and
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoUntextured.html">KMaterialAlbedoUntextured</a>
+      types. When given a value of type
+      <span class="st200_term constant">KMaterialAlbedoType</span>, it is necessary to
+      <span class="st200_term term">pattern-match</span> on the value to find out which
+      of the specific types the value actually is. This is achieved in Java by the
+      use of <span class="st200_term term">generic visitors</span>. As an example:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s5ss2fo1" href="#st200_p2s5ss2fo1">2.5.2.1. Pattern matching</a></div><pre class="st200_verbatim">/*
+ * Copyright © 2014 &lt;code@io7m.com&gt; http://io7m.com
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+ * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+package com.io7m.r1.documentation.examples;
+
+import com.io7m.jfunctional.Unit;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.io7m.r1.kernel.types.KMaterialAlbedoTextured;
+import com.io7m.r1.kernel.types.KMaterialAlbedoType;
+import com.io7m.r1.kernel.types.KMaterialAlbedoUntextured;
+import com.io7m.r1.kernel.types.KMaterialAlbedoVisitorType;
+import com.io7m.r1.types.RException;
+
+/**
+ * An example of pattern matching on materials.
+ */
+
+public final class Match0
+{
+  private Match0()
+  {
+    throw new UnreachableCodeException();
+  }
+
+  public static void whichAlbedoType(
+    final KMaterialAlbedoType m)
+    throws RException
+  {
+    m
+      .albedoAccept(new KMaterialAlbedoVisitorType&lt;Unit, UnreachableCodeException&gt;() {
+        @Override public Unit textured(
+          final KMaterialAlbedoTextured mt)
+        {
+          System.out.println("Textured");
+          return Unit.unit();
+        }
+
+        @Override public Unit untextured(
+          final KMaterialAlbedoUntextured mu)
+        {
+          System.out.println("Untextured");
+          return Unit.unit();
+        }
+      });
+  }
+}
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss2pg5" href="#st200_p2s5ss2pg5">5</a></div><div class="st200_paragraph">
+      Essentially, the method <span class="st200_term constant">albedoAccept</span> is
+      passed a value <span class="st200_term expression">v</span> of type
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialAlbedoVisitorType.html">KMaterialAlbedoVisitorType</a>.
+      The <span class="st200_term constant">textured</span> method of 
+      <span class="st200_term expression">v</span> is called if 
+      <span class="st200_term expression">m</span> is of type
+      <span class="st200_term constant">KMaterialAlbedoTextured</span>, and
+      the <span class="st200_term constant">untextured</span> method of 
+      <span class="st200_term expression">v</span> is called if 
+      <span class="st200_term expression">m</span> is of type
+      <span class="st200_term constant">KMaterialAlbedoUntextured</span>. The
+      methods of <span class="st200_term expression">v</span> can return values
+      of type <span class="st200_term expression">A</span> (in this case, because
+      the visitor simply prints a message and doesn't return anything, the
+      visitor returns a value of type <span class="st200_term expression">Unit</span>),
+      and can raise exceptions of type 
+      <span class="st200_term expression">E</span> (in this case, the visitor does
+      not raise any exceptions and so throws an unchecked
+      <span class="st200_term expression">UnreachableCodeException</span>).
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss2pg6" href="#st200_p2s5ss2pg6">6</a></div><div class="st200_paragraph">
+      This method of representing types with a small number of fixed cases
+      is used throughout the <span class="st200_term package">io7m-r1</span> 
+      package <span class="st200_footnote_reference"><a id="st200_fn_20_ref" href="#st200_fn_20">[20]</a></span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss2pg7" href="#st200_p2s5ss2pg7">7</a></div><div class="st200_paragraph">
+      Materials are divided into <span class="st200_term term">opaque</span> and
+      <span class="st200_term term">translucent</span> types, represented by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialOpaqueType.html">KMaterialOpaqueType</a>
+      and
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentType.html">KMaterialTranslucentType</a>
+      types. Specific cases of the <span class="st200_term term">translucent</span> types
+      allow for effects such as <span class="st200_term term">specular-only</span> 
+      rendering (<a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentSpecularOnly.html">KMaterialTranslucentSpecularOnly</a>)
+      and <a class="st200_link" href="p2s25.xhtml#st200_p2s25">generic refraction</a>
+      (<a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRefractive.html">KMaterialTranslucentRefractive</a>).
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s5ss3" href="#st200_p2s5ss3">2.5.3</a></div><div class="st200_subsection_title">Shaders</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss3pg1" href="#st200_p2s5ss3pg1">1</a></div><div class="st200_paragraph">
+      In order to render an object on modern graphics hardware,
+      it's necessary to use one or more <span class="st200_term term">shaders</span>
+      (<span class="st200_term term">shading programs</span>) to actually
+      render surface details and/or apply lighting.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss3pg2" href="#st200_p2s5ss3pg2">2</a></div><div class="st200_paragraph">
+      When performing <a class="st200_link" href="p2s15.xhtml#st200_p2s15">forward rendering</a>,
+      one shader is used per combination of surface material type and
+      <a class="st200_link" href="p2s18.xhtml#st200_p2s18">light type</a>. When performing
+      <a class="st200_link" href="p2s12.xhtml#st200_p2s12">deferred rendering</a>, one
+      shader is used to render the surface properties into a buffer, and another
+      shader is used to calculate lighting using the data in the buffer.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss3pg3" href="#st200_p2s5ss3pg3">3</a></div><div class="st200_paragraph">
+      It's therefore necessary to be able to, given an arbitrary material and light,
+      efficiently choose shaders with which to perform rendering. Because
+      all possible material and light combinations in the 
+      <span class="st200_term package">io7m-r1</span> package are
+      known ahead of time, the <span class="st200_term package">io7m-r1</span> 
+      package simply picks one from the complete set of possible shaders that were generated
+      when the package was built. When an object with a given material <span class="st200_term variable">m</span>
+      is placed into a scene, the <span class="st200_term package">io7m-r1</span> package
+      reads the <span class="st200_term term">material code</span> (a simple unique identifier string)
+      for the material and uses that code to select a shader. The shader is
+      then compiled, loaded, and cached. The next time a material 
+      (or material and light combination) appears with the same code, the 
+      cached shader is re-used.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s5ss3pg4" href="#st200_p2s5ss3pg4">4</a></div><div class="st200_paragraph">
+      The advantage of this approach, somewhat ironically, is a reduction
+      in the number of shaders that have to be loaded at any given time. In
+      other rendering systems that equate materials with shaders, a scene
+      containing a thousand different material types requires a thousand
+      different shaders to be loaded (even though many of those shaders may
+      be functionally identical). The same scene using the material system
+      in the <span class="st200_term package">io7m-r1</span> package
+      may only require dozens of shaders, because a shader essentially 
+      represents a combination of material properties 
+      (such as "normal mapped, environment mapped, textured albedo"), 
+      as opposed to representing an entire material. This also reduces the
+      number of rendering state changes that have to be performed during
+      rendering: If two materials differ structurally only in the actual 
+      textures that they use, then the same shader will be used for both
+      and therefore the rendering system does not need to switch shaders
+      during rendering to render objects using either material.
+    </div></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_17" href="#st200_fn_17_ref">17</a>]</div><div class="st200_footnote_body">
+            The <span class="st200_term package">io7m-r1</span> package
+            actually uses the <a class="st200_link_external" href="http://mvn.io7m.com/io7m-jparasol">Parasol</a>
+            language internally to avoid the mentioned issues, but does not expose
+            this to programmers using the package.
+          </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_18" href="#st200_fn_18_ref">18</a>]</div><div class="st200_footnote_body">
+            This has the advantage that, if a texture is procedurally generated
+            by an external system, the texture can be cached and re-used by many
+            different surfaces. This is obviously not possible in systems that
+            do all of that work during the actual rendering of an object.
+          </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_19" href="#st200_fn_19_ref">19</a>]</div><div class="st200_footnote_body">
+        There is a tension in rendering systems between providing something that
+        is restrictive but easy to use, and providing something that is so 
+        generalized that it is capable of anything but barely any easier to use
+        than using the OpenGL API directly.
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_20" href="#st200_fn_20_ref">20</a>]</div><div class="st200_footnote_body">
+        Please see <a class="st200_link_external" href="http://io7m.com/documents/types/ccat/">A Crash Course in Algebraic Types</a>,
+        and more or less any software written in a typed functional languages for
+        a description of the immense correctness and maintenance benefits that 
+        algebraic data types provide.
+      </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s4.xhtml#st200_p2s4">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s6.xhtml#st200_p2s6">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.4. Rendering Process</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.6. Regular Materials</td></tr></table></div></div></body></html>

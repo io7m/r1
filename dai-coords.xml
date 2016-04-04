@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.coords"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Coordinate systems</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.coords.conventions">
+    <s:subsection-title>Conventions</s:subsection-title>
+    <s:paragraph>
+      This section attempts to describe the mathematical conventions
+      that the <s:term s:type="package">io7m-r1</s:term> package
+      uses with respect to coordinate systems. The
+      <s:term s:type="package">io7m-r1</s:term> package generally
+      does not deviate from standard OpenGL conventions, and this section does
+      not attempt to give a rigorous formal definition of these existing conventions. It
+      does however attempt to establish the <s:term s:type="term">naming conventions</s:term>
+      that the package uses to refer to the standard coordinate spaces
+      <s:footnote>
+        Almost all rendering systems use different names to refer to the same 
+        concepts, without ever bothering to document their conventions. This
+        harms comprehension and generally wastes everybody's time.
+      </s:footnote>.
+    </s:paragraph>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package
+      uses the <s:link-external s:target="http://mvn.io7m.com/io7m-jtensors">jtensors</s:link-external>
+      package for all mathematical operations on the CPU, and therefore
+      shares its conventions with regards to coordinate system handedness.
+      Important parts are repeated here, but the documentation for the
+      <s:term s:type="package">jtensors</s:term> package should be inspected
+      for details.
+    </s:paragraph>
+    <s:paragraph>
+      Any of the matrix functions that deal with rotations
+      assume a right-handed coordinate system. This
+      matches the system conventionally used by <s:link-external
+      s:target="http://opengl.org">OpenGL</s:link-external> (and most
+      mathematics literature). A right-handed coordinate system
+      assumes that if the viewer is standing at the origin and
+      looking towards negative infinity on the Z axis, then the
+      X axis runs horizontally (left towards negative infinity
+      and right towards positive infinity), and the Y axis runs
+      vertically (down towards negative infinity and up towards
+      positive infinity). The following image demonstrates this
+      axis configuration:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Right-handed coordinate system</s:formal-item-title>
+      <s:image s:source="images/axes2.png">Right-handed coordinate system</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The <s:term s:type="package">jtensors</s:term> package adheres
+      to the convention that a positive rotation around an axis
+      represents a counter-clockwise rotation when viewing the
+      system along the negative direction of the axis in question.
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Right-handed rotations</s:formal-item-title>
+      <s:image s:source="images/rotations.png">Right-handed rotations</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The package uses the following matrices to define rotations
+      around each axis:
+    </s:paragraph>
+    <s:formal-item s:kind="matrix">
+      <s:formal-item-title>Rotation of r radians around the X axis</s:formal-item-title>
+      <s:image s:source="images/matrix_rx.png">Rotation of r radians around the X axis</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="matrix">
+      <s:formal-item-title>Rotation of r radians around the Y axis</s:formal-item-title>
+      <s:image s:source="images/matrix_ry.png">Rotation of r radians around the Y axis</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="matrix">
+      <s:formal-item-title>Rotation of r radians around the Z axis</s:formal-item-title>
+      <s:image s:source="images/matrix_rz.png">Rotation of r radians around the Z axis</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Which results in the following matrix for rotating <s:term
+      s:type="variable">r</s:term> radians around the axis given
+      by <s:term s:type="constant">(x, y, z)</s:term>, assuming
+      <s:term s:type="variable">s = sin(r)</s:term> and <s:term
+      s:type="variable">c = cos(r)</s:term>
+      <s:footnote>
+        See <s:link-external s:target="http://mathfor3dgameprogramming.com">Mathematics
+        for 3D Game Programming and Computer
+        Graphics</s:link-external> 3rd Edition, section 4.3.1 for the
+        derivation.
+      </s:footnote>:
+    </s:paragraph>
+    <s:formal-item s:kind="matrix">
+      <s:formal-item-title>Rotation of r radians around an arbitrary axis</s:formal-item-title>
+      <s:image s:source="images/rot_matrix.png">Rotation of r radians around an arbitrary axis</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.coords.types">
+    <s:subsection-title>Types</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package
+      uses so-called <s:term s:type="term">phantom type parameters</s:term>
+      to statically indicate the coordinate systems of vectors, and the
+      types of transformations that matrices represent. For example, a
+      value of type <s:term s:type="expression">RVectorI3F&lt;RSpaceObjectType></s:term>
+      represents an immutable three-dimension vectors with coordinate 
+      specified in <s:link s:target="r1.dai.coords.object-space">object space</s:link>.
+      A value of type <s:term s:type="expression">RMatrixI4x4F&lt;RSpaceTransformViewType></s:term>
+      represents an immutable 4x4 matrix that contains a transformation from
+      <s:link s:target="r1.dai.coords.world-space">world space</s:link> to
+      <s:link s:target="r1.dai.coords.eye-space">eye space</s:link>.
+    </s:paragraph>
+    <s:paragraph>
+      Due to the limited nature of Java's type system, it is obviously
+      possible for the programmer to deliberately construct vectors and
+      matrices that do not represent valid coordinates or transforms in
+      any coordinate space. However, mistakes involving the mixing up
+      of coordinate systems are rampant in graphics programming, and
+      in practice, the system as implemented catches many of the mistakes
+      at compile time.
+    </s:paragraph>
+    <s:paragraph>
+      The package contains the following coordinate system and transform
+      indexed types:
+    </s:paragraph>
+    <s:formal-item s:kind="listing">
+      <s:formal-item-title>Vector and matrix types</s:formal-item-title>
+      <s:table>
+        <s:table-summary>Vector and matrix types</s:table-summary>
+        <s:table-head>
+          <s:table-column-name>Type</s:table-column-name>
+          <s:table-column-name>Description</s:table-column-name>
+        </s:table-head>
+        <s:table-body>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RMatrixI3x3F.html">RMatrixI3x3F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Immutable 3x3 matrix type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RMatrixI4x4F.html">RMatrixI4x4F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Immutable 4x4 matrix type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RMatrixM4x4F.html">RMatrixM4x4F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Mutable 4x4 matrix type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RMatrixM3x3F.html">RMatrixM3x3F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Mutable 3x3 matrix type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RVectorI2F.html">RVectorI2F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Immutable 2D vector type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RVectorI3F.html">RVectorI3F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Immutable 3D vector type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RVectorI4F.html">RVectorI4F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Immutable 4D vector type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RVectorM3F.html">RVectorM3F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Mutable 3D vector type</s:table-cell>
+          </s:table-row>
+          <s:table-row>
+            <s:table-cell><s:link-external s:target="apidocs/com/io7m/r1/types/RVectorM4F.html">RVectorM4F&lt;T extends RTransformType></s:link-external></s:table-cell>
+            <s:table-cell>Mutable 4D vector type</s:table-cell>
+          </s:table-row>
+        </s:table-body>
+      </s:table>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.coords.object-space">
+    <s:subsection-title>Object space</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Object space</s:term> is the local
+      coordinate system used to describe the positions of vertices
+      in <s:link s:target="r1.dai.meshes">meshes</s:link>. For
+      example, a <s:term s:type="term">unit cube</s:term> with the
+      origin placed at the center of the cube would have eight
+      vertices with positions expressed as object-space coordinates:
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Unit cube vertices</s:formal-item-title>
+      <s:verbatim><![CDATA[cube = {
+    (-0.5, -0.5, -0.5),
+    ( 0.5, -0.5, -0.5),
+    ( 0.5, -0.5,  0.5),
+    (-0.5, -0.5,  0.5),
+  
+    (-0.5,  0.5, -0.5),
+    ( 0.5,  0.5, -0.5),
+    ( 0.5,  0.5,  0.5),
+    (-0.5,  0.5,  0.5)
+  }]]></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      In other rendering systems, <s:term s:type="term">object space</s:term>
+      is sometimes referred to as <s:term s:type="term">local space</s:term>,
+      or <s:term s:type="term">model space</s:term>.
+    </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">io7m-r1</s:term> package, 
+      <s:term s:type="term">object space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceObjectType.html">RSpaceObjectType</s:link-external>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.coords.world-space">
+    <s:subsection-title>World space</s:subsection-title>
+    <s:paragraph>
+      In order to position objects in a scene, they must be
+      assigned a <s:link s:target="r1.dai.concepts.transforms">transform</s:link>
+      that can be applied to each of their 
+      <s:link s:target="r1.dai.coords.object-space">object space</s:link> vertices
+      to yield absolute positions in so-called 
+      <s:term s:type="term">world space</s:term>.
+    </s:paragraph>
+    <s:paragraph>
+      As an example, if the unit cube described above was
+      assigned a transform that moved its origin to
+      <s:term s:type="expression">(3, 5, 1)</s:term>, then its
+      object space vertex <s:term s:type="expression">(-0.5, 0.5, 0.5)</s:term>
+      would end up at
+      <s:term s:type="expression">(3 + -0.5, 5 + 0.5, 1 + 0.5) = (2.5, 5.5, 1.5)</s:term>
+      in world space.
+    </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">io7m-r1</s:term> package,
+      a <s:link s:target="r1.dai.concepts.transforms">transform</s:link> applied
+      to an object produces a 4x4
+      <s:term s:type="term">model matrix</s:term>. Multiplying the model matrix
+      with the positions of the object space vertices yields vertices in
+      world space.
+    </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">io7m-r1</s:term> package, 
+      <s:term s:type="term">world space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceWorldType.html">RSpaceWorldType</s:link-external>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.coords.eye-space">
+    <s:subsection-title>Eye space</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Eye space</s:term> represents the coordinate 
+      system of the 
+      <s:link s:target="r1.dai.concepts.camera">camera</s:link> of
+      a given <s:link s:target="r1.dai.concepts.visible-sets">visible set</s:link>.
+      In eye space, the observer is implicitly fixed at the origin
+      <s:term s:type="expression">(0.0, 0.0, 0.0)</s:term> and is
+      looking towards infinity in the negative Z direction.
+    </s:paragraph>
+    <s:paragraph>
+      The main purpose of eye space is to simplify
+      the mathematics required to implement various algorithms such
+      as lighting. The problem with implementing these sorts of
+      algorithms in world space is that one must constantly take into
+      account the position of the observer (typically by subtracting
+      the location of the observer from each set of world space
+      coordinates and accounting for any change in orientation of the
+      observer). By fixing the orientation of the observer towards 
+      negative Z, and the position of the observer at
+      <s:term s:type="expression">(0.0, 0.0, 0.0)</s:term>, and
+      by transforming all vertices of all objects into the same system, 
+      the mathematics of lighting are greatly simplified.
+      The majority of the rendering algorithms used in the
+      <s:term s:type="package">io7m-r1</s:term> package
+      are implemented in eye space.
+    </s:paragraph>
+    <s:paragraph xml:id="r1.dai.coords.eye-space.model-view">
+      In the <s:term s:type="package">io7m-r1</s:term> package,
+      the <s:link s:target="r1.dai.concepts.camera">camera</s:link> produces
+      a 4x4 <s:term s:type="term">view matrix</s:term>. Multiplying 
+      the view matrix with any given world space position yields 
+      a position in eye space. In practice, the view matrix 
+      <s:term s:type="expression">v</s:term>
+      and the current object's model matrix 
+      <s:term s:type="expression">m</s:term> are concatenated (multiplied)
+      to produce a <s:term s:type="term">model-view matrix</s:term>
+      <s:term s:type="expression">mv = v * m</s:term>
+      <s:footnote>
+        Note that matrix multiplication is not commutative.
+      </s:footnote>, and <s:term s:type="expression">mv</s:term> is then
+      passed directly to the renderer's
+      <s:term s:type="term">vertex shaders</s:term> to transform the
+      current object's vertices
+      <s:footnote>
+        The reason for producing the 
+        concatenated matrix on the CPU and then passing it to the shader
+        is efficiency; if a mesh had <s:term s:type="constant">1000</s:term>
+        vertices, and the shader was passed <s:term s:type="expression">m</s:term>
+        and <s:term s:type="expression">v</s:term> separately, the shader
+        would repeatedly perform the same <s:term s:type="expression">mv = v * m</s:term>
+        multiplication to produce <s:term s:type="expression">mv</s:term> 
+        for each vertex - yielding the exact same 
+        <s:term s:type="expression">mv</s:term> each time!
+      </s:footnote>.
+    </s:paragraph>
+    <s:paragraph xml:id="r1.dai.coords.eye-space.normal-matrix">
+      Additionally, as the <s:term s:type="package">io7m-r1</s:term> package
+      does all lighting in eye space, it's necessary to transform the
+      <s:link s:target="r1.dai.meshes.attributes">object space normal vectors</s:link>
+      given in mesh data to eye space. However, the usual model-view matrix
+      will almost certainly contain some sort of translational component and possibly
+      a scaling component. Normal vectors are not supposed to be translated; they 
+      represent directions! A non-uniform scale applied to an object will also deform the
+      normal vectors, making them non-perpendicular to the surface they're associated 
+      with:
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Scaling deforms normal vectors</s:formal-item-title>
+      <s:image s:source="images/normal_deform.png">Scaling deforms normal vectors</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      With the scaled triangle on the right, the normal vector is now not perpendicular
+      to the surface (in addition to no longer being of unit length). The red vector
+      indicates what the surface normal <s:term s:type="emphasis">should</s:term> be.
+    </s:paragraph>
+    <s:paragraph>
+      Therefore it's necessary to derive another 3x3 matrix known as the 
+      <s:term s:type="term">normal matrix</s:term> from the model-view matrix that
+      contains just the rotational component of the original matrix. The full
+      derivation of this matrix is given in
+      <s:link-external s:target="http://www.mathfor3dgameprogramming.com/">Mathematics for 3D Game Programming and Computer Graphics, Third Edition</s:link-external>
+      <s:footnote>
+        See section 4.5, "Transforming normal vectors".
+      </s:footnote>. Briefly, the normal matrix is equal to
+      the <s:term s:type="term">inverse transpose</s:term> of the top left
+      3x3 elements of an arbitrary 4x4 model-view matrix.
+    </s:paragraph>
+    <s:paragraph>
+      In other rendering systems, <s:term s:type="term">eye space</s:term>
+      is sometimes referred to as <s:term s:type="term">camera space</s:term>,
+      or <s:term s:type="term">view space</s:term>.
+    </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">io7m-r1</s:term> package, 
+      <s:term s:type="term">eye space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceEyeType.html">RSpaceEyeType</s:link-external>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.coords.clip-space">
+    <s:subsection-title>Clip space</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Clip space</s:term> is a homogeneous coordinate
+      system in which OpenGL performs <s:term s:type="term">clipping</s:term>
+      of primitives (such as triangles). In OpenGL,
+      <s:term s:type="term">clip space</s:term> is effectively a
+      left-handed coordinate system by default
+      <s:footnote>
+        Because <s:link s:target="r1.dai.coords.normalized-device-space">normalized device space</s:link>
+        is a left-handed system by default, with the viewer looking towards
+        positive Z, and because the transformation from
+        <s:term s:type="term">clip space</s:term> to
+        <s:term s:type="term">normalized device space</s:term> for
+        a given point is the division of the components of that point
+        by the point's own <s:term s:type="expression">w</s:term>
+        component.
+      </s:footnote>. Intuitively, coordinates in
+      <s:term s:type="term">eye space</s:term> are transformed with a
+      <s:term s:type="term">projection</s:term> (normally either an
+      <s:term s:type="term">orthographic</s:term> or
+      <s:term s:type="term">perspective</s:term> projection) such that
+      all vertices are projected into a homogeneous unit cube placed at
+      the origin - <s:term s:type="term">clip space</s:term> - resulting
+      in four-dimensional <s:term s:type="expression">(x, y, z, w)</s:term>
+      positions. Positions that end up outside of the cube are 
+      <s:term s:type="term">clipped</s:term> (discarded) by dedicated
+      clipping hardware, typically producing more triangles as a result.
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Primitive clipping</s:formal-item-title>
+      <s:image s:source="images/clipping.png">Primitive clipping</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      A <s:term s:type="term">projection</s:term> effectively
+      determines how objects in the three-dimensional scene are projected
+      onto the two-dimensional <s:term s:type="term">viewing plane</s:term>
+      (a computer screen, in most cases).
+      A <s:term s:type="term">perspective</s:term> projection
+      transforms vertices such that objects that are further away from
+      the viewing plane appear to be smaller than objects that are close
+      to it, while an <s:term s:type="term">orthographic</s:term>
+      projection preserves the perceived sizes of objects regardless of
+      their distance from the viewing plane.
+    </s:paragraph>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Perspective projection</s:formal-item-title>
+      <s:image s:source="images/proj_perspective.png">Perspective projection</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="example">
+      <s:formal-item-title>Orthographic projection</s:formal-item-title>
+      <s:image s:source="images/proj_ortho.png">Orthographic projection</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Because <s:link s:target="r1.dai.coords.eye-space">eye space</s:link> is
+      a right-handed coordinate system by convention, but by default
+      <s:link s:target="r1.dai.coords.clip-space">clip space</s:link> is
+      left-handed, the projection matrix used will invert the sign of the
+      <s:term s:type="expression">z</s:term> component of any given point.
+    </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">io7m-r1</s:term> package,
+      the <s:link s:target="r1.dai.concepts.camera">camera</s:link> produces
+      a 4x4 <s:term s:type="term">projection matrix</s:term>. The
+      <s:term s:type="term">projection matrix</s:term> is passed, along with
+      the <s:link s:target="r1.dai.coords.eye-space.model-view">model-view</s:link>
+      matrix, to the renderer's <s:term s:type="term">vertex shaders</s:term>.
+      As is normal in OpenGL, the vertex shader produces 
+      <s:term s:type="term">clip space</s:term> coordinates which are then
+      used by the hardware rasterizer to produce color fragments onscreen.
+    </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">io7m-r1</s:term> package, 
+      <s:term s:type="term">clip space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceClipType.html">RSpaceClipType</s:link-external>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.coords.normalized-device-space">
+    <s:subsection-title>Normalized-device space</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Normalized-device space</s:term> is, by default, a left-handed
+      <s:footnote>
+        The handedness of the coordinate space is dependent on the
+        <s:link s:target="r1.dai.coords.screen-space.depth-range">depth range</s:link>
+        configured for <s:link s:target="r1.dai.coords.screen-space">screen space</s:link>.
+      </s:footnote>
+      coordinate
+      space in which <s:link s:target="r1.dai.coords.clip-space">clip space</s:link>
+      coordinates have been divided by their own <s:term s:type="expression">w</s:term>
+      component (discarding the resulting <s:term s:type="expression">w = 1</s:term>
+      component in the process), yielding three dimensional coordinates. The
+      range of values in the resulting coordinates are effectively normalized by the division
+      to fall within the ranges <s:term s:type="expression">[(-1, -1, -1), (1, 1, 1)]</s:term>
+      <s:footnote>
+        It is actually the division by <s:term s:type="expression">w</s:term> that
+        produces the scaling effect necessary to produce the illusion of perspective
+        in <s:term s:type="term">perspective projections</s:term>.
+      </s:footnote>.
+      The coordinate space represents a simplifying intermediate step 
+      between having <s:link s:target="r1.dai.coords.clip-space">clip space</s:link>
+      coordinates and getting something projected into a two-dimensional image
+      (<s:link s:target="r1.dai.coords.screen-space">screen space</s:link>) for viewing.
+    </s:paragraph>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package
+      does not directly use or manipulate values in 
+      <s:term s:type="term">normalized-device space</s:term>; it is mentioned
+      here for completeness.
+    </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">io7m-r1</s:term> package, 
+      <s:term s:type="term">normalized-device space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceNDCType.html">RSpaceNDCType</s:link-external>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.coords.screen-space">
+    <s:subsection-title>Screen space</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Screen space</s:term> is, by default, a left-handed coordinate
+      system representing the screen (or window) that is displaying the actual
+      results of rendering. If the screen is of width <s:term s:type="expression">w</s:term>
+      and height <s:term s:type="expression">h</s:term>,
+      and the current <s:term s:type="term">depth range</s:term> of the window
+      is <s:term s:type="expression">[n, f]</s:term>, then the range of values
+      in screen space coordinates runs from <s:term s:type="expression">[(0, 0, n), (w, h, f)]</s:term>.
+      The origin <s:term s:type="expression">(0, 0, 0)</s:term> is assumed to be at
+      the bottom-left corner.
+    </s:paragraph>
+    <s:paragraph xml:id="r1.dai.coords.screen-space.depth-range">
+      The <s:term s:type="term">depth range</s:term> is actually a configurable
+      value, but the <s:term s:type="package">io7m-r1</s:term> package
+      keeps the OpenGL default. From the <s:term s:type="expression">glDepthRange</s:term>
+      function manual page:
+    </s:paragraph>
+    <s:formal-item s:kind="quote">
+      <s:formal-item-title>glDepthRange</s:formal-item-title>
+        <s:verbatim>After clipping and division by w, depth coordinates range from -1 to 1, 
+corresponding to the near and far clipping planes. glDepthRange specifies a 
+linear mapping of the normalized depth coordinates in this range to window 
+depth coordinates. Regardless of the actual depth buffer implementation, 
+window coordinate depth values are treated as though they range from 0 
+through 1 (like color components). Thus, the values accepted by 
+glDepthRange are both clamped to this range before they are accepted.
+The setting of (0,1) maps the near plane to 0 and the far plane to 1. 
+With this mapping, the depth buffer range is fully utilized.</s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      As OpenGL, by default, specifies a depth range of 
+      <s:term s:type="expression">[0, 1]</s:term>, the positive Z axis
+      points away from the observer, making the coordinate system left handed.
+    </s:paragraph>
+    <s:paragraph>
+      In the <s:term s:type="package">io7m-r1</s:term> package, 
+      <s:term s:type="term">screen space</s:term> is indicated by the
+      <s:link-external s:target="apidocs/com/io7m/r1/types/RSpaceWindowType.html">RSpaceWindowType</s:link-external>.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>

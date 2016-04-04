@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.16. Normal Mapping</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.15. Forward Rendering (Translucents)</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.17. Environment Mapping</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s15.xhtml#st200_p2s15">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s17.xhtml#st200_p2s17">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s16" href="#st200_p2s16">2.16</a></div><div class="st200_section_title">Normal Mapping</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s16.xhtml#st200_p2s16ss1">2.16.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s16.xhtml#st200_p2s16ss2">2.16.2. Tangent Space</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s16.xhtml#st200_p2s16ss3">2.16.3. Tangent/Bitangent Generation</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s16.xhtml#st200_p2s16ss4">2.16.4. Normal Maps</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s16.xhtml#st200_p2s16ss5">2.16.5. Rendering With Normal Maps</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s16ss1" href="#st200_p2s16ss1">2.16.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss1pg1" href="#st200_p2s16ss1pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      supports the use of <span class="st200_term term">tangent-space normal mapping</span>
+      to allow for per-pixel control over the surface normal of rendered triangles.
+      This allows for meshes to appear to have very complex surface details without
+      requiring those details to actually be rendered as triangles within the scene.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s16ss2" href="#st200_p2s16ss2">2.16.2</a></div><div class="st200_subsection_title">Tangent Space</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss2pg1" href="#st200_p2s16ss2pg1">1</a></div><div class="st200_paragraph">
+      Conceptually, there is a three-dimensional coordinate system based
+      at each vertex, formed by three orthonormal basis vectors: The vertex <span class="st200_term term">normal</span>,
+      <span class="st200_term term">tangent</span> and <span class="st200_term term">bitangent</span>
+      vectors. The <span class="st200_term term">normal</span> vector is a the vector perpendicular
+      to the surface at that vertex. The <span class="st200_term term">tangent</span> and
+      <span class="st200_term term">bitangent</span> vectors are parallel to the surface, and
+      each vector is obviously perpendicular to the other two vectors. This coordinate
+      space is often referred to as <span class="st200_term term">tangent space</span>. The
+      <span class="st200_term term">normal</span> vector actually forms the 
+      <span class="st200_term constant">Z</span> axis of the coordinate space, and this
+      fact is central to the process of normal mapping. The coordinate system at
+      each vertex may be left or right-handed depending on the arrangement of UV 
+      coordinates at that vertex.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s16ss2fo1" href="#st200_p2s16ss2fo1">2.16.2.1. Vertex coordinate system</a></div><img class="st200_image" alt="Vertex coordinate system" src="images/normal.png"/></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s16ss3" href="#st200_p2s16ss3">2.16.3</a></div><div class="st200_subsection_title">Tangent/Bitangent Generation</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss3pg1" href="#st200_p2s16ss3pg1">1</a></div><div class="st200_paragraph">
+      <span class="st200_term term">Tangent</span> and <span class="st200_term term">bitangent</span> 
+      vectors can be generated by the modelling programs that artists use to
+      create polygon meshes, but, additionally, the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/meshes/RMeshTangents.html">RMeshTangents</a>
+      class can take an arbitrary mesh with only normal vectors and UV 
+      coordinates and produce tangent and bitangent vectors. The full
+      description of the algorithm used is given in
+      <a class="st200_link_external" href="http://www.mathfor3dgameprogramming.com/">Mathematics for 3D Game Programming and Computer Graphics, Third Edition</a>
+      <span class="st200_footnote_reference"><a id="st200_fn_30_ref" href="#st200_fn_30">[30]</a></span>,
+      and also in an
+      <a class="st200_link_external" href="http://www.terathon.com/code/tangent.html">article</a>
+      by the same author. The actual aim of tangent/bitangent generation
+      is to produce a pair of orthogonal vectors that are oriented to the
+      <span class="st200_term variable">x</span> and <span class="st200_term variable">y</span>
+      axes of an arbitrary texture. In order to do achieve this,
+      the generated vectors are oriented according to the UV 
+      coordinates in the mesh.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss3pg2" href="#st200_p2s16ss3pg2">2</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package, the
+      <span class="st200_term term">bitangent</span> vector is not actually stored in
+      the mesh data, and the <span class="st200_term term">tangent</span> vector for 
+      any given vertex is instead stored as a four-component vector.
+      The reasons for this are as follows: Because the normal, tangent, and 
+      bitangent vectors are known to be orthonormal, it should be possible to
+      reconstruct any one of the three vectors given the other two at run-time. 
+      This would eliminate the need to store one of the vectors and would
+      reduce the size of mesh data (including the on-disk size, and the 
+      size of mesh data allocated on the GPU) by a significant amount.
+      Given any two orthogonal vectors <span class="st200_term constant">V0</span>
+      and <span class="st200_term constant">V1</span>, a vector orthogonal to both
+      can be calculated by taking the <span class="st200_term term">cross product</span>
+      of both, denoted <span class="st200_term expression">(cross V0 V1)</span>. The
+      problem here is that if <span class="st200_term constant">V0</span> is assumed
+      to be the original normal vector <span class="st200_term constant">N</span>,
+      and <span class="st200_term constant">V1</span> is assumed to be the original
+      tangent vector <span class="st200_term constant">T</span>, there is no guarantee
+      that <span class="st200_term expression">(cross N T)</span> will produce a
+      vector equal to the original bitangent vector 
+      <span class="st200_term constant">B</span>: There are two possible
+      choices of value for <span class="st200_term constant">B</span> that differ
+      only in the sign of their coordinate values.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss3pg3" href="#st200_p2s16ss3pg3">3</a></div><div class="st200_paragraph">
+      As an example, a triangle that will produce <span class="st200_term constant">T</span>
+      and <span class="st200_term constant">B</span> vectors that form a right-handed
+      coordinate system with the normal vector <span class="st200_term constant">N</span>
+      (with UV coordinates indicated at each vertex):
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s16ss3fo1" href="#st200_p2s16ss3fo1">2.16.3.1. Tangent generation (RHC)</a></div><img class="st200_image" alt="Tangent generation (Resulting in a right-handed coordinate system)" src="images/tangent_gen_RHC.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss3pg4" href="#st200_p2s16ss3pg4">4</a></div><div class="st200_paragraph">
+      The same triangle will produce vectors that form a left-handed system when
+      generating vectors for another vertex (note that the result of
+      <span class="st200_term expression">(Vector3f.cross N T) = (Vector3f.negation B)</span>):
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s16ss3fo2" href="#st200_p2s16ss3fo2">2.16.3.2. Tangent generation (LHC)</a></div><img class="st200_image" alt="Tangent generation (Resulting in a left-handed coordinate system)" src="images/tangent_gen_LHC.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss3pg5" href="#st200_p2s16ss3pg5">5</a></div><div class="st200_paragraph">
+      However, if the
+      original tangent vector <span class="st200_term constant">T</span> was augmented
+      with a piece of extra information that indicated whether or not the result of
+      <span class="st200_term expression">(cross N T)</span> needed to be inverted, then
+      reconstructing <span class="st200_term constant">B</span> would be trivial.
+      Therefore, the fourth component of the tangent vector <span class="st200_term constant">T</span>
+      contains <span class="st200_term constant">1.0</span> if 
+      <span class="st200_term expression">(cross N T) = B</span>, and
+      <span class="st200_term constant">-1.0</span> if <span class="st200_term expression">(cross N T) = -B</span>.
+      The bitangent vector can therefore be
+      reconstructed by calculating <span class="st200_term expression">cross (N, T.xyz) * T.w</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss3pg6" href="#st200_p2s16ss3pg6">6</a></div><div class="st200_paragraph">
+      With the three vectors <span class="st200_term expression">(T, B, N)</span>, it's now possible
+      construct a <span class="st200_term expression">3x3</span> matrix that can transform arbitrary
+      vectors in <a class="st200_link" href="p2s16.xhtml#st200_p2s16ss2">tangent space</a>
+      to <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss3">object space</a>:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s16ss3fo3" href="#st200_p2s16ss3fo3">2.16.3.3. Tangent → Object matrix</a></div><img class="st200_image" alt="Tangent → Object matrix" src="images/tangent_object_matrix.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss3pg7" href="#st200_p2s16ss3pg7">7</a></div><div class="st200_paragraph">
+      With this matrix, it's now obviously possible to take an arbitrary vector in
+      tangent space and transform it to object space. Then, with the
+      current <span class="st200_term term">normal matrix</span> (object → eye),
+      transform the object space vector all the way to 
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5">eye space</a> 
+      in the same manner as ordinary per-vertex object space normal vectors. 
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s16ss4" href="#st200_p2s16ss4">2.16.4</a></div><div class="st200_subsection_title">Normal Maps</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss4pg1" href="#st200_p2s16ss4pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">normal map</span> is an ordinary RGB texture
+      where each texel represents a tangent space normal vector. The 
+      <span class="st200_term variable">x</span> coordinate is stored in the
+      red channel, the <span class="st200_term variable">y</span> coordinate is
+      stored in the green channel, and the <span class="st200_term variable">z</span>
+      coordinate is stored in the blue channel. The original
+      coordinate values are assumed to fall within the inclusive range
+      <span class="st200_term expression">[-1.0, 1.0]</span>, and these values
+      are mapped to the range <span class="st200_term expression">[0.0, 1.0]</span>
+      before being encoded to a specific pixel format.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss4pg2" href="#st200_p2s16ss4pg2">2</a></div><div class="st200_paragraph">
+      As an example, the vector <span class="st200_term constant">(0.0, 0.0, 1.0)</span>
+      is first mapped to <span class="st200_term constant">(0.5, 0.5, 1.0)</span> and
+      then, assuming an image format with 8-bits of precision per color channel,
+      encoded to <span class="st200_term constant">(0x7f, 0x7f, 0xff)</span>. This
+      results in a pale blue color that is characteristic of tangent space
+      normal maps:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s16ss4fo1" href="#st200_p2s16ss4fo1">2.16.4.1. (0.0, 0.0, 1.0)</a></div><img class="st200_image" alt="(0.0, 0.0, 1.0)" src="images/normalmap_zerozeroone.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss4pg3" href="#st200_p2s16ss4pg3">3</a></div><div class="st200_paragraph">
+      Typically, tangent space normal maps are generated from a simple
+      height maps: Greyscale images where <span class="st200_term constant">0.0</span>
+      denotes the lowest possible height, and <span class="st200_term constant">1.0</span>
+      indicates the highest possible height. There are multiple algorithms
+      that are capable of generating normal vectors from height maps, but
+      the majority of them work from the same basic principle: For a given
+      pixel with value <span class="st200_term variable">h</span> at location 
+      <span class="st200_term expression">(x, y)</span> in an image, the neighbouring
+      pixel values at <span class="st200_term expression">(x - 1, y)</span>,
+      <span class="st200_term expression">(x - 1, y - 1)</span>, 
+      <span class="st200_term expression">(x + 1, y)</span>,
+      <span class="st200_term expression">(x + 1, y + 1)</span> are compared 
+      with <span class="st200_term variable">h</span>
+      in order to determine the <span class="st200_term term">slope</span> between 
+      the height values. As an example, the
+      <a class="st200_link_external" href="https://en.wikipedia.org/wiki/Prewitt_operator">Prewitt (3x3) operator</a>
+      when used from the
+      <a class="st200_link_external" href="https://code.google.com/p/gimp-normalmap/">gimp-normalmap</a>
+      plugin will produce the following map from a given greyscale height map:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s16ss4fo2" href="#st200_p2s16ss4fo2">2.16.4.2. Prewitt 3x3 normal map</a></div><img class="st200_image" alt="Prewitt 3x3 normal map" src="images/normalmap_fromheight.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss4pg4" href="#st200_p2s16ss4pg4">4</a></div><div class="st200_paragraph">
+      It is reasonably easy to infer the general directions of vectors from
+      a visual inspection of a tangent space normal map alone. In the above
+      image, the flat faces of the bricks are mostly pale blue. This is because the
+      tangent space normal for that surface is pointing straight towards the
+      viewer - mostly towards the positive <span class="st200_term variable">z</span>
+      direction. The right edges of the bricks in the image are tinted with a
+      pinkish hue - this indicates that the normal vectors at that pixel point
+      mostly towards the positive <span class="st200_term variable">x</span> direction.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s16ss5" href="#st200_p2s16ss5">2.16.5</a></div><div class="st200_subsection_title">Rendering With Normal Maps</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss5pg1" href="#st200_p2s16ss5pg1">1</a></div><div class="st200_paragraph">
+      As stated, the purpose of a normal map is to give per-pixel control
+      over the surface normal for a given triangle during rendering. The
+      process is as follows:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s16ss5fo1" href="#st200_p2s16ss5fo1">2.16.5.1. Rendering process</a></div><ol class="st200_list_ordered"><li class="st200_list_item">
+          Calculate the bitangent vector <span class="st200_term constant">B</span>
+          from the <span class="st200_term constant">N</span> and
+          <span class="st200_term constant">T</span> vectors. This step is
+          performed on a per-vertex basis 
+          (in the <span class="st200_term term">vertex shader</span>).
+        </li><li class="st200_list_item">
+          Construct a <span class="st200_term constant">3x3</span> tangent → object
+          matrix <span class="st200_term variable">M</span> 
+          from the <span class="st200_term expression">(T, B, N)</span> vectors.
+          This step is performed on a per-fragment basis 
+          (in the <span class="st200_term term">fragment shader</span>)
+          using the interpolated vectors calculated in the previous step.
+        </li><li class="st200_list_item">
+          Sample a tangent space normal vector <span class="st200_term variable">P</span>
+          from the current normal map.
+        </li><li class="st200_list_item">
+          Transform the vector <span class="st200_term variable">P</span> with
+          the matrix <span class="st200_term variable">M</span> by calculating
+          <span class="st200_term expression">M * P</span>, resulting in
+          an object space normal vector <span class="st200_term variable">Q</span>.
+        </li><li class="st200_list_item">
+          Transform the vector <span class="st200_term variable">Q</span> to
+          eye space, in the same manner that an ordinary per-vertex 
+          normal vector would be (using the 
+          <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5pg4">3x3 normal matrix</a>).
+        </li></ol></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss5pg2" href="#st200_p2s16ss5pg2">2</a></div><div class="st200_paragraph">
+      Effectively, a "replacement" normal vector is sampled from the
+      map, and transformed to object space using the existing
+      <span class="st200_term expression">(T, B, N)</span> vectors. When
+      the replacement normal vector is used when applying lighting,
+      the effect is dramatic. Given a simple two-polygon
+      square textured with the following albedo texture and normal map:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s16ss5fo2" href="#st200_p2s16ss5fo2">2.16.5.2. Example albedo and normal maps</a></div><img class="st200_image" alt="Example albedo and normal maps" src="images/normalmap_metalpanels.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss5pg3" href="#st200_p2s16ss5pg3">3</a></div><div class="st200_paragraph">
+      The square when textured and normal mapped, with three spherical
+      lights:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s16ss5fo3" href="#st200_p2s16ss5fo3">2.16.5.3. Lit and normal mapped</a></div><img class="st200_image" alt="Lit and normal mapped" src="images/normalmap_applied.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s16ss5pg4" href="#st200_p2s16ss5pg4">4</a></div><div class="st200_paragraph">
+      The same square with the same lights but missing the normal map:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s16ss5fo4" href="#st200_p2s16ss5fo4">2.16.5.4. Lit and not normal mapped</a></div><img class="st200_image" alt="Lit and not normal mapped" src="images/normalmap_none.png"/></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_30" href="#st200_fn_30_ref">30</a>]</div><div class="st200_footnote_body">
+        See section 7.8.3, "Calculating tangent vectors".
+      </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s15.xhtml#st200_p2s15">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s17.xhtml#st200_p2s17">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.15. Forward Rendering (Translucents)</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.17. Environment Mapping</td></tr></table></div></div></body></html>

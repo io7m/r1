@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.environment-mapping"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Environment Mapping</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.environment-mapping.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      <s:term s:type="term">Environment mapping</s:term> is conceptually
+      the process of constructing an artificial environment around an object
+      in order to provide, for example, effects such as reflective surfaces
+      or refractive objects.
+      In the <s:term s:type="package">io7m-r1</s:term> package,
+      the artificial environment is represented by 
+      <s:link s:target="r1.dai.environment-mapping.cube-maps">cube maps</s:link>,
+      and the only supported effect is <s:term s:type="reflection">reflection</s:term>.
+      Effects such as refraction are instead provided via
+      <s:link s:target="r1.dai.generic-refraction">generic refraction</s:link>,
+      which doesn't use environment mapping.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.environment-mapping.cube-maps">
+    <s:subsection-title>Cube Maps</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">cube map</s:term> is a <s:term s:type="term">texture</s:term>
+      with six <s:term s:type="term">faces</s:term>. When used for environment mapping,
+      each face represents a 90° image of the environment visible in the direction 
+      (in <s:link s:target="r1.dai.coords.world-space">world space</s:link>) of
+      that face. Cube maps are normally constructed by placing an observer in a scene
+      and then orienting the observer in the direction of each cube face in turn and 
+      rendering an image. As an example:
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Cube map scene</s:formal-item-title>
+      <s:image s:source="images/envmap_cube_scene.png">Cube map scene</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Given the above scene, with the observer placed exactly in the center of the
+      indicated magenta circle and assuming a 90° field of view, the six images visible
+      from that location corresponding to the <s:term s:type="constant">-x</s:term>,
+      <s:term s:type="constant">+x</s:term>, <s:term s:type="constant">-y</s:term>,
+      <s:term s:type="constant">-z</s:term>, <s:term s:type="constant">-z</s:term>,
+      <s:term s:type="constant">+z</s:term> cube faces are:
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Cube map example</s:formal-item-title>
+      <s:image s:source="images/envmap_cubemap.png">Cube map example</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      While sampling from ordinary two-dimensional textures involves looking up texels 
+      by their two-dimensional coordinates, sampling from cube maps requires 
+      three-dimensional coordinates. The three-dimensional coordinates are interpreted
+      as a direction vector or ray emanating from the center of the cube, and the point of
+      intersection between the ray and the corresponding cube face is
+      used to select a texel from that face. Note that in OpenGL there are
+      issues with 
+      <s:link s:target="r1.dai.environment-mapping.handedness">coordinate system handedness</s:link>
+      that the <s:term s:type="package">io7m-r1</s:term> package
+      corrects.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.environment-mapping.reflection">
+    <s:subsection-title>Reflections</s:subsection-title>
+    <s:paragraph>
+      So-called <s:term s:type="term">environment-mapped reflections</s:term> are
+      trivially provided by cube maps. For a given surface with a normal vector
+      <s:term s:type="variable">n</s:term>, and given the view direction 
+      <s:term s:type="variable">v</s:term> (from the observer to the surface),
+      a <s:term s:type="term">reflection vector</s:term> is given by
+      <s:term s:type="expression">r = Reflection.reflection v n</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Reflection vector</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/Reflection.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      The reflection vector <s:term s:type="variable">r</s:term> is then used to 
+      look up a texel in the current cube map directly. This gives a convincing 
+      illusion of reflection that will change as the observer moves relative to 
+      the surface. Combining normal mapping and environment mapped reflections
+      gives a striking effect:
+    </s:paragraph>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Normal/Environment mapping</s:formal-item-title>
+      <s:image s:source="images/envmap_tiles.png">Normal/Environment mapping</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="examples">
+      <s:formal-item-title>Normal/Environment mapping (Cube map)</s:formal-item-title>
+      <s:image s:source="images/envmap_toronto.png">Normal/Environment mapping (Cube map)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Note that in the actual <s:term s:type="package">io7m-r1</s:term> 
+      implementation, the vectors <s:term s:type="variable">n</s:term> and
+      <s:term s:type="variable">v</s:term> will be in eye-space and therefore
+      so will <s:term s:type="variable">r</s:term>. The vector 
+      <s:term s:type="variable">r</s:term> is transformed back to
+      <s:link s:target="r1.dai.coords.world-space">world space</s:link>
+      by the inverse of the current view matrix for use with the cube map.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.environment-mapping.handedness">
+    <s:subsection-title>Handedness</s:subsection-title>
+    <s:paragraph>
+      For reasons lost to time, cube maps in
+      OpenGL use a left-handed coordinate system in contrast to the usual
+      right-handed coordinate system. Because of this, calculated 
+      reflection vectors actually have to be inverted to prevent sampling
+      from the wrong cube face. The 
+      <s:term s:type="package">io7m-r1</s:term> package
+      enforces a consistent right-handed coordinate system everywhere. The
+      direction of each cube face corresponds to the same direction in
+      <s:link s:target="r1.dai.coords.world-space">world space</s:link>, without
+      exception.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>

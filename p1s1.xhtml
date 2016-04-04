@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 1.1. Orientation</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">1. Package Information</td><td class="st200_navbar_up_title_cell">1. Package Information</td><td class="st200_navbar_next_title_cell">1.2. Installation</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p1.xhtml#st200_p1">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p1.xhtml#st200_p1">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p1s2.xhtml#st200_p1s2">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p1s1" href="#st200_p1s1">1.1</a></div><div class="st200_section_title">Orientation</div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p1s1ss1" href="#st200_p1s1ss1">1.1.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p1s1ss1pg1" href="#st200_p1s1ss1pg1">1</a></div><div class="st200_paragraph">
+          The <span class="st200_term package">io7m-r1</span> package 
+          implements an aggressively minimalist 3D renderer.
+        </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p1s1ss2" href="#st200_p1s1ss2">1.1.2</a></div><div class="st200_subsection_title">Features</div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p1s1ss2fo1" href="#st200_p1s1ss2fo1">1.1.2.1. Features</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+              A <span class="st200_term term">deferred rendering</span> core for 
+              <span class="st200_term term">opaque</span> objects.
+            </li><li class="st200_list_item">
+              A <span class="st200_term term">forward renderer</span>, supporting
+              a subset of the features of the 
+              <span class="st200_term term">deferred renderer</span>, for 
+              rendering <span class="st200_term term">translucent</span> objects.
+            </li><li class="st200_list_item">
+              A full dynamic lighting system, including both
+              <span class="st200_term term">basic</span> and
+              <span class="st200_term term">variance</span> shadow mapping. The use
+              of <span class="st200_term term">deferred rendering</span> allows for
+              potentially hundreds of dynamic lights per scene.
+            </li><li class="st200_list_item">
+              A detailed material system, allowing for artists and developers
+              to create surfaces with a wide variety of effects such as 
+              <span class="st200_term term">normal mapping</span>,
+              <span class="st200_term term">environment-mapped reflections</span>,
+              <span class="st200_term term">generic refraction</span>,
+              <span class="st200_term term">surface emission</span>,
+              <span class="st200_term term">mapped specular highlights</span>, etc,
+              without writing a single line of shader code. All materials are
+              immutable but are created via simple mutable builders in code, and so
+              are effectively dynamic
+                <span class="st200_footnote_reference"><a id="st200_fn_0_ref" href="#st200_fn_0">[0]</a></span>.
+            </li><li class="st200_list_item">
+              A variety of postprocessing effects such as 
+              <span class="st200_term term">box blurring</span>, 
+              <span class="st200_term term">fast approximate antialiasing (FXAA)</span>,
+              <span class="st200_term term">color correction</span>,
+              <span class="st200_term term">bloom</span>, etc.
+              Effects can be applied in any order.
+            </li><li class="st200_list_item">
+              Explicit control over all resource loading and caching. For
+              all <span class="st200_term term">transient</span> resources
+              <span class="st200_footnote_reference"><a id="st200_fn_1_ref" href="#st200_fn_1">[1]</a></span>, the
+              programmer is required to provide the renderer with explicit 
+              <span class="st200_term term">caches</span>, and the caches themselves
+              are responsible for allocating and loading resources.
+            </li><li class="st200_list_item">
+              Extensive use of immutable objects for the purposes of correctness.
+              One of the driving design concepts is that the programmer passes
+              an immutable "snapshot" of the scene to be rendered to a rendering
+              function, and that rendering function will always return the same
+              image for that snapshot.
+            </li><li class="st200_list_item">
+              Simplicity. The implementation consists of a few thousand shaders
+              generated at compile-time from the Java <span class="st200_term term">material</span> 
+              and <span class="st200_term term">light</span> types defined in the renderer's
+              API. All of the usual bugs that plague programmers using 3D renderers that
+              directly expose shaders (such as passing incorrect parameters to shaders,
+              forgetting to pass required parameters, etc), are simply not present. The
+              system knows every possible <span class="st200_term term">light</span> and
+              <span class="st200_term term">material</span> combination, statically, and
+              knows how to pass the right parameters to the shaders that implement them.
+              The programmer doesn't have to worry about it.
+            </li><li class="st200_list_item">
+              Extensive use of static types. As with all
+              <a class="st200_link_external" href="http://io7m.com">io7m</a> packages,
+              there is extreme emphasis on using the type system to make it difficult to
+              use the APIs incorrectly.
+            </li><li class="st200_list_item">
+              Portability. The renderer will run on any system supporting either
+              OpenGL <span class="st200_term constant">&gt;= 3.0</span> or
+              OpenGL ES <span class="st200_term constant">&gt;= 3</span>.
+            </li></ul></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p1s1ss3" href="#st200_p1s1ss3">1.1.3</a></div><div class="st200_subsection_title">Non-features</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p1s1ss3pg1" href="#st200_p1s1ss3pg1">1</a></div><div class="st200_paragraph">
+          The intention of the <span class="st200_term package">io7m-r1</span> 
+          package is to essentially expose an advanced <span class="st200_term term">fixed-function</span>
+          rendering pipeline that just happens to provide all of the advanced rendering
+          techniques expected of a modern computer game. Features specifically not implemented
+          by the package include:
+        </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p1s1ss3fo1" href="#st200_p1s1ss3fo1">1.1.3.1. Non-features</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+              A scene graph. The renderer expects the programmer to provide
+              a set of <span class="st200_term term">instances</span> (with associated
+              <span class="st200_term term">materials</span>) and 
+              <span class="st200_term term">lights</span> once per frame, and the
+              renderer will obediently draw exactly those instances. This frees
+              the programmer from having to interact with a clumsy and type-unsafe
+              "object-oriented" scene graph as with other 3D engines, and from 
+              having to try to crowbar their own program's data structures into 
+              an existing graph system.
+            </li><li class="st200_list_item">
+              Spatial partitioning. The renderer knows nothing of the world
+              the programmer is trying to render. The programmer is expected to
+              have done the work of deciding which <span class="st200_term term">instances</span>
+              and <span class="st200_term term">lights</span> contribute to the current
+              image, and to provide only those <span class="st200_term term">lights</span>
+              and <span class="st200_term term">instances</span> for the current frame.
+              This means that the programmer is free to use any spatial
+              partitioning system desired.
+            </li><li class="st200_list_item">
+              Input handling. The renderer knows nothing about keyboards, mice, joysticks.
+              The programmer passes an immutable snapshot of a scene to the renderer, and
+              the renderer returns an image. This means that the programmer is free to use any 
+              input system desired without having to painfully integrate their own code with
+              an existing input system as with other 3D engines.
+            </li><li class="st200_list_item">
+              Audio. The renderer makes images, not sounds. This allows programmers to use
+              any audio system they want in their programs.
+            </li><li class="st200_list_item">
+              Skeletal animation. The input to the renderer is a set of triangle
+              <span class="st200_term term">meshes</span> in the form of
+              <span class="st200_term term">vertex buffer objects</span>. This means that
+              the programmer is free to use any skeletal animation system desired,
+              providing that the system is capable of producing 
+              <span class="st200_term term">vertex buffer objects</span> of the correct type
+              as a result.
+            </li><li class="st200_list_item">
+              Model loading. The input to the renderer is a set of triangle
+              <span class="st200_term term">meshes</span> in the form of
+              <span class="st200_term term">vertex buffer objects</span>. This means that
+              the programmer is free to use any model loading system desired,
+              providing that the system is capable of producing 
+              <span class="st200_term term">vertex buffer objects</span> of the correct type
+              as a result
+                <span class="st200_footnote_reference"><a id="st200_fn_3_ref" href="#st200_fn_3">[3]</a></span>.
+            </li><li class="st200_list_item">
+              Future proofing. The average lifetime of a rendering system is about
+              five years. Due to the extremely rapid pace of advancement in graphics
+              hardware, the methods use to render graphics
+              <span class="st200_term term">today</span> will bear almost no relation to those
+              used five years into the future. The <span class="st200_term package">io7m-r1</span>
+              package is under no illusion that it will still be relevant in a decade's
+              time. It is designed to get work done <span class="st200_term term">today</span>,
+              using exactly those techniques that are relevant <span class="st200_term term">today</span>.
+              It will not be indefinitely expanded and grown organically, as this would
+              directly contradict the goal of having a 
+              <span class="st200_term term">minimalist</span> and <span class="st200_term term">correct</span> 
+              rendering system.
+            </li><li class="st200_list_item">
+              OpenGL ES 2 support. The ES 2 standard was written as a reaction to the
+              insane committee politics that plagued the OpenGL 2.* standards. It is
+              crippled to the point that it essentially cannot support almost any of
+              the rendering techniques present in the 
+              <span class="st200_term package">io7m-r1</span> package, and is
+              becoming increasingly irrelevant as the much saner ES 3 is adopted by
+              hardware vendors.
+            </li></ul></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_0" href="#st200_fn_0_ref">0</a>]</div><div class="st200_footnote_body">
+                  All materials are immutable once created, but if a material
+                  is recreated every frame with varying parameters, the material
+                  becomes effectively dynamic.
+                </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_1" href="#st200_fn_1_ref">1</a>]</div><div class="st200_footnote_body">
+                Such as <span class="st200_term term">shaders</span>, 
+                <span class="st200_term term">temporary framebuffers</span>,
+                <span class="st200_term term">shadow maps</span>, etc.
+              </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_2" href="#st200_fn_2_ref">2</a>]</div><div class="st200_footnote_body">
+                    Such as the mesh shapes required to represent light volumes when
+                    performing deferred rendering.
+                  </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_3" href="#st200_fn_3_ref">3</a>]</div><div class="st200_footnote_body">
+                  The renderer does define two brutally simple on-disk static
+                  <span class="st200_term term">mesh</span> formats for the sake of convenience,
+                  the test suite, and to store some of its own rendering resources
+                  <span class="st200_footnote_reference"><a id="st200_fn_2_ref" href="#st200_fn_2">[2]</a></span>, and provides tools to convert to those formats from
+                  <span class="st200_term term">COLLADA</span> documents, but the programmer
+                  is absolutely not required to use them.
+                </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p1.xhtml#st200_p1">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p1.xhtml#st200_p1">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p1s2.xhtml#st200_p1s2">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">1. Package Information</td><td class="st200_navbar_up_title_cell">1. Package Information</td><td class="st200_navbar_next_title_cell">1.2. Installation</td></tr></table></div></div></body></html>

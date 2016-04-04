@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.deferred-position-recon"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Deferred Rendering: Position Reconstruction</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.deferred-position-recon.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      Applying lighting during <s:term s:type="term">deferred rendering</s:term>
+      is primarily a <s:link s:target="r1.dai.coords.screen-space">screen space</s:link>
+      technique. When the visible set has been rendered into the
+      <s:link s:target="r1.dai.deferred.g-buffer">g-buffer</s:link>, the
+      original <s:link s:target="r1.dai.coords.eye-space">eye space</s:link>
+      positions of all of the surfaces that resulted in visible fragments 
+      in the scene are lost (unless explicitly saved into the g-buffer). 
+      However, given the knowledge of the <s:term s:type="term">projection</s:term> that was
+      used to render the visible set (such as perspective or orthographic), it's
+      possible to reconstruct the original eye-space position of the
+      surfaces that produced each of the fragments in the g-buffer.
+    </s:paragraph>
+    <s:paragraph>
+      Specifically then, for each fragment <s:term s:type="variable">f</s:term>
+      in the g-buffer for which lighting
+      is being applied, a position reconstruction algorithm attempts to
+      reconstruct <s:term s:type="expression">surface_eye</s:term> - the
+      eye-space position of the surface that produced 
+      <s:term s:type="variable">f</s:term> using the
+      screen-space position of the current light volume fragment
+      <s:term s:type="expression">position = (screen_x, screen_y)</s:term> and
+      some form of <s:term s:type="term">depth</s:term> value (such as the
+      screen-space depth of <s:term s:type="variable">f</s:term>).
+    </s:paragraph>
+    <s:paragraph>
+      Position reconstruction is a fundamental technique in deferred rendering, 
+      and there are a practically unlimited number of ways to reconstruct 
+      eye-space positions for fragments, each with various advantages and
+      disadvantages. Some rendering systems actually store 
+      the eye-space position of each fragment in the g-buffer, meaning that
+      reconstructing positions means simply reading a value directly from a 
+      texture. Some systems store only a normalized eye-space depth value in a 
+      separate texture: The first step of most position reconstruction algorithms
+      is to compute the original eye-space Z value of a fragment, so having
+      this value computed during the population of the g-buffer reduces the
+      work performed later. Storing an entire eye-space position into the
+      g-buffer is obviously the simplest and requires the least reconstruction
+      work later on, but is costly in terms of memory bandwidth: Storing a full
+      eye-space position requires an extra <s:term s:type="expression">4 * 4  = 16</s:term>
+      bytes of storage per fragment (four 32-bit floating point values). As screen 
+      resolutions increase, the costs can be prohibitive. Storing a normalized 
+      depth value requires only a single 32-bit floating point value per fragment
+      but even this can be too much on less capable hardware. Some algorithms
+      take advantage of the fact that most projections used to render scenes 
+      are perspective projections. Some naive algorithms use the full inverse
+      of the current projection matrix to reconstruct eye-space positions
+      having already calculated 
+      <s:link s:target="r1.dai.coords.clip-space">clip space</s:link> positions.
+    </s:paragraph>
+    <s:paragraph>
+      The algorithm that the <s:term s:type="package">io7m-r1</s:term> package
+      uses for position reconstruction is generalized to handle both orthographic
+      and perspective projections, and uses only the existing
+      <s:link s:target="r1.dai.log_depth">logarithmic depth values</s:link>
+      that were written to the depth buffer during scene rendering. 
+      This keeps the g-buffer compact, and memory bandwidth requirements 
+      comparatively low. The algorithm works with symmetric and asymmetric viewing 
+      frustums, but will only work with near and far planes that are parallel to the 
+      screen.
+    </s:paragraph>
+    <s:paragraph>
+      The algorithm works in two steps: Firstly, the original 
+      <s:link s:target="r1.dai.deferred-position-recon.eye-space-z">eye-space Z value</s:link>
+      of the fragment in question is recovered, and then this
+      Z value is used to recover the full
+      <s:link s:target="r1.dai.deferred-position-recon.eye-space">eye-space position</s:link>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred-position-recon.eye-space-z">
+    <s:subsection-title>Recovering Eye-space Z</s:subsection-title>
+    <s:paragraph>
+      During rendering of arbitrary scenes, vertices specified in
+      <s:link s:target="r1.dai.coords.object-space">object-space</s:link>
+      are transformed to eye-space, and the eye-space coordinates
+      are transformed to
+      <s:link s:target="r1.dai.coords.clip-space">clip-space</s:link>
+      with a <s:term s:type="term">projection matrix</s:term>. The
+      resulting 4D clip-space coordinates are divided by their own
+      <s:term s:type="variable">w</s:term> components, resulting in
+      <s:link s:target="r1.dai.coords.normalized-device-space">normalized-device space</s:link>
+      coordinates. These normalized-device space coordinates are then
+      transformed to <s:link s:target="r1.dai.coords.screen-space">screen-space</s:link>
+      by multiplying by the current <s:term s:type="term">viewport transform</s:term>.
+      The transitions from clip-space to screen-space are handled automatically by
+      the graphics hardware.
+    </s:paragraph>
+    <s:paragraph xml:id="r1.dai.deferred-position-recon.eye-space-z.initial">
+      The first step required is to recover the original eye-space Z value
+      of <s:term s:type="variable">f</s:term>. This involves sampling a
+      depth value from the current depth buffer. Sampling
+      from the depth buffer is achieved as with any other texture: A particular
+      texel is addressed by using coordinates in the range 
+      <s:term s:type="expression">[(0, 0), (1, 1)]</s:term>.
+      The <s:term s:type="package">io7m-r1</s:term> package
+      currently assumes that the size of the <s:term s:type="term">viewport</s:term>
+      is the same as that of the framebuffer 
+      <s:term s:type="expression">(width, height)</s:term> and that the bottom left corner
+      of the viewport is positioned at <s:term s:type="expression">(0, 0)</s:term>
+      in screen space. Given the assumption on the position and size of the viewport,
+      and assuming that the screen-space position of the current light volume fragment 
+      being shaded is <s:term s:type="expression">position = (screen_x, screen_y)</s:term>, 
+      the texture coordinates <s:term s:type="expression">(screen_uv_x, screen_uv_y)</s:term> 
+      used to access the current depth value are given by:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Screen to texture</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/ScreenToTexture.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      Intuitively, <s:term s:type="expression">(screen_uv_x, screen_uv_y) = (0, 0)</s:term>
+      when the current screen-space position is the bottom-left corner of the screen,
+      <s:term s:type="expression">(screen_uv_x, screen_uv_y) = (1, 1)</s:term> when
+      the current screen-space position is the top-right corner of the screen, and
+      <s:term s:type="expression">(screen_uv_x, screen_uv_y) = (0.5, 0.5)</s:term> when
+      the current screen-space position is the exact center of the screen.
+    </s:paragraph>
+    <s:paragraph>
+      Originally, the <s:term s:type="package">io7m-r1</s:term> package
+      used a standard depth buffer and so recovering the eye-space Z value
+      required a slightly different method compared to the steps required for the
+      <s:link s:target="r1.dai.log_depth">logarithmic depth encoding</s:link> that
+      the package now uses. For historical reasons and for completeness, the method
+      to reconstruct an eye-space Z value from a traditional screen-space depth
+      value is given in the section on
+      <s:link s:target="r1.dai.deferred-position-recon.eye-space-z.screen-space-encoding">screen-space depth encoding</s:link>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred-position-recon.eye-space-z.log-depth-encoding">
+    <s:subsection-title>Recovering Eye-space Z (Logarithmic depth encoding)</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package now
+      uses a <s:link s:target="r1.dai.log_depth">logarithmic depth buffer</s:link>.
+      Depth values sampled from any depth buffer produced by the package can be
+      transformed to a negated eye-space Z value by with a simple decoding
+      <s:link s:target="r1.dai.log_depth.encoding">equation</s:link>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred-position-recon.eye-space-z.screen-space-encoding">
+    <s:subsection-title>Recovering Eye-space Z (Screen-space depth encoding)</s:subsection-title>
+    <s:paragraph>
+      Note: This section is for completeness and historical interest. Please skip
+      ahead to the section on
+      <s:link s:target="r1.dai.deferred-position-recon.eye-space">eye-space position reconstruction</s:link>
+      if you are not interested.
+    </s:paragraph>
+    <s:paragraph>
+      Assuming a screen-space depth value <s:term s:type="variable">screen_depth</s:term>
+      sampled from the depth buffer at <s:term s:type="expression">(screen_uv_x, screen_uv_y)</s:term>,
+      it's now necessary to transform the depth value back into
+      normalized-device space. In OpenGL, screen-space depth values are in the range
+      <s:term s:type="expression">[0, 1]</s:term> by default, with
+      <s:term s:type="expression">0</s:term> representing the near plane and
+      <s:term s:type="expression">1</s:term> representing the far plane. However, in
+      OpenGL, normalized-device space coordinates are in the range 
+      <s:term s:type="expression">[(-1, -1, -1), (1, 1, 1)]</s:term>. The transformation
+      from screen-space to normalized-device space is given by:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Screen-space depth to NDC Z</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/ScreenDepthToNDC.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      In order to understand how to calculate the eye-space depth value
+      from the resulting NDC Z value 
+      <s:term s:type="variable">ndc_z = screen_depth_to_ndc screen_depth</s:term>,
+      it's necessary to understand how the normalized-device coordinates of
+      <s:term s:type="variable">f</s:term>
+      were derived in the first place. Given a standard 4x4 projection matrix 
+      <s:term s:type="variable">m</s:term> and an eye-space position 
+      <s:term s:type="variable">eye</s:term>, clip-space coordinates are
+      calculated by <s:term s:type="variable">Matrix4x4f.mult_v m eye</s:term>.
+      This means that the <s:term s:type="variable">z</s:term>
+      component of the resulting clip-space coordinates is given by:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Clip-space Z Long (Diagram)</s:formal-item-title>
+      <s:image s:source="images/matrix_clip_z_long.png">Clip-space Z Long (Diagram)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Clip-space Z Long</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/ClipSpaceZLong.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      Similarly, the <s:term s:type="variable">w</s:term>
+      component of the resulting clip-space coordinates is given by:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Clip-space W Long (Diagram)</s:formal-item-title>
+      <s:image s:source="images/matrix_clip_w_long.png">Clip-space W Long (Diagram)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Clip-space W Long</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/ClipSpaceWLong.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      However, in the perspective and orthographic projections provided
+      by the <s:term s:type="package">io7m-r1</s:term> package,
+      <s:term s:type="expression">Matrix4x4f.row_column m (2, 0) == 0</s:term>,
+      <s:term s:type="expression">Matrix4x4f.row_column m (2, 1) == 0</s:term>,
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 0) == 0</s:term>,
+      and <s:term s:type="expression">Matrix4x4f.row_column m (3, 1) == 0</s:term>.
+      Additionally, the <s:term s:type="variable">w</s:term> component of all
+      eye-space coordinates is <s:term s:type="expression">1</s:term>. With
+      these assumptions, the previous definitions simplify to:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Clip-space Z Simple (Diagram)</s:formal-item-title>
+      <s:image s:source="images/matrix_clip_z_simple.png">Clip-space Z Simple (Diagram)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Clip-space Z Simple</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/ClipSpaceZSimple.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Clip-space W Simple (Diagram)</s:formal-item-title>
+      <s:image s:source="images/matrix_clip_w_simple.png">Clip-space W Simple (Diagram)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Clip-space W Simple</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/ClipSpaceWSimple.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      It should be noted that for perspective matrices in the
+      <s:term s:type="package">io7m-r1</s:term> package,
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 2) == -1</s:term> and
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 3) == 0</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Clip-space W Simple (Perspective, Diagram)</s:formal-item-title>
+      <s:image s:source="images/matrix_clip_w_simple_perspective.png">Clip-space W Simple (Perspective, Diagram)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      This means that the <s:term s:type="variable">w</s:term> component of the
+      resulting clip-space coordinates is equal to the negated (and therefore positive)
+      eye-space <s:term s:type="variable">z</s:term> of the original coordinates.
+    </s:paragraph>
+    <s:paragraph>
+      For orthographic projections in the
+      <s:term s:type="package">io7m-r1</s:term> package,
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 2) == 0</s:term> and
+      <s:term s:type="expression">Matrix4x4f.row_column m (3, 3) == 1</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Clip-space W Simple (Orthographic, Diagram)</s:formal-item-title>
+      <s:image s:source="images/matrix_clip_w_simple_orthographic.png">Clip-space W Simple (Orthographic, Diagram)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      This means that the <s:term s:type="variable">w</s:term> component of the
+      resulting clip-space coordinates is always equal to <s:term s:type="constant">1</s:term>.
+    </s:paragraph>
+    <s:paragraph>
+      As stated previously, normalized-device space coordinates are calculated
+      by dividing a set of clip-space coordinates by their own 
+      <s:term s:type="variable">w</s:term> component. So, given
+      <s:term s:type="expression">clip_z = ClipSpaceZSimple.clip_z_simple m eye</s:term>
+      and
+      <s:term s:type="expression">clip_w = ClipSpaceWSimple.clip_w_simple m eye</s:term>
+      for some arbitrary projection matrix <s:term s:type="variable">m</s:term> and
+      eye-space position <s:term s:type="variable">eye</s:term>, the normalized-device
+      space Z coordinate is given by <s:term s:type="expression">ndc_z = clip_z / clip_w</s:term>. 
+      Rearranging the definitions of <s:term s:type="expression">clip_z</s:term> and
+      <s:term s:type="expression">clip_w</s:term> algebraically yields an equation
+      that takes an arbitrary projection matrix <s:term s:type="variable">m</s:term>
+      and a normalized-device space Z value <s:term s:type="expression">ndc_z</s:term>
+      and returns an eye-space Z value:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Eye-space Z</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/EyeSpaceZ.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred-position-recon.eye-space">
+    <s:subsection-title>Recovering Eye-space Position</s:subsection-title>
+    <s:paragraph>
+      Given that the eye-space Z value is known, it's now necessary to reconstruct
+      the full eye-space position <s:term s:type="expression">surface_eye</s:term>
+      of the surface that resulted in <s:term s:type="variable">f</s:term>.
+    </s:paragraph>
+    <s:paragraph>
+      When the current projection is a perspective projection, there is conceptually
+      a ray passing through the near clipping plane (<s:term s:type="variable">near</s:term>)
+      from the origin, oriented towards the eye-space position 
+      (<s:term s:type="variable">eye</s:term>) of <s:term s:type="variable">f</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Perspective projection (Diagram)</s:formal-item-title>
+      <s:image s:source="images/reconstruction_view_perspective.png">Perspective projection (Diagram)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      When the current projection is an orthographic projection, the ray is always
+      perpendicular to the clipping planes and is offset by a certain amount 
+      (<s:term s:type="variable">q</s:term>) on the X and Y axes:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Orthographic projection (Diagram)</s:formal-item-title>
+      <s:image s:source="images/reconstruction_view_ortho.png">Orthographic projection (Diagram)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Assuming <s:term s:type="expression">ray = Vector3f.V3 ray_x ray_y 1.0</s:term>,
+      the eye-space position of <s:term s:type="variable">f</s:term> is given by
+      <s:term s:type="expression">surface_eye = Vector3f.add3 q (Vector3f.scale ray eye_z)</s:term>.
+      In the case of perspective projections, 
+      <s:term s:type="expression">q = Vector3f.V3 0.0 0.0 0.0</s:term>. The
+      <s:term s:type="variable">q</s:term> term is sometimes referred to as the
+      origin (because <s:term s:type="variable">q</s:term> is the origin of the view ray), 
+      but that terminology is not used here in order to avoid confusion
+      between the <s:term s:type="variable">ray</s:term> origin and the
+      eye-space coordinate system origin. It's
+      therefore necessary to calculate <s:term s:type="variable">q</s:term> and
+      <s:term s:type="variable">ray</s:term> in order to reconstruct the full eye-space
+      position of the fragment. The way this is achieved in the 
+      <s:term s:type="package">io7m-r1</s:term> 
+      package is to calculate <s:term s:type="variable">q</s:term> and
+      <s:term s:type="variable">ray</s:term> for each of the viewing frustum corners
+      <s:footnote>
+        This step is performed once on the CPU and is only repeated when the projection
+        matrix changes
+        <s:footnote>
+          Which, for many applications, may be once for the entire lifetime of the program.
+        </s:footnote>.
+      </s:footnote>
+      and then bilinearly interpolate between the calculated values during rendering
+      based on <s:term s:type="expression">screen_uv_x</s:term> and 
+      <s:term s:type="expression">screen_uv_y</s:term>.
+    </s:paragraph>
+    <s:paragraph>
+      As stated previously, normalized-device space coordinates are in the range 
+      <s:term s:type="expression">[(-1, -1, -1), (1, 1, 1)]</s:term>. Stating each
+      of the eight corners of the cube that defines normalized-device space as 
+      4D homogeneous coordinates <s:footnote>By simply setting 
+      the <s:term s:type="variable">w</s:term> component to <s:term s:type="constant">1</s:term>.
+      </s:footnote> yields the following values:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Normalized-device space corners</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/NDCCorners.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      Then, for the four pairs of near/far corners
+      (<s:term s:type="expression">(near_x0y0, far_x0y0)</s:term>,
+      <s:term s:type="expression">(near_x1y0, far_x1y0)</s:term>,
+      <s:term s:type="expression">(near_x0y1, far_x0y1)</s:term>,
+      <s:term s:type="expression">(near_x1y1, far_x1y1)</s:term>), a
+      <s:term s:type="variable">q</s:term> and
+      <s:term s:type="variable">ray</s:term> value is calculated. The
+      <s:term s:type="expression">ray_and_q</s:term> function describes the
+      calculation for a given pair of near/far corners:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Ray and Q calculation (Single)</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/RayAndQ.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph xml:id="r1.dai.deferred-position-recon.eye-space.rays_and_qs">
+      The function takes a matrix representing the <s:term s:type="term">inverse</s:term>
+      of the current projection matrix, and "unprojects" the given near and far frustum
+      corners from normalized-device space to eye-space. The desired 
+      <s:term s:type="variable">ray</s:term> value for the pair of corners is simply
+      the vector that results from subtracting the near corner from the far corner,
+      divided by its own <s:term s:type="variable">z</s:term> component. The desired
+      <s:term s:type="variable">q</s:term> value is the vector that results from
+      subtracting <s:term s:type="variable">ray</s:term> scaled by the 
+      <s:term s:type="variable">z</s:term> component of the near corner, from
+      the near corner. 
+    </s:paragraph>
+    <s:paragraph>
+      Note: The function calculates <s:term s:type="variable">ray</s:term> in eye-space, 
+      but the resulting value will have a non-negative <s:term s:type="variable">z</s:term> component. 
+      The reason for this is that the resulting ray will be multiplied by the calculated
+      <s:link s:target="r1.dai.deferred-position-recon.eye-space-z">eye-space Z value</s:link>
+      <s:footnote>
+        Which is guaranteed to be negative, as only a negative Z value could have resulted in
+        a visible fragment in the g-buffer.
+      </s:footnote>
+      to produce an eye-space position. If the <s:term s:type="variable">z</s:term> component of 
+      <s:term s:type="variable">ray</s:term> was negative, the resulting position
+      would have a positive <s:term s:type="variable">z</s:term> component.
+    </s:paragraph>
+    <s:paragraph>
+      Calculating the <s:term s:type="variable">ray</s:term>
+      and <s:term s:type="variable">q</s:term> value for each of the pairs of
+      corners is straightforward:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Ray and Q calculation (All)</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/RayAndQAll.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      Then, by reusing the <s:term s:type="expression">position = (screen_uv_x, screen_uv_y)</s:term>
+      values calculated during the initial
+      <s:link s:target="r1.dai.deferred-position-recon.eye-space-z.initial">eye-space Z</s:link>
+      calculation, determining <s:term s:type="variable">ray</s:term> and
+      <s:term s:type="variable">q</s:term> for the current fragment involves
+      simply bilinearly interpolating between the precalculated values above.
+      Bilinear interpolation between four vectors is defined as:
+    </s:paragraph>
+    <s:formal-item s:kind="equation">
+      <s:formal-item-title>Bilinear interpolation (Vector4f)</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/Bilinear4.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      Finally, now that all of the required components are known, the eye-space
+      position <s:term s:type="variable">surface_eye</s:term> of <s:term s:type="variable">f</s:term>
+      is calculated as <s:term s:type="expression">surface_eye = Vector3f.add3 q (Vector3f.scale ray eye_z)</s:term>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.deferred-position-recon.implementation">
+    <s:subsection-title>Implementation</s:subsection-title>
+    <s:paragraph>
+      In the <s:term s:type="package">io7m-r1</s:term> package,
+      the <s:link-external s:target="apidocs/com/io7m/r1/kernel/KViewRays.html">KViewRays</s:link-external>
+      class precalculates the
+      <s:link s:target="r1.dai.deferred-position-recon.eye-space.rays_and_qs">rays and q values</s:link>
+      for each of the current frustum corners, and the results of which are cached
+      and re-used based on the current projection each time the scene is rendered.
+    </s:paragraph>
+    <s:paragraph>
+      The actual position reconstruction is performed in a
+       <s:term s:type="term">fragment shader</s:term>, producing an eye-space
+       Z value using the <s:term s:type="package">Parasol</s:term> functions in
+       [<s:link-external s:target="parasol/LogDepth.p">LogDepth.p</s:link-external>]
+       and the final position in
+       [<s:link-external s:target="parasol/Reconstruction.p">Reconstruction.p</s:link-external>]:
+    </s:paragraph>
+    <s:formal-item s:kind="listing">
+      <s:formal-item-title>Position reconstruction (LogDepth)</s:formal-item-title>
+      <s:verbatim><xi:include href="parasol/LogDepth.p" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:formal-item s:kind="listing">
+      <s:formal-item-title>Position reconstruction (Parasol)</s:formal-item-title>
+      <s:verbatim><xi:include href="parasol/Reconstruction.p" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      The precalculated view ray vectors are passed to the fragment shader
+      in a value of type <s:term s:type="type">ViewRays.t</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="listing">
+      <s:formal-item-title>View Rays (Parasol)</s:formal-item-title>
+      <s:verbatim><xi:include href="parasol/ViewRays.p" parse="text"/></s:verbatim>
+    </s:formal-item>
+  </s:subsection>
+
+</s:section>

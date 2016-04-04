@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright © 2014 <code@io7m.com> http://io7m.com
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  -->
+
+<s:section 
+  xml:id="r1.dai.lighting-projective"
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:section-title>Projective Lighting</s:section-title>
+  <s:section-contents/>
+
+  <s:subsection xml:id="r1.dai.lighting-projective.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      A <s:term s:type="term">projective light</s:term> in the 
+      <s:term s:type="package">io7m-r1</s:term> package
+      is a light that <s:term s:type="term">projects</s:term> a texture
+      onto the visible set from a given <s:term s:type="term">origin</s:term> 
+      specified in <s:link s:target="r1.dai.coords.eye-space">eye space</s:link>
+      up to a given maximum <s:term s:type="term">radius</s:term>. Projective
+      lights are the only types of lights in the 
+      <s:term s:type="package">io7m-r1</s:term> package that
+      are able to project <s:term s:type="term">shadows</s:term>.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Projective lighting</s:formal-item-title>
+      <s:image s:source="images/projective.png">Projective lighting</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Projective lighting (Texture)</s:formal-item-title>
+      <s:image s:source="images/sunflower.png">Projective lighting (Texture)</s:image>
+    </s:formal-item>
+  </s:subsection>
+  
+  <s:subsection xml:id="r1.dai.lighting-projective.algorithm">
+    <s:subsection-title>Algorithm</s:subsection-title>
+    <s:paragraph>
+      At a basic level, a projective light performs the same operations that
+      occur when an ordinary 3D position is projected onto the screen during
+      rendering. During normal rendering, a point <s:term s:type="expression">p</s:term>
+      given in <s:link s:target="r1.dai.coords.world-space">world space</s:link>
+      is transformed to <s:link s:target="r1.dai.coords.eye-space">eye space</s:link>
+      given the current camera's <s:term s:type="term">view matrix</s:term>, and
+      is then transformed to <s:link s:target="r1.dai.coords.clip-space">clip space</s:link>
+      using the current camera's <s:term s:type="term">projection matrix</s:term>.
+      During rendering of a scene lit by a projective light, a given point
+      <s:term s:type="expression">q</s:term> in the scene is transformed back to
+      <s:term s:type="term">world space</s:term> given the current camera's
+      <s:term s:type="term">inverse view matrix</s:term>, and is then transformed
+      to <s:term s:type="term">eye space from the point of view of the light</s:term>
+      (subsequently referred to as <s:term s:type="term">light-eye space</s:term>)
+      using the light's <s:term s:type="term">view matrix</s:term>. Finally,
+      <s:term s:type="expression">q</s:term> is transformed to
+      <s:term s:type="term">clip space from the point of view of the light</s:term>
+      (subsequently referred to as <s:term s:type="term">light-clip space</s:term>)
+      using the light's <s:term s:type="term">projection matrix</s:term>. It should
+      be noted (in order to indicate that there is nothing unusual about the light's
+      view or projection matrices) that if the camera and light have the same position,
+      orientation, scale, and projection, then the resulting transformed values of
+      <s:term s:type="expression">q</s:term> and <s:term s:type="expression">p</s:term>
+      are identical. The resulting transformed value of <s:term s:type="expression">q</s:term>
+      is mapped from the range <s:term s:type="expression">[(-1, -1, -1), (1, 1, 1)]</s:term>
+      to <s:term s:type="expression">[(0, 0, 0), (1, 1, 1)]</s:term>, and the resulting
+      coordinates are used to retrieve a texel from the 2D texture associated with
+      the light.
+    </s:paragraph>
+    <s:paragraph>
+      Intuitively, an ordinary <s:term s:type="term">perspective projection</s:term> will cause
+      the light to appear to take the shape of a <s:term s:type="term">frustum</s:term>:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Projective lighting (Frustum)</s:formal-item-title>
+      <s:image s:source="images/projective_frustum.png">Projective lighting (Frustum)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      There are two issues with the projective lighting algorithm that also have to be solved: 
+      <s:link s:target="r1.dai.lighting-projective.back-projection">back projection</s:link>
+      and
+      <s:link s:target="r1.dai.lighting-projective.clamping">clamping</s:link>.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-projective.back-projection">
+    <s:subsection-title>Back projection</s:subsection-title>
+    <s:paragraph>
+      The <s:link s:target="r1.dai.lighting-projective.algorithm">algorithm</s:link>
+      described above will produce a so-called 
+      <s:term s:type="term">dual</s:term> or <s:term s:type="term">back projection</s:term>.
+      In other words, the texture will be projected along the view direction of the
+      camera, but will also be projected along the <s:term s:type="term">negative</s:term>
+      view direction
+      <s:footnote>
+        The same issue occurs when performing ordinary rendering of points in a scene. The
+        issue is solved there by clipping primitives based on their
+        <s:term s:type="expression">w</s:term> component so that primitives that are
+        "behind" the observer are not rendered.
+      </s:footnote>. The visual result is that it appears that there are two projective
+      lights in the scene, oriented in opposite directions. 
+      As <s:link s:target="r1.dai.coords.clip-space">mentioned previously</s:link>,
+      given the typical projection matrix, the <s:term s:type="expression">w</s:term>
+      component of a given clip-space position is the negation of the eye-space
+      <s:term s:type="expression">z</s:term> component. 
+      Because it is assumed that the observer is looking towards the negative 
+      <s:term s:type="expression">z</s:term> direction, all positions that are in front
+      of the observer must have positive <s:term s:type="expression">w</s:term> components. 
+      Therefore, if <s:term s:type="expression">w</s:term> is negative, then the position 
+      is behind the observer. The standard fix for this
+      problem is to check to see if the <s:term s:type="expression">w</s:term> component
+      of the <s:term s:type="term">light-clip space</s:term> coordinate is negative, and
+      simply return a pure black color (indicating no light contribution) rather than
+      sampling from the projected texture.
+    </s:paragraph>
+    <s:paragraph xml:id="r1.dai.lighting-projective.back-projection.volume">
+      The <s:term s:type="package">io7m-r1</s:term> package takes an
+      arguably simpler approach to the problem. Because projective lights are only applied
+      by the <s:link s:target="r1.dai.deferred">deferred renderer</s:link>, and because
+      the deferred renderer uses accurate light volumes, pixels that fall outside of the
+      light volume are simply not shaded (meaning that back-projection is free to occur, but
+      pixels that would receive light contributions due to it are simply outside of the
+      light volume). The package essentially depends on the rasterization process and
+      depth testing to ensure that no pixels that would have received a back-projection
+      will be shaded during rendering of the light.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-projective.clamping">
+    <s:subsection-title>Clamping</s:subsection-title>
+    <s:paragraph>
+      The <s:link s:target="r1.dai.lighting-projective.algorithm">algorithm</s:link>
+      described above takes an arbitrary point in the scene and projects it from the
+      point of view of the light. There is no guarantee that the point actually falls
+      within the light's view frustum (although this is mitigated slightly by the
+      <s:term s:type="package">io7m-r1</s:term> package's use of
+      <s:link s:target="r1.dai.lighting-projective.back-projection.volume">light volumes</s:link>
+      for deferred rendering), and therefore the calculated texture coordinates used
+      to sample from the projected texture are not guaranteed to be in the range
+      <s:term s:type="expression">[(0, 0), (1, 1)]</s:term>. In order to get the
+      intended visual effect, the texture used must be set to
+      <s:term s:type="term">clamp-to-edge</s:term> and have black pixels on
+      all of the edges of the texture image, or <s:term s:type="term">clamp-to-border</s:term>
+      with a black border color. Failing to do this can result in strange visual
+      anomalies, as the texture will be unexpectedly repeated or smeared across
+      the area outside of the intersection between the light volume and the
+      receiving surface:
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Projective lighting (Correct, clamped)</s:formal-item-title>
+      <s:image s:source="images/projective_clamped.png">Projective lighting (Correct, clamped)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Projective lighting (Incorrect, not clamped)</s:formal-item-title>
+      <s:image s:source="images/projective_not_clamped.png">Projective lighting (Incorrect, not clamped)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The <s:term s:type="package">io7m-r1</s:term> package will
+      raise an exception if a non-clamped texture is assigned to a projective light.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-projective.types">
+    <s:subsection-title>Types</s:subsection-title>
+    <s:paragraph>
+      Projective lights are represented in the <s:term s:type="package">io7m-r1</s:term> 
+      package by the following types:
+    </s:paragraph>
+    <s:formal-item s:kind="listing">
+      <s:formal-item-title>Types</s:formal-item-title>
+      <s:list-unordered>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithoutShadow.html">KLightProjectiveWithoutShadow</s:link-external> -
+          a projective light that does not project shadows.
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithoutShadowDiffuseOnly.html">KLightProjectiveWithoutShadowDiffuseOnly</s:link-external> -
+          a projective light that does not project shadows, and does not cause specular highlights.
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowBasic.html">KLightProjectiveWithShadowBasic</s:link-external> -
+          a projective light that projects <s:link s:target="r1.dai.shadow-mapping-basic">basic shadows</s:link>.
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowBasicDiffuseOnly.html">KLightProjectiveWithShadowBasicDiffuseOnly</s:link-external> -
+          a projective light that projects <s:link s:target="r1.dai.shadow-mapping-basic">basic shadows</s:link>, and does not cause specular highlights.
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowVariance.html">KLightProjectiveWithShadowVariance</s:link-external> -
+          a projective light that projects <s:link s:target="r1.dai.shadow-mapping-variance">variance shadows</s:link>.
+        </s:list-item>
+        <s:list-item>
+          <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightProjectiveWithShadowVarianceDiffuseOnly.html">KLightProjectiveWithShadowVarianceDiffuseOnly</s:link-external> -
+          a projective light that projects <s:link s:target="r1.dai.shadow-mapping-variance">variance shadows</s:link>, and does not cause specular highlights.
+        </s:list-item>
+      </s:list-unordered>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-projective.attenuation">
+    <s:subsection-title>Attenuation</s:subsection-title>
+    <s:paragraph>
+      The light supports <s:link s:target="r1.dai.lighting.attenuation">attenuation</s:link> 
+      using the maximum range taken from the projection.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-projective.application">
+    <s:subsection-title>Application</s:subsection-title>
+    <s:paragraph>
+      The final light applied to the surface is given by <s:term s:type="function">projective</s:term>
+      [<s:link-external s:target="haskell/Projective.hs">Projective.hs</s:link-external>], where
+      <s:term s:type="variable">sr</s:term>, <s:term s:type="variable">sg</s:term>,
+      <s:term s:type="variable">sb</s:term> are the red, green, and blue channels,
+      respectively, of the surface being lit. The surface-to-light vector 
+      <s:term s:type="variable">stl</s:term> is calculated by normalizing the
+      negation of the difference between the the current eye space
+      <s:term s:type="variable">surface_position</s:term> and the eye space
+      origin of the light.
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Projective lighting (Application)</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/Projective.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+    <s:paragraph>
+      The given <s:term s:type="variable">shadow</s:term> factor is a value in the
+      range <s:term s:type="expression">[0, 1]</s:term>, where 
+      <s:term s:type="expression">0</s:term> indicates that the lit point is fully
+      in shadow for the current light, and <s:term s:type="expression">1</s:term>
+      indicates that the lit point is not in shadow. This is calculated for
+      <s:link s:target="r1.dai.shadow-mapping-basic">basic</s:link> and 
+      <s:link s:target="r1.dai.shadow-mapping-variance">variance</s:link> shadows
+      and is assumed to be <s:term s:type="expression">1</s:term> for
+      lights without shadows. As can be seen, a value of <s:term s:type="expression">0</s:term>
+      has the effect of fully attenuating the light.
+    </s:paragraph>
+    <s:paragraph>
+      The color denoted by <s:term s:type="variable">texture</s:term> is assumed
+      to have been sampled from the projected texture. Assuming the eye-space
+      position being shaded <s:term s:type="expression">p</s:term>, the matrix
+      to get from eye-space to light-clip space is given by 
+      The final light applied to the surface is given by <s:term s:type="function">projective_matrix</s:term>
+      [<s:link-external s:target="haskell/ProjectiveMatrix.hs">ProjectiveMatrix.hs</s:link-external>]:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Projective matrix</s:formal-item-title>
+      <s:verbatim><xi:include href="haskell/ProjectiveMatrix.hs" parse="text"/></s:verbatim>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="r1.dai.lighting-projective.pseudo-spherical">
+    <s:subsection-title>Pseudo-Spherical Lights</s:subsection-title>
+    <s:paragraph>
+      As mentioned, the <s:term s:type="package">io7m-r1</s:term> package
+      does not support shadow projection for
+      <s:link s:target="r1.dai.lighting-spherical">spherical</s:link> lights. However,
+      spherical lights can be emulated with six projective lights, each of which
+      can be configured to project shadows.
+    </s:paragraph>
+    <s:paragraph>
+      A <s:term s:type="term">pseudo-spherical</s:term> light is six projective 
+      <s:term s:type="term">sub-lights</s:term>,
+      each of which are oriented along the major axis directions with projections that
+      have a <s:term s:type="expression">90°</s:term> field of view.
+      <s:link s:target="r1.dai.visible-sets.shadow-geometry">Shadow casters</s:link> are assigned
+      to each sub-light as with any ordinary projective light.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Pseudo-spherical Lighting</s:formal-item-title>
+      <s:image s:source="images/projective_pseudosphere.png">Pseudo-spherical Lighting</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      Pseudo-spherical lights are provided by the
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithShadowBasic.html">KLightSpherePseudoWithShadowBasic</s:link-external>,
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithShadowVariance.html">KLightSpherePseudoWithShadowVariance</s:link-external>,
+      and
+      <s:link-external s:target="apidocs/com/io7m/r1/kernel/types/KLightSpherePseudoWithoutShadow.html">KLightSpherePseudoWithoutShadow</s:link-external>
+      types.
+    </s:paragraph>
+  </s:subsection>
+
+</s:section>

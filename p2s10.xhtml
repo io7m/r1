@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.10. Instances</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.9. Transforms</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.11. Visible Sets</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s9.xhtml#st200_p2s9">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s11.xhtml#st200_p2s11">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s10" href="#st200_p2s10">2.10</a></div><div class="st200_section_title">Instances</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s10.xhtml#st200_p2s10ss1">2.10.1. Overview</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s10ss1" href="#st200_p2s10ss1">2.10.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s10ss1pg1" href="#st200_p2s10ss1pg1">1</a></div><div class="st200_paragraph">
+      An <span class="st200_term term">instance</span> is a 5-tuple
+      <span class="st200_term expression">(f, m, k, t, u)</span>, where:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s10ss1fo1" href="#st200_p2s10ss1fo1">2.10.1.1. Instance components</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+        <span class="st200_term expression">f</span> is a value of type
+        <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KFaceSelection.html">KFaceSelection</a>,
+        which indicates which faces in the given <span class="st200_term term">mesh</span>
+        will be rendered.
+      </li><li class="st200_list_item">
+        <span class="st200_term expression">m</span> is a
+        <a class="st200_link" href="p2s5.xhtml#st200_p2s5">material</a>.
+      </li><li class="st200_list_item">
+        <span class="st200_term expression">k</span> is a reference to
+        a <a class="st200_link" href="p2s8.xhtml#st200_p2s8">mesh</a>.
+      </li><li class="st200_list_item">
+        <span class="st200_term expression">t</span> is a
+        <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss6">transform</a>.
+      </li><li class="st200_list_item">
+        <span class="st200_term expression">u</span> is a 
+        <span class="st200_term term">texture matrix</span>.
+      </li></ul></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s10ss1pg2" href="#st200_p2s10ss1pg2">2</a></div><div class="st200_paragraph">
+      If <span class="st200_term expression">m</span> is an
+      <span class="st200_term term">opaque</span> material, then the instance is
+      said to be <span class="st200_term term">opaque</span>. If
+      <span class="st200_term expression">m</span> is a
+      <span class="st200_term term">translucent</span> material, then the instance is
+      said to be <span class="st200_term term">translucent</span>. This is actually
+      enforced at the type level: An instance of type
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KInstanceOpaqueRegular.html">KInstanceOpaqueRegular</a>
+      may only be associated with a material of type
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialOpaqueRegular.html">KMaterialOpaqueRegular</a>,
+      and so on. Opaque instances implement 
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KInstanceOpaqueType.html">KInstanceOpaqueType</a>,
+      whilst translucent instances implement
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KInstanceTranslucentType.html">KInstanceTranslucentType</a>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s10ss1pg3" href="#st200_p2s10ss1pg3">3</a></div><div class="st200_paragraph">
+      The rendering of <span class="st200_term term">opaque</span> instances
+      is handled differently from the rendering of 
+      <span class="st200_term term">translucent</span> instances. The 
+      <span class="st200_term package">io7m-r1</span> package
+      uses a <a class="st200_link" href="p2s12.xhtml#st200_p2s12">deferred renderer</a>
+      to efficiently render large numbers of opaque instances lit by potentially hundreds
+      of light sources. However, the nature of the deferred rendering
+      algorithm makes it impossible for deferred renderers to support
+      translucent objects. Therefore, the 
+      <span class="st200_term package">io7m-r1</span> package
+      provides a 
+      <a class="st200_link" href="p2s15.xhtml#st200_p2s15">forward renderer</a>
+      that implements a subset of the features of the deferred renderer
+      for rendering translucent instances. Keeping the different categories
+      of instances as distinct types ensures that the programmer is statically
+      prevented from accidentally passing an instance with an opaque material
+      where one with a translucent material was expected, and vice versa.
+    </div></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s9.xhtml#st200_p2s9">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s11.xhtml#st200_p2s11">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.9. Transforms</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.11. Visible Sets</td></tr></table></div></div></body></html>

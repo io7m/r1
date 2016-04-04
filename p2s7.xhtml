@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.7. Depth Materials</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.6. Regular Materials</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.8. Meshes</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s6.xhtml#st200_p2s6">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s8.xhtml#st200_p2s8">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s7" href="#st200_p2s7">2.7</a></div><div class="st200_section_title">Depth Materials</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s7.xhtml#st200_p2s7ss1">2.7.1. Overview</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s7ss1" href="#st200_p2s7ss1">2.7.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s7ss1pg1" href="#st200_p2s7ss1pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term term">depth properties</span> of opaque 
+      materials indicate how surfaces with those materials will affect
+      the current <span class="st200_term term">depth buffer</span>. Essentially,
+      parts of a surface can elect to effectively be discarded by not
+      being written to the depth buffer, allowing parts of otherwise
+      opaque instances to appear fully transparent (without requiring the
+      overhead of using fully <a class="st200_link" href="p2s15.xhtml#st200_p2s15">translucent</a>
+      instances).
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s7ss1pg2" href="#st200_p2s7ss1pg2">2</a></div><div class="st200_paragraph">
+      Depth properties are described by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialDepthType.html">KMaterialDepthType</a>,
+      with
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialDepthConstant.html">KMaterialDepthConstant</a>
+      indicating that an object is fully opaque, and
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialDepthAlpha.html">KMaterialDepthAlpha</a>
+      indicating that parts of the object with an
+      <a class="st200_link" href="p2s6.xhtml#st200_p2s6ss2">albedo</a>
+      that has an opacity of less than a given threshold
+      will appear to be completely translucent.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s7ss1pg3" href="#st200_p2s7ss1pg3">3</a></div><div class="st200_paragraph">
+      Depth information is also taken into account during
+      the application of
+      <a class="st200_link" href="p2s23.xhtml#st200_p2s23">shadow mapping</a>:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s7ss1fo1" href="#st200_p2s7ss1fo1">2.7.1.1. Depth alpha</a></div><img class="st200_image" alt="Depth alpha" src="images/depth_alpha.png"/></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s6.xhtml#st200_p2s6">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s8.xhtml#st200_p2s8">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.6. Regular Materials</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.8. Meshes</td></tr></table></div></div></body></html>

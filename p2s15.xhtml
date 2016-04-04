@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.15. Forward Rendering (Translucents)</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.14. Logarithmic Depth</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.16. Normal Mapping</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s14.xhtml#st200_p2s14">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s16.xhtml#st200_p2s16">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s15" href="#st200_p2s15">2.15</a></div><div class="st200_section_title">Forward Rendering (Translucents)</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s15.xhtml#st200_p2s15ss1">2.15.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s15.xhtml#st200_p2s15ss2">2.15.2. Lit</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s15.xhtml#st200_p2s15ss3">2.15.3. Unlit</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s15ss1" href="#st200_p2s15ss1">2.15.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s15ss1pg1" href="#st200_p2s15ss1pg1">1</a></div><div class="st200_paragraph">
+      Because the <a class="st200_link" href="p2s12.xhtml#st200_p2s12">deferred renderer</a> in
+      the <span class="st200_term package">io7m-r1</span> package is incapable
+      of rendering <span class="st200_term term">translucent instances</span>, a separate
+      <span class="st200_term term">forward renderer</span> is provided. The
+      <span class="st200_term term">forward renderer</span> in the package can only work
+      with a subset of the available <a class="st200_link" href="p2s18.xhtml#st200_p2s18">light types</a>,
+      in order to prevent the 
+      <a class="st200_link" href="p2s12.xhtml#st200_p2s12ss1pg2">combinatorial explosion</a>
+      of shaders required to support a large number of light and surface types.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s15ss1pg2" href="#st200_p2s15ss1pg2">2</a></div><div class="st200_paragraph">
+      Translucent instances are divided into 
+      <a class="st200_link" href="p2s15.xhtml#st200_p2s15ss2">lit</a>
+      and
+      <a class="st200_link" href="p2s15.xhtml#st200_p2s15ss3">unlit</a> categories.
+      As stated previously, translucent instances are drawn in the order that they are
+      submitted to the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KVisibleSetTranslucentsBuilderType.html">visible set builder</a>.
+      A lit instance is submitted to the builder with the set of lights that affect it.
+      Only lights of type
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightTranslucentType.html">KLightTranslucentType</a>
+      can be applied to translucent instances. Rendering of translucent instances
+      typically occurs after the rendering of opaque instances and so rendering
+      works with a depth buffer that has already been populated. Depth testing is
+      enabled to ensure that instances overlap and are overlapped by existing opaque
+      instances, but translucent instances
+      do not have their depths written into the depth buffer, and so care should be
+      taken when rendering translucent instances that intersect with each other
+      <span class="st200_footnote_reference"><a id="st200_fn_29_ref" href="#st200_fn_29">[29]</a></span>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s15ss2" href="#st200_p2s15ss2">2.15.2</a></div><div class="st200_subsection_title">Lit</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s15ss2pg1" href="#st200_p2s15ss2pg1">1</a></div><div class="st200_paragraph">
+      Lit translucent instances can have
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRegular.html">regular</a>
+      and
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentSpecularOnly.html">specular-only</a>
+      materials. Specular-only materials result in only a specular term
+      being calculated for a given object, which is useful for implementing
+      glass-like objects:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s15ss2fo1" href="#st200_p2s15ss2fo1">2.15.2.1. Specular Only</a></div><img class="st200_image" alt="Specular Only" src="images/speconly.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s15ss2pg2" href="#st200_p2s15ss2pg2">2</a></div><div class="st200_paragraph">
+      Rendering of lit instances proceeds as follows:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s15ss2fo2" href="#st200_p2s15ss2fo2">2.15.2.2. Lit instance rendering</a></div><ol class="st200_list_ordered"><li class="st200_list_item">
+          For each light <span class="st200_term variable">k</span> affecting the instance
+          <span class="st200_term variable">o</span>:
+          <ol class="st200_list_ordered"><li class="st200_list_item">
+              If <span class="st200_term variable">k</span> is the first light in the set,
+              set the blending functions to 
+              <span class="st200_term expression">(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE_MINUS_SOURCE_ALPHA)</span>.
+              That is, the source color will be multiplied by <span class="st200_term expression">1</span>
+              and the destination color will be multiplied by
+              <span class="st200_term expression">1 - alpha</span>. This has the effect of
+              setting the overall "opacity" of the object for subsequent light contributions. 
+              If <span class="st200_term variable">k</span>
+              is not the first light in the set, set the blending functions to
+              <span class="st200_term expression">(BlendFunction.BLEND_ONE, BlendFunction.BLEND_ONE)</span>.
+              This is the standard additive blending used to sum light contributions.
+            </li><li class="st200_list_item">
+              Render <span class="st200_term variable">o</span>, lit by
+              <span class="st200_term variable">k</span>.
+            </li></ol>
+        </li></ol></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s15ss3" href="#st200_p2s15ss3">2.15.3</a></div><div class="st200_subsection_title">Unlit</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s15ss3pg1" href="#st200_p2s15ss3pg1">1</a></div><div class="st200_paragraph">
+      Unlit translucent instances can have
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRegular.html">regular</a>
+      and
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRefractive.html">refractive</a>
+      materials. Refractive materials are implemented using the
+      <a class="st200_link" href="p2s25.xhtml#st200_p2s25">generic refraction</a>
+      effect.
+    </div></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_29" href="#st200_fn_29_ref">29</a>]</div><div class="st200_footnote_body">
+        It is fairly widely acknowledged that there is no completely satisfactory
+        solution to the problem of rendering intersecting translucent objects. The
+        <span class="st200_term package">io7m-r1</span> package makes no
+        attempt to solve the problem.
+      </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s14.xhtml#st200_p2s14">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s16.xhtml#st200_p2s16">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.14. Logarithmic Depth</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.16. Normal Mapping</td></tr></table></div></div></body></html>

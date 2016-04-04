@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.29. Filter: Z Fog</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.28. Filter: FXAA</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.30. Filter: Y Fog</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s28.xhtml#st200_p2s28">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s30.xhtml#st200_p2s30">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s29" href="#st200_p2s29">2.29</a></div><div class="st200_section_title">Filter: Z Fog</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s29.xhtml#st200_p2s29ss1">2.29.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s29.xhtml#st200_p2s29ss2">2.29.2. Algorithm</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s29ss1" href="#st200_p2s29ss1">2.29.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s29ss1pg1" href="#st200_p2s29ss1pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> offers
+      a filter that provides simple <span class="st200_term term">distance fog</span>
+      effects for roughly simulating the scattering of light due to atmosphere.
+      It can also be used for special effects such as smoke and dust.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s29ss1fo1" href="#st200_p2s29ss1fo1">2.29.1.1. Fog</a></div><img class="st200_image" alt="Fog" src="images/fog_z.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s29ss1pg2" href="#st200_p2s29ss1pg2">2</a></div><div class="st200_paragraph">
+      The fog filter applies a configurable fog color to all pixels in the
+      scene, based on given near and far planes for the fog. The fog is
+      applied based on the current view direction (the local negative Z axis).
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s29ss2" href="#st200_p2s29ss2">2.29.2</a></div><div class="st200_subsection_title">Algorithm</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s29ss2pg1" href="#st200_p2s29ss2pg1">1</a></div><div class="st200_paragraph">
+      The implemented algorithm takes a color <span class="st200_term expression">c</span>,
+      an eye-space near fog distance <span class="st200_term expression">near</span>, and an
+      eye-space far fog distance <span class="st200_term expression">far</span>. It samples
+      the depth of each pixel in the current scene, and
+      <a class="st200_link" href="p2s13.xhtml#st200_p2s13ss2">reconstructs</a>
+      the eye-space Z component of the surface that produced the pixel in question
+      and takes the absolute value of that component to yield a positive distance
+      <span class="st200_term expression">z</span> from the observer.
+      Then, a <span class="st200_term term">fog factor</span> <span class="st200_term expression">r</span>
+      is calculated by <span class="st200_term expression">fog_factor</span>
+      [<a class="st200_link_external" href="haskell/FogFactorZ.hs">FogFactorZ.hs</a>]:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s29ss2fo1" href="#st200_p2s29ss2fo1">2.29.2.1. Fog factor</a></div><pre class="st200_verbatim">module FogFactorZ where
+
+clamp :: Float -&gt; (Float, Float) -&gt; Float
+clamp x (lower, upper) = max (min x upper) lower
+
+fog_factor :: Float -&gt; (Float, Float) -&gt; Float
+fog_factor z (near, far) =
+  let r = (z - near) / (far - near) in
+    clamp r (0.0, 1.0)
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s29ss2pg2" href="#st200_p2s29ss2pg2">2</a></div><div class="st200_paragraph">
+      The value of <span class="st200_term expression">r</span> is then used to interpolate
+      between the original color of the pixel and <span class="st200_term expression">c</span>.
+      Surfaces with <span class="st200_term expression">z</span> less than <span class="st200_term expression">near</span>
+      are unaffected by fog. Surfaces with <span class="st200_term expression">z</span> greater than or equal to
+      <span class="st200_term expression">far</span> are maximally affected by fog and will actually
+      have their color values completely replaced by <span class="st200_term expression">c</span>.
+      Surfaces with <span class="st200_term expression">z</span> values that fall between 
+      <span class="st200_term expression">near</span>
+      and <span class="st200_term expression">far</span> will have differing amounts of fog applied
+      based on the type of <span class="st200_term term">fog progression</span> selected.
+      The filter offers <span class="st200_term term">linear</span>,
+      <span class="st200_term term">exponential</span>, and <span class="st200_term term">logarithmic</span>
+      fog progressions. With <span class="st200_term term">linear</span> fog, the
+      <span class="st200_term expression">r</span> value linearly interpolates between the
+      original surface color and <span class="st200_term expression">c</span>. With
+      <span class="st200_term term">exponential</span> fog, the value of 
+      <span class="st200_term expression">r * r</span> is used to linearly interpolate
+      between the original surface color and <span class="st200_term expression">c</span>.
+      Finally, with <span class="st200_term term">logarithmic</span> fog, the value of
+      <span class="st200_term expression">sqrt(r)</span> is used to linearly interpolate
+      between the original surface color and <span class="st200_term expression">c</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s29ss2pg3" href="#st200_p2s29ss2pg3">3</a></div><div class="st200_paragraph">
+      The fog effect is provided by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/meshes/KImageFilterFogZ.html">KImageFilterFogZ</a>
+      filter.
+    </div></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s28.xhtml#st200_p2s28">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s30.xhtml#st200_p2s30">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.28. Filter: FXAA</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.30. Filter: Y Fog</td></tr></table></div></div></body></html>

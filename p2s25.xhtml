@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.25. Generic Refraction</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.24. Shadow mapping - Variance</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.26. Filter: Blur</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s24.xhtml#st200_p2s24">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s26.xhtml#st200_p2s26">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s25" href="#st200_p2s25">2.25</a></div><div class="st200_section_title">Generic Refraction</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s25.xhtml#st200_p2s25ss1">2.25.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s25.xhtml#st200_p2s25ss2">2.25.2. Algorithm</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s25.xhtml#st200_p2s25ss3">2.25.3. Masking</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s25.xhtml#st200_p2s25ss4">2.25.4. Vectors</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s25.xhtml#st200_p2s25ss5">2.25.5. Color</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s25ss1" href="#st200_p2s25ss1">2.25.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s25ss1pg1" href="#st200_p2s25ss1pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      implements the <span class="st200_term term">generic refraction</span> effect
+      described in <a class="st200_link_external" href="http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter19.html">GPU Gems 2</a>.
+      The technique lends itself to a huge range of effects such as lenses, glass,
+      heat haze, and water - simply by varying the meshes and textures used 
+      when performing refraction.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s25ss2" href="#st200_p2s25ss2">2.25.2</a></div><div class="st200_subsection_title">Algorithm</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s25ss2pg1" href="#st200_p2s25ss2pg1">1</a></div><div class="st200_paragraph">
+      For a given instance with a
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KMaterialTranslucentRefractive.html">refractive</a>
+      material applied, the process to render the instance is as follows:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s25ss2fo1" href="#st200_p2s25ss2fo1">2.25.2.1. Rendering process</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+          Make a temporary copy <span class="st200_term variable">b</span> of the current scene's color buffer.
+        </li><li class="st200_list_item">
+          If <a class="st200_link" href="p2s25.xhtml#st200_p2s25ss3">masking</a> is
+          enabled for the material, render a mask for the instance into a temporary
+          mask image <span class="st200_term variable">m</span>.
+        </li><li class="st200_list_item">
+          Render the instance, using <span class="st200_term variable">b</span> as the
+          refraction source, material-dependent 
+          <a class="st200_link" href="p2s25.xhtml#st200_p2s25ss4">refraction vectors</a>,
+          a <a class="st200_link" href="p2s25.xhtml#st200_p2s25ss5">refraction color</a>,
+          and optionally <span class="st200_term variable">m</span> for masking.
+        </li></ul></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s25ss2pg2" href="#st200_p2s25ss2pg2">2</a></div><div class="st200_paragraph">
+      The actual rendering technique is very simple: Given a screen-space position 
+      <span class="st200_term expression">(x, y)</span>, sample the color from a saved
+      image of the scene at <span class="st200_term expression">(x + s, y + t)</span>,
+      where <span class="st200_term expression">(s, t)</span> are signed per-pixel offset values -
+      the <a class="st200_link" href="p2s25.xhtml#st200_p2s25ss4">refraction vectors</a> -
+      that are sampled from textures or derived from existing normal vectors.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s25ss3" href="#st200_p2s25ss3">2.25.3</a></div><div class="st200_subsection_title">Masking</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s25ss3pg1" href="#st200_p2s25ss3pg1">1</a></div><div class="st200_paragraph">
+      Because refractive instances are 
+      <a class="st200_link" href="p2s15.xhtml#st200_p2s15">translucent</a>, they
+      are normally rendered after having already rendered all of the opaque
+      objects in the scene. Because rendering of translucent instances occurs with
+      depth testing enabled, it is therefore possible for opaque instances to
+      occlude refractive instances. This poses a problem for the implementation
+      of refraction described above, because the pixels of an occluding object
+      may be sampled when performing the refraction, as shown in the following
+      image:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s25ss3fo1" href="#st200_p2s25ss3fo1">2.25.3.1. Occluding pixel bleeding</a></div><img class="st200_image" alt="Occluding pixel bleeding" src="images/refract_bleed.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s25ss3pg2" href="#st200_p2s25ss3pg2">2</a></div><div class="st200_paragraph">
+      Note how the pixels of the opaque instances are bleeding into the refracting
+      object, despite being conceptually "in front of" it. This is because the
+      refraction effect is implemented in screen space and is just sampling pixels
+      from the surrounding area to simulate the bending of light rays. Using
+      a <span class="st200_term term">mask</span> prevents this:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s25ss3fo2" href="#st200_p2s25ss3fo2">2.25.3.2. Occluding pixels masked</a></div><img class="st200_image" alt="Occluding pixels masked" src="images/refract_nobleed.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s25ss3pg3" href="#st200_p2s25ss3pg3">3</a></div><div class="st200_paragraph">
+      A mask is produced by rendering a black and white silhouette of the
+      refracting object, and then using the values of this mask to linearly
+      interpolate between the colors at
+      <span class="st200_term expression">(x, y)</span> and
+      <span class="st200_term expression">(x + s, y + t)</span>. This has the effect
+      of preventing the refraction simulation from using pixels that fall outside
+      of the mask area.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s25ss3fo3" href="#st200_p2s25ss3fo3">2.25.3.3. Mask</a></div><img class="st200_image" alt="Mask" src="images/refract_mask.png"/></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s25ss4" href="#st200_p2s25ss4">2.25.4</a></div><div class="st200_subsection_title">Vectors</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s25ss4pg1" href="#st200_p2s25ss4pg1">1</a></div><div class="st200_paragraph">
+      Refraction vectors may either be sampled from the current instance's
+      (possibly <a class="st200_link" href="p2s16.xhtml#st200_p2s16">mapped</a>)
+      normals, or from the red and green components of a 
+      <span class="st200_term term">delta texture</span>. The sampled values are
+      scaled by the material's <span class="st200_term term">scale</span> factor
+      and used directly to calculate 
+      <span class="st200_term expression">(x + s, y + t)</span>. For example,
+      a simple noisy red/green <span class="st200_term term">delta texture</span> 
+      applied to a quad results in the following effect:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s25ss4fo1" href="#st200_p2s25ss4fo1">2.25.4.1. Noise quad</a></div><img class="st200_image" alt="Noise quad" src="images/refract_noise_quad.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s25ss4fo2" href="#st200_p2s25ss4fo2">2.25.4.2. Noise quad (texture)</a></div><img class="st200_image" alt="Noise quad (texture)" src="images/refract_noise_quad_texture.png"/></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s25ss5" href="#st200_p2s25ss5">2.25.5</a></div><div class="st200_subsection_title">Color</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s25ss5pg1" href="#st200_p2s25ss5pg1">1</a></div><div class="st200_paragraph">
+      The sampled scene colors used to perform the refraction effect are
+      multiplied by a constant color, specified by each material. This
+      allows for simple colored glass effects (shown here with a
+      <a class="st200_link" href="p2s15.xhtml#st200_p2s15ss2">specular-only</a>
+      instance rendered over the top of the refractive instance to provide
+      specular highlights):
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s25ss5fo1" href="#st200_p2s25ss5fo1">2.25.5.1. Color 0</a></div><img class="st200_image" alt="Color 0" src="images/refract_color_0.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s25ss5pg2" href="#st200_p2s25ss5pg2">2</a></div><div class="st200_paragraph">
+      Using pure RGBA white <span class="st200_term expression">(1.0, 1.0, 1.0, 1.0)</span>
+      results in a clear glass material:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s25ss5fo2" href="#st200_p2s25ss5fo2">2.25.5.2. Color 1</a></div><img class="st200_image" alt="Color 1" src="images/refract_color_1.png"/></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s24.xhtml#st200_p2s24">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s26.xhtml#st200_p2s26">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.24. Shadow mapping - Variance</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.26. Filter: Blur</td></tr></table></div></div></body></html>

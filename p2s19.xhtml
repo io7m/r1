@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.19. Directional Lighting</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.18. Lighting</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.20. Spherical Lighting</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s18.xhtml#st200_p2s18">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s20.xhtml#st200_p2s20">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s19" href="#st200_p2s19">2.19</a></div><div class="st200_section_title">Directional Lighting</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s19.xhtml#st200_p2s19ss1">2.19.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s19.xhtml#st200_p2s19ss2">2.19.2. Types</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s19.xhtml#st200_p2s19ss3">2.19.3. Attenuation</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s19.xhtml#st200_p2s19ss4">2.19.4. Application</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s19ss1" href="#st200_p2s19ss1">2.19.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s19ss1pg1" href="#st200_p2s19ss1pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">directional light</span> in the 
+      <span class="st200_term package">io7m-r1</span> package
+      is a light that emits parallel rays of light in a given 
+      eye space <span class="st200_term term">direction</span>.
+      It has a <span class="st200_term term">color</span> and an
+      <span class="st200_term term">intensity</span>, but does not have
+      an <span class="st200_term term">origin</span> and therefore is not attenuated
+      over distance. It does not cause objects to cast shadows.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s19ss1fo1" href="#st200_p2s19ss1fo1">2.19.1.1. Directional lighting</a></div><img class="st200_image" alt="Directional lighting" src="images/directional_diagram.png"/></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s19ss2" href="#st200_p2s19ss2">2.19.2</a></div><div class="st200_subsection_title">Types</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s19ss2pg1" href="#st200_p2s19ss2pg1">1</a></div><div class="st200_paragraph">
+      Directional lights are represented in the 
+      <span class="st200_term package">io7m-r1</span> 
+      package by the following types:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s19ss2fo1" href="#st200_p2s19ss2fo1">2.19.2.1. Types</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightDirectional.html">KLightDirectional</a> -
+          a directional light.
+        </li><li class="st200_list_item">
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KLightDirectionalDiffuseOnly.html">KLightDirectionalDiffuseOnly</a> -
+          a <a class="st200_link" href="p2s18.xhtml#st200_p2s18ss3">diffuse-only</a>
+          variant of the standard directional light.
+        </li></ul></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s19ss3" href="#st200_p2s19ss3">2.19.3</a></div><div class="st200_subsection_title">Attenuation</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s19ss3pg1" href="#st200_p2s19ss3pg1">1</a></div><div class="st200_paragraph">
+      Directional lights do not have origins and cannot therefore be attenuated
+      over distance.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s19ss4" href="#st200_p2s19ss4">2.19.4</a></div><div class="st200_subsection_title">Application</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s19ss4pg1" href="#st200_p2s19ss4pg1">1</a></div><div class="st200_paragraph">
+      The final light applied to the surface is given by <span class="st200_term function">directional</span>
+      [<a class="st200_link_external" href="haskell/Directional.hs">Directional.hs</a>], where
+      <span class="st200_term variable">sr</span>, <span class="st200_term variable">sg</span>,
+      <span class="st200_term variable">sb</span> are the red, green, and blue channels,
+      respectively, of the surface being lit. Note that the surface-to-light vector
+      <span class="st200_term variable">stl</span> is simply the negation of the light
+      direction.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s19ss4fo1" href="#st200_p2s19ss4fo1">2.19.4.1. Directional lighting (Application)</a></div><pre class="st200_verbatim">module Directional where
+
+import qualified Color4
+import qualified Direction
+import qualified LightDirectional
+import qualified LightDiffuse
+import qualified LightSpecular
+import qualified Normal
+import qualified Position3
+import qualified Spaces
+import qualified Specular
+import qualified Vector3f
+import qualified Vector4f
+
+directional :: Direction.T Spaces.Eye -&gt; Normal.T -&gt; Position3.T Spaces.Eye -&gt; LightDirectional.T -&gt; Specular.T -&gt; Color4.T -&gt; Vector3f.T
+directional view n position light specular (Vector4f.V4 sr sg sb _) =
+  let
+    stl             = Vector3f.normalize (Vector3f.negation position)
+    light_color     = LightDirectional.color light
+    light_intensity = LightDirectional.intensity light
+    light_d         = LightDiffuse.diffuse stl n light_color light_intensity
+    light_s         = LightSpecular.specular stl view n light_color light_intensity specular
+    lit_d           = Vector3f.mult3 (Vector3f.V3 sr sg sb) light_d
+    lit_s           = Vector3f.add3 lit_d light_s
+  in
+    lit_s
+</pre></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s18.xhtml#st200_p2s18">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s20.xhtml#st200_p2s20">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.18. Lighting</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.20. Spherical Lighting</td></tr></table></div></div></body></html>

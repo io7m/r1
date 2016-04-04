@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.9. Transforms</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.8. Meshes</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.10. Instances</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s8.xhtml#st200_p2s8">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s10.xhtml#st200_p2s10">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s9" href="#st200_p2s9">2.9</a></div><div class="st200_section_title">Transforms</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s9.xhtml#st200_p2s9ss1">2.9.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s9.xhtml#st200_p2s9ss2">2.9.2. KTransformMatrix4x4</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s9.xhtml#st200_p2s9ss3">2.9.3. KTransformOST</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s9ss1" href="#st200_p2s9ss1">2.9.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s9ss1pg1" href="#st200_p2s9ss1pg1">1</a></div><div class="st200_paragraph">
+      The ultimate purpose of a <span class="st200_term term">transform</span>
+      is to produce one or more matrices that can be combined with
+      other matrices and then finally passed to a 
+      <span class="st200_term term">shader</span>. The shader uses these
+      matrices to transform vertices and normal vectors during the
+      rendering of objects.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s9ss1pg2" href="#st200_p2s9ss1pg2">2</a></div><div class="st200_paragraph">
+      A transform is effectively responsible for producing a
+      <span class="st200_term term">model matrix</span> that transforms
+      positions in 
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss3">object-space</a>
+      to 
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss4">world-space</a>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s9ss1pg3" href="#st200_p2s9ss1pg3">3</a></div><div class="st200_paragraph">
+      In practical terms, a <span class="st200_term term">transform</span> is
+      a matrix used to position, scale, and rotate 
+      <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss9">instances</a>
+      in a scene. This is achieved by multiplying the matrix with the 
+      object-space positions of all vertices of the mesh that makes up the 
+      instance, during rendering. The type of transforms in the 
+      <span class="st200_term package">io7m-r1</span> package is the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KTransformType.html">KTransformType</a>
+      which, at the time of writing, is implemented by two specific types that
+      are documented in the following sections.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s9ss2" href="#st200_p2s9ss2">2.9.2</a></div><div class="st200_subsection_title">KTransformMatrix4x4</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s9ss2pg1" href="#st200_p2s9ss2pg1">1</a></div><div class="st200_paragraph">
+      The
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KTransformMatrix4x4.html">KTransformMatrix4x4</a>
+      type represents a model matrix directly. In other words, the programmer
+      is assumed to be using some other system of producing transforms that
+      directly produces a 4x4 model matrix as a result.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s9ss2pg2" href="#st200_p2s9ss2pg2">2</a></div><div class="st200_paragraph">
+      This kind of transform is useful for representing transforms that
+      are the result of many other concatenated transforms. As an example,
+      consider a robot arm with multiple joints: The transform for the tip 
+      of the arm is the sum of the rotations of all of the ancestor joints.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s9ss3" href="#st200_p2s9ss3">2.9.3</a></div><div class="st200_subsection_title">KTransformOST</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s9ss3pg1" href="#st200_p2s9ss3pg1">1</a></div><div class="st200_paragraph">
+      The
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KTransformOST.html">KTransformOST</a>
+      type represents a transform using a 
+      <span class="st200_term term">quaternion</span> representing an orientation,
+      a vector representing scaling values on three axes, and a translation vector
+      given in <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss4">world-space</a>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s9ss3pg2" href="#st200_p2s9ss3pg2">2</a></div><div class="st200_paragraph">
+      This representation is simple and allows for convenient positioning
+      and rotation of objects in the world. Quaternions, scaling vectors, and
+      translations are all easily interpolated, and are therefore convenient
+      for producing simple animations. Assuming that 
+      <span class="st200_term variable">mr</span> is a 4x4
+      rotation matrix produced from the quaternion, 
+      <span class="st200_term variable">ms</span> is a 4x4 scaling matrix produced
+      from the scaling vector, and <span class="st200_term variable">mt</span> is a 4x4
+      translation matrix produced from the translation vector, then the final
+      model matrix <span class="st200_term variable">mm</span> is given by 
+      <span class="st200_term expression">mm = mt * mr * ms</span>. This has the effect
+      of first scaling the object along the global axes, and then rotating the
+      scaled object, and then moving the scaled and rotated object to the world
+      position given by the translation 
+      <span class="st200_footnote_reference"><a id="st200_fn_22_ref" href="#st200_fn_22">[22]</a></span>.
+    </div></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_22" href="#st200_fn_22_ref">22</a>]</div><div class="st200_footnote_body">
+        An intuitive way to think about transforms concatenated in this
+        manner is that a transform <span class="st200_term emphasis">always occurs about the origin</span>.
+        So, if a translation is applied first, and then a rotation is applied, the
+        object will appear to orbit around the origin (because the rotation
+        happens around the origin, and the translation moved it away from
+        the origin first).
+      </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s8.xhtml#st200_p2s8">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s10.xhtml#st200_p2s10">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.8. Meshes</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.10. Instances</td></tr></table></div></div></body></html>

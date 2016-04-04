@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.14. Logarithmic Depth</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.13. Deferred Rendering: Position Reconstruction</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.15. Forward Rendering (Translucents)</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s13.xhtml#st200_p2s13">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s15.xhtml#st200_p2s15">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s14" href="#st200_p2s14">2.14</a></div><div class="st200_section_title">Logarithmic Depth</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s14.xhtml#st200_p2s14ss1">2.14.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s14.xhtml#st200_p2s14ss2">2.14.2. OpenGL Depth Issues</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s14.xhtml#st200_p2s14ss3">2.14.3. Logarithmic Encoding</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s14ss1" href="#st200_p2s14ss1">2.14.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s14ss1pg1" href="#st200_p2s14ss1pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      exclusively utilizes a so-called 
+      <span class="st200_term term">logarithmic depth buffer</span> for all
+      rendering operations.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s14ss2" href="#st200_p2s14ss2">2.14.2</a></div><div class="st200_subsection_title">OpenGL Depth Issues</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s14ss2pg1" href="#st200_p2s14ss2pg1">1</a></div><div class="st200_paragraph">
+      By default, OpenGL (effectively) stores a depth value
+      proportional to the reciprocal of the
+      <span class="st200_term variable">z</span> component of the 
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss6">clip-space</a>
+      coordinates of each vertex projected onto the screen
+      <span class="st200_footnote_reference"><a id="st200_fn_27_ref" href="#st200_fn_27">[27]</a></span>. Informally,
+      the <span class="st200_term term">perspective projection</span> matrix 
+      used to transform
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5">eye-space</a>
+      coordinates to clip-space will place the negated 
+      <span class="st200_term variable">z</span> component of the original
+      eye-space coordinates into the 
+      <span class="st200_term variable">w</span> component of the resulting
+      clip-space coordinates. When the hardware performs the
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss7">division by w</a>
+      to produce normalized-device-space coordinates, the resulting
+      <span class="st200_term variable">z</span> component falls within
+      the range <span class="st200_term expression">[-1.0, 1.0]</span>
+      (although any point with a <span class="st200_term variable">z</span> component
+      less than <span class="st200_term constant">0</span> will be clipped
+      away by the clipping hardware). This final value is linearly
+      mapped to a configurable range (typically 
+      <span class="st200_term expression">[0.0, 1.0]</span>) to produce a 
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss8">screen-space</a>
+      depth value.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s14ss2pg2" href="#st200_p2s14ss2pg2">2</a></div><div class="st200_paragraph">
+      Unfortunately, the encoding scheme above means that most of
+      the depth buffer is essentially wasted. The above scheme will
+      give excessive precision for objects close to the viewing plane,
+      and almost none for objects further away. Fortunately, a better
+      encoding scheme known as <span class="st200_term term">logarithmic depth</span>
+      <span class="st200_footnote_reference"><a id="st200_fn_28_ref" href="#st200_fn_28">[28]</a></span> can be implemented that provides 
+      <span class="st200_term emphasis">vastly</span> greater precision
+      and coexists happily with the standard projection matrices
+      used in OpenGL-based renderers.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s14ss3" href="#st200_p2s14ss3">2.14.3</a></div><div class="st200_subsection_title">Logarithmic Encoding</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s14ss3pg1" href="#st200_p2s14ss3pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">logarithmic depth value</span> is
+      produced by encoding a negated (and therefore <span class="st200_term term">positive</span>)
+      eye-space <span class="st200_term variable">z</span> value in the
+      manner specified by <span class="st200_term function">encode</span>
+      [<a class="st200_link_external" href="haskell/LogDepth.hs">LogDepth.hs</a>]:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s14ss3fo1" href="#st200_p2s14ss3fo1">2.14.3.1. Logarithmic Depth (Encoding)</a></div><pre class="st200_verbatim">module LogDepth where
+
+newtype LogDepth =
+  LogDepth Float
+    deriving (Eq, Ord, Show)
+
+type Depth = Float
+
+log2 :: Float -&gt; Float
+log2 = logBase 2.0
+
+depth_coefficient :: Float -&gt; Float
+depth_coefficient far = 2.0 / log2 (far + 1.0)
+
+encode :: Float -&gt; Depth -&gt; LogDepth
+encode depth_co depth =
+  let hco = depth_co * 0.5 in
+    LogDepth $ log2 (depth + 1.0) * hco
+
+decode :: Float -&gt; LogDepth -&gt; Depth
+decode depth_co (LogDepth depth) =
+  let hco = depth_co * 0.5 in
+    (2.0 ** (depth / hco)) - 1
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s14ss3pg2" href="#st200_p2s14ss3pg2">2</a></div><div class="st200_paragraph">
+      The function is parameterized by a so-called
+      <span class="st200_term term">depth coefficient</span> that is
+      derived from the <span class="st200_term term">far plane distance</span>
+      as shown by <span class="st200_term expression">depth_coefficient</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s14ss3pg3" href="#st200_p2s14ss3pg3">3</a></div><div class="st200_paragraph">
+      The inverse of <span class="st200_term function">encode</span> is
+      <span class="st200_term function">decode</span>, such that 
+      for a given negated eye-space <span class="st200_term variable">z</span>,
+      <span class="st200_term expression">z = decode d (encode d z)</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s14ss3pg4" href="#st200_p2s14ss3pg4">4</a></div><div class="st200_paragraph">
+      A graph of the functions is as follows:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s14ss3fo2" href="#st200_p2s14ss3fo2">2.14.3.2. Logarithmic Depth (Graph)</a></div><img class="st200_image" alt="Logarithmic Depth (Graph)" src="images/log_depth.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s14ss3pg5" href="#st200_p2s14ss3pg5">5</a></div><div class="st200_paragraph">
+      An interactive <a class="st200_link_external" href="http://geogebra.org">GeoGebra</a>
+      construction is provided in
+      [<a class="st200_link_external" href="log_depth.ggb">log_depth.ggb</a>]
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s14ss3pg6" href="#st200_p2s14ss3pg6">6</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      uses a slightly modified version of the encoding function that clamps
+      the original <span class="st200_term variable">z</span> value to the range
+      <span class="st200_term expression">[0.000001, ∞]</span>. The reason for this
+      is that <span class="st200_term expression">log2 (0)</span> is undefined, and
+      so attempting to derive a depth value in this manner tends to cause
+      issues with triangle clipping. The encoding function is also separated
+      into two parts as a simple optimization: The encoding function contains
+      a term <span class="st200_term expression">z + 1.0</span>, and this term can
+      be calculated by a <span class="st200_term term">vertex shader</span> and
+      interpolated. The actual functions as implemented are given by
+      [<a class="st200_link_external" href="parasol/LogDepth.p">LogDepth.p</a>]:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s14ss3fo3" href="#st200_p2s14ss3fo3">2.14.3.3. Logarithmic Depth (Parasol)</a></div><pre class="st200_verbatim">--
+-- Copyright © 2014 &lt;code@io7m.com&gt; http://io7m.com
+-- 
+-- Permission to use, copy, modify, and/or distribute this software for any
+-- purpose with or without fee is hereby granted, provided that the above
+-- copyright notice and this permission notice appear in all copies.
+-- 
+-- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+-- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+-- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+-- SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+-- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+-- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+-- IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+--
+
+package com.io7m.r1.core;
+
+--
+-- Functions for handling logarithmic depth buffers.
+--
+
+module LogDepth is
+
+  import com.io7m.parasol.Float as F;
+
+  function prepare_eye_z (z : float) : float =
+    F.add (F.negate (z), 1.0);
+
+  function encode_partial (
+    z                 : float,
+    depth_coefficient : float  
+  ) : float =
+    let 
+      value half_co = F.multiply (depth_coefficient, 0.5);
+      value clamp_z = F.maximum (0.000001, z);
+    in
+      F.multiply (F.log2 (clamp_z), half_co)
+    end;
+
+  function encode_full (
+    z                 : float,
+    depth_coefficient : float  
+  ) : float =
+    let 
+      value half_co = F.multiply (depth_coefficient, 0.5);
+      value clamp_z = F.maximum (0.000001, F.add (z, 1.0));
+    in
+      F.multiply (F.log2 (clamp_z), half_co)
+    end;
+
+  function decode (
+    z                 : float,
+    depth_coefficient : float  
+  ) : float =
+    let value half_co = F.multiply (depth_coefficient, 0.5); in
+      F.subtract (F.power (2.0, F.divide (z, half_co)), 1.0)
+    end;
+
+end;
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s14ss3pg7" href="#st200_p2s14ss3pg7">7</a></div><div class="st200_paragraph">
+      A fragment shader can use <span class="st200_term function">encode_full</span>
+      to compute a logarithmic depth value from a given positive eye-space 
+      <span class="st200_term variable">z</span> value. Alternatively, a vertex
+      shader can compute the <span class="st200_term expression">z + 1.0</span>
+      term <span class="st200_term variable">r</span> from a non-negated eye-space 
+      <span class="st200_term variable">z</span>
+      value, and pass <span class="st200_term variable">r</span> to a cooperating
+      fragment shader which then finishes the computation by applying
+      <span class="st200_term function">encode_partial</span> to
+      <span class="st200_term variable">r</span>. When performing 
+      <a class="st200_link" href="p2s13.xhtml#st200_p2s13">position reconstruction</a>
+      during <span class="st200_term term">deferred rendering</span>, the original
+      eye-space <span class="st200_term variable">z</span> value of a fragment is
+      retrieved by negating the result of <span class="st200_term function">decode</span>
+      applied to a given logarithmic depth sample.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s14ss3pg8" href="#st200_p2s14ss3pg8">8</a></div><div class="st200_paragraph">
+      The original derivation of the encoding and decoding functions as
+      described by Brano Kemen used the <span class="st200_term variable">w</span> component
+      of the resulting clip-space coordinates. Unfortunately, this does not
+      work correctly with orthographic projections, as the typical orthographic
+      projection matrix will produce clip-space coordinates with a
+      <span class="st200_term variable">w</span> component always equal to
+      <span class="st200_term constant">1</span>. Aside from the effects that this will
+      have on depth testing (essentially mapping the depth of all fragments to the
+      far plane), it also makes position reconstruction impossible as the original eye-space
+      <span class="st200_term variable">z</span> value cannot be recovered.
+      Instead, the <span class="st200_term package">io7m-r1</span> package uses
+      the negated eye-space <span class="st200_term variable">z</span> value directly
+      in all cases.
+    </div></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_27" href="#st200_fn_27_ref">27</a>]</div><div class="st200_footnote_body">
+        See <a class="st200_link_external" href="http://www.sjbaker.org/steve/omniv/love_your_z_buffer.html">Learning To Love Your Depth Buffer</a>.
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_28" href="#st200_fn_28_ref">28</a>]</div><div class="st200_footnote_body">
+        Apparently first discovered by <a class="st200_link_external" href="http://outerra.blogspot.co.uk/2012/11/maximizing-depth-buffer-range-and.html">Brano Kemen</a>.
+      </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s13.xhtml#st200_p2s13">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s15.xhtml#st200_p2s15">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.13. Deferred Rendering: Position Reconstruction</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.15. Forward Rendering (Translucents)</td></tr></table></div></div></body></html>

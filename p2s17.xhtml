@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.17. Environment Mapping</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.16. Normal Mapping</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.18. Lighting</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s16.xhtml#st200_p2s16">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s18.xhtml#st200_p2s18">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s17" href="#st200_p2s17">2.17</a></div><div class="st200_section_title">Environment Mapping</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s17.xhtml#st200_p2s17ss1">2.17.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s17.xhtml#st200_p2s17ss2">2.17.2. Cube Maps</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s17.xhtml#st200_p2s17ss3">2.17.3. Reflections</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s17.xhtml#st200_p2s17ss4">2.17.4. Handedness</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s17ss1" href="#st200_p2s17ss1">2.17.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s17ss1pg1" href="#st200_p2s17ss1pg1">1</a></div><div class="st200_paragraph">
+      <span class="st200_term term">Environment mapping</span> is conceptually
+      the process of constructing an artificial environment around an object
+      in order to provide, for example, effects such as reflective surfaces
+      or refractive objects.
+      In the <span class="st200_term package">io7m-r1</span> package,
+      the artificial environment is represented by 
+      <a class="st200_link" href="p2s17.xhtml#st200_p2s17ss2">cube maps</a>,
+      and the only supported effect is <span class="st200_term reflection">reflection</span>.
+      Effects such as refraction are instead provided via
+      <a class="st200_link" href="p2s25.xhtml#st200_p2s25">generic refraction</a>,
+      which doesn't use environment mapping.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s17ss2" href="#st200_p2s17ss2">2.17.2</a></div><div class="st200_subsection_title">Cube Maps</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s17ss2pg1" href="#st200_p2s17ss2pg1">1</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">cube map</span> is a <span class="st200_term term">texture</span>
+      with six <span class="st200_term term">faces</span>. When used for environment mapping,
+      each face represents a 90° image of the environment visible in the direction 
+      (in <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss4">world space</a>) of
+      that face. Cube maps are normally constructed by placing an observer in a scene
+      and then orienting the observer in the direction of each cube face in turn and 
+      rendering an image. As an example:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s17ss2fo1" href="#st200_p2s17ss2fo1">2.17.2.1. Cube map scene</a></div><img class="st200_image" alt="Cube map scene" src="images/envmap_cube_scene.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s17ss2pg2" href="#st200_p2s17ss2pg2">2</a></div><div class="st200_paragraph">
+      Given the above scene, with the observer placed exactly in the center of the
+      indicated magenta circle and assuming a 90° field of view, the six images visible
+      from that location corresponding to the <span class="st200_term constant">-x</span>,
+      <span class="st200_term constant">+x</span>, <span class="st200_term constant">-y</span>,
+      <span class="st200_term constant">-z</span>, <span class="st200_term constant">-z</span>,
+      <span class="st200_term constant">+z</span> cube faces are:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s17ss2fo2" href="#st200_p2s17ss2fo2">2.17.2.2. Cube map example</a></div><img class="st200_image" alt="Cube map example" src="images/envmap_cubemap.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s17ss2pg3" href="#st200_p2s17ss2pg3">3</a></div><div class="st200_paragraph">
+      While sampling from ordinary two-dimensional textures involves looking up texels 
+      by their two-dimensional coordinates, sampling from cube maps requires 
+      three-dimensional coordinates. The three-dimensional coordinates are interpreted
+      as a direction vector or ray emanating from the center of the cube, and the point of
+      intersection between the ray and the corresponding cube face is
+      used to select a texel from that face. Note that in OpenGL there are
+      issues with 
+      <a class="st200_link" href="p2s17.xhtml#st200_p2s17ss4">coordinate system handedness</a>
+      that the <span class="st200_term package">io7m-r1</span> package
+      corrects.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s17ss3" href="#st200_p2s17ss3">2.17.3</a></div><div class="st200_subsection_title">Reflections</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s17ss3pg1" href="#st200_p2s17ss3pg1">1</a></div><div class="st200_paragraph">
+      So-called <span class="st200_term term">environment-mapped reflections</span> are
+      trivially provided by cube maps. For a given surface with a normal vector
+      <span class="st200_term variable">n</span>, and given the view direction 
+      <span class="st200_term variable">v</span> (from the observer to the surface),
+      a <span class="st200_term term">reflection vector</span> is given by
+      <span class="st200_term expression">r = Reflection.reflection v n</span>:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s17ss3fo1" href="#st200_p2s17ss3fo1">2.17.3.1. Reflection vector</a></div><pre class="st200_verbatim">module Reflection where
+
+import qualified Vector3f as V3
+
+reflection :: V3.T -&gt; V3.T -&gt; V3.T
+reflection v0 v1 = V3.sub3 v0 (V3.scale v1 (2.0 * (V3.dot3 v1 v0)))
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s17ss3pg2" href="#st200_p2s17ss3pg2">2</a></div><div class="st200_paragraph">
+      The reflection vector <span class="st200_term variable">r</span> is then used to 
+      look up a texel in the current cube map directly. This gives a convincing 
+      illusion of reflection that will change as the observer moves relative to 
+      the surface. Combining normal mapping and environment mapped reflections
+      gives a striking effect:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s17ss3fo2" href="#st200_p2s17ss3fo2">2.17.3.2. Normal/Environment mapping</a></div><img class="st200_image" alt="Normal/Environment mapping" src="images/envmap_tiles.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s17ss3fo3" href="#st200_p2s17ss3fo3">2.17.3.3. Normal/Environment mapping (Cube map)</a></div><img class="st200_image" alt="Normal/Environment mapping (Cube map)" src="images/envmap_toronto.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s17ss3pg3" href="#st200_p2s17ss3pg3">3</a></div><div class="st200_paragraph">
+      Note that in the actual <span class="st200_term package">io7m-r1</span> 
+      implementation, the vectors <span class="st200_term variable">n</span> and
+      <span class="st200_term variable">v</span> will be in eye-space and therefore
+      so will <span class="st200_term variable">r</span>. The vector 
+      <span class="st200_term variable">r</span> is transformed back to
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss4">world space</a>
+      by the inverse of the current view matrix for use with the cube map.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s17ss4" href="#st200_p2s17ss4">2.17.4</a></div><div class="st200_subsection_title">Handedness</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s17ss4pg1" href="#st200_p2s17ss4pg1">1</a></div><div class="st200_paragraph">
+      For reasons lost to time, cube maps in
+      OpenGL use a left-handed coordinate system in contrast to the usual
+      right-handed coordinate system. Because of this, calculated 
+      reflection vectors actually have to be inverted to prevent sampling
+      from the wrong cube face. The 
+      <span class="st200_term package">io7m-r1</span> package
+      enforces a consistent right-handed coordinate system everywhere. The
+      direction of each cube face corresponds to the same direction in
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss4">world space</a>, without
+      exception.
+    </div></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s16.xhtml#st200_p2s16">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s18.xhtml#st200_p2s18">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.16. Normal Mapping</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.18. Lighting</td></tr></table></div></div></body></html>

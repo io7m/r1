@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.3. Coordinate systems</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.2. Concepts</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.4. Rendering Process</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s2.xhtml#st200_p2s2">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s4.xhtml#st200_p2s4">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s3" href="#st200_p2s3">2.3</a></div><div class="st200_section_title">Coordinate systems</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s3.xhtml#st200_p2s3ss1">2.3.1. Conventions</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s3.xhtml#st200_p2s3ss2">2.3.2. Types</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s3.xhtml#st200_p2s3ss3">2.3.3. Object space</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s3.xhtml#st200_p2s3ss4">2.3.4. World space</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s3.xhtml#st200_p2s3ss5">2.3.5. Eye space</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s3.xhtml#st200_p2s3ss6">2.3.6. Clip space</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s3.xhtml#st200_p2s3ss7">2.3.7. Normalized-device space</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s3.xhtml#st200_p2s3ss8">2.3.8. Screen space</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s3ss1" href="#st200_p2s3ss1">2.3.1</a></div><div class="st200_subsection_title">Conventions</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss1pg1" href="#st200_p2s3ss1pg1">1</a></div><div class="st200_paragraph">
+      This section attempts to describe the mathematical conventions
+      that the <span class="st200_term package">io7m-r1</span> package
+      uses with respect to coordinate systems. The
+      <span class="st200_term package">io7m-r1</span> package generally
+      does not deviate from standard OpenGL conventions, and this section does
+      not attempt to give a rigorous formal definition of these existing conventions. It
+      does however attempt to establish the <span class="st200_term term">naming conventions</span>
+      that the package uses to refer to the standard coordinate spaces
+      <span class="st200_footnote_reference"><a id="st200_fn_8_ref" href="#st200_fn_8">[8]</a></span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss1pg2" href="#st200_p2s3ss1pg2">2</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      uses the <a class="st200_link_external" href="http://mvn.io7m.com/io7m-jtensors">jtensors</a>
+      package for all mathematical operations on the CPU, and therefore
+      shares its conventions with regards to coordinate system handedness.
+      Important parts are repeated here, but the documentation for the
+      <span class="st200_term package">jtensors</span> package should be inspected
+      for details.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss1pg3" href="#st200_p2s3ss1pg3">3</a></div><div class="st200_paragraph">
+      Any of the matrix functions that deal with rotations
+      assume a right-handed coordinate system. This
+      matches the system conventionally used by <a class="st200_link_external" href="http://opengl.org">OpenGL</a> (and most
+      mathematics literature). A right-handed coordinate system
+      assumes that if the viewer is standing at the origin and
+      looking towards negative infinity on the Z axis, then the
+      X axis runs horizontally (left towards negative infinity
+      and right towards positive infinity), and the Y axis runs
+      vertically (down towards negative infinity and up towards
+      positive infinity). The following image demonstrates this
+      axis configuration:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss1fo1" href="#st200_p2s3ss1fo1">2.3.1.1. Right-handed coordinate system</a></div><img class="st200_image" alt="Right-handed coordinate system" src="images/axes2.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss1pg4" href="#st200_p2s3ss1pg4">4</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">jtensors</span> package adheres
+      to the convention that a positive rotation around an axis
+      represents a counter-clockwise rotation when viewing the
+      system along the negative direction of the axis in question.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss1fo2" href="#st200_p2s3ss1fo2">2.3.1.2. Right-handed rotations</a></div><img class="st200_image" alt="Right-handed rotations" src="images/rotations.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss1pg5" href="#st200_p2s3ss1pg5">5</a></div><div class="st200_paragraph">
+      The package uses the following matrices to define rotations
+      around each axis:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss1fo3" href="#st200_p2s3ss1fo3">2.3.1.3. Rotation of r radians around the X axis</a></div><img class="st200_image" alt="Rotation of r radians around the X axis" src="images/matrix_rx.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss1fo4" href="#st200_p2s3ss1fo4">2.3.1.4. Rotation of r radians around the Y axis</a></div><img class="st200_image" alt="Rotation of r radians around the Y axis" src="images/matrix_ry.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss1fo5" href="#st200_p2s3ss1fo5">2.3.1.5. Rotation of r radians around the Z axis</a></div><img class="st200_image" alt="Rotation of r radians around the Z axis" src="images/matrix_rz.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss1pg6" href="#st200_p2s3ss1pg6">6</a></div><div class="st200_paragraph">
+      Which results in the following matrix for rotating <span class="st200_term variable">r</span> radians around the axis given
+      by <span class="st200_term constant">(x, y, z)</span>, assuming
+      <span class="st200_term variable">s = sin(r)</span> and <span class="st200_term variable">c = cos(r)</span>
+      <span class="st200_footnote_reference"><a id="st200_fn_9_ref" href="#st200_fn_9">[9]</a></span>:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss1fo6" href="#st200_p2s3ss1fo6">2.3.1.6. Rotation of r radians around an arbitrary axis</a></div><img class="st200_image" alt="Rotation of r radians around an arbitrary axis" src="images/rot_matrix.png"/></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s3ss2" href="#st200_p2s3ss2">2.3.2</a></div><div class="st200_subsection_title">Types</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss2pg1" href="#st200_p2s3ss2pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      uses so-called <span class="st200_term term">phantom type parameters</span>
+      to statically indicate the coordinate systems of vectors, and the
+      types of transformations that matrices represent. For example, a
+      value of type <span class="st200_term expression">RVectorI3F&lt;RSpaceObjectType&gt;</span>
+      represents an immutable three-dimension vectors with coordinate 
+      specified in <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss3">object space</a>.
+      A value of type <span class="st200_term expression">RMatrixI4x4F&lt;RSpaceTransformViewType&gt;</span>
+      represents an immutable 4x4 matrix that contains a transformation from
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss4">world space</a> to
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5">eye space</a>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss2pg2" href="#st200_p2s3ss2pg2">2</a></div><div class="st200_paragraph">
+      Due to the limited nature of Java's type system, it is obviously
+      possible for the programmer to deliberately construct vectors and
+      matrices that do not represent valid coordinates or transforms in
+      any coordinate space. However, mistakes involving the mixing up
+      of coordinate systems are rampant in graphics programming, and
+      in practice, the system as implemented catches many of the mistakes
+      at compile time.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss2pg3" href="#st200_p2s3ss2pg3">3</a></div><div class="st200_paragraph">
+      The package contains the following coordinate system and transform
+      indexed types:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss2fo1" href="#st200_p2s3ss2fo1">2.3.2.1. Vector and matrix types</a></div><table class="st200_table" summary="Vector and matrix types"><thead class="st200_table_head"><tr><th class="st200_table_column_name">Type</th><th class="st200_table_column_name">Description</th></tr></thead><tbody class="st200_table_body"><tr class="st200_table_row"><td class="st200_table_cell"><a class="st200_link_external" href="apidocs/com/io7m/r1/types/RMatrixI3x3F.html">RMatrixI3x3F&lt;T extends RTransformType&gt;</a></td><td class="st200_table_cell">Immutable 3x3 matrix type</td></tr><tr class="st200_table_row"><td class="st200_table_cell"><a class="st200_link_external" href="apidocs/com/io7m/r1/types/RMatrixI4x4F.html">RMatrixI4x4F&lt;T extends RTransformType&gt;</a></td><td class="st200_table_cell">Immutable 4x4 matrix type</td></tr><tr class="st200_table_row"><td class="st200_table_cell"><a class="st200_link_external" href="apidocs/com/io7m/r1/types/RMatrixM4x4F.html">RMatrixM4x4F&lt;T extends RTransformType&gt;</a></td><td class="st200_table_cell">Mutable 4x4 matrix type</td></tr><tr class="st200_table_row"><td class="st200_table_cell"><a class="st200_link_external" href="apidocs/com/io7m/r1/types/RMatrixM3x3F.html">RMatrixM3x3F&lt;T extends RTransformType&gt;</a></td><td class="st200_table_cell">Mutable 3x3 matrix type</td></tr><tr class="st200_table_row"><td class="st200_table_cell"><a class="st200_link_external" href="apidocs/com/io7m/r1/types/RVectorI2F.html">RVectorI2F&lt;T extends RTransformType&gt;</a></td><td class="st200_table_cell">Immutable 2D vector type</td></tr><tr class="st200_table_row"><td class="st200_table_cell"><a class="st200_link_external" href="apidocs/com/io7m/r1/types/RVectorI3F.html">RVectorI3F&lt;T extends RTransformType&gt;</a></td><td class="st200_table_cell">Immutable 3D vector type</td></tr><tr class="st200_table_row"><td class="st200_table_cell"><a class="st200_link_external" href="apidocs/com/io7m/r1/types/RVectorI4F.html">RVectorI4F&lt;T extends RTransformType&gt;</a></td><td class="st200_table_cell">Immutable 4D vector type</td></tr><tr class="st200_table_row"><td class="st200_table_cell"><a class="st200_link_external" href="apidocs/com/io7m/r1/types/RVectorM3F.html">RVectorM3F&lt;T extends RTransformType&gt;</a></td><td class="st200_table_cell">Mutable 3D vector type</td></tr><tr class="st200_table_row"><td class="st200_table_cell"><a class="st200_link_external" href="apidocs/com/io7m/r1/types/RVectorM4F.html">RVectorM4F&lt;T extends RTransformType&gt;</a></td><td class="st200_table_cell">Mutable 4D vector type</td></tr></tbody></table></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s3ss3" href="#st200_p2s3ss3">2.3.3</a></div><div class="st200_subsection_title">Object space</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss3pg1" href="#st200_p2s3ss3pg1">1</a></div><div class="st200_paragraph">
+      <span class="st200_term term">Object space</span> is the local
+      coordinate system used to describe the positions of vertices
+      in <a class="st200_link" href="p2s8.xhtml#st200_p2s8">meshes</a>. For
+      example, a <span class="st200_term term">unit cube</span> with the
+      origin placed at the center of the cube would have eight
+      vertices with positions expressed as object-space coordinates:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss3fo1" href="#st200_p2s3ss3fo1">2.3.3.1. Unit cube vertices</a></div><pre class="st200_verbatim">cube = {
+    (-0.5, -0.5, -0.5),
+    ( 0.5, -0.5, -0.5),
+    ( 0.5, -0.5,  0.5),
+    (-0.5, -0.5,  0.5),
+  
+    (-0.5,  0.5, -0.5),
+    ( 0.5,  0.5, -0.5),
+    ( 0.5,  0.5,  0.5),
+    (-0.5,  0.5,  0.5)
+  }</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss3pg2" href="#st200_p2s3ss3pg2">2</a></div><div class="st200_paragraph">
+      In other rendering systems, <span class="st200_term term">object space</span>
+      is sometimes referred to as <span class="st200_term term">local space</span>,
+      or <span class="st200_term term">model space</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss3pg3" href="#st200_p2s3ss3pg3">3</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package, 
+      <span class="st200_term term">object space</span> is indicated by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/types/RSpaceObjectType.html">RSpaceObjectType</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s3ss4" href="#st200_p2s3ss4">2.3.4</a></div><div class="st200_subsection_title">World space</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss4pg1" href="#st200_p2s3ss4pg1">1</a></div><div class="st200_paragraph">
+      In order to position objects in a scene, they must be
+      assigned a <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss6">transform</a>
+      that can be applied to each of their 
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss3">object space</a> vertices
+      to yield absolute positions in so-called 
+      <span class="st200_term term">world space</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss4pg2" href="#st200_p2s3ss4pg2">2</a></div><div class="st200_paragraph">
+      As an example, if the unit cube described above was
+      assigned a transform that moved its origin to
+      <span class="st200_term expression">(3, 5, 1)</span>, then its
+      object space vertex <span class="st200_term expression">(-0.5, 0.5, 0.5)</span>
+      would end up at
+      <span class="st200_term expression">(3 + -0.5, 5 + 0.5, 1 + 0.5) = (2.5, 5.5, 1.5)</span>
+      in world space.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss4pg3" href="#st200_p2s3ss4pg3">3</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package,
+      a <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss6">transform</a> applied
+      to an object produces a 4x4
+      <span class="st200_term term">model matrix</span>. Multiplying the model matrix
+      with the positions of the object space vertices yields vertices in
+      world space.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss4pg4" href="#st200_p2s3ss4pg4">4</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package, 
+      <span class="st200_term term">world space</span> is indicated by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/types/RSpaceWorldType.html">RSpaceWorldType</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s3ss5" href="#st200_p2s3ss5">2.3.5</a></div><div class="st200_subsection_title">Eye space</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss5pg1" href="#st200_p2s3ss5pg1">1</a></div><div class="st200_paragraph">
+      <span class="st200_term term">Eye space</span> represents the coordinate 
+      system of the 
+      <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss7">camera</a> of
+      a given <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss3">visible set</a>.
+      In eye space, the observer is implicitly fixed at the origin
+      <span class="st200_term expression">(0.0, 0.0, 0.0)</span> and is
+      looking towards infinity in the negative Z direction.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss5pg2" href="#st200_p2s3ss5pg2">2</a></div><div class="st200_paragraph">
+      The main purpose of eye space is to simplify
+      the mathematics required to implement various algorithms such
+      as lighting. The problem with implementing these sorts of
+      algorithms in world space is that one must constantly take into
+      account the position of the observer (typically by subtracting
+      the location of the observer from each set of world space
+      coordinates and accounting for any change in orientation of the
+      observer). By fixing the orientation of the observer towards 
+      negative Z, and the position of the observer at
+      <span class="st200_term expression">(0.0, 0.0, 0.0)</span>, and
+      by transforming all vertices of all objects into the same system, 
+      the mathematics of lighting are greatly simplified.
+      The majority of the rendering algorithms used in the
+      <span class="st200_term package">io7m-r1</span> package
+      are implemented in eye space.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss5pg3" href="#st200_p2s3ss5pg3">3</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package,
+      the <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss7">camera</a> produces
+      a 4x4 <span class="st200_term term">view matrix</span>. Multiplying 
+      the view matrix with any given world space position yields 
+      a position in eye space. In practice, the view matrix 
+      <span class="st200_term expression">v</span>
+      and the current object's model matrix 
+      <span class="st200_term expression">m</span> are concatenated (multiplied)
+      to produce a <span class="st200_term term">model-view matrix</span>
+      <span class="st200_term expression">mv = v * m</span>
+      <span class="st200_footnote_reference"><a id="st200_fn_10_ref" href="#st200_fn_10">[10]</a></span>, and <span class="st200_term expression">mv</span> is then
+      passed directly to the renderer's
+      <span class="st200_term term">vertex shaders</span> to transform the
+      current object's vertices
+      <span class="st200_footnote_reference"><a id="st200_fn_11_ref" href="#st200_fn_11">[11]</a></span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss5pg4" href="#st200_p2s3ss5pg4">4</a></div><div class="st200_paragraph">
+      Additionally, as the <span class="st200_term package">io7m-r1</span> package
+      does all lighting in eye space, it's necessary to transform the
+      <a class="st200_link" href="p2s8.xhtml#st200_p2s8ss2">object space normal vectors</a>
+      given in mesh data to eye space. However, the usual model-view matrix
+      will almost certainly contain some sort of translational component and possibly
+      a scaling component. Normal vectors are not supposed to be translated; they 
+      represent directions! A non-uniform scale applied to an object will also deform the
+      normal vectors, making them non-perpendicular to the surface they're associated 
+      with:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss5fo1" href="#st200_p2s3ss5fo1">2.3.5.1. Scaling deforms normal vectors</a></div><img class="st200_image" alt="Scaling deforms normal vectors" src="images/normal_deform.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss5pg5" href="#st200_p2s3ss5pg5">5</a></div><div class="st200_paragraph">
+      With the scaled triangle on the right, the normal vector is now not perpendicular
+      to the surface (in addition to no longer being of unit length). The red vector
+      indicates what the surface normal <span class="st200_term emphasis">should</span> be.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss5pg6" href="#st200_p2s3ss5pg6">6</a></div><div class="st200_paragraph">
+      Therefore it's necessary to derive another 3x3 matrix known as the 
+      <span class="st200_term term">normal matrix</span> from the model-view matrix that
+      contains just the rotational component of the original matrix. The full
+      derivation of this matrix is given in
+      <a class="st200_link_external" href="http://www.mathfor3dgameprogramming.com/">Mathematics for 3D Game Programming and Computer Graphics, Third Edition</a>
+      <span class="st200_footnote_reference"><a id="st200_fn_12_ref" href="#st200_fn_12">[12]</a></span>. Briefly, the normal matrix is equal to
+      the <span class="st200_term term">inverse transpose</span> of the top left
+      3x3 elements of an arbitrary 4x4 model-view matrix.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss5pg7" href="#st200_p2s3ss5pg7">7</a></div><div class="st200_paragraph">
+      In other rendering systems, <span class="st200_term term">eye space</span>
+      is sometimes referred to as <span class="st200_term term">camera space</span>,
+      or <span class="st200_term term">view space</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss5pg8" href="#st200_p2s3ss5pg8">8</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package, 
+      <span class="st200_term term">eye space</span> is indicated by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/types/RSpaceEyeType.html">RSpaceEyeType</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s3ss6" href="#st200_p2s3ss6">2.3.6</a></div><div class="st200_subsection_title">Clip space</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss6pg1" href="#st200_p2s3ss6pg1">1</a></div><div class="st200_paragraph">
+      <span class="st200_term term">Clip space</span> is a homogeneous coordinate
+      system in which OpenGL performs <span class="st200_term term">clipping</span>
+      of primitives (such as triangles). In OpenGL,
+      <span class="st200_term term">clip space</span> is effectively a
+      left-handed coordinate system by default
+      <span class="st200_footnote_reference"><a id="st200_fn_13_ref" href="#st200_fn_13">[13]</a></span>. Intuitively, coordinates in
+      <span class="st200_term term">eye space</span> are transformed with a
+      <span class="st200_term term">projection</span> (normally either an
+      <span class="st200_term term">orthographic</span> or
+      <span class="st200_term term">perspective</span> projection) such that
+      all vertices are projected into a homogeneous unit cube placed at
+      the origin - <span class="st200_term term">clip space</span> - resulting
+      in four-dimensional <span class="st200_term expression">(x, y, z, w)</span>
+      positions. Positions that end up outside of the cube are 
+      <span class="st200_term term">clipped</span> (discarded) by dedicated
+      clipping hardware, typically producing more triangles as a result.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss6fo1" href="#st200_p2s3ss6fo1">2.3.6.1. Primitive clipping</a></div><img class="st200_image" alt="Primitive clipping" src="images/clipping.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss6pg2" href="#st200_p2s3ss6pg2">2</a></div><div class="st200_paragraph">
+      A <span class="st200_term term">projection</span> effectively
+      determines how objects in the three-dimensional scene are projected
+      onto the two-dimensional <span class="st200_term term">viewing plane</span>
+      (a computer screen, in most cases).
+      A <span class="st200_term term">perspective</span> projection
+      transforms vertices such that objects that are further away from
+      the viewing plane appear to be smaller than objects that are close
+      to it, while an <span class="st200_term term">orthographic</span>
+      projection preserves the perceived sizes of objects regardless of
+      their distance from the viewing plane.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss6fo2" href="#st200_p2s3ss6fo2">2.3.6.2. Perspective projection</a></div><img class="st200_image" alt="Perspective projection" src="images/proj_perspective.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss6fo3" href="#st200_p2s3ss6fo3">2.3.6.3. Orthographic projection</a></div><img class="st200_image" alt="Orthographic projection" src="images/proj_ortho.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss6pg3" href="#st200_p2s3ss6pg3">3</a></div><div class="st200_paragraph">
+      Because <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5">eye space</a> is
+      a right-handed coordinate system by convention, but by default
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss6">clip space</a> is
+      left-handed, the projection matrix used will invert the sign of the
+      <span class="st200_term expression">z</span> component of any given point.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss6pg4" href="#st200_p2s3ss6pg4">4</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package,
+      the <a class="st200_link" href="p2s2.xhtml#st200_p2s2ss7">camera</a> produces
+      a 4x4 <span class="st200_term term">projection matrix</span>. The
+      <span class="st200_term term">projection matrix</span> is passed, along with
+      the <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5pg3">model-view</a>
+      matrix, to the renderer's <span class="st200_term term">vertex shaders</span>.
+      As is normal in OpenGL, the vertex shader produces 
+      <span class="st200_term term">clip space</span> coordinates which are then
+      used by the hardware rasterizer to produce color fragments onscreen.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss6pg5" href="#st200_p2s3ss6pg5">5</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package, 
+      <span class="st200_term term">clip space</span> is indicated by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/types/RSpaceClipType.html">RSpaceClipType</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s3ss7" href="#st200_p2s3ss7">2.3.7</a></div><div class="st200_subsection_title">Normalized-device space</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss7pg1" href="#st200_p2s3ss7pg1">1</a></div><div class="st200_paragraph">
+      <span class="st200_term term">Normalized-device space</span> is, by default, a left-handed
+      <span class="st200_footnote_reference"><a id="st200_fn_14_ref" href="#st200_fn_14">[14]</a></span>
+      coordinate
+      space in which <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss6">clip space</a>
+      coordinates have been divided by their own <span class="st200_term expression">w</span>
+      component (discarding the resulting <span class="st200_term expression">w = 1</span>
+      component in the process), yielding three dimensional coordinates. The
+      range of values in the resulting coordinates are effectively normalized by the division
+      to fall within the ranges <span class="st200_term expression">[(-1, -1, -1), (1, 1, 1)]</span>
+      <span class="st200_footnote_reference"><a id="st200_fn_15_ref" href="#st200_fn_15">[15]</a></span>.
+      The coordinate space represents a simplifying intermediate step 
+      between having <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss6">clip space</a>
+      coordinates and getting something projected into a two-dimensional image
+      (<a class="st200_link" href="p2s3.xhtml#st200_p2s3ss8">screen space</a>) for viewing.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss7pg2" href="#st200_p2s3ss7pg2">2</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      does not directly use or manipulate values in 
+      <span class="st200_term term">normalized-device space</span>; it is mentioned
+      here for completeness.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss7pg3" href="#st200_p2s3ss7pg3">3</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package, 
+      <span class="st200_term term">normalized-device space</span> is indicated by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/types/RSpaceNDCType.html">RSpaceNDCType</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s3ss8" href="#st200_p2s3ss8">2.3.8</a></div><div class="st200_subsection_title">Screen space</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss8pg1" href="#st200_p2s3ss8pg1">1</a></div><div class="st200_paragraph">
+      <span class="st200_term term">Screen space</span> is, by default, a left-handed coordinate
+      system representing the screen (or window) that is displaying the actual
+      results of rendering. If the screen is of width <span class="st200_term expression">w</span>
+      and height <span class="st200_term expression">h</span>,
+      and the current <span class="st200_term term">depth range</span> of the window
+      is <span class="st200_term expression">[n, f]</span>, then the range of values
+      in screen space coordinates runs from <span class="st200_term expression">[(0, 0, n), (w, h, f)]</span>.
+      The origin <span class="st200_term expression">(0, 0, 0)</span> is assumed to be at
+      the bottom-left corner.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss8pg2" href="#st200_p2s3ss8pg2">2</a></div><div class="st200_paragraph">
+      The <span class="st200_term term">depth range</span> is actually a configurable
+      value, but the <span class="st200_term package">io7m-r1</span> package
+      keeps the OpenGL default. From the <span class="st200_term expression">glDepthRange</span>
+      function manual page:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s3ss8fo1" href="#st200_p2s3ss8fo1">2.3.8.1. glDepthRange</a></div><pre class="st200_verbatim">After clipping and division by w, depth coordinates range from -1 to 1, 
+corresponding to the near and far clipping planes. glDepthRange specifies a 
+linear mapping of the normalized depth coordinates in this range to window 
+depth coordinates. Regardless of the actual depth buffer implementation, 
+window coordinate depth values are treated as though they range from 0 
+through 1 (like color components). Thus, the values accepted by 
+glDepthRange are both clamped to this range before they are accepted.
+The setting of (0,1) maps the near plane to 0 and the far plane to 1. 
+With this mapping, the depth buffer range is fully utilized.</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss8pg3" href="#st200_p2s3ss8pg3">3</a></div><div class="st200_paragraph">
+      As OpenGL, by default, specifies a depth range of 
+      <span class="st200_term expression">[0, 1]</span>, the positive Z axis
+      points away from the observer, making the coordinate system left handed.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s3ss8pg4" href="#st200_p2s3ss8pg4">4</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package, 
+      <span class="st200_term term">screen space</span> is indicated by the
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/types/RSpaceWindowType.html">RSpaceWindowType</a>.
+    </div></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_8" href="#st200_fn_8_ref">8</a>]</div><div class="st200_footnote_body">
+        Almost all rendering systems use different names to refer to the same 
+        concepts, without ever bothering to document their conventions. This
+        harms comprehension and generally wastes everybody's time.
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_9" href="#st200_fn_9_ref">9</a>]</div><div class="st200_footnote_body">
+        See <a class="st200_link_external" href="http://mathfor3dgameprogramming.com">Mathematics
+        for 3D Game Programming and Computer
+        Graphics</a> 3rd Edition, section 4.3.1 for the
+        derivation.
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_10" href="#st200_fn_10_ref">10</a>]</div><div class="st200_footnote_body">
+        Note that matrix multiplication is not commutative.
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_11" href="#st200_fn_11_ref">11</a>]</div><div class="st200_footnote_body">
+        The reason for producing the 
+        concatenated matrix on the CPU and then passing it to the shader
+        is efficiency; if a mesh had <span class="st200_term constant">1000</span>
+        vertices, and the shader was passed <span class="st200_term expression">m</span>
+        and <span class="st200_term expression">v</span> separately, the shader
+        would repeatedly perform the same <span class="st200_term expression">mv = v * m</span>
+        multiplication to produce <span class="st200_term expression">mv</span> 
+        for each vertex - yielding the exact same 
+        <span class="st200_term expression">mv</span> each time!
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_12" href="#st200_fn_12_ref">12</a>]</div><div class="st200_footnote_body">
+        See section 4.5, "Transforming normal vectors".
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_13" href="#st200_fn_13_ref">13</a>]</div><div class="st200_footnote_body">
+        Because <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss7">normalized device space</a>
+        is a left-handed system by default, with the viewer looking towards
+        positive Z, and because the transformation from
+        <span class="st200_term term">clip space</span> to
+        <span class="st200_term term">normalized device space</span> for
+        a given point is the division of the components of that point
+        by the point's own <span class="st200_term expression">w</span>
+        component.
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_14" href="#st200_fn_14_ref">14</a>]</div><div class="st200_footnote_body">
+        The handedness of the coordinate space is dependent on the
+        <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss8pg2">depth range</a>
+        configured for <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss8">screen space</a>.
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_15" href="#st200_fn_15_ref">15</a>]</div><div class="st200_footnote_body">
+        It is actually the division by <span class="st200_term expression">w</span> that
+        produces the scaling effect necessary to produce the illusion of perspective
+        in <span class="st200_term term">perspective projections</span>.
+      </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s2.xhtml#st200_p2s2">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s4.xhtml#st200_p2s4">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.2. Concepts</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.4. Rendering Process</td></tr></table></div></div></body></html>

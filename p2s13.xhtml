@@ -1,0 +1,684 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.13. Deferred Rendering: Position Reconstruction</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.12. Deferred Rendering</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.14. Logarithmic Depth</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s12.xhtml#st200_p2s12">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s14.xhtml#st200_p2s14">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s13" href="#st200_p2s13">2.13</a></div><div class="st200_section_title">Deferred Rendering: Position Reconstruction</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s13.xhtml#st200_p2s13ss1">2.13.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s13.xhtml#st200_p2s13ss2">2.13.2. Recovering Eye-space Z</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s13.xhtml#st200_p2s13ss3">2.13.3. Recovering Eye-space Z (Logarithmic depth encoding)</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s13.xhtml#st200_p2s13ss4">2.13.4. Recovering Eye-space Z (Screen-space depth encoding)</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s13.xhtml#st200_p2s13ss5">2.13.5. Recovering Eye-space Position</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s13.xhtml#st200_p2s13ss6">2.13.6. Implementation</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s13ss1" href="#st200_p2s13ss1">2.13.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss1pg1" href="#st200_p2s13ss1pg1">1</a></div><div class="st200_paragraph">
+      Applying lighting during <span class="st200_term term">deferred rendering</span>
+      is primarily a <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss8">screen space</a>
+      technique. When the visible set has been rendered into the
+      <a class="st200_link" href="p2s12.xhtml#st200_p2s12ss3">g-buffer</a>, the
+      original <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5">eye space</a>
+      positions of all of the surfaces that resulted in visible fragments 
+      in the scene are lost (unless explicitly saved into the g-buffer). 
+      However, given the knowledge of the <span class="st200_term term">projection</span> that was
+      used to render the visible set (such as perspective or orthographic), it's
+      possible to reconstruct the original eye-space position of the
+      surfaces that produced each of the fragments in the g-buffer.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss1pg2" href="#st200_p2s13ss1pg2">2</a></div><div class="st200_paragraph">
+      Specifically then, for each fragment <span class="st200_term variable">f</span>
+      in the g-buffer for which lighting
+      is being applied, a position reconstruction algorithm attempts to
+      reconstruct <span class="st200_term expression">surface_eye</span> - the
+      eye-space position of the surface that produced 
+      <span class="st200_term variable">f</span> using the
+      screen-space position of the current light volume fragment
+      <span class="st200_term expression">position = (screen_x, screen_y)</span> and
+      some form of <span class="st200_term term">depth</span> value (such as the
+      screen-space depth of <span class="st200_term variable">f</span>).
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss1pg3" href="#st200_p2s13ss1pg3">3</a></div><div class="st200_paragraph">
+      Position reconstruction is a fundamental technique in deferred rendering, 
+      and there are a practically unlimited number of ways to reconstruct 
+      eye-space positions for fragments, each with various advantages and
+      disadvantages. Some rendering systems actually store 
+      the eye-space position of each fragment in the g-buffer, meaning that
+      reconstructing positions means simply reading a value directly from a 
+      texture. Some systems store only a normalized eye-space depth value in a 
+      separate texture: The first step of most position reconstruction algorithms
+      is to compute the original eye-space Z value of a fragment, so having
+      this value computed during the population of the g-buffer reduces the
+      work performed later. Storing an entire eye-space position into the
+      g-buffer is obviously the simplest and requires the least reconstruction
+      work later on, but is costly in terms of memory bandwidth: Storing a full
+      eye-space position requires an extra <span class="st200_term expression">4 * 4  = 16</span>
+      bytes of storage per fragment (four 32-bit floating point values). As screen 
+      resolutions increase, the costs can be prohibitive. Storing a normalized 
+      depth value requires only a single 32-bit floating point value per fragment
+      but even this can be too much on less capable hardware. Some algorithms
+      take advantage of the fact that most projections used to render scenes 
+      are perspective projections. Some naive algorithms use the full inverse
+      of the current projection matrix to reconstruct eye-space positions
+      having already calculated 
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss6">clip space</a> positions.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss1pg4" href="#st200_p2s13ss1pg4">4</a></div><div class="st200_paragraph">
+      The algorithm that the <span class="st200_term package">io7m-r1</span> package
+      uses for position reconstruction is generalized to handle both orthographic
+      and perspective projections, and uses only the existing
+      <a class="st200_link" href="p2s14.xhtml#st200_p2s14">logarithmic depth values</a>
+      that were written to the depth buffer during scene rendering. 
+      This keeps the g-buffer compact, and memory bandwidth requirements 
+      comparatively low. The algorithm works with symmetric and asymmetric viewing 
+      frustums, but will only work with near and far planes that are parallel to the 
+      screen.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss1pg5" href="#st200_p2s13ss1pg5">5</a></div><div class="st200_paragraph">
+      The algorithm works in two steps: Firstly, the original 
+      <a class="st200_link" href="p2s13.xhtml#st200_p2s13ss2">eye-space Z value</a>
+      of the fragment in question is recovered, and then this
+      Z value is used to recover the full
+      <a class="st200_link" href="p2s13.xhtml#st200_p2s13ss5">eye-space position</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s13ss2" href="#st200_p2s13ss2">2.13.2</a></div><div class="st200_subsection_title">Recovering Eye-space Z</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss2pg1" href="#st200_p2s13ss2pg1">1</a></div><div class="st200_paragraph">
+      During rendering of arbitrary scenes, vertices specified in
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss3">object-space</a>
+      are transformed to eye-space, and the eye-space coordinates
+      are transformed to
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss6">clip-space</a>
+      with a <span class="st200_term term">projection matrix</span>. The
+      resulting 4D clip-space coordinates are divided by their own
+      <span class="st200_term variable">w</span> components, resulting in
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss7">normalized-device space</a>
+      coordinates. These normalized-device space coordinates are then
+      transformed to <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss8">screen-space</a>
+      by multiplying by the current <span class="st200_term term">viewport transform</span>.
+      The transitions from clip-space to screen-space are handled automatically by
+      the graphics hardware.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss2pg2" href="#st200_p2s13ss2pg2">2</a></div><div class="st200_paragraph">
+      The first step required is to recover the original eye-space Z value
+      of <span class="st200_term variable">f</span>. This involves sampling a
+      depth value from the current depth buffer. Sampling
+      from the depth buffer is achieved as with any other texture: A particular
+      texel is addressed by using coordinates in the range 
+      <span class="st200_term expression">[(0, 0), (1, 1)]</span>.
+      The <span class="st200_term package">io7m-r1</span> package
+      currently assumes that the size of the <span class="st200_term term">viewport</span>
+      is the same as that of the framebuffer 
+      <span class="st200_term expression">(width, height)</span> and that the bottom left corner
+      of the viewport is positioned at <span class="st200_term expression">(0, 0)</span>
+      in screen space. Given the assumption on the position and size of the viewport,
+      and assuming that the screen-space position of the current light volume fragment 
+      being shaded is <span class="st200_term expression">position = (screen_x, screen_y)</span>, 
+      the texture coordinates <span class="st200_term expression">(screen_uv_x, screen_uv_y)</span> 
+      used to access the current depth value are given by:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss2fo1" href="#st200_p2s13ss2fo1">2.13.2.1. Screen to texture</a></div><pre class="st200_verbatim">module ScreenToTexture where
+
+import qualified Vector2f
+
+screen_to_texture :: Vector2f.T -&gt; Float -&gt; Float -&gt; Vector2f.T
+screen_to_texture position width height =
+  let u = (Vector2f.x position) / width
+      v = (Vector2f.y position) / height
+  in Vector2f.V2 u v
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss2pg3" href="#st200_p2s13ss2pg3">3</a></div><div class="st200_paragraph">
+      Intuitively, <span class="st200_term expression">(screen_uv_x, screen_uv_y) = (0, 0)</span>
+      when the current screen-space position is the bottom-left corner of the screen,
+      <span class="st200_term expression">(screen_uv_x, screen_uv_y) = (1, 1)</span> when
+      the current screen-space position is the top-right corner of the screen, and
+      <span class="st200_term expression">(screen_uv_x, screen_uv_y) = (0.5, 0.5)</span> when
+      the current screen-space position is the exact center of the screen.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss2pg4" href="#st200_p2s13ss2pg4">4</a></div><div class="st200_paragraph">
+      Originally, the <span class="st200_term package">io7m-r1</span> package
+      used a standard depth buffer and so recovering the eye-space Z value
+      required a slightly different method compared to the steps required for the
+      <a class="st200_link" href="p2s14.xhtml#st200_p2s14">logarithmic depth encoding</a> that
+      the package now uses. For historical reasons and for completeness, the method
+      to reconstruct an eye-space Z value from a traditional screen-space depth
+      value is given in the section on
+      <a class="st200_link" href="p2s13.xhtml#st200_p2s13ss4">screen-space depth encoding</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s13ss3" href="#st200_p2s13ss3">2.13.3</a></div><div class="st200_subsection_title">Recovering Eye-space Z (Logarithmic depth encoding)</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss3pg1" href="#st200_p2s13ss3pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package now
+      uses a <a class="st200_link" href="p2s14.xhtml#st200_p2s14">logarithmic depth buffer</a>.
+      Depth values sampled from any depth buffer produced by the package can be
+      transformed to a negated eye-space Z value by with a simple decoding
+      <a class="st200_link" href="p2s14.xhtml#st200_p2s14ss3">equation</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s13ss4" href="#st200_p2s13ss4">2.13.4</a></div><div class="st200_subsection_title">Recovering Eye-space Z (Screen-space depth encoding)</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss4pg1" href="#st200_p2s13ss4pg1">1</a></div><div class="st200_paragraph">
+      Note: This section is for completeness and historical interest. Please skip
+      ahead to the section on
+      <a class="st200_link" href="p2s13.xhtml#st200_p2s13ss5">eye-space position reconstruction</a>
+      if you are not interested.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss4pg2" href="#st200_p2s13ss4pg2">2</a></div><div class="st200_paragraph">
+      Assuming a screen-space depth value <span class="st200_term variable">screen_depth</span>
+      sampled from the depth buffer at <span class="st200_term expression">(screen_uv_x, screen_uv_y)</span>,
+      it's now necessary to transform the depth value back into
+      normalized-device space. In OpenGL, screen-space depth values are in the range
+      <span class="st200_term expression">[0, 1]</span> by default, with
+      <span class="st200_term expression">0</span> representing the near plane and
+      <span class="st200_term expression">1</span> representing the far plane. However, in
+      OpenGL, normalized-device space coordinates are in the range 
+      <span class="st200_term expression">[(-1, -1, -1), (1, 1, 1)]</span>. The transformation
+      from screen-space to normalized-device space is given by:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo1" href="#st200_p2s13ss4fo1">2.13.4.1. Screen-space depth to NDC Z</a></div><pre class="st200_verbatim">module ScreenDepthToNDC where
+
+screen_depth_to_ndc :: Float -&gt; Float
+screen_depth_to_ndc screen_depth =
+  (screen_depth * 2.0) - 1.0</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss4pg3" href="#st200_p2s13ss4pg3">3</a></div><div class="st200_paragraph">
+      In order to understand how to calculate the eye-space depth value
+      from the resulting NDC Z value 
+      <span class="st200_term variable">ndc_z = screen_depth_to_ndc screen_depth</span>,
+      it's necessary to understand how the normalized-device coordinates of
+      <span class="st200_term variable">f</span>
+      were derived in the first place. Given a standard 4x4 projection matrix 
+      <span class="st200_term variable">m</span> and an eye-space position 
+      <span class="st200_term variable">eye</span>, clip-space coordinates are
+      calculated by <span class="st200_term variable">Matrix4x4f.mult_v m eye</span>.
+      This means that the <span class="st200_term variable">z</span>
+      component of the resulting clip-space coordinates is given by:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo2" href="#st200_p2s13ss4fo2">2.13.4.2. Clip-space Z Long (Diagram)</a></div><img class="st200_image" alt="Clip-space Z Long (Diagram)" src="images/matrix_clip_z_long.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo3" href="#st200_p2s13ss4fo3">2.13.4.3. Clip-space Z Long</a></div><pre class="st200_verbatim">module ClipSpaceZLong where
+
+import qualified Matrix4f as M4x4;
+import qualified Vector4f as V4;
+
+clip_z_long :: M4x4.T -&gt; V4.T -&gt; Float
+clip_z_long m eye =
+  let
+    m20 = M4x4.row_column m (2, 0)
+    m21 = M4x4.row_column m (2, 1)
+    m22 = M4x4.row_column m (2, 2)
+    m23 = M4x4.row_column m (2, 3)
+
+    k0 = (V4.x eye) * m20
+    k1 = (V4.y eye) * m21
+    k2 = (V4.z eye) * m22
+    k3 = (V4.w eye) * m23
+  in
+    k0 + k1 + k2 + k3
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss4pg4" href="#st200_p2s13ss4pg4">4</a></div><div class="st200_paragraph">
+      Similarly, the <span class="st200_term variable">w</span>
+      component of the resulting clip-space coordinates is given by:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo4" href="#st200_p2s13ss4fo4">2.13.4.4. Clip-space W Long (Diagram)</a></div><img class="st200_image" alt="Clip-space W Long (Diagram)" src="images/matrix_clip_w_long.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo5" href="#st200_p2s13ss4fo5">2.13.4.5. Clip-space W Long</a></div><pre class="st200_verbatim">module ClipSpaceWLong where
+
+import qualified Matrix4f as M4x4;
+import qualified Vector4f as V4;
+
+clip_w_long :: M4x4.T -&gt; V4.T -&gt; Float
+clip_w_long m eye =
+  let
+    m30 = M4x4.row_column m (3, 0)
+    m31 = M4x4.row_column m (3, 1)
+    m32 = M4x4.row_column m (3, 2)
+    m33 = M4x4.row_column m (3, 3)
+
+    k0 = (V4.x eye) * m30
+    k1 = (V4.y eye) * m31
+    k2 = (V4.z eye) * m32
+    k3 = (V4.w eye) * m33
+  in
+    k0 + k1 + k2 + k3
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss4pg5" href="#st200_p2s13ss4pg5">5</a></div><div class="st200_paragraph">
+      However, in the perspective and orthographic projections provided
+      by the <span class="st200_term package">io7m-r1</span> package,
+      <span class="st200_term expression">Matrix4x4f.row_column m (2, 0) == 0</span>,
+      <span class="st200_term expression">Matrix4x4f.row_column m (2, 1) == 0</span>,
+      <span class="st200_term expression">Matrix4x4f.row_column m (3, 0) == 0</span>,
+      and <span class="st200_term expression">Matrix4x4f.row_column m (3, 1) == 0</span>.
+      Additionally, the <span class="st200_term variable">w</span> component of all
+      eye-space coordinates is <span class="st200_term expression">1</span>. With
+      these assumptions, the previous definitions simplify to:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo6" href="#st200_p2s13ss4fo6">2.13.4.6. Clip-space Z Simple (Diagram)</a></div><img class="st200_image" alt="Clip-space Z Simple (Diagram)" src="images/matrix_clip_z_simple.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo7" href="#st200_p2s13ss4fo7">2.13.4.7. Clip-space Z Simple</a></div><pre class="st200_verbatim">module ClipSpaceZSimple where
+
+import qualified Matrix4f as M4x4;
+import qualified Vector4f as V4;
+
+clip_z_simple :: M4x4.T -&gt; V4.T -&gt; Float
+clip_z_simple m eye =
+  let
+    m22 = M4x4.row_column m (2, 2)
+    m23 = M4x4.row_column m (2, 3)
+  in
+    ((V4.z eye) * m22) + m23
+</pre></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo8" href="#st200_p2s13ss4fo8">2.13.4.8. Clip-space W Simple (Diagram)</a></div><img class="st200_image" alt="Clip-space W Simple (Diagram)" src="images/matrix_clip_w_simple.png"/></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo9" href="#st200_p2s13ss4fo9">2.13.4.9. Clip-space W Simple</a></div><pre class="st200_verbatim">module ClipSpaceWSimple where
+
+import qualified Matrix4f as M4x4;
+import qualified Vector4f as V4;
+
+clip_w_simple :: M4x4.T -&gt; V4.T -&gt; Float
+clip_w_simple m eye =
+  let
+    m32 = M4x4.row_column m (3, 2)
+    m33 = M4x4.row_column m (3, 3)
+  in
+    ((V4.z eye) * m32) + m33
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss4pg6" href="#st200_p2s13ss4pg6">6</a></div><div class="st200_paragraph">
+      It should be noted that for perspective matrices in the
+      <span class="st200_term package">io7m-r1</span> package,
+      <span class="st200_term expression">Matrix4x4f.row_column m (3, 2) == -1</span> and
+      <span class="st200_term expression">Matrix4x4f.row_column m (3, 3) == 0</span>:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo10" href="#st200_p2s13ss4fo10">2.13.4.10. Clip-space W Simple (Perspective, Diagram)</a></div><img class="st200_image" alt="Clip-space W Simple (Perspective, Diagram)" src="images/matrix_clip_w_simple_perspective.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss4pg7" href="#st200_p2s13ss4pg7">7</a></div><div class="st200_paragraph">
+      This means that the <span class="st200_term variable">w</span> component of the
+      resulting clip-space coordinates is equal to the negated (and therefore positive)
+      eye-space <span class="st200_term variable">z</span> of the original coordinates.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss4pg8" href="#st200_p2s13ss4pg8">8</a></div><div class="st200_paragraph">
+      For orthographic projections in the
+      <span class="st200_term package">io7m-r1</span> package,
+      <span class="st200_term expression">Matrix4x4f.row_column m (3, 2) == 0</span> and
+      <span class="st200_term expression">Matrix4x4f.row_column m (3, 3) == 1</span>:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo11" href="#st200_p2s13ss4fo11">2.13.4.11. Clip-space W Simple (Orthographic, Diagram)</a></div><img class="st200_image" alt="Clip-space W Simple (Orthographic, Diagram)" src="images/matrix_clip_w_simple_orthographic.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss4pg9" href="#st200_p2s13ss4pg9">9</a></div><div class="st200_paragraph">
+      This means that the <span class="st200_term variable">w</span> component of the
+      resulting clip-space coordinates is always equal to <span class="st200_term constant">1</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss4pg10" href="#st200_p2s13ss4pg10">10</a></div><div class="st200_paragraph">
+      As stated previously, normalized-device space coordinates are calculated
+      by dividing a set of clip-space coordinates by their own 
+      <span class="st200_term variable">w</span> component. So, given
+      <span class="st200_term expression">clip_z = ClipSpaceZSimple.clip_z_simple m eye</span>
+      and
+      <span class="st200_term expression">clip_w = ClipSpaceWSimple.clip_w_simple m eye</span>
+      for some arbitrary projection matrix <span class="st200_term variable">m</span> and
+      eye-space position <span class="st200_term variable">eye</span>, the normalized-device
+      space Z coordinate is given by <span class="st200_term expression">ndc_z = clip_z / clip_w</span>. 
+      Rearranging the definitions of <span class="st200_term expression">clip_z</span> and
+      <span class="st200_term expression">clip_w</span> algebraically yields an equation
+      that takes an arbitrary projection matrix <span class="st200_term variable">m</span>
+      and a normalized-device space Z value <span class="st200_term expression">ndc_z</span>
+      and returns an eye-space Z value:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss4fo12" href="#st200_p2s13ss4fo12">2.13.4.12. Eye-space Z</a></div><pre class="st200_verbatim">module EyeSpaceZ where
+
+import qualified Matrix4f as M4x4;
+
+eye_z :: M4x4.T -&gt; Float -&gt; Float
+eye_z m ndc_z =
+  let
+    m22 = M4x4.row_column m (2, 2)
+    m23 = M4x4.row_column m (2, 3)
+    m32 = M4x4.row_column m (3, 2)
+    m33 = M4x4.row_column m (3, 3)
+    
+    a = (ndc_z * m33) - m32
+    b = (ndc_z * m23) - m22
+  in
+    - (a / b)
+</pre></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s13ss5" href="#st200_p2s13ss5">2.13.5</a></div><div class="st200_subsection_title">Recovering Eye-space Position</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss5pg1" href="#st200_p2s13ss5pg1">1</a></div><div class="st200_paragraph">
+      Given that the eye-space Z value is known, it's now necessary to reconstruct
+      the full eye-space position <span class="st200_term expression">surface_eye</span>
+      of the surface that resulted in <span class="st200_term variable">f</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss5pg2" href="#st200_p2s13ss5pg2">2</a></div><div class="st200_paragraph">
+      When the current projection is a perspective projection, there is conceptually
+      a ray passing through the near clipping plane (<span class="st200_term variable">near</span>)
+      from the origin, oriented towards the eye-space position 
+      (<span class="st200_term variable">eye</span>) of <span class="st200_term variable">f</span>:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss5fo1" href="#st200_p2s13ss5fo1">2.13.5.1. Perspective projection (Diagram)</a></div><img class="st200_image" alt="Perspective projection (Diagram)" src="images/reconstruction_view_perspective.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss5pg3" href="#st200_p2s13ss5pg3">3</a></div><div class="st200_paragraph">
+      When the current projection is an orthographic projection, the ray is always
+      perpendicular to the clipping planes and is offset by a certain amount 
+      (<span class="st200_term variable">q</span>) on the X and Y axes:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss5fo2" href="#st200_p2s13ss5fo2">2.13.5.2. Orthographic projection (Diagram)</a></div><img class="st200_image" alt="Orthographic projection (Diagram)" src="images/reconstruction_view_ortho.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss5pg4" href="#st200_p2s13ss5pg4">4</a></div><div class="st200_paragraph">
+      Assuming <span class="st200_term expression">ray = Vector3f.V3 ray_x ray_y 1.0</span>,
+      the eye-space position of <span class="st200_term variable">f</span> is given by
+      <span class="st200_term expression">surface_eye = Vector3f.add3 q (Vector3f.scale ray eye_z)</span>.
+      In the case of perspective projections, 
+      <span class="st200_term expression">q = Vector3f.V3 0.0 0.0 0.0</span>. The
+      <span class="st200_term variable">q</span> term is sometimes referred to as the
+      origin (because <span class="st200_term variable">q</span> is the origin of the view ray), 
+      but that terminology is not used here in order to avoid confusion
+      between the <span class="st200_term variable">ray</span> origin and the
+      eye-space coordinate system origin. It's
+      therefore necessary to calculate <span class="st200_term variable">q</span> and
+      <span class="st200_term variable">ray</span> in order to reconstruct the full eye-space
+      position of the fragment. The way this is achieved in the 
+      <span class="st200_term package">io7m-r1</span> 
+      package is to calculate <span class="st200_term variable">q</span> and
+      <span class="st200_term variable">ray</span> for each of the viewing frustum corners
+      <span class="st200_footnote_reference"><a id="st200_fn_24_ref" href="#st200_fn_24">[24]</a></span>
+      and then bilinearly interpolate between the calculated values during rendering
+      based on <span class="st200_term expression">screen_uv_x</span> and 
+      <span class="st200_term expression">screen_uv_y</span>.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss5pg5" href="#st200_p2s13ss5pg5">5</a></div><div class="st200_paragraph">
+      As stated previously, normalized-device space coordinates are in the range 
+      <span class="st200_term expression">[(-1, -1, -1), (1, 1, 1)]</span>. Stating each
+      of the eight corners of the cube that defines normalized-device space as 
+      4D homogeneous coordinates <span class="st200_footnote_reference"><a id="st200_fn_25_ref" href="#st200_fn_25">[25]</a></span> yields the following values:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss5fo3" href="#st200_p2s13ss5fo3">2.13.5.3. Normalized-device space corners</a></div><pre class="st200_verbatim">module NDCCorners where
+
+import qualified Vector4f as V4
+
+near_x0y0 :: V4.T
+near_x0y0 = V4.V4 (-1.0) (-1.0) (-1.0) 1.0
+
+near_x1y0 :: V4.T
+near_x1y0 = V4.V4 1.0 (-1.0) (-1.0) 1.0
+
+near_x0y1 :: V4.T
+near_x0y1 = V4.V4 (-1.0) 1.0 (-1.0) 1.0
+
+near_x1y1 :: V4.T
+near_x1y1 = V4.V4 1.0 1.0 (-1.0) 1.0
+
+far_x0y0 :: V4.T
+far_x0y0 = V4.V4 (-1.0) (-1.0) 1.0 1.0
+
+far_x1y0 :: V4.T
+far_x1y0 = V4.V4 1.0 (-1.0) 1.0 1.0
+
+far_x0y1 :: V4.T
+far_x0y1 = V4.V4 (-1.0) 1.0 1.0 1.0
+
+far_x1y1 :: V4.T
+far_x1y1 = V4.V4 1.0 1.0 1.0 1.0
+
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss5pg6" href="#st200_p2s13ss5pg6">6</a></div><div class="st200_paragraph">
+      Then, for the four pairs of near/far corners
+      (<span class="st200_term expression">(near_x0y0, far_x0y0)</span>,
+      <span class="st200_term expression">(near_x1y0, far_x1y0)</span>,
+      <span class="st200_term expression">(near_x0y1, far_x0y1)</span>,
+      <span class="st200_term expression">(near_x1y1, far_x1y1)</span>), a
+      <span class="st200_term variable">q</span> and
+      <span class="st200_term variable">ray</span> value is calculated. The
+      <span class="st200_term expression">ray_and_q</span> function describes the
+      calculation for a given pair of near/far corners:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss5fo4" href="#st200_p2s13ss5fo4">2.13.5.4. Ray and Q calculation (Single)</a></div><pre class="st200_verbatim">module RayAndQ where
+
+import qualified Matrix4f as M4x4
+import qualified Vector4f as V4
+
+-- | Calculate @(ray, q)@ for the given inverse projection matrix and frustum corners
+ray_and_q :: M4x4.T -&gt; (V4.T, V4.T) -&gt; (V4.T, V4.T)
+ray_and_q inverse_m (near, far) =
+  let
+    -- Unproject the NDC coordinates to eye-space
+    near_hom    = M4x4.mult_v inverse_m near
+    near_eye    = V4.div_s near_hom (V4.w near_hom)
+    far_hom     = M4x4.mult_v inverse_m far
+    far_eye     = V4.div_s far_hom (V4.w far_hom)
+    
+    -- Calculate a ray with ray.z == 1.0
+    ray_initial = V4.sub4 far_eye near_eye
+    ray = V4.div_s ray_initial (V4.z ray_initial)
+    
+    -- Subtract the scaled ray from the near corner to calculate q
+    q = V4.sub4 near_eye (V4.scale ray (V4.z near_eye))
+  in
+    (ray, q)
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss5pg7" href="#st200_p2s13ss5pg7">7</a></div><div class="st200_paragraph">
+      The function takes a matrix representing the <span class="st200_term term">inverse</span>
+      of the current projection matrix, and "unprojects" the given near and far frustum
+      corners from normalized-device space to eye-space. The desired 
+      <span class="st200_term variable">ray</span> value for the pair of corners is simply
+      the vector that results from subtracting the near corner from the far corner,
+      divided by its own <span class="st200_term variable">z</span> component. The desired
+      <span class="st200_term variable">q</span> value is the vector that results from
+      subtracting <span class="st200_term variable">ray</span> scaled by the 
+      <span class="st200_term variable">z</span> component of the near corner, from
+      the near corner. 
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss5pg8" href="#st200_p2s13ss5pg8">8</a></div><div class="st200_paragraph">
+      Note: The function calculates <span class="st200_term variable">ray</span> in eye-space, 
+      but the resulting value will have a non-negative <span class="st200_term variable">z</span> component. 
+      The reason for this is that the resulting ray will be multiplied by the calculated
+      <a class="st200_link" href="p2s13.xhtml#st200_p2s13ss2">eye-space Z value</a>
+      <span class="st200_footnote_reference"><a id="st200_fn_26_ref" href="#st200_fn_26">[26]</a></span>
+      to produce an eye-space position. If the <span class="st200_term variable">z</span> component of 
+      <span class="st200_term variable">ray</span> was negative, the resulting position
+      would have a positive <span class="st200_term variable">z</span> component.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss5pg9" href="#st200_p2s13ss5pg9">9</a></div><div class="st200_paragraph">
+      Calculating the <span class="st200_term variable">ray</span>
+      and <span class="st200_term variable">q</span> value for each of the pairs of
+      corners is straightforward:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss5fo5" href="#st200_p2s13ss5fo5">2.13.5.5. Ray and Q calculation (All)</a></div><pre class="st200_verbatim">module RayAndQAll where
+
+import qualified NDCCorners
+import qualified RayAndQ
+import qualified Matrix4f as M4x4
+import qualified Vector4f as V4
+
+data T = T {
+  q_x0y0 :: V4.T,
+  q_x1y0 :: V4.T,
+  q_x0y1 :: V4.T,
+  q_x1y1 :: V4.T,
+  ray_x0y0 :: V4.T,
+  ray_x1y0 :: V4.T,
+  ray_x0y1 :: V4.T,
+  ray_x1y1 :: V4.T
+} deriving (Eq, Ord, Show)
+
+-- | Calculate all rays and qs for the four pairs of near/far frustum corners
+calculate :: M4x4.T -&gt; T
+calculate inverse_m =
+  let
+    (x0y0_ray, x0y0_q) = RayAndQ.ray_and_q inverse_m (NDCCorners.near_x0y0, NDCCorners.far_x0y0)
+    (x1y0_ray, x1y0_q) = RayAndQ.ray_and_q inverse_m (NDCCorners.near_x1y0, NDCCorners.far_x1y0)
+    (x0y1_ray, x0y1_q) = RayAndQ.ray_and_q inverse_m (NDCCorners.near_x0y1, NDCCorners.far_x0y1)
+    (x1y1_ray, x1y1_q) = RayAndQ.ray_and_q inverse_m (NDCCorners.near_x1y1, NDCCorners.far_x1y1)
+  in
+    T {
+      q_x0y0 = x0y0_q,
+      q_x1y0 = x1y0_q,
+      q_x0y1 = x0y1_q,
+      q_x1y1 = x1y1_q,
+      ray_x0y0 = x0y0_ray,
+      ray_x1y0 = x1y0_ray,
+      ray_x0y1 = x0y1_ray,
+      ray_x1y1 = x1y1_ray
+    }
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss5pg10" href="#st200_p2s13ss5pg10">10</a></div><div class="st200_paragraph">
+      Then, by reusing the <span class="st200_term expression">position = (screen_uv_x, screen_uv_y)</span>
+      values calculated during the initial
+      <a class="st200_link" href="p2s13.xhtml#st200_p2s13ss2pg2">eye-space Z</a>
+      calculation, determining <span class="st200_term variable">ray</span> and
+      <span class="st200_term variable">q</span> for the current fragment involves
+      simply bilinearly interpolating between the precalculated values above.
+      Bilinear interpolation between four vectors is defined as:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss5fo6" href="#st200_p2s13ss5fo6">2.13.5.6. Bilinear interpolation (Vector4f)</a></div><pre class="st200_verbatim">module Bilinear4 where
+
+import qualified Vector2f as V2
+import qualified Vector4f as V4
+
+interpolate :: (V4.T, V4.T, V4.T, V4.T) -&gt; V2.T -&gt; V4.T
+interpolate (x0y0, x1y0, x0y1, x1y1) position =
+  let u0 = V4.interpolate x0y0 (V2.x position) x1y0
+      u1 = V4.interpolate x0y1 (V2.x position) x1y1
+  in V4.interpolate u0 (V2.y position) u1
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss5pg11" href="#st200_p2s13ss5pg11">11</a></div><div class="st200_paragraph">
+      Finally, now that all of the required components are known, the eye-space
+      position <span class="st200_term variable">surface_eye</span> of <span class="st200_term variable">f</span>
+      is calculated as <span class="st200_term expression">surface_eye = Vector3f.add3 q (Vector3f.scale ray eye_z)</span>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s13ss6" href="#st200_p2s13ss6">2.13.6</a></div><div class="st200_subsection_title">Implementation</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss6pg1" href="#st200_p2s13ss6pg1">1</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package,
+      the <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/KViewRays.html">KViewRays</a>
+      class precalculates the
+      <a class="st200_link" href="p2s13.xhtml#st200_p2s13ss5pg7">rays and q values</a>
+      for each of the current frustum corners, and the results of which are cached
+      and re-used based on the current projection each time the scene is rendered.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss6pg2" href="#st200_p2s13ss6pg2">2</a></div><div class="st200_paragraph">
+      The actual position reconstruction is performed in a
+       <span class="st200_term term">fragment shader</span>, producing an eye-space
+       Z value using the <span class="st200_term package">Parasol</span> functions in
+       [<a class="st200_link_external" href="parasol/LogDepth.p">LogDepth.p</a>]
+       and the final position in
+       [<a class="st200_link_external" href="parasol/Reconstruction.p">Reconstruction.p</a>]:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss6fo1" href="#st200_p2s13ss6fo1">2.13.6.1. Position reconstruction (LogDepth)</a></div><pre class="st200_verbatim">--
+-- Copyright © 2014 &lt;code@io7m.com&gt; http://io7m.com
+-- 
+-- Permission to use, copy, modify, and/or distribute this software for any
+-- purpose with or without fee is hereby granted, provided that the above
+-- copyright notice and this permission notice appear in all copies.
+-- 
+-- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+-- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+-- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+-- SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+-- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+-- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+-- IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+--
+
+package com.io7m.r1.core;
+
+--
+-- Functions for handling logarithmic depth buffers.
+--
+
+module LogDepth is
+
+  import com.io7m.parasol.Float as F;
+
+  function prepare_eye_z (z : float) : float =
+    F.add (F.negate (z), 1.0);
+
+  function encode_partial (
+    z                 : float,
+    depth_coefficient : float  
+  ) : float =
+    let 
+      value half_co = F.multiply (depth_coefficient, 0.5);
+      value clamp_z = F.maximum (0.000001, z);
+    in
+      F.multiply (F.log2 (clamp_z), half_co)
+    end;
+
+  function encode_full (
+    z                 : float,
+    depth_coefficient : float  
+  ) : float =
+    let 
+      value half_co = F.multiply (depth_coefficient, 0.5);
+      value clamp_z = F.maximum (0.000001, F.add (z, 1.0));
+    in
+      F.multiply (F.log2 (clamp_z), half_co)
+    end;
+
+  function decode (
+    z                 : float,
+    depth_coefficient : float  
+  ) : float =
+    let value half_co = F.multiply (depth_coefficient, 0.5); in
+      F.subtract (F.power (2.0, F.divide (z, half_co)), 1.0)
+    end;
+
+end;
+</pre></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss6fo2" href="#st200_p2s13ss6fo2">2.13.6.2. Position reconstruction (Parasol)</a></div><pre class="st200_verbatim">--
+-- Copyright © 2014 &lt;code@io7m.com&gt; http://io7m.com
+--
+-- Permission to use, copy, modify, and/or distribute this software for any
+-- purpose with or without fee is hereby granted, provided that the above
+-- copyright notice and this permission notice appear in all copies.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+-- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+-- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+-- SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+-- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+-- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+-- IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+--
+
+package com.io7m.r1.core;
+
+--
+-- Position reconstruction for deferred rendering.
+--
+
+module Reconstruction is
+
+  import com.io7m.parasol.Float as F;
+  import com.io7m.parasol.Vector2f as V2;
+  import com.io7m.parasol.Vector3f as V3;
+  import com.io7m.parasol.Vector4f as V4;
+
+  import com.io7m.r1.core.Bilinear;
+  import com.io7m.r1.core.Transform;
+  import com.io7m.r1.core.Viewport;
+  import com.io7m.r1.core.ViewRays;
+
+  function reconstruct_eye (
+    screen_depth : float,
+    screen_uv    : vector_2f,
+    m_projection : matrix_4x4f,
+    view_rays    : ViewRays.t
+  ) : vector_4f =
+    let
+      value eye_depth =
+        Transform.ndc_to_eye_z (
+          m_projection,
+          Transform.screen_depth_to_ndc (screen_depth)
+        );
+    in
+      reconstruct_eye_with_eye_z (
+        eye_depth, 
+        screen_uv, 
+        m_projection, 
+        view_rays
+      )
+    end;
+
+  function reconstruct_eye_with_eye_z (
+    eye_depth    : float,
+    screen_uv    : vector_2f,
+    m_projection : matrix_4x4f,
+    view_rays    : ViewRays.t
+  ) : vector_4f =
+    let
+      value origin =
+        Bilinear.interpolate_3f (
+          view_rays.origin_x0y0,
+          view_rays.origin_x1y0,
+          view_rays.origin_x0y1,
+          view_rays.origin_x1y1,
+          screen_uv
+        );
+
+      value ray_normal =
+        Bilinear.interpolate_3f (
+          view_rays.ray_x0y0,
+          view_rays.ray_x1y0,
+          view_rays.ray_x0y1,
+          view_rays.ray_x1y1,
+          screen_uv
+        );
+        
+      value ray =
+        V3.multiply_scalar (
+          ray_normal,
+          eye_depth
+        );
+    in
+      new vector_4f (V3.add (origin, ray), 1.0)
+    end;
+
+end;
+</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s13ss6pg3" href="#st200_p2s13ss6pg3">3</a></div><div class="st200_paragraph">
+      The precalculated view ray vectors are passed to the fragment shader
+      in a value of type <span class="st200_term type">ViewRays.t</span>:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s13ss6fo3" href="#st200_p2s13ss6fo3">2.13.6.3. View Rays (Parasol)</a></div><pre class="st200_verbatim">--
+-- Copyright © 2014 &lt;code@io7m.com&gt; http://io7m.com
+--
+-- Permission to use, copy, modify, and/or distribute this software for any
+-- purpose with or without fee is hereby granted, provided that the above
+-- copyright notice and this permission notice appear in all copies.
+--
+-- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+-- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+-- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+-- SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+-- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+-- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+-- IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+--
+
+package com.io7m.r1.core;
+
+module ViewRays is
+
+  type t is record
+    origin_x0y0 : vector_3f,
+    origin_x1y0 : vector_3f,
+    origin_x0y1 : vector_3f,
+    origin_x1y1 : vector_3f,
+    ray_x0y0    : vector_3f,
+    ray_x1y0    : vector_3f,
+    ray_x0y1    : vector_3f,
+    ray_x1y1    : vector_3f
+  end;
+
+end;
+</pre></div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_23" href="#st200_fn_23_ref">23</a>]</div><div class="st200_footnote_body">
+          Which, for many applications, may be once for the entire lifetime of the program.
+        </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_24" href="#st200_fn_24_ref">24</a>]</div><div class="st200_footnote_body">
+        This step is performed once on the CPU and is only repeated when the projection
+        matrix changes
+        <span class="st200_footnote_reference"><a id="st200_fn_23_ref" href="#st200_fn_23">[23]</a></span>.
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_25" href="#st200_fn_25_ref">25</a>]</div><div class="st200_footnote_body">By simply setting 
+      the <span class="st200_term variable">w</span> component to <span class="st200_term constant">1</span>.
+      </div></div><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_26" href="#st200_fn_26_ref">26</a>]</div><div class="st200_footnote_body">
+        Which is guaranteed to be negative, as only a negative Z value could have resulted in
+        a visible fragment in the g-buffer.
+      </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s12.xhtml#st200_p2s12">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s14.xhtml#st200_p2s14">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.12. Deferred Rendering</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.14. Logarithmic Depth</td></tr></table></div></div></body></html>

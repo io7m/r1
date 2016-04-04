@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.12. Deferred Rendering</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.11. Visible Sets</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.13. Deferred Rendering: Position Reconstruction</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s11.xhtml#st200_p2s11">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s13.xhtml#st200_p2s13">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s12" href="#st200_p2s12">2.12</a></div><div class="st200_section_title">Deferred Rendering</div><ul class="st200_contents st200_section_contents_outer st200_section_contents"><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s12.xhtml#st200_p2s12ss1">2.12.1. Overview</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s12.xhtml#st200_p2s12ss2">2.12.2. Algorithm</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s12.xhtml#st200_p2s12ss3">2.12.3. G-Buffer</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s12.xhtml#st200_p2s12ss4">2.12.4. Light Group Stencil</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s12.xhtml#st200_p2s12ss5">2.12.5. Normal Compression</a></li><li class="st200_contents_item st200_contents_item1 st200_contents_item_subsection"><a href="p2s12.xhtml#st200_p2s12ss6">2.12.6. Light Volumes</a></li></ul><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s12ss1" href="#st200_p2s12ss1">2.12.1</a></div><div class="st200_subsection_title">Overview</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss1pg1" href="#st200_p2s12ss1pg1">1</a></div><div class="st200_paragraph">
+      <span class="st200_term term">Deferred rendering</span> is a rendering
+      technique where all of the opaque objects in a given scene are
+      rendered into a series of buffers, and then lighting is applied
+      to those buffers in
+      <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss8">screen-space</a>.
+      This is in contrast to <span class="st200_term term">forward rendering</span>,
+      where all lighting is applied to objects as they are rendered.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss1pg2" href="#st200_p2s12ss1pg2">2</a></div><div class="st200_paragraph">
+      One major advantage of deferred rendering is a massive reduction in the number of
+      shaders required (traditional forward rendering requires <span class="st200_term expression">s * l</span>
+      shaders, where <span class="st200_term expression">s</span> is the number of
+      different object surface types in the scene, and 
+      <span class="st200_term expression">l</span> is the number of different light
+      types). In contrast, deferred rendering requires
+      <span class="st200_term expression">s + l</span> shaders, because surface
+      and lighting shaders are applied separately.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss1pg3" href="#st200_p2s12ss1pg3">3</a></div><div class="st200_paragraph">
+      Traditional forward rendering also suffers severe performance
+      problems as the number of lights in the scene increases, because it
+      is necessary to recompute all of the surface attributes of an
+      object each time a light is applied. In contrast, deferred rendering
+      calculates all surface attributes of all objects once, and then reuses
+      them when lighting is applied.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss1pg4" href="#st200_p2s12ss1pg4">4</a></div><div class="st200_paragraph">
+      However, deferred renderers are usually incapable of rendering
+      translucent objects. The deferred renderer in the 
+      <span class="st200_term package">io7m-r1</span> package
+      is no exception, and a severely restricted
+      <a class="st200_link" href="p2s15.xhtml#st200_p2s15">forward renderer</a>
+      is provided to render translucent objects.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s12ss2" href="#st200_p2s12ss2">2.12.2</a></div><div class="st200_subsection_title">Algorithm</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss2pg1" href="#st200_p2s12ss2pg1">1</a></div><div class="st200_paragraph">
+      An informal description of the <span class="st200_term term">deferred rendering</span> algorithm as 
+      implemented in the <span class="st200_term package">io7m-r1</span> package
+      is as follows:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s12ss2fo1" href="#st200_p2s12ss2fo1">2.12.2.1. Deferred Rendering</a></div><ol class="st200_list_ordered"><li class="st200_list_item">
+          Clear the current <a class="st200_link" href="p2s12.xhtml#st200_p2s12ss3">g-buffer</a>,
+          depth buffer, stencil buffer, and optionally the color buffer. The stencil
+          buffer is cleared to <span class="st200_term expression">0</span> and the depth
+          buffer is cleared to <span class="st200_term expression">1</span>.
+        </li><li class="st200_list_item">
+          For each <span class="st200_term term">light group</span> 
+          <span class="st200_term expression">g</span> in the scene:
+          <ol class="st200_list_ordered"><li class="st200_list_item">
+              Enable writing to the depth and stencil buffers, and disable stencil testing.
+            </li><li class="st200_list_item">
+              Set all non-zero values in the current stencil buffer to
+              <span class="st200_term expression">1</span>. See
+              the section on <a class="st200_link" href="p2s12.xhtml#st200_p2s12ss4">light group stencils</a>
+              for the meaning behind these values.
+            </li><li class="st200_list_item">
+              For each <span class="st200_term term">instance</span> <span class="st200_term expression">o</span> in
+              <span class="st200_term expression">g</span>:
+              <ol class="st200_list_ordered"><li class="st200_list_item">
+                  Render the surface <span class="st200_term term">albedo</span>,
+                  <span class="st200_term term">eye-space normals</span>, 
+                  <span class="st200_term term">specular color</span>, and
+                  <span class="st200_term term">emission level</span> 
+                  of <span class="st200_term expression">o</span> into the
+                  <a class="st200_link" href="p2s12.xhtml#st200_p2s12ss3">g-buffer</a>.
+                  <a class="st200_link" href="p2s16.xhtml#st200_p2s16">Normal mapping</a>
+                  is performed during rendering, and if
+                  <span class="st200_term expression">o</span> does not have
+                  specular highlights, then a pure black (zero intensity) 
+                  specular color is written. Effects such as 
+                  <a class="st200_link" href="p2s17.xhtml#st200_p2s17">environment mapping</a>
+                  are considered to be part of the surface albedo and so are performed
+                  in this step. Depth testing is enabled, and a depth function that
+                  only results in pixels being drawn if the depth of the current pixel is
+                  <span class="st200_term term">less than or equal</span> to the current depth
+                  buffer value is used. The corresponding 
+                  stencil buffer value is set to <span class="st200_term expression">2</span>.
+                </li></ol>
+            </li><li class="st200_list_item">
+              Disable depth buffer and stencil buffer writing. Keep depth testing enabled
+              and set the depth function to <span class="st200_term term">greater than or equal</span>.
+              Enable the stencil test, and configure it such that only pixels with
+              a corresponding value of <span class="st200_term expression">2</span> in the
+              stencil buffer will be affected.
+            </li><li class="st200_list_item">
+              For each <span class="st200_term term">light</span> <span class="st200_term expression">k</span> in
+              <span class="st200_term expression">g</span>:
+              <ol class="st200_list_ordered"><li class="st200_list_item">
+                  Render a <a class="st200_link" href="p2s12.xhtml#st200_p2s12ss6">light</a> volume
+                  representing <span class="st200_term expression">k</span>. All pixels that are
+                  overlapped by <span class="st200_term expression">k</span> and that satisfy the
+                  depth test have lighting applied. Lighting is applied in
+                  <a class="st200_link" href="p2s3.xhtml#st200_p2s3ss5">eye-space</a>, and the
+                  original eye-space position of the current surface is reconstructed
+                  using a <a class="st200_link" href="p2s13.xhtml#st200_p2s13">position reconstruction</a>
+                  algorithm.
+                </li></ol>
+            </li></ol>
+        </li></ol></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss2pg2" href="#st200_p2s12ss2pg2">2</a></div><div class="st200_paragraph">
+      In the <span class="st200_term package">io7m-r1</span> package, deferred
+      renderers have the type
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/KRendererDeferredOpaqueType.html">KRendererDeferredOpaqueType</a>,
+      and the primary implementation is given by
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/KRendererDeferredOpaque.html">KRendererDeferredOpaque</a>.
+      Deferred renderers are usually paired with simple
+      <a class="st200_link" href="p2s15.xhtml#st200_p2s15">forward renderers</a> in order
+      to render any translucent instances in the scene. The type of paired deferred/forward
+      renderers is
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/KRendererDeferredType.html">KRendererDeferredType</a>
+      with the primary implementation given by
+      <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/KRendererDeferred.html">KRendererDeferred</a>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s12ss3" href="#st200_p2s12ss3">2.12.3</a></div><div class="st200_subsection_title">G-Buffer</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss3pg1" href="#st200_p2s12ss3pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term term">g-buffer</span> (the abbreviated form of
+      <span class="st200_term term">geometry buffer</span>) is the buffer in which
+      the surface attributes of objects are stored prior to having lighting
+      applied to produce a final rendered image.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss3pg2" href="#st200_p2s12ss3pg2">2</a></div><div class="st200_paragraph">
+      One of the main implementation issues in any deferred renderer is
+      deciding which surface attributes (such as position, albedo, normals, etc)
+      to store and which to reconstruct. The more attributes that are stored,
+      the less work is required during rendering to reconstruct those values.
+      However, storing more attributes requires a larger 
+      <span class="st200_term term">g-buffer</span> and more memory bandwidth to
+      actually populate that <span class="st200_term term">g-buffer</span> during
+      rendering. The <span class="st200_term package">io7m-r1</span> package
+      leans towards having a more compact <span class="st200_term term">g-buffer</span>
+      and doing slightly more reconstruction work during rendering.
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s12ss3fo1" href="#st200_p2s12ss3fo1">2.12.3.1. G-Buffer</a></div><img class="st200_image" alt="G-Buffer" src="images/gbuffer.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss3pg3" href="#st200_p2s12ss3pg3">3</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      explicitly stores the albedo, normals, emission level, and specular
+      color of surfaces. Additionally, the depth buffer is sampled to recover
+      the depth of surfaces. The eye-space positions of surfaces are recovered
+      via an efficient <a class="st200_link" href="p2s13.xhtml#st200_p2s13">position reconstruction</a>
+      algorithm which uses the current viewing projection and 
+      <span class="st200_term term">screen-space</span> depth value as input. In
+      order to reduce the amount of storage required, three-dimensional
+      eye-space normal vectors are stored compressed as two 
+      <span class="st200_term expression">16</span> half-precision floating point components 
+      via a simple <a class="st200_link" href="p2s12.xhtml#st200_p2s12ss5">mapping</a>.
+      This means that only <span class="st200_term expression">32</span> bits
+      are required to store the vectors, and very little precision is lost.
+      There is support for optionally storing the vectors as two 
+      <span class="st200_term expression">8</span> bit components for systems that
+      are memory-starved, with a noticeable loss in the visual quality of
+      specular highlights.
+    </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss3pg4" href="#st200_p2s12ss3pg4">4</a></div><div class="st200_paragraph">
+      The precise format of the g-buffer when using <span class="st200_term expression">16</span>
+      bit normals is as follows:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s12ss3fo2" href="#st200_p2s12ss3fo2">2.12.3.2. G-Buffer Format 0</a></div><img class="st200_image" alt="G-Buffer Format 0" src="images/gbuffer_format_0.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss3pg5" href="#st200_p2s12ss3pg5">5</a></div><div class="st200_paragraph">
+      The vertical lines indicate byte boundaries. Not including the depth/stencil
+      buffer, the amount of storage required per pixel is <span class="st200_term expression">3 * 4 = 12 bytes = 96 bits</span>.
+      When <span class="st200_term expression">8</span> bit normals are used, the layout
+      format is:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s12ss3fo3" href="#st200_p2s12ss3fo3">2.12.3.3. G-Buffer Format 1</a></div><img class="st200_image" alt="G-Buffer Format 1" src="images/gbuffer_format_1.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss3pg6" href="#st200_p2s12ss3pg6">6</a></div><div class="st200_paragraph">
+      The <span class="st200_term variable">albedo_r</span>, <span class="st200_term variable">albedo_g</span>,
+      and <span class="st200_term variable">albedo_b</span> components correspond to the
+      red, green, and blue components of the surface, respectively. The
+      <span class="st200_term variable">emission</span> component refers to the surface
+      <a class="st200_link" href="p2s27.xhtml#st200_p2s27">emission</a> level. The
+      <span class="st200_term variable">normal_x</span> and
+      <span class="st200_term variable">normal_y</span> components correspond to the
+      two components of the <a class="st200_link" href="p2s12.xhtml#st200_p2s12ss5">compressed surface normal</a>
+      vector. The <span class="st200_term variable">specular_r</span>, 
+      <span class="st200_term variable">specular_g</span>, and 
+      <span class="st200_term variable">specular_b</span> components correspond to the
+      red, green, and blue components of the surface specularity. Surfaces that will
+      not receive specular highlights simply have
+      <span class="st200_term expression">0</span> for each component. The
+      <span class="st200_term variable">specular_e</span> component holds the
+      surface <span class="st200_term term">specular exponent</span> divided by
+      <span class="st200_term expression">256</span>.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s12ss4" href="#st200_p2s12ss4">2.12.4</a></div><div class="st200_subsection_title">Light Group Stencil</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss4pg1" href="#st200_p2s12ss4pg1">1</a></div><div class="st200_paragraph">
+      <span class="st200_term term">Light groups</span> partition the scene into
+      separate lighting environments. A given light <span class="st200_term expression">k</span>
+      can be in any number of groups, and will be applied to all instances that are
+      in the same group. To implement this, the
+      <span class="st200_term package">io7m-r1</span> package uses
+      the stencil buffer to control which pixels will receive lighting during
+      rendering of each group. Essentially:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s12ss4fo1" href="#st200_p2s12ss4fo1">2.12.4.1. Deferred Rendering</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+          A value of <span class="st200_term expression">0</span> in the stencil buffer
+          indicates that the current pixel has never been affected by any light
+          group. This is the initial state of all pixels.
+        </li><li class="st200_list_item">
+          A value of <span class="st200_term expression">1</span> in the stencil buffer
+          indicates that the current pixel was previously affected by a light
+          group.
+        </li><li class="st200_list_item">
+          A value of <span class="st200_term expression">2</span> in the stencil buffer
+          indicates that the current pixel is in the current light group and will
+          have lighting applied.
+        </li></ul></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss4pg2" href="#st200_p2s12ss4pg2">2</a></div><div class="st200_paragraph">
+      As noted by the <a class="st200_link" href="p2s12.xhtml#st200_p2s12ss2">algorithm</a>
+      given above, pixels belonging to the current light group are marked with
+      a value of <span class="st200_term expression">2</span> in the stencil buffer
+      when all of the surfaces in the light group are rendered into the 
+      <span class="st200_term term">g-buffer</span>. Only pixels with a corresponding
+      value of <span class="st200_term expression">2</span> in the stencil buffer have
+      lighting applied. This is the step that prevents lights in one group from
+      affecting surfaces in another group. When a light group has completed
+      rendering, all pixels with a non-zero value in the stencil buffer have
+      their stencil values set to <span class="st200_term expression">1</span>. When
+      all light groups have been rendered, the stencil buffer will contain a
+      non-zero value for all pixels that were touched during rendering - this
+      fact can then be used in further postprocessing stages if desired.
+    </div></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s12ss5" href="#st200_p2s12ss5">2.12.5</a></div><div class="st200_subsection_title">Normal Compression</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss5pg1" href="#st200_p2s12ss5pg1">1</a></div><div class="st200_paragraph">
+      The <span class="st200_term package">io7m-r1</span> package
+      uses a
+      <a class="st200_link_external" href="http://en.wikipedia.org/wiki/Lambert_azimuthal_equal-area_projection">Lambert azimuthal equal-area projection</a>
+      to store surface normal vectors in two components instead of three. This
+      makes use of the fact that normalized vectors represent points on the
+      unit sphere. The mapping from normal vectors to two-dimensional spheremap coordinates
+      is given by <span class="st200_term function">compress</span> 
+      [<a class="st200_link_external" href="haskell/NormalCompress.hs">NormalCompress.hs</a>]:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s12ss5fo1" href="#st200_p2s12ss5fo1">2.12.5.1. Normal Compression</a></div><pre class="st200_verbatim">module NormalCompress where
+
+import qualified Vector3f
+import qualified Vector2f
+import qualified Normal
+
+compress :: Normal.T -&gt; Vector2f.T
+compress n =
+  let p = sqrt ((Vector3f.z n * 8.0) + 8.0)
+      x = (Vector3f.x n / p) + 0.5
+      y = (Vector3f.y n / p) + 0.5
+  in Vector2f.V2 x y</pre></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss5pg2" href="#st200_p2s12ss5pg2">2</a></div><div class="st200_paragraph">
+      The mapping from two-dimensional spheremap coordinates to normal vectors is given by
+      <span class="st200_term function">decompress</span> 
+      [<a class="st200_link_external" href="haskell/NormalDecompress.hs">NormalDecompress.hs</a>]:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s12ss5fo2" href="#st200_p2s12ss5fo2">2.12.5.2. Normal Decompression</a></div><pre class="st200_verbatim">module NormalDecompress where
+
+import qualified Vector3f
+import qualified Vector2f
+import qualified Normal
+
+decompress :: Vector2f.T -&gt; Normal.T
+decompress v =
+  let fn = Vector2f.V2 ((Vector2f.x v * 4.0) - 2.0) ((Vector2f.y v * 4.0) - 2.0)
+      f  = Vector2f.dot2 fn fn
+      g  = sqrt (1.0 - (f / 4.0))
+      x  = (Vector2f.x fn) * g
+      y  = (Vector2f.y fn) * g
+      z  = 1.0 - (f / 2.0)
+  in Vector3f.V3 x y z</pre></div></div><div class="st200_subsection_container"><div class="st200_subsection_title_number"><a id="st200_p2s12ss6" href="#st200_p2s12ss6">2.12.6</a></div><div class="st200_subsection_title">Light Volumes</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s12ss6pg1" href="#st200_p2s12ss6pg1">1</a></div><div class="st200_paragraph">
+      In order to apply lighting during deferred rendering, it is necessary
+      to render <span class="st200_term term">light volumes</span> representing the
+      shape and size of the current light. All pixels that fall within this
+      light volume have lighting applied. Specifically:
+    </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s12ss6fo1" href="#st200_p2s12ss6fo1">2.12.6.1. Light Volumes</a></div><ul class="st200_list_unordered"><li class="st200_list_item">
+          <a class="st200_link" href="p2s20.xhtml#st200_p2s20">Spherical</a> lights
+          with radius <span class="st200_term expression">r</span> are represented by
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KUnitSphere.html">unit spheres</a>
+          with a transform that scales them during rendering to spheres with a resulting radius of
+          <span class="st200_term expression">r</span>.
+        </li><li class="st200_list_item">
+          <a class="st200_link" href="p2s19.xhtml#st200_p2s19">Directional</a> lights
+          are represented by full-screen
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KUnitQuad.html">quads</a>.
+        </li><li class="st200_list_item">
+          <a class="st200_link" href="p2s21.xhtml#st200_p2s21">Projective</a> lights
+          are represented by
+          <a class="st200_link_external" href="apidocs/com/io7m/r1/kernel/types/KFrustumMesh.html">frustums</a>
+          that are created and cached on demand to match the size and shape of the light's projection.
+        </li></ul></div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s11.xhtml#st200_p2s11">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s13.xhtml#st200_p2s13">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.11. Visible Sets</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.13. Deferred Rendering: Position Reconstruction</td></tr></table></div></div></body></html>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>io7m-r1 0.10.0 Documentation: 2.4. Rendering Process</title><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-layout.css"/><link rel="stylesheet" type="text/css" href="jstructural-2.0.0-colour.css"/><link rel="stylesheet" type="text/css" href="documentation.css"/></head><body><div class="st200_body"><div class="brand">
+  <div class="brand_left">
+    <a href="http://io7m.com/">io7m</a>
+  </div>
+  <div class="brand_right">
+    <a href="http://mvn.io7m.com/io7m-r1/">io7m-r1</a> 0.10.0
+  </div>
+</div><div class="st200_navbar st200_navbar_top"><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_title_cell">2.3. Coordinate systems</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.5. Materials</td></tr><tr><td class="st200_navbar_prev_file_cell"><a href="p2s3.xhtml#st200_p2s3">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s5.xhtml#st200_p2s5">Next</a></td></tr></table><hr class="st200_hr"/></div><div class="st200_section_container"><div class="st200_section_title_number"><a id="st200_p2s4" href="#st200_p2s4">2.4</a></div><div class="st200_section_title">Rendering Process</div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s4pg1" href="#st200_p2s4pg1">1</a></div><div class="st200_paragraph">
+    This section attempts to give a high-level view of the rendering
+    process as it occurs in the <span class="st200_term package">io7m-r1</span> 
+    package.
+  </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s4pg2" href="#st200_p2s4pg2">2</a></div><div class="st200_paragraph">
+    A rough diagram of the rendering process for a typical program is as follows,
+    with red nodes indicating actions taken by the programmer, and blue nodes
+    indicating actions performed by the 
+    <span class="st200_term package">io7m-r1</span> package:
+  </div></div><div class="st200_formal_item"><div class="st200_formal_item_title"><a id="st200_p2s4fo1" href="#st200_p2s4fo1">2.4.1. Rendering Flow Chart</a></div><img class="st200_image" alt="Rendering Flow Chart" src="images/process_flow.png"/></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s4pg3" href="#st200_p2s4pg3">3</a></div><div class="st200_paragraph">
+    During the <span class="st200_term term">initialization</span> stage, the
+    programmer is required to create a <span class="st200_term term">framebuffer</span>
+    that will contain the results of rendering. Then, the programmer loads
+    all of the <a class="st200_link" href="p2s8.xhtml#st200_p2s8">meshes</a> that will be
+    used during rendering <span class="st200_footnote_reference"><a id="st200_fn_16_ref" href="#st200_fn_16">[16]</a></span>. Then, the programmer creates instances of any
+    <span class="st200_term term">renderers</span> and/or 
+    <span class="st200_term term">filters</span> that will be used during
+    rendering.
+  </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s4pg4" href="#st200_p2s4pg4">4</a></div><div class="st200_paragraph">
+    Most applications will enter into some form of 
+    <span class="st200_term term">rendering loop</span>, where a new image is
+    produced onto the screen at a rate of sixty or so per second. The
+    <span class="st200_term package">io7m-r1</span> package does
+    not have its own rendering loop: The programmer is simply required to
+    call the renderers provided by the package whenever a new image is
+    needed.
+  </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s4pg5" href="#st200_p2s4pg5">5</a></div><div class="st200_paragraph">
+    Ordinarily, the programmer will be rendering a scene of some description.
+    Most 3D simulations contain some sort of representation of a world containing
+    objects and entities, with at least one observer placed within that world,
+    with images produced of that world from the perspective of the observer. Almost
+    certainly, the world contains some sort of 
+    <span class="st200_term term">spatial data structure</span> that partitions
+    the world into sections in order to efficiently implement collision detection
+    algorithms, physics simulations, and for determining exactly which objects are
+    potentially visible from the perspective of the observer. The
+    <span class="st200_term package">io7m-r1</span> package remains
+    completely ignorant of these details: It expects the programmer to pass it
+    a list of objects and light sources to render, and does not make any attempt
+    to do any spatial partitioning or visibility calculations of its own. Therefore,
+    the first step taken by the programmer in most rendering loops is to work out
+    exactly what needs to be rendered, and then put together a list of things that
+    need to be rendered in a form that the 
+    <span class="st200_term package">io7m-r1</span> package can use.
+    Concretely, the programmer constructs
+    <a class="st200_link" href="p2s10.xhtml#st200_p2s10">instances</a> (associated with
+    <a class="st200_link" href="p2s5.xhtml#st200_p2s5">materials</a>) and
+    <a class="st200_link" href="p2s18.xhtml#st200_p2s18">lights</a>, placing them into
+    an immutable snapshot known as a <a class="st200_link" href="p2s11.xhtml#st200_p2s11">visible set</a>.
+    Because all objects in the <span class="st200_term package">io7m-r1</span> package
+    are immutable, it may be that instances, materials, and lights are re-used from the
+    previous loop iteration (or submitted again with minor modifications via the use of mutable 
+    builders). This is how the illusion of animated materials, lights, and instances
+    are achieved in the <span class="st200_term package">io7m-r1</span> package:
+    If the programmer has created a light <span class="st200_term variable">L0</span> in
+    the previous rendering loop iteration, and submits a light <span class="st200_term variable">L1</span>
+    in the current loop iteration that is structurally identical to 
+    <span class="st200_term variable">L0</span> but with a slightly different intensity, then
+    there will appear to be a single light in the scene with an intensity that varies over 
+    time. The <span class="st200_term package">io7m-r1</span> package remains 
+    completely ignorant of the passage of time and doesn't need to be concerned with 
+    keeping any sort of internal state to handle animation - simplifying the 
+    implementation drastically.
+  </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s4pg6" href="#st200_p2s4pg6">6</a></div><div class="st200_paragraph">
+    The <span class="st200_term package">io7m-r1</span> package takes the
+    immutable scene produced by the programmer and efficiently batches all of the
+    instances by material, aiming to reduce the number of state changes required
+    to render all of the given instances. The instances in the scene are also
+    separated into <span class="st200_term term">translucent</span> and 
+    <span class="st200_term term">opaque</span> groups. The programmer then passes
+    this batched visible set to whichever renderer is currently being used. The renderer
+    generates any shadow maps required for the lights in the visible set and then renders
+    all of the opaque instances to the given framebuffer. The programmer can then
+    optionally pass this framebuffer to a filter if desired. Then, the
+    programmer submits the same visible set to the renderer in order to allow
+    it to render the remaining translucent instances. Again, the programmer can
+    optionally pass the framebuffer to another filter, or the contents of
+    the framebuffer can simply be copied to the screen for display.
+  </div></div><div class="st200_paragraph_container"><div class="st200_paragraph_number"><a id="st200_p2s4pg7" href="#st200_p2s4pg7">7</a></div><div class="st200_paragraph">
+    Of course, the above process is simply one possible way to use the
+    <span class="st200_term package">io7m-r1</span> package. Real
+    applications might use the renderers to produce images that will then
+    be re-used in further visible sets. For example, if a visible set uses materials that
+    use <a class="st200_link" href="p2s17.xhtml#st200_p2s17">environment mapping</a>,
+    the programmer might pass six drastically simplified versions of a scene
+    to the renderer in order to produce the six faces of a 
+    <span class="st200_term term">cube map</span>.
+    This cube map may then be used in materials that are used with instances
+    to render a visible set that will actually be displayed to the screen.
+  </div></div></div><div class="st200_footnotes"><hr/><div class="st200_footnote_container"><div class="st200_footnote_number">[<a id="st200_fn_16" href="#st200_fn_16_ref">16</a>]</div><div class="st200_footnote_body">
+      Of course, it may be that the programmer actually loads many more
+      meshes during the lifetime of the application in question. This step
+      is just included for the purposes of the process description.
+    </div></div></div><div class="st200_navbar st200_navbar_bottom"><hr class="st200_hr"/><table class="st200_navbar_table" summary="Navigation bar"><tr><td class="st200_navbar_prev_file_cell"><a href="p2s3.xhtml#st200_p2s3">Previous</a></td><td class="st200_navbar_up_file_cell"><a href="p2.xhtml#st200_p2">Up</a></td><td class="st200_navbar_next_file_cell"><a href="p2s5.xhtml#st200_p2s5">Next</a></td></tr><tr><td class="st200_navbar_prev_title_cell">2.3. Coordinate systems</td><td class="st200_navbar_up_title_cell">2. Design and Implementation</td><td class="st200_navbar_next_title_cell">2.5. Materials</td></tr></table></div></div></body></html>
